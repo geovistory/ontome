@@ -1,0 +1,28 @@
+{% extends 'base.html.twig' %}
+{% block body %}
+<div class="container">
+    <div class="row">
+        <div class="col-xs-12">
+            <h1>Register!</h1>
+
+            {{ form_start(form) }}
+                {{ form_row(form.login) }}
+                {{ form_row(form.email) }}
+                {{ form_row(form.firstName) }}
+                {{ form_row(form.lastName) }}
+                {{ form_row(form.institution) }}
+                {{ form_row(form.plainPassword.first, {
+                    'label': 'Password'
+                }) }}
+                {{ form_row(form.plainPassword.second, {
+                    'label': 'Repeat Password'
+                }) }}
+                {{ form_row(form.status) }}
+                {{ form_row(form.hasValidatedPolicy) }}
+
+                <button type="submit" class="btn btn-primary" formnovalidate>Register</button>
+            {{ form_end(form) }}
+        </div>
+    </div>
+</div>
+{% endblock %}

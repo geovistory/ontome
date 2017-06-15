@@ -1,0 +1,21 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ class.identifierInNamespace }}{% endblock %}
+
+{% block body %}
+
+    <div class="container">
+        <h2 class="class-name">{{ class.identifierInNamespace }}</h2>
+        <div class="entity-details">
+            <i class="icon-cog">Work in progress</i>
+        </div>
+    </div>
+
+    </section>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+
+
+{% endblock %}

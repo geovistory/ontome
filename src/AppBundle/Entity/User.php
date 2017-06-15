@@ -1,0 +1,289 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: Djamel
+ * Date: 18/04/2017
+ * Time: 17:12
+ */
+
+namespace AppBundle\Entity;
+
+
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Security\Core\User\UserInterface;
+use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
+
+
+/**
+ * @ORM\Entity
+ * @ORM\Table(schema="che", name="admin_user")
+ * @UniqueEntity(fields={"email"}, message="This e-mail is already in use.")
+ */
+class User implements UserInterface
+{
+    /**
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="AUTO")
+     * @ORM\Column(type="integer",  name="pk_user")
+     */
+    private $id;
+
+    /**
+     * @Assert\NotBlank()
+     *
+     * @ORM\Column(type="string", unique=true)
+     */
+    private $login;
+
+    /**
+     * @Assert\NotBlank()
+     * @Assert\Email()
+     *
+     * @ORM\Column(type="string", unique=true)
+     */
+    private $email;
+
+    /**
+     * The encoded password
+     *
+     * @ORM\Column(type="string", nullable=true)
+     */
+    private $password;
+
+    /**
+     * A non-persisted field that's used to create the encoded password.
+     * @Assert\NotBlank(groups={"Registration"})
+     *
+     * @var string
+     */
+    private $plainPassword;
+
+    /**
+     * @Assert\NotBlank()
+     *
+     * @ORM\Column(type="string", nullable=false)
+     */
+    private $lastName;
+
+    /**
+     * @Assert\NotBlank()
+     *
+     * @ORM\Column(type="string", nullable=false)
+     */
+    private $firstName;
+
+    /**
+     * @ORM\Column(type="boolean", nullable=false)
+     */
+    private $status;
+
+    /**
+     * @ORM\Column(type="boolean", nullable=false)
+     */
+    private $hasValidatedPolicy;
+
+    /**
+     * @ORM\Column(type="string", nullable=true)
+     */
+    private $institution;
+
+    /**
+     * @ORM\Column(type="json_array", nullable=true)
+     */
+    private $roles = [];
+
+    /**
+     * @return mixed
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getLogin()
+    {
+        return $this->login;
+    }
+
+    public function getUsername()
+    {
+        return $this->login;
+    }
+
+    public function getRoles()
+    {
+        $roles = $this->roles;
+
+        // give everyone ROLE_USER!
+        if (!in_array('ROLE_USER', $roles)) {
+            $roles[] = 'ROLE_USER';
+        }
+
+        return $roles;
+    }
+
+    public function getPassword()
+    {
+        return $this->password;
+    }
+
+    /**
+     * @return string $email
+     */
+    public function getEmail()
+    {
+        return $this->email;
+    }
+
+    public function getSalt()
+    {
+    }
+
+    public function eraseCredentials()
+    {
+        $this->plainPassword = null;
+    }
+
+    /**
+     * @param mixed $login
+     */
+    public function setLogin($login)
+    {
+        $this->login = $login;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getFirstName()
+    {
+        return $this->firstName;
+    }
+
+    /**
+     * @param mixed $firstName
+     */
+    public function setFirstName($firstName)
+    {
+        $this->firstName = $firstName;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getLastName()
+    {
+        return $this->lastName;
+    }
+
+    /**
+     * @param mixed $lastName
+     */
+    public function setLastName($lastName)
+    {
+        $this->lastName = $lastName;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getInstitution()
+    {
+        return $this->institution;
+    }
+
+    /**
+     * @param mixed $institution
+     */
+    public function setInstitution($institution)
+    {
+        $this->institution = $institution;
+    }
+
+    /**
+     * @param string $email
+     */
+    public function setEmail($email)
+    {
+        $this->email = $email;
+    }
+
+    /**
+     * @param mixed $roles
+     */
+    public function setRoles(array $roles)
+    {
+        $this->roles = $roles;
+    }
+
+    /**
+     * @param mixed $password
+     */
+    public function setPassword($password)
+    {
+        $this->password = $password;
+    }
+
+    /**
+     * @return string
+     */
+    public function getPlainPassword()
+    {
+        return $this->plainPassword;
+    }
+
+    /**
+     * @param string $plainPassword
+     */
+    public function setPlainPassword($plainPassword)
+    {
+        $this->plainPassword = $plainPassword;
+        // forces the object to look "dirty" to Doctrine. Avoids
+        // Doctrine *not* saving this entity, if only plainPassword changes
+        $this->password = null;
+    }
+
+    public function getFullName()
+    {
+        return trim($this->getFirstName().' '.$this->getLastName());
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getStatus()
+    {
+        return $this->status;
+    }
+
+    /**
+     * @param mixed $status
+     */
+    public function setStatus($status)
+    {
+        $this->status = $status;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getHasValidatedPolicy()
+    {
+        return $this->hasValidatedPolicy;
+    }
+
+    /**
+     * @param mixed $hasValidatedPolicy
+     */
+    public function setHasValidatedPolicy($hasValidatedPolicy)
+    {
+        $this->hasValidatedPolicy = $hasValidatedPolicy;
+    }
+
+
+
+}

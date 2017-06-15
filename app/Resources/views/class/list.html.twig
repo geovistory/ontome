@@ -1,0 +1,44 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    {{ parent() }}
+
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.15/css/dataTables.bootstrap.min.css">
+{%  endblock %}
+
+{% block body %}
+    <table class="table table-striped" id="class-table">
+        <thead>
+        <tr>
+            <th>Class namespace identifier</th>
+            <th>Last updated</th>
+        </tr>
+        </thead>
+        <tbody>
+            {% for class in classes %}
+                <tr>
+                    <td>
+                        <a href="{{ path('class_show', {
+                            'id': class.id
+                        }) }}">
+                            {{ class.identifierInNamespace }}
+                        </a>
+                    </td>
+                    <td>{{ class.modificationTime|date('Y-m-d') }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
+{% block javascripts %}
+    {{ parent() }}
+
+    <script src="https://cdn.datatables.net/1.10.15/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.15/js/dataTables.bootstrap.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+        $('#class-table').DataTable();
+    } );
+    </script>
+{% endblock %}

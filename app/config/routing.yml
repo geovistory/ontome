@@ -1,0 +1,8 @@
+app:
+    resource: "@AppBundle/Controller/"
+    type:     annotation
+
+home:
+    path: /
+    defaults:
+        _controller: AppBundle:Main:homepage

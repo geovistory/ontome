@@ -1,0 +1,54 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div class="container">
+        <div class="row">
+            <div class="col-xs-8">
+                <h1>
+                    {% if user.fullName %}
+                        {{ user.fullName }}
+                    {% else %}
+                        {{ user.email }}
+                    {% endif %}
+
+                    <a href="{{ path('user_edit', {
+                        id: user.id
+                    }) }}" class="pull-right btn btn-link">
+                        <span class="fa fa-pencil"></span>
+                    </a>
+                </h1>
+
+                <table class="table">
+                    <tbody>
+                    <tr>
+                        <th>Name</th>
+                        <td>{{ user.fullName|default('-') }}</td>
+                    </tr>
+                    <tr>
+                        <th>Email</th>
+                        <td>{{ user.email }}</td>
+                    </tr>
+                    <tr>
+                        <th>University</th>
+                        <td>{{ user.universityName|default('-') }}</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="col-xs-4">
+                <h3>Genus Studied</h3>
+                <ul class="list-group">
+                    {% for genusStudied in user.studiedGenuses %}
+                        <li class="list-group-item">
+                            <a href="{{ path('genus_show', {
+                                'slug': genusStudied.slug
+                            }) }}">
+                                {{ genusStudied.name }}
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+{% endblock %}
