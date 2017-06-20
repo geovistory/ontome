@@ -2,9 +2,14 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="59380328-57ac-477d-9924-2ad6c1141397" name="Default" comment="">
+      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/dictionaries/Djamel.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/modules.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/ontologies.iml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/sonarIssues.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/symfony2.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/vcs.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.gitignore" afterPath="$PROJECT_DIR$/.gitignore" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/sonarIssues.xml" afterPath="$PROJECT_DIR$/.idea/sonarIssues.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -798,7 +803,7 @@
       <workItem from="1497532336129" duration="2933000" />
       <workItem from="1497612171613" duration="636000" />
       <workItem from="1497943762292" duration="214000" />
-      <workItem from="1497944050431" duration="13227000" />
+      <workItem from="1497944050431" duration="13334000" />
     </task>
     <task id="LOCAL-00001" summary="Premier commit avec liste et fiche des classes basiques">
       <created>1497519938307</created>
@@ -821,11 +826,18 @@
       <option name="project" value="LOCAL" />
       <updated>1497970475256</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="Merge remote-tracking branch 'origin/FeatureNamespaceImplementation' into FeatureNamespaceImplementation&#10;&#10;# Conflicts:&#10;#&#9;src/AppBundle/Entity/OntoClass.php&#10;#&#9;src/AppBundle/Entity/OntoNamespace.php">
+      <created>1497970924565</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1497970924566</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="45882000" />
+    <option name="totallyTimeSpent" value="45989000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -882,7 +894,8 @@
     </ignored-roots>
     <MESSAGE value="Premier commit avec liste et fiche des classes basiques" />
     <MESSAGE value="Mise à jour du mapping des classes dans le but d'utiliser la jointure avec les namespaces et les users" />
-    <option name="LAST_COMMIT_MESSAGE" value="Mise à jour du mapping des classes dans le but d'utiliser la jointure avec les namespaces et les users" />
+    <MESSAGE value="Merge remote-tracking branch 'origin/FeatureNamespaceImplementation' into FeatureNamespaceImplementation&#10;&#10;# Conflicts:&#10;#&#9;src/AppBundle/Entity/OntoClass.php&#10;#&#9;src/AppBundle/Entity/OntoNamespace.php" />
+    <option name="LAST_COMMIT_MESSAGE" value="Merge remote-tracking branch 'origin/FeatureNamespaceImplementation' into FeatureNamespaceImplementation&#10;&#10;# Conflicts:&#10;#&#9;src/AppBundle/Entity/OntoClass.php&#10;#&#9;src/AppBundle/Entity/OntoNamespace.php" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
