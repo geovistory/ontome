@@ -9,13 +9,13 @@
 namespace AppBundle\Repository;
 
 
-use AppBundle\Entity\CRMClass;
+use AppBundle\Entity\OntoClass;
 use Doctrine\ORM\EntityRepository;
 
 class ClassRepository extends EntityRepository
 {
     /**
-     * @return CRMClass[]
+     * @return OntoClass[]
      */
     public function findAllOrderedById()
     {
