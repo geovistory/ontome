@@ -8,13 +8,14 @@
 
 namespace AppBundle\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 /**
- * Class CRMClass
+ * Class OntoClass
  * @ORM\Entity
  * @ORM\Table(schema="che", name="class")
  */
-class CRMClass
+class OntoClass
 {
     /**
      * @ORM\Id
@@ -49,12 +50,16 @@ class CRMClass
     private $notes;
 
     /**
-     * @ORM\Column(type="integer")
+     * @Assert\NotBlank()
+     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\User")
+     * @ORM\JoinColumn(nullable=false)
      */
     private $creator;
 
     /**
-     * @ORM\Column(type="integer")
+     * @Assert\NotBlank()
+     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\User")
+     * @ORM\JoinColumn(nullable=false)
      */
     private $modifier;
 
@@ -67,6 +72,21 @@ class CRMClass
      * @ORM\Column(type="datetime")
      */
     private $modificationTime;
+
+    /**
+     * @ORM\ManyToMany(targetEntity="OntoNamespace",  inversedBy="OntoClass", fetch="EXTRA_LAZY")
+     * @ORM\JoinTable(name="associates_namespace",
+     *      joinColumns={@ORM\JoinColumn(name="fk_class", referencedColumnName="pk_class")},
+     *      inverseJoinColumns={@ORM\JoinColumn()umn(name="fk_namespace", referencedColumnName="pk_namespace")}
+     *      )
+     */
+    private $namespaces;
+
+    public function __construct()
+    {
+        $this->namespaces = new ArrayCollection();
+    }
+
 
     /**
      * @return mixed
@@ -148,6 +168,12 @@ class CRMClass
         return $this->modificationTime;
     }
 
-
+    /**
+     * @return ArrayCollection|OntoNamespace[]
+     */
+    public function getNamespaces()
+    {
+        return $this->namespaces;
+    }
 
 }

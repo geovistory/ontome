@@ -8,6 +8,11 @@
             <set />
           </value>
         </entry>
+        <entry key="/a.dummy">
+          <value>
+            <set />
+          </value>
+        </entry>
         <entry key="$PROJECT_DIR$/app/AppKernel.php">
           <value>
             <set />
@@ -99,6 +104,16 @@
           </value>
         </entry>
         <entry key="$PROJECT_DIR$/src/AppBundle/Entity/Class.php">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/src/AppBundle/Entity/OntoClass.php">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/src/AppBundle/Entity/OntoNamespace.php">
           <value>
             <set />
           </value>

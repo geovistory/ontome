@@ -9,7 +9,7 @@
 namespace AppBundle\Controller;
 
 
-use AppBundle\Entity\CRMClass;
+use AppBundle\Entity\OntoClass;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 
@@ -22,7 +22,7 @@ class ClassController extends Controller
     {
         $em = $this->getDoctrine()->getManager();
 
-        $classes = $em->getRepository('AppBundle:CRMClass')
+        $classes = $em->getRepository('AppBundle:OntoClass')
             ->findAll();
 
         return $this->render('class/list.html.twig', [
@@ -35,7 +35,7 @@ class ClassController extends Controller
      * @param string $id
      * @return Response the rendered template
      */
-    public function showAction(CRMClass $class)
+    public function showAction(OntoClass $class)
     {
         $em = $this->getDoctrine()->getManager();
 
