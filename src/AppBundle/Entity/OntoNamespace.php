@@ -46,6 +46,12 @@ fk_is_version_of integer,*/
     private $importerInteger;
 
     /**
+     * @ORM\ManyToOne(targetEntity="OntoNamespace")
+     * @ORM\JoinColumn(name="fk_is_version_of", referencedColumnName="pk_namespace", nullable=true)
+     */
+    private $referencedVersion;
+
+    /**
      * @ORM\Column(type="text")
      */
     private $notes;
@@ -107,6 +113,14 @@ fk_is_version_of integer,*/
     public function getImporterInteger()
     {
         return $this->importerInteger;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getReferencedVersion()
+    {
+        return $this->referencedVersion;
     }
 
     /**
