@@ -14,7 +14,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Class OntoClass
- * @ORM\Entity
+ * @ORM\Entity(repositoryClass="AppBundle\Repository\ClassRepository")
  * @ORM\Table(schema="che", name="class")
  */
 class OntoClass
@@ -77,7 +77,7 @@ class OntoClass
 
     /**
      * @ORM\ManyToMany(targetEntity="OntoNamespace",  inversedBy="OntoClass", fetch="EXTRA_LAZY")
-     * @ORM\JoinTable(name="associates_namespace",
+     * @ORM\JoinTable(schema="che", name="associates_namespace",
      *      joinColumns={@ORM\JoinColumn(name="fk_class", referencedColumnName="pk_class")},
      *      inverseJoinColumns={@ORM\JoinColumn(name="fk_namespace", referencedColumnName="pk_namespace")}
      *      )

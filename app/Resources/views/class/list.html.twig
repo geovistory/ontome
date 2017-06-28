@@ -11,6 +11,7 @@
         <thead>
         <tr>
             <th>Class namespace identifier</th>
+            <th>Namespace URI</th>
             <th>Last updated</th>
         </tr>
         </thead>
@@ -23,6 +24,11 @@
                         }) }}">
                             {{ class.identifierInNamespace }}
                         </a>
+                    </td>
+                    <td>
+                        {% if class.namespaces|first.referencedVersion is not null %}
+                            {{ class.namespaces|first.referencedVersion.namespaceURI }}
+                        {% endif %}
                     </td>
                     <td>{{ class.modificationTime|date('Y-m-d') }}</td>
                 </tr>
