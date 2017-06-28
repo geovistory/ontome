@@ -25,7 +25,6 @@ class ClassController extends Controller
         $classes = $em->getRepository('AppBundle:OntoClass')
             ->findAllOrderedById();
 
-        //var_dump($classes[0]->getNamespaces()[0]->getReferencedVersion());die;
         return $this->render('class/list.html.twig', [
             'classes' => $classes
         ]);

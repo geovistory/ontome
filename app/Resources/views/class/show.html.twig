@@ -25,7 +25,26 @@
             </div>
             <div id="namespaces" class="tab-pane fade">
                 <h3>Namespace</h3>
-                <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam.</p>
+                <table class="table table-striped" id="namespaces-table">
+                    <thead>
+                    <tr>
+                        <th>Namespace URI</th>
+                        <th>Last updated</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for namespace in class.namespaces %}
+                        <tr>
+                            <td>
+                                <a href="#">
+                                    {{ namespace.namespaceURI }}
+                                </a>
+                            </td>
+                            <td>{{ namespace.modificationTime|date('Y-m-d') }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
             </div>
             <div id="class-hierarchy" class="tab-pane fade">
                 <h3>Class hierarchy</h3>
@@ -40,5 +59,10 @@
 {% block javascripts %}
     {{ parent() }}
 
+    <script>
+        $(document).ready(function() {
+            $('#namespaces-table').DataTable();
+        } );
+    </script>
 
 {% endblock %}
