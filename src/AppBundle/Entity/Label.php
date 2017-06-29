@@ -2,36 +2,40 @@
 /**
  * Created by PhpStorm.
  * User: Djamel
- * Date: 20/06/2017
- * Time: 10:26
+ * Date: 29/06/2017
+ * Time: 12:22
  */
 
 namespace AppBundle\Entity;
 
-use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
- * Class OntoClass
- * @ORM\Entity(repositoryClass="AppBundle\Repository\NamespaceRepository")
- * @ORM\Table(schema="che", name="namespace")
+ * Class Label
+ * @ORM\Entity
+ * @ORM\Table(schema="che", name="label")
  */
-class OntoNamespace
+class Label
 {
     /**
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
-     * @ORM\Column(type="integer", name="pk_namespace")
+     * @ORM\Column(type="integer", name="pk_label")
      */
     private $id;
 
     /**
      * @Assert\NotBlank()
-     * @Assert\Url()
-     * @ORM\Column(type="text", nullable=false, unique=true)
+     * @ORM\Column(type="text", nullable=false)
      */
-    private $namespaceURI;
+    private $label;
+
+    /**
+     * @Assert\NotBlank()
+     * @ORM\Column(type="text", nullable=false)
+     */
+    private $languageIsoCode;
 
     /**
      * @ORM\Column(type="integer")
@@ -39,10 +43,15 @@ class OntoNamespace
     private $importerInteger;
 
     /**
-     * @ORM\ManyToOne(targetEntity="OntoNamespace")
-     * @ORM\JoinColumn(name="fk_is_version_of", referencedColumnName="pk_namespace", nullable=true)
+     * @ORM\Column(type="boolean", nullable=false)
      */
-    private $referencedVersion;
+    private $isStandardLabelForLanguage;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="OntoClass", inversedBy="labels")
+     * @ORM\JoinColumn(name="fk_class", referencedColumnName="pk_class")
+     */
+    private $class;
 
     /**
      * @ORM\Column(type="text")
@@ -74,17 +83,6 @@ class OntoNamespace
     private $modificationTime;
 
     /**
-     * @ORM\ManyToMany(targetEntity="OntoClass", mappedBy="namespaces")
-     * @ORM\OrderBy({"identifierInNamespace" = "ASC"})
-     */
-    private $classes;
-
-    public function __construct()
-    {
-        $this->classes = new ArrayCollection();
-    }
-
-    /**
      * @return mixed
      */
     public function getId()
@@ -95,9 +93,17 @@ class OntoNamespace
     /**
      * @return mixed
      */
-    public function getNamespaceURI()
+    public function getLabel()
     {
-        return $this->namespaceURI;
+        return $this->label;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getLanguageIsoCode()
+    {
+        return $this->languageIsoCode;
     }
 
     /**
@@ -111,9 +117,17 @@ class OntoNamespace
     /**
      * @return mixed
      */
-    public function getReferencedVersion()
+    public function getisStandardLabelForLanguage()
     {
-        return $this->referencedVersion;
+        return $this->isStandardLabelForLanguage;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getClass()
+    {
+        return $this->class;
     }
 
     /**
@@ -154,14 +168,6 @@ class OntoNamespace
     public function getModificationTime()
     {
         return $this->modificationTime;
-    }
-
-    /**
-     * @return ArrayCollection|OntoClass[]
-     */
-    public function getClasses()
-    {
-        return $this->classes;
     }
 
 

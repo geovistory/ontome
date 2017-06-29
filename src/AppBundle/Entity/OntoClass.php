@@ -87,7 +87,15 @@ class OntoClass
     public function __construct()
     {
         $this->namespaces = new ArrayCollection();
+        $this->labels = new ArrayCollection();
     }
+
+    /**
+     * @Assert\NotBlank()
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Label", mappedBy="class")
+     * @ORM\OrderBy({"languageIsoCode" = "ASC"})
+     */
+    private $labels;
 
 
     /**
@@ -176,6 +184,14 @@ class OntoClass
     public function getNamespaces()
     {
         return $this->namespaces;
+    }
+
+    /**
+     * @return ArrayCollection|Label[]
+     */
+    public function getLabels()
+    {
+        return $this->labels;
     }
 
 }

@@ -8,7 +8,7 @@
         <h2 class="class-name">{{ class.identifierInNamespace }}</h2>
 
         <ul class="nav nav-tabs">
-            <li class="active"><a data-toggle="tab" href="#scope-notes">Home</a></li>
+            <li class="active"><a data-toggle="tab" href="#scope-notes">Scope Notes</a></li>
             <li><a data-toggle="tab" href="#identification">Identification</a></li>
             <li><a data-toggle="tab" href="#namespaces">Namespace</a></li>
             <li><a data-toggle="tab" href="#class-hierarchy">Class hierarchy</a></li>
@@ -20,8 +20,29 @@
                 <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
             </div>
             <div id="identification" class="tab-pane fade">
-                <h3>Identification</h3>
-                <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+                <h3>Labels</h3>
+                <table class="table table-striped" id="labels-table">
+                    <thead>
+                    <tr>
+                        <th>Label</th>
+                        <th>Language</th>
+                        <th>Last updated</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for label in class.labels %}
+                        <tr>
+                            <td>
+                                <a href="#">
+                                    {{ label.label }}
+                                </a>
+                            </td>
+                            <td>{{ label.languageIsoCode}}</td>
+                            <td>{{ label.modificationTime|date('Y-m-d') }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
             </div>
             <div id="namespaces" class="tab-pane fade">
                 <h3>Namespace</h3>
@@ -62,6 +83,7 @@
     <script>
         $(document).ready(function() {
             $('#namespaces-table').DataTable();
+            $('#labels-table').DataTable();
         } );
     </script>
 
