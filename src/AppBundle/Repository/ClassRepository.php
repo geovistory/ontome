@@ -9,17 +9,21 @@
 namespace AppBundle\Repository;
 
 
-use AppBundle\Entity\CRMClass;
+use AppBundle\Entity\OntoClass;
 use Doctrine\ORM\EntityRepository;
 
 class ClassRepository extends EntityRepository
 {
     /**
-     * @return CRMClass[]
+     * @return OntoClass[]
      */
     public function findAllOrderedById()
     {
         return $this->createQueryBuilder('class')
+            ->join('class.namespaces','nspc')
+            ->addSelect('nspc')
+            ->leftJoin('nspc.referencedVersion', 'referencedVersion')
+            ->addSelect('referencedVersion')
             ->orderBy('class.id','DESC')
             ->getQuery()
             ->execute();
