@@ -14,7 +14,11 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Class OntoClass
+<<<<<<< Updated upstream
  * @ORM\Entity
+=======
+ * @ORM\Entity(repositoryClass="AppBundle\Repository\NamespaceRepository")
+>>>>>>> Stashed changes
  * @ORM\Table(schema="che", name="namespace")
  */
 class OntoNamespace

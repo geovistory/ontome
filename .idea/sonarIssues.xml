@@ -8,11 +8,14 @@
             <set />
           </value>
         </entry>
+<<<<<<< Updated upstream
         <entry key="/a.dummy">
           <value>
             <set />
           </value>
         </entry>
+=======
+>>>>>>> Stashed changes
         <entry key="$PROJECT_DIR$/.gitignore">
           <value>
             <set />
@@ -138,6 +141,11 @@
             <set />
           </value>
         </entry>
+        <entry key="$PROJECT_DIR$/src/AppBundle/Repository/NamespaceRepository.php">
+          <value>
+            <set />
+          </value>
+        </entry>
         <entry key="$PROJECT_DIR$/src/AppBundle/Repository/UserRepository.php">
           <value>
             <set />
@@ -174,6 +182,11 @@
           </value>
         </entry>
         <entry key="$PROJECT_DIR$/../symfony-test/src/.htaccess">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/../symfony-test/src/AppBundle/Controller/GenusController.php">
           <value>
             <set />
           </value>
