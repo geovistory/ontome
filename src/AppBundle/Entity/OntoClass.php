@@ -84,12 +84,6 @@ class OntoClass
      */
     private $namespaces;
 
-    public function __construct()
-    {
-        $this->namespaces = new ArrayCollection();
-        $this->labels = new ArrayCollection();
-    }
-
     /**
      * @Assert\NotBlank()
      * @ORM\OneToMany(targetEntity="AppBundle\Entity\Label", mappedBy="class")
@@ -97,6 +91,19 @@ class OntoClass
      */
     private $labels;
 
+    /**
+     * @Assert\NotBlank()
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\TextProperty", mappedBy="class")
+     * @ORM\OrderBy({"languageIsoCode" = "ASC"})
+     */
+    private $textProperties;
+
+    public function __construct()
+    {
+        $this->namespaces = new ArrayCollection();
+        $this->labels = new ArrayCollection();
+        $this->textProperties = new ArrayCollection();
+    }
 
     /**
      * @return mixed
@@ -192,6 +199,14 @@ class OntoClass
     public function getLabels()
     {
         return $this->labels;
+    }
+
+    /**
+     * @return ArrayCollection|TextProperty[]
+     */
+    public function getTextProperties()
+    {
+        return $this->textProperties;
     }
 
 }
