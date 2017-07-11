@@ -45,7 +45,7 @@ class TextProperty
 
     /**
      * @ORM\ManyToOne(targetEntity="SystemType", inversedBy="textProperties")
-     * @ORM\JoinColumn(name="fk_system_type", referencedColumnName="pk_system_type")
+     * @ORM\JoinColumn(name="fk_text_propery_type", referencedColumnName="pk_system_type")
      */
     private $systemType;
 

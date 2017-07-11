@@ -17,7 +17,51 @@
         <div class="tab-content">
             <div id="scope-notes" class="tab-pane fade in active">
                 <h3>Scope Notes</h3>
-                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+                <table class="table table-striped" id="scope-notes-table">
+                    <thead>
+                    <tr>
+                        <th>Scope note</th>
+                        <th>Language</th>
+                        <th>Namespace</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for textProperty in class.textProperties if textProperty.systemType.id == 1 %}
+                        <tr>
+                            <td>
+                                <a href="#">
+                                    {{ textProperty.textProperty }}
+                                </a>
+                            </td>
+                            <td>{{ textProperty.languageIsoCode}}</td>
+                            <td>WIP</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                <h3>Examples</h3>
+                <table class="table table-striped" id="examples-table">
+                    <thead>
+                    <tr>
+                        <th>Example</th>
+                        <th>Language</th>
+                        <th>Namespace</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for textProperty in class.textProperties if textProperty.systemType.id == 999 %}
+                        <tr>
+                            <td>
+                                <a href="#">
+                                    {{ textProperty.textProperty }}
+                                </a>
+                            </td>
+                            <td>{{ textProperty.languageIsoCode}}</td>
+                            <td>WIP</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
             </div>
             <div id="identification" class="tab-pane fade">
                 <h3>Labels</h3>
@@ -84,6 +128,8 @@
         $(document).ready(function() {
             $('#namespaces-table').DataTable();
             $('#labels-table').DataTable();
+            $('#scope-notes-table').DataTable();
+            $('#examples-table').DataTable();
         } );
     </script>
 
