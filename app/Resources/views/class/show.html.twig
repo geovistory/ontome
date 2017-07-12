@@ -11,7 +11,8 @@
             <li class="active"><a data-toggle="tab" href="#scope-notes">Scope Notes</a></li>
             <li><a data-toggle="tab" href="#identification">Identification</a></li>
             <li><a data-toggle="tab" href="#namespaces">Namespace</a></li>
-            <li><a data-toggle="tab" href="#class-hierarchy">Class hierarchy</a></li>
+            <li><a data-toggle="tab" href="#class-hierarchy">Hierarchy</a></li>
+            <li><a data-toggle="tab" href="#equivalences">Equivalences</a></li>
         </ul>
 
         <div class="tab-content">
@@ -112,8 +113,81 @@
                 </table>
             </div>
             <div id="class-hierarchy" class="tab-pane fade">
-                <h3>Class hierarchy</h3>
-                <p>Eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.</p>
+                <h3>Parent and ancestor classes</h3>
+                <table class="table table-striped" id="ancestors-table">
+                    <thead>
+                    <tr>
+                        <th>Class identifier</th>
+                        <th>Depth</th>
+                        <th>Root namespace</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for ancestor in ancestors|sort %}
+                        <tr>
+                            <td>
+                                <a href="{{ path('class_show', {
+                                    'id': ancestor.id
+                                }) }}">
+                                    {{ ancestor.identifier }}
+                                </a>
+                            </td>
+                            <td>{{ ancestor.depth }}</td>
+                            <td>{{ ancestor.rootNamespaceLabel }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                <h3>Childs and descendant classes</h3>
+                <table class="table table-striped" id="descendants-table">
+                    <thead>
+                    <tr>
+                        <th>Class identifier</th>
+                        <th>Depth</th>
+                        <th>Root namespace</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for descendant in descendants|sort %}
+                        <tr>
+                            <td>
+                                <a href="{{ path('class_show', {
+                                    'id': descendant.id
+                                }) }}">
+                                    {{ descendant.identifier }}
+                                </a>
+                            </td>
+                            <td>{{ descendant.depth }}</td>
+                            <td>{{ descendant.rootNamespaceLabel }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div id="equivalences" class="tab-pane fade">
+                <h3>Equivalent classes</h3>
+                <table class="table table-striped" id="equivalences-table">
+                    <thead>
+                    <tr>
+                        <th>Class identifier</th>
+                        <th>Root namespace</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for equivalence in equivalences|sort %}
+                        <tr>
+                            <td>
+                                <a href="{{ path('class_show', {
+                                    'id': equivalence.id
+                                }) }}">
+                                    {{ equivalence.identifier }}
+                                </a>
+                            </td>
+                            <td>{{ equivalence.rootNamespaceLabel }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
@@ -130,6 +204,15 @@
             $('#labels-table').DataTable();
             $('#scope-notes-table').DataTable();
             $('#examples-table').DataTable();
+            $('#ancestors-table').DataTable({
+                "order": [[ 1, "desc" ]]
+            });
+            $('#descendants-table').DataTable({
+                "order": [[ 1, "asc" ]]
+            });
+            $('#equivalences-table').DataTable({
+                "order": [[ 0, "asc" ]]
+            });
         } );
     </script>
 

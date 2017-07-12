@@ -27,6 +27,94 @@ class ClassRepository extends EntityRepository
             ->orderBy('class.id','DESC')
             ->getQuery()
             ->execute();
+    }
 
+    /**
+     * @param OntoClass $class
+     * @return array
+     */
+    public function findAncestorsById(OntoClass $class){
+        $conn = $this->getEntityManager()
+            ->getConnection();
+
+        $sql = "WITH tw1 AS
+                (
+                  SELECT pk_parent,
+                     parent_identifier,
+                     DEPTH,
+                     ARRAY_TO_STRING(_path,'|') ancestors
+                  FROM che.ascendant_class_hierarchy(:class)
+                )
+                SELECT tw1.pk_parent AS id,
+                       tw1.parent_identifier AS identifier,
+                       tw1.DEPTH,
+                       che.get_root_namespace(nsp.pk_namespace) AS \"rootNamespaceId\",
+                       (SELECT label FROM che.get_namespace_labels(che.get_root_namespace(nsp.pk_namespace)) WHERE language_iso_code = 'en') AS \"rootNamespaceLabel\"
+                FROM tw1,
+                     che.associates_namespace asnsp,
+                     che.namespace nsp
+                WHERE asnsp.fk_class = tw1.pk_parent
+                AND   nsp.pk_namespace = asnsp.fk_namespace
+                GROUP BY tw1.pk_parent,
+                     tw1.parent_identifier,
+                     tw1.depth,
+                     nsp.pk_namespace
+                ORDER BY depth DESC;";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->execute(array('class' => $class->getId()));
+
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * @param OntoClass $class
+     * @return array
+     */
+    public function findDescendantsById(OntoClass $class){
+        $conn = $this->getEntityManager()
+            ->getConnection();
+
+        $sql = "SELECT 	pk_child AS id,
+                        child_identifier AS identifier,
+                        depth,
+                        che.get_root_namespace(nsp.pk_namespace) AS \"rootNamespaceId\",
+                        (SELECT label FROM che.get_namespace_labels(che.get_root_namespace(nsp.pk_namespace)) WHERE language_iso_code = 'en') AS \"rootNamespaceLabel\"
+                FROM 	che.descendant_class_hierarchy(:class) cls, 
+                    che.associates_namespace asnsp,
+                        che.namespace nsp
+                WHERE 	asnsp.fk_class = cls.pk_child
+                AND   	nsp.pk_namespace = asnsp.fk_namespace
+                GROUP BY pk_child, child_identifier, depth, nsp.pk_namespace, che.get_root_namespace(nsp.pk_namespace)
+                ORDER BY depth ASC;";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->execute(array('class' => $class->getId()));
+
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * @param OntoClass $class
+     * @return array
+     */
+    public function findEquivalencesById(OntoClass $class){
+        $conn = $this->getEntityManager()
+            ->getConnection();
+
+        $sql = "SELECT 	fk_associated_class AS id,
+                        identifier_in_namespace AS identifier,
+                        che.get_root_namespace(nsp.pk_namespace) AS \"rootNamespaceId\",
+                        (SELECT label FROM che.get_namespace_labels(che.get_root_namespace(nsp.pk_namespace)) WHERE language_iso_code = 'en') AS \"rootNamespaceLabel\"
+                FROM che.get_equivalent_classes(:class) cls,
+                    che.associates_namespace asnsp,
+                        che.namespace nsp
+                WHERE 	asnsp.fk_class = cls.fk_associated_class
+                 AND   	nsp.pk_namespace = asnsp.fk_namespace;";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->execute(array('class' => $class->getId()));
+
+        return $stmt->fetchAll();
     }
 }
