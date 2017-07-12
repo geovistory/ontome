@@ -39,12 +39,24 @@ class ClassController extends Controller
     {
         $em = $this->getDoctrine()->getManager();
 
+        $ancestors = $em->getRepository('AppBundle:OntoClass')
+            ->findAncestorsById($class);
+
+        $descendants = $em->getRepository('AppBundle:OntoClass')
+            ->findDescendantsById($class);
+
+        $equivalences = $em->getRepository('AppBundle:OntoClass')
+            ->findEquivalencesById($class);
+
         $this->get('logger')
             ->info('Showing genus: '.$class->getIdentifierInNamespace());
 
 
         return $this->render('class/show.html.twig', array(
-            'class' => $class
+            'class' => $class,
+            'ancestors' => $ancestors,
+            'descendants' => $descendants,
+            'equivalences' => $equivalences
         ));
     }
 
