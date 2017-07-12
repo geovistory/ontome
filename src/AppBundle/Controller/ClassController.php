@@ -48,6 +48,9 @@ class ClassController extends Controller
         $equivalences = $em->getRepository('AppBundle:OntoClass')
             ->findEquivalencesById($class);
 
+        $outgoingProperties = $em->getRepository('AppBundle:Property')
+            ->findOutgoingPropertiesById($class);
+
         $this->get('logger')
             ->info('Showing genus: '.$class->getIdentifierInNamespace());
 
@@ -56,7 +59,8 @@ class ClassController extends Controller
             'class' => $class,
             'ancestors' => $ancestors,
             'descendants' => $descendants,
-            'equivalences' => $equivalences
+            'equivalences' => $equivalences,
+            'outgoingProperties' => $outgoingProperties
         ));
     }
 

@@ -13,6 +13,7 @@
             <li><a data-toggle="tab" href="#namespaces">Namespace</a></li>
             <li><a data-toggle="tab" href="#class-hierarchy">Hierarchy</a></li>
             <li><a data-toggle="tab" href="#equivalences">Equivalences</a></li>
+            <li><a data-toggle="tab" href="#properties">Properties</a></li>
         </ul>
 
         <div class="tab-content">
@@ -184,6 +185,43 @@
                                 </a>
                             </td>
                             <td>{{ equivalence.rootNamespaceLabel }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div id="properties" class="tab-pane fade">
+                <h3>Outgoing properties (this class is domain)</h3>
+                <table class="table table-striped" id="outgoing-properties-table">
+                    <thead>
+                    <tr>
+                        <th>Domain</th>
+                        <th>Property identifier</th>
+                        <th>Range</th>
+                        <th>Namespace</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for outgoingProperty in outgoingProperties|sort %}
+                        <tr>
+                            <td>
+                                {{ outgoingProperty.domain }}
+                            </td>
+                            <td>
+                                <a href="{{ path('class_show', {
+                                    'id': outgoingProperty.propertyId
+                                }) }}">
+                                    {{ outgoingProperty.property }}
+                                </a>
+                            </td>
+                            <td>
+                                <a href="{{ path('class_show', {
+                                    'id': outgoingProperty.rangeId
+                                }) }}">
+                                    {{ outgoingProperty.range }}
+                                </a>
+                            </td>
+                            <td>{{ outgoingProperty.rootNamespaceLabel }}</td>
                         </tr>
                     {% endfor %}
                     </tbody>
