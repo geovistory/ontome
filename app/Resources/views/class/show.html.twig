@@ -221,7 +221,49 @@
                                     {{ outgoingProperty.range }}
                                 </a>
                             </td>
-                            <td>{{ outgoingProperty.rootNamespaceLabel }}</td>
+                            <td>{{ outgoingProperty.namespace }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                <h3>Outgoing properties (inherited from ancestors)</h3>
+                <table class="table table-striped" id="outgoing-inherited-properties-table">
+                    <thead>
+                    <tr>
+                        <th>Domain</th>
+                        <th>Property identifier</th>
+                        <th>Range</th>
+                        <th>Namespace</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for outgoingInheritedProperty in outgoingInheritedProperties|sort %}
+                        <tr>
+                            <td>
+                                {{ outgoingInheritedProperty.domain }} (is a
+                                <a
+                                    href="{{ path('class_show', {
+                                        'id': outgoingInheritedProperty.parentClassId
+                                    }) }}"
+                                    title="{{ outgoingInheritedProperty.ancestors }}">
+                                    {{ outgoingInheritedProperty.parentClass }}
+                                </a>)
+                            </td>
+                            <td>
+                                <a href="{{ path('class_show', {
+                                    'id': outgoingInheritedProperty.propertyId
+                                }) }}">
+                                    {{ outgoingInheritedProperty.property }}
+                                </a>
+                            </td>
+                            <td>
+                                <a href="{{ path('class_show', {
+                                    'id': outgoingInheritedProperty.rangeId
+                                }) }}">
+                                    {{ outgoingInheritedProperty.range }}
+                                </a>
+                            </td>
+                            <td>{{ outgoingInheritedProperty.namespace }}</td>
                         </tr>
                     {% endfor %}
                     </tbody>
@@ -251,6 +293,8 @@
             $('#equivalences-table').DataTable({
                 "order": [[ 0, "asc" ]]
             });
+            $('#outgoing-properties-table').DataTable();
+            $('#outgoing-inherited-properties-table').DataTable();
         } );
     </script>
 
