@@ -268,6 +268,41 @@
                     {% endfor %}
                     </tbody>
                 </table>
+                <h3>Ingoing properties (this class is range)</h3>
+                <table class="table table-striped" id="ingoing-properties-table">
+                    <thead>
+                    <tr>
+                        <th>Domain</th>
+                        <th>Property identifier</th>
+                        <th>Range</th>
+                        <th>Namespace</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for ingoingProperty in ingoingProperties|sort %}
+                        <tr>
+                            <td>
+                                {{ ingoingProperty.domain }}
+                            </td>
+                            <td>
+                                <a href="{{ path('class_show', {
+                                    'id': ingoingProperty.propertyId
+                                }) }}">
+                                    {{ ingoingProperty.property }}
+                                </a>
+                            </td>
+                            <td>
+                                <a href="{{ path('class_show', {
+                                    'id': ingoingProperty.rangeId
+                                }) }}">
+                                    {{ ingoingProperty.range }}
+                                </a>
+                            </td>
+                            <td>{{ ingoingProperty.namespace }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
@@ -295,6 +330,7 @@
             });
             $('#outgoing-properties-table').DataTable();
             $('#outgoing-inherited-properties-table').DataTable();
+            $('#ingoing-properties-table').DataTable();
         } );
     </script>
 

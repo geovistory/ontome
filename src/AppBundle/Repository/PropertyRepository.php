@@ -70,4 +70,31 @@ class PropertyRepository extends EntityRepository
 
         return $stmt->fetchAll();
     }
+
+    /**
+     * @param OntoClass $class
+     * @return array
+     */
+    public function findIngoingPropertiesById(OntoClass $class){
+        $conn = $this->getEntityManager()
+            ->getConnection();
+
+        $sql = "SELECT  identifier_domain AS domain,
+                        identifier_property AS property,
+                        pk_property AS \"propertyId\",
+                        pk_range AS \"rangeId\",
+                        identifier_range AS range,
+                        (SELECT label FROM che.get_namespace_labels(nsp.pk_namespace) WHERE language_iso_code = 'en') AS namespace
+                FROM  che.v_properties_with_domain_range,
+                      che.associates_namespace asnsp,
+                      che.namespace nsp 
+                WHERE pk_range = :class
+                  AND asnsp.fk_property = pk_property
+                  AND nsp.pk_namespace = asnsp.fk_namespace;";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->execute(array('class' => $class->getId()));
+
+        return $stmt->fetchAll();
+    }
 }
