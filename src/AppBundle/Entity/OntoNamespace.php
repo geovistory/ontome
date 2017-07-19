@@ -13,7 +13,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
- * Class OntoClass
+ * Class OntoNamespace
  * @ORM\Entity(repositoryClass="AppBundle\Repository\NamespaceRepository")
  * @ORM\Table(schema="che", name="namespace")
  */
@@ -79,9 +79,16 @@ class OntoNamespace
      */
     private $classes;
 
+    /**
+     * @ORM\ManyToMany(targetEntity="Property", mappedBy="namespaces")
+     * @ORM\OrderBy({"identifierInNamespace" = "ASC"})
+     */
+    private $properties;
+
     public function __construct()
     {
         $this->classes = new ArrayCollection();
+        $this->properties = new ArrayCollection();
     }
 
     /**
@@ -162,6 +169,14 @@ class OntoNamespace
     public function getClasses()
     {
         return $this->classes;
+    }
+
+    /**
+     * @return ArrayCollection|Property[]
+     */
+    public function getProperties()
+    {
+        return $this->properties;
     }
 
 

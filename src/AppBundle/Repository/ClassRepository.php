@@ -106,9 +106,9 @@ class ClassRepository extends EntityRepository
                         identifier_in_namespace AS identifier,
                         che.get_root_namespace(nsp.pk_namespace) AS \"rootNamespaceId\",
                         (SELECT label FROM che.get_namespace_labels(che.get_root_namespace(nsp.pk_namespace)) WHERE language_iso_code = 'en') AS \"rootNamespaceLabel\"
-                FROM che.get_equivalent_classes(:class) cls,
-                    che.associates_namespace asnsp,
-                        che.namespace nsp
+                FROM  che.get_equivalent_classes(:class) cls,
+                      che.associates_namespace asnsp,
+                      che.namespace nsp
                 WHERE 	asnsp.fk_class = cls.fk_associated_class
                  AND   	nsp.pk_namespace = asnsp.fk_namespace;";
 

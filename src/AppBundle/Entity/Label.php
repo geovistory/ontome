@@ -54,6 +54,12 @@ class Label
     private $class;
 
     /**
+     * @ORM\ManyToOne(targetEntity="Property", inversedBy="labels")
+     * @ORM\JoinColumn(name="fk_property", referencedColumnName="pk_property")
+     */
+    private $property;
+
+    /**
      * @ORM\Column(type="text")
      */
     private $notes;
@@ -128,6 +134,14 @@ class Label
     public function getClass()
     {
         return $this->class;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getProperty()
+    {
+        return $this->property;
     }
 
     /**

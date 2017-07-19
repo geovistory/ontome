@@ -48,6 +48,18 @@ class ClassController extends Controller
         $equivalences = $em->getRepository('AppBundle:OntoClass')
             ->findEquivalencesById($class);
 
+        $outgoingProperties = $em->getRepository('AppBundle:Property')
+            ->findOutgoingPropertiesById($class);
+
+        $outgoingInheritedProperties = $em->getRepository('AppBundle:Property')
+            ->findOutgoingInheritedPropertiesById($class);
+
+        $ingoingProperties = $em->getRepository('AppBundle:Property')
+            ->findIngoingPropertiesById($class);
+
+        $ingoingInheritedProperties = $em->getRepository('AppBundle:Property')
+            ->findIngoingInheritedPropertiesById($class);
+
         $this->get('logger')
             ->info('Showing genus: '.$class->getIdentifierInNamespace());
 
@@ -56,7 +68,11 @@ class ClassController extends Controller
             'class' => $class,
             'ancestors' => $ancestors,
             'descendants' => $descendants,
-            'equivalences' => $equivalences
+            'equivalences' => $equivalences,
+            'outgoingProperties' => $outgoingProperties,
+            'outgoingInheritedProperties' => $outgoingInheritedProperties,
+            'ingoingProperties' => $ingoingProperties,
+            'ingoingInheritedProperties' => $ingoingInheritedProperties
         ));
     }
 
