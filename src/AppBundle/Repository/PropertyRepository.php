@@ -97,4 +97,31 @@ class PropertyRepository extends EntityRepository
 
         return $stmt->fetchAll();
     }
+
+    /**
+     * @param OntoClass $class
+     * @return array
+     */
+    public function findIngoingInheritedPropertiesById(OntoClass $class){
+        $conn = $this->getEntityManager()
+            ->getConnection();
+
+        $sql = "SELECT  identifier_domain AS domain,
+                        identifier_property AS property,
+                        pk_property AS \"propertyId\",
+                        pk_parent AS \"rangeId\",
+                        parent_identifier AS range,
+                        replace(ancestors, '|', '→') AS ancestors,
+                        (SELECT label FROM che.get_namespace_labels(nsp.pk_namespace) WHERE language_iso_code = 'en') AS namespace
+                FROM  che.class_ingoing_inherited_properties(:class),
+                      che.associates_namespace asnsp,
+                      che.namespace nsp 
+                WHERE asnsp.fk_property = pk_property
+                  AND nsp.pk_namespace = asnsp.fk_namespace;";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->execute(array('class' => $class->getId()));
+
+        return $stmt->fetchAll();
+    }
 }
