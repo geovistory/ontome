@@ -23,6 +23,7 @@
                 <table class="table table-striped" id="scope-notes-table">
                     <thead>
                     <tr>
+                        <th>Show</th>
                         <th>Scope note</th>
                         <th>Language</th>
                         <th>Namespace</th>
@@ -31,10 +32,9 @@
                     <tbody>
                     {% for textProperty in class.textProperties if textProperty.systemType.id == 1 %}
                         <tr>
-                            <td>
-                                <a href="#">
-                                    {{ textProperty.textProperty }}
-                                </a>
+                            <td><a class="btn" href="#"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
+                            <td class="truncated-text">
+                                    <span>{{ textProperty.textProperty}}</span>
                             </td>
                             <td>{{ textProperty.languageIsoCode}}</td>
                             <td>WIP</td>
@@ -46,6 +46,7 @@
                 <table class="table table-striped" id="examples-table">
                     <thead>
                     <tr>
+                        <th>Show</th>
                         <th>Example</th>
                         <th>Language</th>
                         <th>Namespace</th>
@@ -54,10 +55,9 @@
                     <tbody>
                     {% for textProperty in class.textProperties if textProperty.systemType.id == 999 %}
                         <tr>
-                            <td>
-                                <a href="#">
-                                    {{ textProperty.textProperty }}
-                                </a>
+                            <td><a class="btn" href="#"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
+                            <td class="truncated-text">
+                                <span>{{ textProperty.textProperty}}</span>
                             </td>
                             <td>{{ textProperty.languageIsoCode}}</td>
                             <td>WIP</td>
