@@ -14,6 +14,7 @@
             <li><a data-toggle="tab" href="#class-hierarchy">Hierarchy</a></li>
             <li><a data-toggle="tab" href="#equivalences">Equivalences</a></li>
             <li><a data-toggle="tab" href="#properties">Properties</a></li>
+            <li><a data-toggle="tab" href="#projects">Projects</a></li>
         </ul>
 
         <div class="tab-content">
@@ -342,6 +343,33 @@
                     </tbody>
                 </table>
             </div>
+            <div id="projects" class="tab-pane fade">
+                <h3>Projects using this class</h3>
+                <table class="table table-striped" id="projects-table">
+                    <thead>
+                    <tr>
+                        <th>Label</th>
+                        <th>Start date</th>
+                        <th>End date</th>
+                        <th>Last updated</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for project in class.projects %}
+                        <tr>
+                            <td>
+                                <a href="#">
+                                    {{ project.standardLabel }}
+                                </a>
+                            </td>
+                            <td>{{ project.startDate}}</td>
+                            <td>{{ project.endDate}}</td>
+                            <td>{{ project.modificationTime|date('Y-m-d') }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
@@ -370,6 +398,7 @@
             $('#outgoing-inherited-properties-table').DataTable();
             $('#ingoing-properties-table').DataTable();
             $('#ingoing-inherited-properties-table').DataTable();
+            $('#projects-table').DataTable();
         } );
     </script>
 

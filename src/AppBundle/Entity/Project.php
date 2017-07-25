@@ -21,7 +21,7 @@ class Project
     /**
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
-     * @ORM\Column(type="integer", name="pk_label")
+     * @ORM\Column(type="integer", name="pk_project")
      */
     private $id;
 
