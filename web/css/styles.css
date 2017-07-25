@@ -639,6 +639,26 @@ Main components
 }
 
 /******************************
+COLUMNS Styling
+*******************************/
+
+.table .truncated-text {
+    position: relative;
+}
+.table .truncated-text span {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    position: absolute;
+    left: 0;
+    right: 0;
+}
+.truncated-text:before {
+    content: '';
+    display: inline-block;
+}
+
+/******************************
 FOOTER Styling
 *******************************/
 
