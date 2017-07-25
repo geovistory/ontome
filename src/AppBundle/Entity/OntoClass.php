@@ -98,11 +98,21 @@ class OntoClass
      */
     private $textProperties;
 
+    /**
+     * @ORM\ManyToMany(targetEntity="Project",  inversedBy="OntoClass", fetch="EXTRA_LAZY")
+     * @ORM\JoinTable(schema="che", name="associates_project",
+     *      joinColumns={@ORM\JoinColumn(name="fk_class", referencedColumnName="pk_class")},
+     *      inverseJoinColumns={@ORM\JoinColumn(name="fk_project", referencedColumnName="pk_project")}
+     *      )
+     */
+    private $projects;
+
     public function __construct()
     {
         $this->namespaces = new ArrayCollection();
         $this->labels = new ArrayCollection();
         $this->textProperties = new ArrayCollection();
+        $this->projects = new ArrayCollection();
     }
 
     /**
@@ -207,6 +217,14 @@ class OntoClass
     public function getTextProperties()
     {
         return $this->textProperties;
+    }
+
+    /**
+     * @return ArrayCollection|Project[]
+     */
+    public function getProjects()
+    {
+        return $this->projects;
     }
 
 }

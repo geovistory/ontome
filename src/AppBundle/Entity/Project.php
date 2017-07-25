@@ -52,6 +52,12 @@ class Project
     private $parentProject;
 
     /**
+     * @ORM\ManyToMany(targetEntity="OntoClass", mappedBy="projects")
+     * @ORM\OrderBy({"identifierInNamespace" = "ASC"})
+     */
+    private $classes;
+
+    /**
      * @Assert\NotBlank()
      * @ORM\ManyToOne(targetEntity="User")
      * @ORM\JoinColumn(name="creator", referencedColumnName="pk_user", nullable=false)
