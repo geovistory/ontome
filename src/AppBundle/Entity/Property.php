@@ -91,4 +91,109 @@ class Property
      */
     private $labels;
 
+    public function __construct()
+    {
+        $this->namespaces = new ArrayCollection();
+        $this->labels = new ArrayCollection();
+        /*$this->textProperties = new ArrayCollection();
+        $this->projects = new ArrayCollection();*/
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getIdentifierInNamespace()
+    {
+        return $this->identifierInNamespace;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getImporterXmlField()
+    {
+        return $this->importerXmlField;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getImporterTextField()
+    {
+        return $this->importerTextField;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getStandardLabel()
+    {
+        return $this->standardLabel;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getNotes()
+    {
+        return $this->notes;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getCreator()
+    {
+        return $this->creator;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getModifier()
+    {
+        return $this->modifier;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getCreationTime()
+    {
+        return $this->creationTime;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getModificationTime()
+    {
+        return $this->modificationTime;
+    }
+
+    /**
+     * @return ArrayCollection|OntoNamespace[]
+     */
+    public function getNamespaces()
+    {
+        return $this->namespaces;
+    }
+
+    /**
+     * @return ArrayCollection|Label[]
+     */
+    public function getLabels()
+    {
+        return $this->labels;
+    }
+
+
 }

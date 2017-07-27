@@ -61,7 +61,7 @@ class ClassController extends Controller
             ->findIngoingInheritedPropertiesById($class);
 
         $this->get('logger')
-            ->info('Showing genus: '.$class->getIdentifierInNamespace());
+            ->info('Showing class: '.$class->getIdentifierInNamespace());
 
 
         return $this->render('class/show.html.twig', array(

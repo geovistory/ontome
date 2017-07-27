@@ -15,6 +15,21 @@ class PropertyRepository extends EntityRepository
 {
 
     /**
+     * @return Property[]
+     */
+    public function findAllOrderedById()
+    {
+        return $this->createQueryBuilder('property')
+            ->join('property.namespaces','nspc')
+            ->addSelect('nspc')
+            ->leftJoin('nspc.referencedVersion', 'referencedVersion')
+            ->addSelect('referencedVersion')
+            ->orderBy('property.id','DESC')
+            ->getQuery()
+            ->execute();
+    }
+
+    /**
      * @param OntoClass $class
      * @return array
      */
