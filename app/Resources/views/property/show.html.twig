@@ -11,7 +11,7 @@
             <li class="active"><a data-toggle="tab" href="#scope-notes">Scope Notes</a></li>
             <li><a data-toggle="tab" href="#identification">Identification</a></li>
             <li><a data-toggle="tab" href="#namespaces">Namespace</a></li>
-            <li><a data-toggle="tab" href="#class-hierarchy">Hierarchy</a></li>
+            <li><a data-toggle="tab" href="#property-hierarchy">Hierarchy</a></li>
             <li><a data-toggle="tab" href="#equivalences">Equivalences</a></li>
             <li><a data-toggle="tab" href="#properties">Properties</a></li>
             <li><a data-toggle="tab" href="#projects">Projects</a></li>
@@ -53,7 +53,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for textProperty in property.textProperties if textProperty.systemType.id == 999 %}
+                    {% for textProperty in property.textProperties if textProperty.systemType.id == 7 %}
                         <tr>
                             <td><a class="btn" href="#"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
                             <td class="truncated-text">
@@ -114,28 +114,30 @@
                     </tbody>
                 </table>
             </div>
-            <div id="class-hierarchy" class="tab-pane fade">
-                <h3>Parent and ancestor classes</h3>
-                <table class="table table-striped" id="ancestors-table">
+            <div id="property-hierarchy" class="tab-pane fade">
+                <h3>Parent and ancestor properties</h3>
+                <table class="table table-striped" id="ancestors-properties-table">
                     <thead>
                     <tr>
-                        <th>Class identifier</th>
+                        <th>Property identifier</th>
+                        <th>Namespace</th>
                         <th>Depth</th>
-                        <th>Root namespace</th>
                     </tr>
                     </thead>
                     <tbody>
                     {% for ancestor in ancestors|sort %}
                         <tr>
                             <td>
-                                <a href="{{ path('class_show', {
+                                <a href="{{ path('property_show', {
                                     'id': ancestor.id
-                                }) }}">
-                                    {{ ancestor.identifier }}
+                                    }) }}"
+                                   title="{{ ancestor.ancestors }}">
+                                    {{ ancestor.parentIdentifier }}
                                 </a>
                             </td>
+                            <td>{{ ancestor.namespaces }}</td>
                             <td>{{ ancestor.depth }}</td>
-                            <td>{{ ancestor.rootNamespaceLabel }}</td>
+
                         </tr>
                     {% endfor %}
                     </tbody>
@@ -144,204 +146,35 @@
                 <table class="table table-striped" id="descendants-table">
                     <thead>
                     <tr>
-                        <th>Class identifier</th>
+                        <th>Property identifier</th>
                         <th>Depth</th>
-                        <th>Root namespace</th>
+                        <th>Namespace</th>
                     </tr>
                     </thead>
                     <tbody>
                     {% for descendant in descendants|sort %}
                         <tr>
                             <td>
-                                <a href="{{ path('class_show', {
+                                <a href="{{ path('property_show', {
                                     'id': descendant.id
-                                }) }}">
+                                    }) }}"
+                                   title="{{ descendant.descendants }}">
                                     {{ descendant.identifier }}
                                 </a>
                             </td>
                             <td>{{ descendant.depth }}</td>
-                            <td>{{ descendant.rootNamespaceLabel }}</td>
+                            <td>{{ descendant.namespaces }}</td>
                         </tr>
                     {% endfor %}
                     </tbody>
                 </table>
             </div>
             <div id="equivalences" class="tab-pane fade">
-                <h3>Equivalent classes</h3>
-                <table class="table table-striped" id="equivalences-table">
-                    <thead>
-                    <tr>
-                        <th>Class identifier</th>
-                        <th>Root namespace</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% for equivalence in equivalences|sort %}
-                        <tr>
-                            <td>
-                                <a href="{{ path('class_show', {
-                                    'id': equivalence.id
-                                }) }}">
-                                    {{ equivalence.identifier }}
-                                </a>
-                            </td>
-                            <td>{{ equivalence.rootNamespaceLabel }}</td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
+                <h3>Equivalent properties</h3>
+
             </div>
             <div id="properties" class="tab-pane fade">
-                <h3>Outgoing properties (this class is domain)</h3>
-                <table class="table table-striped" id="outgoing-properties-table">
-                    <thead>
-                    <tr>
-                        <th>Domain</th>
-                        <th>Property identifier</th>
-                        <th>Range</th>
-                        <th>Namespace</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% for outgoingProperty in outgoingProperties|sort %}
-                        <tr>
-                            <td>
-                                {{ outgoingProperty.domain }}
-                            </td>
-                            <td>
-                                <a href="{{ path('class_show', {
-                                    'id': outgoingProperty.propertyId
-                                }) }}">
-                                    {{ outgoingProperty.property }}
-                                </a>
-                            </td>
-                            <td>
-                                <a href="{{ path('class_show', {
-                                    'id': outgoingProperty.rangeId
-                                }) }}">
-                                    {{ outgoingProperty.range }}
-                                </a>
-                            </td>
-                            <td>{{ outgoingProperty.namespace }}</td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-                <h3>Outgoing properties (inherited from ancestors)</h3>
-                <table class="table table-striped" id="outgoing-inherited-properties-table">
-                    <thead>
-                    <tr>
-                        <th>Domain</th>
-                        <th>Property identifier</th>
-                        <th>Range</th>
-                        <th>Namespace</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% for outgoingInheritedProperty in outgoingInheritedProperties|sort %}
-                        <tr>
-                            <td>
-                                {{ outgoingInheritedProperty.domain }} (is a
-                                <a
-                                    href="{{ path('class_show', {
-                                        'id': outgoingInheritedProperty.parentClassId
-                                    }) }}"
-                                    title="{{ outgoingInheritedProperty.ancestors }}">
-                                    {{ outgoingInheritedProperty.parentClass }}
-                                </a>)
-                            </td>
-                            <td>
-                                <a href="{{ path('class_show', {
-                                    'id': outgoingInheritedProperty.propertyId
-                                }) }}">
-                                    {{ outgoingInheritedProperty.property }}
-                                </a>
-                            </td>
-                            <td>
-                                <a href="{{ path('class_show', {
-                                    'id': outgoingInheritedProperty.rangeId
-                                }) }}">
-                                    {{ outgoingInheritedProperty.range }}
-                                </a>
-                            </td>
-                            <td>{{ outgoingInheritedProperty.namespace }}</td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-                <h3>Ingoing properties (this class is range)</h3>
-                <table class="table table-striped" id="ingoing-properties-table">
-                    <thead>
-                    <tr>
-                        <th>Domain</th>
-                        <th>Property identifier</th>
-                        <th>Range</th>
-                        <th>Namespace</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% for ingoingProperty in ingoingProperties|sort %}
-                        <tr>
-                            <td>
-                                {{ ingoingProperty.domain }}
-                            </td>
-                            <td>
-                                <a href="{{ path('class_show', {
-                                    'id': ingoingProperty.propertyId
-                                }) }}">
-                                    {{ ingoingProperty.property }}
-                                </a>
-                            </td>
-                            <td>
-                                <a href="{{ path('class_show', {
-                                    'id': ingoingProperty.rangeId
-                                }) }}">
-                                    {{ ingoingProperty.range }}
-                                </a>
-                            </td>
-                            <td>{{ ingoingProperty.namespace }}</td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-                <h3>Ingoing properties (this class is range)</h3>
-                <table class="table table-striped" id="ingoing-inherited-properties-table">
-                    <thead>
-                    <tr>
-                        <th>Domain</th>
-                        <th>Property identifier</th>
-                        <th>Range</th>
-                        <th>Namespace</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% for ingoingInheritedProperty in ingoingInheritedProperties|sort %}
-                        <tr>
-                            <td>
-                                {{ ingoingInheritedProperty.domain }}
-                            </td>
-                            <td>
-                                <a href="{{ path('class_show', {
-                                    'id': ingoingInheritedProperty.propertyId
-                                }) }}">
-                                    {{ ingoingInheritedProperty.property }}
-                                </a>
-                            </td>
-                            <td>
-                                {{ property.identifierInNamespace }} (is a
-                                <a
-                                    href="{{ path('class_show', {
-                                        'id': ingoingInheritedProperty.rangeId
-                                    }) }}"
-                                    title="{{ ingoingInheritedProperty.ancestors }}">
-                                    {{ ingoingInheritedProperty.range }}
-                                </a>)
-                            </td>
-                            <td>{{ ingoingInheritedProperty.namespace }})</td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
+
             </div>
             <div id="projects" class="tab-pane fade">
                 <h3>Projects using this class</h3>
@@ -383,21 +216,26 @@
         $(document).ready(function() {
             $('#namespaces-table').DataTable();
             $('#labels-table').DataTable();
-            $('#scope-notes-table').DataTable();
-            $('#examples-table').DataTable();
+            $('#scope-notes-table').DataTable({
+                "columnDefs": [
+                    { "width": "3%", "targets": 0 },
+                    { "width": "10%", "targets": 2 },
+                    { "width": "10%", "targets": 3 }
+                ]
+            });
+            $('#examples-table').DataTable({
+                "columnDefs": [
+                    { "width": "3%", "targets": 0 },
+                    { "width": "10%", "targets": 2 },
+                    { "width": "10%", "targets": 3 }
+                ]
+            });
             $('#ancestors-table').DataTable({
-                "order": [[ 1, "desc" ]]
+                "order": [[ 1, "asc" ]]
             });
             $('#descendants-table').DataTable({
                 "order": [[ 1, "asc" ]]
             });
-            $('#equivalences-table').DataTable({
-                "order": [[ 0, "asc" ]]
-            });
-            $('#outgoing-properties-table').DataTable();
-            $('#outgoing-inherited-properties-table').DataTable();
-            $('#ingoing-properties-table').DataTable();
-            $('#ingoing-inherited-properties-table').DataTable();
             $('#projects-table').DataTable();
         } );
     </script>
