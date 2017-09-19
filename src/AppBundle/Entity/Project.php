@@ -8,6 +8,7 @@
 
 namespace AppBundle\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -58,6 +59,12 @@ class Project
     private $classes;
 
     /**
+     * @ORM\ManyToMany(targetEntity="Property", mappedBy="projects")
+     * @ORM\OrderBy({"identifierInNamespace" = "ASC"})
+     */
+    private $properties;
+
+    /**
      * @Assert\NotBlank()
      * @ORM\ManyToOne(targetEntity="User")
      * @ORM\JoinColumn(name="creator", referencedColumnName="pk_user", nullable=false)
@@ -80,6 +87,13 @@ class Project
      * @ORM\Column(type="datetime")
      */
     private $modificationTime;
+
+    public function __construct()
+    {
+        $this->properties = new ArrayCollection();
+        $this->classes = new ArrayCollection();
+    }
+
 
     /**
      * @return mixed
@@ -159,6 +173,22 @@ class Project
     public function getModificationTime()
     {
         return $this->modificationTime;
+    }
+
+    /**
+     * @return ArrayCollection|OntoClass[]
+     */
+    public function getClasses()
+    {
+        return $this->classes;
+    }
+
+    /**
+     * @return ArrayCollection|Property[]
+     */
+    public function getProperties()
+    {
+        return $this->properties;
     }
 
 

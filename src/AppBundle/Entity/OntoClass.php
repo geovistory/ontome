@@ -92,10 +92,10 @@ class OntoClass
     private $labels;
 
     /**
-     * @Assert\NotBlank()
-     * @ORM\OneToMany(targetEntity="AppBundle\Entity\TextProperty", mappedBy="class")
-     * @ORM\OrderBy({"languageIsoCode" = "ASC"})
-     */
+    * @Assert\NotBlank()
+    * @ORM\OneToMany(targetEntity="AppBundle\Entity\TextProperty", mappedBy="class")
+    * @ORM\OrderBy({"languageIsoCode" = "ASC"})
+    */
     private $textProperties;
 
     /**
