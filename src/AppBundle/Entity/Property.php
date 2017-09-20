@@ -76,6 +76,22 @@ class Property
     private $modificationTime;
 
     /**
+     * @Assert\NotBlank()
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\TextProperty", mappedBy="property")
+     * @ORM\OrderBy({"languageIsoCode" = "ASC"})
+     */
+    private $textProperties;
+
+    /**
+     * @ORM\ManyToMany(targetEntity="Project",  inversedBy="Property", fetch="EXTRA_LAZY")
+     * @ORM\JoinTable(schema="che", name="associates_project",
+     *      joinColumns={@ORM\JoinColumn(name="fk_property", referencedColumnName="pk_property")},
+     *      inverseJoinColumns={@ORM\JoinColumn(name="fk_project", referencedColumnName="pk_project")}
+     *      )
+     */
+    private $projects;
+
+    /**
      * @ORM\ManyToMany(targetEntity="OntoNamespace",  inversedBy="Property", fetch="EXTRA_LAZY")
      * @ORM\JoinTable(schema="che", name="associates_namespace",
      *      joinColumns={@ORM\JoinColumn(name="fk_property", referencedColumnName="pk_property")},
@@ -95,8 +111,8 @@ class Property
     {
         $this->namespaces = new ArrayCollection();
         $this->labels = new ArrayCollection();
-        /*$this->textProperties = new ArrayCollection();
-        $this->projects = new ArrayCollection();*/
+        $this->textProperties = new ArrayCollection();
+        $this->projects = new ArrayCollection();
     }
 
     /**
@@ -195,5 +211,20 @@ class Property
         return $this->labels;
     }
 
+    /**
+     * @return ArrayCollection|TextProperty[]
+     */
+    public function getTextProperties()
+    {
+        return $this->textProperties;
+    }
+
+    /**
+     * @return ArrayCollection|Project[]
+     */
+    public function getProjects()
+    {
+        return $this->projects;
+    }
 
 }

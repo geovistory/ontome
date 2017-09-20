@@ -9,6 +9,7 @@
 namespace AppBundle\Repository;
 
 use AppBundle\Entity\OntoClass;
+use AppBundle\Entity\Property;
 use Doctrine\ORM\EntityRepository;
 
 class PropertyRepository extends EntityRepository
@@ -136,6 +137,64 @@ class PropertyRepository extends EntityRepository
 
         $stmt = $conn->prepare($sql);
         $stmt->execute(array('class' => $class->getId()));
+
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * @param Property $property
+     * @return array
+     */
+    public function findAncestorsById(Property $property){
+        $conn = $this->getEntityManager()
+            ->getConnection();
+
+        $sql = "WITH tw1 AS
+                (
+                  SELECT pk_parent,
+                     parent_identifier,
+                     DEPTH,
+                     ARRAY_TO_STRING(_path,'|') ancestors
+                  FROM che.ascendant_property_hierarchy(:property)
+                )
+                SELECT tw1.pk_parent  AS id,
+                       tw1.parent_identifier AS \"parentIdentifier\",
+                       tw1.DEPTH,
+                       replace(tw1.ancestors, '|', '→') AS ancestors,
+                       STRING_AGG(nsp.namespace_uri,'; ') namespaces
+                FROM tw1,
+                     che.associates_namespace asnsp,
+                     che.namespace nsp
+                WHERE asnsp.fk_property = tw1.pk_parent
+                AND   nsp.pk_namespace = asnsp.fk_namespace
+                GROUP BY tw1.pk_parent,
+                     tw1.parent_identifier,
+                     tw1.depth,
+                     tw1.ancestors";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->execute(array('property' => $property->getId()));
+
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * @param Property $property
+     * @return array
+     */
+    public function findDescendantsById(Property $property){
+        $conn = $this->getEntityManager()
+            ->getConnection();
+
+        $sql = "SELECT  pk_child AS id,
+                        child_identifier as identifier,
+                        depth,
+                        replace(descendants, '|', '→') AS descendants,
+                        namespaces
+                    FROM che.descendant_property_hierarchy((:property))";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->execute(array('property' => $property->getId()));
 
         return $stmt->fetchAll();
     }

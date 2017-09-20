@@ -39,12 +39,12 @@ class PropertyController extends Controller
     {
         $em = $this->getDoctrine()->getManager();
 
-        /*$ancestors = $em->getRepository('AppBundle:Property')
+        $ancestors = $em->getRepository('AppBundle:Property')
             ->findAncestorsById($property);
 
         $descendants = $em->getRepository('AppBundle:Property')
             ->findDescendantsById($property);
-
+/*
         $equivalences = $em->getRepository('AppBundle:Property')
             ->findEquivalencesById($property);
 
@@ -66,9 +66,9 @@ class PropertyController extends Controller
 
         return $this->render('property/show.html.twig', array(
             'property' => $property,
-            /*'ancestors' => $ancestors,
+            'ancestors' => $ancestors,
             'descendants' => $descendants,
-            'equivalences' => $equivalences,
+            /*'equivalences' => $equivalences,
             'outgoingProperties' => $outgoingProperties,
             'outgoingInheritedProperties' => $outgoingInheritedProperties,
             'ingoingProperties' => $ingoingProperties,

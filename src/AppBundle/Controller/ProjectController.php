@@ -8,38 +8,38 @@
 
 namespace AppBundle\Controller;
 
-use AppBundle\Entity\OntoNamespace;
+use AppBundle\Entity\Project;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 
-class NamespaceController  extends Controller
+class ProjectController  extends Controller
 {
     /**
-     * @Route("/namespace")
+     * @Route("/project")
      */
     public function listAction()
     {
         $em = $this->getDoctrine()->getManager();
 
-        $namespaces = $em->getRepository('AppBundle:OntoNamespace')
-            ->findAllOrderedById();
+        $projects = $em->getRepository('AppBundle:Project')
+            ->findAll();
 
-        return $this->render('namespace/list.html.twig', [
-            'namespaces' => $namespaces
+        return $this->render('project/list.html.twig', [
+            'projects' => $projects
         ]);
     }
 
     /**
-     * @Route("/namespace/{id}", name="namespace_show")
+     * @Route("/project/{id}", name="project_show")
      * @param string $id
      * @return Response the rendered template
      */
-    public function showAction(OntoNamespace $namespace)
+    public function showAction(OntoProject $project)
     {
         $em = $this->getDoctrine()->getManager();
 
-        return $this->render('namespace/show.html.twig', array(
-            'namespace' => $namespace
+        return $this->render('project/show.html.twig', array(
+            'project' => $project
         ));
     }
 
