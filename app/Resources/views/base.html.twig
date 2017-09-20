@@ -21,6 +21,20 @@
                 {% endif %}
             </ul>
         </header>
+        <nav class="navbar navbar-default">
+            <div class="container-fluid">
+                <div class="navbar-header">
+                    <a class="navbar-brand" href="#">Ontologies Management Interface</a>
+                </div>
+                <ul class="nav navbar-nav">
+                    <li class="active"><a href="{{ url('home') }}">Home</a></li>
+                    <li><a href="class">Classes</a></li>
+                    <li><a href="property">Properties</a></li>
+                    <li><a href="namespace">Namespaces</a></li>
+                    <li><a href="#">System types</a></li>
+                </ul>
+            </div>
+        </nav>
         <div class="main-content">
             {% for msg in app.session.flashBag.get('success') %}
                 <div class="alert alert-success">
