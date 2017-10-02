@@ -34,7 +34,7 @@ class ProjectController  extends Controller
      * @param string $id
      * @return Response the rendered template
      */
-    public function showAction(OntoProject $project)
+    public function showAction(Project $project)
     {
         $em = $this->getDoctrine()->getManager();
 
