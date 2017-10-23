@@ -1,0 +1,17 @@
+{% extends 'baseMin.html.twig' %}
+
+{% block title %}{{ textProperty.class.identifierInNamespace }} {{ textProperty.systemType.standardLabel }}{% endblock %}
+
+{% block body %}
+
+    <div class="container">
+        <h2 class="text-propery-class">{{ textProperty.class.identifierInNamespace }} {{ textProperty.systemType.standardLabel }}</h2>
+        <p>{{ textProperty.textProperty }}</p>
+    </div>
+
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+
+{% endblock %}

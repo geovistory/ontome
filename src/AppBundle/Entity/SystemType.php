@@ -33,6 +33,11 @@ class SystemType
     private $usedInTable;
 
     /**
+     *  @ORM\Column(type="text")
+     */
+    private $standardLabel;
+
+    /**
      * @Assert\NotBlank()
      * @ORM\OneToMany(targetEntity="AppBundle\Entity\TextProperty", mappedBy="systemType")
      */
@@ -86,6 +91,14 @@ class SystemType
     public function getUsedInTable()
     {
         return $this->usedInTable;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getStandardLabel()
+    {
+        return $this->standardLabel;
     }
 
     /**
