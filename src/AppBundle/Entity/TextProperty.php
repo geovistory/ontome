@@ -117,6 +117,19 @@ class TextProperty
     }
 
     /**
+     * @return OntoClass|Property|null the object described by the text property
+     */
+    public function getObject()
+    {
+        $object = null;
+        if(!is_null($this->class))
+            $object =  $this->class;
+        elseif (!is_null($this->property))
+            $object = $this->property;
+        return $object;
+    }
+
+    /**
      * @return mixed
      */
     public function getSystemType()
