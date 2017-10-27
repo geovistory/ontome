@@ -12,6 +12,9 @@ namespace AppBundle\Controller;
 use AppBundle\Entity\OntoClass;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
 
 class ClassController extends Controller
 {
@@ -32,7 +35,7 @@ class ClassController extends Controller
 
     /**
      * @Route("/class/{id}", name="class_show")
-     * @param string $id
+     * @param string $class
      * @return Response the rendered template
      */
     public function showAction(OntoClass $class)
@@ -75,5 +78,43 @@ class ClassController extends Controller
             'ingoingInheritedProperties' => $ingoingInheritedProperties
         ));
     }
+
+    /**
+     * @Route("/classes-tree")
+     */
+    public function getTreeAction()
+    {
+        return $this->render('class/tree.html.twig');
+    }
+
+    /**
+     * @Route("/classes-tree/json", name="classes_tree_json")
+     * @Method("GET")
+     * @return JsonResponse a Json formatted tree representation of OntoClasses
+     */
+    public function getTreeJson()
+    {
+        $em = $this->getDoctrine()->getManager();
+        $classes = $em->getRepository('AppBundle:OntoClass')
+            ->findClassesTree();
+
+        return new JsonResponse($classes[0]['json'],200, array(), true);
+    }
+
+    /**
+     * @Route("/classes-tree-legend/json", name="classes_tree_legend_json")
+     * @Method("GET")
+     * @return JsonResponse a Json formatted legend for the OntoClasses tree
+     */
+    public function getTreeLegendJson()
+    {
+        $em = $this->getDoctrine()->getManager();
+        $legend = $em->getRepository('AppBundle:OntoClass')
+            ->findClassesTreeLegend();
+
+
+        return new JsonResponse($legend[0]['json']);
+    }
+
 
 }

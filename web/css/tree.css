@@ -1,0 +1,37 @@
+/* classes tree */
+
+.search {
+    width: 100%;
+}
+
+#tree-container {
+    overflow-x:scroll;
+}
+
+#tree-container-properties {
+    height:700pt;
+    overflow-y:auto;
+}
+
+.node {
+
+}
+
+.node circle {
+    stroke-width: 1.5px;
+}
+
+.found {
+    fill: #ff4136;
+    stroke: #ff4136;
+}
+.node text {
+    font: 10px sans-serif;
+    cursor: pointer;
+}
+
+.link {
+    fill: none;
+    stroke: #ccc;
+    stroke-width: 1.5px;
+}
