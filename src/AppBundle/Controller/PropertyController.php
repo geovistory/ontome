@@ -12,6 +12,9 @@ namespace AppBundle\Controller;
 use AppBundle\Entity\Property;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
 
 class PropertyController extends Controller
 {
@@ -74,6 +77,43 @@ class PropertyController extends Controller
             'ingoingProperties' => $ingoingProperties,
             'ingoingInheritedProperties' => $ingoingInheritedProperties*/
         ));
+    }
+
+    /**
+     * @Route("/properties-tree")
+     */
+    public function getTreeAction()
+    {
+        return $this->render('property/tree.html.twig');
+    }
+
+    /**
+     * @Route("/properties-tree/json", name="properties_tree_json")
+     * @Method("GET")
+     * @return JsonResponse a Json formatted tree representation of Properties
+     */
+    public function getTreeJson()
+    {
+        $em = $this->getDoctrine()->getManager();
+        $properties = $em->getRepository('AppBundle:Property')
+            ->findPropertiesTree();
+
+        return new JsonResponse($properties[0]['json'],200, array(), true);
+    }
+
+    /**
+     * @Route("/properties-tree-legend/json", name="properties_tree_legend_json")
+     * @Method("GET")
+     * @return JsonResponse a Json formatted legend for the Properties tree
+     */
+    public function getTreeLegendJson()
+    {
+        $em = $this->getDoctrine()->getManager();
+        $legend = $em->getRepository('AppBundle:Property')
+            ->findPropertiesTreeLegend();
+
+
+        return new JsonResponse($legend[0]['json']);
     }
 
 }

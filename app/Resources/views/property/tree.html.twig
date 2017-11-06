@@ -1,0 +1,44 @@
+{% extends 'base.html.twig' %}
+
+{% block title %} Properties tree {% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.4/css/select2.min.css" rel="stylesheet" />
+    <link rel="stylesheet" type="text/css" href="{{ asset('css/tree.css') }}"/>
+{%  endblock %}
+
+{% block body %}
+
+    <div id="content" class="container">
+        <h3>Properties tree</h3>
+
+        <select id="search"></select>
+        <p>
+            <button id="reset-tree" onclick="javascript:reset();">Reset</button>
+        </p>
+        <div id="tree-container" data-url="{{ url('properties_tree_json') }}"></div>
+        <div>
+        <p>
+            <em>Legend: </em>
+        </p>
+
+        <svg id="legend-container" data-url="{{ url('properties_tree_legend_json') }}" width="300"/>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block javascripts %}
+    <script
+            src="https://code.jquery.com/jquery-3.2.1.min.js"
+            integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+            crossorigin="anonymous">
+    </script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.4/js/select2.min.js"></script>
+    <script src="https://d3js.org/d3.v3.min.js"></script>
+    <script type="text/javascript" src="{{ asset('js/classes-tree.js') }}"></script>
+    <script src="{{ asset('vendor/bootstrap/js/bootstrap.min.js') }}"></script>
+
+    <script type="text/javascript" src="{{ asset('js/classes-tree-legend.js') }}"></script>
+{% endblock %}
