@@ -1,0 +1,12 @@
+line {
+    stroke: #666;
+    alpha: -9999;
+}
+
+.node {
+    pointer-events: all;
+}
+
+.node text {
+    font: 8px sans-serif;
+}

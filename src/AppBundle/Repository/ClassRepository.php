@@ -147,4 +147,20 @@ class ClassRepository extends EntityRepository
 
         return $stmt->fetchAll();
     }
+
+    /**
+     * @param OntoClass $class
+     * @return array
+     */
+    public function findClassesGraphById(OntoClass $class){
+        $conn = $this->getEntityManager()
+            ->getConnection();
+
+        $sql = "SELECT array_to_json(array_agg(result)) AS json FROM (SELECT pk_target AS id, pk_target AS real_id, replace(target_identifier, '_',' ') AS name, pk_source AS pk_parent, pk_source AS parent_id, source_identifier AS parent_name, depth, link_type FROM che.get_classes_rows_for_graph (:class)) result;";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->execute(array('class' => $class->getId()));
+
+        return $stmt->fetchAll();
+    }
 }
