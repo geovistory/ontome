@@ -198,4 +198,34 @@ class PropertyRepository extends EntityRepository
 
         return $stmt->fetchAll();
     }
+
+    /**
+     * @return array
+     */
+    public function findPropertiesTree(){
+        $conn = $this->getEntityManager()
+            ->getConnection();
+
+        $sql = "SELECT array_to_json(array_agg(tree)) AS json FROM che.tree_properties_with_css_color(155) tree";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->execute();
+
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * @return array
+     */
+    public function findPropertiesTreeLegend(){
+        $conn = $this->getEntityManager()
+            ->getConnection();
+
+        $sql = "SELECT array_to_json(array_agg(legend)) AS json FROM (SELECT pk_css_color, css_color, label FROM che.css_color WHERE context = 'ontologies_properties_tree' ORDER BY pk_css_color) legend;";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->execute();
+
+        return $stmt->fetchAll();
+    }
 }
