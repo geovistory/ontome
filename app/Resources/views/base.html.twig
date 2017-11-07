@@ -36,7 +36,14 @@
                             </li>
                         </ul>
                     </li>
-                    <li><a href="{{ url('app_property_list') }}">Properties</a></li>
+                    <li><a href="#" class="dropdown-toggle" data-toggle="dropdown">Classes <span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="{{ url('app_property_list') }}">Properties list</a>
+                            </li>
+                            <li><a href="{{ url('app_property_gettree') }}">Properties tree</a>
+                            </li>
+                        </ul>
+                    </li>
                     <li><a href="{{ url('app_namespace_list') }}">Namespaces</a></li>
                     <li><a href="#">System types</a></li>
                 </ul>
