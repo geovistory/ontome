@@ -35,7 +35,7 @@ class ClassController extends Controller
 
     /**
      * @Route("/class/{id}", name="class_show")
-     * @param string $class
+     * @param OntoClass $class
      * @return Response the rendered template
      */
     public function showAction(OntoClass $class)
@@ -116,5 +116,19 @@ class ClassController extends Controller
         return new JsonResponse($legend[0]['json']);
     }
 
+    /**
+     * @Route("/class/{class}/graph/json", name="class_graph_json")
+     * @Method("GET")
+     * @param OntoClass $class
+     * @return JsonResponse a Json formatted tree representation of OntoClasses
+     */
+    public function getGraphJson(OntoClass $class)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $classes = $em->getRepository('AppBundle:OntoClass')
+            ->findClassesGraphById($class);
+
+        return new JsonResponse($classes[0]['json'],200, array(), true);
+    }
 
 }

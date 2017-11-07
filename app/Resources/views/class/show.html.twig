@@ -2,12 +2,17 @@
 
 {% block title %}{{ class.identifierInNamespace }}{% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" type="text/css" href="{{ asset('css/graph.css') }}"/>
+{% endblock %}
+
 {% block body %}
 
     <div class="container">
         <h2 class="class-name">{{ class.identifierInNamespace }}</h2>
 
-        <ul class="nav nav-tabs">
+        <ul class="nav nav-tabs" id="main-tabs">
             <li class="active"><a data-toggle="tab" href="#scope-notes">Scope Notes</a></li>
             <li><a data-toggle="tab" href="#identification">Identification</a></li>
             <li><a data-toggle="tab" href="#namespaces">Namespace</a></li>
@@ -15,6 +20,7 @@
             <li><a data-toggle="tab" href="#equivalences">Equivalences</a></li>
             <li><a data-toggle="tab" href="#properties">Properties</a></li>
             <li><a data-toggle="tab" href="#projects">Projects</a></li>
+            <li><a data-toggle="tab" href="#graph">Graph</a></li>
         </ul>
 
         <div class="tab-content">
@@ -373,6 +379,15 @@
                     </tbody>
                 </table>
             </div>
+            <div id="graph" class="tab-pane fade">
+                <p>
+                    <button id="reset-tree" onclick="reset();">Reset</button>
+                </p>
+                <div id="graph-container" data-url="{{ path('class_graph_json', {
+                                                    'class': class.id})
+                }}">
+                </div>
+            </div>
         </div>
     </div>
 
@@ -404,5 +419,7 @@
             $('#projects-table').DataTable();
         } );
     </script>
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <script type="text/javascript" src="{{ asset('js/class-graph.js') }}"></script>
 
 {% endblock %}

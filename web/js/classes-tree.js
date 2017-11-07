@@ -206,6 +206,23 @@ $(document).ready(function() {
 
             nodeEnter.append("circle")
                 .attr("r", 1e-6)
+                /*.attr("class", 	function(d) {
+                                    val = 'CRM';
+                                    if(d.namespaces === "http://www.cidoc-crm.org/cidoc-crm/6-2/"){
+                                        val = 'CRM';
+                                    }
+                                    else if(d.namespaces === "http://hist.org/"){
+                                        val = 'hist';
+                                    }
+                                    else if(d.namespaces === "http://symogih.org/ontology/1-2/"){
+                                        val = 'symogih';
+                                    }
+                                    else if(d.namespaces === "http://iflastandards.info/ns/fr/frbr/frbroo/2-4"){
+                                        val = 'frbr';
+                                    }
+                                    return val;
+                                }
+                      )*/
                 .attr("stroke", function(d) {
 
                     return d.namespace_color; //red
