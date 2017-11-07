@@ -126,7 +126,7 @@ $(document).ready(function() {
                 .attr("x", function(d) { return d.children ? -8 : 8; })
                 .style("text-anchor", function(d) { return d.children ? "end" : "start"; })
                 .text(function(d) { return d.data.name; })
-                .on("click",function(d){if(d.data.real_id){window.open('class_page.html?pk_item='+d.data.real_id+'#class_graph','_blank')};});
+                .on("click",function(d){if(d.data.real_id){window.open(d.data.real_id+'#graph','_blank')};});
 
             nodeSvg = nodeEnter.merge(nodeSvg);
 
