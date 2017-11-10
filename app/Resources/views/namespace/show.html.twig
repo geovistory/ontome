@@ -95,10 +95,54 @@
             </div>
             <div id="classes" class="tab-pane fade">
                 <h3>Classes</h3>
+                <table class="table table-striped" id="classes-table">
+                    <thead>
+                    <tr>
+                        <th>Class namespace identifier</th>
+                        <th>Last updated</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for class in namespace.classes %}
+                        <tr>
+                            <td>
+                                <a href="{{ path('class_show', {
+                                    'id': class.id
+                                }) }}">
+                                    {{ class.identifierInNamespace }}
+                                </a>
+                            </td>
+                            <td>{{ class.modificationTime|date('Y-m-d') }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
 
             </div>
             <div id="properties" class="tab-pane fade">
                 <h3>Properties</h3>
+                <table class="table table-striped" id="properties-table">
+                    <thead>
+                    <tr>
+                        <th>Property identifier</th>
+                        <th>Last updated</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for property in namespace.properties %}
+                        <tr>
+                            <td>
+                                <a href="{{ path('property_show', {
+                                    'id': property.id
+                                }) }}">
+                                    {{ property.identifierInNamespace }}
+                                </a>
+                            </td>
+                            <td>{{ property.modificationTime|date('Y-m-d') }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
             </div>
             <div id="comments" class="tab-pane fade">
                 <h3>Comments</h3>
@@ -119,8 +163,8 @@
             $('#labels-table').DataTable();
             $('#scope-notes-table').DataTable();
             $('#examples-table').DataTable();
-            //$('#properties-table').DataTable();
-            //$('#classes-table').DataTable();
+            $('#properties-table').DataTable();
+            $('#classes-table').DataTable();
 
         } );
     </script>

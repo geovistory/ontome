@@ -60,6 +60,12 @@ class Label
     private $property;
 
     /**
+     * @ORM\ManyToOne(targetEntity="OntoNamespace", inversedBy="namespaces")
+     * @ORM\JoinColumn(name="fk_namespace", referencedColumnName="pk_namespace")
+     */
+    private $namespace;
+
+    /**
      * @ORM\Column(type="text")
      */
     private $notes;
@@ -142,6 +148,14 @@ class Label
     public function getProperty()
     {
         return $this->property;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getNamespace()
+    {
+        return $this->namespace;
     }
 
     /**

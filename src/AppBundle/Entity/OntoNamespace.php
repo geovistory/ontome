@@ -74,6 +74,20 @@ class OntoNamespace
     private $modificationTime;
 
     /**
+     * @Assert\NotBlank()
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Label", mappedBy="namespace")
+     * @ORM\OrderBy({"languageIsoCode" = "ASC"})
+     */
+    private $labels;
+
+    /**
+     * @Assert\NotBlank()
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\TextProperty", mappedBy="namespace")
+     * @ORM\OrderBy({"languageIsoCode" = "ASC"})
+     */
+    private $textProperties;
+
+    /**
      * @ORM\ManyToMany(targetEntity="OntoClass", mappedBy="namespaces")
      * @ORM\OrderBy({"identifierInNamespace" = "ASC"})
      */
@@ -177,6 +191,22 @@ class OntoNamespace
     public function getProperties()
     {
         return $this->properties;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getLabels()
+    {
+        return $this->labels;
+    }
+
+    /**
+     * @return ArrayCollection|TextProperty[]
+     */
+    public function getTextProperties()
+    {
+        return $this->textProperties;
     }
 
 
