@@ -45,6 +45,21 @@ class OntoNamespace
     private $referencedVersion;
 
     /**
+     * @ORM\Column(type="boolean")
+     */
+    private $isTopLevelNamespace;
+
+    /**
+     * @ORM\Column(type="datetime")
+     */
+    private $startDate;
+
+    /**
+     * @ORM\Column(type="datetime")
+     */
+    private $endDate;
+
+    /**
      * @ORM\Column(type="text")
      */
     private $notes;
@@ -135,6 +150,30 @@ class OntoNamespace
     public function getReferencedVersion()
     {
         return $this->referencedVersion;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getIsTopLevelNamespace()
+    {
+        return $this->isTopLevelNamespace;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getStartDate()
+    {
+        return $this->startDate;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getEndDate()
+    {
+        return $this->endDate;
     }
 
     /**
