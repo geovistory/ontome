@@ -95,7 +95,46 @@
                 </table>
             </div>
             <div id="namespace-hierarchy" class="tab-pane fade">
+                <h3>Parent namespaces</h3>
+                <table class="table table-striped" id="classes-table">
+                    <thead>
+                        <tr>
+                            <th>Namespaces URI</th>
+                            <th>Namespaces identifier</th>
+                            <th>Last updated</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>{{ namespace.referencedVersion.namespaceUri }}</td>
+                            <td>
+                                <a href="{{ path('namespace_show', {
+                                    'id': namespace.referencedVersion.id
+                                }) }}">
+                                    {% for label in namespace.referencedVersion.labels %}
+                                        {% if label.isStandardLabelForLanguage == true and label.languageIsoCode == 'en' %}
+                                            {{ label.label }}
+                                        {% endif %}
+                                    {% endfor %}
+                                </a>
+                            </td>
+                            <td>{{ namespace.referencedVersion.modificationTime|date('Y-m-d') }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <h3>Child namespaces</h3>
+                <table class="table table-striped" id="classes-table">
+                    <thead>
+                        <tr>
 
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+
+                        </tr>
+                    </tbody>
+                </table>
             </div>
             <div id="classes" class="tab-pane fade">
                 <h3>Classes</h3>
