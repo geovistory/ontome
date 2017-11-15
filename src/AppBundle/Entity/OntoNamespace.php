@@ -39,7 +39,7 @@ class OntoNamespace
     private $importerInteger;
 
     /**
-     * @ORM\ManyToOne(targetEntity="OntoNamespace")
+     * @ORM\ManyToOne(targetEntity="OntoNamespace",  inversedBy="childVersions")
      * @ORM\JoinColumn(name="fk_is_version_of", referencedColumnName="pk_namespace", nullable=true)
      */
     private $referencedVersion;
@@ -119,6 +119,11 @@ class OntoNamespace
         $this->classes = new ArrayCollection();
         $this->properties = new ArrayCollection();
     }
+
+    /**
+     * @ORM\OneToMany(targetEntity="OntoNamespace", mappedBy="referencedVersion")
+     */
+    private $childVersions;
 
     /**
      * @return mixed
@@ -246,6 +251,14 @@ class OntoNamespace
     public function getTextProperties()
     {
         return $this->textProperties;
+    }
+
+    /**
+     * @return ArrayCollection|OntoNamespace[]
+     */
+    public function getChildVersions()
+    {
+        return $this->childVersions;
     }
 
 

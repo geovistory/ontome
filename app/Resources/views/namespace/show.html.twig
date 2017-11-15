@@ -96,7 +96,7 @@
             </div>
             <div id="namespace-hierarchy" class="tab-pane fade">
                 <h3>Parent namespaces</h3>
-                <table class="table table-striped" id="classes-table">
+                <table class="table table-striped" id="parent-namespaces-table">
                     <thead>
                         <tr>
                             <th>Namespaces URI</th>
@@ -106,6 +106,7 @@
                     </thead>
                     <tbody>
                         <tr>
+                            {% if namespace.referencedVersion is not null  %}
                             <td>{{ namespace.referencedVersion.namespaceUri }}</td>
                             <td>
                                 <a href="{{ path('namespace_show', {
@@ -119,20 +120,37 @@
                                 </a>
                             </td>
                             <td>{{ namespace.referencedVersion.modificationTime|date('Y-m-d') }}</td>
+                            {% endif %}
                         </tr>
                     </tbody>
                 </table>
                 <h3>Child namespaces</h3>
-                <table class="table table-striped" id="classes-table">
+                <table class="table table-striped" id="child-namespaces-table">
                     <thead>
                         <tr>
-
+                            <th>Namespaces URI</th>
+                            <th>Namespaces identifier</th>
+                            <th>Last updated</th>
                         </tr>
                     </thead>
                     <tbody>
+                        {% for childNamespace in namespace.childVersions  %}
                         <tr>
-
+                            <td>{{ childNamespace.namespaceUri }}</td>
+                            <td>
+                                <a href="{{ path('namespace_show', {
+                                    'id': childNamespace.id
+                                }) }}">
+                                    {% for label in childNamespace.labels %}
+                                        {% if label.isStandardLabelForLanguage == true and label.languageIsoCode == 'en' %}
+                                            {{ label.label }}
+                                        {% endif %}
+                                    {% endfor %}
+                                </a>
+                            </td>
+                            <td>{{ childNamespace.modificationTime|date('Y-m-d') }}</td>
                         </tr>
+                        {% endfor %}
                     </tbody>
                 </table>
             </div>
@@ -208,6 +226,8 @@
             $('#examples-table').DataTable();
             $('#properties-table').DataTable();
             $('#classes-table').DataTable();
+            $('#parent-namespaces-table').DataTable();
+            $('#child-namespaces-table').DataTable();
 
         } );
     </script>
