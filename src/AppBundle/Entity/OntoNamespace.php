@@ -39,10 +39,25 @@ class OntoNamespace
     private $importerInteger;
 
     /**
-     * @ORM\ManyToOne(targetEntity="OntoNamespace")
+     * @ORM\ManyToOne(targetEntity="OntoNamespace",  inversedBy="childVersions")
      * @ORM\JoinColumn(name="fk_is_version_of", referencedColumnName="pk_namespace", nullable=true)
      */
     private $referencedVersion;
+
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    private $isTopLevelNamespace;
+
+    /**
+     * @ORM\Column(type="datetime")
+     */
+    private $startDate;
+
+    /**
+     * @ORM\Column(type="datetime")
+     */
+    private $endDate;
 
     /**
      * @ORM\Column(type="text")
@@ -74,6 +89,20 @@ class OntoNamespace
     private $modificationTime;
 
     /**
+     * @Assert\NotBlank()
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Label", mappedBy="namespace")
+     * @ORM\OrderBy({"languageIsoCode" = "ASC"})
+     */
+    private $labels;
+
+    /**
+     * @Assert\NotBlank()
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\TextProperty", mappedBy="namespace")
+     * @ORM\OrderBy({"languageIsoCode" = "ASC"})
+     */
+    private $textProperties;
+
+    /**
      * @ORM\ManyToMany(targetEntity="OntoClass", mappedBy="namespaces")
      * @ORM\OrderBy({"identifierInNamespace" = "ASC"})
      */
@@ -90,6 +119,11 @@ class OntoNamespace
         $this->classes = new ArrayCollection();
         $this->properties = new ArrayCollection();
     }
+
+    /**
+     * @ORM\OneToMany(targetEntity="OntoNamespace", mappedBy="referencedVersion")
+     */
+    private $childVersions;
 
     /**
      * @return mixed
@@ -121,6 +155,30 @@ class OntoNamespace
     public function getReferencedVersion()
     {
         return $this->referencedVersion;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getIsTopLevelNamespace()
+    {
+        return $this->isTopLevelNamespace;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getStartDate()
+    {
+        return $this->startDate;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getEndDate()
+    {
+        return $this->endDate;
     }
 
     /**
@@ -177,6 +235,30 @@ class OntoNamespace
     public function getProperties()
     {
         return $this->properties;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getLabels()
+    {
+        return $this->labels;
+    }
+
+    /**
+     * @return ArrayCollection|TextProperty[]
+     */
+    public function getTextProperties()
+    {
+        return $this->textProperties;
+    }
+
+    /**
+     * @return ArrayCollection|OntoNamespace[]
+     */
+    public function getChildVersions()
+    {
+        return $this->childVersions;
     }
 
 

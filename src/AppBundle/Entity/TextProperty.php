@@ -50,6 +50,12 @@ class TextProperty
     private $property;
 
     /**
+     * @ORM\ManyToOne(targetEntity="OntoNamespace", inversedBy="textProperties")
+     * @ORM\JoinColumn(name="fk_namespace", referencedColumnName="pk_namespace")
+     */
+    private $namespace;
+
+    /**
      * @ORM\ManyToOne(targetEntity="SystemType", inversedBy="textProperties")
      * @ORM\JoinColumn(name="fk_text_propery_type", referencedColumnName="pk_system_type")
      */
@@ -117,7 +123,25 @@ class TextProperty
     }
 
     /**
-     * @return OntoClass|Property|null the object described by the text property
+     * @return mixed
+     */
+    public function getProperty()
+    {
+        return $this->property;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getNamespace()
+    {
+        return $this->namespace;
+    }
+
+
+
+    /**
+     * @return OntoClass|Property|OntoNamespace|null the object described by the text property
      */
     public function getObject()
     {
@@ -126,6 +150,8 @@ class TextProperty
             $object =  $this->class;
         elseif (!is_null($this->property))
             $object = $this->property;
+        elseif (!is_null($this->namespace))
+            $object = $this->namespace;
         return $object;
     }
 

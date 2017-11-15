@@ -66,6 +66,10 @@
                 </table>
             </div>
             <div id="identification" class="tab-pane fade">
+                {% if namespace.isTopLevelNamespace == false %}
+                    <p>Start date: {{ namespace.startDate }}</p>
+                    <p>End date: {{ namespace.endDate }}</p>
+                {% endif %}
                 <h3>Labels</h3>
                 <table class="table table-striped" id="labels-table">
                     <thead>
@@ -91,14 +95,115 @@
                 </table>
             </div>
             <div id="namespace-hierarchy" class="tab-pane fade">
-
+                <h3>Parent namespaces</h3>
+                <table class="table table-striped" id="parent-namespaces-table">
+                    <thead>
+                        <tr>
+                            <th>Namespaces URI</th>
+                            <th>Namespaces identifier</th>
+                            <th>Last updated</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            {% if namespace.referencedVersion is not null  %}
+                            <td>{{ namespace.referencedVersion.namespaceUri }}</td>
+                            <td>
+                                <a href="{{ path('namespace_show', {
+                                    'id': namespace.referencedVersion.id
+                                }) }}">
+                                    {% for label in namespace.referencedVersion.labels %}
+                                        {% if label.isStandardLabelForLanguage == true and label.languageIsoCode == 'en' %}
+                                            {{ label.label }}
+                                        {% endif %}
+                                    {% endfor %}
+                                </a>
+                            </td>
+                            <td>{{ namespace.referencedVersion.modificationTime|date('Y-m-d') }}</td>
+                            {% endif %}
+                        </tr>
+                    </tbody>
+                </table>
+                <h3>Child namespaces</h3>
+                <table class="table table-striped" id="child-namespaces-table">
+                    <thead>
+                        <tr>
+                            <th>Namespaces URI</th>
+                            <th>Namespaces identifier</th>
+                            <th>Last updated</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for childNamespace in namespace.childVersions  %}
+                        <tr>
+                            <td>{{ childNamespace.namespaceUri }}</td>
+                            <td>
+                                <a href="{{ path('namespace_show', {
+                                    'id': childNamespace.id
+                                }) }}">
+                                    {% for label in childNamespace.labels %}
+                                        {% if label.isStandardLabelForLanguage == true and label.languageIsoCode == 'en' %}
+                                            {{ label.label }}
+                                        {% endif %}
+                                    {% endfor %}
+                                </a>
+                            </td>
+                            <td>{{ childNamespace.modificationTime|date('Y-m-d') }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
             <div id="classes" class="tab-pane fade">
                 <h3>Classes</h3>
+                <table class="table table-striped" id="classes-table">
+                    <thead>
+                    <tr>
+                        <th>Class namespace identifier</th>
+                        <th>Last updated</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for class in namespace.classes %}
+                        <tr>
+                            <td>
+                                <a href="{{ path('class_show', {
+                                    'id': class.id
+                                }) }}">
+                                    {{ class.identifierInNamespace }}
+                                </a>
+                            </td>
+                            <td>{{ class.modificationTime|date('Y-m-d') }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
 
             </div>
             <div id="properties" class="tab-pane fade">
                 <h3>Properties</h3>
+                <table class="table table-striped" id="properties-table">
+                    <thead>
+                    <tr>
+                        <th>Property identifier</th>
+                        <th>Last updated</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for property in namespace.properties %}
+                        <tr>
+                            <td>
+                                <a href="{{ path('property_show', {
+                                    'id': property.id
+                                }) }}">
+                                    {{ property.identifierInNamespace }}
+                                </a>
+                            </td>
+                            <td>{{ property.modificationTime|date('Y-m-d') }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
             </div>
             <div id="comments" class="tab-pane fade">
                 <h3>Comments</h3>
@@ -119,8 +224,10 @@
             $('#labels-table').DataTable();
             $('#scope-notes-table').DataTable();
             $('#examples-table').DataTable();
-            //$('#properties-table').DataTable();
-            //$('#classes-table').DataTable();
+            $('#properties-table').DataTable();
+            $('#classes-table').DataTable();
+            $('#parent-namespaces-table').DataTable();
+            $('#child-namespaces-table').DataTable();
 
         } );
     </script>
