@@ -120,6 +120,10 @@
                                 </a>
                             </td>
                             <td>{{ namespace.referencedVersion.modificationTime|date('Y-m-d') }}</td>
+                            {% else %}
+                                <td></td>
+                                <td></td>
+                                <td></td>
                             {% endif %}
                         </tr>
                     </tbody>
