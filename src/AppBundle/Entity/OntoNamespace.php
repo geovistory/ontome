@@ -118,6 +118,9 @@ class OntoNamespace
     {
         $this->classes = new ArrayCollection();
         $this->properties = new ArrayCollection();
+        $this->labels = new ArrayCollection();
+        $this->textProperties = new ArrayCollection();
+        $this->childVersions = new ArrayCollection();
     }
 
     /**

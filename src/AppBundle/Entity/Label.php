@@ -60,10 +60,16 @@ class Label
     private $property;
 
     /**
-     * @ORM\ManyToOne(targetEntity="OntoNamespace", inversedBy="namespaces")
+     * @ORM\ManyToOne(targetEntity="OntoNamespace", inversedBy="labels")
      * @ORM\JoinColumn(name="fk_namespace", referencedColumnName="pk_namespace")
      */
     private $namespace;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Profile", inversedBy="labels")
+     * @ORM\JoinColumn(name="fk_profile", referencedColumnName="pk_profile")
+     */
+    private $profile;
 
     /**
      * @ORM\Column(type="text")

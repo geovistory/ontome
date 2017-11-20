@@ -1,0 +1,44 @@
+{% extends 'base.html.twig' %}
+
+{% block title %} {{ parent() }} - Profiles {% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+
+{%  endblock %}
+
+{% block body %}
+    <h3>Profiles</h3>
+    <table class="table table-striped" id="profile-table">
+        <thead>
+        <tr>
+            <th>Profile standard label</th>
+            <th>Namespace URI</th>
+            <th>Last updated</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for profile in profiles %}
+            <tr>
+                <td>
+                    <a href="#">
+                        {{ profile.standardLabel }}
+                    </a>
+                </td>
+                <td>
+                </td>
+                <td>{{ profile.modificationTime|date('Y-m-d') }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
+{% block javascripts %}
+    {{ parent() }}
+
+    <script>
+        $(document).ready(function() {
+            $('#profile-table').DataTable();
+        } );
+    </script>
+{% endblock %}
