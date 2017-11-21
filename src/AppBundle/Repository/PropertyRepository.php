@@ -9,6 +9,7 @@
 namespace AppBundle\Repository;
 
 use AppBundle\Entity\OntoClass;
+use AppBundle\Entity\Project;
 use AppBundle\Entity\Property;
 use Doctrine\ORM\EntityRepository;
 
