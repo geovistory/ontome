@@ -116,4 +116,26 @@ class PropertyController extends Controller
         return new JsonResponse($legend[0]['json']);
     }
 
+    /**
+     * @Route("/api/properties/project/{project}/json", name="properties_project_json")
+     * @Method("GET")
+     * @param Project $project
+     * @return JsonResponse a Json formatted list representation of Property related to a Project
+     */
+    public function getPropertiesByProject(Project $project)
+    {
+        try{
+            $em = $this->getDoctrine()->getManager();
+            $properties = $em->getRepository('AppBundle:Property')
+                ->findPropertiesByProjectId($project);
+
+        }
+        catch (NotFoundHttpException $e) {
+            return new JsonResponse(null,404, 'contennt-type:application/problem+json');
+        }
+
+
+        return new JsonResponse($properties[0]['json'],200, array(), true);
+    }
+
 }
