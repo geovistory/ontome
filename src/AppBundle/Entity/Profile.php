@@ -102,6 +102,18 @@ class Profile
     private $labels;
 
     /**
+     * @ORM\ManyToMany(targetEntity="OntoClass", mappedBy="profiles")
+     * @ORM\OrderBy({"identifierInNamespace" = "ASC"})
+     */
+    private $classes;
+
+    /**
+     * @ORM\ManyToMany(targetEntity="Property", mappedBy="profiles")
+     * @ORM\OrderBy({"identifierInNamespace" = "ASC"})
+     */
+    private $properties;
+
+    /**
      * Profile constructor.
      * @param $childProfiles
      * @param $textProperties

@@ -13,7 +13,8 @@
         <thead>
         <tr>
             <th>Profile standard label</th>
-            <th>Namespace URI</th>
+            <th>Start date</th>
+            <th>End date</th>
             <th>Last updated</th>
         </tr>
         </thead>
@@ -25,8 +26,8 @@
                         {{ profile.standardLabel }}
                     </a>
                 </td>
-                <td>
-                </td>
+                <td>{{ profile.startDate }}</td>
+                <td>{{ profile.endDate }}</td>
                 <td>{{ profile.modificationTime|date('Y-m-d') }}</td>
             </tr>
         {% endfor %}

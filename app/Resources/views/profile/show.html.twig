@@ -1,0 +1,29 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ profile.standardLabel }}{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+{% endblock %}
+
+{% block body %}
+
+<div class="container">
+    <h2 class="class-name">{{ profile.standardLabel }}</h2>
+
+</div>
+
+
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+
+    <script>
+        $(document).ready(function() {
+
+        } );
+    </script>
+
+
+{% endblock %}

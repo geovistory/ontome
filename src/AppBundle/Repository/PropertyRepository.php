@@ -9,6 +9,7 @@
 namespace AppBundle\Repository;
 
 use AppBundle\Entity\OntoClass;
+use AppBundle\Entity\Profile;
 use AppBundle\Entity\Project;
 use AppBundle\Entity\Property;
 use Doctrine\ORM\EntityRepository;
@@ -242,6 +243,22 @@ class PropertyRepository extends EntityRepository
 
         $stmt = $conn->prepare($sql);
         $stmt->execute(array('project' => $project->getId()));
+
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * @param Profile $profile
+     * @return array
+     */
+    public function findProfileByProjectId(Profile $profile){
+        $conn = $this->getEntityManager()
+            ->getConnection();
+
+        $sql = "SELECT array_to_json(array_agg(result)) AS json FROM (SELECT * FROM api.v_property_all_profile_project WHERE pk_profile = :profile ) result;";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->execute(array('profile' => $profile->getId()));
 
         return $stmt->fetchAll();
     }

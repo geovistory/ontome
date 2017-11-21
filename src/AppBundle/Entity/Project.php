@@ -53,18 +53,6 @@ class Project
     private $parentProject;
 
     /**
-     * @ORM\ManyToMany(targetEntity="OntoClass", mappedBy="projects")
-     * @ORM\OrderBy({"identifierInNamespace" = "ASC"})
-     */
-    private $classes;
-
-    /**
-     * @ORM\ManyToMany(targetEntity="Property", mappedBy="projects")
-     * @ORM\OrderBy({"identifierInNamespace" = "ASC"})
-     */
-    private $properties;
-
-    /**
      * @ORM\OneToMany(targetEntity="Profile", mappedBy="projectOfBelonging")
      */
     private $ownedProfiles;

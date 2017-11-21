@@ -19,7 +19,7 @@
             <li><a data-toggle="tab" href="#class-hierarchy">Hierarchy</a></li>
             <li><a data-toggle="tab" href="#equivalences">Equivalences</a></li>
             <li><a data-toggle="tab" href="#properties">Properties</a></li>
-            <li><a data-toggle="tab" href="#projects">Projects</a></li>
+            <li><a data-toggle="tab" href="#profiles">Profiles</a></li>
             <li><a data-toggle="tab" href="#graph">Graph</a></li>
         </ul>
 
@@ -352,9 +352,9 @@
                     </tbody>
                 </table>
             </div>
-            <div id="projects" class="tab-pane fade">
-                <h3>Projects using this class</h3>
-                <table class="table table-striped" id="projects-table">
+            <div id="profiles" class="tab-pane fade">
+                <h3>Profiles using this class</h3>
+                <table class="table table-striped" id="profiles-table">
                     <thead>
                     <tr>
                         <th>Label</th>
@@ -364,16 +364,16 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for project in class.projects %}
+                    {% for profile in class.profiles %}
                         <tr>
                             <td>
                                 <a href="#">
-                                    {{ project.standardLabel }}
+                                    {{ profile.standardLabel }}
                                 </a>
                             </td>
-                            <td>{{ project.startDate}}</td>
-                            <td>{{ project.endDate}}</td>
-                            <td>{{ project.modificationTime|date('Y-m-d') }}</td>
+                            <td>{{ profile.startDate}}</td>
+                            <td>{{ profile.endDate}}</td>
+                            <td>{{ profile.modificationTime|date('Y-m-d') }}</td>
                         </tr>
                     {% endfor %}
                     </tbody>
@@ -393,7 +393,6 @@
         </div>
     </div>
 
-    </section>
 {% endblock %}
 
 {% block javascripts %}
@@ -418,7 +417,7 @@
             $('#outgoing-inherited-properties-table').DataTable();
             $('#ingoing-properties-table').DataTable();
             $('#ingoing-inherited-properties-table').DataTable();
-            $('#projects-table').DataTable();
+            $('#profiles-table').DataTable();
         } );
     </script>
     <script src="https://d3js.org/d3.v4.min.js"></script>

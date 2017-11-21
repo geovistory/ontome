@@ -14,6 +14,29 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 
 class ProfileController  extends Controller
 {
+
+    /**
+     * @Route("/profile/{id}", name="profile_show")
+     * @param Profile $profile
+     * @return Response the rendered template
+     */
+    public function showAction(Profile $profile)
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        $classes = $em->getRepository('AppBundle:OntoClass')
+            ->findClassesByProfileId($profile);
+        $properties = $em->getRepository('AppBundle:Property')
+            ->findPropertiesByProfileId($profile);
+
+        return $this->render('class/show.html.twig', array(
+            'profile' => $profile,
+            'classes' => $classes,
+            'properties' => $properties
+        ));
+
+    }
+
     /**
      * @Route("/profile")
      */
