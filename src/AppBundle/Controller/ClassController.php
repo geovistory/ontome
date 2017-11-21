@@ -148,10 +148,10 @@ class ClassController extends Controller
 
         }
         catch (NotFoundHttpException $e) {
-            return new JsonResponse(null,404, 'contennt-type:application/problem+json');
+            return new JsonResponse(null,404, 'content-type:application/problem+json');
         }
 
-
+        //return new JsonResponse(null,404, array('content-type'=>'application/problem+json'));
         return new JsonResponse($classes[0]['json'],200, array(), true);
     }
 

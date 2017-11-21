@@ -6,3 +6,9 @@ home:
     path: /
     defaults:
         _controller: AppBundle:Main:homepage
+
+api:
+    resource: "@AppBundle/Controller/ApiController.php"
+    type: annotation
+    defaults:
+        _format: json
