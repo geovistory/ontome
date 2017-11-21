@@ -10,11 +10,13 @@ namespace AppBundle\Controller;
 
 
 use AppBundle\Entity\OntoClass;
+use AppBundle\Entity\Project;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class ClassController extends Controller
 {
@@ -127,6 +129,28 @@ class ClassController extends Controller
         $em = $this->getDoctrine()->getManager();
         $classes = $em->getRepository('AppBundle:OntoClass')
             ->findClassesGraphById($class);
+
+        return new JsonResponse($classes[0]['json'],200, array(), true);
+    }
+
+    /**
+     * @Route("/api/classes/project/{project}/json", name="classes_project_json")
+     * @Method("GET")
+     * @param Project $project
+     * @return JsonResponse a Json formatted list representation of OntoClasses related to a Project
+     */
+    public function getClassesByProject(Project $project)
+    {
+        try{
+            $em = $this->getDoctrine()->getManager();
+            $classes = $em->getRepository('AppBundle:OntoClass')
+                ->findClassesByProjectId($project);
+
+        }
+        catch (NotFoundHttpException $e) {
+            return new JsonResponse(null,404, 'contennt-type:application/problem+json');
+        }
+
 
         return new JsonResponse($classes[0]['json'],200, array(), true);
     }

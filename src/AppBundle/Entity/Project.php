@@ -65,6 +65,11 @@ class Project
     private $properties;
 
     /**
+     * @ORM\OneToMany(targetEntity="Profile", mappedBy="projectOfBelonging")
+     */
+    private $ownedProfiles;
+
+    /**
      * @Assert\NotBlank()
      * @ORM\ManyToOne(targetEntity="User")
      * @ORM\JoinColumn(name="creator", referencedColumnName="pk_user", nullable=false)
@@ -92,6 +97,7 @@ class Project
     {
         $this->properties = new ArrayCollection();
         $this->classes = new ArrayCollection();
+        $this->ownedProfiles = new ArrayCollection();
     }
 
 

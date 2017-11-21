@@ -105,8 +105,8 @@
                         </tr>
                     </thead>
                     <tbody>
+                        {% if namespace.referencedVersion is not null  %}
                         <tr>
-                            {% if namespace.referencedVersion is not null  %}
                             <td>{{ namespace.referencedVersion.namespaceUri }}</td>
                             <td>
                                 <a href="{{ path('namespace_show', {
@@ -120,12 +120,8 @@
                                 </a>
                             </td>
                             <td>{{ namespace.referencedVersion.modificationTime|date('Y-m-d') }}</td>
-                            {% else %}
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                            {% endif %}
                         </tr>
+                        {% endif %}
                     </tbody>
                 </table>
                 <h3>Child namespaces</h3>

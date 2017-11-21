@@ -62,6 +62,12 @@ class TextProperty
     private $systemType;
 
     /**
+     * @ORM\ManyToOne(targetEntity="Profile", inversedBy="textProperties")
+     * @ORM\JoinColumn(name="fk_profile", referencedColumnName="pk_profile")
+     */
+    private $profile;
+
+    /**
      * @ORM\Column(type="text", nullable=true)
      */
     private $notes;

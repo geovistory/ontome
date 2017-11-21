@@ -10,6 +10,7 @@ namespace AppBundle\Repository;
 
 
 use AppBundle\Entity\OntoClass;
+use AppBundle\Entity\Project;
 use Doctrine\ORM\EntityRepository;
 
 class ClassRepository extends EntityRepository
@@ -163,4 +164,22 @@ class ClassRepository extends EntityRepository
 
         return $stmt->fetchAll();
     }
+
+    /**
+     * @param Project $project
+     * @return array
+     */
+    public function findClassesByProjectId(Project $project){
+        $conn = $this->getEntityManager()
+            ->getConnection();
+
+        $sql = "SELECT array_to_json(array_agg(result)) AS json FROM (SELECT * FROM api.v_classes_all_profile_project WHERE pk_project = :project ) result;";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->execute(array('project' => $project->getId()));
+
+        return $stmt->fetchAll();
+    }
+
+
 }
