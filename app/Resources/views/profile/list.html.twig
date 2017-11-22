@@ -22,7 +22,9 @@
         {% for profile in profiles %}
             <tr>
                 <td>
-                    <a href="#">
+                    <a href="{{ path('profile_show', {
+                        'id': profile.id
+                    }) }}">
                         {{ profile.standardLabel }}
                     </a>
                 </td>

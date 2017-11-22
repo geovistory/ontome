@@ -251,11 +251,14 @@ class PropertyRepository extends EntityRepository
      * @param Profile $profile
      * @return array
      */
-    public function findProfileByProjectId(Profile $profile){
+    public function findPropertiesByProfileId(Profile $profile){
         $conn = $this->getEntityManager()
             ->getConnection();
 
-        $sql = "SELECT array_to_json(array_agg(result)) AS json FROM (SELECT * FROM api.v_property_all_profile_project WHERE pk_profile = :profile ) result;";
+        $sql = "SELECT  pk_property AS id,
+                        identifier_in_namespace AS \"identifierInNamespace\",
+                        root_namespace AS \"rootNamespace\"                     
+                FROM api.v_property_all_profile_project WHERE pk_profile = :profile;";
 
         $stmt = $conn->prepare($sql);
         $stmt->execute(array('profile' => $profile->getId()));

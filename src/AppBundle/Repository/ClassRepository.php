@@ -190,8 +190,11 @@ class ClassRepository extends EntityRepository
         $conn = $this->getEntityManager()
             ->getConnection();
 
-        $sql = "SELECT array_to_json(array_agg(result)) AS json FROM (SELECT * FROM api.v_classes_all_profile_project WHERE pk_profile = :profile ) result;";
-
+        $sql = "SELECT  pk_class AS id,
+                        identifier_in_namespace AS \"identifierInNamespace\" ,
+                        root_namespace AS \"rootNamespace\" ,
+                        profile_association_type AS \"associationType\"
+                FROM api.v_classes_all_profile_project WHERE pk_profile = :profile;";
         $stmt = $conn->prepare($sql);
         $stmt->execute(array('profile' => $profile->getId()));
 

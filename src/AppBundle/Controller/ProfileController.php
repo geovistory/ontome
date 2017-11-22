@@ -11,6 +11,7 @@ namespace AppBundle\Controller;
 use AppBundle\Entity\Profile;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\HttpFoundation\Response;
 
 class ProfileController  extends Controller
 {
@@ -26,10 +27,11 @@ class ProfileController  extends Controller
 
         $classes = $em->getRepository('AppBundle:OntoClass')
             ->findClassesByProfileId($profile);
+
         $properties = $em->getRepository('AppBundle:Property')
             ->findPropertiesByProfileId($profile);
 
-        return $this->render('class/show.html.twig', array(
+        return $this->render('profile/show.html.twig', array(
             'profile' => $profile,
             'classes' => $classes,
             'properties' => $properties

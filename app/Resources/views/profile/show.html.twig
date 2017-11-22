@@ -9,8 +9,126 @@
 {% block body %}
 
 <div class="container">
-    <h2 class="class-name">{{ profile.standardLabel }}</h2>
+    <h2 class="profile-name">{{ profile.standardLabel }}</h2>
+    <ul class="nav nav-tabs" id="main-tabs">
+        <li class="active"><a data-toggle="tab" href="#identification">Profile identification</a></li>
+        <li><a data-toggle="tab" href="#classes">Classes</a></li>
+        <li><a data-toggle="tab" href="#properties">Properties</a></li>
+        <li><a data-toggle="tab" href="#projects">Projects</a></li>
+    </ul>
 
+    <div class="tab-content">
+        <div id="identification" class="tab-pane fade in active">
+            <h3>Identification</h3>
+            <p>Start date: {{ profile.startDate }}</p>
+            <p>End date: {{ profile.endDate }}</p>
+            <p>Project of belonging: <a href="{{ path('project_show', {'id': profile.projectOfBelonging.id}) }}">{{ profile.projectOfBelonging.standardLabel }}</a></p>
+            <h3>Labels</h3>
+            <table class="table table-striped" id="labels-table">
+                <thead>
+                <tr>
+                    <th>Label</th>
+                    <th>Language</th>
+                    <th>Last updated</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for label in profile.labels %}
+                    <tr>
+                        <td>
+                            <a href="#">
+                                {{ label.label }}
+                            </a>
+                        </td>
+                        <td>{{ label.languageIsoCode}}</td>
+                        <td>{{ label.modificationTime|date('Y-m-d') }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div id="classes" class="tab-pane fade">
+            <h3>Associated classes</h3>
+            <table class="table table-striped" id="classes-table">
+                <thead>
+                <tr>
+                    <th>Class identifier</th>
+                    <th>Association type</th>
+                    <th>Namespace URI</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for class in classes %}
+                    <tr>
+                        <td>
+                            <a href="{{ path('class_show', {
+                                'id': class.id
+                            }) }}">
+                                {{ class.identifierInNamespace }}
+                            </a>
+                        </td>
+                        <td>{{ class.associationType }}</td>
+                        <td>
+                            {{ class.rootNamespace }}
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div id="properties" class="tab-pane fade">
+            <h3>Associated properties</h3>
+            <table class="table table-striped" id="properties-table">
+                <thead>
+                <tr>
+                    <th>Property identifier</th>
+                    <th>Namespace URI</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for property in properties %}
+                    <tr>
+                        <td>
+                            <a href="{{ path('property_show', {
+                                'id': property.id
+                            }) }}">
+                                {{ property.identifierInNamespace }}
+                            </a>
+                        </td>
+                        <td>
+                            {{ property.rootNamespace }}
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div id="projects" class="tab-pane fade">
+            <h3>Associated projects</h3>
+            <table class="table table-striped" id="projects-table">
+                <thead>
+                <tr>
+                    <th>Project identifier</th>
+                    <th>Last updated</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for project in profile.projects %}
+                    <tr>
+                        <td>
+                            <a href="{{ path('project_show', {
+                                'id': project.id
+                            }) }}">
+                                {{ project.standardLabel }}
+                            </a>
+                        </td>
+                        <td>{{ project.modificationTime|date('Y-m-d') }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 
 
@@ -21,7 +139,9 @@
 
     <script>
         $(document).ready(function() {
-
+            $('#labels-table').DataTable();
+            $('#classes-table').DataTable();
+            $('#properties-table').DataTable();
         } );
     </script>
 
