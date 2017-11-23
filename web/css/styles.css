@@ -18,6 +18,7 @@ Flexbox Layout
 
 .main-content {
     min-height: 300px;
+    padding: 0 10px;
 }
 
 .sea-creature-container {
@@ -75,7 +76,7 @@ body {
 }
 
 .header {
-    padding: 10px 0;
+    padding: 10px 10px;
     margin: 0 auto;
     background-color: #81B9BA;
 }
