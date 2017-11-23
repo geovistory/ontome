@@ -69,6 +69,10 @@
                 </table>
             </div>
             <div id="identification" class="tab-pane fade">
+                {% if domainRange is not null %}
+                <h3>Domain and range</h3>
+                    <p><a href="{{ path('class_show', {'id': domainRange.domainId}) }}">{{ domainRange.domainIdentifier }}</a> → {{ domainRange.propertyIdentifier }} → <a href="{{ path('class_show', {'id': domainRange.rangeId}) }}">{{ domainRange.rangeIdentifier }}</a></p>
+                {% endif %}
                 <h3>Labels</h3>
                 <table class="table table-striped" id="labels-table">
                     <thead>

@@ -13,6 +13,7 @@
         <thead>
         <tr>
             <th>Profile standard label</th>
+            <th>Project of belonging</th>
             <th>Start date</th>
             <th>End date</th>
             <th>Last updated</th>
@@ -26,6 +27,11 @@
                         'id': profile.id
                     }) }}">
                         {{ profile.standardLabel }}
+                    </a>
+                </td>
+                <td>
+                    <a href="#">
+                        {{ profile.projectOfBelonging.standardLabel }}
                     </a>
                 </td>
                 <td>{{ profile.startDate }}</td>

@@ -202,6 +202,28 @@ class PropertyRepository extends EntityRepository
     }
 
     /**
+     * @param Property $property
+     * @return array
+     */
+    public function findDomainRangeById(Property $property){
+        $conn = $this->getEntityManager()
+            ->getConnection();
+
+        $sql = "SELECT  pk_domain AS \"domainId\",
+                        identifier_domain AS \"domainIdentifier\",
+                        identifier_property AS \"propertyIdentifier\",
+                        pk_range AS \"rangeId\",
+                        identifier_range AS \"rangeIdentifier\"
+                FROM che.v_properties_with_domain_range
+                WHERE pk_property = :property";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->execute(array('property' => $property->getId()));
+
+        return $stmt->fetch();
+    }
+
+    /**
      * @return array
      */
     public function findPropertiesTree(){
