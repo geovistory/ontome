@@ -102,16 +102,28 @@ class Profile
     private $labels;
 
     /**
-     * Profile constructor.
-     * @param $childProfiles
-     * @param $textProperties
-     * @param $labels
+     * @ORM\ManyToMany(targetEntity="OntoClass", mappedBy="profiles")
+     * @ORM\OrderBy({"identifierInNamespace" = "ASC"})
      */
-    public function __construct($childProfiles, $textProperties, $labels)
+    private $classes;
+
+    /**
+     * @ORM\ManyToMany(targetEntity="Property", mappedBy="profiles")
+     * @ORM\OrderBy({"identifierInNamespace" = "ASC"})
+     */
+    private $properties;
+
+    /**
+     * @ORM\ManyToMany(targetEntity="Project", mappedBy="profiles")
+     */
+    private $projects;
+
+    public function __construct()
     {
-        $this->childProfiles = $childProfiles;
-        $this->textProperties = $textProperties;
-        $this->labels = $labels;
+        $this->childProfiles = new ArrayCollection();
+        $this->textProperties = new ArrayCollection();
+        $this->labels = new ArrayCollection();
+        $this->projects = new ArrayCollection();
     }
 
     /**
@@ -226,5 +238,28 @@ class Profile
         return $this->projectOfBelonging;
     }
 
+    /**
+     * @return ArrayCollection|OntoClass[]
+     */
+    public function getClasses()
+    {
+        return $this->classes;
+    }
+
+    /**
+     * @return ArrayCollection|Property[]
+     */
+    public function getProperties()
+    {
+        return $this->properties;
+    }
+
+    /**
+     * @return ArrayCollection|Project[]
+     */
+    public function getProjects()
+    {
+        return $this->projects;
+    }
 
 }

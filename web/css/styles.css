@@ -2,7 +2,7 @@
 Flexbox Layout
 *******************************/
 
-.header, .navi, .sea-creature-container, .genus-details, .notes-container, .footer {
+.header, .navi, .sea-creature-container, .object-details, .notes-container, .footer {
     display: -webkit-flex;
     display: flex;
 }
@@ -18,6 +18,7 @@ Flexbox Layout
 
 .main-content {
     min-height: 300px;
+    padding: 0 10px;
 }
 
 .sea-creature-container {
@@ -75,7 +76,7 @@ body {
 }
 
 .header {
-    padding: 10px 0;
+    padding: 10px 10px;
     margin: 0 auto;
     background-color: #81B9BA;
 }
@@ -122,7 +123,7 @@ body {
     color: #000;
 }
 
-.genus-name {
+.object-name {
     margin-top: 30px;
     margin-bottom: 30px;
     text-align: center;
@@ -137,7 +138,7 @@ body {
         justify-content: flex-start;
     }
 
-    .genus-name {
+    .object-name {
         text-align: left;
         margin-left: 60px;
     }
@@ -148,11 +149,11 @@ body {
 BODY Styling
 *******************************/
 
-.genus-details-list, .notes-header {
+.object-details-list, .notes-header {
     padding-left: 20px;
 }
 
-.genus-details-list > dt {
+.object-details-list > dt {
     text-transform: uppercase;
     padding-top: 10px;
 }

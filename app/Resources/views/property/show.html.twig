@@ -14,7 +14,7 @@
             <li><a data-toggle="tab" href="#property-hierarchy">Hierarchy</a></li>
             <li><a data-toggle="tab" href="#equivalences">Equivalences</a></li>
             <li><a data-toggle="tab" href="#properties">Properties</a></li>
-            <li><a data-toggle="tab" href="#projects">Projects</a></li>
+            <li><a data-toggle="tab" href="#profiles">Profiles</a></li>
         </ul>
 
         <div class="tab-content">
@@ -178,9 +178,9 @@
             <div id="properties" class="tab-pane fade">
 
             </div>
-            <div id="projects" class="tab-pane fade">
-                <h3>Projects using this class</h3>
-                <table class="table table-striped" id="projects-table">
+            <div id="profiles" class="tab-pane fade">
+                <h3>Profiles using this class</h3>
+                <table class="table table-striped" id="profiles-table">
                     <thead>
                     <tr>
                         <th>Label</th>
@@ -190,16 +190,16 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for project in property.projects %}
+                    {% for profile in property.profiles %}
                         <tr>
                             <td>
                                 <a href="#">
-                                    {{ project.standardLabel }}
+                                    {{ profile.standardLabel }}
                                 </a>
                             </td>
-                            <td>{{ project.startDate}}</td>
-                            <td>{{ project.endDate}}</td>
-                            <td>{{ project.modificationTime|date('Y-m-d') }}</td>
+                            <td>{{ profile.startDate}}</td>
+                            <td>{{ profile.endDate}}</td>
+                            <td>{{ profile.modificationTime|date('Y-m-d') }}</td>
                         </tr>
                     {% endfor %}
                     </tbody>
@@ -208,7 +208,6 @@
         </div>
     </div>
 
-    </section>
 {% endblock %}
 
 {% block javascripts %}
@@ -238,7 +237,7 @@
             $('#descendants-table').DataTable({
                 "order": [[ 1, "asc" ]]
             });
-            $('#projects-table').DataTable();
+            $('#profiles-table').DataTable();
         } );
     </script>
 

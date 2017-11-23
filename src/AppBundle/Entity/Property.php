@@ -83,13 +83,13 @@ class Property
     private $textProperties;
 
     /**
-     * @ORM\ManyToMany(targetEntity="Project",  inversedBy="Property", fetch="EXTRA_LAZY")
-     * @ORM\JoinTable(schema="che", name="associates_project",
+     * @ORM\ManyToMany(targetEntity="Profile",  inversedBy="Property", fetch="EXTRA_LAZY")
+     * @ORM\JoinTable(schema="che", name="associates_profile",
      *      joinColumns={@ORM\JoinColumn(name="fk_property", referencedColumnName="pk_property")},
-     *      inverseJoinColumns={@ORM\JoinColumn(name="fk_project", referencedColumnName="pk_project")}
+     *      inverseJoinColumns={@ORM\JoinColumn(name="fk_profile", referencedColumnName="pk_profile")}
      *      )
      */
-    private $projects;
+    private $profiles;
 
     /**
      * @ORM\ManyToMany(targetEntity="OntoNamespace",  inversedBy="Property", fetch="EXTRA_LAZY")
@@ -112,7 +112,7 @@ class Property
         $this->namespaces = new ArrayCollection();
         $this->labels = new ArrayCollection();
         $this->textProperties = new ArrayCollection();
-        $this->projects = new ArrayCollection();
+        $this->profiles = new ArrayCollection();
     }
 
     /**
@@ -220,11 +220,11 @@ class Property
     }
 
     /**
-     * @return ArrayCollection|Project[]
+     * @return ArrayCollection|Profile[]
      */
-    public function getProjects()
+    public function getProfiles()
     {
-        return $this->projects;
+        return $this->profiles;
     }
 
 }

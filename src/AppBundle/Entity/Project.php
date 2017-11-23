@@ -53,18 +53,6 @@ class Project
     private $parentProject;
 
     /**
-     * @ORM\ManyToMany(targetEntity="OntoClass", mappedBy="projects")
-     * @ORM\OrderBy({"identifierInNamespace" = "ASC"})
-     */
-    private $classes;
-
-    /**
-     * @ORM\ManyToMany(targetEntity="Property", mappedBy="projects")
-     * @ORM\OrderBy({"identifierInNamespace" = "ASC"})
-     */
-    private $properties;
-
-    /**
      * @ORM\OneToMany(targetEntity="Profile", mappedBy="projectOfBelonging")
      */
     private $ownedProfiles;
@@ -93,11 +81,21 @@ class Project
      */
     private $modificationTime;
 
+    /**
+     * @ORM\ManyToMany(targetEntity="Profile",  inversedBy="Project", fetch="EXTRA_LAZY")
+     * @ORM\JoinTable(schema="che", name="associates_project",
+     *      joinColumns={@ORM\JoinColumn(name="fk_project", referencedColumnName="pk_project")},
+     *      inverseJoinColumns={@ORM\JoinColumn(name="fk_profile", referencedColumnName="pk_profile")}
+     *      )
+     */
+    private $profiles;
+
     public function __construct()
     {
         $this->properties = new ArrayCollection();
         $this->classes = new ArrayCollection();
         $this->ownedProfiles = new ArrayCollection();
+        $this->profiles = new ArrayCollection();
     }
 
 
@@ -195,6 +193,22 @@ class Project
     public function getProperties()
     {
         return $this->properties;
+    }
+
+    /**
+     * @return ArrayCollection|Profile[]
+     */
+    public function getOwnedProfiles()
+    {
+        return $this->ownedProfiles;
+    }
+
+    /**
+     * @return ArrayCollection|Profile[]
+     */
+    public function getProfiles()
+    {
+        return $this->profiles;
     }
 
 

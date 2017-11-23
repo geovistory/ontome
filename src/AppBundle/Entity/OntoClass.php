@@ -99,20 +99,20 @@ class OntoClass
     private $textProperties;
 
     /**
-     * @ORM\ManyToMany(targetEntity="Project",  inversedBy="OntoClass", fetch="EXTRA_LAZY")
-     * @ORM\JoinTable(schema="che", name="associates_project",
+     * @ORM\ManyToMany(targetEntity="Profile",  inversedBy="OntoClass", fetch="EXTRA_LAZY")
+     * @ORM\JoinTable(schema="che", name="associates_profile",
      *      joinColumns={@ORM\JoinColumn(name="fk_class", referencedColumnName="pk_class")},
-     *      inverseJoinColumns={@ORM\JoinColumn(name="fk_project", referencedColumnName="pk_project")}
+     *      inverseJoinColumns={@ORM\JoinColumn(name="fk_profile", referencedColumnName="pk_profile")}
      *      )
      */
-    private $projects;
+    private $profiles;
 
     public function __construct()
     {
         $this->namespaces = new ArrayCollection();
         $this->labels = new ArrayCollection();
         $this->textProperties = new ArrayCollection();
-        $this->projects = new ArrayCollection();
+        $this->profiles = new ArrayCollection();
     }
 
     /**
@@ -220,11 +220,11 @@ class OntoClass
     }
 
     /**
-     * @return ArrayCollection|Project[]
+     * @return ArrayCollection|Profile[]
      */
-    public function getProjects()
+    public function getProfiles()
     {
-        return $this->projects;
+        return $this->profiles;
     }
 
 }

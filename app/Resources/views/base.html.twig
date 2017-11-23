@@ -2,7 +2,7 @@
 <html>
     <head>
         <meta charset="UTF-8" />
-        <title>{% block title %}Ontologies Management Interface{% endblock %}</title>
+        <title>{% block title %}Ontology Management Environment{% endblock %}</title>
         {% block stylesheets %}
             <link rel="stylesheet" href="{{ asset('vendor/bootstrap/css/bootstrap.min.css') }}"/>
             <link rel="stylesheet" href="https://cdn.datatables.net/1.10.15/css/dataTables.bootstrap.min.css">
@@ -12,7 +12,7 @@
     </head>
     <body>
         <header class="header">
-            <h1 class="logo">Ontologies Management Interface</h1>
+            <h1 class="logo">Ontology Management Environment</h1>
             <ul class="navi">
                 {% if is_granted('ROLE_USER') %}
                     <li><a href="{{ path('security_logout') }}">Logout</a></li>
