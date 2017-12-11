@@ -278,5 +278,8 @@ class OntoNamespace
         return $this->childVersions;
     }
 
+    public function getIdentifierInNamespace(){
+        return $this->namespaceURI;
+    }
 
 }
