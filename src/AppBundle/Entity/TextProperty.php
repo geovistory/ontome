@@ -57,7 +57,7 @@ class TextProperty
 
     /**
      * @ORM\ManyToOne(targetEntity="SystemType", inversedBy="textProperties")
-     * @ORM\JoinColumn(name="fk_text_propery_type", referencedColumnName="pk_system_type")
+     * @ORM\JoinColumn(name="fk_text_property_type", referencedColumnName="pk_system_type")
      */
     private $systemType;
 
@@ -142,6 +142,14 @@ class TextProperty
     public function getNamespace()
     {
         return $this->namespace;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getProfile()
+    {
+        return $this->profile;
     }
 
 
