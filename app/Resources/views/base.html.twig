@@ -24,7 +24,7 @@
         <nav class="navbar navbar-default">
             <div class="container-fluid">
                 <div class="navbar-header">
-                    <a class="navbar-brand" href="#">Ontologies Management Interface</a>
+                    <a class="navbar-brand" href="http://dataforhistory.org">Data for History Consortium</a>
                 </div>
                 <ul class="nav navbar-nav">
                     <li class="active"><a href="{{ url('home') }}">Home</a></li>
@@ -57,9 +57,64 @@
             {% endfor %}
             {% block body %}{% endblock %}
         </div>
-
         <div class="footer">
-            <p class="footer-text">Propulsé par le <a href="http://larhra.ish-lyon.cnrs.fr/pole-histoire-numerique">Pôle Histoire Numérique</a></p>
+            <div class="container">
+                <div class="row">
+                    <div class="footer-block col-sm-3">
+                        <div class="region region-footer-first">
+                            <div id="block-block-3" class="block block-block">
+                                <h3>MENU</h3>
+                                <div class="content">
+                                    <p><a href="{{ url('app_class_list') }}">Classes list</a></p>
+                                    <p><a href="{{ url('app_property_list') }}">Properties list</a></p>
+                                    <p><a href="{{ url('app_namespace_list') }}">Namespaces list</a></p>
+                                    <p><a href="{{ url('app_profile_list') }}">Profiles list</a></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="footer-block col-sm-3">
+                        <div class="region region-footer-second">
+                            <div id="block-block-2" class="block block-block">
+                                <h3>ABOUT</h3>
+                                <div class="content">
+                                    <p><a href="{{ url('app_main_legalnotice') }}">Legal notice</a></p>
+                                    <p><a href="#">Sitemap</a></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="footer-block col-sm-3">
+                        <div class="region region-footer-third">
+                            <div id="block-block-4" class="block block-block">
+                                <h3>CREDITS</h3>
+                                <div class="content">
+                                <p>Powered by the <a href="http://larhra.ish-lyon.cnrs.fr/pole-histoire-numerique" target="_blank">Digital History Department</a> -  <a href="http://larhra.ish-lyon.cnrs.fr/" target="_blank">LARHRA</a></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="footer-block col-sm-3">
+                    <div class="region region-footer-fourth">
+                        <div id="block-block-5" class="block block-block">
+                            <h3>CONTACT US</h3>
+                            <div class="content">
+                                <p>E-mail : <a href="mailto:contact@dataforhistory.org?subject=Contact">contact@dataforhistory.org</a></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <p class="footer-text">
+                    <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/" target="_blank"><img alt="Licence Creative Commons" style="border-width:0" src="http://i.creativecommons.org/l/by-sa/4.0/88x31.png"></a>
+                    All the contents of this website are licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/" target="_blank">Creative Commons Licence Attribution-ShareAlike 4.0 International</a>.
+                </p>
+            </div>
+        </div>
+                <!--<p class="footer-text">Propulsé par le <a href="http://larhra.ish-lyon.cnrs.fr/pole-histoire-numerique">Pôle Histoire Numérique</a></p>!-->
+
+            </div>
         </div>
         {% block javascripts %}
             <script
