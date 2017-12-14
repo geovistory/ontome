@@ -666,8 +666,12 @@ FOOTER Styling
 .footer {
     padding: 20px;
     background: #E9D4B7;
-    font-size: 1.3em;
+    font-size: 1em;
     margin-top: 40px;
+}
+
+.footer-block .block {
+    margin-bottom: 30px;
 }
 
 .footer-text {
