@@ -30,7 +30,7 @@ class MainController extends Controller
     /**
      * @Route("/the-data-for-history-consortium")
      */
-    public function projectDescriptioneAction()
+    public function projectDescriptionAction()
     {
         return $this->render('main/projectDescription.html.twig');
     }
