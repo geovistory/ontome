@@ -49,21 +49,10 @@ class PropertyController extends Controller
 
         $descendants = $em->getRepository('AppBundle:Property')
             ->findDescendantsById($property);
-/*
-        $equivalences = $em->getRepository('AppBundle:Property')
-            ->findEquivalencesById($property);
 
-        $outgoingProperties = $em->getRepository('AppBundle:Property')
-            ->findOutgoingPropertiesById($property);
+        $domainRange = $em->getRepository('AppBundle:Property')
+            ->findDomainRangeById($property);
 
-        $outgoingInheritedProperties = $em->getRepository('AppBundle:Property')
-            ->findOutgoingInheritedPropertiesById($property);
-
-        $ingoingProperties = $em->getRepository('AppBundle:Property')
-            ->findIngoingPropertiesById($property);
-
-        $ingoingInheritedProperties = $em->getRepository('AppBundle:Property')
-            ->findIngoingInheritedPropertiesById($property);*/
 
         $this->get('logger')
             ->info('Showing property: '.$property->getIdentifierInNamespace());
@@ -73,11 +62,7 @@ class PropertyController extends Controller
             'property' => $property,
             'ancestors' => $ancestors,
             'descendants' => $descendants,
-            /*'equivalences' => $equivalences,
-            'outgoingProperties' => $outgoingProperties,
-            'outgoingInheritedProperties' => $outgoingInheritedProperties,
-            'ingoingProperties' => $ingoingProperties,
-            'ingoingInheritedProperties' => $ingoingInheritedProperties*/
+            'domainRange' => $domainRange
         ));
     }
 

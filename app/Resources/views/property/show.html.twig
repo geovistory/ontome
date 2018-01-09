@@ -13,7 +13,6 @@
             <li><a data-toggle="tab" href="#namespaces">Namespace</a></li>
             <li><a data-toggle="tab" href="#property-hierarchy">Hierarchy</a></li>
             <li><a data-toggle="tab" href="#equivalences">Equivalences</a></li>
-            <li><a data-toggle="tab" href="#properties">Properties</a></li>
             <li><a data-toggle="tab" href="#profiles">Profiles</a></li>
         </ul>
 
@@ -69,6 +68,10 @@
                 </table>
             </div>
             <div id="identification" class="tab-pane fade">
+                {% if domainRange is not null %}
+                <h3>Domain and range</h3>
+                    <p><a href="{{ path('class_show', {'id': domainRange.domainId}) }}">{{ domainRange.domainIdentifier }}</a> → {{ domainRange.propertyIdentifier }} → <a href="{{ path('class_show', {'id': domainRange.rangeId}) }}">{{ domainRange.rangeIdentifier }}</a></p>
+                {% endif %}
                 <h3>Labels</h3>
                 <table class="table table-striped" id="labels-table">
                     <thead>
@@ -173,9 +176,6 @@
             </div>
             <div id="equivalences" class="tab-pane fade">
                 <h3>Equivalent properties</h3>
-
-            </div>
-            <div id="properties" class="tab-pane fade">
 
             </div>
             <div id="profiles" class="tab-pane fade">

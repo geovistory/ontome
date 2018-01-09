@@ -45,6 +45,12 @@ class OntoNamespace
     private $referencedVersion;
 
     /**
+     * @ORM\ManyToOne(targetEntity="OntoNamespace")
+     * @ORM\JoinColumn(name="fk_top_level_namespace", referencedColumnName="pk_namespace", nullable=true)
+     */
+    private $topLevelNamespace;
+
+    /**
      * @ORM\Column(type="boolean")
      */
     private $isTopLevelNamespace;
@@ -163,6 +169,14 @@ class OntoNamespace
     /**
      * @return mixed
      */
+    public function getTopLevelNamespace()
+    {
+        return $this->topLevelNamespace;
+    }
+
+    /**
+     * @return mixed
+     */
     public function getIsTopLevelNamespace()
     {
         return $this->isTopLevelNamespace;
@@ -264,5 +278,8 @@ class OntoNamespace
         return $this->childVersions;
     }
 
+    public function getIdentifierInNamespace(){
+        return $this->namespaceURI;
+    }
 
 }

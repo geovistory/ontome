@@ -44,7 +44,15 @@
                                     {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
                             </td>
                             <td>{{ textProperty.languageIsoCode}}</td>
-                            <td>WIP</td>
+                            <td>
+                               <!-- {% if textProperty.namespace is not null %}
+                                    {% for label in textProperty.namespace.topLevelNamespace.labels %}
+                                        {% if label.isStandardLabelForLanguage == true and label.languageIsoCode == 'en' %}
+                                            {{ label.label }}
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endif %} -->
+                            </td>
                         </tr>
                     {% endfor %}
                     </tbody>
