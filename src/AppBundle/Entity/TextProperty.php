@@ -56,6 +56,12 @@ class TextProperty
     private $namespace;
 
     /**
+     * @ORM\ManyToOne(targetEntity="Project", inversedBy="textProperties")
+     * @ORM\JoinColumn(name="fk_project", referencedColumnName="pk_project")
+     */
+    private $project;
+
+    /**
      * @ORM\ManyToOne(targetEntity="SystemType", inversedBy="textProperties")
      * @ORM\JoinColumn(name="fk_text_property_type", referencedColumnName="pk_system_type")
      */
@@ -142,6 +148,14 @@ class TextProperty
     public function getNamespace()
     {
         return $this->namespace;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getProject()
+    {
+        return $this->project;
     }
 
     /**

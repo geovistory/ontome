@@ -90,12 +90,28 @@ class Project
      */
     private $profiles;
 
+    /**
+     * @Assert\NotBlank()
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\TextProperty", mappedBy="project")
+     * @ORM\OrderBy({"languageIsoCode" = "ASC"})
+     */
+    private $textProperties;
+
+    /**
+     * @Assert\NotBlank()
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Label", mappedBy="project")
+     * @ORM\OrderBy({"languageIsoCode" = "ASC"})
+     */
+    private $labels;
+
     public function __construct()
     {
         $this->properties = new ArrayCollection();
         $this->classes = new ArrayCollection();
         $this->ownedProfiles = new ArrayCollection();
         $this->profiles = new ArrayCollection();
+        $this->textProperties = new ArrayCollection();
+        $this->labels = new ArrayCollection();
     }
 
 
@@ -201,6 +217,22 @@ class Project
     public function getOwnedProfiles()
     {
         return $this->ownedProfiles;
+    }
+
+    /**
+     * @return ArrayCollection|Label[]
+     */
+    public function getLabels()
+    {
+        return $this->labels;
+    }
+
+    /**
+     * @return ArrayCollection|TextProperty[]
+     */
+    public function getTextProperties()
+    {
+        return $this->textProperties;
     }
 
     /**

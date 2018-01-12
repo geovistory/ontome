@@ -1,19 +1,16 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}{{ namespace.namespaceURI }}{% endblock %}
+{% block title %}{{ project.standardLabel }}{% endblock %}
 
 {% block body %}
 
     <div class="container">
-        <h2 class="class-name">{{ namespace.namespaceURI }}</h2>
+        <h2 class="oject-name">{{ project.standardLabel }}</h2>
 
         <ul class="nav nav-tabs">
             <li class="active"><a data-toggle="tab" href="#scope-notes">Scope Notes</a></li>
             <li><a data-toggle="tab" href="#identification">Identification</a></li>
-            <li><a data-toggle="tab" href="#namespace-hierarchy">Hierarchy</a></li>
-            <li><a data-toggle="tab" href="#classes">Classes</a></li>
-            <li><a data-toggle="tab" href="#properties">Properties</a></li>
-            <li><a data-toggle="tab" href="#comments">Comments</a></li>
+            <li><a data-toggle="tab" href="#profiles">Profiles</a></li>
         </ul>
 
         <div class="tab-content">
@@ -29,7 +26,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for textProperty in namespace.textProperties if textProperty.systemType.id == 1 %}
+                    {% for textProperty in project.textProperties if textProperty.systemType.id == 1 %}
                         <tr>
                             <td><a class="btn" href="#"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
                             <td class="truncated-text">
@@ -52,7 +49,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for textProperty in namespace.textProperties if textProperty.systemType.id == 999 %}
+                    {% for textProperty in project.textProperties if textProperty.systemType.id == 999 %}
                         <tr>
                             <td><a class="btn" href="#"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
                             <td class="truncated-text">
@@ -66,6 +63,9 @@
                 </table>
             </div>
             <div id="identification" class="tab-pane fade">
+                <h3>Identification</h3>
+                <p>Start date: {{ project.startDate }}</p>
+                <p>End date: {{ project.endDate }}</p>
                 <h3>Labels</h3>
                 <table class="table table-striped" id="labels-table">
                     <thead>
@@ -76,7 +76,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for label in namespace.labels %}
+                    {% for label in project.labels %}
                         <tr>
                             <td>
                                 <a href="#">
@@ -90,19 +90,28 @@
                     </tbody>
                 </table>
             </div>
-            <div id="namespace-hierarchy" class="tab-pane fade">
-
-            </div>
-            <div id="classes" class="tab-pane fade">
-                <h3>Classes</h3>
-
-            </div>
-            <div id="properties" class="tab-pane fade">
-                <h3>Properties</h3>
-            </div>
-            <div id="comments" class="tab-pane fade">
-                <h3>Comments</h3>
-
+            <div id="profiles" class="tab-pane fade">
+                <h3>Profiles</h3>
+                <table class="table table-striped" id="profile-table">
+                    <thead>
+                    <tr>
+                        <th>Profile</th>
+                        <th>Creation date</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for profile in project.profiles %}
+                        <tr>
+                            <td>
+                                <a href="#">
+                                    {{ profile.standardLabel }}
+                                </a>
+                            </td>
+                            <td>{{ profile.creationTime|date('Y-m-d') }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
@@ -119,8 +128,7 @@
             $('#labels-table').DataTable();
             $('#scope-notes-table').DataTable();
             $('#examples-table').DataTable();
-            //$('#properties-table').DataTable();
-            //$('#classes-table').DataTable();
+            $('#profile-table').DataTable();
 
         } );
     </script>

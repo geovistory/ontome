@@ -66,6 +66,12 @@ class Label
     private $namespace;
 
     /**
+     * @ORM\ManyToOne(targetEntity="Project", inversedBy="labels")
+     * @ORM\JoinColumn(name="fk_project", referencedColumnName="pk_project")
+     */
+    private $project;
+
+    /**
      * @ORM\ManyToOne(targetEntity="Profile", inversedBy="labels")
      * @ORM\JoinColumn(name="fk_profile", referencedColumnName="pk_profile")
      */
@@ -162,6 +168,22 @@ class Label
     public function getNamespace()
     {
         return $this->namespace;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getProject()
+    {
+        return $this->project;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getProfile()
+    {
+        return $this->profile;
     }
 
     /**
