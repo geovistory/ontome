@@ -10,6 +10,7 @@
         <ul class="nav nav-tabs">
             <li class="active"><a data-toggle="tab" href="#scope-notes">Scope Notes</a></li>
             <li><a data-toggle="tab" href="#identification">Identification</a></li>
+            <li><a data-toggle="tab" href="#project-hierarchy">Hierarchy</a></li>
             <li><a data-toggle="tab" href="#profiles">Profiles</a></li>
         </ul>
 
@@ -22,7 +23,6 @@
                         <th>Show</th>
                         <th>Scope note</th>
                         <th>Language</th>
-                        <th>Namespace</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -33,7 +33,6 @@
                                     <span>{{ textProperty.textProperty}}</span>
                             </td>
                             <td>{{ textProperty.languageIsoCode}}</td>
-                            <td>WIP</td>
                         </tr>
                     {% endfor %}
                     </tbody>
@@ -45,7 +44,6 @@
                         <th>Show</th>
                         <th>Example</th>
                         <th>Language</th>
-                        <th>Namespace</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -56,7 +54,6 @@
                                 <span>{{ textProperty.textProperty}}</span>
                             </td>
                             <td>{{ textProperty.languageIsoCode}}</td>
-                            <td>WIP</td>
                         </tr>
                     {% endfor %}
                     </tbody>
@@ -85,6 +82,54 @@
                             </td>
                             <td>{{ label.languageIsoCode}}</td>
                             <td>{{ label.modificationTime|date('Y-m-d') }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div id="project-hierarchy" class="tab-pane fade">
+                <h3>Parent projects</h3>
+                <table class="table table-striped" id="parent-projects-table">
+                    <thead>
+                    <tr>
+                        <th>Project identifier</th>
+                        <th>Last updated</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% if project.parentProject is not null  %}
+                        <tr>
+                            <td>
+                                <a href="{{ path('project_show', {
+                                    'id': project.parentProject.id
+                                }) }}">
+                                    {{ project.parentProject.standardLabel }}
+                                </a>
+                            </td>
+                            <td>{{ project.parentProject.modificationTime|date('Y-m-d') }}</td>
+                        </tr>
+                    {% endif %}
+                    </tbody>
+                </table>
+                <h3>Child projects</h3>
+                <table class="table table-striped" id="child-projects-table">
+                    <thead>
+                    <tr>
+                        <th>Project identifier</th>
+                        <th>Last updated</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for childProject in project.childProjects  %}
+                        <tr>
+                            <td>
+                                <a href="{{ path('project_show', {
+                                    'id': childProject.id
+                                }) }}">
+                                    {{ childProject.standardLabel }}
+                                </a>
+                            </td>
+                            <td>{{ childProject.modificationTime|date('Y-m-d') }}</td>
                         </tr>
                     {% endfor %}
                     </tbody>
@@ -124,10 +169,11 @@
 
     <script>
         $(document).ready(function() {
-            $('#namespaces-table').DataTable();
             $('#labels-table').DataTable();
             $('#scope-notes-table').DataTable();
             $('#examples-table').DataTable();
+            $('#parent-projects-table').DataTable();
+            $('#child-projects-table').DataTable();
             $('#profile-table').DataTable();
 
         } );

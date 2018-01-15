@@ -120,6 +120,11 @@ class OntoNamespace
      */
     private $properties;
 
+    /**
+     * @ORM\OneToMany(targetEntity="OntoNamespace", mappedBy="referencedVersion")
+     */
+    private $childVersions;
+
     public function __construct()
     {
         $this->classes = new ArrayCollection();
@@ -128,11 +133,6 @@ class OntoNamespace
         $this->textProperties = new ArrayCollection();
         $this->childVersions = new ArrayCollection();
     }
-
-    /**
-     * @ORM\OneToMany(targetEntity="OntoNamespace", mappedBy="referencedVersion")
-     */
-    private $childVersions;
 
     /**
      * @return mixed

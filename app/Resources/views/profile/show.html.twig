@@ -53,7 +53,6 @@
                     <th>Show</th>
                     <th>Scope note</th>
                     <th>Language</th>
-                    <th>Namespace</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -65,7 +64,6 @@
                             {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
                         </td>
                         <td>{{ textProperty.languageIsoCode}}</td>
-                        <td>WIP</td>
                     </tr>
                 {% endfor %}
                 </tbody>

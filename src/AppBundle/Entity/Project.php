@@ -47,7 +47,7 @@ class Project
     private $standardLabel;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Project")
+     * @ORM\ManyToOne(targetEntity="Project", inversedBy="childProjects")
      * @ORM\JoinColumn(name="fk_is_subproject_of", referencedColumnName="pk_project", nullable=true)
      */
     private $parentProject;
@@ -104,6 +104,11 @@ class Project
      */
     private $labels;
 
+    /**
+     * @ORM\OneToMany(targetEntity="Project", mappedBy="parentProject")
+     */
+    private $childProjects;
+
     public function __construct()
     {
         $this->properties = new ArrayCollection();
@@ -112,6 +117,7 @@ class Project
         $this->profiles = new ArrayCollection();
         $this->textProperties = new ArrayCollection();
         $this->labels = new ArrayCollection();
+        $this->childProjects = new ArrayCollection();
     }
 
 
@@ -161,6 +167,14 @@ class Project
     public function getParentProject()
     {
         return $this->parentProject;
+    }
+
+    /**
+     * @return ArrayCollection|Project[]
+     */
+    public function getChildProjects()
+    {
+        return $this->childProjects;
     }
 
     /**
