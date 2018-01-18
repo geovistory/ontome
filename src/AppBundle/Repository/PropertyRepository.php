@@ -97,7 +97,8 @@ class PropertyRepository extends EntityRepository
         $conn = $this->getEntityManager()
             ->getConnection();
 
-        $sql = "SELECT  identifier_domain AS domain,
+        $sql = "SELECT  pk_domain AS \"domainId\",
+                        identifier_domain AS domain,
                         identifier_property AS property,
                         pk_property AS \"propertyId\",
                         pk_range AS \"rangeId\",
@@ -124,7 +125,8 @@ class PropertyRepository extends EntityRepository
         $conn = $this->getEntityManager()
             ->getConnection();
 
-        $sql = "SELECT  identifier_domain AS domain,
+        $sql = "SELECT  pk_domain AS \"domainId\",
+                        identifier_domain AS domain,
                         identifier_property AS property,
                         pk_property AS \"propertyId\",
                         pk_parent AS \"rangeId\",

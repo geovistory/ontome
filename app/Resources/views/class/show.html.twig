@@ -14,11 +14,11 @@
 
         <ul class="nav nav-tabs" id="main-tabs">
             <li class="active"><a data-toggle="tab" href="#scope-notes">Scope Notes</a></li>
+            <li><a data-toggle="tab" href="#properties">Properties</a></li>
             <li><a data-toggle="tab" href="#identification">Identification</a></li>
             <li><a data-toggle="tab" href="#namespaces">Namespace</a></li>
             <li><a data-toggle="tab" href="#class-hierarchy">Hierarchy</a></li>
             <li><a data-toggle="tab" href="#equivalences">Equivalences</a></li>
-            <li><a data-toggle="tab" href="#properties">Properties</a></li>
             <li><a data-toggle="tab" href="#profiles">Profiles</a></li>
             <li><a data-toggle="tab" href="#graph">Graph</a></li>
         </ul>
@@ -321,7 +321,7 @@
                     {% endfor %}
                     </tbody>
                 </table>
-                <h3>Ingoing properties (this class is range)</h3>
+                <h3>Ingoing properties (inherited from ancestors)</h3>
                 <table class="table table-striped" id="ingoing-inherited-properties-table">
                     <thead>
                     <tr>
@@ -335,7 +335,11 @@
                     {% for ingoingInheritedProperty in ingoingInheritedProperties|sort %}
                         <tr>
                             <td>
-                                {{ ingoingInheritedProperty.domain }}
+                                <a href="{{ path('class_show', {
+                                    'id': ingoingInheritedProperty.domainId
+                                }) }}">
+                                    {{ ingoingInheritedProperty.domain }}
+                                </a>
                             </td>
                             <td>
                                 <a href="{{ path('property_show', {
@@ -413,7 +417,7 @@
             $('#scope-notes-table').DataTable();
             $('#examples-table').DataTable();
             $('#ancestors-table').DataTable({
-                "order": [[ 1, "desc" ]]
+                "order": [[ 1, "asc" ]]
             });
             $('#descendants-table').DataTable({
                 "order": [[ 1, "asc" ]]
