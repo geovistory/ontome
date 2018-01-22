@@ -20,9 +20,9 @@
     <div class="tab-content">
         <div id="identification" class="tab-pane fade in active">
             <h3>Identification</h3>
+            <p>Project of belonging: <a href="{{ path('project_show', {'id': profile.projectOfBelonging.id}) }}">{{ profile.projectOfBelonging.standardLabel }}</a></p>
             <p>Start date: {{ profile.startDate }}</p>
             <p>End date: {{ profile.endDate }}</p>
-            <p>Project of belonging: <a href="{{ path('project_show', {'id': profile.projectOfBelonging.id}) }}">{{ profile.projectOfBelonging.standardLabel }}</a></p>
             <h3>Labels</h3>
             <table class="table table-striped" id="labels-table">
                 <thead>
