@@ -75,6 +75,7 @@
                 <thead>
                 <tr>
                     <th>Class identifier</th>
+                    <th>Standard label</th>
                     <th>Association type</th>
                     <th>Namespace URI</th>
                 </tr>
@@ -89,6 +90,12 @@
                                 {{ class.identifierInNamespace }}
                             </a>
                         </td>
+                        <td>
+                            <a href="{{ path('class_show', {
+                                'id': class.id
+                            }) }}">
+                                {{ class.standardLabel }}</td>
+                            </a>
                         <td>{{ class.associationType }}</td>
                         <td>
                             {{ class.rootNamespace }}
@@ -104,6 +111,7 @@
                 <thead>
                 <tr>
                     <th>Property identifier</th>
+                    <th>Standard label</th>
                     <th>Namespace URI</th>
                 </tr>
                 </thead>
@@ -115,6 +123,13 @@
                                 'id': property.id
                             }) }}">
                                 {{ property.identifierInNamespace }}
+                            </a>
+                        </td>
+                        <td>
+                            <a href="{{ path('property_show', {
+                                'id': property.id
+                            }) }}">
+                                {{ property.standardLabel }}
                             </a>
                         </td>
                         <td>

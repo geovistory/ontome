@@ -190,7 +190,8 @@ class ClassRepository extends EntityRepository
         $conn = $this->getEntityManager()
             ->getConnection();
 
-        $sql = "SELECT  pk_class AS id,
+        $sql = "SELECT DISTINCT pk_class AS id,
+                        class_standard_label AS \"standardLabel\",
                         identifier_in_namespace AS \"identifierInNamespace\" ,
                         root_namespace AS \"rootNamespace\" ,
                         profile_association_type AS \"associationType\"

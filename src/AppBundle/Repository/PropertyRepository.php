@@ -279,7 +279,8 @@ class PropertyRepository extends EntityRepository
         $conn = $this->getEntityManager()
             ->getConnection();
 
-        $sql = "SELECT  pk_property AS id,
+        $sql = "SELECT DISTINCT pk_property AS id,
+                        standard_label AS \"standardLabel\",
                         identifier_in_namespace AS \"identifierInNamespace\",
                         root_namespace AS \"rootNamespace\"                     
                 FROM api.v_property_all_profile_project WHERE pk_profile = :profile;";
