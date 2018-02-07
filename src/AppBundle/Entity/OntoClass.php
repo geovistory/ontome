@@ -76,6 +76,17 @@ class OntoClass
     private $modificationTime;
 
     /**
+     * @ORM\OneToMany(targetEntity="ClassAssociation", mappedBy="childClass")
+     */
+    private $childClassAssociation;
+
+    /**
+     * @ORM\OneToMany(targetEntity="ClassAssociation", mappedBy="parentClass")
+     */
+    private $parentClassAssociation;
+
+
+    /**
      * @ORM\ManyToMany(targetEntity="OntoNamespace",  inversedBy="OntoClass", fetch="EXTRA_LAZY")
      * @ORM\JoinTable(schema="che", name="associates_namespace",
      *      joinColumns={@ORM\JoinColumn(name="fk_class", referencedColumnName="pk_class")},
@@ -225,6 +236,11 @@ class OntoClass
     public function getProfiles()
     {
         return $this->profiles;
+    }
+
+    public function __toString()
+    {
+        return $this->getIdentifierInNamespace().' '.$this->getStandardLabel();
     }
 
 }

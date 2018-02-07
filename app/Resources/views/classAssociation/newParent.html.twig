@@ -1,0 +1,58 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Add new parent class for {childClass.standardLabel}{% endblock %}
+
+{% block body %}
+
+    <div class="container">
+        <div class="row">
+            <div class="col-xs-12">
+                <h2>New parent class</h2>
+
+                {{ form_start(parentClassAssociationForm) }}
+                    {{ form_widget(parentClassAssociationForm) }}
+
+                    <button type="submit" class="btn btn-primary" formnovalidate>Save</button>
+                {{ form_end(parentClassAssociationForm) }}
+            </div>
+        </div>
+        <h3>Parent and ancestor classes</h3>
+        <table class="table table-striped" id="ancestors-table">
+            <thead>
+            <tr>
+                <th>Class identifier</th>
+                <th>Depth</th>
+                <th>Root namespace</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for ancestor in ancestors|sort %}
+                <tr>
+                    <td>
+                        <a href="{{ path('class_show', {
+                            'id': ancestor.id
+                        }) }}">
+                            {{ ancestor.identifier }}
+                        </a>
+                    </td>
+                    <td>{{ ancestor.depth }}</td>
+                    <td>{{ ancestor.rootNamespaceLabel }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+
+    <script>
+        $(document).ready(function() {
+            $('#ancestors-table').DataTable({
+                "order": [[ 1, "asc" ]]
+            });
+        } );
+    </script>
+{% endblock %}
