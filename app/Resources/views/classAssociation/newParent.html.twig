@@ -1,13 +1,13 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Add new parent class for {childClass.standardLabel}{% endblock %}
+{% block title %}Add new parent class for {{ childClass.identifierInNamespace }}{% endblock %}
 
 {% block body %}
 
     <div class="container">
         <div class="row">
             <div class="col-xs-12">
-                <h2>New parent class</h2>
+                <h2>Add new parent class for {{ childClass.identifierInNamespace }}</h2>
 
                 {{ form_start(parentClassAssociationForm) }}
                     {{ form_widget(parentClassAssociationForm) }}
