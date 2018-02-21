@@ -9,12 +9,17 @@
 namespace AppBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Class ClassAssociation
  * @ORM\Entity
  * @ORM\Table(schema="che", name="is_subclass_of")
+ * @UniqueEntity(
+ *     fields={"childClass", "parentClass"},
+ *     message="This parent class is already associated with this child class"
+ * )
  */
 class ClassAssociation
 {

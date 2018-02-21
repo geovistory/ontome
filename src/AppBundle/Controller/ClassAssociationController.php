@@ -53,7 +53,6 @@ class ClassAssociationController extends Controller
 
         $ancestors = $em->getRepository('AppBundle:OntoClass')
             ->findAncestorsById($childClass);
-
         return $this->render('classAssociation/newParent.html.twig', [
             'childClass' => $childClass,
             'parentClassAssociationForm' => $form->createView(),
