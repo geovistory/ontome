@@ -32,7 +32,9 @@
                         <a href="{{ path('class_show', {
                             'id': ancestor.id
                         }) }}">
-                            {{ ancestor.identifier }}
+                            {% if  ancestor.depth == '1' %}<strong>{%  endif %}
+                                {{ ancestor.identifier }}
+                            {% if  ancestor.depth == '1' %}</strong>{%  endif %}
                         </a>
                     </td>
                     <td>{{ ancestor.depth }}</td>
