@@ -300,7 +300,11 @@
                     {% for ingoingProperty in ingoingProperties|sort %}
                         <tr>
                             <td>
-                                {{ ingoingProperty.domain }}
+                                <a href="{{ path('property_show', {
+                                    'id': ingoingProperty.domainId
+                                }) }}">
+                                    {{ ingoingProperty.domain }}
+                                </a>
                             </td>
                             <td>
                                 <a href="{{ path('property_show', {
@@ -310,11 +314,7 @@
                                 </a>
                             </td>
                             <td>
-                                <a href="{{ path('class_show', {
-                                    'id': ingoingProperty.rangeId
-                                }) }}">
-                                    {{ ingoingProperty.range }}
-                                </a>
+                                {{ ingoingProperty.range }}
                             </td>
                             <td>{{ ingoingProperty.namespace }}</td>
                         </tr>
