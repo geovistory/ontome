@@ -30,7 +30,9 @@
                     </a>
                 </td>
                 <td>
-                    <a href="#">
+                    <a href="{{ path('project_show', {
+                        'id': profile.projectOfBelonging.id
+                    }) }}">
                         {{ profile.projectOfBelonging.standardLabel }}
                     </a>
                 </td>
