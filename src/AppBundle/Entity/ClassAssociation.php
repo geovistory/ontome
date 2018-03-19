@@ -8,6 +8,7 @@
 
 namespace AppBundle\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -49,6 +50,13 @@ class ClassAssociation
     private $notes;
 
     /**
+     * @Assert\NotBlank()
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\TextProperty", mappedBy="classAssociation")
+     * @ORM\OrderBy({"languageIsoCode" = "ASC"})
+     */
+    private $textProperties;
+
+    /**
      * @ORM\ManyToOne(targetEntity="User")
      * @ORM\JoinColumn(name="creator", referencedColumnName="pk_user", nullable=false)
      */
@@ -75,6 +83,7 @@ class ClassAssociation
      */
     public function __construct()
     {
+        $this->textProperties = new ArrayCollection();
     }
 
     /**
@@ -108,6 +117,14 @@ class ClassAssociation
     public function getNotes()
     {
         return $this->notes;
+    }
+
+    /**
+     * @return ArrayCollection|TextProperty[]
+     */
+    public function getTextProperties()
+    {
+        return $this->textProperties;
     }
 
     /**

@@ -74,6 +74,12 @@ class TextProperty
     private $profile;
 
     /**
+     * @ORM\ManyToOne(targetEntity="ClassAssociation", inversedBy="textProperties")
+     * @ORM\JoinColumn(name="fk_is_subclass_of", referencedColumnName="pk_is_subclass_of")
+     */
+    private $classAssociation;
+
+    /**
      * @ORM\Column(type="text", nullable=true)
      */
     private $notes;
@@ -101,6 +107,10 @@ class TextProperty
      * @ORM\Column(type="datetime")
      */
     private $modificationTime;
+
+    public function __construct()
+    {
+    }
 
     /**
      * @return mixed
@@ -166,7 +176,13 @@ class TextProperty
         return $this->profile;
     }
 
-
+    /**
+     * @return mixed
+     */
+    public function getClassAssociation()
+    {
+        return $this->classAssociation;
+    }
 
     /**
      * @return OntoClass|Property|OntoNamespace|null the object described by the text property
@@ -180,6 +196,8 @@ class TextProperty
             $object = $this->property;
         elseif (!is_null($this->namespace))
             $object = $this->namespace;
+        elseif (!is_null($this->classAssociation))
+            $object = $this->classAssociation;
         return $object;
     }
 
@@ -229,6 +247,118 @@ class TextProperty
     public function getModificationTime()
     {
         return $this->modificationTime;
+    }
+
+    /**
+     * @param mixed $textProperty
+     */
+    public function setTextProperty($textProperty)
+    {
+        $this->textProperty = $textProperty;
+    }
+
+    /**
+     * @param mixed $languageIsoCode
+     */
+    public function setLanguageIsoCode($languageIsoCode)
+    {
+        $this->languageIsoCode = $languageIsoCode;
+    }
+
+    /**
+     * @param mixed $class
+     */
+    public function setClass($class)
+    {
+        $this->class = $class;
+    }
+
+    /**
+     * @param mixed $property
+     */
+    public function setProperty($property)
+    {
+        $this->property = $property;
+    }
+
+    /**
+     * @param mixed $namespace
+     */
+    public function setNamespace($namespace)
+    {
+        $this->namespace = $namespace;
+    }
+
+    /**
+     * @param mixed $project
+     */
+    public function setProject($project)
+    {
+        $this->project = $project;
+    }
+
+    /**
+     * @param mixed $systemType
+     */
+    public function setSystemType($systemType)
+    {
+        $this->systemType = $systemType;
+    }
+
+    /**
+     * @param mixed $profile
+     */
+    public function setProfile($profile)
+    {
+        $this->profile = $profile;
+    }
+
+    /**
+     * @param mixed $classAssociation
+     */
+    public function setClassAssociation($classAssociation)
+    {
+        $this->classAssociation = $classAssociation;
+    }
+
+    /**
+     * @param mixed $notes
+     */
+    public function setNotes($notes)
+    {
+        $this->notes = $notes;
+    }
+
+    /**
+     * @param mixed $creator
+     */
+    public function setCreator($creator)
+    {
+        $this->creator = $creator;
+    }
+
+    /**
+     * @param mixed $modifier
+     */
+    public function setModifier($modifier)
+    {
+        $this->modifier = $modifier;
+    }
+
+    /**
+     * @param mixed $creationTime
+     */
+    public function setCreationTime($creationTime)
+    {
+        $this->creationTime = $creationTime;
+    }
+
+    /**
+     * @param mixed $modificationTime
+     */
+    public function setModificationTime($modificationTime)
+    {
+        $this->modificationTime = $modificationTime;
     }
 
 
