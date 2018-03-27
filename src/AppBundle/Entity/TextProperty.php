@@ -76,6 +76,8 @@ class TextProperty
     /**
      * @ORM\ManyToOne(targetEntity="ClassAssociation", inversedBy="textProperties")
      * @ORM\JoinColumn(name="fk_is_subclass_of", referencedColumnName="pk_is_subclass_of")
+     * @Assert\Type(type="AppBundle\Entity\ClassAssociation")
+     * @Assert\Valid()
      */
     private $classAssociation;
 
@@ -314,9 +316,9 @@ class TextProperty
     }
 
     /**
-     * @param mixed $classAssociation
+     * @param ClassAssociation $classAssociation
      */
-    public function setClassAssociation($classAssociation)
+    public function setClassAssociation(ClassAssociation $classAssociation = null)
     {
         $this->classAssociation = $classAssociation;
     }

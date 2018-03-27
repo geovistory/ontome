@@ -50,8 +50,9 @@ class ClassAssociation
     private $notes;
 
     /**
-     * @Assert\NotBlank()
-     * @ORM\OneToMany(targetEntity="AppBundle\Entity\TextProperty", mappedBy="classAssociation")
+     * @Assert\NotNull()
+     * @Assert\Valid()
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\TextProperty", mappedBy="classAssociation", cascade={"persist"})
      * @ORM\OrderBy({"languageIsoCode" = "ASC"})
      */
     private $textProperties;
@@ -215,5 +216,13 @@ class ClassAssociation
         $this->modificationTime = $modificationTime;
     }
 
+    public function addTextProperty(TextProperty $textProperty)
+    {
+        if ($this->textProperties->contains($textProperty)) {
+            return;
+        }
+
+        $this->textProperties[] = $textProperty;
+    }
 
 }

@@ -10,8 +10,29 @@
                 <h2>Add new parent class for {{ childClass.identifierInNamespace }}</h2>
 
                 {{ form_start(parentClassAssociationForm) }}
-                    {{ form_widget(parentClassAssociationForm) }}
+                    {{ form_errors(parentClassAssociationForm) }}
+                    {{ form_row(parentClassAssociationForm.parentClass) }}
 
+                    {{ form_row(parentClassAssociationForm.childClass) }}
+
+
+                    {{ form_row(parentClassAssociationForm.textProperties[0].textProperty, {
+                        'label': 'Scope note'
+                    }) }}
+                    {{ form_row(parentClassAssociationForm.textProperties[0].languageIsoCode, {
+                        'label': 'Language'
+                    }) }}
+
+                    {{ form_row(parentClassAssociationForm.textProperties[1].textProperty, {
+                        'label': 'Example'
+                    }) }}
+                    {{ form_row(parentClassAssociationForm.textProperties[1].languageIsoCode, {
+                        'label': 'Language'
+                    }) }}
+
+
+                    {{ form_row(parentClassAssociationForm.notes) }}
+                    {{ form_errors(parentClassAssociationForm.notes) }}
                     <button type="submit" class="btn btn-primary" formnovalidate>Save</button>
                 {{ form_end(parentClassAssociationForm) }}
             </div>
