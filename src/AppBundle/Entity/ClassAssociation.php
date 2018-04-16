@@ -169,6 +169,14 @@ class ClassAssociation
     }
 
     /**
+     * @param mixed $textProperties
+     */
+    public function setTextProperties($textProperties)
+    {
+        $this->textProperties = $textProperties;
+    }
+
+    /**
      * @param mixed $parentClass
      */
     public function setParentClass($parentClass)
@@ -221,8 +229,9 @@ class ClassAssociation
         if ($this->textProperties->contains($textProperty)) {
             return;
         }
-
         $this->textProperties[] = $textProperty;
+        // needed to update the owning side of the relationship!
+        $textProperty->setClassAssociation($this);
     }
 
 }
