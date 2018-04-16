@@ -118,6 +118,12 @@ class OntoClass
      */
     private $profiles;
 
+    /**
+     * @ORM\ManyToOne(targetEntity="OntoNamespace")
+     * @ORM\JoinColumn(name="fk_ongoing_namespace", referencedColumnName="pk_namespace", nullable=true)
+     */
+    private $ongoingNamespace;
+
     public function __construct()
     {
         $this->namespaces = new ArrayCollection();
@@ -236,6 +242,14 @@ class OntoClass
     public function getProfiles()
     {
         return $this->profiles;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getOngoingNamespace()
+    {
+        return $this->ongoingNamespace;
     }
 
     public function __toString()
