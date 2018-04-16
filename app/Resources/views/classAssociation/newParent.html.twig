@@ -15,21 +15,25 @@
 
                     {{ form_row(parentClassAssociationForm.childClass) }}
 
+                    <div class="row js-text-property-wrapper"
+                         data-prototype="{{ form_widget(parentClassAssociationForm.textProperties.vars.prototype)|e('html_attr') }}"
+                         data-index="{{ parentClassAssociationForm.textProperties|length }}"
+                     >
+                        {% for textPropertyForm in parentClassAssociationForm.textProperties %}
+                            {{ form_errors(textPropertyForm) }}
+                            {{ form_row(textPropertyForm.textProperty, {
+                                'label': 'Scope note'
+                            }) }}
+                            {{ form_row(textPropertyForm.languageIsoCode, {
+                                'label': 'Language'
+                            }) }}
+                        {% endfor %}
+                        <a href="#" class="js-example-add">
+                            <span class="fa fa-plus-circle"></span>
+                            Add an example
+                        </a>
 
-                    {{ form_row(parentClassAssociationForm.textProperties[0].textProperty, {
-                        'label': 'Scope note'
-                    }) }}
-                    {{ form_row(parentClassAssociationForm.textProperties[0].languageIsoCode, {
-                        'label': 'Language'
-                    }) }}
-
-                    {{ form_row(parentClassAssociationForm.textProperties[1].textProperty, {
-                        'label': 'Example'
-                    }) }}
-                    {{ form_row(parentClassAssociationForm.textProperties[1].languageIsoCode, {
-                        'label': 'Language'
-                    }) }}
-
+                    </div>
 
                     {{ form_row(parentClassAssociationForm.notes) }}
                     {{ form_errors(parentClassAssociationForm.notes) }}
@@ -75,6 +79,32 @@
         $(document).ready(function() {
             $('#ancestors-table').DataTable({
                 "order": [[ 1, "asc" ]]
+            });
+
+            $('[for=parent_class_association_form_textProperties_1_textProperty]').text('Example');
+            var $wrapper = $('.js-text-property-wrapper');
+            $wrapper.on('click', '.js-example-add', function(e) {
+                e.preventDefault();
+
+                // Get the data-prototype explained earlier
+                var prototype = $wrapper.data('prototype');
+
+                // get the new index
+                var index = $wrapper.data('index');
+
+                // Replace '__name__' in the prototype's HTML to
+                // instead be a number based on how many items we have
+                var newForm = prototype.replace(/__name__/g, index);
+
+                // increase the index with one for the next item
+                $wrapper.data('index', index + 1);
+
+                // Display the form in the page before the "new" link
+                $(this).before(newForm);
+                $('#parent_class_association_form_textProperties_1_creator').val($('#parent_class_association_form_textProperties_0_creator').val());
+                $('#parent_class_association_form_textProperties_1_modifier').val($('#parent_class_association_form_textProperties_0_creator').val());
+                $('.js-example-add').hide();
+                $('[for=parent_class_association_form_textProperties_1_textProperty]').text('Example');
             });
         } );
     </script>

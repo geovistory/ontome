@@ -27,11 +27,14 @@ class ParentClassAssociationForm extends AbstractType
                 'entry_type' => TextPropertyType::class,
                 'entry_options' => array('label' => false),
                 'error_bubbling' => false,
+                'allow_add' => true,
+                'by_reference' => false,
             ))
             ->add('notes');
 
         $builder->get('childClass')
             ->addModelTransformer($this->transformer);
+
     }
 
     public function configureOptions(OptionsResolver $resolver)

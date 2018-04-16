@@ -34,34 +34,34 @@ class ClassAssociationController extends Controller
         $scopeNote = new TextProperty();
         $scopeNote->setClassAssociation($classAssociation);
         $scopeNote->setSystemType($systemTypeScopeNote);
+        $scopeNote->setNamespace($childClass->getOngoingNamespace());
         $scopeNote->setCreator($this->getUser());
         $scopeNote->setModifier($this->getUser());
         $scopeNote->setCreationTime(new \DateTime('now'));
         $scopeNote->setModificationTime(new \DateTime('now'));
 
-
-        $example = new TextProperty();
-        $example->setClassAssociation($classAssociation);
-        $example->setSystemType($systemTypeExample);
-        $example->setCreator($this->getUser());
-        $example->setModifier($this->getUser());
-        $example->setCreationTime(new \DateTime('now'));
-        $example->setModificationTime(new \DateTime('now'));
-
-        $classAssociation->getTextProperties()->add($scopeNote);
-        $classAssociation->getTextProperties()->add($example);
+        $classAssociation->addTextProperty($scopeNote);
         $classAssociation->setChildClass($childClass);
+
         $form = $this->createForm(ParentClassAssociationForm::class, $classAssociation);
 
         // only handles data on POST
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $classAssociation = $form->getData();
-
             $classAssociation->setCreator($this->getUser());
             $classAssociation->setModifier($this->getUser());
             $classAssociation->setCreationTime(new \DateTime('now'));
             $classAssociation->setModificationTime(new \DateTime('now'));
+
+            if($classAssociation->getTextProperties()->containsKey(1)){
+                $classAssociation->getTextProperties()[1]->setCreationTime(new \DateTime('now'));
+                $classAssociation->getTextProperties()[1]->setModificationTime(new \DateTime('now'));
+                $classAssociation->getTextProperties()[1]->setSystemType($systemTypeExample);
+                $classAssociation->getTextProperties()[1]->setNamespace($childClass->getOngoingNamespace());
+                $classAssociation->getTextProperties()[1]->setClassAssociation($classAssociation);
+            }
+
 
             $em = $this->getDoctrine()->getManager();
             $em->persist($classAssociation);
