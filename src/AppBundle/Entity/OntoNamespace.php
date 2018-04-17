@@ -56,6 +56,12 @@ class OntoNamespace
     private $isTopLevelNamespace;
 
     /**
+     * @ORM\ManyToOne(targetEntity="Project")
+     * @ORM\JoinColumn(name="fk_project_for_top_level_namespace", referencedColumnName="pk_project")
+     */
+    private $projectForTopLevelNamespace;
+
+    /**
      * @ORM\Column(type="datetime")
      */
     private $startDate;
@@ -180,6 +186,14 @@ class OntoNamespace
     public function getIsTopLevelNamespace()
     {
         return $this->isTopLevelNamespace;
+    }
+
+    /**
+     * @return Project
+     */
+    public function getProjectForTopLevelNamespace()
+    {
+        return $this->projectForTopLevelNamespace;
     }
 
     /**

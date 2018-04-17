@@ -245,7 +245,7 @@ class OntoClass
     }
 
     /**
-     * @return mixed
+     * @return OntoNamespace
      */
     public function getOngoingNamespace()
     {

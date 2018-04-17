@@ -27,6 +27,9 @@ class ClassAssociationController extends Controller
     {
         $classAssociation = new ClassAssociation();
 
+        $this->denyAccessUnlessGranted('edit', $childClass);
+
+
         $em = $this->getDoctrine()->getManager();
         $systemTypeScopeNote = $em->getRepository('AppBundle:SystemType')->find(1); //systemType 1 = scope note
         $systemTypeExample = $em->getRepository('AppBundle:SystemType')->find(7); //systemType 1 = scope note

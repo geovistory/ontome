@@ -57,6 +57,7 @@ class Project
      */
     private $ownedProfiles;
 
+
     /**
      * @Assert\NotBlank()
      * @ORM\ManyToOne(targetEntity="User")
@@ -109,6 +110,12 @@ class Project
      */
     private $childProjects;
 
+    /**
+     * @Assert\NotBlank()
+     * @ORM\OneToMany(targetEntity="UserProjectAssociation", mappedBy="project")
+     */
+    private $userProjectAssociations;
+
     public function __construct()
     {
         $this->properties = new ArrayCollection();
@@ -118,6 +125,7 @@ class Project
         $this->textProperties = new ArrayCollection();
         $this->labels = new ArrayCollection();
         $this->childProjects = new ArrayCollection();
+        $this->userProjectAssociations = new ArrayCollection();
     }
 
 
@@ -257,6 +265,12 @@ class Project
         return $this->profiles;
     }
 
-
+    /**
+     * @return ArrayCollection|UserProjectAssociation
+     */
+    public function getUserProjectAssociations()
+    {
+        return $this->userProjectAssociations;
+    }
 
 }
