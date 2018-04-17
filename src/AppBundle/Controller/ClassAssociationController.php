@@ -20,8 +20,7 @@ class ClassAssociationController extends Controller
 {
 
     /**
-     * @Route("/parent-class-association/new/{childClass}", name="new-parent-class-form")
-     * @param OntoClass $childClass
+     * @Route("/parent-class-association/new/{childClass}", name="new_parent_class_form")
      */
     public function newParentAction(Request $request, OntoClass $childClass)
     {

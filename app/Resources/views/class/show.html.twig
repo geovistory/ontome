@@ -132,6 +132,9 @@
                 </table>
             </div>
             <div id="class-hierarchy" class="tab-pane fade">
+                <div class="pull-right add-div">
+                    <a href="{{ path('new_parent_class_form', {'childClass': class.id}) }}" class="btn btn-primary pull-right">Add <span class="fa fa-plus-circle"></span></a>
+                </div>
                 <h3>Parent and ancestor classes</h3>
                 <table class="table table-striped" id="ancestors-table">
                     <thead>
