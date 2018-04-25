@@ -177,6 +177,11 @@ BODY Styling
     margin-top: 20px;
 }
 
+.reset-div {
+    margin-bottom: 10px;
+    margin-top: 20px;
+}
+
 .cd-container {
     /* this class is used to give a max-width to the element it is applied to, and center it horizontally when it reaches that max-width */
     width: 90%;

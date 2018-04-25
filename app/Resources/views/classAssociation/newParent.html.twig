@@ -20,6 +20,9 @@
     <div class="container">
         <div class="row">
             <div class="col-xs-12">
+                <div class="pull-right reset-div">
+                    <a href="{{ path('new_parent_class_form', {'childClass': childClass.id}) }}" class="btn btn-primary pull-right">Reset <span class="fa fa-undo"></span></a>
+                </div>
                 <h2>Add new parent class for {{ childClass.identifierInNamespace }}</h2>
 
                 {{ form_start(parentClassAssociationForm) }}
