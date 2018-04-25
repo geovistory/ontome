@@ -296,4 +296,12 @@ class OntoNamespace
         return $this->namespaceURI;
     }
 
+    /**
+     * @return string a human readable identification of the object
+     */
+    public function getObjectIdentification()
+    {
+        return $this->namespaceURI;
+    }
+
 }

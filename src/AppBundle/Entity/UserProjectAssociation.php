@@ -151,6 +151,14 @@ class UserProjectAssociation
     }
 
     /**
+     * @return string a human readable identification of the object
+     */
+    public function getObjectIdentification()
+    {
+        return 'User/project association n°'.$this->id;
+    }
+
+    /**
      * @param User $user
      */
     public function setUser($user)

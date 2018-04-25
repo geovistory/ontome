@@ -60,6 +60,9 @@ class OntoClassVoter extends Voter
     private function canEdit(OntoClass $class, User $user)
     {
         foreach($user->getUserProjectAssociations()->getIterator() as $i => $userProjectAssociation) {
+            if(is_null($class->getOngoingNamespace())) {
+                return false;
+            }
             if($userProjectAssociation->getProject() === $class->getOngoingNamespace()->getProjectForTopLevelNamespace() && $userProjectAssociation->getPermission() === 1){
                 return true;
             }

@@ -252,6 +252,14 @@ class TextProperty
     }
 
     /**
+     * @return string a human readable identification of the object
+     */
+    public function getObjectIdentification()
+    {
+        return 'Text property n°'.$this->id;
+    }
+
+    /**
      * @param mixed $textProperty
      */
     public function setTextProperty($textProperty)

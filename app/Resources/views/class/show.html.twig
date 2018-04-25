@@ -132,10 +132,60 @@
                 </table>
             </div>
             <div id="class-hierarchy" class="tab-pane fade">
+                {% if is_granted('edit', class) %}
                 <div class="pull-right add-div">
                     <a href="{{ path('new_parent_class_form', {'childClass': class.id}) }}" class="btn btn-primary pull-right">Add <span class="fa fa-plus-circle"></span></a>
                 </div>
-                <h3>Parent and ancestor classes</h3>
+                {% endif %}
+                <h3>Parent classes</h3>
+                <table class="table table-striped" id="parent-classes-table">
+                    <thead>
+                    <tr>
+                        <th>Class identifier</th>
+                        <th>Explanation</th>
+                        <th>Root namespace</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for association in class.childClassAssociations %}
+                        <tr>
+                            <td>
+                                <a href="{{ path('class_show', {
+                                    'id': association.parentClass.id
+                                }) }}">
+                                    {{ association.parentClass.identifierInNamespace }}
+                                </a>
+                            </td>
+                            <td>
+                                {% if association.textProperties is not null %}
+                                    {% for textProperty in association.textProperties if textProperty.systemType.id == 1 and textProperty.languageIsoCode == 'en' %}
+                                        <a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a>
+                                        {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
+                                    {% endfor %}
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if association.parentClass.namespaces is not null %}
+                                    {% for namespace in association.parentClass.namespaces %}
+                                        {% if namespace.isTopLevelNamespace == true %}
+                                            {% for label in namespace.labels %}
+                                                {% if label.isStandardLabelForLanguage == true and label.languageIsoCode == 'en' %}
+                                                    {{ label.label }}
+                                                {% endif %}
+                                            {%  endfor %}
+                                        {% else %}
+                                            WIP
+                                        {% endif %}
+                                    {% endfor %}
+                                {% else %}
+                                    WIP
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                <h3>Ancestor classes</h3>
                 <table class="table table-striped" id="ancestors-table">
                     <thead>
                     <tr>
@@ -419,6 +469,7 @@
             $('#labels-table').DataTable();
             $('#scope-notes-table').DataTable();
             $('#examples-table').DataTable();
+            $('#parent-classes-table').DataTable();
             $('#ancestors-table').DataTable({
                 "order": [[ 1, "asc" ]]
             });

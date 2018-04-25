@@ -129,6 +129,14 @@ class ClassAssociation
     }
 
     /**
+     * @return string a human readable identification of the object
+     */
+    public function getObjectIdentification()
+    {
+        return 'Class association n°'.$this->id;
+    }
+
+    /**
      * @return mixed
      */
     public function getCreator()

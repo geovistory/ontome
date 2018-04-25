@@ -78,12 +78,12 @@ class OntoClass
     /**
      * @ORM\OneToMany(targetEntity="ClassAssociation", mappedBy="childClass")
      */
-    private $childClassAssociation;
+    private $childClassAssociations;
 
     /**
      * @ORM\OneToMany(targetEntity="ClassAssociation", mappedBy="parentClass")
      */
-    private $parentClassAssociation;
+    private $parentClassAssociations;
 
 
     /**
@@ -130,6 +130,8 @@ class OntoClass
         $this->labels = new ArrayCollection();
         $this->textProperties = new ArrayCollection();
         $this->profiles = new ArrayCollection();
+        $this->parentClassAssociations = new ArrayCollection();
+        $this->childClassAssociations = new ArrayCollection();
     }
 
     /**
@@ -245,11 +247,35 @@ class OntoClass
     }
 
     /**
-     * @return OntoNamespace
+     * @return ArrayCollection|Profile[]
      */
     public function getOngoingNamespace()
     {
         return $this->ongoingNamespace;
+    }
+
+    /**
+     * @return ArrayCollection|ClassAssociation[]
+     */
+    public function getParentClassAssociations()
+    {
+        return $this->parentClassAssociations;
+    }
+
+    /**
+     * @return ArrayCollection|ClassAssociation[]
+     */
+    public function getChildClassAssociations()
+    {
+        return $this->childClassAssociations;
+    }
+
+    /**
+     * @return string a human readable identification of the object
+     */
+    public function getObjectIdentification()
+    {
+        return $this->identifierInNamespace;
     }
 
     public function __toString()

@@ -227,4 +227,12 @@ class Property
         return $this->profiles;
     }
 
+    /**
+     * @return string a human readable identification of the object
+     */
+    public function getObjectIdentification()
+    {
+        return $this->identifierInNamespace;
+    }
+
 }

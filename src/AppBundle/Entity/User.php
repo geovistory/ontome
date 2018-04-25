@@ -307,7 +307,13 @@ class User implements UserInterface
         return $this->userProjectAssociations;
     }
 
-
+    /**
+     * @return string a human readable identification of the object
+     */
+    public function getObjectIdentification()
+    {
+        return $this->login;
+    }
 
 
 

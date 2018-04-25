@@ -187,6 +187,14 @@ class Label
     }
 
     /**
+     * @return string a human readable identification of the object
+     */
+    public function getObjectIdentification()
+    {
+        return $this->label;
+    }
+
+    /**
      * @return mixed
      */
     public function getNotes()
