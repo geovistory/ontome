@@ -47,7 +47,7 @@ class Project
     private $standardLabel;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Project")
+     * @ORM\ManyToOne(targetEntity="Project", inversedBy="childProjects")
      * @ORM\JoinColumn(name="fk_is_subproject_of", referencedColumnName="pk_project", nullable=true)
      */
     private $parentProject;
@@ -56,6 +56,7 @@ class Project
      * @ORM\OneToMany(targetEntity="Profile", mappedBy="projectOfBelonging")
      */
     private $ownedProfiles;
+
 
     /**
      * @Assert\NotBlank()
@@ -90,12 +91,41 @@ class Project
      */
     private $profiles;
 
+    /**
+     * @Assert\NotBlank()
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\TextProperty", mappedBy="project")
+     * @ORM\OrderBy({"languageIsoCode" = "ASC"})
+     */
+    private $textProperties;
+
+    /**
+     * @Assert\NotBlank()
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Label", mappedBy="project")
+     * @ORM\OrderBy({"languageIsoCode" = "ASC"})
+     */
+    private $labels;
+
+    /**
+     * @ORM\OneToMany(targetEntity="Project", mappedBy="parentProject")
+     */
+    private $childProjects;
+
+    /**
+     * @Assert\NotBlank()
+     * @ORM\OneToMany(targetEntity="UserProjectAssociation", mappedBy="project")
+     */
+    private $userProjectAssociations;
+
     public function __construct()
     {
         $this->properties = new ArrayCollection();
         $this->classes = new ArrayCollection();
         $this->ownedProfiles = new ArrayCollection();
         $this->profiles = new ArrayCollection();
+        $this->textProperties = new ArrayCollection();
+        $this->labels = new ArrayCollection();
+        $this->childProjects = new ArrayCollection();
+        $this->userProjectAssociations = new ArrayCollection();
     }
 
 
@@ -145,6 +175,14 @@ class Project
     public function getParentProject()
     {
         return $this->parentProject;
+    }
+
+    /**
+     * @return ArrayCollection|Project[]
+     */
+    public function getChildProjects()
+    {
+        return $this->childProjects;
     }
 
     /**
@@ -204,6 +242,22 @@ class Project
     }
 
     /**
+     * @return ArrayCollection|Label[]
+     */
+    public function getLabels()
+    {
+        return $this->labels;
+    }
+
+    /**
+     * @return ArrayCollection|TextProperty[]
+     */
+    public function getTextProperties()
+    {
+        return $this->textProperties;
+    }
+
+    /**
      * @return ArrayCollection|Profile[]
      */
     public function getProfiles()
@@ -211,6 +265,20 @@ class Project
         return $this->profiles;
     }
 
+    /**
+     * @return ArrayCollection|UserProjectAssociation
+     */
+    public function getUserProjectAssociations()
+    {
+        return $this->userProjectAssociations;
+    }
 
+    /**
+     * @return string a human readable identification of the object
+     */
+    public function getObjectIdentification()
+    {
+        return $this->standardLabel;
+    }
 
 }

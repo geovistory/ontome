@@ -56,6 +56,12 @@ class OntoNamespace
     private $isTopLevelNamespace;
 
     /**
+     * @ORM\ManyToOne(targetEntity="Project")
+     * @ORM\JoinColumn(name="fk_project_for_top_level_namespace", referencedColumnName="pk_project")
+     */
+    private $projectForTopLevelNamespace;
+
+    /**
      * @ORM\Column(type="datetime")
      */
     private $startDate;
@@ -120,6 +126,11 @@ class OntoNamespace
      */
     private $properties;
 
+    /**
+     * @ORM\OneToMany(targetEntity="OntoNamespace", mappedBy="referencedVersion")
+     */
+    private $childVersions;
+
     public function __construct()
     {
         $this->classes = new ArrayCollection();
@@ -128,11 +139,6 @@ class OntoNamespace
         $this->textProperties = new ArrayCollection();
         $this->childVersions = new ArrayCollection();
     }
-
-    /**
-     * @ORM\OneToMany(targetEntity="OntoNamespace", mappedBy="referencedVersion")
-     */
-    private $childVersions;
 
     /**
      * @return mixed
@@ -180,6 +186,14 @@ class OntoNamespace
     public function getIsTopLevelNamespace()
     {
         return $this->isTopLevelNamespace;
+    }
+
+    /**
+     * @return Project
+     */
+    public function getProjectForTopLevelNamespace()
+    {
+        return $this->projectForTopLevelNamespace;
     }
 
     /**
@@ -279,6 +293,14 @@ class OntoNamespace
     }
 
     public function getIdentifierInNamespace(){
+        return $this->namespaceURI;
+    }
+
+    /**
+     * @return string a human readable identification of the object
+     */
+    public function getObjectIdentification()
+    {
         return $this->namespaceURI;
     }
 

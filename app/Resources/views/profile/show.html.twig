@@ -20,9 +20,9 @@
     <div class="tab-content">
         <div id="identification" class="tab-pane fade in active">
             <h3>Identification</h3>
+            <p>Project of belonging: <a href="{{ path('project_show', {'id': profile.projectOfBelonging.id}) }}">{{ profile.projectOfBelonging.standardLabel }}</a></p>
             <p>Start date: {{ profile.startDate }}</p>
             <p>End date: {{ profile.endDate }}</p>
-            <p>Project of belonging: <a href="{{ path('project_show', {'id': profile.projectOfBelonging.id}) }}">{{ profile.projectOfBelonging.standardLabel }}</a></p>
             <h3>Labels</h3>
             <table class="table table-striped" id="labels-table">
                 <thead>
@@ -53,7 +53,6 @@
                     <th>Show</th>
                     <th>Scope note</th>
                     <th>Language</th>
-                    <th>Namespace</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -65,7 +64,6 @@
                             {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
                         </td>
                         <td>{{ textProperty.languageIsoCode}}</td>
-                        <td>WIP</td>
                     </tr>
                 {% endfor %}
                 </tbody>
@@ -77,6 +75,7 @@
                 <thead>
                 <tr>
                     <th>Class identifier</th>
+                    <th>Standard label</th>
                     <th>Association type</th>
                     <th>Namespace URI</th>
                 </tr>
@@ -91,6 +90,12 @@
                                 {{ class.identifierInNamespace }}
                             </a>
                         </td>
+                        <td>
+                            <a href="{{ path('class_show', {
+                                'id': class.id
+                            }) }}">
+                                {{ class.standardLabel }}</td>
+                            </a>
                         <td>{{ class.associationType }}</td>
                         <td>
                             {{ class.rootNamespace }}
@@ -106,6 +111,7 @@
                 <thead>
                 <tr>
                     <th>Property identifier</th>
+                    <th>Standard label</th>
                     <th>Namespace URI</th>
                 </tr>
                 </thead>
@@ -117,6 +123,13 @@
                                 'id': property.id
                             }) }}">
                                 {{ property.identifierInNamespace }}
+                            </a>
+                        </td>
+                        <td>
+                            <a href="{{ path('property_show', {
+                                'id': property.id
+                            }) }}">
+                                {{ property.standardLabel }}
                             </a>
                         </td>
                         <td>

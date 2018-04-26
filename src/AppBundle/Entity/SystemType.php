@@ -148,4 +148,12 @@ class SystemType
     {
         return $this->textProperties;
     }
+
+    /**
+     * @return string a human readable identification of the object
+     */
+    public function getObjectIdentification()
+    {
+        return $this->standardLabel;
+    }
 }

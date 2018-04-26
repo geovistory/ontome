@@ -9,6 +9,7 @@
 namespace AppBundle\Entity;
 
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Doctrine\ORM\Mapping as ORM;
@@ -92,6 +93,20 @@ class User implements UserInterface
      * @ORM\Column(type="json_array", nullable=true)
      */
     private $roles = [];
+
+    /**
+     * @Assert\NotBlank()
+     * @ORM\OneToMany(targetEntity="UserProjectAssociation", mappedBy="user")
+     */
+    private $userProjectAssociations;
+
+    /**
+     * User constructor.
+     */
+    public function __construct()
+    {
+        $this->userProjectAssociations = new ArrayCollection();
+    }
 
     /**
      * @return mixed
@@ -282,6 +297,22 @@ class User implements UserInterface
     public function setHasValidatedPolicy($hasValidatedPolicy)
     {
         $this->hasValidatedPolicy = $hasValidatedPolicy;
+    }
+
+    /**
+     * @return ArrayCollection|UserProjectAssociation
+     */
+    public function getUserProjectAssociations()
+    {
+        return $this->userProjectAssociations;
+    }
+
+    /**
+     * @return string a human readable identification of the object
+     */
+    public function getObjectIdentification()
+    {
+        return $this->login;
     }
 
 

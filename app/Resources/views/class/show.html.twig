@@ -14,11 +14,11 @@
 
         <ul class="nav nav-tabs" id="main-tabs">
             <li class="active"><a data-toggle="tab" href="#scope-notes">Scope Notes</a></li>
+            <li><a data-toggle="tab" href="#properties">Properties</a></li>
             <li><a data-toggle="tab" href="#identification">Identification</a></li>
             <li><a data-toggle="tab" href="#namespaces">Namespace</a></li>
             <li><a data-toggle="tab" href="#class-hierarchy">Hierarchy</a></li>
             <li><a data-toggle="tab" href="#equivalences">Equivalences</a></li>
-            <li><a data-toggle="tab" href="#properties">Properties</a></li>
             <li><a data-toggle="tab" href="#profiles">Profiles</a></li>
             <li><a data-toggle="tab" href="#graph">Graph</a></li>
         </ul>
@@ -132,7 +132,60 @@
                 </table>
             </div>
             <div id="class-hierarchy" class="tab-pane fade">
-                <h3>Parent and ancestor classes</h3>
+                {% if is_granted('edit', class) %}
+                <div class="pull-right add-div">
+                    <a href="{{ path('new_parent_class_form', {'childClass': class.id}) }}" class="btn btn-primary pull-right">Add <span class="fa fa-plus-circle"></span></a>
+                </div>
+                {% endif %}
+                <h3>Parent classes</h3>
+                <table class="table table-striped" id="parent-classes-table">
+                    <thead>
+                    <tr>
+                        <th>Class identifier</th>
+                        <th>Explanation</th>
+                        <th>Root namespace</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for association in class.childClassAssociations %}
+                        <tr>
+                            <td>
+                                <a href="{{ path('class_show', {
+                                    'id': association.parentClass.id
+                                }) }}">
+                                    {{ association.parentClass.identifierInNamespace }}
+                                </a>
+                            </td>
+                            <td>
+                                {% if association.textProperties is not null %}
+                                    {% for textProperty in association.textProperties if textProperty.systemType.id == 1 and textProperty.languageIsoCode == 'en' %}
+                                        <a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a>
+                                        {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
+                                    {% endfor %}
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if association.parentClass.namespaces is not null %}
+                                    {% for namespace in association.parentClass.namespaces %}
+                                        {% if namespace.isTopLevelNamespace == true %}
+                                            {% for label in namespace.labels %}
+                                                {% if label.isStandardLabelForLanguage == true and label.languageIsoCode == 'en' %}
+                                                    {{ label.label }}
+                                                {% endif %}
+                                            {%  endfor %}
+                                        {% else %}
+                                            WIP
+                                        {% endif %}
+                                    {% endfor %}
+                                {% else %}
+                                    WIP
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                <h3>Ancestor classes</h3>
                 <table class="table table-striped" id="ancestors-table">
                     <thead>
                     <tr>
@@ -300,7 +353,11 @@
                     {% for ingoingProperty in ingoingProperties|sort %}
                         <tr>
                             <td>
-                                {{ ingoingProperty.domain }}
+                                <a href="{{ path('class_show', {
+                                    'id': ingoingProperty.domainId
+                                }) }}">
+                                    {{ ingoingProperty.domain }}
+                                </a>
                             </td>
                             <td>
                                 <a href="{{ path('property_show', {
@@ -310,18 +367,14 @@
                                 </a>
                             </td>
                             <td>
-                                <a href="{{ path('class_show', {
-                                    'id': ingoingProperty.rangeId
-                                }) }}">
-                                    {{ ingoingProperty.range }}
-                                </a>
+                                {{ ingoingProperty.range }}
                             </td>
                             <td>{{ ingoingProperty.namespace }}</td>
                         </tr>
                     {% endfor %}
                     </tbody>
                 </table>
-                <h3>Ingoing properties (this class is range)</h3>
+                <h3>Ingoing properties (inherited from ancestors)</h3>
                 <table class="table table-striped" id="ingoing-inherited-properties-table">
                     <thead>
                     <tr>
@@ -335,7 +388,11 @@
                     {% for ingoingInheritedProperty in ingoingInheritedProperties|sort %}
                         <tr>
                             <td>
-                                {{ ingoingInheritedProperty.domain }}
+                                <a href="{{ path('class_show', {
+                                    'id': ingoingInheritedProperty.domainId
+                                }) }}">
+                                    {{ ingoingInheritedProperty.domain }}
+                                </a>
                             </td>
                             <td>
                                 <a href="{{ path('property_show', {
@@ -412,8 +469,9 @@
             $('#labels-table').DataTable();
             $('#scope-notes-table').DataTable();
             $('#examples-table').DataTable();
+            $('#parent-classes-table').DataTable();
             $('#ancestors-table').DataTable({
-                "order": [[ 1, "desc" ]]
+                "order": [[ 1, "asc" ]]
             });
             $('#descendants-table').DataTable({
                 "order": [[ 1, "asc" ]]

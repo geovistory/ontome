@@ -56,6 +56,12 @@ class TextProperty
     private $namespace;
 
     /**
+     * @ORM\ManyToOne(targetEntity="Project", inversedBy="textProperties")
+     * @ORM\JoinColumn(name="fk_project", referencedColumnName="pk_project")
+     */
+    private $project;
+
+    /**
      * @ORM\ManyToOne(targetEntity="SystemType", inversedBy="textProperties")
      * @ORM\JoinColumn(name="fk_text_property_type", referencedColumnName="pk_system_type")
      */
@@ -66,6 +72,14 @@ class TextProperty
      * @ORM\JoinColumn(name="fk_profile", referencedColumnName="pk_profile")
      */
     private $profile;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="ClassAssociation", inversedBy="textProperties")
+     * @ORM\JoinColumn(name="fk_is_subclass_of", referencedColumnName="pk_is_subclass_of")
+     * @Assert\Type(type="AppBundle\Entity\ClassAssociation")
+     * @Assert\Valid()
+     */
+    private $classAssociation;
 
     /**
      * @ORM\Column(type="text", nullable=true)
@@ -95,6 +109,10 @@ class TextProperty
      * @ORM\Column(type="datetime")
      */
     private $modificationTime;
+
+    public function __construct()
+    {
+    }
 
     /**
      * @return mixed
@@ -147,12 +165,26 @@ class TextProperty
     /**
      * @return mixed
      */
+    public function getProject()
+    {
+        return $this->project;
+    }
+
+    /**
+     * @return mixed
+     */
     public function getProfile()
     {
         return $this->profile;
     }
 
-
+    /**
+     * @return mixed
+     */
+    public function getClassAssociation()
+    {
+        return $this->classAssociation;
+    }
 
     /**
      * @return OntoClass|Property|OntoNamespace|null the object described by the text property
@@ -166,6 +198,8 @@ class TextProperty
             $object = $this->property;
         elseif (!is_null($this->namespace))
             $object = $this->namespace;
+        elseif (!is_null($this->classAssociation))
+            $object = $this->classAssociation;
         return $object;
     }
 
@@ -215,6 +249,126 @@ class TextProperty
     public function getModificationTime()
     {
         return $this->modificationTime;
+    }
+
+    /**
+     * @return string a human readable identification of the object
+     */
+    public function getObjectIdentification()
+    {
+        return 'Text property n°'.$this->id;
+    }
+
+    /**
+     * @param mixed $textProperty
+     */
+    public function setTextProperty($textProperty)
+    {
+        $this->textProperty = $textProperty;
+    }
+
+    /**
+     * @param mixed $languageIsoCode
+     */
+    public function setLanguageIsoCode($languageIsoCode)
+    {
+        $this->languageIsoCode = $languageIsoCode;
+    }
+
+    /**
+     * @param mixed $class
+     */
+    public function setClass($class)
+    {
+        $this->class = $class;
+    }
+
+    /**
+     * @param mixed $property
+     */
+    public function setProperty($property)
+    {
+        $this->property = $property;
+    }
+
+    /**
+     * @param mixed $namespace
+     */
+    public function setNamespace($namespace)
+    {
+        $this->namespace = $namespace;
+    }
+
+    /**
+     * @param mixed $project
+     */
+    public function setProject($project)
+    {
+        $this->project = $project;
+    }
+
+    /**
+     * @param mixed $systemType
+     */
+    public function setSystemType($systemType)
+    {
+        $this->systemType = $systemType;
+    }
+
+    /**
+     * @param mixed $profile
+     */
+    public function setProfile($profile)
+    {
+        $this->profile = $profile;
+    }
+
+    /**
+     * @param ClassAssociation $classAssociation
+     */
+    public function setClassAssociation(ClassAssociation $classAssociation = null)
+    {
+        $this->classAssociation = $classAssociation;
+    }
+
+    /**
+     * @param mixed $notes
+     */
+    public function setNotes($notes)
+    {
+        $this->notes = $notes;
+    }
+
+    /**
+     * @param mixed $creator
+     */
+    public function setCreator($creator)
+    {
+        $this->creator = $creator;
+    }
+
+    /**
+     * @param mixed $modifier
+     */
+    public function setModifier($modifier)
+    {
+        $this->modifier = $modifier;
+    }
+
+    /**
+     * @param mixed $creationTime
+     */
+    public function setCreationTime($creationTime)
+    {
+        $this->creationTime = $creationTime;
+    }
+
+    /**
+     * @param mixed $modificationTime
+     */
+    public function setModificationTime($modificationTime)
+    {
+        $this->modificationTime = $modificationTime;
     }
 
 

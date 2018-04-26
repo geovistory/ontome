@@ -76,6 +76,17 @@ class OntoClass
     private $modificationTime;
 
     /**
+     * @ORM\OneToMany(targetEntity="ClassAssociation", mappedBy="childClass")
+     */
+    private $childClassAssociations;
+
+    /**
+     * @ORM\OneToMany(targetEntity="ClassAssociation", mappedBy="parentClass")
+     */
+    private $parentClassAssociations;
+
+
+    /**
      * @ORM\ManyToMany(targetEntity="OntoNamespace",  inversedBy="OntoClass", fetch="EXTRA_LAZY")
      * @ORM\JoinTable(schema="che", name="associates_namespace",
      *      joinColumns={@ORM\JoinColumn(name="fk_class", referencedColumnName="pk_class")},
@@ -107,12 +118,20 @@ class OntoClass
      */
     private $profiles;
 
+    /**
+     * @ORM\ManyToOne(targetEntity="OntoNamespace")
+     * @ORM\JoinColumn(name="fk_ongoing_namespace", referencedColumnName="pk_namespace", nullable=true)
+     */
+    private $ongoingNamespace;
+
     public function __construct()
     {
         $this->namespaces = new ArrayCollection();
         $this->labels = new ArrayCollection();
         $this->textProperties = new ArrayCollection();
         $this->profiles = new ArrayCollection();
+        $this->parentClassAssociations = new ArrayCollection();
+        $this->childClassAssociations = new ArrayCollection();
     }
 
     /**
@@ -225,6 +244,43 @@ class OntoClass
     public function getProfiles()
     {
         return $this->profiles;
+    }
+
+    /**
+     * @return ArrayCollection|Profile[]
+     */
+    public function getOngoingNamespace()
+    {
+        return $this->ongoingNamespace;
+    }
+
+    /**
+     * @return ArrayCollection|ClassAssociation[]
+     */
+    public function getParentClassAssociations()
+    {
+        return $this->parentClassAssociations;
+    }
+
+    /**
+     * @return ArrayCollection|ClassAssociation[]
+     */
+    public function getChildClassAssociations()
+    {
+        return $this->childClassAssociations;
+    }
+
+    /**
+     * @return string a human readable identification of the object
+     */
+    public function getObjectIdentification()
+    {
+        return $this->identifierInNamespace;
+    }
+
+    public function __toString()
+    {
+        return $this->getIdentifierInNamespace().' '.$this->getStandardLabel();
     }
 
 }

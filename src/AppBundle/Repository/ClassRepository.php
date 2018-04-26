@@ -44,7 +44,8 @@ class ClassRepository extends EntityRepository
                   SELECT pk_parent,
                      parent_identifier,
                      DEPTH,
-                     ARRAY_TO_STRING(_path,'|') ancestors
+                     ARRAY_TO_STRING(_path,'|') ancestors,
+                     pk_is_subclass_of
                   FROM che.ascendant_class_hierarchy(:class)
                 )
                 SELECT tw1.pk_parent AS id,
@@ -52,11 +53,10 @@ class ClassRepository extends EntityRepository
                        tw1.DEPTH,
                        che.get_root_namespace(nsp.pk_namespace) AS \"rootNamespaceId\",
                        (SELECT label FROM che.get_namespace_labels(che.get_root_namespace(nsp.pk_namespace)) WHERE language_iso_code = 'en') AS \"rootNamespaceLabel\"
-                FROM tw1,
-                     che.associates_namespace asnsp,
-                     che.namespace nsp
-                WHERE asnsp.fk_class = tw1.pk_parent
-                AND   nsp.pk_namespace = asnsp.fk_namespace
+                FROM tw1
+                JOIN che.associates_namespace asnsp ON (asnsp.fk_class = tw1.pk_parent)
+                JOIN che.namespace nsp ON (nsp.pk_namespace = asnsp.fk_namespace)
+                WHERE depth > 1 
                 GROUP BY tw1.pk_parent,
                      tw1.parent_identifier,
                      tw1.depth,
@@ -190,7 +190,8 @@ class ClassRepository extends EntityRepository
         $conn = $this->getEntityManager()
             ->getConnection();
 
-        $sql = "SELECT  pk_class AS id,
+        $sql = "SELECT DISTINCT pk_class AS id,
+                        class_standard_label AS \"standardLabel\",
                         identifier_in_namespace AS \"identifierInNamespace\" ,
                         root_namespace AS \"rootNamespace\" ,
                         profile_association_type AS \"associationType\"

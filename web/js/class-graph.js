@@ -42,13 +42,13 @@ $(document).ready(function() {
 
         var sTreeData = '{"name": "'+$("#class-label").text()+'","children": '+JSON.stringify(treeData)+'}';
         treeData = JSON.parse(sTreeData);
-        console.log(treeData);
+
         //initialising hierarchical data
         root = d3.hierarchy(treeData);
         console.log(root);
         var i = 0;
 
-        var transform = d3.zoomIdentity;;
+        var transform = d3.zoomIdentity;
 
         var nodeSvg, linkSvg, simulation, nodeEnter, linkEnter ;
 
