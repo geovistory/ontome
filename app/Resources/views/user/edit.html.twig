@@ -1,0 +1,27 @@
+{% extends 'base.html.twig' %}
+{% block body %}
+<div class="container">
+    <div class="row">
+        <div class="col-xs-12">
+            <h1>Edit user {{ user.login }}</h1>
+
+            {{ form_start(userForm) }}
+                {{ form_row(userForm.email) }}
+                {{ form_row(userForm.firstName) }}
+                {{ form_row(userForm.lastName) }}
+                {{ form_row(userForm.institution) }}
+                {{ form_row(userForm.plainPassword.first, {
+                    'label': 'Password'
+                }) }}
+                {{ form_row(userForm.plainPassword.second, {
+                    'label': 'Repeat Password'
+                }) }}
+                {{ form_row(userForm.status) }}
+                {{ form_row(userForm.hasValidatedPolicy) }}
+
+                <button type="submit" class="btn btn-primary" userFormnovalidate>Save</button>
+            {{ form_end(userForm) }}
+        </div>
+    </div>
+</div>
+{% endblock %}

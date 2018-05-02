@@ -1,0 +1,54 @@
+{% extends 'base.html.twig' %}
+
+{% block title %} {{ parent() }} - Users {% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+
+{%  endblock %}
+
+{% block body %}
+    <h3>Users</h3>
+    <table class="table table-striped" id="user-table">
+        <thead>
+        <tr>
+            <th>Login</th>
+            <th>Full name</th>
+            <th>Institution</th>
+            <th>Edit</th>
+        </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+                <tr>
+                    <td>
+                        <a href="{{ path('user_show', {
+                            'id': user.id
+                        }) }}">
+                            {{ user.login }}
+                        </a>
+                    </td>
+                    <td>{{ user.fullName }}</td>
+                    <td>{{ user.institution }}</td>
+                    <td>
+                        <a href="{{ path('user_edit', {
+                            'id': user.id
+                        }) }}"
+                           class="btn btn-xs btn-success">
+                            <span class="fa fa-edit"></span>
+                        </a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
+{% block javascripts %}
+    {{ parent() }}
+
+    <script>
+        $(document).ready(function() {
+        $('#user-table').DataTable();
+    } );
+    </script>
+{% endblock %}
