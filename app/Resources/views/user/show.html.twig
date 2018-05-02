@@ -14,7 +14,7 @@
                     <a href="{{ path('user_edit', {
                         id: user.id
                     }) }}" class="pull-right btn btn-link">
-                        <span class="fa fa-pencil"></span>
+                        <span class="fa fa-edit"></span>
                     </a>
                 </h1>
 
@@ -29,25 +29,11 @@
                         <td>{{ user.email }}</td>
                     </tr>
                     <tr>
-                        <th>University</th>
-                        <td>{{ user.universityName|default('-') }}</td>
+                        <th>Institution</th>
+                        <td>{{ user.institution|default('-') }}</td>
                     </tr>
                     </tbody>
                 </table>
-            </div>
-            <div class="col-xs-4">
-                <h3>Genus Studied</h3>
-                <ul class="list-group">
-                    {% for genusStudied in user.studiedGenuses %}
-                        <li class="list-group-item">
-                            <a href="{{ path('genus_show', {
-                                'slug': genusStudied.slug
-                            }) }}">
-                                {{ genusStudied.name }}
-                            </a>
-                        </li>
-                    {% endfor %}
-                </ul>
             </div>
         </div>
     </div>

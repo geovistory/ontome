@@ -10,6 +10,7 @@ namespace AppBundle\Controller;
 
 
 use AppBundle\Entity\User;
+use AppBundle\Form\UserEditForm;
 use AppBundle\Form\UserRegistrationForm;
 use AppBundle\Security\LoginFormAuthenticator;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
@@ -55,7 +56,22 @@ class UserController extends Controller
     }
 
     /**
-     * @Route("/users/{id}", name="user_show")
+     * @Route("/user")
+     */
+    public function listAction()
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        $users = $em->getRepository('AppBundle:User')
+            ->findAll();
+
+        return $this->render('user/list.html.twig', [
+            'users' => $users
+        ]);
+    }
+
+    /**
+     * @Route("/user/{id}", name="user_show")
      */
     public function showAction(User $user)
     {
@@ -65,7 +81,7 @@ class UserController extends Controller
     }
 
     /**
-     * @Route("/users/{id}/edit", name="user_edit")
+     * @Route("/user/{id}/edit", name="user_edit")
      */
     public function editAction(User $user, Request $request)
     {
@@ -85,7 +101,8 @@ class UserController extends Controller
         }
 
         return $this->render('user/edit.html.twig', [
-            'userForm' => $form->createView()
+            'userForm' => $form->createView(),
+            'user' => $user
         ]);
 
     }
