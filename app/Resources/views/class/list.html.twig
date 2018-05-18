@@ -12,7 +12,7 @@
     <table class="table table-striped" id="class-table">
         <thead>
         <tr>
-            <th>Class namespace identifier</th>
+            <th>Class name</th>
             <th>Namespace URI</th>
             <th>Last updated</th>
         </tr>
@@ -24,7 +24,7 @@
                         <a href="{{ path('class_show', {
                             'id': class.id
                         }) }}">
-                            {{ class.identifierInNamespace }}
+                            {{ class }}
                         </a>
                     </td>
                     <td>
