@@ -57,6 +57,10 @@ class Project
      */
     private $ownedProfiles;
 
+    /**
+     * @ORM\OneToMany(targetEntity="OntoNamespace", mappedBy="projectForTopLevelNamespace")
+     */
+    private $managedNamespaces;
 
     /**
      * @Assert\NotBlank()
@@ -121,6 +125,7 @@ class Project
         $this->properties = new ArrayCollection();
         $this->classes = new ArrayCollection();
         $this->ownedProfiles = new ArrayCollection();
+        $this->managedNamespaces = new ArrayCollection();
         $this->profiles = new ArrayCollection();
         $this->textProperties = new ArrayCollection();
         $this->labels = new ArrayCollection();
@@ -239,6 +244,14 @@ class Project
     public function getOwnedProfiles()
     {
         return $this->ownedProfiles;
+    }
+
+    /**
+     * @return ArrayCollection|OntoNamespace[]
+     */
+    public function getManagedNamespaces()
+    {
+        return $this->managedNamespaces;
     }
 
     /**

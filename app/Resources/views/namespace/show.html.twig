@@ -68,9 +68,14 @@
                 </table>
             </div>
             <div id="identification" class="tab-pane fade">
+
                 {% if namespace.isTopLevelNamespace == false %}
-                    <p>Start date: {{ namespace.startDate }}</p>
-                    <p>End date: {{ namespace.endDate }}</p>
+                    {% if  namespace.startDate is not null %}
+                        <p>Start date: {{ namespace.startDate|date('Y-m-d') }}</p>
+                    {% endif %}
+                    {% if  namespace.endDate is not null %}
+                        <p>End date: {{ namespace.endDate|date('Y-m-d') }}</p>
+                    {% endif %}
                 {% endif %}
                 <h3>Labels</h3>
                 <table class="table table-striped" id="labels-table">
