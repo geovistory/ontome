@@ -301,7 +301,7 @@ class OntoNamespace
      */
     public function getObjectIdentification()
     {
-        return $this->namespaceURI;
+        return $this->labels[0];
     }
 
 }

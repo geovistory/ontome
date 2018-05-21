@@ -11,6 +11,7 @@
             <li class="active"><a data-toggle="tab" href="#scope-notes">Scope Notes</a></li>
             <li><a data-toggle="tab" href="#identification">Identification</a></li>
             <li><a data-toggle="tab" href="#project-hierarchy">Hierarchy</a></li>
+            <li><a data-toggle="tab" href="#managed-namespaces">Namespaces</a></li>
             <li><a data-toggle="tab" href="#profiles">Profiles</a></li>
         </ul>
 
@@ -135,6 +136,33 @@
                     </tbody>
                 </table>
             </div>
+            <div id="managed-namespaces" class="tab-pane fade">
+                <h3>Namespaces managed by this project</h3>
+                <table class="table table-striped" id="managed-namespaces-table">
+                    <thead>
+                    <tr>
+                        <th>Namespaces URI</th>
+                        <th>Namespaces identifier</th>
+                        <th>Last updated</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for namespace in project.managedNamespaces if namespace.isTopLevelNamespace %}
+                        <tr>
+                            <td>{{ namespace.namespaceUri }}</td>
+                            <td>
+                                <a href="{{ path('namespace_show', {
+                                    'id': namespace.id
+                                }) }}">
+                                    {{ namespace.objectIdentification }}
+                                </a>
+                            </td>
+                            <td>{{ namespace.modificationTime|date('Y-m-d') }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
             <div id="profiles" class="tab-pane fade">
                 <h3>Profiles</h3>
                 <table class="table table-striped" id="profile-table">
@@ -176,6 +204,7 @@
             $('#examples-table').DataTable();
             $('#parent-projects-table').DataTable();
             $('#child-projects-table').DataTable();
+            $('#managed-namespaces-table').DataTable();
             $('#profile-table').DataTable();
 
         } );

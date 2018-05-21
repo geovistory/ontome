@@ -234,5 +234,10 @@ class Label
         return $this->modificationTime;
     }
 
+    public function __toString()
+    {
+        return $this->label;
+    }
+
 
 }
