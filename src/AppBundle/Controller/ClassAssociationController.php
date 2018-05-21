@@ -87,4 +87,21 @@ class ClassAssociationController extends Controller
         ]);
     }
 
+    /**
+     * @Route("/class-association/{id}", name="class_association_show")
+     * @param ClassAssociation $classAssociation
+     * @return Response the rendered template
+     */
+    public function showAction(ClassAssociation $classAssociation)
+    {
+        $this->get('logger')
+            ->info('Showing class association: '.$classAssociation->getObjectIdentification());
+
+
+        return $this->render('classAssociation/show.html.twig', array(
+            'classAssociation' => $classAssociation
+        ));
+
+    }
+
 }

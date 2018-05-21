@@ -278,4 +278,9 @@ class ClassAssociation
         $namespace->addClassAssociation($this);
     }
 
+    public function __toString()
+    {
+        return 'Class association n°'.$this->id;
+    }
+
 }
