@@ -51,6 +51,7 @@ class ClassAssociationController extends Controller
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $classAssociation = $form->getData();
+            $classAssociation->addNamespace($childClass->getOngoingNamespace());
             $classAssociation->setCreator($this->getUser());
             $classAssociation->setModifier($this->getUser());
             $classAssociation->setCreationTime(new \DateTime('now'));
