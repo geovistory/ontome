@@ -13,7 +13,19 @@
     </head>
     <body>
         <header class="header">
-            <h1 class="logo">Ontology Management Environment</h1>
+            <div class="container">
+                <div class="row">
+                    <h1 class="logo">
+                        OntoME
+                    </h1>
+                </div>
+                <div class="row">
+                    <h4>
+                        <em class="text-muted">Ontology Management Environment</em>
+                    </h4>
+                </div>
+            </div>
+
             <ul class="navi">
                 {% if is_granted('ROLE_USER') %}
                     <li><a href="{{ path('security_logout') }}">Logout</a></li>
