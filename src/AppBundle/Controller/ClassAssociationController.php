@@ -99,6 +99,7 @@ class ClassAssociationController extends Controller
 
 
         return $this->render('classAssociation/show.html.twig', array(
+            'class' => $classAssociation->getChildClass(),
             'classAssociation' => $classAssociation
         ));
 

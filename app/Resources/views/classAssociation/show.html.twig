@@ -9,14 +9,34 @@
 {% block body %}
 
     <div class="container">
-        <h2 class="class-name">{{ classAssociation }}</h2>
+        <h2 class="class-name">
+            {{ classAssociation }}
+            <a href="{{ path('class_show', {
+                id: classAssociation.childClass.id
+            }) }}" class="pull-right btn btn-link">
+                <i class="far fa-caret-square-left"></i><span>Back</span>
+            </a>
+        </h2>
 
         <ul class="nav nav-tabs" id="main-tabs">
-            <li class="active"><a data-toggle="tab" href="#scope-notes">Scope Notes</a></li>
+            <li class="active"><a data-toggle="tab" href="#scope-notes">Identification and Scope Notes</a></li>
         </ul>
 
         <div class="tab-content">
             <div id="scope-notes" class="tab-pane fade in active">
+                <h3>Identification</h3>
+                <p>
+                    Child class: <a href="{{ path('class_show', {
+                        'id': classAssociation.childClass.id
+                    }) }}">{{ classAssociation.childClass }}
+                    </a>
+                </p>
+                <p>
+                    Parent class: <a href="{{ path('class_show', {
+                        'id': classAssociation.parentClass.id
+                    }) }}">{{ classAssociation.parentClass }}
+                    </a>
+                </p>
                 <h3>Scope Notes</h3>
                 <table class="table table-striped" id="scope-notes-table">
                     <thead>
@@ -25,6 +45,9 @@
                         <th>Scope note</th>
                         <th>Language</th>
                         <th>Namespace</th>
+                        {% if is_granted('edit', class) %}
+                        <th>Edit</th>
+                        {% endif %}
                     </tr>
                     </thead>
                     <tbody>
@@ -44,6 +67,16 @@
                                         {% endif %}
                                     {% endfor %}
                                 {% endif %} -->
+                            </td>
+                            <td>
+                                {% if is_granted('edit', class) %}
+                                    <a href="{{ path('text_property_edit', {
+                                        'id': textProperty.id
+                                    }) }}"
+                                       class="btn btn-xs btn-success">
+                                        <span class="fa fa-edit"></span>
+                                    </a>
+                                {% endif %}
                             </td>
                         </tr>
                     {% endfor %}

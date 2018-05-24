@@ -179,7 +179,7 @@ class TextProperty
     }
 
     /**
-     * @return mixed
+     * @return ClassAssociation
      */
     public function getClassAssociation()
     {

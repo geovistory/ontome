@@ -280,7 +280,7 @@ class ClassAssociation
 
     public function __toString()
     {
-        return 'Class association n°'.$this->id;
+        return $this->childClass.': parent class association';
     }
 
 }
