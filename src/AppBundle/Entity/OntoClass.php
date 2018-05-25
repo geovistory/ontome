@@ -280,7 +280,11 @@ class OntoClass
 
     public function __toString()
     {
-        return $this->getIdentifierInNamespace().' '.$this->getStandardLabel();
+        if($this->getIdentifierInNamespace() === $this->getStandardLabel()){
+            $s = $this->getIdentifierInNamespace();
+        }
+        else $s =  $this->getIdentifierInNamespace().' '.$this->getStandardLabel();
+        return (string) $s;
     }
 
 }

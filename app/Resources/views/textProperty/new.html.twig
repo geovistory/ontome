@@ -3,12 +3,7 @@
 <div class="container">
     <div class="row">
         <div class="col-xs-12">
-            <h2>Edit
-                {% if textProperty.object is not null %}
-                {{ textProperty.object.objectIdentification }} - {{ textProperty.systemType.standardLabel }}
-                {% else %}
-                    {{ textProperty.systemType.standardLabel }}
-                {% endif %}
+            <h2>New {{ textProperty.systemType.standardLabel }}
                 {% if textProperty.classAssociation is not null %}
                     <a href="{{ path('class_association_show', {
                                 id: textProperty.classAssociation.id

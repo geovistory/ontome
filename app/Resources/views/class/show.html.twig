@@ -160,7 +160,7 @@
                                 <a href="{{ path('class_show', {
                                     'id': association.parentClass.id
                                 }) }}">
-                                    {{ association.parentClass.identifierInNamespace }}
+                                    {{ association.parentClass }}
                                 </a>
                             </td>
                             <td>
@@ -173,17 +173,9 @@
                             </td>
                             <td>
                                 {% if association.parentClass.namespaces is not null %}
-                                    {% for namespace in association.parentClass.namespaces %}
-                                        {% if namespace.isTopLevelNamespace == true %}
-                                            {% for label in namespace.labels %}
-                                                {% if label.isStandardLabelForLanguage == true and label.languageIsoCode == 'en' %}
-                                                    {{ label.label }}
-                                                {% endif %}
-                                            {%  endfor %}
-                                        {% else %}
-                                            WIP
-                                        {% endif %}
-                                    {% endfor %}
+                                    {% if association.parentClass.namespaces|first.topLevelNamespace is not null %}
+                                        {{ association.parentClass.namespaces|first.topLevelNamespace.namespaceURI }}
+                                    {% endif %}
                                 {% else %}
                                     WIP
                                 {% endif %}

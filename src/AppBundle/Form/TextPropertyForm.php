@@ -33,7 +33,7 @@ class TextPropertyForm extends AbstractType
 
         if (!$user) {
             throw new \LogicException(
-                'The TextPropertyType cannot be used without an authenticated user!'
+                'The TextPropertyForm cannot be used without an authenticated user!'
             );
         }
 
