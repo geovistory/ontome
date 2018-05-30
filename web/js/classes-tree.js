@@ -8,6 +8,12 @@ $(document).ready(function() {
 // *********** Convert flat data into a nice tree ***************
 // create a name: node map
     var url = $('#tree-container').data('url');
+    var pageName = location.href.split("/").slice(-1).pop();
+    var nodeLink = 'class';
+    if(pageName == 'properties-tree') {
+        nodeLink = 'property';
+    }
+    console.log(pageName);
     $.get(url, function(data){
 
         // *********** Convert flat data into a nice tree ***************
@@ -35,6 +41,9 @@ $(document).ready(function() {
         });
         //var sTreeData = '{"name": "E1_CRM_Entity","search_name": "E1_CRM_Entity","children": '+JSON.stringify(treeData)+'}';
         var sTreeData = '{"name": "owl:Thing","search_name": "owl:Thing","real_id": "214","children": '+JSON.stringify(treeData)+'}';
+        if(pageName == 'properties-tree') {
+            sTreeData = '{"name": "owl:topObjectProperty","search_name": "owl:topObjectProperty","real_id": "155","children": '+JSON.stringify(treeData)+'}';
+        }
 
         treeData = JSON.parse(sTreeData);
         var sqlquery = treeData;
@@ -238,7 +247,7 @@ $(document).ready(function() {
                 .text(function(d) { return d.name; })
                 .style("fill-opacity", 1e-6)
                 .call(wrap, 125)
-                .on("click",function(d){window.open('class/'+d.real_id,'_blank');});
+                .on("click",function(d){window.open(nodeLink+'/'+d.real_id,'_blank');});
 
             // Transition nodes to their new position.
             var nodeUpdate = node.transition()
