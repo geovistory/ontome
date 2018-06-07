@@ -283,10 +283,10 @@ class OntoClass
         if($this->getIdentifierInNamespace() === $this->getStandardLabel()){
             $s = $this->getIdentifierInNamespace();
         }
-        else if($this->getStandardLabel()) {
+        else if(!is_null($this->getStandardLabel())) {
             $s = $this->getStandardLabel().' – '.$this->getIdentifierInNamespace();
         }
-        else $this->getIdentifierInNamespace();
+        else $s = $this->getIdentifierInNamespace();
         return (string) $s;
     }
 
