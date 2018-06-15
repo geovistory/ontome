@@ -11,6 +11,7 @@ namespace AppBundle\Controller;
 use AppBundle\Entity\ClassAssociation;
 use AppBundle\Entity\OntoClass;
 use AppBundle\Entity\TextProperty;
+use AppBundle\Form\ClassAssociationEditForm;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use AppBundle\Form\ParentClassAssociationForm;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -51,6 +52,7 @@ class ClassAssociationController extends Controller
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $classAssociation = $form->getData();
+            $classAssociation->addNamespace($childClass->getOngoingNamespace());
             $classAssociation->setCreator($this->getUser());
             $classAssociation->setModifier($this->getUser());
             $classAssociation->setCreationTime(new \DateTime('now'));
@@ -85,5 +87,62 @@ class ClassAssociationController extends Controller
             'ancestors' => $ancestors
         ]);
     }
+
+    /**
+     * @Route("/class-association/{id}", name="class_association_show")
+     * @param ClassAssociation $classAssociation
+     * @return Response the rendered template
+     */
+    public function showAction(ClassAssociation $classAssociation)
+    {
+        $this->get('logger')
+            ->info('Showing class association: '.$classAssociation->getObjectIdentification());
+
+
+        return $this->render('classAssociation/show.html.twig', array(
+            'class' => $classAssociation->getChildClass(),
+            'classAssociation' => $classAssociation
+        ));
+
+    }
+
+    /**
+     * @Route("/class-association/{id}/edit", name="class_association_edit")
+     */
+    public function editAction(Request $request, ClassAssociation $classAssociation)
+    {
+
+        $this->denyAccessUnlessGranted('edit', $classAssociation->getChildClass());
+
+        $form = $this->createForm(ClassAssociationEditForm::class, $classAssociation);
+
+        // only handles data on POST
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $classAssociation = $form->getData();
+            //$classAssociation->addNamespace($classAssociation->getChildClass()->getOngoingNamespace());
+            $classAssociation->setModifier($this->getUser());
+            $classAssociation->setModificationTime(new \DateTime('now'));
+
+
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($classAssociation);
+            $em->flush();
+
+            return $this->redirectToRoute('class_association_edit', [
+                'id' => $classAssociation->getId()
+            ]);
+
+        }
+
+        $em = $this->getDoctrine()->getManager();
+
+        return $this->render('classAssociation/edit.html.twig', array(
+            'class' => $classAssociation->getChildClass(),
+            'classAssociation' => $classAssociation,
+            'classAssociationForm' => $form->createView(),
+        ));
+    }
+
 
 }

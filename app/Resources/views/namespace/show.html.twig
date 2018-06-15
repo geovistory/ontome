@@ -166,7 +166,7 @@
                 <table class="table table-striped" id="classes-table">
                     <thead>
                     <tr>
-                        <th>Class namespace identifier</th>
+                        <th>Class</th>
                         <th>Last updated</th>
                     </tr>
                     </thead>
@@ -177,7 +177,7 @@
                                 <a href="{{ path('class_show', {
                                     'id': class.id
                                 }) }}">
-                                    {{ class.identifierInNamespace }}
+                                    {{ class }}
                                 </a>
                             </td>
                             <td>{{ class.modificationTime|date('Y-m-d') }}</td>

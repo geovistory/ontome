@@ -247,7 +247,7 @@ class OntoClass
     }
 
     /**
-     * @return ArrayCollection|Profile[]
+     * @return ArrayCollection|OntoNamespace[]
      */
     public function getOngoingNamespace()
     {
@@ -280,7 +280,14 @@ class OntoClass
 
     public function __toString()
     {
-        return $this->getIdentifierInNamespace().' '.$this->getStandardLabel();
+        if($this->getIdentifierInNamespace() === $this->getStandardLabel()){
+            $s = $this->getIdentifierInNamespace();
+        }
+        else if(!is_null($this->getStandardLabel())) {
+            $s = $this->getStandardLabel().' – '.$this->getIdentifierInNamespace();
+        }
+        else $s = $this->getIdentifierInNamespace();
+        return (string) $s;
     }
 
 }

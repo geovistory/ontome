@@ -1,0 +1,142 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ classAssociation }}{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+{% endblock %}
+
+{% block body %}
+
+    <div class="container">
+        <h2 class="class-name">
+            {{ classAssociation }}
+            <a href="{{ path('class_show', {
+                id: classAssociation.childClass.id
+            }) }}" class="pull-right btn btn-link">
+                <i class="far fa-caret-square-left"></i><span>Back</span>
+            </a>
+        </h2>
+
+        <ul class="nav nav-tabs" id="main-tabs">
+            <li class="active"><a data-toggle="tab" href="#scope-notes">Parent class and scope notes</a></li>
+        </ul>
+
+        <div class="tab-content">
+            <div id="scope-notes" class="tab-pane fade in active">
+                <h3>Edit class association</h3>
+                {{ form_start(classAssociationForm) }}
+                    {{ form_errors(classAssociationForm) }}
+                    {{ form_row(classAssociationForm.parentClass) }}
+
+                    {{ form_row(classAssociationForm.childClass) }}
+
+                    {{ form_row(classAssociationForm.notes) }}
+                    {{ form_errors(classAssociationForm.notes) }}
+                    <button type="submit" class="btn btn-primary" formnovalidate>Save</button>
+                {{ form_end(classAssociationForm) }}
+                {% if is_granted('edit', class) %}
+                    <div class="pull-right add-div">
+                        <a href="{{ path('text_property_new', {'type': 'scope-note', 'object': 'class-association', 'objectId': classAssociation.id })}}"
+                           class="btn btn-primary pull-right">
+                            Add <span class="fa fa-plus-circle"></span>
+                        </a>
+                    </div>
+                {% endif %}
+                <h3>Scope Notes</h3>
+                <table class="table table-striped" id="scope-notes-table">
+                    <thead>
+                    <tr>
+                        <th>Show</th>
+                        <th>Scope note</th>
+                        <th>Language</th>
+                        <th>Namespace</th>
+                        {% if is_granted('edit', class) %}
+                        <th>Edit</th>
+                        {% endif %}
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for textProperty in classAssociation.textProperties if textProperty.systemType.id == 1 %}
+                        <tr>
+                            <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
+                            <td class="truncated-text">
+                                <span>{{ textProperty.textProperty}}</span>
+                                {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
+                            </td>
+                            <td>{{ textProperty.languageIsoCode}}</td>
+                            <td>
+                                <!-- {% if textProperty.namespace is not null %}
+                                    {% for label in textProperty.namespace.topLevelNamespace.labels %}
+                                        {% if label.isStandardLabelForLanguage == true and label.languageIsoCode == 'en' %}
+                                            {{ label.label }}
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endif %} -->
+                            </td>
+                            <td>
+                                {% if is_granted('edit', class) %}
+                                    <a href="{{ path('text_property_edit', {
+                                        'id': textProperty.id
+                                    }) }}"
+                                       class="btn btn-xs btn-success">
+                                        <span class="fa fa-edit"></span>
+                                    </a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+
+                {% if is_granted('edit', class) %}
+                    <div class="pull-right add-div">
+                        <a href="{{ path('text_property_new', {'type': 'example', 'object': 'class-association', 'objectId': classAssociation.id })}}"
+                           class="btn btn-primary pull-right">
+                            Add <span class="fa fa-plus-circle"></span>
+                        </a>
+                    </div>
+                {% endif %}
+                <h3>Examples</h3>
+                <table class="table table-striped" id="examples-table">
+                    <thead>
+                    <tr>
+                        <th>Show</th>
+                        <th>Example</th>
+                        <th>Language</th>
+                        <th>Namespace</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for textProperty in classAssociation.textProperties if textProperty.systemType.id == 7 %}
+                        <tr>
+                            <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
+                            <td class="truncated-text">
+                                <span>{{ textProperty.textProperty}}</span>
+                                {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
+                            </td>
+                            <td>{{ textProperty.languageIsoCode}}</td>
+                            <td>WIP</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+
+    <script>
+        $(document).ready(function() {
+            $('#scope-notes-table').DataTable();
+            $('#examples-table').DataTable();
+
+        } );
+    </script>
+    <script type="text/javascript" src="{{ asset('js/class-graph.js') }}"></script>
+
+{% endblock %}

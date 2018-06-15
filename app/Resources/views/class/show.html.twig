@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}{{ class.identifierInNamespace }}{% endblock %}
+{% block title %}{{ class }}{% endblock %}
 
 {% block stylesheets %}
     {{ parent() }}
@@ -144,6 +144,13 @@
                         <th>Class identifier</th>
                         <th>Explanation</th>
                         <th>Root namespace</th>
+                        <th>
+                            {% if is_granted('edit', class) %}
+                               Edit association
+                            {% else %}
+                                View association
+                            {% endif %}
+                        </th>
                     </tr>
                     </thead>
                     <tbody>
@@ -153,33 +160,42 @@
                                 <a href="{{ path('class_show', {
                                     'id': association.parentClass.id
                                 }) }}">
-                                    {{ association.parentClass.identifierInNamespace }}
+                                    {{ association.parentClass }}
                                 </a>
                             </td>
                             <td>
                                 {% if association.textProperties is not null %}
                                     {% for textProperty in association.textProperties if textProperty.systemType.id == 1 and textProperty.languageIsoCode == 'en' %}
-                                        <a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a>
+                                        <a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="fas fa-info-circle" aria-hidden="true"></span></a>
                                         {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
                                     {% endfor %}
                                 {% endif %}
                             </td>
                             <td>
                                 {% if association.parentClass.namespaces is not null %}
-                                    {% for namespace in association.parentClass.namespaces %}
-                                        {% if namespace.isTopLevelNamespace == true %}
-                                            {% for label in namespace.labels %}
-                                                {% if label.isStandardLabelForLanguage == true and label.languageIsoCode == 'en' %}
-                                                    {{ label.label }}
-                                                {% endif %}
-                                            {%  endfor %}
-                                        {% else %}
-                                            WIP
-                                        {% endif %}
-                                    {% endfor %}
+                                    {% if association.parentClass.namespaces|first.topLevelNamespace is not null %}
+                                        {{ association.parentClass.namespaces|first.topLevelNamespace.namespaceURI }}
+                                    {% endif %}
                                 {% else %}
                                     WIP
                                 {% endif %}
+                            </td>
+                            <td>
+                                {% if is_granted('edit', class) %}
+                                    <a href="{{ path('class_association_edit', {
+                                        'id': association.id
+                                    }) }}"
+                                       class="btn btn-xs btn-success">
+                                        <span class="fa fa-edit"></span>
+                                    </a>
+                                {% else %}
+                                    <a href="{{ path('class_association_show', {
+                                        'id': association.id
+                                    }) }}">
+                                        <span class="fa fa-eye"></span>
+                                    </a>
+                                {% endif %}
+
                             </td>
                         </tr>
                     {% endfor %}

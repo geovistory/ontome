@@ -58,6 +58,15 @@ class ClassAssociation
     private $textProperties;
 
     /**
+     * @ORM\ManyToMany(targetEntity="OntoNamespace",  inversedBy="OntoClass", fetch="EXTRA_LAZY")
+     * @ORM\JoinTable(schema="che", name="associates_namespace",
+     *      joinColumns={@ORM\JoinColumn(name="fk_is_subclass_of", referencedColumnName="pk_is_subclass_of")},
+     *      inverseJoinColumns={@ORM\JoinColumn(name="fk_namespace", referencedColumnName="pk_namespace")}
+     *      )
+     */
+    private $namespaces;
+
+    /**
      * @ORM\ManyToOne(targetEntity="User")
      * @ORM\JoinColumn(name="creator", referencedColumnName="pk_user", nullable=false)
      */
@@ -85,6 +94,7 @@ class ClassAssociation
     public function __construct()
     {
         $this->textProperties = new ArrayCollection();
+        $this->namespaces = new ArrayCollection();
     }
 
     /**
@@ -126,6 +136,14 @@ class ClassAssociation
     public function getTextProperties()
     {
         return $this->textProperties;
+    }
+
+    /**
+     * @return ArrayCollection|OntoNamespace[]
+     */
+    public function getNamespaces()
+    {
+        return $this->namespaces;
     }
 
     /**
@@ -185,6 +203,14 @@ class ClassAssociation
     }
 
     /**
+     * @param mixed $namespace
+     */
+    public function setNamespaces($namespaces)
+    {
+        $this->namespaces = $namespaces;
+    }
+
+    /**
      * @param mixed $parentClass
      */
     public function setParentClass($parentClass)
@@ -240,6 +266,21 @@ class ClassAssociation
         $this->textProperties[] = $textProperty;
         // needed to update the owning side of the relationship!
         $textProperty->setClassAssociation($this);
+    }
+
+    public function addNamespace(OntoNamespace $namespace)
+    {
+        if ($this->namespaces->contains($namespace)) {
+            return;
+        }
+        $this->namespaces[] = $namespace;
+        // needed to update the owning side of the relationship!
+        $namespace->addClassAssociation($this);
+    }
+
+    public function __toString()
+    {
+        return (string) $this->childClass.': parent class association';
     }
 
 }
