@@ -133,6 +133,12 @@ class OntoNamespace
     private $classAssociations;
 
     /**
+     * @ORM\ManyToMany(targetEntity="PropertyAssociation", mappedBy="namespaces")
+     * @ORM\OrderBy({"id" = "ASC"})
+     */
+    private $propertyAssociations;
+
+    /**
      * @ORM\OneToMany(targetEntity="OntoNamespace", mappedBy="referencedVersion")
      */
     private $childVersions;
@@ -144,6 +150,7 @@ class OntoNamespace
         $this->labels = new ArrayCollection();
         $this->textProperties = new ArrayCollection();
         $this->classAssociations = new ArrayCollection();
+        $this->propertyAssociations = new ArrayCollection();
         $this->childVersions = new ArrayCollection();
     }
 
@@ -300,6 +307,14 @@ class OntoNamespace
     }
 
     /**
+     * @return mixed
+     */
+    public function getPropertyAssociations()
+    {
+        return $this->propertyAssociations;
+    }
+
+    /**
      * @return ArrayCollection|OntoNamespace[]
      */
     public function getChildVersions()
@@ -327,6 +342,16 @@ class OntoNamespace
         $this->classAssociations[] = $classAssociation;
         // needed to update the owning side of the relationship!
         $classAssociation->addNamespace($this);
+    }
+
+    public function addPropertyAssociation(PropertyAssociation $propertyAssociation)
+    {
+        if ($this->propertyAssociations->contains($propertyAssociation)) {
+            return;
+        }
+        $this->propertyAssociations[] = $propertyAssociation;
+        // needed to update the owning side of the relationship!
+        $propertyAssociation->addNamespace($this);
     }
 
 }

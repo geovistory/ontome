@@ -107,6 +107,12 @@ class Property
      */
     private $labels;
 
+    /**
+     * @ORM\ManyToOne(targetEntity="OntoNamespace")
+     * @ORM\JoinColumn(name="fk_ongoing_namespace", referencedColumnName="pk_namespace", nullable=true)
+     */
+    private $ongoingNamespace;
+
     public function __construct()
     {
         $this->namespaces = new ArrayCollection();
