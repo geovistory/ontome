@@ -24,13 +24,17 @@
 
         <div class="tab-content">
             <div id="scope-notes" class="tab-pane fade in active">
-                <h3>Parent class</h3>
-                <h4>
-                    <a href="{{ path('class_show', {
-                        'id': classAssociation.parentClass.id
-                    }) }}">{{ classAssociation.parentClass }}
-                    </a>
-                </h4>
+                <h3>Edit class association</h3>
+                {{ form_start(classAssociationForm) }}
+                    {{ form_errors(classAssociationForm) }}
+                    {{ form_row(classAssociationForm.parentClass) }}
+
+                    {{ form_row(classAssociationForm.childClass) }}
+
+                    {{ form_row(classAssociationForm.notes) }}
+                    {{ form_errors(classAssociationForm.notes) }}
+                    <button type="submit" class="btn btn-primary" formnovalidate>Save</button>
+                {{ form_end(classAssociationForm) }}
                 {% if is_granted('edit', class) %}
                     <div class="pull-right add-div">
                         <a href="{{ path('text_property_new', {'type': 'scope-note', 'object': 'class-association', 'objectId': classAssociation.id })}}"
@@ -118,11 +122,6 @@
                     </tbody>
                 </table>
             </div>
-            {% if classAssociation.notes is not empty %}
-            <div id="notes">
-                <p>Notes: {{ classAssociation.notes }}</p>
-            </div>
-            {% endif %}
         </div>
     </div>
 

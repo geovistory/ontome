@@ -182,7 +182,7 @@
                             </td>
                             <td>
                                 {% if is_granted('edit', class) %}
-                                    <a href="{{ path('class_association_show', {
+                                    <a href="{{ path('class_association_edit', {
                                         'id': association.id
                                     }) }}"
                                        class="btn btn-xs btn-success">

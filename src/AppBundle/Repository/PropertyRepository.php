@@ -263,7 +263,7 @@ class PropertyRepository extends EntityRepository
         $conn = $this->getEntityManager()
             ->getConnection();
 
-        $sql = "SELECT array_to_json(array_agg(result)) AS json FROM (SELECT * FROM api.v_property_all_profile_project WHERE pk_project = :project ) result;";
+        $sql = "SELECT array_to_json(array_agg(result)) AS json FROM (SELECT * FROM api.v_property_profile_project WHERE pk_project = :project ) result;";
 
         $stmt = $conn->prepare($sql);
         $stmt->execute(array('project' => $project->getId()));
@@ -283,7 +283,7 @@ class PropertyRepository extends EntityRepository
                         standard_label AS \"standardLabel\",
                         identifier_in_namespace AS \"identifierInNamespace\",
                         root_namespace AS \"rootNamespace\"                     
-                FROM api.v_property_all_profile_project WHERE pk_profile = :profile;";
+                FROM api.v_property_profile_project WHERE pk_profile = :profile;";
 
         $stmt = $conn->prepare($sql);
         $stmt->execute(array('profile' => $profile->getId()));
