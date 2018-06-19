@@ -1,0 +1,147 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Add new parent property for {{ childProperty.identifierInNamespace }}{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.4/css/select2.min.css" rel="stylesheet" />
+{%  endblock %}
+
+{% block body %}
+
+    {% import _self as formMacros %}
+    {% macro printTextPropertyRow(textPropertyForm) %}
+        {{ form_errors(textPropertyForm) }}
+        {{ form_row(textPropertyForm.textProperty, {
+            'label': 'Scope note'
+        }) }}
+        {{ form_row(textPropertyForm.languageIsoCode, {
+            'label': 'Language'
+        }) }}
+        {{ form_row(textPropertyForm.creator) }}
+        {{ form_row(textPropertyForm.modifier) }}
+    {% endmacro %}
+
+    <div class="container">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="pull-right reset-div">
+                    <a href="{{ path('new_parent_property_form', {'childProperty': childProperty.id}) }}" class="btn btn-primary pull-right">Reset <span class="fa fa-undo"></span></a>
+                </div>
+                <h2>Add new parent property for {{ childProperty.identifierInNamespace }}</h2>
+
+                {{ form_start(parentPropertyAssociationForm) }}
+                    {{ form_errors(parentPropertyAssociationForm) }}
+                    {{ form_row(parentPropertyAssociationForm.parentProperty) }}
+
+                    {{ form_row(parentPropertyAssociationForm.childProperty) }}
+
+                    <div class="js-text-property-wrapper"
+                         data-prototype="{{ formMacros.printTextPropertyRow(parentPropertyAssociationForm.textProperties.vars.prototype)|e('html_attr') }}"
+                         data-index="{{ parentPropertyAssociationForm.textProperties|length }}"
+                     >
+                        {% for textPropertyForm in parentPropertyAssociationForm.textProperties %}
+                            {{ formMacros.printTextPropertyRow(textPropertyForm) }}
+                        {% endfor %}
+                        <a href="#" class="js-example-add">
+                            <span class="fa fa-plus-circle"></span>
+                            Add an example
+                        </a>
+
+                    </div>
+
+                    {{ form_row(parentPropertyAssociationForm.notes) }}
+                    {{ form_errors(parentPropertyAssociationForm.notes) }}
+                    <button type="submit" class="btn btn-primary" formnovalidate>Save</button>
+                {{ form_end(parentPropertyAssociationForm) }}
+            </div>
+        </div>
+        <h3>Parent and ancestor properties</h3>
+        <table class="table table-striped" id="ancestors-table">
+            <thead>
+            <tr>
+                <th>Property identifier</th>
+                <th>Depth</th>
+                <th>Root namespace</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for ancestor in ancestors|sort %}
+                <tr>
+                    <td>
+                        <a href="{{ path('property_show', {
+                            'id': ancestor.id
+                        }) }}">
+                            {% if  ancestor.depth == '1' %}<strong>{%  endif %}
+                                {{ ancestor.identifier }}
+                            {% if  ancestor.depth == '1' %}</strong>{%  endif %}
+                        </a>
+                    </td>
+                    <td>{{ ancestor.depth }}</td>
+                    <td>{{ ancestor.rootNamespaceLabel }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.4/js/select2.min.js"></script>
+    <script>
+
+        $(document).ready(function() {
+            $('#parent_property_association_form_parentProperty').select2({
+                sorter: function(data) {
+                    /* Sort data using lowercase comparison */
+                    return data.sort(function (a, b) {
+                        a = a.text.toLowerCase();
+                        b = b.text.toLowerCase();
+                        if (a > b) {
+                            return 1;
+                        } else if (a < b) {
+                            return -1;
+                        }
+                        return 0;
+                    });
+                }
+            });
+
+            $('#ancestors-table').DataTable({
+                "order": [[ 1, "asc" ]]
+            });
+
+            if($('[for=parent_property_association_form_textProperties_1_textProperty]').length) {
+                //we hide the button in order to prevent the add of more than 2 text properties
+                $('.js-example-add').hide();
+                $('[for=parent_property_association_form_textProperties_1_textProperty]').text('Example');
+            }
+            var $wrapper = $('.js-text-property-wrapper');
+            $wrapper.on('click', '.js-example-add', function(e) {
+                e.preventDefault();
+
+                // Get the data-prototype explained earlier
+                var prototype = $wrapper.data('prototype');
+
+                // get the new index
+                var index = $wrapper.data('index');
+
+                // Replace '__name__' in the prototype's HTML to
+                // instead be a number based on how many items we have
+                var newForm = prototype.replace(/__name__/g, index);
+
+                // increase the index with one for the next item
+                $wrapper.data('index', index + 1);
+
+                // Display the form in the page before the "new" link
+                $(this).before(newForm);
+                $('#parent_property_association_form_textProperties_1_creator').val($('#parent_property_association_form_textProperties_0_creator').val());
+                $('#parent_property_association_form_textProperties_1_modifier').val($('#parent_property_association_form_textProperties_0_creator').val());
+                $('.js-example-add').hide();
+                $('[for=parent_property_association_form_textProperties_1_textProperty]').text('Example');
+            });
+        } );
+    </script>
+{% endblock %}
