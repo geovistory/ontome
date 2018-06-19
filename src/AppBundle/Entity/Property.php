@@ -244,6 +244,14 @@ class Property
     }
 
     /**
+     * @return OntoNamespace
+     */
+    public function getOngoingNamespace()
+    {
+        return $this->ongoingNamespace;
+    }
+
+    /**
      * @return ArrayCollection|PropertyAssociation[]
      */
     public function getParentPropertyAssociations()

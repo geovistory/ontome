@@ -247,7 +247,7 @@ class OntoClass
     }
 
     /**
-     * @return ArrayCollection|OntoNamespace[]
+     * @return OntoNamespace
      */
     public function getOngoingNamespace()
     {
