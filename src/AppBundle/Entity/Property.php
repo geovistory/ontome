@@ -92,6 +92,16 @@ class Property
     private $profiles;
 
     /**
+     * @ORM\OneToMany(targetEntity="PropertyAssociation", mappedBy="childClass")
+     */
+    private $childPropertyAssociations;
+
+    /**
+     * @ORM\OneToMany(targetEntity="PropertyAssociation", mappedBy="parentClass")
+     */
+    private $parentPropertyAssociations;
+
+    /**
      * @ORM\ManyToMany(targetEntity="OntoNamespace",  inversedBy="Property", fetch="EXTRA_LAZY")
      * @ORM\JoinTable(schema="che", name="associates_namespace",
      *      joinColumns={@ORM\JoinColumn(name="fk_property", referencedColumnName="pk_property")},
@@ -231,6 +241,22 @@ class Property
     public function getProfiles()
     {
         return $this->profiles;
+    }
+
+    /**
+     * @return ArrayCollection|PropertyAssociation[]
+     */
+    public function getParentPropertyAssociations()
+    {
+        return $this->parentPropertyAssociations;
+    }
+
+    /**
+     * @return ArrayCollection|PropertyAssociation[]
+     */
+    public function getChildPropertyAssociations()
+    {
+        return $this->childPropertyAssociations;
     }
 
     /**
