@@ -92,12 +92,12 @@ class Property
     private $profiles;
 
     /**
-     * @ORM\OneToMany(targetEntity="PropertyAssociation", mappedBy="childClass")
+     * @ORM\OneToMany(targetEntity="PropertyAssociation", mappedBy="childProperty")
      */
     private $childPropertyAssociations;
 
     /**
-     * @ORM\OneToMany(targetEntity="PropertyAssociation", mappedBy="parentClass")
+     * @ORM\OneToMany(targetEntity="PropertyAssociation", mappedBy="parentProperty")
      */
     private $parentPropertyAssociations;
 
@@ -273,6 +273,18 @@ class Property
     public function getObjectIdentification()
     {
         return $this->identifierInNamespace;
+    }
+
+    public function __toString()
+    {
+        if($this->getIdentifierInNamespace() === $this->getStandardLabel()){
+            $s = $this->getIdentifierInNamespace();
+        }
+        else if(!is_null($this->getStandardLabel())) {
+            $s = $this->getStandardLabel().' – '.$this->getIdentifierInNamespace();
+        }
+        else $s = $this->getIdentifierInNamespace();
+        return (string) $s;
     }
 
 }
