@@ -37,8 +37,15 @@ class TextPropertyController extends Controller
      */
     public function editAction(TextProperty $textProperty, Request $request)
     {
-        $childClass = $textProperty->getClassAssociation()->getChildClass();
-        $this->denyAccessUnlessGranted('edit', $childClass);
+        if(!is_null($textProperty->getClassAssociation())){
+            $object = $textProperty->getClassAssociation()->getChildClass();
+        }
+        else if(!is_null($textProperty->getPropertyAssociation())){
+            $object = $textProperty->getPropertyAssociation()->getChildProperty();
+        }
+        else throw $this->createNotFoundException('The related object for the text property  n° '.$textProperty->getId().' does not exist. Please contact an administrator.');
+
+        $this->denyAccessUnlessGranted('edit', $object);
 
         $form = $this->createForm(TextPropertyForm::class, $textProperty);
 
@@ -58,7 +65,7 @@ class TextPropertyController extends Controller
 
         return $this->render('textProperty/edit.html.twig', [
             'textPropertyForm' => $form->createView(),
-            'class' => $childClass,
+            'associatedObject' => $object,
             'textProperty' => $textProperty
         ]);
 

@@ -162,19 +162,22 @@ class PropertyRepository extends EntityRepository
                   FROM che.ascendant_property_hierarchy(:property)
                 )
                 SELECT tw1.pk_parent  AS id,
-                       tw1.parent_identifier AS \"parentIdentifier\",
+                       tw1.parent_identifier AS identifier,
                        tw1.DEPTH,
                        replace(tw1.ancestors, '|', '→') AS ancestors,
-                       STRING_AGG(nsp.namespace_uri,'; ') namespaces
+                       che.get_root_namespace(nsp.pk_namespace) AS \"rootNamespaceId\",
+                       (SELECT label FROM che.get_namespace_labels(che.get_root_namespace(nsp.pk_namespace)) WHERE language_iso_code = 'en') AS \"rootNamespaceLabel\"
                 FROM tw1,
                      che.associates_namespace asnsp,
                      che.namespace nsp
                 WHERE asnsp.fk_property = tw1.pk_parent
                 AND   nsp.pk_namespace = asnsp.fk_namespace
+                AND depth > 1 
                 GROUP BY tw1.pk_parent,
                      tw1.parent_identifier,
                      tw1.depth,
-                     tw1.ancestors";
+                     tw1.ancestors,
+                     nsp.pk_namespace";
 
         $stmt = $conn->prepare($sql);
         $stmt->execute(array('property' => $property->getId()));
