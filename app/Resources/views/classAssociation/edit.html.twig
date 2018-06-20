@@ -14,7 +14,7 @@
             <a href="{{ path('class_show', {
                 id: classAssociation.childClass.id
             }) }}" class="pull-right btn btn-link">
-                <i class="far fa-caret-square-left"></i><span>Back</span>
+                <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
             </a>
         </h2>
 
@@ -33,7 +33,7 @@
 
                     {{ form_row(classAssociationForm.notes) }}
                     {{ form_errors(classAssociationForm.notes) }}
-                    <button type="submit" class="btn btn-primary" formnovalidate>Save</button>
+                    <button type="submit" class="btn btn-primary" formnovalidate>Save <span class="far fa-save"></span></button>
                 {{ form_end(classAssociationForm) }}
                 {% if is_granted('edit', class) %}
                     <div class="pull-right add-div">
@@ -137,6 +137,5 @@
 
         } );
     </script>
-    <script type="text/javascript" src="{{ asset('js/class-graph.js') }}"></script>
 
 {% endblock %}

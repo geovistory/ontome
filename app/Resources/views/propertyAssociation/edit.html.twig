@@ -14,7 +14,7 @@
             <a href="{{ path('property_show', {
                 id: propertyAssociation.childProperty.id
             }) }}" class="pull-right btn btn-link">
-                <i class="far fa-caret-square-left"></i><span>Back</span>
+                <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
             </a>
         </h2>
 
@@ -33,7 +33,7 @@
 
                     {{ form_row(propertyAssociationForm.notes) }}
                     {{ form_errors(propertyAssociationForm.notes) }}
-                    <button type="submit" class="btn btn-primary" formnovalidate>Save</button>
+                    <button type="submit" class="btn btn-primary" formnovalidate>Save <span class="far fa-save"></span></button>
                 {{ form_end(propertyAssociationForm) }}
                 {% if is_granted('edit', property) %}
                     <div class="pull-right add-div">

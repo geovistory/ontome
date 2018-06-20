@@ -120,13 +120,82 @@
                 </table>
             </div>
             <div id="property-hierarchy" class="tab-pane fade">
-                <h3>Parent and ancestor properties</h3>
-                <table class="table table-striped" id="ancestors-properties-table">
+                {% if is_granted('edit', property) %}
+                    <div class="pull-right add-div">
+                        <a href="{{ path('new_parent_property_form', {'childProperty': property.id}) }}" class="btn btn-primary pull-right">Add <span class="fa fa-plus-circle"></span></a>
+                    </div>
+                {% endif %}
+                <h3>Parent properties</h3>
+                <table class="table table-striped" id="parent-properties-table">
                     <thead>
                     <tr>
                         <th>Property identifier</th>
-                        <th>Namespace</th>
+                        <th>Explanation</th>
+                        <th>Root namespace</th>
+                        <th>
+                            {% if is_granted('edit', property) %}
+                                Edit association
+                            {% else %}
+                                View association
+                            {% endif %}
+                        </th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for association in property.childPropertyAssociations %}
+                        <tr>
+                            <td>
+                                <a href="{{ path('property_show', {
+                                    'id': association.parentProperty.id
+                                }) }}">
+                                    {{ association.parentProperty }}
+                                </a>
+                            </td>
+                            <td>
+                                {% if association.textProperties is not null %}
+                                    {% for textProperty in association.textProperties if textProperty.systemType.id == 1 and textProperty.languageIsoCode == 'en' %}
+                                        <a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="fas fa-info-circle" aria-hidden="true"></span></a>
+                                        {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
+                                    {% endfor %}
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if association.parentProperty.namespaces is not null %}
+                                    {% if association.parentProperty.namespaces|first.topLevelNamespace is not null %}
+                                        {{ association.parentProperty.namespaces|first.topLevelNamespace.namespaceURI }}
+                                    {% endif %}
+                                {% else %}
+                                    WIP
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if is_granted('edit', property) %}
+                                    <a href="{{ path('property_association_edit', {
+                                        'id': association.id
+                                    }) }}"
+                                       class="btn btn-xs btn-success">
+                                        <span class="fa fa-edit"></span>
+                                    </a>
+                                {% else %}
+                                    <a href="{{ path('property_association_show', {
+                                        'id': association.id
+                                    }) }}">
+                                        <span class="fa fa-eye"></span>
+                                    </a>
+                                {% endif %}
+
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                <h3>Ancestor properties</h3>
+                <table class="table table-striped" id="ancestors-table">
+                    <thead>
+                    <tr>
+                        <th>Property identifier</th>
                         <th>Depth</th>
+                        <th>Root namespace</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -135,25 +204,23 @@
                             <td>
                                 <a href="{{ path('property_show', {
                                     'id': ancestor.id
-                                    }) }}"
-                                   title="{{ ancestor.ancestors }}">
-                                    {{ ancestor.parentIdentifier }}
+                                }) }}">
+                                    {{ ancestor.identifier }}
                                 </a>
                             </td>
-                            <td>{{ ancestor.namespaces }}</td>
                             <td>{{ ancestor.depth }}</td>
-
+                            <td>{{ ancestor.rootNamespaceLabel }}</td>
                         </tr>
                     {% endfor %}
                     </tbody>
                 </table>
-                <h3>Childs and descendant classes</h3>
+                <h3>Childs and descendant properties</h3>
                 <table class="table table-striped" id="descendants-table">
                     <thead>
                     <tr>
                         <th>Property identifier</th>
                         <th>Depth</th>
-                        <th>Namespace</th>
+                        <th>Root namespace</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -162,13 +229,12 @@
                             <td>
                                 <a href="{{ path('property_show', {
                                     'id': descendant.id
-                                    }) }}"
-                                   title="{{ descendant.descendants }}">
+                                }) }}">
                                     {{ descendant.identifier }}
                                 </a>
                             </td>
                             <td>{{ descendant.depth }}</td>
-                            <td>{{ descendant.namespaces }}</td>
+                            <td>{{ descendant.rootNamespaceLabel }}</td>
                         </tr>
                     {% endfor %}
                     </tbody>
@@ -231,6 +297,7 @@
                     { "width": "10%", "targets": 3 }
                 ]
             });
+            $('#parent-properties-table').DataTable();
             $('#ancestors-table').DataTable({
                 "order": [[ 1, "asc" ]]
             });
