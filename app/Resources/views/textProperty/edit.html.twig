@@ -10,7 +10,7 @@
                     {{ textProperty.systemType.standardLabel }}
                 {% endif %}
                 {% if textProperty.classAssociation is not null %}
-                    <a href="{{ path('class_association_show', {
+                    <a href="{{ path('class_association_edit', {
                                 id: textProperty.classAssociation.id
                         }) }}"
                        class="pull-right btn btn-link"
@@ -18,7 +18,7 @@
                         <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
                     </a>
                 {% elseif  textProperty.propertyAssociation is not null %}
-                    <a href="{{ path('property_association_show', {
+                    <a href="{{ path('property_association_edit', {
                         id: textProperty.propertyAssociation.id
                     }) }}"
                        class="pull-right btn btn-link"
@@ -35,7 +35,7 @@
 
                 <button type="submit" class="btn btn-primary" formnovalidate>Save <span class="far fa-save"></span></button>
                 {% if textProperty.classAssociation is not null %}
-                    <a href="{{ path('class_association_show', {
+                    <a href="{{ path('class_association_edit', {
                         id: textProperty.classAssociation.id
                     }) }}"
                        class="btn btn-default"
@@ -43,7 +43,7 @@
                         Back <i class="fas fa-arrow-left"></i>
                     </a>
                 {% elseif  textProperty.propertyAssociation is not null %}
-                    <a href="{{ path('property_association_show', {
+                    <a href="{{ path('property_association_edit', {
                         id: textProperty.propertyAssociation.id
                     }) }}"
                        class="btn btn-default"
