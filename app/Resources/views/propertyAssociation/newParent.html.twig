@@ -28,7 +28,14 @@
                 <div class="pull-right reset-div">
                     <a href="{{ path('new_parent_property_form', {'childProperty': childProperty.id}) }}" class="btn btn-primary pull-right">Reset <span class="fa fa-undo"></span></a>
                 </div>
-                <h2>Add new parent property for {{ childProperty.identifierInNamespace }}</h2>
+                <h2>
+                    Add new parent property for {{ childProperty.identifierInNamespace }}
+                    <a href="{{ path('property_show', {
+                        id: childProperty.id
+                    }) }}" class="pull-right btn btn-link">
+                        <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
+                    </a>
+                </h2>
 
                 {{ form_start(parentPropertyAssociationForm) }}
                     {{ form_errors(parentPropertyAssociationForm) }}
