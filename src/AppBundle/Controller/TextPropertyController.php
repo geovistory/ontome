@@ -86,7 +86,15 @@ class TextPropertyController extends Controller
                 throw $this->createNotFoundException('The class association n° '.$objectId.' does not exist');
             }
             $textProperty->setClassAssociation($associatedEntity);
-            $class = $associatedEntity->getChildClass();
+            $associatedObject = $associatedEntity->getChildClass();
+        }
+        else if($object === 'property-association') {
+            $associatedEntity = $em->getRepository('AppBundle:PropertyAssociation')->find($objectId);
+            if (!$associatedEntity) {
+                throw $this->createNotFoundException('The property association n° '.$objectId.' does not exist');
+            }
+            $textProperty->setPropertyAssociation($associatedEntity);
+            $associatedObject = $associatedEntity->getChildProperty();
         }
         else throw $this->createNotFoundException('The requested object "'.$object.'" does not exist!');
 
@@ -98,10 +106,10 @@ class TextPropertyController extends Controller
         }
         else throw $this->createNotFoundException('The requested text property type "'.$type.'" does not exist!');
 
-        $this->denyAccessUnlessGranted('edit', $class);
+        $this->denyAccessUnlessGranted('edit', $associatedObject);
 
         $textProperty->setSystemType($systemType);
-        $textProperty->setNamespace($class->getOngoingNamespace());
+        $textProperty->setNamespace($associatedObject->getOngoingNamespace());
         $textProperty->setCreator($this->getUser());
         $textProperty->setModifier($this->getUser());
         $textProperty->setCreationTime(new \DateTime('now'));
@@ -115,7 +123,7 @@ class TextPropertyController extends Controller
         if ($form->isSubmitted() && $form->isValid()) {
             $textProperty = $form->getData();
             $textProperty->setSystemType($systemType);
-            $textProperty->setNamespace($class->getOngoingNamespace());
+            $textProperty->setNamespace($associatedObject->getOngoingNamespace());
             $textProperty->setCreator($this->getUser());
             $textProperty->setModifier($this->getUser());
             $textProperty->setCreationTime(new \DateTime('now'));
