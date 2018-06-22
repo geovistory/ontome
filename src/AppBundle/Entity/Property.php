@@ -92,6 +92,16 @@ class Property
     private $profiles;
 
     /**
+     * @ORM\OneToMany(targetEntity="PropertyAssociation", mappedBy="childProperty")
+     */
+    private $childPropertyAssociations;
+
+    /**
+     * @ORM\OneToMany(targetEntity="PropertyAssociation", mappedBy="parentProperty")
+     */
+    private $parentPropertyAssociations;
+
+    /**
      * @ORM\ManyToMany(targetEntity="OntoNamespace",  inversedBy="Property", fetch="EXTRA_LAZY")
      * @ORM\JoinTable(schema="che", name="associates_namespace",
      *      joinColumns={@ORM\JoinColumn(name="fk_property", referencedColumnName="pk_property")},
@@ -106,6 +116,12 @@ class Property
      * @ORM\OrderBy({"languageIsoCode" = "ASC"})
      */
     private $labels;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="OntoNamespace")
+     * @ORM\JoinColumn(name="fk_ongoing_namespace", referencedColumnName="pk_namespace", nullable=true)
+     */
+    private $ongoingNamespace;
 
     public function __construct()
     {
@@ -228,11 +244,47 @@ class Property
     }
 
     /**
+     * @return OntoNamespace
+     */
+    public function getOngoingNamespace()
+    {
+        return $this->ongoingNamespace;
+    }
+
+    /**
+     * @return ArrayCollection|PropertyAssociation[]
+     */
+    public function getParentPropertyAssociations()
+    {
+        return $this->parentPropertyAssociations;
+    }
+
+    /**
+     * @return ArrayCollection|PropertyAssociation[]
+     */
+    public function getChildPropertyAssociations()
+    {
+        return $this->childPropertyAssociations;
+    }
+
+    /**
      * @return string a human readable identification of the object
      */
     public function getObjectIdentification()
     {
         return $this->identifierInNamespace;
+    }
+
+    public function __toString()
+    {
+        if($this->getIdentifierInNamespace() === $this->getStandardLabel()){
+            $s = $this->getIdentifierInNamespace();
+        }
+        else if(!is_null($this->getStandardLabel())) {
+            $s = $this->getStandardLabel().' – '.$this->getIdentifierInNamespace();
+        }
+        else $s = $this->getIdentifierInNamespace();
+        return (string) $s;
     }
 
 }

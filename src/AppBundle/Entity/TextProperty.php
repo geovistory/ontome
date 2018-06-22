@@ -82,6 +82,14 @@ class TextProperty
     private $classAssociation;
 
     /**
+     * @ORM\ManyToOne(targetEntity="PropertyAssociation", inversedBy="textProperties")
+     * @ORM\JoinColumn(name="fk_is_subproperty_of", referencedColumnName="pk_is_subproperty_of")
+     * @Assert\Type(type="AppBundle\Entity\PropertyAssociation")
+     * @Assert\Valid()
+     */
+    private $propertyAssociation;
+
+    /**
      * @ORM\Column(type="text", nullable=true)
      */
     private $notes;
@@ -184,6 +192,14 @@ class TextProperty
     public function getClassAssociation()
     {
         return $this->classAssociation;
+    }
+
+    /**
+     * @return PropertyAssociation
+     */
+    public function getPropertyAssociation()
+    {
+        return $this->propertyAssociation;
     }
 
     /**
@@ -329,6 +345,14 @@ class TextProperty
     public function setClassAssociation(ClassAssociation $classAssociation = null)
     {
         $this->classAssociation = $classAssociation;
+    }
+
+    /**
+     * @param PropertyAssociation $propertyAssociation
+     */
+    public function setPropertyAssociation($propertyAssociation)
+    {
+        $this->propertyAssociation = $propertyAssociation;
     }
 
     /**

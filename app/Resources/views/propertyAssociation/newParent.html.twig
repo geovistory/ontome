@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Add new parent class for {{ childClass.identifierInNamespace }}{% endblock %}
+{% block title %}Add new parent property for {{ childProperty.identifierInNamespace }}{% endblock %}
 
 {% block stylesheets %}
     {{ parent() }}
@@ -26,28 +26,28 @@
         <div class="row">
             <div class="col-xs-12">
                 <div class="pull-right reset-div">
-                    <a href="{{ path('new_parent_class_form', {'childClass': childClass.id}) }}" class="btn btn-primary pull-right">Reset <span class="fa fa-undo"></span></a>
+                    <a href="{{ path('new_parent_property_form', {'childProperty': childProperty.id}) }}" class="btn btn-primary pull-right">Reset <span class="fa fa-undo"></span></a>
                 </div>
                 <h2>
-                    Add new parent class for {{ childClass.identifierInNamespace }}
-                    <a href="{{ path('class_show', {
-                        id: childClass.id
+                    Add new parent property for {{ childProperty.identifierInNamespace }}
+                    <a href="{{ path('property_show', {
+                        id: childProperty.id
                     }) }}" class="pull-right btn btn-link">
                         <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
                     </a>
                 </h2>
 
-                {{ form_start(parentClassAssociationForm) }}
-                    {{ form_errors(parentClassAssociationForm) }}
-                    {{ form_row(parentClassAssociationForm.parentClass) }}
+                {{ form_start(parentPropertyAssociationForm) }}
+                    {{ form_errors(parentPropertyAssociationForm) }}
+                    {{ form_row(parentPropertyAssociationForm.parentProperty) }}
 
-                    {{ form_row(parentClassAssociationForm.childClass) }}
+                    {{ form_row(parentPropertyAssociationForm.childProperty) }}
 
                     <div class="js-text-property-wrapper"
-                         data-prototype="{{ formMacros.printTextPropertyRow(parentClassAssociationForm.textProperties.vars.prototype)|e('html_attr') }}"
-                         data-index="{{ parentClassAssociationForm.textProperties|length }}"
+                         data-prototype="{{ formMacros.printTextPropertyRow(parentPropertyAssociationForm.textProperties.vars.prototype)|e('html_attr') }}"
+                         data-index="{{ parentPropertyAssociationForm.textProperties|length }}"
                      >
-                        {% for textPropertyForm in parentClassAssociationForm.textProperties %}
+                        {% for textPropertyForm in parentPropertyAssociationForm.textProperties %}
                             {{ formMacros.printTextPropertyRow(textPropertyForm) }}
                         {% endfor %}
                         <a href="#" class="js-example-add">
@@ -57,17 +57,17 @@
 
                     </div>
 
-                    {{ form_row(parentClassAssociationForm.notes) }}
-                    {{ form_errors(parentClassAssociationForm.notes) }}
+                    {{ form_row(parentPropertyAssociationForm.notes) }}
+                    {{ form_errors(parentPropertyAssociationForm.notes) }}
                     <button type="submit" class="btn btn-primary" formnovalidate>Save</button>
-                {{ form_end(parentClassAssociationForm) }}
+                {{ form_end(parentPropertyAssociationForm) }}
             </div>
         </div>
-        <h3>Parent and ancestor classes</h3>
+        <h3>Parent and ancestor properties</h3>
         <table class="table table-striped" id="ancestors-table">
             <thead>
             <tr>
-                <th>Class identifier</th>
+                <th>Property identifier</th>
                 <th>Depth</th>
                 <th>Root namespace</th>
             </tr>
@@ -76,7 +76,7 @@
             {% for ancestor in ancestors|sort %}
                 <tr>
                     <td>
-                        <a href="{{ path('class_show', {
+                        <a href="{{ path('property_show', {
                             'id': ancestor.id
                         }) }}">
                             {% if  ancestor.depth == '1' %}<strong>{%  endif %}
@@ -100,7 +100,7 @@
     <script>
 
         $(document).ready(function() {
-            $('#parent_class_association_form_parentClass').select2({
+            $('#parent_property_association_form_parentProperty').select2({
                 sorter: function(data) {
                     /* Sort data using lowercase comparison */
                     return data.sort(function (a, b) {
@@ -120,10 +120,10 @@
                 "order": [[ 1, "asc" ]]
             });
 
-            if($('[for=parent_class_association_form_textProperties_1_textProperty]').length) {
+            if($('[for=parent_property_association_form_textProperties_1_textProperty]').length) {
                 //we hide the button in order to prevent the add of more than 2 text properties
                 $('.js-example-add').hide();
-                $('[for=parent_class_association_form_textProperties_1_textProperty]').text('Example');
+                $('[for=parent_property_association_form_textProperties_1_textProperty]').text('Example');
             }
             var $wrapper = $('.js-text-property-wrapper');
             $wrapper.on('click', '.js-example-add', function(e) {
@@ -144,10 +144,10 @@
 
                 // Display the form in the page before the "new" link
                 $(this).before(newForm);
-                $('#parent_class_association_form_textProperties_1_creator').val($('#parent_class_association_form_textProperties_0_creator').val());
-                $('#parent_class_association_form_textProperties_1_modifier').val($('#parent_class_association_form_textProperties_0_creator').val());
+                $('#parent_property_association_form_textProperties_1_creator').val($('#parent_property_association_form_textProperties_0_creator').val());
+                $('#parent_property_association_form_textProperties_1_modifier').val($('#parent_property_association_form_textProperties_0_creator').val());
                 $('.js-example-add').hide();
-                $('[for=parent_class_association_form_textProperties_1_textProperty]').text('Example');
+                $('[for=parent_property_association_form_textProperties_1_textProperty]').text('Example');
             });
         } );
     </script>

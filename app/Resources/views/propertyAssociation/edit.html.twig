@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}{{ classAssociation }}{% endblock %}
+{% block title %}{{ propertyAssociation }}{% endblock %}
 
 {% block stylesheets %}
     {{ parent() }}
@@ -9,31 +9,35 @@
 {% block body %}
 
     <div class="container">
-        <h2 class="class-name">
-            {{ classAssociation }}
-            <a href="{{ path('class_show', {
-                id: classAssociation.childClass.id
+        <h2 class="property-name">
+            {{ propertyAssociation }}
+            <a href="{{ path('property_show', {
+                id: propertyAssociation.childProperty.id
             }) }}" class="pull-right btn btn-link">
                 <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
             </a>
         </h2>
 
         <ul class="nav nav-tabs" id="main-tabs">
-            <li class="active"><a data-toggle="tab" href="#scope-notes">Parent class and scope notes</a></li>
+            <li class="active"><a data-toggle="tab" href="#scope-notes">Parent property and scope notes</a></li>
         </ul>
 
         <div class="tab-content">
             <div id="scope-notes" class="tab-pane fade in active">
-                <h3>Parent class</h3>
-                <h4>
-                    <a href="{{ path('class_show', {
-                        'id': classAssociation.parentClass.id
-                    }) }}">{{ classAssociation.parentClass }}
-                    </a>
-                </h4>
-                {% if is_granted('edit', class) %}
+                <h3>Edit property association</h3>
+                {{ form_start(propertyAssociationForm) }}
+                    {{ form_errors(propertyAssociationForm) }}
+                    {{ form_row(propertyAssociationForm.parentProperty) }}
+
+                    {{ form_row(propertyAssociationForm.childProperty) }}
+
+                    {{ form_row(propertyAssociationForm.notes) }}
+                    {{ form_errors(propertyAssociationForm.notes) }}
+                    <button type="submit" class="btn btn-primary" formnovalidate>Save <span class="far fa-save"></span></button>
+                {{ form_end(propertyAssociationForm) }}
+                {% if is_granted('edit', property) %}
                     <div class="pull-right add-div">
-                        <a href="{{ path('text_property_new', {'type': 'scope-note', 'object': 'class-association', 'objectId': classAssociation.id })}}"
+                        <a href="{{ path('text_property_new', {'type': 'scope-note', 'object': 'property-association', 'objectId': propertyAssociation.id })}}"
                            class="btn btn-primary pull-right">
                             Add <span class="fa fa-plus-circle"></span>
                         </a>
@@ -47,13 +51,13 @@
                         <th>Scope note</th>
                         <th>Language</th>
                         <th>Namespace</th>
-                        {% if is_granted('edit', class) %}
+                        {% if is_granted('edit', property) %}
                         <th>Edit</th>
                         {% endif %}
                     </tr>
                     </thead>
                     <tbody>
-                    {% for textProperty in classAssociation.textProperties if textProperty.systemType.id == 1 %}
+                    {% for textProperty in propertyAssociation.textProperties if textProperty.systemType.id == 1 %}
                         <tr>
                             <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
                             <td class="truncated-text">
@@ -70,24 +74,24 @@
                                     {% endfor %}
                                 {% endif %} -->
                             </td>
-                            {% if is_granted('edit', class) %}
                             <td>
-                                <a href="{{ path('text_property_edit', {
-                                    'id': textProperty.id
-                                }) }}"
-                                   class="btn btn-xs btn-success">
-                                    <span class="fa fa-edit"></span>
-                                </a>
+                                {% if is_granted('edit', property) %}
+                                    <a href="{{ path('text_property_edit', {
+                                        'id': textProperty.id
+                                    }) }}"
+                                       class="btn btn-xs btn-success">
+                                        <span class="fa fa-edit"></span>
+                                    </a>
+                                {% endif %}
                             </td>
-                            {% endif %}
                         </tr>
                     {% endfor %}
                     </tbody>
                 </table>
 
-                {% if is_granted('edit', class) %}
+                {% if is_granted('edit', property) %}
                     <div class="pull-right add-div">
-                        <a href="{{ path('text_property_new', {'type': 'example', 'object': 'class-association', 'objectId': classAssociation.id })}}"
+                        <a href="{{ path('text_property_new', {'type': 'example', 'object': 'property-association', 'objectId': propertyAssociation.id })}}"
                            class="btn btn-primary pull-right">
                             Add <span class="fa fa-plus-circle"></span>
                         </a>
@@ -101,13 +105,11 @@
                         <th>Example</th>
                         <th>Language</th>
                         <th>Namespace</th>
-                        {% if is_granted('edit', class) %}
-                            <th>Edit</th>
-                        {% endif %}
+                        <th>Edit</th>
                     </tr>
                     </thead>
                     <tbody>
-                    {% for textProperty in classAssociation.textProperties if textProperty.systemType.id == 7 %}
+                    {% for textProperty in propertyAssociation.textProperties if textProperty.systemType.id == 7 %}
                         <tr>
                             <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
                             <td class="truncated-text">
@@ -116,26 +118,21 @@
                             </td>
                             <td>{{ textProperty.languageIsoCode}}</td>
                             <td>WIP</td>
-                            {% if is_granted('edit', class) %}
-                                <td>
+                            <td>
+                                {% if is_granted('edit', property) %}
                                     <a href="{{ path('text_property_edit', {
                                         'id': textProperty.id
                                     }) }}"
                                        class="btn btn-xs btn-success">
                                         <span class="fa fa-edit"></span>
                                     </a>
-                                </td>
-                            {% endif %}
+                                {% endif %}
+                            </td>
                         </tr>
                     {% endfor %}
                     </tbody>
                 </table>
             </div>
-            {% if classAssociation.notes is not empty %}
-            <div id="notes">
-                <p>Notes: {{ classAssociation.notes }}</p>
-            </div>
-            {% endif %}
         </div>
     </div>
 

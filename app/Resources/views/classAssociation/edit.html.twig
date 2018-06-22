@@ -14,7 +14,7 @@
             <a href="{{ path('class_show', {
                 id: classAssociation.childClass.id
             }) }}" class="pull-right btn btn-link">
-                <i class="far fa-caret-square-left"></i><span>Back</span>
+                <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
             </a>
         </h2>
 
@@ -33,7 +33,7 @@
 
                     {{ form_row(classAssociationForm.notes) }}
                     {{ form_errors(classAssociationForm.notes) }}
-                    <button type="submit" class="btn btn-primary" formnovalidate>Save</button>
+                    <button type="submit" class="btn btn-primary" formnovalidate>Save <span class="far fa-save"></span></button>
                 {{ form_end(classAssociationForm) }}
                 {% if is_granted('edit', class) %}
                     <div class="pull-right add-div">
@@ -74,16 +74,16 @@
                                     {% endfor %}
                                 {% endif %} -->
                             </td>
-                            <td>
-                                {% if is_granted('edit', class) %}
+                            {% if is_granted('edit', class) %}
+                                <td>
                                     <a href="{{ path('text_property_edit', {
                                         'id': textProperty.id
                                     }) }}"
                                        class="btn btn-xs btn-success">
                                         <span class="fa fa-edit"></span>
                                     </a>
-                                {% endif %}
-                            </td>
+                                </td>
+                            {% endif %}
                         </tr>
                     {% endfor %}
                     </tbody>
@@ -105,6 +105,9 @@
                         <th>Example</th>
                         <th>Language</th>
                         <th>Namespace</th>
+                        {% if is_granted('edit', class) %}
+                            <th>Edit</th>
+                        {% endif %}
                     </tr>
                     </thead>
                     <tbody>
@@ -117,6 +120,16 @@
                             </td>
                             <td>{{ textProperty.languageIsoCode}}</td>
                             <td>WIP</td>
+                            {% if is_granted('edit', class) %}
+                                <td>
+                                    <a href="{{ path('text_property_edit', {
+                                        'id': textProperty.id
+                                    }) }}"
+                                       class="btn btn-xs btn-success">
+                                        <span class="fa fa-edit"></span>
+                                    </a>
+                                </td>
+                            {% endif %}
                         </tr>
                     {% endfor %}
                     </tbody>
@@ -137,6 +150,5 @@
 
         } );
     </script>
-    <script type="text/javascript" src="{{ asset('js/class-graph.js') }}"></script>
 
 {% endblock %}
