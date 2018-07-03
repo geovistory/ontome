@@ -8,13 +8,11 @@
 
 namespace AppBundle\Controller;
 
-use AppBundle\Entity\ClassAssociation;
 use AppBundle\Entity\TextProperty;
 use AppBundle\Form\TextPropertyForm;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class TextPropertyController extends Controller
 {
