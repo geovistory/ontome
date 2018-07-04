@@ -197,8 +197,14 @@ class PropertyRepository extends EntityRepository
                         child_identifier as identifier,
                         depth,
                         replace(descendants, '|', '→') AS descendants,
-                        namespaces
-                    FROM che.descendant_property_hierarchy((:property))";
+                        che.get_root_namespace(nsp.pk_namespace) AS \"rootNamespaceId\",
+                       (SELECT label FROM che.get_namespace_labels(che.get_root_namespace(nsp.pk_namespace)) WHERE language_iso_code = 'en') AS \"rootNamespaceLabel\"                        
+                    FROM che.descendant_property_hierarchy((:property)),
+                         che.associates_namespace asnsp,
+                         che.namespace nsp
+                    WHERE asnsp.fk_property = pk_child
+                    AND   nsp.pk_namespace = asnsp.fk_namespace    
+                         ";
 
         $stmt = $conn->prepare($sql);
         $stmt->execute(array('property' => $property->getId()));
