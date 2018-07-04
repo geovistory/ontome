@@ -82,6 +82,54 @@ class ClassController extends Controller
     }
 
     /**
+     * @Route("/class/{id}/edit", name="class_edit")
+     * @param OntoClass $class
+     * @return Response the rendered template
+     */
+    public function editAction(OntoClass $class)
+    {
+        $this->denyAccessUnlessGranted('edit', $class);
+
+        $em = $this->getDoctrine()->getManager();
+
+        $ancestors = $em->getRepository('AppBundle:OntoClass')
+            ->findAncestorsById($class);
+
+        $descendants = $em->getRepository('AppBundle:OntoClass')
+            ->findDescendantsById($class);
+
+        $equivalences = $em->getRepository('AppBundle:OntoClass')
+            ->findEquivalencesById($class);
+
+        $outgoingProperties = $em->getRepository('AppBundle:Property')
+            ->findOutgoingPropertiesById($class);
+
+        $outgoingInheritedProperties = $em->getRepository('AppBundle:Property')
+            ->findOutgoingInheritedPropertiesById($class);
+
+        $ingoingProperties = $em->getRepository('AppBundle:Property')
+            ->findIngoingPropertiesById($class);
+
+        $ingoingInheritedProperties = $em->getRepository('AppBundle:Property')
+            ->findIngoingInheritedPropertiesById($class);
+
+        $this->get('logger')
+            ->info('Showing class: '.$class->getIdentifierInNamespace());
+
+
+        return $this->render('class/edit.html.twig', array(
+            'class' => $class,
+            'ancestors' => $ancestors,
+            'descendants' => $descendants,
+            'equivalences' => $equivalences,
+            'outgoingProperties' => $outgoingProperties,
+            'outgoingInheritedProperties' => $outgoingInheritedProperties,
+            'ingoingProperties' => $ingoingProperties,
+            'ingoingInheritedProperties' => $ingoingInheritedProperties
+        ));
+    }
+
+    /**
      * @Route("/classes-tree")
      */
     public function getTreeAction()
