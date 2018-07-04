@@ -1,0 +1,17 @@
+{% extends 'baseMin.html.twig' %}
+
+{% block title %}{{ label.label }}{% endblock %}
+
+{% block body %}
+
+    <div class="container">
+        <h2 class="text-propery-class">{{ label.label }}</h2>
+        <p>{{ label.isStandardLabelForLanguage }}</p>
+    </div>
+
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+
+{% endblock %}
