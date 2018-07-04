@@ -216,6 +216,8 @@ class TextProperty
             $object = $this->namespace;
         elseif (!is_null($this->classAssociation))
             $object = $this->classAssociation;
+        elseif (!is_null($this->propertyAssociation))
+            $object = $this->propertyAssociation;
         return $object;
     }
 
