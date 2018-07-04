@@ -72,16 +72,16 @@ class LabelController  extends Controller
     }
 
     /**
-     * @Route("/label/{type}/new/{object}/{objectId}", name="label_new")
+     * @Route("/label/new/{object}/{objectId}", name="label_new")
      */
-    public function newAction($type, $object, $objectId, Request $request)
+    public function newAction($object, $objectId, Request $request)
     {
         $em = $this->getDoctrine()->getManager();
 
         $label = new Label();
 
         if($object === 'class') {
-            $associatedEntity = $em->getRepository('AppBundle:Class')->find($objectId);
+            $associatedEntity = $em->getRepository('AppBundle:OntoClass')->find($objectId);
             if (!$associatedEntity) {
                 throw $this->createNotFoundException('The class n° '.$objectId.' does not exist');
             }
