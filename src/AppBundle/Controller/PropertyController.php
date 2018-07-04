@@ -67,6 +67,37 @@ class PropertyController extends Controller
     }
 
     /**
+     * @Route("/property/{id}/edit", name="property_edit")
+     * @param string $id
+     * @return Response the rendered template
+     */
+    public function editAction(Property $property)
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        $ancestors = $em->getRepository('AppBundle:Property')
+            ->findAncestorsById($property);
+
+        $descendants = $em->getRepository('AppBundle:Property')
+            ->findDescendantsById($property);
+
+        $domainRange = $em->getRepository('AppBundle:Property')
+            ->findDomainRangeById($property);
+
+
+        $this->get('logger')
+            ->info('Showing property: '.$property->getIdentifierInNamespace());
+
+
+        return $this->render('property/edit.html.twig', array(
+            'property' => $property,
+            'ancestors' => $ancestors,
+            'descendants' => $descendants,
+            'domainRange' => $domainRange
+        ));
+    }
+
+    /**
      * @Route("/properties-tree")
      */
     public function getTreeAction()
