@@ -5,16 +5,7 @@
 {% block body %}
 
     <div class="container">
-        <h2 class="property-name">
-            {{ property }}
-            {% if is_granted('edit', property) %}
-                <a href="{{ path('property_edit', {
-                    id: property.id
-                }) }}" class="pull-right btn btn-success">
-                    <i class="fa fa-edit"></i>
-                </a>
-            {% endif %}
-        </h2>
+        <h2 class="property-name">{{ property }}</h2>
 
         <ul class="nav nav-tabs">
             <li class="active"><a data-toggle="tab" href="#scope-notes">Scope Notes</a></li>
@@ -81,6 +72,12 @@
                 <h3>Domain and range</h3>
                     <p><a href="{{ path('class_show', {'id': domainRange.domainId}) }}">{{ domainRange.domainIdentifier }}</a> → {{ domainRange.propertyIdentifier }} → <a href="{{ path('class_show', {'id': domainRange.rangeId}) }}">{{ domainRange.rangeIdentifier }}</a></p>
                 {% endif %}
+                <div class="pull-right add-div">
+                    <a href="{{ path('label_new', {'object': 'property', 'objectId': property.id })}}"
+                       class="btn btn-primary pull-right">
+                        Add <span class="fa fa-plus-circle"></span>
+                    </a>
+                </div>
                 <h3>Labels</h3>
                 <table class="table table-striped" id="labels-table">
                     <thead>
@@ -88,6 +85,7 @@
                         <th>Label</th>
                         <th>Language</th>
                         <th>Last updated</th>
+                        <th>Edit</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -100,6 +98,14 @@
                             </td>
                             <td>{{ label.languageIsoCode}}</td>
                             <td>{{ label.modificationTime|date('Y-m-d') }}</td>
+                            <td>
+                                <a href="{{ path('label_edit', {
+                                    'id': label.id
+                                }) }}"
+                                   class="btn btn-xs btn-success">
+                                    <span class="fa fa-edit"></span>
+                                </a>
+                            </td>
                         </tr>
                     {% endfor %}
                     </tbody>

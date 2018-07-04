@@ -10,16 +10,7 @@
 {% block body %}
 
     <div class="container">
-        <h2 class="class-name">
-            {{ class }}
-            {% if is_granted('edit', class) %}
-            <a href="{{ path('class_edit', {
-                id: class.id
-            }) }}" class="pull-right btn btn-success">
-                <i class="fa fa-edit"></i>
-            </a>
-            {% endif %}
-        </h2>
+        <h2 class="class-name">{{ class }}</h2>
 
         <ul class="nav nav-tabs" id="main-tabs">
             <li class="active"><a data-toggle="tab" href="#scope-notes">Scope Notes</a></li>
@@ -93,6 +84,12 @@
                 </table>
             </div>
             <div id="identification" class="tab-pane fade">
+                <div class="pull-right add-div">
+                    <a href="{{ path('label_new', {'object': 'class', 'objectId': class.id })}}"
+                       class="btn btn-primary pull-right">
+                        Add <span class="fa fa-plus-circle"></span>
+                    </a>
+                </div>
                 <h3>Labels</h3>
                 <table class="table table-striped" id="labels-table">
                     <thead>
@@ -100,6 +97,7 @@
                         <th>Label</th>
                         <th>Language</th>
                         <th>Last updated</th>
+                        <th>Edit</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -112,6 +110,14 @@
                             </td>
                             <td>{{ label.languageIsoCode}}</td>
                             <td>{{ label.modificationTime|date('Y-m-d') }}</td>
+                            <td>
+                                <a href="{{ path('label_edit', {
+                                    'id': label.id
+                                }) }}"
+                                   class="btn btn-xs btn-success">
+                                    <span class="fa fa-edit"></span>
+                                </a>
+                            </td>
                         </tr>
                     {% endfor %}
                     </tbody>
