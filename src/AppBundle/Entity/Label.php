@@ -141,7 +141,7 @@ class Label
     /**
      * @return mixed
      */
-    public function getisStandardLabelForLanguage()
+    public function getIsStandardLabelForLanguage()
     {
         return $this->isStandardLabelForLanguage;
     }
@@ -184,6 +184,21 @@ class Label
     public function getProfile()
     {
         return $this->profile;
+    }
+
+    /**
+     * @return OntoClass|Property|OntoNamespace|null the object described by the text property
+     */
+    public function getObject()
+    {
+        $object = null;
+        if(!is_null($this->class))
+            $object =  $this->class;
+        elseif (!is_null($this->property))
+            $object = $this->property;
+        elseif (!is_null($this->namespace))
+            $object = $this->namespace;
+        return $object;
     }
 
     /**
@@ -232,6 +247,102 @@ class Label
     public function getModificationTime()
     {
         return $this->modificationTime;
+    }
+
+    /**
+     * @param mixed $label
+     */
+    public function setLabel($label)
+    {
+        $this->label = $label;
+    }
+
+    /**
+     * @param mixed $languageIsoCode
+     */
+    public function setLanguageIsoCode($languageIsoCode)
+    {
+        $this->languageIsoCode = $languageIsoCode;
+    }
+
+    /**
+     * @param mixed $isStandardLabelForLanguage
+     */
+    public function setIsStandardLabelForLanguage($isStandardLabelForLanguage)
+    {
+        $this->isStandardLabelForLanguage = $isStandardLabelForLanguage;
+    }
+
+    /**
+     * @param mixed $class
+     */
+    public function setClass($class)
+    {
+        $this->class = $class;
+    }
+
+    /**
+     * @param mixed $property
+     */
+    public function setProperty($property)
+    {
+        $this->property = $property;
+    }
+
+    /**
+     * @param mixed $namespace
+     */
+    public function setNamespace($namespace)
+    {
+        $this->namespace = $namespace;
+    }
+
+    /**
+     * @param mixed $project
+     */
+    public function setProject($project)
+    {
+        $this->project = $project;
+    }
+
+    /**
+     * @param mixed $profile
+     */
+    public function setProfile($profile)
+    {
+        $this->profile = $profile;
+    }
+
+    /**
+     * @param mixed $creator
+     */
+    public function setCreator($creator)
+    {
+        $this->creator = $creator;
+    }
+
+    /**
+     * @param mixed $modifier
+     */
+    public function setModifier($modifier)
+    {
+        $this->modifier = $modifier;
+    }
+
+    /**
+     * @param mixed $creationTime
+     */
+    public function setCreationTime($creationTime)
+    {
+        $this->creationTime = $creationTime;
+    }
+
+    /**
+     * @param mixed $modificationTime
+     */
+    public function setModificationTime($modificationTime)
+    {
+        $this->modificationTime = $modificationTime;
     }
 
     public function __toString()
