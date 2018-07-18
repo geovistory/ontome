@@ -25,6 +25,12 @@
 
         <div class="tab-content">
             <div id="scope-notes" class="tab-pane fade in active">
+                <div class="pull-right add-div">
+                    <a href="{{ path('text_property_new', {'type': 'scope-note', 'object': 'class', 'objectId': class.id })}}"
+                       class="btn btn-primary pull-right">
+                        Add <span class="fa fa-plus-circle"></span>
+                    </a>
+                </div>
                 <h3>Scope Notes</h3>
                 <table class="table table-striped" id="scope-notes-table">
                     <thead>
@@ -33,6 +39,7 @@
                         <th>Scope note</th>
                         <th>Language</th>
                         <th>Namespace</th>
+                        <th>Edit</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -53,11 +60,25 @@
                                     {% endfor %}
                                 {% endif %} -->
                             </td>
+                            <td>
+                                <a href="{{ path('text_property_edit', {
+                                    'id': textProperty.id
+                                }) }}"
+                                   class="btn btn-xs btn-success">
+                                    <span class="fa fa-edit"></span>
+                                </a>
+                            </td>
                         </tr>
                     {% endfor %}
                     </tbody>
                 </table>
 
+                <div class="pull-right add-div">
+                    <a href="{{ path('text_property_new', {'type': 'example', 'object': 'class', 'objectId': class.id })}}"
+                       class="btn btn-primary pull-right">
+                        Add <span class="fa fa-plus-circle"></span>
+                    </a>
+                </div>
                 <h3>Examples</h3>
                 <table class="table table-striped" id="examples-table">
                     <thead>
@@ -66,10 +87,11 @@
                         <th>Example</th>
                         <th>Language</th>
                         <th>Namespace</th>
+                        <th>Edit</th>
                     </tr>
                     </thead>
                     <tbody>
-                    {% for textProperty in class.textProperties if textProperty.systemType.id == 999 %}
+                    {% for textProperty in class.textProperties if textProperty.systemType.id == 7 %}
                         <tr>
                             <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
                             <td class="truncated-text">
@@ -78,6 +100,14 @@
                             </td>
                             <td>{{ textProperty.languageIsoCode}}</td>
                             <td>WIP</td>
+                            <td>
+                                <a href="{{ path('text_property_edit', {
+                                    'id': textProperty.id
+                                }) }}"
+                                   class="btn btn-xs btn-success">
+                                    <span class="fa fa-edit"></span>
+                                </a>
+                            </td>
                         </tr>
                     {% endfor %}
                     </tbody>

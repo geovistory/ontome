@@ -20,6 +20,22 @@
                        role="button">
                         <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
                     </a>
+                {% elseif  textProperty.class is not null %}
+                    <a href="{{ path('class_edit', {
+                        id: textProperty.class.id
+                    }) }}"
+                       class="pull-right btn btn-link"
+                       role="button">
+                        <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
+                    </a>
+                {% elseif  textProperty.property is not null %}
+                    <a href="{{ path('property_edit', {
+                        id: textProperty.property.id
+                    }) }}"
+                       class="pull-right btn btn-link"
+                       role="button">
+                        <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
+                    </a>
                 {% endif %}
             </h2>
 
@@ -41,6 +57,22 @@
                     <a href="{{ path('property_association_edit', {
                         id: textProperty.propertyAssociation.id
                     }) }}"
+                       class="btn btn-default"
+                       role="button">
+                        Back <i class="fas fa-arrow-left"></i>
+                    </a>
+                {% elseif  textProperty.class is not null %}
+                    <a href="{{ path('class_edit', {
+                        id: textProperty.class.id
+                    }) }}#scopes-notes"
+                       class="btn btn-default"
+                       role="button">
+                        Back <i class="fas fa-arrow-left"></i>
+                    </a>
+                {% elseif  textProperty.property is not null %}
+                    <a href="{{ path('property_edit', {
+                        id: textProperty.property.id
+                    }) }}#scopes-notes"
                        class="btn btn-default"
                        role="button">
                         Back <i class="fas fa-arrow-left"></i>
