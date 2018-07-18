@@ -47,7 +47,6 @@
             {{ form_start(textPropertyForm) }}
                 {{ form_row(textPropertyForm.textProperty) }}
                 {{ form_row(textPropertyForm.languageIsoCode) }}
-                {{ form_row(textPropertyForm.notes) }}
 
                 <button type="submit" class="btn btn-primary" formnovalidate>Save <span class="far fa-save"></span></button>
                 {% if textProperty.classAssociation is not null %}

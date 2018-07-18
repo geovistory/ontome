@@ -47,6 +47,8 @@ class LabelController  extends Controller
 
         $this->denyAccessUnlessGranted('edit', $object);
 
+        $label->setModifier($this->getUser());
+
         $form = $this->createForm(LabelForm::class, $label);
 
         $form->handleRequest($request);

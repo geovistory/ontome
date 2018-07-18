@@ -51,9 +51,6 @@ class TextPropertyForm extends AbstractType
                 ),
                 'label' => 'Language'
             ))
-            ->add('notes', TextareaType::class, array(
-                'attr' => array('class' => 'tinymce')
-            ))
             ->add('creator', HiddenType::class)
             ->add('modifier', HiddenType::class);
         $builder->get('creator')

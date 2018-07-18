@@ -51,6 +51,8 @@ class TextPropertyController extends Controller
 
         $this->denyAccessUnlessGranted('edit', $object);
 
+        $textProperty->setModifier($this->getUser());
+
         $form = $this->createForm(TextPropertyForm::class, $textProperty);
 
         $form->handleRequest($request);
