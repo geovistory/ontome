@@ -141,6 +141,21 @@
             <script src="{{ asset('vendor/bootstrap/js/bootstrap.min.js') }}"></script>
             <script src="https://cdn.datatables.net/1.10.15/js/jquery.dataTables.min.js"></script>
             <script src="https://cdn.datatables.net/1.10.15/js/dataTables.bootstrap.min.js"></script>
+            <script>
+                $(function() {
+                    // Javascript to enable link to tab
+                    var hash = document.location.hash;
+                    if (hash) {
+                        console.log(hash);
+                        $('.nav-tabs a[href="'+hash+'"]').tab('show');
+                    }
+
+                    // Change hash for page-reload
+                    $('a[data-toggle="tab"]').on('show.bs.tab', function (e) {
+                        window.location.hash = e.target.hash;
+                    });
+                });
+            </script>
         {% endblock %}
     </body>
 </html>
