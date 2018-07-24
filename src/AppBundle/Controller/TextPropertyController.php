@@ -8,13 +8,11 @@
 
 namespace AppBundle\Controller;
 
-use AppBundle\Entity\ClassAssociation;
 use AppBundle\Entity\TextProperty;
 use AppBundle\Form\TextPropertyForm;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class TextPropertyController extends Controller
 {
@@ -43,9 +41,17 @@ class TextPropertyController extends Controller
         else if(!is_null($textProperty->getPropertyAssociation())){
             $object = $textProperty->getPropertyAssociation()->getChildProperty();
         }
+        else if(!is_null($textProperty->getClass())){
+            $object = $textProperty->getClass();
+        }
+        else if(!is_null($textProperty->getProperty())){
+            $object = $textProperty->getProperty();
+        }
         else throw $this->createNotFoundException('The related object for the text property  n° '.$textProperty->getId().' does not exist. Please contact an administrator.');
 
         $this->denyAccessUnlessGranted('edit', $object);
+
+        $textProperty->setModifier($this->getUser());
 
         $form = $this->createForm(TextPropertyForm::class, $textProperty);
 
@@ -95,6 +101,22 @@ class TextPropertyController extends Controller
             }
             $textProperty->setPropertyAssociation($associatedEntity);
             $associatedObject = $associatedEntity->getChildProperty();
+        }
+        else if($object === 'class') {
+            $associatedEntity = $em->getRepository('AppBundle:OntoClass')->find($objectId);
+            if (!$associatedEntity) {
+                throw $this->createNotFoundException('The class n° '.$objectId.' does not exist');
+            }
+            $textProperty->setClass($associatedEntity);
+            $associatedObject = $associatedEntity;
+        }
+        else if($object === 'property') {
+            $associatedEntity = $em->getRepository('AppBundle:Property')->find($objectId);
+            if (!$associatedEntity) {
+                throw $this->createNotFoundException('The property n° '.$objectId.' does not exist');
+            }
+            $textProperty->setProperty($associatedEntity);
+            $associatedObject = $associatedEntity;
         }
         else throw $this->createNotFoundException('The requested object "'.$object.'" does not exist!');
 

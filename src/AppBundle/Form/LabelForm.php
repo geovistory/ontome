@@ -2,18 +2,20 @@
 
 namespace AppBundle\Form;
 
-use AppBundle\Entity\TextProperty;
+use AppBundle\Entity\Label;
 use AppBundle\Form\DataTransformer\UserToNumberTransformer;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
-class TextPropertyForm extends AbstractType
+class LabelForm extends AbstractType
 {
     private $transformer;
     private $tokenStorage;
@@ -33,12 +35,12 @@ class TextPropertyForm extends AbstractType
 
         if (!$user) {
             throw new \LogicException(
-                'The TextPropertyForm cannot be used without an authenticated user!'
+                'The LabelForm cannot be used without an authenticated user!'
             );
         }
 
         $builder
-            ->add('textProperty', TextareaType::class, array(
+            ->add('label', TextType::class, array(
                 'attr' => array('class' => 'tinymce')
             ))
             ->add('languageIsoCode', ChoiceType::class, array(
@@ -50,6 +52,9 @@ class TextPropertyForm extends AbstractType
                     'Spanish' => 'es'
                 ),
                 'label' => 'Language'
+            ))
+            ->add('isStandardLabelForLanguage', CheckboxType::class, array(
+                'label' => 'Standard label for this language'
             ))
             ->add('creator', HiddenType::class)
             ->add('modifier', HiddenType::class);
@@ -63,7 +68,7 @@ class TextPropertyForm extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults(array(
-            'data_class' => TextProperty::class,
+            'data_class' => Label::class,
         ));
     }
 

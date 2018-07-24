@@ -1,0 +1,58 @@
+{% extends 'base.html.twig' %}
+{% block body %}
+<div class="container">
+    <div class="row">
+        <div class="col-xs-12">
+            <h2>Edit
+                {% if label.object is not null %}
+                {{ label.object }} label
+                {% else %}
+                    label
+                {% endif %}
+                {% if label.class is not null %}
+                    <a href="{{ path('class_edit', {
+                                id: label.class.id
+                        }) }}#identification"
+                       class="pull-right btn btn-link"
+                       role="button">
+                        <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
+                    </a>
+                {% elseif  label.property is not null %}
+                    <a href="{{ path('property_edit', {
+                        id: label.property.id
+                    }) }}#identification"
+                       class="pull-right btn btn-link"
+                       role="button">
+                        <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
+                    </a>
+                {% endif %}
+            </h2>
+
+            {{ form_start(labelForm) }}
+                {{ form_row(labelForm.label) }}
+                {{ form_row(labelForm.languageIsoCode) }}
+                {{ form_row(labelForm.isStandardLabelForLanguage) }}
+
+                <button type="submit" class="btn btn-primary" formnovalidate>Save <span class="far fa-save"></span></button>
+                {% if label.class is not null %}
+                    <a href="{{ path('class_edit', {
+                        id: label.class.id
+                    }) }}#identification"
+                       class="btn btn-default"
+                       role="button">
+                        Back <i class="fas fa-arrow-left"></i>
+                    </a>
+                {% elseif label.property is not null %}
+                    <a href="{{ path('property_edit', {
+                        id: label.property.id
+                    }) }}#identification"
+                       class="btn btn-default"
+                       role="button">
+                        Back <i class="fas fa-arrow-left"></i>
+                    </a>
+                {% endif %}
+            {{ form_end(labelForm) }}
+        </div>
+    </div>
+</div>
+{% endblock %}

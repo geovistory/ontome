@@ -5,18 +5,9 @@
 {% block body %}
 
     <div class="container">
-        <h2 class="property-name">
-            {{ property }}
-            {% if is_granted('edit', property) %}
-                <a href="{{ path('property_edit', {
-                    id: property.id
-                }) }}" class="pull-right btn btn-success">
-                    <i class="fa fa-edit"></i>
-                </a>
-            {% endif %}
-        </h2>
+        <h2 class="property-name">{{ property }}</h2>
 
-        <ul class="nav nav-tabs">
+        <ul class="nav nav-tabs" id="main-tabs">
             <li class="active"><a data-toggle="tab" href="#scope-notes">Scope Notes</a></li>
             <li><a data-toggle="tab" href="#identification">Identification</a></li>
             <li><a data-toggle="tab" href="#namespaces">Namespace</a></li>
@@ -27,6 +18,12 @@
 
         <div class="tab-content">
             <div id="scope-notes" class="tab-pane fade in active">
+                <div class="pull-right add-div">
+                    <a href="{{ path('text_property_new', {'type': 'scope-note', 'object': 'property', 'objectId': property.id })}}"
+                       class="btn btn-primary pull-right">
+                        Add <span class="fa fa-plus-circle"></span>
+                    </a>
+                </div>
                 <h3>Scope Notes</h3>
                 <table class="table table-striped" id="scope-notes-table">
                     <thead>
@@ -35,6 +32,7 @@
                         <th>Scope note</th>
                         <th>Language</th>
                         <th>Namespace</th>
+                        <th>Edit</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -47,10 +45,24 @@
                             </td>
                             <td>{{ textProperty.languageIsoCode}}</td>
                             <td>WIP</td>
+                            <td>
+                                <a href="{{ path('text_property_edit', {
+                                    'id': textProperty.id
+                                }) }}"
+                                   class="btn btn-xs btn-success">
+                                    <span class="fa fa-edit"></span>
+                                </a>
+                            </td>
                         </tr>
                     {% endfor %}
                     </tbody>
                 </table>
+                <div class="pull-right add-div">
+                    <a href="{{ path('text_property_new', {'type': 'example', 'object': 'property', 'objectId': property.id })}}"
+                       class="btn btn-primary pull-right">
+                        Add <span class="fa fa-plus-circle"></span>
+                    </a>
+                </div>
                 <h3>Examples</h3>
                 <table class="table table-striped" id="examples-table">
                     <thead>
@@ -59,6 +71,7 @@
                         <th>Example</th>
                         <th>Language</th>
                         <th>Namespace</th>
+                        <th>Edit</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -71,6 +84,14 @@
                             </td>
                             <td>{{ textProperty.languageIsoCode}}</td>
                             <td>WIP</td>
+                            <td>
+                                <a href="{{ path('text_property_edit', {
+                                    'id': textProperty.id
+                                }) }}"
+                                   class="btn btn-xs btn-success">
+                                    <span class="fa fa-edit"></span>
+                                </a>
+                            </td>
                         </tr>
                     {% endfor %}
                     </tbody>
@@ -81,6 +102,12 @@
                 <h3>Domain and range</h3>
                     <p><a href="{{ path('class_show', {'id': domainRange.domainId}) }}">{{ domainRange.domainIdentifier }}</a> → {{ domainRange.propertyIdentifier }} → <a href="{{ path('class_show', {'id': domainRange.rangeId}) }}">{{ domainRange.rangeIdentifier }}</a></p>
                 {% endif %}
+                <div class="pull-right add-div">
+                    <a href="{{ path('label_new', {'object': 'property', 'objectId': property.id })}}"
+                       class="btn btn-primary pull-right">
+                        Add <span class="fa fa-plus-circle"></span>
+                    </a>
+                </div>
                 <h3>Labels</h3>
                 <table class="table table-striped" id="labels-table">
                     <thead>
@@ -88,6 +115,7 @@
                         <th>Label</th>
                         <th>Language</th>
                         <th>Last updated</th>
+                        <th>Edit</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -100,6 +128,14 @@
                             </td>
                             <td>{{ label.languageIsoCode}}</td>
                             <td>{{ label.modificationTime|date('Y-m-d') }}</td>
+                            <td>
+                                <a href="{{ path('label_edit', {
+                                    'id': label.id
+                                }) }}"
+                                   class="btn btn-xs btn-success">
+                                    <span class="fa fa-edit"></span>
+                                </a>
+                            </td>
                         </tr>
                     {% endfor %}
                     </tbody>
