@@ -56,6 +56,11 @@ class OntoNamespace
     private $isTopLevelNamespace;
 
     /**
+     * @ORM\Column(type="boolean")
+     */
+    private $isOngoing;
+
+    /**
      * @ORM\ManyToOne(targetEntity="Project")
      * @ORM\JoinColumn(name="fk_project_for_top_level_namespace", referencedColumnName="pk_project")
      */
@@ -200,6 +205,14 @@ class OntoNamespace
     public function getIsTopLevelNamespace()
     {
         return $this->isTopLevelNamespace;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getisOngoing()
+    {
+        return $this->isOngoing;
     }
 
     /**

@@ -9,12 +9,16 @@
 namespace AppBundle\Controller;
 
 
+use AppBundle\Entity\Label;
 use AppBundle\Entity\OntoClass;
 use AppBundle\Entity\Project;
+use AppBundle\Entity\TextProperty;
+use AppBundle\Form\ClassQuickAddForm;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -79,6 +83,80 @@ class ClassController extends Controller
             'ingoingProperties' => $ingoingProperties,
             'ingoingInheritedProperties' => $ingoingInheritedProperties
         ));
+    }
+
+    /**
+     * @Route("class/new/", name="new_class_form")
+     */
+    public function newAction(Request $request)
+    {
+        $class = new OntoClass();
+
+        //$this->denyAccessUnlessGranted('edit', $childClass);
+
+
+        $em = $this->getDoctrine()->getManager();
+        $systemTypeScopeNote = $em->getRepository('AppBundle:SystemType')->find(1); //systemType 1 = scope note
+        $systemTypeExample = $em->getRepository('AppBundle:SystemType')->find(7); //systemType 1 = scope note
+
+        $scopeNote = new TextProperty();
+        $scopeNote->setClass($class);
+        $scopeNote->setSystemType($systemTypeScopeNote);
+        $scopeNote->setCreator($this->getUser());
+        $scopeNote->setModifier($this->getUser());
+        $scopeNote->setCreationTime(new \DateTime('now'));
+        $scopeNote->setModificationTime(new \DateTime('now'));
+
+        $class->addTextProperty($scopeNote);
+
+        $label = new Label();
+        $label->setClass($class);
+        $label->setIsStandardLabelForLanguage(true);
+        $label->setCreator($this->getUser());
+        $label->setModifier($this->getUser());
+        $label->setCreationTime(new \DateTime('now'));
+        $label->setModificationTime(new \DateTime('now'));
+
+        $class->addlabel($label);
+
+        $form = $this->createForm(ClassQuickAddForm::class, $class);
+
+        // only handles data on POST
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $class = $form->getData();
+            $class->addNamespace($class->getNamespace());
+            $class->setCreator($this->getUser());
+            $class->setModifier($this->getUser());
+            $class->setCreationTime(new \DateTime('now'));
+            $class->setModificationTime(new \DateTime('now'));
+
+            if($class->getTextProperties()->containsKey(1)){
+                $class->getTextProperties()[1]->setCreationTime(new \DateTime('now'));
+                $class->getTextProperties()[1]->setModificationTime(new \DateTime('now'));
+                $class->getTextProperties()[1]->setSystemType($systemTypeExample);
+                $class->getTextProperties()[1]->setNamespace($class->getNamespace());
+                $class->getTextProperties()[1]->setClass($class);
+            }
+
+
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($class);
+            $em->flush();
+
+            return $this->redirectToRoute('class_show', [
+                'id' => $class->getId()
+            ]);
+
+        }
+
+        $em = $this->getDoctrine()->getManager();
+
+
+        return $this->render('class/new.html.twig', [
+            'class' => $class,
+            'classForm' => $form->createView()
+        ]);
     }
 
     /**

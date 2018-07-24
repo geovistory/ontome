@@ -278,6 +278,66 @@ class OntoClass
         return $this->identifierInNamespace;
     }
 
+    /**
+     * @param mixed $identifierInNamespace
+     */
+    public function setIdentifierInNamespace($identifierInNamespace)
+    {
+        $this->identifierInNamespace = $identifierInNamespace;
+    }
+
+    /**
+     * @param mixed $creator
+     */
+    public function setCreator($creator)
+    {
+        $this->creator = $creator;
+    }
+
+    /**
+     * @param mixed $modifier
+     */
+    public function setModifier($modifier)
+    {
+        $this->modifier = $modifier;
+    }
+
+    /**
+     * @param mixed $creationTime
+     */
+    public function setCreationTime($creationTime)
+    {
+        $this->creationTime = $creationTime;
+    }
+
+    /**
+     * @param mixed $modificationTime
+     */
+    public function setModificationTime($modificationTime)
+    {
+        $this->modificationTime = $modificationTime;
+    }
+
+    public function addTextProperty(TextProperty $textProperty)
+    {
+        if ($this->textProperties->contains($textProperty)) {
+            return;
+        }
+        $this->textProperties[] = $textProperty;
+        // needed to update the owning side of the relationship!
+        $textProperty->setClass($this);
+    }
+
+    public function addLabel(Label $label)
+    {
+        if ($this->labels->contains($label)) {
+            return;
+        }
+        $this->labels[] = $label;
+        // needed to update the owning side of the relationship!
+        $label->setClass($this);
+    }
+
     public function __toString()
     {
         if($this->getIdentifierInNamespace() === $this->getStandardLabel()){
