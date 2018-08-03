@@ -26,7 +26,7 @@
         <div class="row">
             <div class="col-xs-12">
                 <div class="pull-right reset-div">
-                    <a href="{{ path('new_class_form', {'namespace': app.request.get('namespace').id}) }}" class="btn btn-primary pull-right">Reset <span class="fa fa-undo"></span></a>
+                    <a href="{{ path('class_new', {'namespace': app.request.get('namespace').id}) }}" class="btn btn-primary pull-right">Reset <span class="fa fa-undo"></span></a>
                 </div>
                 <h2>
                     Add new class in the {{ app.request.get('namespace') }} namespace

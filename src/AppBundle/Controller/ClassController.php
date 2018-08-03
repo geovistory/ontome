@@ -41,13 +41,13 @@ class ClassController extends Controller
     }
 
     /**
-     * @Route("class/new/{namespace}", name="new_class_form")
+     * @Route("class/new/{namespace}", name="class_new")
      */
     public function newAction(Request $request, OntoNamespace $namespace)
     {
         $class = new OntoClass();
 
-        //$this->denyAccessUnlessGranted('edit', $childClass);
+        $this->denyAccessUnlessGranted('edit', $namespace);
 
 
         $em = $this->getDoctrine()->getManager();
