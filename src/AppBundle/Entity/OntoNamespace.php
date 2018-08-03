@@ -367,4 +367,11 @@ class OntoNamespace
         $propertyAssociation->addNamespace($this);
     }
 
+    public function __toString()
+    {
+        //$s = $this->getLabels()[0];
+        $s = $this->namespaceURI;
+        return (string) $s;
+    }
+
 }

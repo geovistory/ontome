@@ -47,7 +47,7 @@ class NamespaceRepository extends EntityRepository
         return $stmt->fetchAll();
     }
 
-    public function findAllowedOngoingNamespaceByUser(User $user)
+    public function findAllowedOngoingNamespaceByUser($user)
     {
         return $this->createQueryBuilder('nsp')
             ->andWhere('nsp.isOngoing = :isOngoing')
@@ -58,11 +58,11 @@ class NamespaceRepository extends EntityRepository
             ->addSelect('upa')
             ->join('upa.user', 'user')
             ->addSelect('user')
-            ->andWhere('user = :user')
+            ->andWhere('user.id = :user')
             ->setParameter('user', $user)
-            ->orderBy('nsp.id','DESC')
-            ->getQuery()
-            ->execute();
+            ->orderBy('nsp.id','DESC');
+            //->getQuery()
+            //->execute();
 
     }
 

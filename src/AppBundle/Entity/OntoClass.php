@@ -97,14 +97,14 @@ class OntoClass
 
     /**
      * @Assert\NotBlank()
-     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Label", mappedBy="class")
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Label", mappedBy="class", cascade={"persist"})
      * @ORM\OrderBy({"languageIsoCode" = "ASC"})
      */
     private $labels;
 
     /**
     * @Assert\NotBlank()
-    * @ORM\OneToMany(targetEntity="AppBundle\Entity\TextProperty", mappedBy="class")
+    * @ORM\OneToMany(targetEntity="AppBundle\Entity\TextProperty", mappedBy="class", cascade={"persist"})
     * @ORM\OrderBy({"languageIsoCode" = "ASC"})
     */
     private $textProperties;
@@ -287,6 +287,22 @@ class OntoClass
     }
 
     /**
+     * @param mixed $labels
+     */
+    public function setLabels($labels)
+    {
+        $this->labels = $labels;
+    }
+
+    /**
+     * @param mixed $textProperties
+     */
+    public function setTextProperties($textProperties)
+    {
+        $this->textProperties = $textProperties;
+    }
+
+    /**
      * @param mixed $creator
      */
     public function setCreator($creator)
@@ -336,6 +352,14 @@ class OntoClass
         $this->labels[] = $label;
         // needed to update the owning side of the relationship!
         $label->setClass($this);
+    }
+
+    public function addNamespace(OntoNamespace $namespace)
+    {
+        if ($this->labels->contains($namespace)) {
+            return;
+        }
+        $this->namespaces[] = $namespace;
     }
 
     public function __toString()

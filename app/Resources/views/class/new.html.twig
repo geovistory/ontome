@@ -26,19 +26,18 @@
         <div class="row">
             <div class="col-xs-12">
                 <div class="pull-right reset-div">
-                    <a href="{{ path('new_class_form') }}" class="btn btn-primary pull-right">Reset <span class="fa fa-undo"></span></a>
+                    <a href="{{ path('new_class_form', {'namespace': app.request.get('namespace').id}) }}" class="btn btn-primary pull-right">Reset <span class="fa fa-undo"></span></a>
                 </div>
                 <h2>
-                    Add new class
-                    <a href="{{ path('app_class_list', ) }}" class="pull-right btn btn-link">
+                    Add new class in the {{ app.request.get('namespace') }} namespace
+                    <a href="{{ path('app_class_list') }}" class="pull-right btn btn-link">
                         <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
                     </a>
                 </h2>
 
                 {{ form_start(classForm) }}
                 {{ form_errors(classForm) }}
-                {{ form_row(classForm.namespace) }}
-                {{ form_row(classForm.label) }}
+                {{ form_row(classForm.labels) }}
 
 
                 <div class="js-text-property-wrapper"
@@ -55,39 +54,10 @@
 
                 </div>
 
-                {{ form_row(classForm.notes) }}
-                {{ form_errors(classForm.notes) }}
                 <button type="submit" class="btn btn-primary" formnovalidate>Save</button>
                 {{ form_end(classForm) }}
             </div>
         </div>
-        <h3>Parent and ancestor classes</h3>
-        <table class="table table-striped" id="ancestors-table">
-            <thead>
-            <tr>
-                <th>Class identifier</th>
-                <th>Depth</th>
-                <th>Root namespace</th>
-            </tr>
-            </thead>
-            <tbody>
-            {% for ancestor in ancestors|sort %}
-                <tr>
-                    <td>
-                        <a href="{{ path('class_show', {
-                            'id': ancestor.id
-                        }) }}">
-                            {% if  ancestor.depth == '1' %}<strong>{%  endif %}
-                                {{ ancestor.identifier }}
-                                {% if  ancestor.depth == '1' %}</strong>{%  endif %}
-                        </a>
-                    </td>
-                    <td>{{ ancestor.depth }}</td>
-                    <td>{{ ancestor.rootNamespaceLabel }}</td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
     </div>
 
 {% endblock %}
@@ -98,7 +68,7 @@
     <script>
 
         $(document).ready(function() {
-            $('#parent_class_association_form_parentClass').select2({
+            $('#class_form_parentClass').select2({
                 sorter: function(data) {
                     /* Sort data using lowercase comparison */
                     return data.sort(function (a, b) {
@@ -114,14 +84,10 @@
                 }
             });
 
-            $('#ancestors-table').DataTable({
-                "order": [[ 1, "asc" ]]
-            });
-
-            if($('[for=parent_class_association_form_textProperties_1_textProperty]').length) {
+            if($('[for=class_quick_add_form_textProperties_1_textProperty]').length) {
                 //we hide the button in order to prevent the add of more than 2 text properties
                 $('.js-example-add').hide();
-                $('[for=parent_class_association_form_textProperties_1_textProperty]').text('Example');
+                $('[for=class_quick_add_form_textProperties_1_textProperty]').text('Example');
             }
             var $wrapper = $('.js-text-property-wrapper');
             $wrapper.on('click', '.js-example-add', function(e) {
@@ -142,10 +108,10 @@
 
                 // Display the form in the page before the "new" link
                 $(this).before(newForm);
-                $('#parent_class_association_form_textProperties_1_creator').val($('#parent_class_association_form_textProperties_0_creator').val());
-                $('#parent_class_association_form_textProperties_1_modifier').val($('#parent_class_association_form_textProperties_0_creator').val());
+                $('#class_quick_add_form_textProperties_1_creator').val($('#class_form_textProperties_0_creator').val());
+                $('#class_quick_add_form_textProperties_1_modifier').val($('#class_form_textProperties_0_creator').val());
                 $('.js-example-add').hide();
-                $('[for=parent_class_association_form_textProperties_1_textProperty]').text('Example');
+                $('[for=class_quick_add_form_textProperties_1_textProperty]').text('Example');
             });
         } );
     </script>

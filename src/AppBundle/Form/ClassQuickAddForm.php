@@ -32,26 +32,11 @@ class ClassQuickAddForm extends AbstractType
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $userID = $this->tokenStorage->getToken()->getUser()->getId();
-        $user = $this->em->getRepository('AppBundle:User')->find($userID);
 
-        if (!$user) {
-            throw new \LogicException(
-                'The ClassQuickAddForm cannot be used without an authenticated user!'
-            );
-        }
 
         $builder
-            ->add('namespace', EntityType::class, array(
-                'required' => true,
-                'class' => 'AppBundle\Entity\OntoNamespace',
-                'placeholder' => 'Choose a namespace',
-                'label' => 'Namespace',
-                'query_builder' => function (NamespaceRepository $namespaceRepository, User $user) {
-                    return $namespaceRepository->findAllowedOngoingNamespaceByUser($user);
-                }
-            ))
-            ->add('label', CollectionType::class, array(
+            ->add('labels', CollectionType::class, array(
+                'label' => 'Enter a label and select a language',
                 'required' => true,
                 'entry_type' => LabelType::class,
                 'entry_options' => array('label' => false),
@@ -73,7 +58,7 @@ class ClassQuickAddForm extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
-            'data_class' => 'AppBundle\Entity\ClassAssociation',
+            'data_class' => 'AppBundle\Entity\OntoClass',
             "allow_extra_fields" => true
         ]);
     }
