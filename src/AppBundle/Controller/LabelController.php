@@ -102,7 +102,7 @@ class LabelController  extends Controller
 
         $this->denyAccessUnlessGranted('edit', $associatedObject);
         
-        $label->setNamespace($associatedObject->getOngoingNamespace());
+        $label->addNamespace($associatedObject->getOngoingNamespace());
         $label->setCreator($this->getUser());
         $label->setModifier($this->getUser());
         $label->setCreationTime(new \DateTime('now'));
@@ -115,7 +115,7 @@ class LabelController  extends Controller
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $label = $form->getData();
-            $label->setNamespace($associatedObject->getOngoingNamespace());
+            $label->addNamespace($associatedObject->getOngoingNamespace());
             $label->setCreator($this->getUser());
             $label->setModifier($this->getUser());
             $label->setCreationTime(new \DateTime('now'));

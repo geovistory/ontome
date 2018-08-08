@@ -57,6 +57,7 @@ class ClassController extends Controller
         $scopeNote = new TextProperty();
         $scopeNote->setClass($class);
         $scopeNote->setSystemType($systemTypeScopeNote);
+        $scopeNote->addNamespace($namespace);
         $scopeNote->setCreator($this->getUser());
         $scopeNote->setModifier($this->getUser());
         $scopeNote->setCreationTime(new \DateTime('now'));
@@ -92,7 +93,7 @@ class ClassController extends Controller
                 $class->getTextProperties()[1]->setCreationTime(new \DateTime('now'));
                 $class->getTextProperties()[1]->setModificationTime(new \DateTime('now'));
                 $class->getTextProperties()[1]->setSystemType($systemTypeExample);
-                $class->getTextProperties()[1]->setNamespace($class->getNamespace());
+                $class->getTextProperties()[1]->addNamespace($class->getNamespace());
                 $class->getTextProperties()[1]->setClass($class);
             }
 

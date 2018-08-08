@@ -143,6 +143,7 @@ class OntoNamespace
      */
     private $propertyAssociations;
 
+
     /**
      * @ORM\OneToMany(targetEntity="OntoNamespace", mappedBy="referencedVersion")
      */

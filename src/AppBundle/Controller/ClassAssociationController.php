@@ -37,7 +37,7 @@ class ClassAssociationController extends Controller
         $scopeNote = new TextProperty();
         $scopeNote->setClassAssociation($classAssociation);
         $scopeNote->setSystemType($systemTypeScopeNote);
-        $scopeNote->setNamespace($childClass->getOngoingNamespace());
+        $scopeNote->addNamespace($childClass->getOngoingNamespace());
         $scopeNote->setCreator($this->getUser());
         $scopeNote->setModifier($this->getUser());
         $scopeNote->setCreationTime(new \DateTime('now'));
@@ -62,7 +62,7 @@ class ClassAssociationController extends Controller
                 $classAssociation->getTextProperties()[1]->setCreationTime(new \DateTime('now'));
                 $classAssociation->getTextProperties()[1]->setModificationTime(new \DateTime('now'));
                 $classAssociation->getTextProperties()[1]->setSystemType($systemTypeExample);
-                $classAssociation->getTextProperties()[1]->setNamespace($childClass->getOngoingNamespace());
+                $classAssociation->getTextProperties()[1]->addNamespace($childClass->getOngoingNamespace());
                 $classAssociation->getTextProperties()[1]->setClassAssociation($classAssociation);
             }
 

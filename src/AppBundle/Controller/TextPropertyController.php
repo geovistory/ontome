@@ -131,7 +131,7 @@ class TextPropertyController extends Controller
         $this->denyAccessUnlessGranted('edit', $associatedObject);
 
         $textProperty->setSystemType($systemType);
-        $textProperty->setNamespace($associatedObject->getOngoingNamespace());
+        $textProperty->addNamespace($associatedObject->getOngoingNamespace());
         $textProperty->setCreator($this->getUser());
         $textProperty->setModifier($this->getUser());
         $textProperty->setCreationTime(new \DateTime('now'));
@@ -145,7 +145,7 @@ class TextPropertyController extends Controller
         if ($form->isSubmitted() && $form->isValid()) {
             $textProperty = $form->getData();
             $textProperty->setSystemType($systemType);
-            $textProperty->setNamespace($associatedObject->getOngoingNamespace());
+            $textProperty->addNamespace($associatedObject->getOngoingNamespace());
             $textProperty->setCreator($this->getUser());
             $textProperty->setModifier($this->getUser());
             $textProperty->setCreationTime(new \DateTime('now'));

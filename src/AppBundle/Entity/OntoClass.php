@@ -124,6 +124,13 @@ class OntoClass
      */
     private $ongoingNamespace;
 
+    /**
+     * @ORM\OneToMany(targetEntity="Property", mappedBy="domain", cascade={"persist"})
+     */
+    private $propertiesAsDomain;
+
+    private $propertiesAsRange;
+
     public function __construct()
     {
         $this->namespaces = new ArrayCollection();
@@ -356,7 +363,7 @@ class OntoClass
 
     public function addNamespace(OntoNamespace $namespace)
     {
-        if ($this->labels->contains($namespace)) {
+        if ($this->namespaces->contains($namespace)) {
             return;
         }
         $this->namespaces[] = $namespace;
