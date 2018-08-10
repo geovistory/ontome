@@ -96,14 +96,16 @@ class OntoClass
     private $namespaces;
 
     /**
-     * @Assert\NotBlank()
+     * @Assert\Valid()
+     * @Assert\NotNull()
      * @ORM\OneToMany(targetEntity="AppBundle\Entity\Label", mappedBy="class", cascade={"persist"})
      * @ORM\OrderBy({"languageIsoCode" = "ASC"})
      */
     private $labels;
 
     /**
-    * @Assert\NotBlank()
+    * @Assert\Valid()
+    * @Assert\NotNull()
     * @ORM\OneToMany(targetEntity="AppBundle\Entity\TextProperty", mappedBy="class", cascade={"persist"})
     * @ORM\OrderBy({"languageIsoCode" = "ASC"})
     */
