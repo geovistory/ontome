@@ -37,7 +37,6 @@ class ClassQuickAddForm extends AbstractType
         $builder
             ->add('labels', CollectionType::class, array(
                 'label' => 'Enter a label and select a language',
-                'required' => true,
                 'entry_type' => LabelType::class,
                 'entry_options' => array('label' => false),
                 'error_bubbling' => false,
@@ -45,7 +44,6 @@ class ClassQuickAddForm extends AbstractType
                 'by_reference' => false,
             ))
             ->add('textProperties', CollectionType::class, array(
-                'required' => true,
                 'entry_type' => TextPropertyType::class,
                 'entry_options' => array('label' => false),
                 'error_bubbling' => false,
