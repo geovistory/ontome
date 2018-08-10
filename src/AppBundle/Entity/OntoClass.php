@@ -141,6 +141,7 @@ class OntoClass
         $this->profiles = new ArrayCollection();
         $this->parentClassAssociations = new ArrayCollection();
         $this->childClassAssociations = new ArrayCollection();
+        $this->propertiesAsDomain = new ArrayCollection();
     }
 
     /**
@@ -264,6 +265,14 @@ class OntoClass
     }
 
     /**
+     * @return Property
+     */
+    public function getPropertiesAsDomain()
+    {
+        return $this->propertiesAsDomain;
+    }
+
+    /**
      * @return ArrayCollection|ClassAssociation[]
      */
     public function getParentClassAssociations()
@@ -293,6 +302,14 @@ class OntoClass
     public function setIdentifierInNamespace($identifierInNamespace)
     {
         $this->identifierInNamespace = $identifierInNamespace;
+    }
+
+    /**
+     * @param mixed $propertiesAsDomain
+     */
+    public function setPropertiesAsDomain($propertiesAsDomain)
+    {
+        $this->propertiesAsDomain = $propertiesAsDomain;
     }
 
     /**
@@ -369,6 +386,14 @@ class OntoClass
             return;
         }
         $this->namespaces[] = $namespace;
+    }
+
+    public function addPropertyAsDomain(Property $property)
+    {
+        if ($this->propertiesAsDomain->contains($property)) {
+            return;
+        }
+        $this->propertiesAsDomain[] = $property;
     }
 
     public function __toString()

@@ -93,7 +93,7 @@ class ClassController extends Controller
                 $class->getTextProperties()[1]->setCreationTime(new \DateTime('now'));
                 $class->getTextProperties()[1]->setModificationTime(new \DateTime('now'));
                 $class->getTextProperties()[1]->setSystemType($systemTypeExample);
-                $class->getTextProperties()[1]->addNamespace($class->getNamespace());
+                $class->getTextProperties()[1]->addNamespace($namespace);
                 $class->getTextProperties()[1]->setClass($class);
             }
 

@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Add new class{% endblock %}
+{% block title %}Add new property{% endblock %}
 
 {% block stylesheets %}
     {{ parent() }}
@@ -26,36 +26,36 @@
         <div class="row">
             <div class="col-xs-12">
                 <div class="pull-right reset-div">
-                    <a href="{{ path('class_new', {'namespace': app.request.get('namespace').id}) }}" class="btn btn-primary pull-right">Reset <span class="fa fa-undo"></span></a>
+                    <a href="{{ path('property_new', {'class': app.request.get('class').id}) }}" class="btn btn-primary pull-right">Reset <span class="fa fa-undo"></span></a>
                 </div>
                 <h2>
-                    Add new class in the {{ app.request.get('namespace') }} namespace
-                    <a href="{{ path('namespace_show', {'id': app.request.get('namespace').id}) }}#classes" class="pull-right btn btn-link">
+                    Add new property for the domain {{ app.request.get('class') }}
+                    <a href="{{ path('class_edit', {'id': app.request.get('class').id}) }}#properties" class="pull-right btn btn-link">
                         <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
                     </a>
                 </h2>
 
-                {{ form_start(classForm) }}
-                {{ form_errors(classForm) }}
-                {{ form_row(classForm.labels) }}
+                {{ form_start(propertyForm) }}
+                    {{ form_errors(propertyForm) }}
+                    {{ form_row(propertyForm.range) }}
+                    {{ form_row(propertyForm.labels) }}
 
+                    <div class="js-text-property-wrapper"
+                         data-prototype="{{ formMacros.printTextPropertyRow(propertyForm.textProperties.vars.prototype)|e('html_attr') }}"
+                         data-index="{{ propertyForm.textProperties|length }}"
+                    >
+                        {% for textPropertyForm in propertyForm.textProperties %}
+                            {{ formMacros.printTextPropertyRow(textPropertyForm) }}
+                        {% endfor %}
+                        <a href="#" class="js-example-add">
+                            <span class="fa fa-plus-circle"></span>
+                            Add an example
+                        </a>
 
-                <div class="js-text-property-wrapper"
-                     data-prototype="{{ formMacros.printTextPropertyRow(classForm.textProperties.vars.prototype)|e('html_attr') }}"
-                     data-index="{{ classForm.textProperties|length }}"
-                >
-                    {% for textPropertyForm in classForm.textProperties %}
-                        {{ formMacros.printTextPropertyRow(textPropertyForm) }}
-                    {% endfor %}
-                    <a href="#" class="js-example-add">
-                        <span class="fa fa-plus-circle"></span>
-                        Add an example
-                    </a>
+                    </div>
 
-                </div>
-
-                <button type="submit" class="btn btn-primary" formnovalidate>Save</button>
-                {{ form_end(classForm) }}
+                    <button type="submit" class="btn btn-primary" formnovalidate>Save</button>
+                {{ form_end(propertyForm) }}
             </div>
         </div>
     </div>
@@ -68,7 +68,7 @@
     <script>
 
         $(document).ready(function() {
-            $('#class_form_parentClass').select2({
+            $('#property_quick_add_form_range').select2({
                 sorter: function(data) {
                     /* Sort data using lowercase comparison */
                     return data.sort(function (a, b) {
@@ -84,10 +84,10 @@
                 }
             });
 
-            if($('[for=class_quick_add_form_textProperties_1_textProperty]').length) {
+            if($('[for=property_quick_add_form_textProperties_1_textProperty]').length) {
                 //we hide the button in order to prevent the add of more than 2 text properties
                 $('.js-example-add').hide();
-                $('[for=class_quick_add_form_textProperties_1_textProperty]').text('Example');
+                $('[for=property_quick_add_form_textProperties_1_textProperty]').text('Example');
             }
             var $wrapper = $('.js-text-property-wrapper');
             $wrapper.on('click', '.js-example-add', function(e) {
@@ -108,10 +108,10 @@
 
                 // Display the form in the page before the "new" link
                 $(this).before(newForm);
-                $('#class_quick_add_form_textProperties_1_creator').val($('#class_quick_add_form_textProperties_0_creator').val());
-                $('#class_quick_add_form_textProperties_1_modifier').val($('#class_quick_add_form_textProperties_0_creator').val());
+                $('#property_quick_add_form_textProperties_1_creator').val($('#property_quick_add_form_labels_0_creator').val());
+                $('#property_quick_add_form_textProperties_1_modifier').val($('#property_quick_add_form_labels_0_creator').val());
                 $('.js-example-add').hide();
-                $('[for=class_quick_add_form_textProperties_1_textProperty]').text('Example');
+                $('[for=property_quick_add_form_textProperties_1_textProperty]').text('Example');
             });
         } );
     </script>

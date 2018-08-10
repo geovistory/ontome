@@ -9,12 +9,17 @@
 namespace AppBundle\Controller;
 
 
+use AppBundle\Entity\Label;
+use AppBundle\Entity\OntoClass;
 use AppBundle\Entity\Project;
 use AppBundle\Entity\Property;
+use AppBundle\Entity\TextProperty;
+use AppBundle\Form\PropertyQuickAddForm;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -32,6 +37,85 @@ class PropertyController extends Controller
 
         return $this->render('property/list.html.twig', [
             'properties' => $properties
+        ]);
+    }
+
+    /**
+     * @Route("property/new/{class}", name="property_new")
+     */
+    public function newAction(Request $request, OntoClass $class)
+    {
+        $property = new Property();
+
+        $this->denyAccessUnlessGranted('edit', $class);
+
+
+        $em = $this->getDoctrine()->getManager();
+        $systemTypeScopeNote = $em->getRepository('AppBundle:SystemType')->find(1); //systemType 1 = scope note
+        $systemTypeExample = $em->getRepository('AppBundle:SystemType')->find(7); //systemType 1 = scope note
+
+        $scopeNote = new TextProperty();
+        $scopeNote->setProperty($property);
+        $scopeNote->setSystemType($systemTypeScopeNote);
+        $scopeNote->addNamespace($class->getOngoingNamespace());
+        $scopeNote->setCreator($this->getUser());
+        $scopeNote->setModifier($this->getUser());
+        $scopeNote->setCreationTime(new \DateTime('now'));
+        $scopeNote->setModificationTime(new \DateTime('now'));
+
+        $property->addTextProperty($scopeNote);
+
+        $label = new Label();
+        $label->setProperty($property);
+        $label->setIsStandardLabelForLanguage(true);
+        $label->setCreator($this->getUser());
+        $label->setModifier($this->getUser());
+        $label->setCreationTime(new \DateTime('now'));
+        $label->setModificationTime(new \DateTime('now'));
+
+        $property->addLabel($label);
+        $property->setDomain($class);
+        $property->setCreator($this->getUser());
+        $property->setModifier($this->getUser());
+
+        $form = $this->createForm(PropertyQuickAddForm::class, $property);
+
+        // only handles data on POST
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $property = $form->getData();
+            $property->addNamespace($class->getOngoingNamespace());
+            $property->setDomain($class);
+            $property->setCreator($this->getUser());
+            $property->setModifier($this->getUser());
+            $property->setCreationTime(new \DateTime('now'));
+            $property->setModificationTime(new \DateTime('now'));
+
+            if($property->getTextProperties()->containsKey(1)){
+                $property->getTextProperties()[1]->setCreationTime(new \DateTime('now'));
+                $property->getTextProperties()[1]->setModificationTime(new \DateTime('now'));
+                $property->getTextProperties()[1]->setSystemType($systemTypeExample);
+                $property->getTextProperties()[1]->addNamespace($class->getOngoingNamespace());
+                $property->getTextProperties()[1]->setProperty($property);
+            }
+
+
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($property);
+            $em->flush();
+
+            return $this->redirectToRoute('property_show', [
+                'id' => $property->getId()
+            ]);
+
+        }
+
+        $em = $this->getDoctrine()->getManager();
+
+
+        return $this->render('property/new.html.twig', [
+            'property' => $property,
+            'propertyForm' => $form->createView()
         ]);
     }
 

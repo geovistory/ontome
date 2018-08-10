@@ -323,6 +323,11 @@
                 </table>
             </div>
             <div id="properties" class="tab-pane fade">
+                {% if is_granted('edit', class) %}
+                    <div class="pull-right add-div">
+                        <a href="{{ path('property_new', {'class': class.id}) }}" class="btn btn-primary pull-right">Add <span class="fa fa-plus-circle"></span></a>
+                    </div>
+                {% endif %}
                 <h3>Outgoing properties (this class is domain)</h3>
                 <table class="table table-striped" id="outgoing-properties-table">
                     <thead>

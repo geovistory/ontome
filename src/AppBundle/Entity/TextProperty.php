@@ -41,6 +41,8 @@ class TextProperty
     /**
      * @ORM\ManyToOne(targetEntity="OntoClass", inversedBy="textProperties")
      * @ORM\JoinColumn(name="fk_class", referencedColumnName="pk_class")
+     * @Assert\Type(type="AppBundle\Entity\OntoClass")
+     * @Assert\Valid()
      */
     private $class;
 
