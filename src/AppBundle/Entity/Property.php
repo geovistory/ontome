@@ -47,6 +47,19 @@ class Property
     private $standardLabel;
 
     /**
+     * @ORM\ManyToOne(targetEntity="OntoClass")
+     * @ORM\JoinColumn(name="has_domain", referencedColumnName="pk_class", nullable=false)
+     */
+    private $domain;
+
+    /**
+     * @Assert\NotBlank()
+     * @ORM\ManyToOne(targetEntity="OntoClass")
+     * @ORM\JoinColumn(name="has_range", referencedColumnName="pk_class", nullable=false)
+     */
+    private $range;
+
+    /**
      * @ORM\Column(type="text")
      */
     private $notes;
@@ -76,8 +89,9 @@ class Property
     private $modificationTime;
 
     /**
-     * @Assert\NotBlank()
-     * @ORM\OneToMany(targetEntity="AppBundle\Entity\TextProperty", mappedBy="property")
+     * @Assert\Valid()
+     * @Assert\NotNull()
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\TextProperty", mappedBy="property", cascade={"persist"})
      * @ORM\OrderBy({"languageIsoCode" = "ASC"})
      */
     private $textProperties;
@@ -92,8 +106,8 @@ class Property
     private $profiles;
 
     /**
-     * @ORM\OneToMany(targetEntity="PropertyAssociation", mappedBy="childProperty")
-     */
+ * @ORM\OneToMany(targetEntity="PropertyAssociation", mappedBy="childProperty")
+ */
     private $childPropertyAssociations;
 
     /**
@@ -111,8 +125,9 @@ class Property
     private $namespaces;
 
     /**
-     * @Assert\NotBlank()
-     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Label", mappedBy="property")
+     * @Assert\Valid()
+     * @Assert\NotNull()
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Label", mappedBy="property", cascade={"persist"})
      * @ORM\OrderBy({"languageIsoCode" = "ASC"})
      */
     private $labels;
@@ -153,6 +168,14 @@ class Property
     public function getImporterXmlField()
     {
         return $this->importerXmlField;
+    }
+
+    /**
+     * @return OntoClass
+     */
+    public function getDomain()
+    {
+        return $this->domain;
     }
 
     /**
@@ -252,6 +275,14 @@ class Property
     }
 
     /**
+     * @return OntoClass
+     */
+    public function getRange()
+    {
+        return $this->range;
+    }
+
+    /**
      * @return ArrayCollection|PropertyAssociation[]
      */
     public function getParentPropertyAssociations()
@@ -273,6 +304,114 @@ class Property
     public function getObjectIdentification()
     {
         return $this->identifierInNamespace;
+    }
+
+    /**
+     * @param mixed $range
+     */
+    public function setRange($range)
+    {
+        $this->range = $range;
+    }
+
+    /**
+     * @param mixed $domain
+     */
+    public function setDomain($domain)
+    {
+        $this->domain = $domain;
+    }
+
+    /**
+     * @param mixed $creator
+     */
+    public function setCreator($creator)
+    {
+        $this->creator = $creator;
+    }
+
+    /**
+     * @param mixed $modifier
+     */
+    public function setModifier($modifier)
+    {
+        $this->modifier = $modifier;
+    }
+
+    /**
+     * @param mixed $creationTime
+     */
+    public function setCreationTime($creationTime)
+    {
+        $this->creationTime = $creationTime;
+    }
+
+    /**
+     * @param mixed $modificationTime
+     */
+    public function setModificationTime($modificationTime)
+    {
+        $this->modificationTime = $modificationTime;
+    }
+
+    /**
+     * @param mixed $textProperties
+     */
+    public function setTextProperties($textProperties)
+    {
+        $this->textProperties = $textProperties;
+    }
+
+    /**
+     * @param mixed $profiles
+     */
+    public function setProfiles($profiles)
+    {
+        $this->profiles = $profiles;
+    }
+
+    /**
+     * @param mixed $namespaces
+     */
+    public function setNamespaces($namespaces)
+    {
+        $this->namespaces = $namespaces;
+    }
+
+    /**
+     * @param mixed $labels
+     */
+    public function setLabels($labels)
+    {
+        $this->labels = $labels;
+    }
+
+    public function addTextProperty(TextProperty $textProperty)
+    {
+        if ($this->textProperties->contains($textProperty)) {
+            return;
+        }
+        $this->textProperties[] = $textProperty;
+        // needed to update the owning side of the relationship!
+        $textProperty->setProperty($this);
+    }
+
+    public function addLabel(Label $label)
+    {
+        if ($this->labels->contains($label)) {
+            return;
+        }
+        $this->labels[] = $label;
+        // needed to update the owning side of the relationship!
+        $label->setProperty($this);
+    }
+
+    public function addNamespace(OntoNamespace $namespace)
+    {
+        if ($this->namespaces->contains($namespace)) {
+            return;
+        }
+        $this->namespaces[] = $namespace;
     }
 
     public function __toString()

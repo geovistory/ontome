@@ -6,7 +6,6 @@ use AppBundle\Entity\Label;
 use AppBundle\Form\DataTransformer\UserToNumberTransformer;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
@@ -15,7 +14,7 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
-class LabelForm extends AbstractType
+class LabelType extends AbstractType
 {
     private $transformer;
     private $tokenStorage;
@@ -35,7 +34,7 @@ class LabelForm extends AbstractType
 
         if (!$user) {
             throw new \LogicException(
-                'The LabelForm cannot be used without an authenticated user!'
+                'The LabelType cannot be used without an authenticated user!'
             );
         }
 
@@ -52,8 +51,8 @@ class LabelForm extends AbstractType
                 ),
                 'label' => 'Language'
             ))
-            ->add('isStandardLabelForLanguage', CheckboxType::class, array(
-                'label' => 'Standard label for this language'
+            ->add('isStandardLabelForLanguage', HiddenType::class, array(
+                'data' => true,
             ))
             ->add('creator', HiddenType::class)
             ->add('modifier', HiddenType::class);

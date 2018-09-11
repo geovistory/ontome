@@ -8,6 +8,7 @@
 
 namespace AppBundle\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -78,6 +79,15 @@ class Label
     private $profile;
 
     /**
+     * @ORM\ManyToMany(targetEntity="OntoNamespace",  inversedBy="Label", fetch="EXTRA_LAZY")
+     * @ORM\JoinTable(schema="che", name="associates_namespace",
+     *      joinColumns={@ORM\JoinColumn(name="fk_label", referencedColumnName="pk_label")},
+     *      inverseJoinColumns={@ORM\JoinColumn(name="fk_namespace", referencedColumnName="pk_namespace")}
+     *      )
+     */
+    private $namespaces;
+
+    /**
      * @ORM\Column(type="text")
      */
     private $notes;
@@ -105,6 +115,11 @@ class Label
      * @ORM\Column(type="datetime")
      */
     private $modificationTime;
+
+    public function __construct()
+    {
+        $this->namespaces = new ArrayCollection();
+    }
 
     /**
      * @return mixed
@@ -184,6 +199,14 @@ class Label
     public function getProfile()
     {
         return $this->profile;
+    }
+
+    /**
+     * @return ArrayCollection|OntoNamespace[]
+     */
+    public function getNamespaces()
+    {
+        return $this->namespaces;
     }
 
     /**
@@ -343,6 +366,14 @@ class Label
     public function setModificationTime($modificationTime)
     {
         $this->modificationTime = $modificationTime;
+    }
+
+    public function addNamespace(OntoNamespace $namespace)
+    {
+        if ($this->namespaces->contains($namespace)) {
+            return;
+        }
+        $this->namespaces[] = $namespace;
     }
 
     public function __toString()

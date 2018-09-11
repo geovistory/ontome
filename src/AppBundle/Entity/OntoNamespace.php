@@ -56,6 +56,11 @@ class OntoNamespace
     private $isTopLevelNamespace;
 
     /**
+     * @ORM\Column(type="boolean")
+     */
+    private $isOngoing;
+
+    /**
      * @ORM\ManyToOne(targetEntity="Project")
      * @ORM\JoinColumn(name="fk_project_for_top_level_namespace", referencedColumnName="pk_project")
      */
@@ -138,6 +143,7 @@ class OntoNamespace
      */
     private $propertyAssociations;
 
+
     /**
      * @ORM\OneToMany(targetEntity="OntoNamespace", mappedBy="referencedVersion")
      */
@@ -200,6 +206,14 @@ class OntoNamespace
     public function getIsTopLevelNamespace()
     {
         return $this->isTopLevelNamespace;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getisOngoing()
+    {
+        return $this->isOngoing;
     }
 
     /**
@@ -352,6 +366,13 @@ class OntoNamespace
         $this->propertyAssociations[] = $propertyAssociation;
         // needed to update the owning side of the relationship!
         $propertyAssociation->addNamespace($this);
+    }
+
+    public function __toString()
+    {
+        //$s = $this->getLabels()[0];
+        $s = $this->namespaceURI;
+        return (string) $s;
     }
 
 }

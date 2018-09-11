@@ -162,6 +162,11 @@
                 </table>
             </div>
             <div id="classes" class="tab-pane fade">
+                {% if is_granted('edit', namespace) %}
+                    <div class="pull-right add-div">
+                        <a href="{{ path('class_new', {'namespace': namespace.id}) }}" class="btn btn-primary pull-right">Add <span class="fa fa-plus-circle"></span></a>
+                    </div>
+                {% endif %}
                 <h3>Classes</h3>
                 <table class="table table-striped" id="classes-table">
                     <thead>

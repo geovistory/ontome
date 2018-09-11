@@ -78,7 +78,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for textProperty in class.textProperties if textProperty.systemType.id == 999 %}
+                    {% for textProperty in class.textProperties if textProperty.systemType.id == 7 %}
                         <tr>
                             <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
                             <td class="truncated-text">
@@ -130,7 +130,9 @@
                     {% for namespace in class.namespaces %}
                         <tr>
                             <td>
-                                <a href="#">
+                                <a href="{{ path('namespace_show', {
+                                    'id': namespace.id
+                                }) }}">
                                     {{ namespace.namespaceURI }}
                                 </a>
                             </td>

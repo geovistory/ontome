@@ -8,6 +8,7 @@
 
 namespace AppBundle\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -40,6 +41,8 @@ class TextProperty
     /**
      * @ORM\ManyToOne(targetEntity="OntoClass", inversedBy="textProperties")
      * @ORM\JoinColumn(name="fk_class", referencedColumnName="pk_class")
+     * @Assert\Type(type="AppBundle\Entity\OntoClass")
+     * @Assert\Valid()
      */
     private $class;
 
@@ -90,6 +93,15 @@ class TextProperty
     private $propertyAssociation;
 
     /**
+     * @ORM\ManyToMany(targetEntity="OntoNamespace",  inversedBy="TextProperty", fetch="EXTRA_LAZY")
+     * @ORM\JoinTable(schema="che", name="associates_namespace",
+     *      joinColumns={@ORM\JoinColumn(name="fk_text_property", referencedColumnName="pk_text_property")},
+     *      inverseJoinColumns={@ORM\JoinColumn(name="fk_namespace", referencedColumnName="pk_namespace")}
+     *      )
+     */
+    private $namespaces;
+
+    /**
      * @ORM\Column(type="text", nullable=true)
      */
     private $notes;
@@ -120,6 +132,7 @@ class TextProperty
 
     public function __construct()
     {
+        $this->namespaces = new ArrayCollection();
     }
 
     /**
@@ -200,6 +213,14 @@ class TextProperty
     public function getPropertyAssociation()
     {
         return $this->propertyAssociation;
+    }
+
+    /**
+     * @return ArrayCollection|OntoNamespace[]
+     */
+    public function getNamespaces()
+    {
+        return $this->namespaces;
     }
 
     /**
@@ -355,6 +376,14 @@ class TextProperty
     public function setPropertyAssociation($propertyAssociation)
     {
         $this->propertyAssociation = $propertyAssociation;
+    }
+
+    public function addNamespace(OntoNamespace $namespace)
+    {
+        if ($this->namespaces->contains($namespace)) {
+            return;
+        }
+        $this->namespaces[] = $namespace;
     }
 
     /**

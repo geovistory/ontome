@@ -96,15 +96,17 @@ class OntoClass
     private $namespaces;
 
     /**
-     * @Assert\NotBlank()
-     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Label", mappedBy="class")
+     * @Assert\Valid()
+     * @Assert\NotNull()
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Label", mappedBy="class", cascade={"persist"})
      * @ORM\OrderBy({"languageIsoCode" = "ASC"})
      */
     private $labels;
 
     /**
-    * @Assert\NotBlank()
-    * @ORM\OneToMany(targetEntity="AppBundle\Entity\TextProperty", mappedBy="class")
+    * @Assert\Valid()
+    * @Assert\NotNull()
+    * @ORM\OneToMany(targetEntity="AppBundle\Entity\TextProperty", mappedBy="class", cascade={"persist"})
     * @ORM\OrderBy({"languageIsoCode" = "ASC"})
     */
     private $textProperties;
@@ -124,6 +126,13 @@ class OntoClass
      */
     private $ongoingNamespace;
 
+    /**
+     * @ORM\OneToMany(targetEntity="Property", mappedBy="domain", cascade={"persist"})
+     */
+    private $propertiesAsDomain;
+
+    private $propertiesAsRange;
+
     public function __construct()
     {
         $this->namespaces = new ArrayCollection();
@@ -132,6 +141,7 @@ class OntoClass
         $this->profiles = new ArrayCollection();
         $this->parentClassAssociations = new ArrayCollection();
         $this->childClassAssociations = new ArrayCollection();
+        $this->propertiesAsDomain = new ArrayCollection();
     }
 
     /**
@@ -255,6 +265,14 @@ class OntoClass
     }
 
     /**
+     * @return Property
+     */
+    public function getPropertiesAsDomain()
+    {
+        return $this->propertiesAsDomain;
+    }
+
+    /**
      * @return ArrayCollection|ClassAssociation[]
      */
     public function getParentClassAssociations()
@@ -276,6 +294,106 @@ class OntoClass
     public function getObjectIdentification()
     {
         return $this->identifierInNamespace;
+    }
+
+    /**
+     * @param mixed $identifierInNamespace
+     */
+    public function setIdentifierInNamespace($identifierInNamespace)
+    {
+        $this->identifierInNamespace = $identifierInNamespace;
+    }
+
+    /**
+     * @param mixed $propertiesAsDomain
+     */
+    public function setPropertiesAsDomain($propertiesAsDomain)
+    {
+        $this->propertiesAsDomain = $propertiesAsDomain;
+    }
+
+    /**
+     * @param mixed $labels
+     */
+    public function setLabels($labels)
+    {
+        $this->labels = $labels;
+    }
+
+    /**
+     * @param mixed $textProperties
+     */
+    public function setTextProperties($textProperties)
+    {
+        $this->textProperties = $textProperties;
+    }
+
+    /**
+     * @param mixed $creator
+     */
+    public function setCreator($creator)
+    {
+        $this->creator = $creator;
+    }
+
+    /**
+     * @param mixed $modifier
+     */
+    public function setModifier($modifier)
+    {
+        $this->modifier = $modifier;
+    }
+
+    /**
+     * @param mixed $creationTime
+     */
+    public function setCreationTime($creationTime)
+    {
+        $this->creationTime = $creationTime;
+    }
+
+    /**
+     * @param mixed $modificationTime
+     */
+    public function setModificationTime($modificationTime)
+    {
+        $this->modificationTime = $modificationTime;
+    }
+
+    public function addTextProperty(TextProperty $textProperty)
+    {
+        if ($this->textProperties->contains($textProperty)) {
+            return;
+        }
+        $this->textProperties[] = $textProperty;
+        // needed to update the owning side of the relationship!
+        $textProperty->setClass($this);
+    }
+
+    public function addLabel(Label $label)
+    {
+        if ($this->labels->contains($label)) {
+            return;
+        }
+        $this->labels[] = $label;
+        // needed to update the owning side of the relationship!
+        $label->setClass($this);
+    }
+
+    public function addNamespace(OntoNamespace $namespace)
+    {
+        if ($this->namespaces->contains($namespace)) {
+            return;
+        }
+        $this->namespaces[] = $namespace;
+    }
+
+    public function addPropertyAsDomain(Property $property)
+    {
+        if ($this->propertiesAsDomain->contains($property)) {
+            return;
+        }
+        $this->propertiesAsDomain[] = $property;
     }
 
     public function __toString()
