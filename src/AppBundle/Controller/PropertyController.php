@@ -51,7 +51,7 @@ class PropertyController extends Controller
 
         $this->denyAccessUnlessGranted('edit', $class);
 
-        if($type !== 'ingoing' || $type !== 'outgoing') throw $this->createNotFoundException('The requested property type "'.$type.'" does not exist!');
+        if($type !== 'ingoing' && $type !== 'outgoing') throw $this->createNotFoundException('The requested property type "'.$type.'" does not exist!');
 
         $em = $this->getDoctrine()->getManager();
         $systemTypeScopeNote = $em->getRepository('AppBundle:SystemType')->find(1); //systemType 1 = scope note
@@ -134,9 +134,16 @@ class PropertyController extends Controller
 
         $em = $this->getDoctrine()->getManager();
 
-
-        return $this->render('property/new.html.twig', [
+        $template = null;
+        if($type == 'outgoing') {
+            $template = 'property/newOutgoing.html.twig';
+        }
+        elseif ($type == 'ingoing') {
+            $template = 'property/newIngoing.html.twig';
+        }
+        return $this->render($template, [
             'property' => $property,
+            'type' => $type,
             'propertyForm' => $form->createView()
         ]);
     }

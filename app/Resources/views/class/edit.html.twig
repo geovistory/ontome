@@ -325,7 +325,7 @@
             <div id="properties" class="tab-pane fade">
                 {% if is_granted('edit', class) %}
                     <div class="pull-right add-div">
-                        <a href="{{ path('property_new', {'class': class.id}) }}" class="btn btn-primary pull-right">Add <span class="fa fa-plus-circle"></span></a>
+                        <a href="{{ path('property_new', {'type': 'outgoing','class': class.id}) }}" class="btn btn-primary pull-right">Add <span class="fa fa-plus-circle"></span></a>
                     </div>
                 {% endif %}
                 <h3>Outgoing properties (this class is domain)</h3>
@@ -405,6 +405,11 @@
                     {% endfor %}
                     </tbody>
                 </table>
+                {% if is_granted('edit', class) %}
+                    <div class="pull-right add-div">
+                        <a href="{{ path('property_new', {'type': 'ingoing','class': class.id}) }}" class="btn btn-primary pull-right">Add <span class="fa fa-plus-circle"></span></a>
+                    </div>
+                {% endif %}
                 <h3>Ingoing properties (this class is range)</h3>
                 <table class="table table-striped" id="ingoing-properties-table">
                     <thead>
