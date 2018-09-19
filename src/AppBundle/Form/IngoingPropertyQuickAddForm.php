@@ -16,7 +16,7 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
-class PropertyQuickAddForm extends AbstractType
+class IngoingPropertyQuickAddForm extends AbstractType
 {
 
     private $transformer;
@@ -43,7 +43,7 @@ class PropertyQuickAddForm extends AbstractType
                 'allow_add' => true,
                 'by_reference' => false,
             ))
-            ->add('range')
+            ->add('domain')
             ->add('textProperties', CollectionType::class, array(
                 'entry_type' => TextPropertyType::class,
                 'entry_options' => array('label' => false),
