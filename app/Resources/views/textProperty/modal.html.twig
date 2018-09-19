@@ -16,7 +16,7 @@
             </div>
             <div class="modal-body">
                 {% if textProperty is defined %}
-                    <p>{{ textProperty.textProperty}}</p>
+                    <div>{{ textProperty.textProperty|raw}}</div>
                 {% endif %}
             </div>
             <div class="modal-footer">

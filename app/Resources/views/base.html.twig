@@ -9,6 +9,14 @@
             <link rel="stylesheet" href="{{ asset('css/styles.css') }}"/>
         {% endblock %}
         <script defer src="https://use.fontawesome.com/releases/v5.0.10/js/all.js" integrity="sha384-slN8GvtUJGnv6ca26v8EzVaR9DC58QEwsIk9q1QXdCU8Yu8ck/tL/5szYlBbqmS+" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/4.8.2/tinymce.min.js"></script>
+        <script>
+            tinymce.init({
+                selector:'.tinymce',
+                plugins : 'autolink link lists charmap print preview',
+                default_link_target: "_blank"
+            });
+        </script>
         <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}" />
     </head>
     <body>
