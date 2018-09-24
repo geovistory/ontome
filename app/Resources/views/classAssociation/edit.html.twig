@@ -31,8 +31,6 @@
 
                     {{ form_row(classAssociationForm.childClass) }}
 
-                    {{ form_row(classAssociationForm.notes) }}
-                    {{ form_errors(classAssociationForm.notes) }}
                     <button type="submit" class="btn btn-primary" formnovalidate>Save <span class="far fa-save"></span></button>
                 {{ form_end(classAssociationForm) }}
                 {% if is_granted('edit', class) %}

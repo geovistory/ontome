@@ -31,8 +31,6 @@
 
                     {{ form_row(propertyAssociationForm.childProperty) }}
 
-                    {{ form_row(propertyAssociationForm.notes) }}
-                    {{ form_errors(propertyAssociationForm.notes) }}
                     <button type="submit" class="btn btn-primary" formnovalidate>Save <span class="far fa-save"></span></button>
                 {{ form_end(propertyAssociationForm) }}
                 {% if is_granted('edit', property) %}
