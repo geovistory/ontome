@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Add new property{% endblock %}
+{% block title %}Create a new property{% endblock %}
 
 {% block stylesheets %}
     {{ parent() }}
@@ -26,7 +26,7 @@
         <div class="row">
             <div class="col-xs-12">
                 <div class="pull-right reset-div">
-                    <a href="{{ path('property_new', {'class': app.request.get('class').id}) }}" class="btn btn-primary pull-right">Reset <span class="fa fa-undo"></span></a>
+                    <a href="{{ path('property_new', {'type':type,'class': app.request.get('class').id}) }}" class="btn btn-primary pull-right">Reset <span class="fa fa-undo"></span></a>
                 </div>
                 <h2>
                     Add new property for the domain {{ app.request.get('class') }}
@@ -68,7 +68,7 @@
     <script>
 
         $(document).ready(function() {
-            $('#property_quick_add_form_range').select2({
+            $('#outgoing_property_quick_add_form_range').select2({
                 sorter: function(data) {
                     /* Sort data using lowercase comparison */
                     return data.sort(function (a, b) {

@@ -21,8 +21,7 @@ class ClassAssociationEditForm extends AbstractType
     {
         $builder
             ->add('parentClass')
-            ->add('childClass', HiddenType::class)
-            ->add('notes');
+            ->add('childClass', HiddenType::class);
 
         $builder->get('childClass')
             ->addModelTransformer($this->transformer);

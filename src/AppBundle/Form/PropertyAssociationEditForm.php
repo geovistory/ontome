@@ -21,8 +21,7 @@ class PropertyAssociationEditForm extends AbstractType
     {
         $builder
             ->add('parentProperty')
-            ->add('childProperty', HiddenType::class)
-            ->add('notes');
+            ->add('childProperty', HiddenType::class);
 
         $builder->get('childProperty')
             ->addModelTransformer($this->transformer);

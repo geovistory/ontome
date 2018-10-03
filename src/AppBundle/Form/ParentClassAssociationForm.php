@@ -29,8 +29,7 @@ class ParentClassAssociationForm extends AbstractType
                 'error_bubbling' => false,
                 'allow_add' => true,
                 'by_reference' => false,
-            ))
-            ->add('notes');
+            ));
 
         $builder->get('childClass')
             ->addModelTransformer($this->transformer);

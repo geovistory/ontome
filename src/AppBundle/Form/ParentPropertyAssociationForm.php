@@ -29,8 +29,7 @@ class ParentPropertyAssociationForm extends AbstractType
                 'error_bubbling' => false,
                 'allow_add' => true,
                 'by_reference' => false,
-            ))
-            ->add('notes');
+            ));
 
         $builder->get('childProperty')
             ->addModelTransformer($this->transformer);

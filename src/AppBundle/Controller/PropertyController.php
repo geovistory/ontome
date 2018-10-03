@@ -14,10 +14,12 @@ use AppBundle\Entity\OntoClass;
 use AppBundle\Entity\Project;
 use AppBundle\Entity\Property;
 use AppBundle\Entity\TextProperty;
-use AppBundle\Form\PropertyQuickAddForm;
+use AppBundle\Form\IngoingPropertyQuickAddForm;
+use AppBundle\Form\OutgoingPropertyQuickAddForm;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
+use Symfony\Component\Form\Form;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -41,14 +43,15 @@ class PropertyController extends Controller
     }
 
     /**
-     * @Route("property/new/{class}", name="property_new")
+     * @Route("property/{type}/new/{class}", name="property_new")
      */
-    public function newAction(Request $request, OntoClass $class)
+    public function newAction($type,Request $request, OntoClass $class)
     {
         $property = new Property();
 
         $this->denyAccessUnlessGranted('edit', $class);
 
+        if($type !== 'ingoing' && $type !== 'outgoing') throw $this->createNotFoundException('The requested property type "'.$type.'" does not exist!');
 
         $em = $this->getDoctrine()->getManager();
         $systemTypeScopeNote = $em->getRepository('AppBundle:SystemType')->find(1); //systemType 1 = scope note
@@ -74,18 +77,37 @@ class PropertyController extends Controller
         $label->setModificationTime(new \DateTime('now'));
 
         $property->addLabel($label);
-        $property->setDomain($class);
+        if($type == 'outgoing') {
+            $property->setDomain($class);
+        }
+        elseif ($type == 'ingoing') {
+            $property->setRange($class);
+        }
+
         $property->setCreator($this->getUser());
         $property->setModifier($this->getUser());
 
-        $form = $this->createForm(PropertyQuickAddForm::class, $property);
+        $form = null;
+        if($type == 'outgoing') {
+            $form = $this->createForm(OutgoingPropertyQuickAddForm::class, $property);
+        }
+        elseif ($type == 'ingoing') {
+            $form = $this->createForm(IngoingPropertyQuickAddForm::class, $property);
+        }
+
 
         // only handles data on POST
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $property = $form->getData();
             $property->addNamespace($class->getOngoingNamespace());
-            $property->setDomain($class);
+            if($type == 'outgoing') {
+                $property->setDomain($class);
+            }
+            elseif ($type == 'ingoing') {
+                $property->setRange($class);
+            }
+
             $property->setCreator($this->getUser());
             $property->setModifier($this->getUser());
             $property->setCreationTime(new \DateTime('now'));
@@ -112,9 +134,16 @@ class PropertyController extends Controller
 
         $em = $this->getDoctrine()->getManager();
 
-
-        return $this->render('property/new.html.twig', [
+        $template = null;
+        if($type == 'outgoing') {
+            $template = 'property/newOutgoing.html.twig';
+        }
+        elseif ($type == 'ingoing') {
+            $template = 'property/newIngoing.html.twig';
+        }
+        return $this->render($template, [
             'property' => $property,
+            'type' => $type,
             'propertyForm' => $form->createView()
         ]);
     }
