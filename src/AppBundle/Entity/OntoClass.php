@@ -11,13 +11,15 @@ namespace AppBundle\Entity;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\GroupSequenceProviderInterface;
 
 /**
  * Class OntoClass
  * @ORM\Entity(repositoryClass="AppBundle\Repository\ClassRepository")
  * @ORM\Table(schema="che", name="class")
+ * @Assert\GroupSequenceProvider()
  */
-class OntoClass
+class OntoClass implements GroupSequenceProviderInterface
 {
     /**
      * @ORM\Id
@@ -28,8 +30,19 @@ class OntoClass
 
     /**
      * @ORM\Column(type="string")
+     * @Assert\NotBlank(groups={"ManualIdentifier"})
      */
     private $identifierInNamespace;
+
+    /**
+     * A non-persisted field that's used to know if the $identifierInNamespace field is manually set by the user
+     * or automatically set by a trigger in the database
+     * @Assert\NotBlank()
+     * @Assert\
+     *
+     * @var boolean
+     */
+    private $isManualIdentifier;
 
     /**
      * @ORM\Column(type="text")
@@ -142,6 +155,17 @@ class OntoClass
         $this->parentClassAssociations = new ArrayCollection();
         $this->childClassAssociations = new ArrayCollection();
         $this->propertiesAsDomain = new ArrayCollection();
+    }
+
+    public function getGroupSequence()
+    {
+        $groups = array('OntoClass');
+
+        if ($this->isManualIdentifier()) {
+            $groups[] = 'ManualIdentifier';
+        }
+
+        return $groups;
     }
 
     /**
