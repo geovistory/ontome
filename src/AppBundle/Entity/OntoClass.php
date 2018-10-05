@@ -11,15 +11,14 @@ namespace AppBundle\Entity;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
-use Symfony\Component\Validator\GroupSequenceProviderInterface;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 /**
  * Class OntoClass
  * @ORM\Entity(repositoryClass="AppBundle\Repository\ClassRepository")
  * @ORM\Table(schema="che", name="class")
- * @Assert\GroupSequenceProvider()
  */
-class OntoClass implements GroupSequenceProviderInterface
+class OntoClass
 {
     /**
      * @ORM\Id
@@ -30,17 +29,13 @@ class OntoClass implements GroupSequenceProviderInterface
 
     /**
      * @ORM\Column(type="string")
-     * @Assert\NotBlank(groups={"ManualIdentifier"})
      */
     private $identifierInNamespace;
 
     /**
-     * A non-persisted field that's used to know if the $identifierInNamespace field is manually set by the user
-     * or automatically set by a trigger in the database
-     * @Assert\NotBlank()
-     * @Assert\
-     *
      * @var boolean
+     * A non-persisted field that's used to know if the $identifierInNamespace field is manually set by the user
+     * or automatically set by a trigger in the database     *
      */
     private $isManualIdentifier;
 
@@ -157,15 +152,20 @@ class OntoClass implements GroupSequenceProviderInterface
         $this->propertiesAsDomain = new ArrayCollection();
     }
 
-    public function getGroupSequence()
+    /**
+     * @Assert\Callback
+     * @param ExecutionContextInterface $context
+     * @param $payload
+     */
+    public function validate(ExecutionContextInterface $context, $payload)
     {
-        $groups = array('OntoClass');
 
-        if ($this->isManualIdentifier()) {
-            $groups[] = 'ManualIdentifier';
+        // check if the identifier is set when needed
+        if ($this->isManualIdentifier && empty($this->identifierInNamespace)) {
+            $context->buildViolation('The identifier cannot be null.')
+                ->atPath('identifierInNamespace')
+                ->addViolation();
         }
-
-        return $groups;
     }
 
     /**
@@ -183,6 +183,15 @@ class OntoClass implements GroupSequenceProviderInterface
     {
         return $this->identifierInNamespace;
     }
+
+    /**
+     * @return bool
+     */
+    public function isManualIdentifier()
+    {
+        return $this->isManualIdentifier;
+    }
+
 
     /**
      * @return mixed
@@ -326,6 +335,15 @@ class OntoClass implements GroupSequenceProviderInterface
     public function setIdentifierInNamespace($identifierInNamespace)
     {
         $this->identifierInNamespace = $identifierInNamespace;
+    }
+
+
+    /**
+     * @param bool $isManualIdentifier
+     */
+    public function setIsManualIdentifier($isManualIdentifier)
+    {
+        $this->isManualIdentifier = $isManualIdentifier;
     }
 
     /**

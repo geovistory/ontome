@@ -84,6 +84,7 @@ class PropertyController extends Controller
             $property->setRange($class);
         }
 
+        $property->setIsManualIdentifier(is_null($class->getOngoingNamespace()->getClassPrefix()));
         $property->setCreator($this->getUser());
         $property->setModifier($this->getUser());
 

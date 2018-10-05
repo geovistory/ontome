@@ -37,6 +37,11 @@
 
                 {{ form_start(propertyForm) }}
                     {{ form_errors(propertyForm) }}
+                    {% if  property.isManualIdentifier %}
+                        {{ form_row(propertyForm.identifierInNamespace) }}
+                    {% else %}
+                        {{ form_widget(propertyForm.identifierInNamespace, { 'attr': {'style': 'display:none'} }) }}
+                    {% endif %}
                     {{ form_row(propertyForm.range) }}
                     {{ form_row(propertyForm.labels) }}
 

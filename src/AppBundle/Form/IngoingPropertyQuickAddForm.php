@@ -7,6 +7,7 @@ use AppBundle\Entity\User;
 use AppBundle\Form\DataTransformer\OntoClassToNumberTransformer;
 use AppBundle\Form\DataTransformer\UserToNumberTransformer;
 use AppBundle\Repository\NamespaceRepository;
+use Doctrine\DBAL\Types\TextType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
@@ -35,6 +36,8 @@ class IngoingPropertyQuickAddForm extends AbstractType
 
 
         $builder
+            ->add('identifierInNamespace', TextType::class, array(
+            ))
             ->add('labels', CollectionType::class, array(
                 'label' => 'Enter a label and select a language',
                 'entry_type' => LabelType::class,

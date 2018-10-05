@@ -11,6 +11,7 @@ namespace AppBundle\Entity;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 /**
  * Class Property
@@ -30,6 +31,13 @@ class Property
      * @ORM\Column(type="string")
      */
     private $identifierInNamespace;
+
+    /**
+     * @var boolean
+     * A non-persisted field that's used to know if the $identifierInNamespace field is manually set by the user
+     * or automatically set by a trigger in the database     *
+     */
+    private $isManualIdentifier;
 
     /**
      * @ORM\Column(type="text")
@@ -147,6 +155,22 @@ class Property
     }
 
     /**
+     * @Assert\Callback
+     * @param ExecutionContextInterface $context
+     * @param $payload
+     */
+    public function validate(ExecutionContextInterface $context, $payload)
+    {
+
+        // check if the identifier is set when needed
+        if ($this->isManualIdentifier && empty($this->identifierInNamespace)) {
+            $context->buildViolation('The identifier cannot be null.')
+                ->atPath('identifierInNamespace')
+                ->addViolation();
+        }
+    }
+
+    /**
      * @return mixed
      */
     public function getId()
@@ -168,6 +192,14 @@ class Property
     public function getImporterXmlField()
     {
         return $this->importerXmlField;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isManualIdentifier()
+    {
+        return $this->isManualIdentifier;
     }
 
     /**
@@ -304,6 +336,23 @@ class Property
     public function getObjectIdentification()
     {
         return $this->identifierInNamespace;
+    }
+
+    /**
+     * @param mixed $identifierInNamespace
+     */
+    public function setIdentifierInNamespace($identifierInNamespace)
+    {
+        $this->identifierInNamespace = $identifierInNamespace;
+    }
+
+
+    /**
+     * @param bool $isManualIdentifier
+     */
+    public function setIsManualIdentifier($isManualIdentifier)
+    {
+        $this->isManualIdentifier = $isManualIdentifier;
     }
 
     /**

@@ -34,6 +34,16 @@ class OntoNamespace
     private $namespaceURI;
 
     /**
+     * @ORM\Column(type="text")
+     */
+    private $classPrefix;
+
+    /**
+     * @ORM\Column(type="text")
+     */
+    private $propertyPrefix;
+
+    /**
      * @ORM\Column(type="integer")
      */
     private $importerInteger;
@@ -174,6 +184,22 @@ class OntoNamespace
     public function getNamespaceURI()
     {
         return $this->namespaceURI;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getClassPrefix()
+    {
+        return $this->classPrefix;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getPropertyPrefix()
+    {
+        return $this->propertyPrefix;
     }
 
     /**

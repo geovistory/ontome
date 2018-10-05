@@ -36,25 +36,30 @@
                 </h2>
 
                 {{ form_start(classForm) }}
-                {{ form_errors(classForm) }}
-                {{ form_row(classForm.labels) }}
+                    {{ form_errors(classForm) }}
+                    {% if  class.isManualIdentifier %}
+                        {{ form_row(classForm.identifierInNamespace) }}
+                    {% else %}
+                        {{ form_widget(classForm.identifierInNamespace, { 'attr': {'style': 'display:none'} }) }}
+                    {% endif %}
+                    {{ form_row(classForm.labels) }}
 
 
-                <div class="js-text-property-wrapper"
-                     data-prototype="{{ formMacros.printTextPropertyRow(classForm.textProperties.vars.prototype)|e('html_attr') }}"
-                     data-index="{{ classForm.textProperties|length }}"
-                >
-                    {% for textPropertyForm in classForm.textProperties %}
-                        {{ formMacros.printTextPropertyRow(textPropertyForm) }}
-                    {% endfor %}
-                    <a href="#" class="js-example-add">
-                        <span class="fa fa-plus-circle"></span>
-                        Add an example
-                    </a>
+                    <div class="js-text-property-wrapper"
+                         data-prototype="{{ formMacros.printTextPropertyRow(classForm.textProperties.vars.prototype)|e('html_attr') }}"
+                         data-index="{{ classForm.textProperties|length }}"
+                    >
+                        {% for textPropertyForm in classForm.textProperties %}
+                            {{ formMacros.printTextPropertyRow(textPropertyForm) }}
+                        {% endfor %}
+                        <a href="#" class="js-example-add">
+                            <span class="fa fa-plus-circle"></span>
+                            Add an example
+                        </a>
 
-                </div>
+                    </div>
 
-                <button type="submit" class="btn btn-primary" formnovalidate>Save</button>
+                    <button type="submit" class="btn btn-primary" formnovalidate>Save</button>
                 {{ form_end(classForm) }}
             </div>
         </div>
