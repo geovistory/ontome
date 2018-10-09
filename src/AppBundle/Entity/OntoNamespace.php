@@ -219,7 +219,7 @@ class OntoNamespace
     }
 
     /**
-     * @return mixed
+     * @return OntoNamespace
      */
     public function getTopLevelNamespace()
     {

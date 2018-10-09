@@ -73,7 +73,7 @@ class ClassController extends Controller
         $label->setCreationTime(new \DateTime('now'));
         $label->setModificationTime(new \DateTime('now'));
 
-        $class->setIsManualIdentifier(is_null($namespace->getClassPrefix()));
+        $class->setIsManualIdentifier(is_null($namespace->getTopLevelNamespace()->getClassPrefix()));
         $class->addLabel($label);
         $class->setCreator($this->getUser());
         $class->setModifier($this->getUser());
@@ -84,7 +84,7 @@ class ClassController extends Controller
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $class = $form->getData();
-            $class->setIsManualIdentifier(is_null($namespace->getClassPrefix()));
+            $class->setIsManualIdentifier(is_null($namespace->getTopLevelNamespace()->getClassPrefix()));
             $class->addNamespace($namespace);
             $class->setCreator($this->getUser());
             $class->setModifier($this->getUser());
