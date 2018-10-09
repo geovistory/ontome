@@ -37,6 +37,10 @@ class ApiController extends Controller
             return new JsonResponse(null,404, 'content-type:application/problem+json');
         }
 
+        if(empty($classes[0]['json'])) {
+            return new JsonResponse(null,204, array());
+        }
+
         //return new JsonResponse(null,404, array('content-type'=>'application/problem+json'));
         return new JsonResponse($classes[0]['json'],200, array(), true);
     }
@@ -49,16 +53,19 @@ class ApiController extends Controller
      */
     public function getPropertiesByProject(Project $project)
     {
-        try{
+        try {
             $em = $this->getDoctrine()->getManager();
             $properties = $em->getRepository('AppBundle:Property')
                 ->findPropertiesByProjectId($project);
 
         }
         catch (NotFoundHttpException $e) {
-            return new JsonResponse(null,404, 'contennt-type:application/problem+json');
+            return new JsonResponse(null,404, 'content-type:application/problem+json');
         }
 
+        if(empty($properties[0]['json'])) {
+            return new JsonResponse(null,204, array());
+        }
 
         return new JsonResponse($properties[0]['json'],200, array(), true);
     }

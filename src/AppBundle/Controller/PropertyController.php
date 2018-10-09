@@ -84,6 +84,7 @@ class PropertyController extends Controller
             $property->setRange($class);
         }
 
+        $property->setIsManualIdentifier(is_null($class->getOngoingNamespace()->getTopLevelNamespace()->getClassPrefix()));
         $property->setCreator($this->getUser());
         $property->setModifier($this->getUser());
 
@@ -100,6 +101,7 @@ class PropertyController extends Controller
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $property = $form->getData();
+            $property->setIsManualIdentifier(is_null($class->getOngoingNamespace()->getTopLevelNamespace()->getClassPrefix()));
             $property->addNamespace($class->getOngoingNamespace());
             if($type == 'outgoing') {
                 $property->setDomain($class);

@@ -12,6 +12,7 @@ use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
@@ -35,6 +36,8 @@ class OutgoingPropertyQuickAddForm extends AbstractType
 
 
         $builder
+            ->add('identifierInNamespace', TextType::class, array(
+            ))
             ->add('labels', CollectionType::class, array(
                 'label' => 'Enter a label and select a language',
                 'entry_type' => LabelType::class,
