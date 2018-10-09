@@ -129,6 +129,13 @@ class OntoClass
     private $profiles;
 
     /**
+     * @Assert\NotNull()
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Comment", mappedBy="class")
+     * @ORM\OrderBy({"creationTime" = "DESC"})
+     */
+    private $comments;
+
+    /**
      * @ORM\ManyToOne(targetEntity="OntoNamespace")
      * @ORM\JoinColumn(name="fk_ongoing_namespace", referencedColumnName="pk_namespace", nullable=true)
      */
@@ -287,6 +294,14 @@ class OntoClass
     public function getProfiles()
     {
         return $this->profiles;
+    }
+
+    /**
+     * @return ArrayCollection|Comment[]
+     */
+    public function getComments()
+    {
+        return $this->comments;
     }
 
     /**
