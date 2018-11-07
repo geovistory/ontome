@@ -129,7 +129,6 @@ class OntoClass
     private $profiles;
 
     /**
-     * @Assert\NotNull()
      * @ORM\OneToMany(targetEntity="AppBundle\Entity\Comment", mappedBy="class")
      * @ORM\OrderBy({"creationTime" = "DESC"})
      */
@@ -173,6 +172,19 @@ class OntoClass
                 ->atPath('identifierInNamespace')
                 ->addViolation();
         }
+        else if($this->isManualIdentifier) {
+            foreach ($this->getNamespaces() as $namespace) {
+                foreach ($namespace->getClasses() as $class) {
+                    if ($class->identifierInNamespace === $this->identifierInNamespace) {
+                        $context->buildViolation('The identifier must be unique. Please choose another one.')
+                            ->atPath('identifierInNamespace')
+                            ->addViolation();
+                        break;
+                    }
+                }
+            }
+        }
+
     }
 
     /**
