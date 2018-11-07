@@ -74,6 +74,7 @@ class ClassController extends Controller
         $label->setModificationTime(new \DateTime('now'));
 
         $class->setIsManualIdentifier(is_null($namespace->getTopLevelNamespace()->getClassPrefix()));
+        $class->addNamespace($namespace);
         $class->addLabel($label);
         $class->setCreator($this->getUser());
         $class->setModifier($this->getUser());
