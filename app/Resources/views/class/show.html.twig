@@ -30,6 +30,7 @@
             <li><a data-toggle="tab" href="#equivalences">Equivalences</a></li>
             <li><a data-toggle="tab" href="#profiles">Profiles</a></li>
             <li><a data-toggle="tab" href="#graph">Graph</a></li>
+            <li><a data-toggle="tab" href="#comments">Comments</a></li>
         </ul>
 
         <div class="tab-content">
@@ -481,6 +482,27 @@
                 }}">
                 </div>
                 <p><span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span><em>Use mouse wheel to zoom in/out.</em></p>
+            </div>
+            <div id="comments" class="tab-pane fade">
+                <h3>Comments</h3>
+                <ul  class="comments-list">
+                    {% for comment in class.comments %}
+                        <li>
+                            <div class="comment-author">
+                                <span>{{ comment.creator.fullName }}</span>
+                            </div>
+                            <div class="comment-text">
+                                {{ comment.comment }}
+                            </div>
+                            <div class="sub-comment-text">
+                                on {{ comment.creationTime|date('Y-m-d') }}
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+                <div class="new-comment-form">
+                    {{ render(controller('AppBundle:Comment:new', {'object' : 'class', 'objectId' : class.id})) }}
+                </div>
             </div>
         </div>
     </div>
