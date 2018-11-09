@@ -32,12 +32,6 @@ class Comment
     private $comment;
 
     /**
-     * @Assert\NotBlank()
-     * @ORM\Column(type="text", nullable=false)
-     */
-    private $languageIsoCode;
-
-    /**
      * @ORM\ManyToOne(targetEntity="OntoClass", inversedBy="comments")
      * @ORM\JoinColumn(name="fk_class", referencedColumnName="pk_class")
      */

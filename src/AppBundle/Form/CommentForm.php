@@ -41,7 +41,7 @@ class CommentForm extends AbstractType
 
         $builder
             ->add('comment', TextareaType::class, array(
-                'attr' => array('class' => 'tinymce')
+                //'attr' => array('class' => 'tinymce')
             ))
             ->add('creator', HiddenType::class)
             ->add('modifier', HiddenType::class);

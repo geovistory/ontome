@@ -63,44 +63,57 @@ class CommentController extends Controller
 
         // only handles data on POST
         $form->handleRequest($request);
-        if(!$form->isSubmitted()){
-            return $this->render('comment/new.html.twig', [
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $comment = $form->getData();
+            $comment->setCreator($this->getUser());
+            $comment->setModifier($this->getUser());
+            $comment->setCreationTime(new \DateTime('now'));
+            $comment->setModificationTime(new \DateTime('now'));
+
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($comment);
+            $em->flush();
+
+            $html = $this->renderView('comment/new.html.twig', [
                 'comment' => $comment,
                 'commentForm' => $form->createView()
             ]);
-        }
-        else {
-            if ($form->isSubmitted() && $form->isValid()) {
-                $comment = $form->getData();
-                $comment->setCreator($this->getUser());
-                $comment->setModifier($this->getUser());
-                $comment->setCreationTime(new \DateTime('now'));
-                $comment->setModificationTime(new \DateTime('now'));
 
-                $em = $this->getDoctrine()->getManager();
-                $em->persist($comment);
+            try {
                 $em->flush();
-
-                try {
-                    $em->flush();
-                    $status = 'Success';
-                    $message = 'New comment saved';
-                } catch (\Exception $e) {
-                    $message = $e->getMessage();
-                }
-
-
-            }
-            else {
-                $message = 'Invalid form data';
+                $status = 'Success';
+                $message = 'New comment saved';
+            } catch (\Exception $e) {
+                $message = $e->getMessage();
             }
 
             $response = array(
                 'status' => $status,
-                'message' => $message
+                'message' => $message,
+                'html' => $html
             );
 
             return new JsonResponse($response);
+
         }
+        else if ($form->isSubmitted() && !$form->isValid()) {
+            $status = 'Error';
+            $message = 'Invalid form validation';
+            $html = $this->renderView('comment/new.html.twig', [
+                'comment' => $comment,
+                'commentForm' => $form->createView()
+            ]);
+            $response = array(
+                'status' => $status,
+                'message' => $message,
+                'html' => $html
+            );
+            return new JsonResponse($response);
+        }
+        else return $this->render('comment/new.html.twig', [
+            'comment' => $comment,
+            'commentForm' => $form->createView()
+        ]);
     }
 }
