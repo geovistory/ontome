@@ -673,6 +673,65 @@ COLUMNS Styling
 FOOTER Styling
 *******************************/
 
+.detailBox {
+    width:320px;
+    border:1px solid #bbb;
+    margin:50px;
+}
+.comment-box {
+    padding:10px;
+}
+.comment-box .form-group:first-child, .action-box .form-group:first-child {
+    width:80%;
+}
+.comment-box .form-group:nth-child(2), .action-box .form-group:nth-child(2) {
+    width:18%;
+}
+.action-box .form-group * {
+    width:100%;
+}
+
+.comments-list {
+    padding:0;
+    list-style:none;
+    max-height:200px;
+    overflow:auto;
+}
+.comments-list li {
+    margin:0;
+    margin-top:10px;
+    border-bottom:1px dotted #bbb;
+}
+.comments-list li > div {
+    display:table-cell;
+}
+.commenterImage {
+    width:30px;
+    margin-right:5px;
+    height:100%;
+    float:left;
+}
+.commenterImage img {
+    width:100%;
+    border-radius:50%;
+}
+.comment-text p {
+    margin:0;
+}
+.sub-comment-text {
+    color:#aaa;
+    font-family:verdana;
+    font-size:11px;
+}
+.action-box {
+    border-top:1px dotted #bbb;
+    padding:10px;
+}
+
+/******************************
+FOOTER Styling
+*******************************/
+
 .footer {
     padding: 20px;
     background: #E9D4B7;

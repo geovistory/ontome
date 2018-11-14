@@ -485,23 +485,23 @@
             </div>
             <div id="comments" class="tab-pane fade">
                 <h3>Comments</h3>
-                <ul  class="comments-list">
-                    {% for comment in class.comments %}
-                        <li>
-                            <div class="comment-author">
-                                <span>{{ comment.creator.fullName }}</span>
-                            </div>
-                            <div class="comment-text">
-                                {{ comment.comment }}
-                            </div>
-                            <div class="sub-comment-text">
-                                on {{ comment.creationTime|date('Y-m-d') }}
-                            </div>
-                        </li>
-                    {% endfor %}
-                </ul>
-                <div class="new-comment-form" id="new-comment-form">
-                    {{ render(controller('AppBundle:Comment:new', {'object' : 'class', 'objectId' : class.id})) }}
+                <div class="comment-box">
+                    <div class="action-box">
+                        <ul  class="comments-list">
+                            {% for comment in class.comments %}
+                                <li>
+                                    <div class="comment-text">
+                                        <p><strong><a href="#">{{ comment.creator.fullName }}</a></strong></p>
+                                        <p>{{ comment.comment }}</p>
+                                        <span class="date sub-comment-text">on {{ comment.creationTime|date() }}</span>
+                                    </div>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                        <div class="new-comment-form" id="new-comment-form">
+                            {{ render(controller('AppBundle:Comment:new', {'object' : 'class', 'objectId' : class.id})) }}
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -573,7 +573,8 @@
             // get the properties and values from the form
             var form_data = form.serialize();
             // always makes sense to signal user that something is happening
-            //$('#loadingSpinner').show();
+            $('#submit-icon').attr('class', 'fas fa-spinner fa-spin');
+            $('#submit-text').text('Sending');
 
             // simple approach avoid submitting multiple times
             $('#mySubmitButton').attr("disabled",true);
@@ -600,6 +601,7 @@
                         $('#new-comment-form').html(innerHTML);
                         $('#comment_form_comment').val('');
                         console.log("[API] SUCCESS: "+data.message);
+                        console.log(form_data);
                     }
 
                     if(!data.success) { // undefined here, set to true in controller the form is valid
@@ -609,7 +611,8 @@
                     }
 
                     // signal to user the action is done
-                    $('#loadingSpinner').hide();
+                    $('#submit-icon').attr('class', 'far fa-comment');
+                    $('#submit-text').text('Send');
                     $('#mySubmitButton').attr("disabled",false);
                 }
             });
