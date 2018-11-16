@@ -485,9 +485,9 @@
             </div>
             <div id="comments" class="tab-pane fade">
                 <h3>Comments</h3>
-                <div class="comment-box">
+                <div class="comment-box js-user-info" data-fullname="{{ app.user }}">
                     <div class="action-box">
-                        <ul  class="comments-list">
+                        <ul id="comments-list" class="comments-list">
                             {% for comment in class.comments %}
                                 <li>
                                     <div class="comment-text">
@@ -498,9 +498,11 @@
                                 </li>
                             {% endfor %}
                         </ul>
+                        {% if app.user %}
                         <div class="new-comment-form" id="new-comment-form">
                             {{ render(controller('AppBundle:Comment:new', {'object' : 'class', 'objectId' : class.id})) }}
                         </div>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -535,90 +537,9 @@
             $('#profiles-table').DataTable();
         } );
 
-        $.fn.serializeObject = function()
-        {
-            var o = {};
-            var a = this.serializeArray();
-            $.each(a, function() {
-                if (o[this.name] !== undefined) {
-                    if (!o[this.name].push) {
-                        o[this.name] = [o[this.name]];
-                    }
-                    o[this.name].push(this.value || '');
-                } else {
-                    o[this.name] = this.value || '';
-                }
-            });
-            return o;
-        };
-
-        $(document).on("submit", "#form_comment_new", function(e){
-            e.preventDefault();
-            return  false;
-        });
-
-        $(document).on('click', '#mySubmitButton', function(e){
-            e.preventDefault();
-            var form = $('#form_comment_new');
-            /*if(!form.checkValidity()){
-                // To show the native error hints you can fake a click() on the actual submit button
-                // which must not be the button #mySubmitButton and shall be hidden with display:none;
-                //  example:
-                //  <button type="button" id="#mySubmitButton" class"btn btn-default" > Save </button>
-                //  <button type="submit" id="#myHIDDENSubmitButton" style="display:none;"></button>
-                //
-                $("#myHIDDENSubmitButton").click();
-                return false;
-            }*/
-            // get the properties and values from the form
-            var form_data = form.serialize();
-            // always makes sense to signal user that something is happening
-            $('#submit-icon').attr('class', 'fas fa-spinner fa-spin');
-            $('#submit-text').text('Sending');
-
-            // simple approach avoid submitting multiple times
-            $('#mySubmitButton').attr("disabled",true);
-
-            // the actual request to your newAction
-            $.ajax({
-                url: '/comment/new/class/{{ class.id }}',
-                url: "{{ path('comment_new', {'object' : 'class','objectId': class.id}) }}",
-                type: 'POST',
-                dataType: 'json',
-                data: form_data,
-                success:function(data){
-
-                    // handling the response data from the controller
-                    if(data.status == 'Error'){
-                        console.log("[API] ERROR: "+data.message);
-                        var innerHTML = $(data.html);
-                        $('#form_comment_new').remove();
-                        $('#new-comment-form').html(innerHTML);
-                    }
-                    if(data.status == 'Success'){
-                        var innerHTML = $(data.html);
-                        $('#form_comment_new').remove();
-                        $('#new-comment-form').html(innerHTML);
-                        $('#comment_form_comment').val('');
-                        console.log("[API] SUCCESS: "+data.message);
-                        console.log(form_data);
-                    }
-
-                    if(!data.success) { // undefined here, set to true in controller the form is valid
-
-                    } else {
-                        // Submit OK
-                    }
-
-                    // signal to user the action is done
-                    $('#submit-icon').attr('class', 'far fa-comment');
-                    $('#submit-text').text('Send');
-                    $('#mySubmitButton').attr("disabled",false);
-                }
-            });
-        });
 
     </script>
+    {% include 'comment/js-bock.html.twig'  with {'objectType': 'class', 'objectId' : class.id  } %}
     <script src="https://d3js.org/d3.v4.min.js"></script>
     <script type="text/javascript" src="{{ asset('js/class-graph.js') }}"></script>
 

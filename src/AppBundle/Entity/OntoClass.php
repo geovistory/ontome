@@ -130,7 +130,7 @@ class OntoClass
 
     /**
      * @ORM\OneToMany(targetEntity="AppBundle\Entity\Comment", mappedBy="class")
-     * @ORM\OrderBy({"creationTime" = "ASC"})
+     * @ORM\OrderBy({"creationTime" = "DESC"})
      */
     private $comments;
 

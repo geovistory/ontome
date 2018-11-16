@@ -30,13 +30,14 @@ class CommentForm extends AbstractType
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $userID = $this->tokenStorage->getToken()->getUser()->getId();
-        $user = $this->em->getRepository('AppBundle:User')->find($userID);
+        try {
 
-        if (!$user) {
-            throw new \LogicException(
-                'The TextPropertyForm cannot be used without an authenticated user!'
-            );
+            $userID = $this->tokenStorage->getToken()->getUser()->getId();
+            $user = $this->em->getRepository('AppBundle:User')->find($userID);
+        }
+        catch (\Exception $e)
+        {
+            $message = $e->getMessage();
         }
 
         $builder

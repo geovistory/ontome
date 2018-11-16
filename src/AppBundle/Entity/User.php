@@ -315,6 +315,15 @@ class User implements UserInterface
         return $this->login;
     }
 
+    public function __toString()
+    {
+        $s = $this->getFullName();
+        if(is_null($s)) {
+            $s = 'Anonymous';
+        }
+        return (string) $s;
+    }
+
 
 
 }

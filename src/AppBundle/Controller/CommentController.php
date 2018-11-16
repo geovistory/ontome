@@ -20,6 +20,44 @@ use Symfony\Component\HttpFoundation\Request;
 class CommentController extends Controller
 {
     /**
+     * @Route("/comment/{objectType}/{objectId}/json", name="comment_show_json")
+     * @Method("GET")
+     * @param string $objectType    The object type name
+     * @param int  $objectId    The id of the object
+     * @return JsonResponse a Json formatted comments list
+     */
+    public function getCommentsAction($objectType, $objectId)
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        //$objectType = 'class';
+        //$objectId = 268;
+        if($objectType === 'class') {
+            $associatedEntity = $em->getRepository('AppBundle:OntoClass')->find($objectId);
+            if (!$associatedEntity) {
+                throw $this->createNotFoundException('The class n° '.$objectId.' does not exist');
+            }
+        }
+        else throw $this->createNotFoundException('The requested object "'.$objectType.'" does not exist!');
+
+        $comments = [];
+
+        foreach ($associatedEntity->getComments() as $comment) {
+            $comments[] = [
+                'id' => $comment->getId(),
+                'creator' => $comment->getCreator(),
+                'text' => $comment->getComment(),
+                'creationTime' => $comment->getCreationTime()->format('M d, Y')
+            ];
+        }
+
+        $data =[
+            'comments' => $comments
+        ];
+        return new JsonResponse($data);
+    }
+
+    /**
      * @Route("/comment/new/{object}/{objectId}", name="comment_new")
      * @Method({ "POST"})
      */
@@ -44,8 +82,8 @@ class CommentController extends Controller
             }
             $comment->setProperty($associatedEntity);
             $associatedObject = $associatedEntity;
-        }
-        else throw $this->createNotFoundException('The requested object "'.$object.'" does not exist!');*/
+        }*/
+        //else throw $this->createNotFoundException('The requested object "'.$object.'" does not exist!');
 
 
         //$this->denyAccessUnlessGranted('edit', $associatedObject);
