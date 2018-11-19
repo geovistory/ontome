@@ -46,6 +46,7 @@
                 if(data.status == 'Success'){
                     var innerHTML = $(data.html);
                     $('#form_comment_new').remove();
+                    $('#comment-not-found').remove();
                     $('#new-comment-form').html(innerHTML);
                     $('#comment_form_comment').val('');
                     $('#comments-list').prepend( $('<li>\n' +

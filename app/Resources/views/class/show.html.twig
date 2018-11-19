@@ -487,6 +487,9 @@
                 <h3>Comments</h3>
                 <div class="comment-box js-user-info" data-fullname="{{ app.user }}">
                     <div class="action-box">
+                        {% if class.comments is empty %}
+                            <p id="comment-not-found"><em>No comment found.</em></p>
+                        {% endif %}
                         <ul id="comments-list" class="comments-list">
                             {% for comment in class.comments %}
                                 <li>
@@ -498,6 +501,7 @@
                                 </li>
                             {% endfor %}
                         </ul>
+
                         {% if app.user %}
                         <div class="new-comment-form" id="new-comment-form">
                             {{ render(controller('AppBundle:Comment:new', {'object' : 'class', 'objectId' : class.id})) }}
