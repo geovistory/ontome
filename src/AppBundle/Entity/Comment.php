@@ -44,7 +44,7 @@ class Comment
     private $property;
 
     /**
-     * @ORM\ManyToOne(targetEntity="classAssociation", inversedBy="comments")
+     * @ORM\ManyToOne(targetEntity="ClassAssociation", inversedBy="comments")
      * @ORM\JoinColumn(name="fk_is_subclass_of", referencedColumnName="pk_is_subclass_of")
      */
     private $classAssociation;
