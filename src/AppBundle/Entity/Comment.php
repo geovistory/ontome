@@ -38,6 +38,24 @@ class Comment
     private $class;
 
     /**
+     * @ORM\ManyToOne(targetEntity="Property", inversedBy="comments")
+     * @ORM\JoinColumn(name="fk_property", referencedColumnName="pk_property")
+     */
+    private $property;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="classAssociation", inversedBy="comments")
+     * @ORM\JoinColumn(name="fk_is_subclass_of", referencedColumnName="pk_is_subclass_of")
+     */
+    private $classAssociation;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="PropertyAssociation", inversedBy="comments")
+     * @ORM\JoinColumn(name="fk_is_subproperty_of", referencedColumnName="pk_is_subproperty_of")
+     */
+    private $propertyAssociation;
+
+    /**
      * @Assert\NotBlank()
      * @ORM\ManyToOne(targetEntity="User")
      * @ORM\JoinColumn(name="creator", referencedColumnName="pk_user", nullable=false)
@@ -91,6 +109,30 @@ class Comment
     public function getClass()
     {
         return $this->class;
+    }
+
+    /**
+     * @return Property
+     */
+    public function getProperty()
+    {
+        return $this->property;
+    }
+
+    /**
+     * @return ClassAssociation
+     */
+    public function getClassAssociation()
+    {
+        return $this->classAssociation;
+    }
+
+    /**
+     * @return PropertyAssociation
+     */
+    public function getPropertyAssociation()
+    {
+        return $this->propertyAssociation;
     }
 
     /**
@@ -148,6 +190,32 @@ class Comment
     {
         $this->class = $class;
     }
+
+    /**
+     * @param mixed $property
+     */
+    public function setProperty($property)
+    {
+        $this->property = $property;
+    }
+
+    /**
+     * @param mixed $classAssociation
+     */
+    public function setClassAssociation($classAssociation)
+    {
+        $this->classAssociation = $classAssociation;
+    }
+
+    /**
+     * @param mixed $propertyAssociation
+     */
+    public function setPropertyAssociation($propertyAssociation)
+    {
+        $this->propertyAssociation = $propertyAssociation;
+    }
+
+
 
     /**
      * @param mixed $creator
