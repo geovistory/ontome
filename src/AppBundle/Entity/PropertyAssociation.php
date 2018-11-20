@@ -67,6 +67,12 @@ class PropertyAssociation
     private $namespaces;
 
     /**
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Comment", mappedBy="propertyAssociation")
+     * @ORM\OrderBy({"creationTime" = "DESC"})
+     */
+    private $comments;
+
+    /**
      * @ORM\ManyToOne(targetEntity="User")
      * @ORM\JoinColumn(name="creator", referencedColumnName="pk_user", nullable=false)
      */
@@ -95,6 +101,7 @@ class PropertyAssociation
     {
         $this->textProperties = new ArrayCollection();
         $this->namespaces = new ArrayCollection();
+        $this->comments = new ArrayCollection();
     }
 
     /**
@@ -144,6 +151,14 @@ class PropertyAssociation
     public function getNamespaces()
     {
         return $this->namespaces;
+    }
+
+    /**
+     * @return ArrayCollection|Comment[]
+     */
+    public function getComments()
+    {
+        return $this->comments;
     }
 
     /**

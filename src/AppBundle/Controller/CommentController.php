@@ -38,6 +38,24 @@ class CommentController extends Controller
                 throw $this->createNotFoundException('The class n° '.$objectId.' does not exist');
             }
         }
+        else if($objectType === 'property') {
+            $associatedEntity = $em->getRepository('AppBundle:Property')->find($objectId);
+            if (!$associatedEntity) {
+                throw $this->createNotFoundException('The property n° '.$objectId.' does not exist');
+            }
+        }
+        else if($objectType === 'class-association') {
+            $associatedEntity = $em->getRepository('AppBundle:ClassAssociation')->find($objectId);
+            if (!$associatedEntity) {
+                throw $this->createNotFoundException('The class association n° '.$objectId.' does not exist');
+            }
+        }
+        else if($objectType === 'property-association') {
+            $associatedEntity = $em->getRepository('AppBundle:PropertyAssociation')->find($objectId);
+            if (!$associatedEntity) {
+                throw $this->createNotFoundException('The property association n° '.$objectId.' does not exist');
+            }
+        }
         else throw $this->createNotFoundException('The requested object "'.$objectType.'" does not exist!');
 
         $comments = [];
@@ -73,17 +91,29 @@ class CommentController extends Controller
                 throw $this->createNotFoundException('The class n° '.$objectId.' does not exist');
             }
             $comment->setClass($associatedEntity);
-            $associatedObject = $associatedEntity;
         }
-        /*else if($object === 'property') {
+        else if($object === 'property') {
             $associatedEntity = $em->getRepository('AppBundle:Property')->find($objectId);
             if (!$associatedEntity) {
                 throw $this->createNotFoundException('The property n° '.$objectId.' does not exist');
             }
             $comment->setProperty($associatedEntity);
-            $associatedObject = $associatedEntity;
-        }*/
-        //else throw $this->createNotFoundException('The requested object "'.$object.'" does not exist!');
+        }
+        else if($object === 'class-association') {
+            $associatedEntity = $em->getRepository('AppBundle:ClassAssociation')->find($objectId);
+            if (!$associatedEntity) {
+                throw $this->createNotFoundException('The class association n° '.$objectId.' does not exist');
+            }
+            $comment->setClassAssociation($associatedEntity);
+        }
+        else if($object === 'property-association') {
+            $associatedEntity = $em->getRepository('AppBundle:PropertyAssociation')->find($objectId);
+            if (!$associatedEntity) {
+                throw $this->createNotFoundException('The property association n° '.$objectId.' does not exist');
+            }
+            $comment->setPropertyAssociation($associatedEntity);
+        }
+        else throw $this->createNotFoundException('The requested object "'.$object.'" does not exist!');
 
 
         //$this->denyAccessUnlessGranted('edit', $associatedObject);

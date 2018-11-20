@@ -156,6 +156,7 @@ class OntoClass
         $this->parentClassAssociations = new ArrayCollection();
         $this->childClassAssociations = new ArrayCollection();
         $this->propertiesAsDomain = new ArrayCollection();
+        $this->comments = new ArrayCollection();
     }
 
     /**
