@@ -114,8 +114,14 @@ class Property
     private $profiles;
 
     /**
- * @ORM\OneToMany(targetEntity="PropertyAssociation", mappedBy="childProperty")
- */
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Comment", mappedBy="property")
+     * @ORM\OrderBy({"creationTime" = "DESC"})
+     */
+    private $comments;
+
+    /**
+    * @ORM\OneToMany(targetEntity="PropertyAssociation", mappedBy="childProperty")
+    */
     private $childPropertyAssociations;
 
     /**
@@ -152,6 +158,7 @@ class Property
         $this->labels = new ArrayCollection();
         $this->textProperties = new ArrayCollection();
         $this->profiles = new ArrayCollection();
+        $this->comments = new ArrayCollection();
     }
 
     /**
@@ -224,6 +231,14 @@ class Property
     public function getStandardLabel()
     {
         return $this->standardLabel;
+    }
+
+    /**
+     * @return ArrayCollection|Comment[]
+     */
+    public function getComments()
+    {
+        return $this->comments;
     }
 
     /**

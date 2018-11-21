@@ -1,0 +1,5 @@
+{{ form_start(commentForm, {'attr': {'id': 'form_comment_new'}}) }}
+    {{ form_row(commentForm.comment) }}
+    <button type="button" id="mySubmitButton" class="btn btn-primary" formnovalidate><span id="submit-text">Send</span>&nbsp;<span id="submit-icon" class="far fa-comment"></span></button>
+    <button type="submit" id="myHIDDENSubmitButton" formnovalidate style="display:none;"></button>
+{{ form_end(commentForm) }}

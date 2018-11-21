@@ -2,17 +2,11 @@
 
 namespace AppBundle\Form;
 
-use AppBundle\Entity\OntoNamespace;
-use AppBundle\Entity\User;
-use AppBundle\Form\DataTransformer\OntoClassToNumberTransformer;
 use AppBundle\Form\DataTransformer\UserToNumberTransformer;
-use AppBundle\Repository\NamespaceRepository;
-use Doctrine\DBAL\Types\TextType;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
-use Symfony\Component\Form\Extension\Core\Type\HiddenType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;

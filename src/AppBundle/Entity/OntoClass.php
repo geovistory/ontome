@@ -129,6 +129,12 @@ class OntoClass
     private $profiles;
 
     /**
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Comment", mappedBy="class")
+     * @ORM\OrderBy({"creationTime" = "DESC"})
+     */
+    private $comments;
+
+    /**
      * @ORM\ManyToOne(targetEntity="OntoNamespace")
      * @ORM\JoinColumn(name="fk_ongoing_namespace", referencedColumnName="pk_namespace", nullable=true)
      */
@@ -150,6 +156,7 @@ class OntoClass
         $this->parentClassAssociations = new ArrayCollection();
         $this->childClassAssociations = new ArrayCollection();
         $this->propertiesAsDomain = new ArrayCollection();
+        $this->comments = new ArrayCollection();
     }
 
     /**
@@ -166,6 +173,19 @@ class OntoClass
                 ->atPath('identifierInNamespace')
                 ->addViolation();
         }
+        else if($this->isManualIdentifier) {
+            foreach ($this->getNamespaces() as $namespace) {
+                foreach ($namespace->getClasses() as $class) {
+                    if ($class->identifierInNamespace === $this->identifierInNamespace) {
+                        $context->buildViolation('The identifier must be unique. Please choose another one.')
+                            ->atPath('identifierInNamespace')
+                            ->addViolation();
+                        break;
+                    }
+                }
+            }
+        }
+
     }
 
     /**
@@ -287,6 +307,14 @@ class OntoClass
     public function getProfiles()
     {
         return $this->profiles;
+    }
+
+    /**
+     * @return ArrayCollection|Comment[]
+     */
+    public function getComments()
+    {
+        return $this->comments;
     }
 
     /**
