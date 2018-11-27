@@ -155,7 +155,9 @@
                     {% for namespace in property.namespaces %}
                         <tr>
                             <td>
-                                <a href="#">
+                                <a href="{{ path('namespace_show', {
+                                    'id': namespace.id
+                                }) }}">
                                     {{ namespace.namespaceURI }}
                                 </a>
                             </td>
