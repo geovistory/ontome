@@ -374,6 +374,120 @@ class OntoNamespace
         return $this->labels[0];
     }
 
+    /**
+     * @param mixed $namespaceURI
+     */
+    public function setNamespaceURI($namespaceURI)
+    {
+        $this->namespaceURI = $namespaceURI;
+    }
+
+    /**
+     * @param mixed $classPrefix
+     */
+    public function setClassPrefix($classPrefix)
+    {
+        $this->classPrefix = $classPrefix;
+    }
+
+    /**
+     * @param mixed $propertyPrefix
+     */
+    public function setPropertyPrefix($propertyPrefix)
+    {
+        $this->propertyPrefix = $propertyPrefix;
+    }
+
+    /**
+     * @param mixed $referencedVersion
+     */
+    public function setReferencedVersion($referencedVersion)
+    {
+        $this->referencedVersion = $referencedVersion;
+    }
+
+    /**
+     * @param mixed $topLevelNamespace
+     */
+    public function setTopLevelNamespace($topLevelNamespace)
+    {
+        $this->topLevelNamespace = $topLevelNamespace;
+    }
+
+    /**
+     * @param mixed $isTopLevelNamespace
+     */
+    public function setIsTopLevelNamespace($isTopLevelNamespace)
+    {
+        $this->isTopLevelNamespace = $isTopLevelNamespace;
+    }
+
+    /**
+     * @param mixed $isOngoing
+     */
+    public function setIsOngoing($isOngoing)
+    {
+        $this->isOngoing = $isOngoing;
+    }
+
+    /**
+     * @param mixed $projectForTopLevelNamespace
+     */
+    public function setProjectForTopLevelNamespace($projectForTopLevelNamespace)
+    {
+        $this->projectForTopLevelNamespace = $projectForTopLevelNamespace;
+    }
+
+    /**
+     * @param mixed $startDate
+     */
+    public function setStartDate($startDate)
+    {
+        $this->startDate = $startDate;
+    }
+
+    /**
+     * @param mixed $endDate
+     */
+    public function setEndDate($endDate)
+    {
+        $this->endDate = $endDate;
+    }
+
+    /**
+     * @param mixed $creator
+     */
+    public function setCreator($creator)
+    {
+        $this->creator = $creator;
+    }
+
+    /**
+     * @param mixed $modifier
+     */
+    public function setModifier($modifier)
+    {
+        $this->modifier = $modifier;
+    }
+
+    /**
+     * @param mixed $creationTime
+     */
+    public function setCreationTime($creationTime)
+    {
+        $this->creationTime = $creationTime;
+    }
+
+    /**
+     * @param mixed $modificationTime
+     */
+    public function setModificationTime($modificationTime)
+    {
+        $this->modificationTime = $modificationTime;
+    }
+
+
+
     public function addClassAssociation(ClassAssociation $classAssociation)
     {
         if ($this->classAssociations->contains($classAssociation)) {

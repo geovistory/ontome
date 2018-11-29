@@ -57,6 +57,11 @@ class UserProjectAssociation
     private $endDate;
 
     /**
+     * @ORM\Column(type="text")
+     */
+    private $notes;
+
+    /**
      * @ORM\ManyToOne(targetEntity="User")
      * @ORM\JoinColumn(name="creator", referencedColumnName="pk_user", nullable=false)
      */
@@ -116,6 +121,14 @@ class UserProjectAssociation
     public function getEndDate()
     {
         return $this->endDate;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getNotes()
+    {
+        return $this->notes;
     }
 
     /**
@@ -196,6 +209,14 @@ class UserProjectAssociation
     public function setEndDate($endDate)
     {
         $this->endDate = $endDate;
+    }
+
+    /**
+     * @param mixed $notes
+     */
+    public function setNotes($notes)
+    {
+        $this->notes = $notes;
     }
 
     /**

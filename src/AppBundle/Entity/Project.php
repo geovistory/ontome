@@ -122,8 +122,6 @@ class Project
 
     public function __construct()
     {
-        $this->properties = new ArrayCollection();
-        $this->classes = new ArrayCollection();
         $this->ownedProfiles = new ArrayCollection();
         $this->managedNamespaces = new ArrayCollection();
         $this->profiles = new ArrayCollection();
@@ -294,4 +292,61 @@ class Project
         return $this->standardLabel;
     }
 
+    /**
+     * @param mixed $startDate
+     */
+    public function setStartDate($startDate)
+    {
+        $this->startDate = $startDate;
+    }
+
+    /**
+     * @param mixed $endDate
+     */
+    public function setEndDate($endDate)
+    {
+        $this->endDate = $endDate;
+    }
+
+    /**
+     * @param mixed $creator
+     */
+    public function setCreator($creator)
+    {
+        $this->creator = $creator;
+    }
+
+    /**
+     * @param mixed $modifier
+     */
+    public function setModifier($modifier)
+    {
+        $this->modifier = $modifier;
+    }
+
+    /**
+     * @param mixed $creationTime
+     */
+    public function setCreationTime($creationTime)
+    {
+        $this->creationTime = $creationTime;
+    }
+
+    /**
+     * @param mixed $modificationTime
+     */
+    public function setModificationTime($modificationTime)
+    {
+        $this->modificationTime = $modificationTime;
+    }
+
+    public function addLabel(Label $label)
+    {
+        if ($this->labels->contains($label)) {
+            return;
+        }
+        $this->labels[] = $label;
+        // needed to update the owning side of the relationship!
+        $label->setProject($this);
+    }
 }
