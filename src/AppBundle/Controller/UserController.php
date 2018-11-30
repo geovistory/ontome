@@ -75,7 +75,14 @@ class UserController extends Controller
      */
     public function showAction(User $user)
     {
+        $em = $this->getDoctrine()->getManager();
+        $profiles = $em->getRepository('AppBundle:Profile')
+            ->findBy(array('creator' => $user->getId()));
+        $namespaces = $em->getRepository('AppBundle:OntoNamespace')
+            ->findBy(array('creator' => $user->getId()));
         return $this->render('user/show.html.twig', array(
+            'profiles' => $profiles,
+            'namespaces' => $namespaces,
             'user' => $user
         ));
     }

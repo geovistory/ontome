@@ -68,6 +68,11 @@
                     <li><a href="{{ url('app_namespace_list') }}">Namespaces</a></li>
                     <li><a href="{{ url('app_project_list') }}">Projects</a></li>
                     <li><a href="{{ url('app_profile_list') }}">Profiles</a></li>
+                    {% if app.user %}
+                        <li><a href="{{ path('user_show', {
+                                'id': app.user.id
+                            }) }}"><i class="fas fa-tachometer-alt"></i>&nbsp;Dashboard</a></li>
+                    {% endif %}
                 </ul>
             </div>
         </nav>

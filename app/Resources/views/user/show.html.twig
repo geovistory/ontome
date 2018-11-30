@@ -3,21 +3,21 @@
 {% block body %}
     <div class="container">
         <div class="row">
-            <div class="col-xs-8">
-                <h1>
-                    {% if user.fullName %}
-                        {{ user.fullName }}
-                    {% else %}
-                        {{ user.email }}
-                    {% endif %}
+            <h1>
+                {% if user.fullName %}
+                    {{ user.fullName }}'s dashboard
+                {% else %}
+                    {{ user.email }}'s dashboard
+                {% endif %}
 
-                    <a href="{{ path('user_edit', {
-                        id: user.id
-                    }) }}" class="pull-right btn btn-link">
-                        <span class="fa fa-edit"></span>
-                    </a>
-                </h1>
-
+                <a href="{{ path('user_edit', {
+                    id: user.id
+                }) }}" class="pull-right btn btn-link">
+                    <span class="fa fa-edit"></span>
+                </a>
+            </h1>
+            <div class="user-info">
+                <h3>My personal information</h3>
                 <table class="table">
                     <tbody>
                     <tr>
@@ -32,6 +32,33 @@
                         <th>Institution</th>
                         <td>{{ user.institution|default('-') }}</td>
                     </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div id="my-namespaces">
+                <h3>My namespaces</h3>
+                <table class="table table-striped" id="project-table">
+                    <thead>
+                    <tr>
+                        <th>Namespaces URI</th>
+                        <th>Namespaces identifier</th>
+                        <th>Last updated</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for namespace in namespaces %}
+                        <tr>
+                            <td>{{ namespace.namespaceUri }}</td>
+                            <td>
+                                <a href="{{ path('namespace_show', {
+                                    'id': namespace.id
+                                }) }}">
+                                    {{ namespace }}
+                                </a>
+                            </td>
+                            <td>{{ namespace.modificationTime|date('Y-m-d') }}</td>
+                        </tr>
+                    {% endfor %}
                     </tbody>
                 </table>
             </div>

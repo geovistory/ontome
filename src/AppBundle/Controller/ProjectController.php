@@ -51,6 +51,8 @@ class ProjectController  extends Controller
         $namespace = new OntoNamespace();
         $ongoingNamespace = new OntoNamespace();
         $userProjectAssociation = new UserProjectAssociation();
+        $namespaceLabel = new Label();
+        $ongoingNamespaceLabel = new Label();
         $errors = null;
 
         //$now = new \DateTime('now');
@@ -126,6 +128,25 @@ class ProjectController  extends Controller
             $userProjectAssociation->setModifier($this->getUser());
             $userProjectAssociation->setCreationTime(new \DateTime('now'));
             $userProjectAssociation->setModificationTime(new \DateTime('now'));
+
+            $namespaceLabel->setIsStandardLabelForLanguage(true);
+            $namespaceLabel->setLabel($projectLabel->getLabel());
+            $namespaceLabel->setLanguageIsoCode($projectLabel->getLanguageIsoCode());
+            $namespaceLabel->setCreator($this->getUser());
+            $namespaceLabel->setModifier($this->getUser());
+            $namespaceLabel->setCreationTime(new \DateTime('now'));
+            $namespaceLabel->setModificationTime(new \DateTime('now'));
+            $namespace->addLabel($namespaceLabel);
+
+            $ongoingNamespaceLabel->setIsStandardLabelForLanguage(true);
+            $ongoingNamespaceLabel->setLabel($projectLabel->getLabel());
+            $ongoingNamespaceLabel->setLanguageIsoCode($projectLabel->getLanguageIsoCode());
+            $ongoingNamespaceLabel->setCreator($this->getUser());
+            $ongoingNamespaceLabel->setModifier($this->getUser());
+            $ongoingNamespaceLabel->setCreationTime(new \DateTime('now'));
+            $ongoingNamespaceLabel->setModificationTime(new \DateTime('now'));
+            $ongoingNamespace->addLabel($ongoingNamespaceLabel);
+
 
             $em = $this->getDoctrine()->getManager();
             $em->persist($project);

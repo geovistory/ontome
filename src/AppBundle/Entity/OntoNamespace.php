@@ -79,6 +79,11 @@ class OntoNamespace
     private $projectForTopLevelNamespace;
 
     /**
+     * @ORM\Column(type="string")
+     */
+    private $standardLabel;
+
+    /**
      * @ORM\Column(type="date")
      */
     private $startDate;
@@ -118,8 +123,9 @@ class OntoNamespace
     private $modificationTime;
 
     /**
+     * @Assert\Valid()
      * @Assert\NotBlank()
-     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Label", mappedBy="namespace")
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Label", mappedBy="namespace", cascade={"persist"})
      * @ORM\OrderBy({"languageIsoCode" = "ASC"})
      */
     private $labels;
@@ -250,6 +256,14 @@ class OntoNamespace
     public function getProjectForTopLevelNamespace()
     {
         return $this->projectForTopLevelNamespace;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getStandardLabel()
+    {
+        return $this->standardLabel;
     }
 
     /**
@@ -510,10 +524,20 @@ class OntoNamespace
         $propertyAssociation->addNamespace($this);
     }
 
+    public function addLabel(Label $label)
+    {
+        if ($this->labels->contains($label)) {
+            return;
+        }
+        $this->labels[] = $label;
+        // needed to update the owning side of the relationship!
+        $label->setNamespace($this);
+    }
+
     public function __toString()
     {
-        //$s = $this->getLabels()[0];
-        $s = $this->namespaceURI;
+        $s = $this->getStandardLabel();
+        if(empty($s)) $s = $this->namespaceURI;
         return (string) $s;
     }
 
