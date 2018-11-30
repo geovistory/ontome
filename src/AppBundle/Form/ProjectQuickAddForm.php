@@ -27,10 +27,6 @@ class ProjectQuickAddForm extends AbstractType
                 'error_bubbling' => false,
                 'allow_add' => true,
                 'by_reference' => false,
-            ))
-            ->add('startDate', DateType::class, array(
-            ))
-            ->add('endDate', DateType::class, array(
             ));
     }
 

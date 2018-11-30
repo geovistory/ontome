@@ -38,20 +38,6 @@ class ProjectController  extends Controller
     }
 
     /**
-     * @Route("/project/{id}", name="project_show")
-     * @param string $id
-     * @return Response the rendered template
-     */
-    public function showAction(Project $project)
-    {
-        $em = $this->getDoctrine()->getManager();
-
-        return $this->render('project/show.html.twig', array(
-            'project' => $project
-        ));
-    }
-
-    /**
      * @Route("/project/new", name="project_new_user")
      */
     public function newUserProjectAction(Request $request)
@@ -65,6 +51,17 @@ class ProjectController  extends Controller
         $namespace = new OntoNamespace();
         $ongoingNamespace = new OntoNamespace();
         $userProjectAssociation = new UserProjectAssociation();
+        $errors = null;
+
+        //$now = new \DateTime('now');
+        //$now = $now->format('Y-m-d');
+        $date = new \DateTime('now');
+        $now = $date->format('Y-m-d');
+        $now = new \DateTime();
+
+        $project->setCreator($this->getUser());
+        $project->setModifier($this->getUser());
+
         $projectLabel = new Label();
         $projectLabel->setProject($project);
         $projectLabel->setIsStandardLabelForLanguage(true);
@@ -73,32 +70,6 @@ class ProjectController  extends Controller
         $projectLabel->setCreationTime(new \DateTime('now'));
         $projectLabel->setModificationTime(new \DateTime('now'));
 
-        $namespace->setNamespaceURI('http://dataforhistory.org/'.$projectLabel->getLabel().'/');
-        $namespace->setIsTopLevelNamespace(true);
-        $namespace->setIsOngoing(false);
-        $namespace->setTopLevelNamespace($namespace);
-        $namespace->setProjectForTopLevelNamespace($project);
-        $namespace->setStartDate(new \DateTime('now'));
-        $namespace->setCreationTime(new \DateTime('now'));
-        $namespace->setModificationTime(new \DateTime('now'));
-
-        $ongoingNamespace->setNamespaceURI('http://dataforhistory.org/'.$projectLabel->getLabel().'/ongoing/');
-        $ongoingNamespace->setIsTopLevelNamespace(false);
-        $ongoingNamespace->setIsOngoing(true);
-        $ongoingNamespace->setTopLevelNamespace($namespace);
-        $ongoingNamespace->setProjectForTopLevelNamespace($project);
-        $ongoingNamespace->setReferencedVersion($namespace);
-        $ongoingNamespace->setStartDate(new \DateTime('now'));
-        $ongoingNamespace->setCreationTime(new \DateTime('now'));
-        $ongoingNamespace->setModificationTime(new \DateTime('now'));
-
-        $userProjectAssociation->setUser($this->getUser());
-        $userProjectAssociation->setProject($project);
-        $userProjectAssociation->setPermission(1);
-        $userProjectAssociation->setNotes('Project created by user via OntoME form.');
-        $userProjectAssociation->setStartDate(new \DateTime('now'));
-
-
         $project->addLabel($projectLabel);
 
         $form = $this->createForm(ProjectQuickAddForm::class, $project);
@@ -106,13 +77,55 @@ class ProjectController  extends Controller
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $project = $form->getData();
-
+            $project->setStartDate($now);
             $project->setCreator($this->getUser());
             $project->setModifier($this->getUser());
             $project->setCreationTime(new \DateTime('now'));
             $project->setModificationTime(new \DateTime('now'));
 
+            $labelForURI = str_replace(' ', '-', $projectLabel->getLabel());
 
+            $namespace->setNamespaceURI('http://dataforhistory.org/'.$labelForURI.'/');
+            $namespace->setIsTopLevelNamespace(true);
+            $namespace->setIsOngoing(false);
+            $namespace->setTopLevelNamespace($namespace);
+            $namespace->setProjectForTopLevelNamespace($project);
+            $namespace->setStartDate($now);
+            $namespace->setCreator($this->getUser());
+            $namespace->setModifier($this->getUser());
+            $namespace->setCreationTime(new \DateTime('now'));
+            $namespace->setModificationTime(new \DateTime('now'));
+
+            $errors = $this->container->get('validator')->validate($namespace);
+            if (count($errors) > 0) {
+                return $this->render('project/new.html.twig', array(
+                    'errors' => $errors,
+                    'project' => $project,
+                    'projectForm' => $form->createView()
+                ));
+            }
+
+            $ongoingNamespace->setNamespaceURI('http://dataforhistory.org/'.$labelForURI.'/ongoing/');
+            $ongoingNamespace->setIsTopLevelNamespace(false);
+            $ongoingNamespace->setIsOngoing(true);
+            $ongoingNamespace->setTopLevelNamespace($namespace);
+            $ongoingNamespace->setProjectForTopLevelNamespace($project);
+            $ongoingNamespace->setReferencedVersion($namespace);
+            $ongoingNamespace->setStartDate($now);
+            $ongoingNamespace->setCreator($this->getUser());
+            $ongoingNamespace->setModifier($this->getUser());
+            $ongoingNamespace->setCreationTime(new \DateTime('now'));
+            $ongoingNamespace->setModificationTime(new \DateTime('now'));
+
+            $userProjectAssociation->setUser($this->getUser());
+            $userProjectAssociation->setProject($project);
+            $userProjectAssociation->setPermission(1);
+            $userProjectAssociation->setNotes('Project created by user via OntoME form.');
+            $userProjectAssociation->setStartDate($now);
+            $userProjectAssociation->setCreator($this->getUser());
+            $userProjectAssociation->setModifier($this->getUser());
+            $userProjectAssociation->setCreationTime(new \DateTime('now'));
+            $userProjectAssociation->setModificationTime(new \DateTime('now'));
 
             $em = $this->getDoctrine()->getManager();
             $em->persist($project);
@@ -121,8 +134,9 @@ class ProjectController  extends Controller
             $em->persist($userProjectAssociation);
             $em->flush();
 
+
             return $this->redirectToRoute('user_show', [
-                'id' =>$this->getUser()
+                'id' =>$userProjectAssociation->getUser()->getId()
             ]);
 
         }
@@ -131,9 +145,25 @@ class ProjectController  extends Controller
 
 
         return $this->render('project/new.html.twig', [
+            'errors' => $errors,
             'project' => $project,
             'projectForm' => $form->createView()
         ]);
     }
+
+    /**
+     * @Route("/project/{id}", name="project_show")
+     * @param string $id
+     * @return Response the rendered template
+     */
+    public function showAction(Project $project)
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        return $this->render('project/show.html.twig', array(
+            'project' => $project
+        ));
+    }
+
 
 }

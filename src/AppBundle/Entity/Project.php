@@ -27,12 +27,12 @@ class Project
     private $id;
 
     /**
-     * @ORM\Column(type="text")
+     * @ORM\Column(type="date")
      */
     private $startDate;
 
     /**
-     * @ORM\Column(type="text")
+     * @ORM\Column(type="date")
      */
     private $endDate;
 
@@ -103,8 +103,9 @@ class Project
     private $textProperties;
 
     /**
+     * @Assert\Valid()
      * @Assert\NotBlank()
-     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Label", mappedBy="project")
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Label", mappedBy="project", cascade={"persist"})
      * @ORM\OrderBy({"languageIsoCode" = "ASC"})
      */
     private $labels;
@@ -306,6 +307,14 @@ class Project
     public function setEndDate($endDate)
     {
         $this->endDate = $endDate;
+    }
+
+    /**
+     * @param mixed $labels
+     */
+    public function setLabels($labels)
+    {
+        $this->labels = $labels;
     }
 
     /**

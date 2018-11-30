@@ -10,11 +10,13 @@ namespace AppBundle\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Class OntoNamespace
  * @ORM\Entity(repositoryClass="AppBundle\Repository\NamespaceRepository")
+ * @UniqueEntity("namespaceURI", message="A namespace with the same URI already exists. Please chose another label for your project.")
  * @ORM\Table(schema="che", name="namespace")
  */
 class OntoNamespace
@@ -77,12 +79,12 @@ class OntoNamespace
     private $projectForTopLevelNamespace;
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(type="date")
      */
     private $startDate;
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(type="date")
      */
     private $endDate;
 

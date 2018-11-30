@@ -30,7 +30,7 @@ class UserProjectAssociation
     private $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity="User")
+     * @ORM\ManyToOne(targetEntity="User", inversedBy="userProjectAssociations")
      * @ORM\JoinColumn(name="fk_user", referencedColumnName="pk_user", nullable=false)
      */
     private $user;
