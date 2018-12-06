@@ -15,7 +15,9 @@
             <th>Login</th>
             <th>Full name</th>
             <th>Institution</th>
+            {% if is_granted('ROLE_ADMIN') %}
             <th>Edit</th>
+            {% endif %}
         </tr>
         </thead>
         <tbody>
@@ -30,6 +32,7 @@
                     </td>
                     <td>{{ user.fullName }}</td>
                     <td>{{ user.institution }}</td>
+                    {% if is_granted('ROLE_ADMIN') %}
                     <td>
                         <a href="{{ path('user_edit', {
                             'id': user.id
@@ -38,6 +41,7 @@
                             <span class="fa fa-edit"></span>
                         </a>
                     </td>
+                    {% endif %}
                 </tr>
             {% endfor %}
         </tbody>
