@@ -358,4 +358,10 @@ class Project
         // needed to update the owning side of the relationship!
         $label->setProject($this);
     }
+
+    public function __toString()
+    {
+        $s = $this->standardLabel();
+        return (string) $s;
+    }
 }
