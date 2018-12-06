@@ -63,8 +63,8 @@
             </div>
             <div id="identification" class="tab-pane fade">
                 <h3>Identification</h3>
-                <p>Start date: {{ project.startDate }}</p>
-                <p>End date: {{ project.endDate }}</p>
+                <p>Start date: {{ project.startDate|date('Y-m-d') }}</p>
+                <p>End date: {{ project.endDate|date('Y-m-d') }}</p>
                 <h3>Labels</h3>
                 <table class="table table-striped" id="labels-table">
                     <thead>
