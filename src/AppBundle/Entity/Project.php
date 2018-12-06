@@ -361,7 +361,7 @@ class Project
 
     public function __toString()
     {
-        $s = $this->standardLabel();
+        $s = $this->getStandardLabel();
         return (string) $s;
     }
 }
