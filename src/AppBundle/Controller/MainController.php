@@ -20,7 +20,7 @@ class MainController extends Controller
     }
 
     /**
-     * @Route("/legal-notice")
+     * @Route("/terms-of-service")
      */
     public function legalNoticeAction()
     {
