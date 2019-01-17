@@ -107,6 +107,16 @@ class User implements UserInterface
     private $roles = [];
 
     /**
+     * @ORM\Column(type="string")
+     */
+    private $token;
+
+    /**
+     * @ORM\Column(type="datetime")
+     */
+    private $tokenDate;
+
+    /**
      * @Assert\NotBlank()
      * @ORM\OneToMany(targetEntity="UserProjectAssociation", mappedBy="user")
      */
@@ -151,6 +161,22 @@ class User implements UserInterface
         }
 
         return $roles;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getToken()
+    {
+        return $this->token;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getTokenDate()
+    {
+        return $this->tokenDate;
     }
 
     public function getPassword()
@@ -325,6 +351,22 @@ class User implements UserInterface
     public function getObjectIdentification()
     {
         return $this->login;
+    }
+
+    /**
+     * @param mixed $token
+     */
+    public function setToken($token)
+    {
+        $this->token = $token;
+    }
+
+    /**
+     * @param mixed $tokenDate
+     */
+    public function setTokenDate($tokenDate)
+    {
+        $this->tokenDate = $tokenDate;
     }
 
     public function __toString()

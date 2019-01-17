@@ -63,8 +63,12 @@
             </div>
             <div id="identification" class="tab-pane fade">
                 <h3>Identification</h3>
+                {% if  project.startDate is not null %}
                 <p>Start date: {{ project.startDate|date('Y-m-d') }}</p>
-                <p>End date: {{ project.endDate|date('Y-m-d') }}</p>
+                {% endif %}
+                {% if  project.endDate is not null %}
+                    <p>End date: {{ project.endDate|date('Y-m-d') }}</p>
+                {% endif %}
                 <h3>Labels</h3>
                 <table class="table table-striped" id="labels-table">
                     <thead>

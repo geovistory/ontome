@@ -52,7 +52,7 @@
                         </div>
                     {% endif %}
                     <h3>My projects</h3>
-                    <table class="table table-striped" id="namespaces-table">
+                    <table class="table table-striped" id="projects-table">
                         <thead>
                         <tr>
                             <th>Project identifier</th>
@@ -60,16 +60,16 @@
                         </tr>
                         </thead>
                         <tbody>
-                        {% for project in projects %}
+                        {% for userProjectAssociation in userProjectAssociations %}
                             <tr>
                                 <td>
                                     <a href="{{ path('project_show', {
-                                        'id': project.id
+                                        'id': userProjectAssociation.project.id
                                     }) }}">
-                                        {{ project.standardLabel }}
+                                        {{ userProjectAssociation.project.standardLabel }}
                                     </a>
                                 </td>
-                                <td>{{ project.modificationTime|date('Y-m-d') }}</td>
+                                <td>{{ userProjectAssociation.project.modificationTime|date('Y-m-d') }}</td>
                             </tr>
                         {% endfor %}
                         </tbody>
