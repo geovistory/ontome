@@ -174,8 +174,6 @@ class UserController extends Controller
         $tmpUser = $em->getRepository('AppBundle:User')->findOneBy(['token'=>$token]);
         $formView = null;
 
-
-
         if($tmpUser){
             $now = new \DateTime('now');
             $tokenDate = $tmpUser->getTokenDate();

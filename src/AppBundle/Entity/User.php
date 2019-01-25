@@ -55,8 +55,8 @@ class User implements UserInterface
 
     /**
      * A non-persisted field that's used to create the encoded password.
-     * @Assert\NotBlank(groups={"Registration"})
-     *  @Assert\Length(
+     * @Assert\NotBlank(groups={"Registration","ResetPassword"})
+     * @Assert\Length(
      *      min = 12,
      *      minMessage = "Your password must be at least {{ limit }} characters long",
      * )
