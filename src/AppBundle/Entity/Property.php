@@ -68,6 +68,12 @@ class Property
     private $range;
 
     /**
+     * @ORM\ManyToOne(targetEntity="Property")
+     * @ORM\JoinColumn(name="fk_property_of_origin", referencedColumnName="pk_property")
+     */
+    private $propertyOfOrigin;
+
+    /**
      * @ORM\Column(type="text")
      */
     private $notes;
@@ -231,6 +237,14 @@ class Property
     public function getStandardLabel()
     {
         return $this->standardLabel;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getPropertyOfOrigin()
+    {
+        return $this->propertyOfOrigin;
     }
 
     /**
