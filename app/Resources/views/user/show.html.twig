@@ -3,38 +3,120 @@
 {% block body %}
     <div class="container">
         <div class="row">
-            <div class="col-xs-8">
-                <h1>
-                    {% if user.fullName %}
-                        {{ user.fullName }}
-                    {% else %}
-                        {{ user.email }}
+            <h1>
+                {% if user.fullName %}
+                    {{ user.fullName }}'s dashboard
+                {% else %}
+                    {{ user.email }}'s dashboard
+                {% endif %}
+                {% if (is_granted('ROLE_ADMIN')) or (app.user.id == user.id) %}
+                <a href="{{ path('user_edit', {
+                    id: user.id
+                }) }}" class="pull-right btn btn-link">
+                    <span class="fa fa-edit"></span>
+                </a>
+                {% endif %}
+            </h1>
+            <ul class="nav nav-tabs" id="main-tabs">
+                <li class="active"><a data-toggle="tab" href="#user-info">My account</a></li>
+                <li><a data-toggle="tab" href="#my-projects">My projects</a></li>
+                <li><a data-toggle="tab" href="#my-namespaces">My namespaces</a></li>
+            </ul>
+            <div class="tab-content">
+                <div id="user-info" class="tab-pane fade in active">
+                    <h3>My personal information</h3>
+                    <table class="table">
+                        <tbody>
+                        <tr>
+                            <th>Name</th>
+                            <td>{{ user.fullName|default('-') }}</td>
+                        </tr>
+                        <tr>
+                            <th>Email</th>
+                            <td>{{ user.email }}</td>
+                        </tr>
+                        <tr>
+                            <th>Institution</th>
+                            <td>{{ user.institution|default('-') }}</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div id="my-projects" class="tab-pane fade">
+                    {% if namespaces|length < 1 %}
+                        <div class="pull-right add-div">
+                            <a href="{{ path('project_new_user')}}"
+                               class="btn btn-primary pull-right">
+                                Add <span class="fa fa-plus-circle"></span>
+                            </a>
+                        </div>
                     {% endif %}
-
-                    <a href="{{ path('user_edit', {
-                        id: user.id
-                    }) }}" class="pull-right btn btn-link">
-                        <span class="fa fa-edit"></span>
-                    </a>
-                </h1>
-
-                <table class="table">
-                    <tbody>
-                    <tr>
-                        <th>Name</th>
-                        <td>{{ user.fullName|default('-') }}</td>
-                    </tr>
-                    <tr>
-                        <th>Email</th>
-                        <td>{{ user.email }}</td>
-                    </tr>
-                    <tr>
-                        <th>Institution</th>
-                        <td>{{ user.institution|default('-') }}</td>
-                    </tr>
-                    </tbody>
-                </table>
+                    <h3>My projects</h3>
+                    <table class="table table-striped" id="projects-table">
+                        <thead>
+                        <tr>
+                            <th>Project identifier</th>
+                            <th>Last updated</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for userProjectAssociation in userProjectAssociations %}
+                            <tr>
+                                <td>
+                                    <a href="{{ path('project_show', {
+                                        'id': userProjectAssociation.project.id
+                                    }) }}">
+                                        {{ userProjectAssociation.project.standardLabel }}
+                                    </a>
+                                </td>
+                                <td>{{ userProjectAssociation.project.modificationTime|date('Y-m-d') }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                    <div class="alert alert-info">
+                        <p><i class="fas fa-info-circle"></i>&nbsp;If you are interested in joining an <a href="{{ path('app_project_list') }}" target="_blank">existing project</a>, please write to <a href="mailto:ontome@dataforhistory.org">ontome@dataforhistory.org</a> indicating the name of the <a href="{{ path('app_project_list') }}" target="_blank">project</a> and the reason of your request. </p>
+                    </div>
+                </div>
+                <div id="my-namespaces" class="tab-pane fade">
+                    <h3>My namespaces</h3>
+                    <table class="table table-striped" id="namespaces-table">
+                        <thead>
+                        <tr>
+                            <th>Namespaces URI</th>
+                            <th>Namespaces identifier</th>
+                            <th>Last updated</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for namespace in namespaces %}
+                            <tr>
+                                <td>{{ namespace.namespaceUri }}</td>
+                                <td>
+                                    <a href="{{ path('namespace_show', {
+                                        'id': namespace.id
+                                    }) }}">
+                                        {{ namespace }}
+                                    </a>
+                                </td>
+                                <td>{{ namespace.modificationTime|date('Y-m-d') }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+
+    <script>
+        $(document).ready(function() {
+            $('#namespaces-table').DataTable();
+            $('#projects-table').DataTable();
+        } );
+    </script>
 {% endblock %}

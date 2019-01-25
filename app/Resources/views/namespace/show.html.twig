@@ -5,7 +5,7 @@
 {% block body %}
 
     <div class="container">
-        <h2 class="class-name">{{ namespace.namespaceURI }}</h2>
+        <h2 class="class-name">{{ namespace }}</h2>
 
         <ul class="nav nav-tabs">
             <li class="active"><a data-toggle="tab" href="#scope-notes">Scope Notes</a></li>
@@ -68,7 +68,17 @@
                 </table>
             </div>
             <div id="identification" class="tab-pane fade">
-
+                <h3>Identification</h3>
+                <p>URI: {{ namespace.namespaceURI }}</p>
+                {% if namespace.projectForTopLevelNamespace is not null %}
+                <p>
+                    Project: <a href="{{ path('project_show', {
+                                'id': namespace.projectForTopLevelNamespace.id
+                            }) }}"
+                                target="_blank">{{ namespace.projectForTopLevelNamespace }}
+                            </a>
+                </p>
+                {% endif %}
                 {% if namespace.isTopLevelNamespace == false %}
                     {% if  namespace.startDate is not null %}
                         <p>Start date: {{ namespace.startDate|date('Y-m-d') }}</p>

@@ -1,0 +1,40 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Create a new project{% endblock %}
+
+{% block body %}
+
+<div class="container">
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="pull-right reset-div">
+                <a href="{{ path('project_new_user') }}" class="btn btn-primary pull-right">Reset <span class="fa fa-undo"></span></a>
+            </div>
+            <h2>
+                Create a new project
+            </h2>
+
+            {{ form_start(projectForm) }}
+                {{ form_errors(projectForm) }}
+                {{ form_row(projectForm.labels) }}
+                <div class="form-group cool-class has-error has-feedback">
+                    <span class="help-block">
+                        <ul class="list-unstyled">
+                            {% for error in errors %}
+                                <li><span class="glyphicon glyphicon-exclamation-sign"></span>{{ error.message }}</li>
+                            {% endfor %}
+                        </ul>
+                    </span>
+                </div>
+            <button type="submit" class="btn btn-primary" formnovalidate>Save</button>
+            {{ form_end(projectForm) }}
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+{% endblock %}

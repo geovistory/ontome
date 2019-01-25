@@ -29,7 +29,7 @@
                 </div>
                 <div class="row">
                     <h4>
-                        <strong><em class="text-muted">Ontology Management Environment</em></strong>
+                        <strong><em class="text-muted">Ontology Management Environment - beta version</em></strong>
                     </h4>
                 </div>
             </div>
@@ -45,7 +45,7 @@
         <nav class="navbar navbar-default">
             <div class="container-fluid">
                 <div class="navbar-header">
-                    <a class="navbar-brand" href="http://dataforhistory.org">Data for History Consortium</a>
+                    <a class="navbar-brand" href="http://dataforhistory.org" target="_blank">Data for History Consortium</a>
                 </div>
                 <ul class="nav navbar-nav">
                     <li class="active"><a href="{{ url('home') }}">Home</a></li>
@@ -68,6 +68,11 @@
                     <li><a href="{{ url('app_namespace_list') }}">Namespaces</a></li>
                     <li><a href="{{ url('app_project_list') }}">Projects</a></li>
                     <li><a href="{{ url('app_profile_list') }}">Profiles</a></li>
+                    {% if app.user %}
+                        <li><a href="{{ path('user_show', {
+                                'id': app.user.id
+                            }) }}"><i class="fas fa-tachometer-alt"></i>&nbsp;Dashboard</a></li>
+                    {% endif %}
                 </ul>
             </div>
         </nav>
@@ -101,8 +106,8 @@
                             <div id="block-block-2" class="block block-block">
                                 <h3>ABOUT</h3>
                                 <div class="content">
-                                    <p><a href="http://dataforhistory.org">The Data for History Consortium</a></p>
-                                    <p><a href="{{ url('app_main_legalnotice') }}">Legal notice</a></p>
+                                    <p><a href="http://dataforhistory.org" target="_blank">The Data for History Consortium</a></p>
+                                    <p><a href="{{ url('app_main_legalnotice') }}">Terms of Service</a></p>
                                     <p><a href="#">Sitemap</a></p>
                                 </div>
                             </div>
@@ -123,7 +128,7 @@
                         <div id="block-block-5" class="block block-block">
                             <h3>CONTACT US</h3>
                             <div class="content">
-                                <p>E-mail : <a href="mailto:contact@dataforhistory.org?subject=Contact">contact@dataforhistory.org</a></p>
+                                <p>E-mail : <a href="mailto:ontome@dataforhistory.org?subject=Contact">ontome@dataforhistory.org</a></p>
                             </div>
                         </div>
                     </div>

@@ -20,6 +20,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @ORM\Entity
  * @ORM\Table(schema="che", name="admin_user")
  * @UniqueEntity(fields={"email"}, message="This e-mail is already in use.")
+ * @UniqueEntity(fields={"login"}, message="This login is already in use.")
  */
 class User implements UserInterface
 {
@@ -54,7 +55,17 @@ class User implements UserInterface
 
     /**
      * A non-persisted field that's used to create the encoded password.
-     * @Assert\NotBlank(groups={"Registration"})
+     * @Assert\NotBlank(groups={"Registration","ResetPassword"})
+     * @Assert\Length(
+     *      min = 12,
+     *      minMessage = "Your password must be at least {{ limit }} characters long",
+     * )
+     *
+     * @Assert\Regex(
+     *     pattern="/^(?:(?!.*[<>])(?:(?=.*[~!\[@#$%^&*()_,|`\]\{+=?.\}\\\/<>-])(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9]))).*$/",
+     *     match=true,
+     *     message="Your password must contain at least 1 special character, 1 digit, 1 lowercase and 1 uppercase letter"
+     * )
      *
      * @var string
      */
@@ -80,6 +91,7 @@ class User implements UserInterface
     private $status;
 
     /**
+     * @Assert\NotEqualTo(false, message="You must accept our term of service")
      * @ORM\Column(type="boolean", nullable=false)
      */
     private $hasValidatedPolicy;
@@ -93,6 +105,16 @@ class User implements UserInterface
      * @ORM\Column(type="json_array", nullable=true)
      */
     private $roles = [];
+
+    /**
+     * @ORM\Column(type="string")
+     */
+    private $token;
+
+    /**
+     * @ORM\Column(type="datetime")
+     */
+    private $tokenDate;
 
     /**
      * @Assert\NotBlank()
@@ -139,6 +161,22 @@ class User implements UserInterface
         }
 
         return $roles;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getToken()
+    {
+        return $this->token;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getTokenDate()
+    {
+        return $this->tokenDate;
     }
 
     public function getPassword()
@@ -313,6 +351,22 @@ class User implements UserInterface
     public function getObjectIdentification()
     {
         return $this->login;
+    }
+
+    /**
+     * @param mixed $token
+     */
+    public function setToken($token)
+    {
+        $this->token = $token;
+    }
+
+    /**
+     * @param mixed $tokenDate
+     */
+    public function setTokenDate($tokenDate)
+    {
+        $this->tokenDate = $tokenDate;
     }
 
     public function __toString()

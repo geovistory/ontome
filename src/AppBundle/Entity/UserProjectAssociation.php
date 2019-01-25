@@ -30,7 +30,7 @@ class UserProjectAssociation
     private $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity="User")
+     * @ORM\ManyToOne(targetEntity="User", inversedBy="userProjectAssociations")
      * @ORM\JoinColumn(name="fk_user", referencedColumnName="pk_user", nullable=false)
      */
     private $user;
@@ -55,6 +55,11 @@ class UserProjectAssociation
      * @ORM\Column(type="date")
      */
     private $endDate;
+
+    /**
+     * @ORM\Column(type="text")
+     */
+    private $notes;
 
     /**
      * @ORM\ManyToOne(targetEntity="User")
@@ -116,6 +121,14 @@ class UserProjectAssociation
     public function getEndDate()
     {
         return $this->endDate;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getNotes()
+    {
+        return $this->notes;
     }
 
     /**
@@ -196,6 +209,14 @@ class UserProjectAssociation
     public function setEndDate($endDate)
     {
         $this->endDate = $endDate;
+    }
+
+    /**
+     * @param mixed $notes
+     */
+    public function setNotes($notes)
+    {
+        $this->notes = $notes;
     }
 
     /**

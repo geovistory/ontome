@@ -1,28 +1,42 @@
 {% extends 'base.html.twig' %}
+
 {% block body %}
 <div class="container">
     <div class="row">
         <div class="col-xs-12">
-            <h1>Register!</h1>
-
+            <h1>Register</h1>
             {{ form_start(form) }}
-                {{ form_row(form.login) }}
+            {% for msg in app.session.flashBag.get('error') %}
+                <div class="alert alert-warning">
+                    {{ msg }}
+                </div>
+            {% endfor %}
+                <div class="g-recaptcha" data-sitekey="6Lcvi34UAAAAAPt0_K-ZtNa3TSKd-2SViyFNclX5"></div>
+                {{ form_row(form.login, {
+                    help: 'Recommended way: jdupont for Jacques Dupont / mhfernandez for Maria-Helena Fernandez'
+                }) }}
                 {{ form_row(form.email) }}
                 {{ form_row(form.firstName) }}
                 {{ form_row(form.lastName) }}
                 {{ form_row(form.institution) }}
                 {{ form_row(form.plainPassword.first, {
-                    'label': 'Password'
+                    'label': 'Password',
+                    'help': 'For security reason, your password must contain at least 1 special character, 1 digit, 1 lowercase and 1 uppercase letter. We strongly recommand the use of a password manager.'
                 }) }}
                 {{ form_row(form.plainPassword.second, {
                     'label': 'Repeat Password'
                 }) }}
-                {{ form_row(form.status) }}
-                {{ form_row(form.hasValidatedPolicy) }}
-
-                <button type="submit" class="btn btn-primary" formnovalidate>Register</button>
+                {{ form_row(form.hasValidatedPolicy, {
+                    'label': 'I have read and agree to the terms and conditions of use:'
+                }) }}
+                <p><span><strong><a href="{{ asset('documents/ontome-terms-of-service-2018-12-01.pdf') }}" type="application/pdf" target="_blank">OntoME: Terms and conditions of Use</a></strong></span></p>
+            <button type="submit" class="btn btn-primary" formnovalidate>Register</button>
             {{ form_end(form) }}
         </div>
     </div>
 </div>
+{% endblock %}
+{% block javascripts %}
+    {{ parent() }}
+    <script src='https://www.google.com/recaptcha/api.js'></script>
 {% endblock %}

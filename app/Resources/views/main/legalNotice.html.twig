@@ -1,52 +1,146 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}{{ parent() }} | Legal Notice{% endblock %}
+{% block title %}{{ parent() }} | Terms of Service{% endblock %}
 
 {% block body %}
     <div class="container">
-        <h1 class="page-header">Legal Notice</h1>
-        <h2>Designation</h2>
-        <p><a href="http://ontologies.dataforhistory.org">http://ontologies.dataforhistory.org</a></p>
-        <p><strong>Ontology Management Environment</strong> website, hosted by the <a href="http://larhra.ish-lyon.cnrs.fr">Laboratoire de recherche historique Rhône-Alpes</a> (LARHRA)</p>
+        <h1 class="page-header">Terms of Service</h1>
+        <h2>Article 1 – Object</h2>
 
-        <h2>Editor</h2>
+        <p class="text-justify">The purpose of these Terms of service (hereinafter "ToS") is to provide a legal framework for using&nbsp; the OntoME online application (hereinafter "OntoME" or "the application") by "the user".
+            ToS must be accepted by any user wishing to access the application. ToS constitute the contract between the application and the user. Access to the application by the user signifies his acceptance of these terms of service.</p>
 
-        <p><strong>Publication director:</strong> Bernard Hours, director of LARHRA.</p>
-        <p><strong>Site manager: </strong> Francesco Beretta, head of Digital history department (Pôle histoire numérique).</p>
-        <p><strong>Design, development and implementation:</strong> Vincent Alamercery, research assistant ENS de Lyon LARHRA ; Djamel Ferhod, IT engineer CNRS LARHRA.</p>
+        <h2>
+            Article 2 – Legal notice</h2>
 
-        <h2 class="text-justify">Social reason and denomination</h2>
+        <p class="text-justify">OntoME is developed inside the Laboratoire de recherche historique Rhône-Alpes (UMR 5190 LARHRA – CNRS, Universités de Lyon et de Grenoble – hereinafter "LARHRA"), as part of the Data for History consortium. LARHRA provides the servers on which OntoME is located and the related software, as well as computer support and regular data backup.
+            The publication director is Bernard Hours, director of LARHRA.
+            The application administrators are:</p>
 
-        <p class="text-justify">LARHRA - Laboratoire de Recherche Historique Rhône-Alpes : unité mixte de recherche (joint research center) 5190 from Centre national de la recherche scientifique (CNRS), in cotutelle with Université Lumière Lyon 2, Université Jean Moulin Lyon 3, Université Grenoble Alpes and École normale supérieure de Lyon.</p>
+        <ul>
+            <li>Francesco Beretta, head of Digital history department of LARHRA – project leader</li>
+            <li>Djamel Ferhod, LARHRA – lead developer</li>
+            <li>Vincent Alamercery, LARHRA – project manager</li>
+        </ul>
 
-        <h2>Hosting</h2>
+        <h2>
+            Article 3 – Definitions</h2>
 
-        <p>LARHRA – UMR 5190</p>
-        <p>Institut des Sciences de l'Homme</p>
-        <p>14 avenue Berthelot</p>
-        <p>69363 LYON Cedex 07</p>
-        <p>France</p>
+        <ul>
+            <li>User : any person using the application.</li>
+            <li>Member : a user becomes a member when he or she is identified in the application.</li>
+            <li>User content : data created by the user within the application.</li>
+            <li>Identifier and password : all the information necessary to identify a user of the application. Username and password allow the user to access services reserved for members of the application. The password is confidential.</li>
+        </ul>
 
-        <h2>Software</h2>
+        <h2>
+            Article 4 – Accessing the services and disclaimer</h2>
 
-        <p>Symfony, PostgreSQL, Apache, Linux Debian</p>
+        <p class="text-justify">The application is accessible free of charge anywhere to any user with Internet access. All access costs (hardware, software, Internet connection, etc.) are the responsibility of the user.
+            The non-member user does not have access to the services reserved for members. To do this, he or she must identify himself or herself using his or her username and password. Failure by a member to comply with the ToS may result in the removal of their access to OntoME.</p>
 
-        <h2>License</h2>
+        <p class="text-justify">LARHRA uses all the means at its disposal to ensure quality access to the application's services. As the obligation is one of means, LARHRA does not undertake to achieve this result.
+            Any event due to a case of force majeure resulting in a malfunction of the network or server does not engage the responsibility of LARHRA.
+            Access to OntoME may be interrupted, suspended, modified without notice at any time for maintenance or any other purpose. The user undertakes not to claim any compensation following the interruption, suspension or modification of this contract.</p>
 
-        <p><a href="https://creativecommons.org/licenses/by-sa/4.0/"><img alt="Creative Commons License" src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png" style="border-width:0" /></a></p>
-        <p>This work is licensed under a <a href="https://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International License</a>.</p>
+        <p class="text-justify">In the event of withdrawal, exclusion or any other reason that terminates a member access to OntoME, the member may not request the removal of the content he or she has created. However, the name of the producer of the content will remain associated with it.</p>
 
-        <h2>Personal data</h2>
+        <p class="text-justify">The user has the option of contacting the application administrators by e-mail at <a href="mailto:ontome@dataforhistory.org">ontome@dataforhistory.org</a></p>
 
-        <p class="text-justify">In accordance with the consolidated version of the French Data Protection Law 78-17, dated 6 January 1978, you have the right to access and rectify the data concerning you by writing an email to: larhra@ish-lyon.cnrs.fr.</p>
+        <h2>
+            Article 5 – Intellectual Property</h2>
 
-        <p>Or by postal mail :</p>
-        <p>LARHRA - UMR 5190</p>
-        <p>Institut des Sciences de l'Homme</p>
-        <p>14, avenue Berthelot</p>
-        <p>69363 Lyon Cedex 07</p>
-        <p>France</p>
+        <p class="text-justify">The intellectual property of the OntoME application, database architecture and development belongs to LARHRA. LARHRA is the producer of OntoME and its database as defined by Article L 341-1 of the French Intellectual Property Code.</p>
 
-        <p>You can also, for legitimate reasons, oppose the processing of your personal data.</p>
+        <p class="text-justify">Data produced in OntoME are subject to the
+            <strong>Creative Commons BY-SA 4.0 International licence</strong> (Attribution-ShareAlike)
+            as described here: <a href="https://creativecommons.org/licenses/by-sa/4.0/legalcode" target="_blank">https://creativecommons.org/licenses/by-sa/4.0/legalcode</a>.
+            Member remains the owner of all its intellectual property rights.</p>
+
+        <h2>
+            Article 6 – Publication by the user</h2>
+
+        <p class="text-justify">The application allows registered members to post comments.</p>
+
+        <p class="text-justify">In his publications, the member undertakes to respect the basic rules of courtesy and the rules of law in force.
+            OntoME administrators exercise a posteriori moderation on the comments and reserve the right to refuse their posting online, without having to justify it to the member.
+            Comments, as well as all data produced in the application, are subject to the Creative Commons 4.0 CC-BY-SA license as described in Article 5.</p>
+
+        <h2>
+            Article 7 – Processing of your personal data</h2>
+
+        <p class="text-justify">The information requested when registering with OntoME is necessary and mandatory for the creation of the user account.
+            The information collected that concerns you will be processed and is destined for managing accounts and access to OntoME and its database.</p>
+
+        <p class="text-justify">Responsibles for the treatment are:</p>
+
+        <ul>
+            <li>OntoME administrators whose names appear in Article 2.</li>
+        </ul>
+
+        <p class="text-justify">For the following aim:</p>
+
+        <ul>
+            <li>creation of your account: user key, login, password. The password is encrypted in the database and known to you alone.</li>
+            <li>management of your account: user key, login, given name, surname, e-mail, institution.</li>
+            <li>administration, management and animation of the service: e-mail</li>
+            <li>publication of the members list: login, given name, surname, institution.</li>
+            <li>management of the access log (OntoME and its database): login, IP address, user agent, timestamp.</li>
+        </ul>
+
+        <p class="text-justify">The recipients of this data are:</p>
+
+        <ul>
+            <li>OntoME administrators whose names appear in Article 2: user key, login, given name, surname, e-mail, institution.</li>
+            <li>OntoME members : personal data published in the members list.</li>
+            <li>for all: information published in the comments.</li>
+        </ul>
+
+        <p class="text-justify">The duration of conservation of the data is:</p>
+
+        <ul>
+            <li>one year: data used for the access log.</li>
+            <li>until the end of OntoME: data used to create your account, data used to publish the members list and information published in the comments.</li>
+        </ul>
+
+        <p class="text-justify">In accordance with the consolidated version of the French Data Protection Law 78-17 and the European Union regulation 2016/679, you have the right of access, of correction, of portability, or of removal of this data. You can oppose the processing of your personal data and you have the right to withdraw your agreement at any time.&nbsp;</p>
+
+        <p class="text-justify">To exercise your right, you can send a request by e-mail to: <a href="mailto:ontome@dataforhistory.org">ontome@dataforhistory.org</a>.
+            Or by postal mail:</p>
+        <address>
+            <strong>LARHRA – UMR 5190</strong><br>
+            MSH Lyon Saint-Étienne<br>
+            14 avenue Berthelot<br>
+            69363 LYON Cedex 07<br>
+            France<br>
+        </address>
+
+        <p class="text-justify">You can also direct a complaint at a controlling body.</p>
+
+        <h2>
+            Article 8 – Liability and force majeure</h2>
+
+        <p class="text-justify">Member ensures that his password is kept secret. Any disclosure of the password, in any form, is prohibited.
+            Member assumes the risks associated with the use of his username and password.
+            Any use of the application by the user resulting directly or indirectly in damage must be compensated to LARHRA.</p>
+
+        <p class="text-justify">The application does not guarantee optimal security and confidentiality of the transmitted data. However, LARHRA undertakes to implement all necessary means to ensure the best possible security and confidentiality of data.</p>
+
+        <p class="text-justify">LARHRA cannot be held liable in the event of force majeure or the unforeseeable and insurmountable event of a third party.</p>
+        
+
+        <h2>Article 9 – Modifying the Terms of Service</h2>
+
+        <p class="text-justify">LARHRA reserves the right to modify the clauses stipulated in these ToS at any time.</p>
+
+        <h2>
+            Article 10 – Duration</h2>
+
+        <p class="text-justify">The duration of these ToS is indefinite. The ToS are effective from the time the service is used.</p>
+
+        <h2>
+            Article 11 – Governing law and jurisdiction</h2>
+
+        <p class="text-justify">The French laws governs these Terms.</p>
     </div>
 {% endblock %}

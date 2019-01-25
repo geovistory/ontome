@@ -37,7 +37,7 @@ class PropertyAssociationController extends Controller
         $scopeNote = new TextProperty();
         $scopeNote->setPropertyAssociation($propertyAssociation);
         $scopeNote->setSystemType($systemTypeScopeNote);
-        $scopeNote->setNamespace($childProperty->getOngoingNamespace());
+        $scopeNote->addNamespace($childProperty->getOngoingNamespace());
         $scopeNote->setCreator($this->getUser());
         $scopeNote->setModifier($this->getUser());
         $scopeNote->setCreationTime(new \DateTime('now'));
@@ -62,7 +62,7 @@ class PropertyAssociationController extends Controller
                 $propertyAssociation->getTextProperties()[1]->setCreationTime(new \DateTime('now'));
                 $propertyAssociation->getTextProperties()[1]->setModificationTime(new \DateTime('now'));
                 $propertyAssociation->getTextProperties()[1]->setSystemType($systemTypeExample);
-                $propertyAssociation->getTextProperties()[1]->setNamespace($childProperty->getOngoingNamespace());
+                $propertyAssociation->getTextProperties()[1]->addNamespace($childProperty->getOngoingNamespace());
                 $propertyAssociation->getTextProperties()[1]->setPropertyAssociation($propertyAssociation);
             }
 

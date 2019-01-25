@@ -10,11 +10,13 @@ namespace AppBundle\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Class OntoNamespace
  * @ORM\Entity(repositoryClass="AppBundle\Repository\NamespaceRepository")
+ * @UniqueEntity("namespaceURI", message="A namespace with the same URI already exists. Please chose another label for your project.")
  * @ORM\Table(schema="che", name="namespace")
  */
 class OntoNamespace
@@ -77,12 +79,17 @@ class OntoNamespace
     private $projectForTopLevelNamespace;
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(type="string")
+     */
+    private $standardLabel;
+
+    /**
+     * @ORM\Column(type="date")
      */
     private $startDate;
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(type="date")
      */
     private $endDate;
 
@@ -116,8 +123,9 @@ class OntoNamespace
     private $modificationTime;
 
     /**
+     * @Assert\Valid()
      * @Assert\NotBlank()
-     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Label", mappedBy="namespace")
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Label", mappedBy="namespace", cascade={"persist"})
      * @ORM\OrderBy({"languageIsoCode" = "ASC"})
      */
     private $labels;
@@ -253,6 +261,14 @@ class OntoNamespace
     /**
      * @return mixed
      */
+    public function getStandardLabel()
+    {
+        return $this->standardLabel;
+    }
+
+    /**
+     * @return mixed
+     */
     public function getStartDate()
     {
         return $this->startDate;
@@ -374,6 +390,120 @@ class OntoNamespace
         return $this->labels[0];
     }
 
+    /**
+     * @param mixed $namespaceURI
+     */
+    public function setNamespaceURI($namespaceURI)
+    {
+        $this->namespaceURI = $namespaceURI;
+    }
+
+    /**
+     * @param mixed $classPrefix
+     */
+    public function setClassPrefix($classPrefix)
+    {
+        $this->classPrefix = $classPrefix;
+    }
+
+    /**
+     * @param mixed $propertyPrefix
+     */
+    public function setPropertyPrefix($propertyPrefix)
+    {
+        $this->propertyPrefix = $propertyPrefix;
+    }
+
+    /**
+     * @param mixed $referencedVersion
+     */
+    public function setReferencedVersion($referencedVersion)
+    {
+        $this->referencedVersion = $referencedVersion;
+    }
+
+    /**
+     * @param mixed $topLevelNamespace
+     */
+    public function setTopLevelNamespace($topLevelNamespace)
+    {
+        $this->topLevelNamespace = $topLevelNamespace;
+    }
+
+    /**
+     * @param mixed $isTopLevelNamespace
+     */
+    public function setIsTopLevelNamespace($isTopLevelNamespace)
+    {
+        $this->isTopLevelNamespace = $isTopLevelNamespace;
+    }
+
+    /**
+     * @param mixed $isOngoing
+     */
+    public function setIsOngoing($isOngoing)
+    {
+        $this->isOngoing = $isOngoing;
+    }
+
+    /**
+     * @param mixed $projectForTopLevelNamespace
+     */
+    public function setProjectForTopLevelNamespace($projectForTopLevelNamespace)
+    {
+        $this->projectForTopLevelNamespace = $projectForTopLevelNamespace;
+    }
+
+    /**
+     * @param mixed $startDate
+     */
+    public function setStartDate($startDate)
+    {
+        $this->startDate = $startDate;
+    }
+
+    /**
+     * @param mixed $endDate
+     */
+    public function setEndDate($endDate)
+    {
+        $this->endDate = $endDate;
+    }
+
+    /**
+     * @param mixed $creator
+     */
+    public function setCreator($creator)
+    {
+        $this->creator = $creator;
+    }
+
+    /**
+     * @param mixed $modifier
+     */
+    public function setModifier($modifier)
+    {
+        $this->modifier = $modifier;
+    }
+
+    /**
+     * @param mixed $creationTime
+     */
+    public function setCreationTime($creationTime)
+    {
+        $this->creationTime = $creationTime;
+    }
+
+    /**
+     * @param mixed $modificationTime
+     */
+    public function setModificationTime($modificationTime)
+    {
+        $this->modificationTime = $modificationTime;
+    }
+
+
+
     public function addClassAssociation(ClassAssociation $classAssociation)
     {
         if ($this->classAssociations->contains($classAssociation)) {
@@ -394,10 +524,20 @@ class OntoNamespace
         $propertyAssociation->addNamespace($this);
     }
 
+    public function addLabel(Label $label)
+    {
+        if ($this->labels->contains($label)) {
+            return;
+        }
+        $this->labels[] = $label;
+        // needed to update the owning side of the relationship!
+        $label->setNamespace($this);
+    }
+
     public function __toString()
     {
-        //$s = $this->getLabels()[0];
-        $s = $this->namespaceURI;
+        $s = $this->getStandardLabel();
+        if(empty($s)) $s = $this->namespaceURI;
         return (string) $s;
     }
 
