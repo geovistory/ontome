@@ -5,7 +5,12 @@
 {% block body %}
 
     <div class="container">
-        <h2 class="property-name">{{ property }}</h2>
+        <h2 class="property-name">
+            {{ property }}
+            {% if property.propertyOfOrigin is not null %}
+                [inherited, cf. <a href="{{ path('property_show', {'id': property.propertyOfOrigin.id}) }}" target="_blank"><em>original</em></a>]
+            {% endif %}
+        </h2>
 
         <ul class="nav nav-tabs" id="main-tabs">
             <li class="active"><a data-toggle="tab" href="#scope-notes">Scope Notes</a></li>
