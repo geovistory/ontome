@@ -191,6 +191,8 @@ class UserController extends Controller
                 $form->handleRequest($request);
                 $formView = $form->createView();
                 if ($form->isSubmitted() && $form->isValid()) {
+                    $user->setToken(null); //token remis à null
+                    $user->setTokenDate(null); //date du token remise à null
                     $em->persist($user);
                     $em->flush();
 
