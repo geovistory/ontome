@@ -68,6 +68,26 @@ class Property
     private $range;
 
     /**
+     * @ORM\Column(type="smallint", name="domain_instances_min_quantifier")
+     */
+    private $domainMinQuantifier;
+
+    /**
+     * @ORM\Column(type="smallint", name="domain_instances_max_quantifier")
+     */
+    private $domainMaxQuantifier;
+
+    /**
+     * @ORM\Column(type="smallint", name="range_instances_min_quantifier")
+     */
+    private $rangeMinQuantifier;
+
+    /**
+     * @ORM\Column(type="smallint", name="range_instances_max_quantifier")
+     */
+    private $rangeMaxQuantifier;
+
+    /**
      * @ORM\ManyToOne(targetEntity="Property")
      * @ORM\JoinColumn(name="fk_property_of_origin", referencedColumnName="pk_property")
      */
@@ -344,6 +364,69 @@ class Property
     }
 
     /**
+     * @return integer
+     */
+    public function getDomainMinQuantifier()
+    {
+        return $this->domainMinQuantifier;
+    }
+
+    /**
+     * @return integer
+     */
+    public function getDomainMaxQuantifier()
+    {
+        return $this->domainMaxQuantifier;
+    }
+
+    /**
+     * @return integer
+     */
+    public function getRangeMinQuantifier()
+    {
+        return $this->rangeMinQuantifier;
+    }
+
+    /**
+     * @return integer
+     */
+    public function getRangeMaxQuantifier()
+    {
+        return $this->rangeMaxQuantifier;
+    }
+
+    /**
+     * @return string the formatted quantifiers string
+     */
+    public function getQuantifiers()
+    {
+        $s = null;
+
+        if(!is_null($this->domainMinQuantifier)&&!is_null($this->domainMaxQuantifier)&&!is_null($this->rangeMinQuantifier)&&!is_null($this->rangeMaxQuantifier)){
+            if($this->domainMinQuantifier == -1)
+                $domainMinQ = 'n';
+            else $domainMinQ = $this->domainMinQuantifier;
+
+            if($this->domainMaxQuantifier == -1)
+                $domainMaxQ = 'n';
+            else $domainMaxQ = $this->domainMaxQuantifier;
+
+            if($this->rangeMinQuantifier == -1)
+                $rangeMinQ = 'n';
+            else $rangeMinQ = $this->rangeMinQuantifier;
+
+            if($this->rangeMaxQuantifier == -1)
+                $rangeMaxQ = 'n';
+            else $rangeMaxQ = $this->rangeMaxQuantifier;
+
+            $s = $domainMinQ.','.$domainMaxQ.':'.$rangeMinQ.','.$rangeMaxQ;
+        }
+
+        return $s;
+
+    }
+
+    /**
      * @return ArrayCollection|PropertyAssociation[]
      */
     public function getParentPropertyAssociations()
@@ -398,6 +481,38 @@ class Property
     public function setDomain($domain)
     {
         $this->domain = $domain;
+    }
+
+    /**
+     * @param mixed $domainMinQuantifier
+     */
+    public function setDomainMinQuantifier($domainMinQuantifier)
+    {
+        $this->domainMinQuantifier = $domainMinQuantifier;
+    }
+
+    /**
+     * @param mixed $domainMaxQuantifier
+     */
+    public function setDomainMaxQuantifier($domainMaxQuantifier)
+    {
+        $this->domainMaxQuantifier = $domainMaxQuantifier;
+    }
+
+    /**
+     * @param mixed $rangeMinQuantifier
+     */
+    public function setRangeMinQuantifier($rangeMinQuantifier)
+    {
+        $this->rangeMinQuantifier = $rangeMinQuantifier;
+    }
+
+    /**
+     * @param mixed $rangeMaxQuantifier
+     */
+    public function setRangeMaxQuantifier($rangeMaxQuantifier)
+    {
+        $this->rangeMaxQuantifier = $rangeMaxQuantifier;
     }
 
     /**
