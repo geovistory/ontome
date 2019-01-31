@@ -16,6 +16,7 @@ use AppBundle\Entity\Property;
 use AppBundle\Entity\TextProperty;
 use AppBundle\Form\IngoingPropertyQuickAddForm;
 use AppBundle\Form\OutgoingPropertyQuickAddForm;
+use AppBundle\Form\PropertyEditForm;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
@@ -186,8 +187,24 @@ class PropertyController extends Controller
      * @param string $id
      * @return Response the rendered template
      */
-    public function editAction(Property $property)
+    public function editAction(Property $property, Request $request)
     {
+        $this->denyAccessUnlessGranted('edit', $property);
+
+        $form = $this->createForm(PropertyEditForm::class, $property);
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($property);
+            $em->flush();
+
+            $this->addFlash('success', 'Property updated!');
+            return $this->redirectToRoute('property_edit', [
+                'id' => $property->getId(),
+                '_fragment' => 'identification'
+            ]);
+        }
+
         $em = $this->getDoctrine()->getManager();
 
         $ancestors = $em->getRepository('AppBundle:Property')
@@ -208,7 +225,8 @@ class PropertyController extends Controller
             'property' => $property,
             'ancestors' => $ancestors,
             'descendants' => $descendants,
-            'domainRange' => $domainRange
+            'domainRange' => $domainRange,
+            'propertyForm' => $form->createView()
         ));
     }
 

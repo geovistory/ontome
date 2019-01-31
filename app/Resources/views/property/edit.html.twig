@@ -2,6 +2,11 @@
 
 {% block title %}{{ parent() }} - {{ property }}{% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.4/css/select2.min.css" rel="stylesheet" />
+{%  endblock %}
+
 {% block body %}
 
     <div class="container">
@@ -106,7 +111,14 @@
             <div id="identification" class="tab-pane fade">
                 {% if domainRange is not empty %}
                 <h3>Domain and range</h3>
-                    <p><a href="{{ path('class_show', {'id': domainRange.domainId}) }}">{{ domainRange.domainIdentifier }}</a> → {{ domainRange.propertyIdentifier }} → <a href="{{ path('class_show', {'id': domainRange.rangeId}) }}">{{ domainRange.rangeIdentifier }}</a></p>
+                    <div id="domain-range-form-block">
+                        {{ form_start(propertyForm) }}
+                            {{ form_row(propertyForm.domain) }}
+                            {{ form_row(propertyForm.range) }}
+                            <button type="submit" class="btn btn-primary" formnovalidate>Save</button>
+                        {{ form_end(propertyForm) }}
+                    </div>
+                    <p id="domain-range-details-block"><a href="{{ path('class_show', {'id': domainRange.domainId}) }}">{{ domainRange.domainIdentifier }}</a> → {{ domainRange.propertyIdentifier }} → <a href="{{ path('class_show', {'id': domainRange.rangeId}) }}">{{ domainRange.rangeIdentifier }}</a><a class="btn" id="domain-range-edit-btn" href="#"><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span></a></p>
                 {% endif %}
                 <div class="pull-right add-div">
                     <a href="{{ path('label_new', {'object': 'property', 'objectId': property.id })}}"
@@ -359,6 +371,7 @@
 {% block javascripts %}
     {{ parent() }}
 
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.4/js/select2.min.js"></script>
     <script>
         $(document).ready(function() {
             $('#namespaces-table').DataTable();
@@ -385,6 +398,47 @@
                 "order": [[ 1, "asc" ]]
             });
             $('#profiles-table').DataTable();
+
+            $('#property_edit_form_domain').select2({
+                width: '100%',
+                sorter: function(data) {
+                    /* Sort data using lowercase comparison */
+                    return data.sort(function (a, b) {
+                        a = a.text.toLowerCase();
+                        b = b.text.toLowerCase();
+                        if (a > b) {
+                            return 1;
+                        } else if (a < b) {
+                            return -1;
+                        }
+                        return 0;
+                    });
+                }
+            });
+
+            $('#property_edit_form_range').select2({
+                width: '100%',
+                sorter: function(data) {
+                    /* Sort data using lowercase comparison */
+                    return data.sort(function (a, b) {
+                        a = a.text.toLowerCase();
+                        b = b.text.toLowerCase();
+                        if (a > b) {
+                            return 1;
+                        } else if (a < b) {
+                            return -1;
+                        }
+                        return 0;
+                    });
+                }
+            });
+            $('#domain-range-form-block').hide(0);
+
+            $('#domain-range-edit-btn').click(function(){
+                $('#domain-range-details-block').hide(200);
+                $('#domain-range-form-block').show(200);
+            });
+
         } );
     </script>
     {% include 'comment/js-bock.html.twig'  with {'objectType': 'property', 'objectId' : property.id  } %}
