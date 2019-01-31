@@ -5,6 +5,7 @@ namespace AppBundle\Form;
 use AppBundle\Form\DataTransformer\UserToNumberTransformer;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -41,6 +42,38 @@ class IngoingPropertyQuickAddForm extends AbstractType
                 'by_reference' => false,
             ))
             ->add('domain')
+            ->add('domainMinQuantifier',ChoiceType::class, array(
+                'choices'  => array(
+                    '' => null,
+                    '0' => 0,
+                    '1' => 1,
+                    'n' => -1,
+                ),
+            ))
+            ->add('domainMaxQuantifier',ChoiceType::class, array(
+                'choices'  => array(
+                    '' => null,
+                    '0' => 0,
+                    '1' => 1,
+                    'n' => -1,
+                ),
+            ))
+            ->add('rangeMinQuantifier',ChoiceType::class, array(
+                'choices'  => array(
+                    '' => null,
+                    '0' => 0,
+                    '1' => 1,
+                    'n' => -1,
+                ),
+            ))
+            ->add('rangeMaxQuantifier',ChoiceType::class, array(
+                'choices'  => array(
+                    '' => null,
+                    '0' => 0,
+                    '1' => 1,
+                    'n' => -1,
+                ),
+            ))
             ->add('textProperties', CollectionType::class, array(
                 'entry_type' => TextPropertyType::class,
                 'entry_options' => array('label' => false),

@@ -10,6 +10,7 @@ use AppBundle\Repository\NamespaceRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -47,6 +48,38 @@ class OutgoingPropertyQuickAddForm extends AbstractType
                 'by_reference' => false,
             ))
             ->add('range')
+            ->add('domainMinQuantifier',ChoiceType::class, array(
+                'choices'  => array(
+                    '' => null,
+                    '0' => 0,
+                    '1' => 1,
+                    'n' => -1,
+                ),
+            ))
+            ->add('domainMaxQuantifier',ChoiceType::class, array(
+                'choices'  => array(
+                    '' => null,
+                    '0' => 0,
+                    '1' => 1,
+                    'n' => -1,
+                ),
+            ))
+            ->add('rangeMinQuantifier',ChoiceType::class, array(
+                'choices'  => array(
+                    '' => null,
+                    '0' => 0,
+                    '1' => 1,
+                    'n' => -1,
+                ),
+            ))
+            ->add('rangeMaxQuantifier',ChoiceType::class, array(
+                'choices'  => array(
+                    '' => null,
+                    '0' => 0,
+                    '1' => 1,
+                    'n' => -1,
+                ),
+            ))
             ->add('textProperties', CollectionType::class, array(
                 'entry_type' => TextPropertyType::class,
                 'entry_options' => array('label' => false),

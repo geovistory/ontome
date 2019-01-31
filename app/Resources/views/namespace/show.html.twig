@@ -129,11 +129,7 @@
                                 <a href="{{ path('namespace_show', {
                                     'id': namespace.referencedVersion.id
                                 }) }}">
-                                    {% for label in namespace.referencedVersion.labels %}
-                                        {% if label.isStandardLabelForLanguage == true and label.languageIsoCode == 'en' %}
-                                            {{ label.label }}
-                                        {% endif %}
-                                    {% endfor %}
+                                    {{ namespace.standardLabel }}
                                 </a>
                             </td>
                             <td>{{ namespace.referencedVersion.modificationTime|date('Y-m-d') }}</td>
@@ -158,11 +154,7 @@
                                 <a href="{{ path('namespace_show', {
                                     'id': childNamespace.id
                                 }) }}">
-                                    {% for label in childNamespace.labels %}
-                                        {% if label.isStandardLabelForLanguage == true and label.languageIsoCode == 'en' %}
-                                            {{ label.label }}
-                                        {% endif %}
-                                    {% endfor %}
+                                    {{ childNamespace.standardLabel }}
                                 </a>
                             </td>
                             <td>{{ childNamespace.modificationTime|date('Y-m-d') }}</td>

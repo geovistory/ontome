@@ -43,6 +43,10 @@
                         {{ form_widget(propertyForm.identifierInNamespace, { 'attr': {'style': 'display:none'} }) }}
                     {% endif %}
                     {{ form_row(propertyForm.domain) }}
+                    {{ form_row(propertyForm.domainMinQuantifier) }}
+                    {{ form_row(propertyForm.domainMaxQuantifier) }}
+                    {{ form_row(propertyForm.rangeMinQuantifier) }}
+                    {{ form_row(propertyForm.rangeMaxQuantifier) }}
                     {{ form_row(propertyForm.labels) }}
 
                     <div class="js-text-property-wrapper"
