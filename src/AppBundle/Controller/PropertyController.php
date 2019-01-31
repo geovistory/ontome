@@ -199,6 +199,10 @@ class PropertyController extends Controller
             $em->flush();
 
             $this->addFlash('success', 'Property updated!');
+            return $this->redirectToRoute('property_edit', [
+                'id' => $property->getId(),
+                '_fragment' => 'identification'
+            ]);
         }
 
         $em = $this->getDoctrine()->getManager();
@@ -221,7 +225,8 @@ class PropertyController extends Controller
             'property' => $property,
             'ancestors' => $ancestors,
             'descendants' => $descendants,
-            'domainRange' => $domainRange
+            'domainRange' => $domainRange,
+            'propertyForm' => $form->createView()
         ));
     }
 
