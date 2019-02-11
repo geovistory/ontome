@@ -13,7 +13,7 @@
             {% if is_granted('edit', property) %}
                 <a href="{{ path('property_edit', {
                     id: property.id
-                }) }}" class="pull-right btn btn-success">
+                }) }}" class="pull-right btn btn-success btn-edit">
                     <i class="fa fa-edit"></i>
                 </a>
             {% endif %}
