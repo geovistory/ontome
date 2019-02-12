@@ -30,7 +30,9 @@
             <li><a data-toggle="tab" href="#equivalences">Equivalences</a></li>
             <li><a data-toggle="tab" href="#profiles">Profiles</a></li>
             <li><a data-toggle="tab" href="#graph">Graph</a></li>
+            {%  if class.ongoingNamespace is not null %}
             <li><a data-toggle="tab" href="#comments">Comments</a></li>
+            {% endif %}
         </ul>
 
         <div class="tab-content">
@@ -507,6 +509,7 @@
                 </div>
                 <p><span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span><em>Use mouse wheel to zoom in/out.</em></p>
             </div>
+            {%  if class.ongoingNamespace is not null %}
             <div id="comments" class="tab-pane fade">
                 <h3>Comments</h3>
                 <div class="comment-box js-user-info" data-fullname="{{ app.user }}">
@@ -534,6 +537,7 @@
                     </div>
                 </div>
             </div>
+            {% endif %}
         </div>
     </div>
 

@@ -26,7 +26,9 @@
             <li><a data-toggle="tab" href="#property-hierarchy">Hierarchy</a></li>
             <li><a data-toggle="tab" href="#equivalences">Equivalences</a></li>
             <li><a data-toggle="tab" href="#profiles">Profiles</a></li>
+            {%  if property.ongoingNamespace is not null %}
             <li><a data-toggle="tab" href="#comments">Comments</a></li>
+            {% endif %}
         </ul>
 
         <div class="tab-content">
@@ -315,6 +317,7 @@
                     </tbody>
                 </table>
             </div>
+            {%  if property.ongoingNamespace is not null %}
             <div id="comments" class="tab-pane fade">
                 <h3>Comments</h3>
                 <div class="comment-box js-user-info" data-fullname="{{ app.user }}">
@@ -342,6 +345,7 @@
                     </div>
                 </div>
             </div>
+            {% endif %}
         </div>
     </div>
 
