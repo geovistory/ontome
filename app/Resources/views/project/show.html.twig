@@ -60,6 +60,30 @@
                     {% endfor %}
                     </tbody>
                 </table>
+                <h3>Additional notes</h3>
+                <table class="table table-striped" id="additional-notes-table">
+                    <thead>
+                    <tr>
+                        <th>Show</th>
+                        <th>Notes</th>
+                        <th>Language</th>
+                        <th>Namespace</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for textProperty in project.textProperties if textProperty.systemType.id == 12 %}
+                        <tr>
+                            <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
+                            <td class="truncated-text">
+                                <span>{{ textProperty.textProperty}}</span>
+                                {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
+                            </td>
+                            <td>{{ textProperty.languageIsoCode}}</td>
+                            <td>WIP</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
             </div>
             <div id="identification" class="tab-pane fade">
                 <h3>Identification</h3>
@@ -207,6 +231,7 @@
             $('#labels-table').DataTable();
             $('#scope-notes-table').DataTable();
             $('#examples-table').DataTable();
+            $('#additional-notes-table').DataTable();
             $('#parent-projects-table').DataTable();
             $('#child-projects-table').DataTable();
             $('#managed-namespaces-table').DataTable();
