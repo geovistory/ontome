@@ -49,7 +49,7 @@
                             <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
                             <td class="truncated-text">
                                 <span>{{ textProperty.textProperty|striptags|raw }}</span>
-                                    {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
+                                {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
                             </td>
                             <td>{{ textProperty.languageIsoCode}}</td>
                             <td>WIP</td>
@@ -108,7 +108,7 @@
             </div>
             <div id="identification" class="tab-pane fade">
                 {% if domainRange is not empty %}
-                <h3>Domain and range</h3>
+                    <h3>Domain and range</h3>
                     <p>
                         <a href="{{ path('class_show', {'id': domainRange.domainId}) }}">{{ domainRange.domainIdentifier }}</a> → {{ domainRange.propertyIdentifier }} → <a href="{{ path('class_show', {'id': domainRange.rangeId}) }}">{{ domainRange.rangeIdentifier }}</a>
                         {% if property.quantifiers is not null %}
@@ -318,33 +318,33 @@
                 </table>
             </div>
             {%  if property.ongoingNamespace is not null %}
-            <div id="comments" class="tab-pane fade">
-                <h3>Comments</h3>
-                <div class="comment-box js-user-info" data-fullname="{{ app.user }}">
-                    <div class="action-box">
-                        {% if property.comments is empty %}
-                            <p id="comment-not-found"><em>No comment found.</em></p>
-                        {% endif %}
-                        <ul id="comments-list" class="comments-list">
-                            {% for comment in property.comments %}
-                                <li>
-                                    <div class="comment-text">
-                                        <p><strong><a href="#">{{ comment.creator.fullName }}</a></strong></p>
-                                        <p>{{ comment.comment }}</p>
-                                        <span class="date sub-comment-text">on {{ comment.creationTime|date() }}</span>
-                                    </div>
-                                </li>
-                            {% endfor %}
-                        </ul>
+                <div id="comments" class="tab-pane fade">
+                    <h3>Comments</h3>
+                    <div class="comment-box js-user-info" data-fullname="{{ app.user }}">
+                        <div class="action-box">
+                            {% if property.comments is empty %}
+                                <p id="comment-not-found"><em>No comment found.</em></p>
+                            {% endif %}
+                            <ul id="comments-list" class="comments-list">
+                                {% for comment in property.comments %}
+                                    <li>
+                                        <div class="comment-text">
+                                            <p><strong><a href="#">{{ comment.creator.fullName }}</a></strong></p>
+                                            <p>{{ comment.comment }}</p>
+                                            <span class="date sub-comment-text">on {{ comment.creationTime|date() }}</span>
+                                        </div>
+                                    </li>
+                                {% endfor %}
+                            </ul>
 
-                        {% if app.user %}
-                            <div class="new-comment-form" id="new-comment-form">
-                                {{ render(controller('AppBundle:Comment:new', {'object' : 'property', 'objectId' : property.id})) }}
-                            </div>
-                        {% endif %}
+                            {% if app.user %}
+                                <div class="new-comment-form" id="new-comment-form">
+                                    {{ render(controller('AppBundle:Comment:new', {'object' : 'property', 'objectId' : property.id})) }}
+                                </div>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
-            </div>
             {% endif %}
         </div>
     </div>
