@@ -134,6 +134,14 @@
                             </td>
                             <td>{{ textProperty.languageIsoCode }}</td>
                             <td>WIP</td>
+                            <td>
+                                <a href="{{ path('text_property_edit', {
+                                    'id': textProperty.id
+                                }) }}"
+                                   class="btn btn-xs btn-success">
+                                    <span class="fa fa-edit"></span>
+                                </a>
+                            </td>
                         </tr>
                     {% endfor %}
                     </tbody>
