@@ -33,7 +33,7 @@
                         <tr>
                             <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
                             <td class="truncated-text">
-                                <span>{{ textProperty.textProperty}}</span>
+                                <span>{{ textProperty.textProperty|striptags|raw }}</span>
                                 {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
                             </td>
                             <td>{{ textProperty.languageIsoCode}}</td>
@@ -43,7 +43,7 @@
                     </tbody>
                 </table>
                 <h3>Additional notes</h3>
-                <table class="table table-striped" id="examples-table">
+                <table class="table table-striped" id="additional-notes-table">
                     <thead>
                     <tr>
                         <th>Show</th>
@@ -53,11 +53,11 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for textProperty in namespace.textProperties if textProperty.systemType.id == 999 %}
+                    {% for textProperty in namespace.textProperties if textProperty.systemType.id == 12 %}
                         <tr>
                             <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
                             <td class="truncated-text">
-                                <span>{{ textProperty.textProperty}}</span>
+                                <span>{{ textProperty.textProperty|striptags|raw }}</span>
                                 {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
                             </td>
                             <td>{{ textProperty.languageIsoCode}}</td>
@@ -237,7 +237,7 @@
             $('#namespaces-table').DataTable();
             $('#labels-table').DataTable();
             $('#scope-notes-table').DataTable();
-            $('#examples-table').DataTable();
+            $('#additional-notes-table').DataTable();
             $('#properties-table').DataTable();
             $('#classes-table').DataTable();
             $('#parent-namespaces-table').DataTable();

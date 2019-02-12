@@ -126,6 +126,9 @@ class TextPropertyController extends Controller
         else if($type === 'example') {
             $systemType = $em->getRepository('AppBundle:SystemType')->find(7); //systemType 7 = example
         }
+        else if($type === 'additional-note') {
+            $systemType = $em->getRepository('AppBundle:SystemType')->find(12); //systemType 12 = additional-note
+        }
         else throw $this->createNotFoundException('The requested text property type "'.$type.'" does not exist!');
 
         $this->denyAccessUnlessGranted('edit', $associatedObject);
