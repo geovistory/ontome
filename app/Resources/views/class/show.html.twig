@@ -13,11 +13,11 @@
         <h2 class="class-name">
             {{ class }}
             {% if is_granted('edit', class) %}
-            <a href="{{ path('class_edit', {
-                id: class.id
-            }) }}" class="pull-right btn btn-success btn-edit">
-                <i class="fa fa-edit"></i>
-            </a>
+                <a href="{{ path('class_edit', {
+                    id: class.id
+                }) }}" class="pull-right btn btn-success btn-edit">
+                    <i class="fa fa-edit"></i>
+                </a>
             {% endif %}
         </h2>
 
@@ -30,7 +30,9 @@
             <li><a data-toggle="tab" href="#equivalences">Equivalences</a></li>
             <li><a data-toggle="tab" href="#profiles">Profiles</a></li>
             <li><a data-toggle="tab" href="#graph">Graph</a></li>
+            {%  if class.ongoingNamespace is not null %}
             <li><a data-toggle="tab" href="#comments">Comments</a></li>
+            {% endif %}
         </ul>
 
         <div class="tab-content">
@@ -51,11 +53,11 @@
                             <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
                             <td class="truncated-text">
                                 <span>{{ textProperty.textProperty|striptags|raw }}</span>
-                                    {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
+                                {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
                             </td>
                             <td>{{ textProperty.languageIsoCode}}</td>
                             <td>
-                               <!-- {% if textProperty.namespace is not null %}
+                                <!-- {% if textProperty.namespace is not null %}
                                     {% for label in textProperty.namespace.topLevelNamespace.labels %}
                                         {% if label.isStandardLabelForLanguage == true and label.languageIsoCode == 'en' %}
                                             {{ label.label }}
@@ -169,9 +171,9 @@
             </div>
             <div id="class-hierarchy" class="tab-pane fade">
                 {% if is_granted('edit', class) %}
-                <div class="pull-right add-div">
-                    <a href="{{ path('new_parent_class_form', {'childClass': class.id}) }}" class="btn btn-primary pull-right">Add <span class="fa fa-plus-circle"></span></a>
-                </div>
+                    <div class="pull-right add-div">
+                        <a href="{{ path('new_parent_class_form', {'childClass': class.id}) }}" class="btn btn-primary pull-right">Add <span class="fa fa-plus-circle"></span></a>
+                    </div>
                 {% endif %}
                 <h3>Parent classes</h3>
                 <table class="table table-striped" id="parent-classes-table">
@@ -182,7 +184,7 @@
                         <th>Root namespace</th>
                         <th>
                             {% if is_granted('edit', class) %}
-                               Edit association
+                                Edit association
                             {% else %}
                                 View association
                             {% endif %}
@@ -365,10 +367,10 @@
                             <td>
                                 {{ outgoingInheritedProperty.domain }} (is a
                                 <a
-                                    href="{{ path('class_show', {
-                                        'id': outgoingInheritedProperty.parentClassId
-                                    }) }}"
-                                    title="{{ outgoingInheritedProperty.ancestors }}">
+                                        href="{{ path('class_show', {
+                                            'id': outgoingInheritedProperty.parentClassId
+                                        }) }}"
+                                        title="{{ outgoingInheritedProperty.ancestors }}">
                                     {{ outgoingInheritedProperty.parentClass }}
                                 </a>)
                             </td>
@@ -456,10 +458,10 @@
                             <td>
                                 {{ class.identifierInNamespace }} (is a
                                 <a
-                                    href="{{ path('class_show', {
-                                        'id': ingoingInheritedProperty.rangeId
-                                    }) }}"
-                                    title="{{ ingoingInheritedProperty.ancestors }}">
+                                        href="{{ path('class_show', {
+                                            'id': ingoingInheritedProperty.rangeId
+                                        }) }}"
+                                        title="{{ ingoingInheritedProperty.ancestors }}">
                                     {{ ingoingInheritedProperty.range }}
                                 </a>)
                             </td>
@@ -502,38 +504,40 @@
                     <button id="reset-tree" onclick="reset();">Reset</button>
                 </p>
                 <div id="graph-container" data-url="{{ path('class_graph_json', {
-                                                    'class': class.id})
+                    'class': class.id})
                 }}">
                 </div>
                 <p><span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span><em>Use mouse wheel to zoom in/out.</em></p>
             </div>
-            <div id="comments" class="tab-pane fade">
-                <h3>Comments</h3>
-                <div class="comment-box js-user-info" data-fullname="{{ app.user }}">
-                    <div class="action-box">
-                        {% if class.comments is empty %}
-                            <p id="comment-not-found"><em>No comment found.</em></p>
-                        {% endif %}
-                        <ul id="comments-list" class="comments-list">
-                            {% for comment in class.comments %}
-                                <li>
-                                    <div class="comment-text">
-                                        <p><strong><a href="#">{{ comment.creator.fullName }}</a></strong></p>
-                                        <p>{{ comment.comment }}</p>
-                                        <span class="date sub-comment-text">on {{ comment.creationTime|date() }}</span>
-                                    </div>
-                                </li>
-                            {% endfor %}
-                        </ul>
+            {%  if class.ongoingNamespace is not null %}
+                <div id="comments" class="tab-pane fade">
+                    <h3>Comments</h3>
+                    <div class="comment-box js-user-info" data-fullname="{{ app.user }}">
+                        <div class="action-box">
+                            {% if class.comments is empty %}
+                                <p id="comment-not-found"><em>No comment found.</em></p>
+                            {% endif %}
+                            <ul id="comments-list" class="comments-list">
+                                {% for comment in class.comments %}
+                                    <li>
+                                        <div class="comment-text">
+                                            <p><strong><a href="#">{{ comment.creator.fullName }}</a></strong></p>
+                                            <p>{{ comment.comment }}</p>
+                                            <span class="date sub-comment-text">on {{ comment.creationTime|date() }}</span>
+                                        </div>
+                                    </li>
+                                {% endfor %}
+                            </ul>
 
-                        {% if app.user %}
-                        <div class="new-comment-form" id="new-comment-form">
-                            {{ render(controller('AppBundle:Comment:new', {'object' : 'class', 'objectId' : class.id})) }}
+                            {% if app.user %}
+                                <div class="new-comment-form" id="new-comment-form">
+                                    {{ render(controller('AppBundle:Comment:new', {'object' : 'class', 'objectId' : class.id})) }}
+                                </div>
+                            {% endif %}
                         </div>
-                        {% endif %}
                     </div>
                 </div>
-            </div>
+            {% endif %}
         </div>
     </div>
 
