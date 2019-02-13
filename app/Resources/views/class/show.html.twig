@@ -549,7 +549,7 @@
 
     <script>
         $(document).ready(function() {
-            e.preventDefault();
+            window.addEventListener("scroll", function () {return false;}
             $('#namespaces-table').DataTable();
             $('#labels-table').DataTable();
             $('#scope-notes-table').DataTable();
