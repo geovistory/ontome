@@ -374,8 +374,7 @@
                                             'id': outgoingInheritedProperty.parentClassId
                                         }) }}"
                                         title="{{ outgoingInheritedProperty.ancestors }}">
-                                    {{ outgoingInheritedProperty.parentClass }}
-                                </a>)
+                                    {{ outgoingInheritedProperty.parentClass }}</a>)
                             </td>
                             <td>
                                 <a href="{{ path('property_show', {
@@ -465,10 +464,9 @@
                                             'id': ingoingInheritedProperty.rangeId
                                         }) }}"
                                         title="{{ ingoingInheritedProperty.ancestors }}">
-                                    {{ ingoingInheritedProperty.range }}
-                                </a>)
+                                    {{ ingoingInheritedProperty.range }}</a>)
                             </td>
-                            <td>{{ ingoingInheritedProperty.namespace }})</td>
+                            <td>{{ ingoingInheritedProperty.namespace }}</td>
                         </tr>
                     {% endfor %}
                     </tbody>
