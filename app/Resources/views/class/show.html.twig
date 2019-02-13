@@ -196,7 +196,8 @@
                         <tr>
                             <td>
                                 <a href="{{ path('class_show', {
-                                    'id': association.parentClass.id
+                                    'id': association.parentClass.id,
+                                    '_fragment': 'class-hierarchy'
                                 }) }}">
                                     {{ association.parentClass }}
                                 </a>
@@ -253,7 +254,8 @@
                         <tr>
                             <td>
                                 <a href="{{ path('class_show', {
-                                    'id': ancestor.id
+                                    'id': ancestor.id,
+                                    '_fragment': 'class-hierarchy'
                                 }) }}">
                                     {{ ancestor.identifier }}
                                 </a>
@@ -278,7 +280,8 @@
                         <tr>
                             <td>
                                 <a href="{{ path('class_show', {
-                                    'id': descendant.id
+                                    'id': descendant.id,
+                                    '_fragment': 'class-hierarchy'
                                 }) }}">
                                     {{ descendant.identifier }}
                                 </a>
