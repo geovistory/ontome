@@ -374,8 +374,7 @@
                                             'id': outgoingInheritedProperty.parentClassId
                                         }) }}"
                                         title="{{ outgoingInheritedProperty.ancestors }}">
-                                    {{ outgoingInheritedProperty.parentClass }}
-                                </a>)
+                                    {{ outgoingInheritedProperty.parentClass }}</a>)
                             </td>
                             <td>
                                 <a href="{{ path('property_show', {
@@ -396,7 +395,7 @@
                     {% endfor %}
                     </tbody>
                 </table>
-                <h3>Ingoing properties (this class is range)</h3>
+                <h3>Incoming properties (this class is range)</h3>
                 <table class="table table-striped" id="ingoing-properties-table">
                     <thead>
                     <tr>
@@ -431,7 +430,7 @@
                     {% endfor %}
                     </tbody>
                 </table>
-                <h3>Ingoing properties (inherited from ancestors)</h3>
+                <h3>Incoming properties (inherited from ancestors)</h3>
                 <table class="table table-striped" id="ingoing-inherited-properties-table">
                     <thead>
                     <tr>
@@ -459,16 +458,15 @@
                                 </a>
                             </td>
                             <td>
-                                {{ class.identifierInNamespace }} (is a
+                                {{ class }} (is a
                                 <a
                                         href="{{ path('class_show', {
                                             'id': ingoingInheritedProperty.rangeId
                                         }) }}"
                                         title="{{ ingoingInheritedProperty.ancestors }}">
-                                    {{ ingoingInheritedProperty.range }}
-                                </a>)
+                                    {{ ingoingInheritedProperty.range }}</a>)
                             </td>
-                            <td>{{ ingoingInheritedProperty.namespace }})</td>
+                            <td>{{ ingoingInheritedProperty.namespace }}</td>
                         </tr>
                     {% endfor %}
                     </tbody>
