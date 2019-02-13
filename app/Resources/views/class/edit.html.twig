@@ -223,7 +223,7 @@
                     <a href="{{ path('new_parent_class_form', {'childClass': class.id}) }}" class="btn btn-primary pull-right">Add <span class="fa fa-plus-circle"></span></a>
                 </div>
                 {% endif %}
-                <h3>Parent classes</h3>
+                <h3>Parent classes ({{ class }} rdfs:subclassOf this class)</h3>
                 <table class="table table-striped" id="parent-classes-table">
                     <thead>
                     <tr>
@@ -244,7 +244,8 @@
                         <tr>
                             <td>
                                 <a href="{{ path('class_show', {
-                                    'id': association.parentClass.id
+                                    'id': association.parentClass.id,
+                                    '_fragment': 'class-hierarchy'
                                 }) }}">
                                     {{ association.parentClass }}
                                 </a>
@@ -301,7 +302,8 @@
                         <tr>
                             <td>
                                 <a href="{{ path('class_show', {
-                                    'id': ancestor.id
+                                    'id': ancestor.id,
+                                    '_fragment': 'class-hierarchy'
                                 }) }}">
                                     {{ ancestor.identifier }}
                                 </a>
@@ -326,7 +328,8 @@
                         <tr>
                             <td>
                                 <a href="{{ path('class_show', {
-                                    'id': descendant.id
+                                    'id': descendant.id,
+                                    '_fragment': 'class-hierarchy'
                                 }) }}">
                                     {{ descendant.identifier }}
                                 </a>

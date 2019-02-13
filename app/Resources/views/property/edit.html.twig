@@ -240,7 +240,7 @@
                         <a href="{{ path('new_parent_property_form', {'childProperty': property.id}) }}" class="btn btn-primary pull-right">Add <span class="fa fa-plus-circle"></span></a>
                     </div>
                 {% endif %}
-                <h3>Parent properties</h3>
+                <h3>Parent properties ({{ property }} rdfs:subpropertyOf this property)</h3>
                 <table class="table table-striped" id="parent-properties-table">
                     <thead>
                     <tr>
@@ -261,7 +261,8 @@
                         <tr>
                             <td>
                                 <a href="{{ path('property_show', {
-                                    'id': association.parentProperty.id
+                                    'id': association.parentProperty.id,
+                                    '_fragment': 'property-hierarchy'
                                 }) }}">
                                     {{ association.parentProperty }}
                                 </a>
@@ -286,7 +287,8 @@
                             <td>
                                 {% if is_granted('edit', property) %}
                                     <a href="{{ path('property_association_edit', {
-                                        'id': association.id
+                                        'id': association.id,
+                                        '_fragment': 'property-hierarchy'
                                     }) }}"
                                        class="btn btn-xs btn-success">
                                         <span class="fa fa-edit"></span>
@@ -318,7 +320,8 @@
                         <tr>
                             <td>
                                 <a href="{{ path('property_show', {
-                                    'id': ancestor.id
+                                    'id': ancestor.id,
+                                    '_fragment': 'property-hierarchy'
                                 }) }}">
                                     {{ ancestor.identifier }}
                                 </a>
@@ -343,7 +346,8 @@
                         <tr>
                             <td>
                                 <a href="{{ path('property_show', {
-                                    'id': descendant.id
+                                    'id': descendant.id,
+                                    '_fragment': 'property-hierarchy'
                                 }) }}">
                                     {{ descendant.identifier }}
                                 </a>
