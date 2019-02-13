@@ -171,7 +171,7 @@
                         <a href="{{ path('new_parent_property_form', {'childProperty': property.id}) }}" class="btn btn-primary pull-right">Add <span class="fa fa-plus-circle"></span></a>
                     </div>
                 {% endif %}
-                <h3>Parent properties</h3>
+                <h3>Parent properties ({{ property }} rdfs:subpropertyOf this property)</h3>
                 <table class="table table-striped" id="parent-properties-table">
                     <thead>
                     <tr>

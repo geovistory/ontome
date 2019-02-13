@@ -175,7 +175,7 @@
                         <a href="{{ path('new_parent_class_form', {'childClass': class.id}) }}" class="btn btn-primary pull-right">Add <span class="fa fa-plus-circle"></span></a>
                     </div>
                 {% endif %}
-                <h3>Parent classes</h3>
+                <h3>Parent classes ({{ class }} rdfs:subclassOf this class)</h3>
                 <table class="table table-striped" id="parent-classes-table">
                     <thead>
                     <tr>
