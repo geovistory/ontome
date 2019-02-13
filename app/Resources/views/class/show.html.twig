@@ -549,7 +549,6 @@
 
     <script>
         $(document).ready(function() {
-            window.addEventListener("scroll", function () {return false;});
             $('#namespaces-table').DataTable();
             $('#labels-table').DataTable();
             $('#scope-notes-table').DataTable();
@@ -570,9 +569,12 @@
             $('#ingoing-properties-table').DataTable();
             $('#ingoing-inherited-properties-table').DataTable();
             $('#profiles-table').DataTable();
-        } );
-
-
+            if (location.hash){
+                setTimeout(function(){
+                    window.scrollTo(0, 0);
+                }, 1);
+            }
+        });
     </script>
     {% include 'comment/js-bock.html.twig'  with {'objectType': 'class', 'objectId' : class.id  } %}
     <script src="https://d3js.org/d3.v4.min.js"></script>
