@@ -395,7 +395,7 @@
                     {% endfor %}
                     </tbody>
                 </table>
-                <h3>Ingoing properties (this class is range)</h3>
+                <h3>Incoming properties (this class is range)</h3>
                 <table class="table table-striped" id="ingoing-properties-table">
                     <thead>
                     <tr>
@@ -430,7 +430,7 @@
                     {% endfor %}
                     </tbody>
                 </table>
-                <h3>Ingoing properties (inherited from ancestors)</h3>
+                <h3>Incoming properties (inherited from ancestors)</h3>
                 <table class="table table-striped" id="ingoing-inherited-properties-table">
                     <thead>
                     <tr>
@@ -458,7 +458,7 @@
                                 </a>
                             </td>
                             <td>
-                                {{ class.identifierInNamespace }} (is a
+                                {{ class }} (is a
                                 <a
                                         href="{{ path('class_show', {
                                             'id': ingoingInheritedProperty.rangeId
