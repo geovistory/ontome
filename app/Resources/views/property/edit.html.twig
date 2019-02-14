@@ -428,7 +428,6 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.4/js/select2.min.js"></script>
     <script>
         $(document).ready(function() {
-            window.addEventListener("scroll", function () {return false;});
             $('#namespaces-table').DataTable();
             $('#labels-table').DataTable();
             $('#additional-notes-table').DataTable();
@@ -494,6 +493,11 @@
                 $('#domain-range-details-block').hide(200);
                 $('#domain-range-form-block').show(200);
             });
+            if (location.hash){
+                setTimeout(function(){
+                    window.scrollTo(0, 0);
+                }, 1);
+            }
 
         } );
     </script>
