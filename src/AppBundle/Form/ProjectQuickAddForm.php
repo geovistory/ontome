@@ -43,7 +43,7 @@ class ProjectQuickAddForm extends AbstractType
         $resolver->setDefaults([
             'data_class' => 'AppBundle\Entity\Project',
             "allow_extra_fields" => true,
-            'validation_groups' => ['Description']
+            'validation_groups' => ['Default', 'Description']
         ]);
     }
 
