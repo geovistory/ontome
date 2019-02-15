@@ -27,6 +27,14 @@ class ProjectQuickAddForm extends AbstractType
                 'error_bubbling' => false,
                 'allow_add' => true,
                 'by_reference' => false,
+            ))
+            ->add('textProperties', CollectionType::class, array(
+                'label' => 'Enter a description and select a language',
+                'entry_type' => TextPropertyType::class,
+                'entry_options' => array('label' => false),
+                'error_bubbling' => false,
+                'allow_add' => true,
+                'by_reference' => false,
             ));
     }
 
@@ -34,7 +42,8 @@ class ProjectQuickAddForm extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => 'AppBundle\Entity\Project',
-            "allow_extra_fields" => true
+            "allow_extra_fields" => true,
+            'validation_groups' => ['Description']
         ]);
     }
 
