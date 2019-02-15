@@ -5,10 +5,10 @@
 {% block body %}
 
     <div class="container">
-        <h2 class="oject-name">{{ project.standardLabel }}</h2>
+        <h2 class="project-name">{{ project.standardLabel }}</h2>
 
         <ul class="nav nav-tabs">
-            <li class="active"><a data-toggle="tab" href="#scope-notes">Scope Notes</a></li>
+            <li class="active"><a data-toggle="tab" href="#definition">Definition</a></li>
             <li><a data-toggle="tab" href="#identification">Identification</a></li>
             <li><a data-toggle="tab" href="#project-hierarchy">Hierarchy</a></li>
             <li><a data-toggle="tab" href="#managed-namespaces">Namespaces</a></li>
@@ -16,9 +16,9 @@
         </ul>
 
         <div class="tab-content">
-            <div id="scope-notes" class="tab-pane fade in active">
-                <h3>Scope Notes</h3>
-                <table class="table table-striped" id="scope-notes-table">
+            <div id="definition" class="tab-pane fade in active">
+                <h3>Definition</h3>
+                <table class="table table-striped" id="definition-table">
                     <thead>
                     <tr>
                         <th>Show</th>
@@ -33,27 +33,6 @@
                             <td class="truncated-text">
                                 <span>{{ textProperty.textProperty}}</span>
                                 {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
-                            </td>
-                            <td>{{ textProperty.languageIsoCode}}</td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-                <h3>Examples</h3>
-                <table class="table table-striped" id="examples-table">
-                    <thead>
-                    <tr>
-                        <th>Show</th>
-                        <th>Example</th>
-                        <th>Language</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% for textProperty in project.textProperties if textProperty.systemType.id == 999 %}
-                        <tr>
-                            <td><a class="btn" href="#"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
-                            <td class="truncated-text">
-                                <span>{{ textProperty.textProperty|striptags|raw }}</span>
                             </td>
                             <td>{{ textProperty.languageIsoCode}}</td>
                         </tr>
@@ -229,8 +208,7 @@
     <script>
         $(document).ready(function() {
             $('#labels-table').DataTable();
-            $('#scope-notes-table').DataTable();
-            $('#examples-table').DataTable();
+            $('#definition-table').DataTable();
             $('#additional-notes-table').DataTable();
             $('#parent-projects-table').DataTable();
             $('#child-projects-table').DataTable();
