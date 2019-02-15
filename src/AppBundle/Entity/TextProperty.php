@@ -27,7 +27,7 @@ class TextProperty
     private $id;
 
     /**
-     * @Assert\NotBlank(groups={"Description"})
+     * @Assert\NotBlank()
      * @Assert\Length(
      *      groups={"Description"},
      *      min = 80,
