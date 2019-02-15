@@ -11,6 +11,7 @@ namespace AppBundle\Controller;
 use AppBundle\Entity\Label;
 use AppBundle\Entity\OntoNamespace;
 use AppBundle\Entity\Project;
+use AppBundle\Entity\TextProperty;
 use AppBundle\Entity\PropertyAssociation;
 use AppBundle\Entity\User;
 use AppBundle\Entity\UserProjectAssociation;
@@ -48,7 +49,23 @@ class ProjectController  extends Controller
         if(!$isAuthenticated) throw new AccessDeniedException('You must be an authenticated user to access this page.');
 
         $project = new Project();
+
         $namespace = new OntoNamespace();
+
+        $em = $this->getDoctrine()->getManager();
+        $systemTypeDescription = $em->getRepository('AppBundle:SystemType')->find(16); //systemType 16 = Description
+
+        $description = new TextProperty();
+        $description->setProject($project);
+        $description->setSystemType($systemTypeDescription);
+        $description->addNamespace($namespace);
+        $description->setCreator($this->getUser());
+        $description->setModifier($this->getUser());
+        $description->setCreationTime(new \DateTime('now'));
+        $description->setModificationTime(new \DateTime('now'));
+
+        $project->addTextProperty($description);
+
         $ongoingNamespace = new OntoNamespace();
         $userProjectAssociation = new UserProjectAssociation();
         $namespaceLabel = new Label();

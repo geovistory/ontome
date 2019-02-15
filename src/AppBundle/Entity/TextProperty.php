@@ -28,6 +28,11 @@ class TextProperty
 
     /**
      * @Assert\NotBlank()
+     * @Assert\Length(
+     *      groups={"Description"},
+     *      min = 80,
+     *      minMessage = "Your description must be at least {{ limit }} characters long",
+     * )
      * @ORM\Column(type="text", nullable=false)
      */
     private $textProperty;
