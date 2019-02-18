@@ -36,6 +36,14 @@
                        role="button">
                         <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
                     </a>
+                {% elseif  textProperty.project is not null %}
+                    <a href="{{ path('project_edit', {
+                        id: textProperty.project.id
+                    }) }}"
+                       class="pull-right btn btn-link"
+                       role="button">
+                        <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
+                    </a>
                 {% endif %}
             </h2>
 
@@ -72,6 +80,14 @@
                     <a href="{{ path('property_edit', {
                         id: textProperty.property.id
                     }) }}#scopes-notes"
+                       class="btn btn-default"
+                       role="button">
+                        Back <i class="fas fa-arrow-left"></i>
+                    </a>
+                {% elseif  textProperty.project is not null %}
+                    <a href="{{ path('project_edit', {
+                        id: textProperty.project.id
+                    }) }}#description-notes"
                        class="btn btn-default"
                        role="button">
                         Back <i class="fas fa-arrow-left"></i>

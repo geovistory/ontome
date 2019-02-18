@@ -12,6 +12,8 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\GroupSequenceProviderInterface;
+use AppBundle\Validator\Constraints\CharacterLength;
+
 
 /**
  * Class TextProperty
@@ -30,10 +32,10 @@ class TextProperty implements GroupSequenceProviderInterface
 
     /**
      * @Assert\NotBlank()
-     * @Assert\Length(
+     * @CharacterLength(
      *      groups={"Description"},
      *      min = 80,
-     *      minMessage = "Your description must be at least {{ limit }} characters long",
+     *      message = "Your description must be at least {{ min }} characters long",
      * )
      * @ORM\Column(type="text", nullable=false)
      */
@@ -442,7 +444,6 @@ class TextProperty implements GroupSequenceProviderInterface
      */
     public function getGroupSequence()
     {
-        // TODO: Implement getGroupSequence() method.
         if($this->systemType->getId() == 16)
         {
             return ['Default', 'Description'];
