@@ -1,181 +1,182 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="UTF-8" />
-        <title>{% block title %}Ontology Management Environment{% endblock %}</title>
-        {% block stylesheets %}
-            <link rel="stylesheet" href="{{ asset('vendor/bootstrap/css/bootstrap.min.css') }}"/>
-            <link rel="stylesheet" href="https://cdn.datatables.net/1.10.15/css/dataTables.bootstrap.min.css">
-            <link rel="stylesheet" href="{{ asset('css/styles.css') }}"/>
-        {% endblock %}
-        <script defer src="https://use.fontawesome.com/releases/v5.0.10/js/all.js" integrity="sha384-slN8GvtUJGnv6ca26v8EzVaR9DC58QEwsIk9q1QXdCU8Yu8ck/tL/5szYlBbqmS+" crossorigin="anonymous"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/4.8.2/tinymce.min.js"></script>
-        <script>
-            tinymce.init({
-                selector:'.tinymce',
-                plugins : 'autolink link lists charmap print preview',
-                default_link_target: "_blank"
-            });
-        </script>
-        <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}" />
-    </head>
-    <body>
-        <header class="header">
-            <div class="container">
-                <div class="row">
-                    <h1 class="logo">
-                        OntoME
-                    </h1>
-                </div>
-                <div class="row">
-                    <h4>
-                        <strong><em class="text-muted">Ontology Management Environment - beta version</em></strong>
-                    </h4>
-                </div>
-            </div>
+<head>
+    <meta charset="UTF-8" />
+    <title>{% block title %}Ontology Management Environment{% endblock %}</title>
+    {% block stylesheets %}
+        <link rel="stylesheet" href="{{ asset('vendor/bootstrap/css/bootstrap.min.css') }}"/>
+        <link rel="stylesheet" href="https://cdn.datatables.net/1.10.15/css/dataTables.bootstrap.min.css">
+        <link rel="stylesheet" href="{{ asset('css/styles.css') }}"/>
+    {% endblock %}
+    <script defer src="https://use.fontawesome.com/releases/v5.0.10/js/all.js" integrity="sha384-slN8GvtUJGnv6ca26v8EzVaR9DC58QEwsIk9q1QXdCU8Yu8ck/tL/5szYlBbqmS+" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/4.8.2/tinymce.min.js"></script>
+    <script>
+        tinymce.init({
+            selector:'.tinymce',
+            plugins : 'autolink link lists charmap print preview',
+            default_link_target: "_blank"
+        });
+    </script>
+    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}" />
+</head>
+<body>
+<header class="header">
+    <div class="container">
+        <div class="row">
+            <h1 class="logo">
+                OntoME
+            </h1>
+        </div>
+        <div class="row">
+            <h4>
+                <strong><em class="text-muted">Ontology Management Environment - beta version</em></strong>
+            </h4>
+        </div>
+    </div>
 
-            <ul class="navi">
-                {% if is_granted('ROLE_USER') %}
-                    <li><a href="{{ path('security_logout') }}">Logout</a></li>
-                {% else %}
-                    <li><a href="{{ path('security_login') }}">Login</a></li>
-                {% endif %}
-            </ul>
-        </header>
-        <nav class="navbar navbar-default">
-            <div class="container-fluid">
-                <div class="navbar-header">
-                    <a class="navbar-brand" href="http://dataforhistory.org" target="_blank">Data for History Consortium</a>
-                </div>
-                <ul class="nav navbar-nav">
-                    <li class="active"><a href="{{ url('home') }}">Home</a></li>
-                    <li><a href="#" class="dropdown-toggle" data-toggle="dropdown">Classes <span class="caret"></span></a>
-                        <ul class="dropdown-menu">
-                            <li><a href="{{ url('app_class_list') }}">Classes list</a>
-                            </li>
-                            <li><a href="{{ url('app_class_gettree') }}">Classes tree</a>
-                            </li>
-                        </ul>
+    <ul class="navi">
+        {% if is_granted('ROLE_USER') %}
+            <li><a href="{{ path('security_logout') }}">Logout</a></li>
+        {% else %}
+            <li><a href="{{ path('security_login') }}">Login</a></li>
+        {% endif %}
+    </ul>
+</header>
+<nav class="navbar navbar-default">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="http://dataforhistory.org" target="_blank">Data for History Consortium</a>
+        </div>
+        <ul class="nav navbar-nav">
+            {% set route = app.request.get('_route') %}{{ route }}
+            <li class="{{ 'home' in route ? 'active' }}"><a href="{{ url('home') }}">Home</a></li>
+            <li class="{{ 'class' in route ? 'active' }}"><a href="#" class="dropdown-toggle" data-toggle="dropdown">Classes <span class="caret"></span></a>
+                <ul class="dropdown-menu">
+                    <li><a href="{{ url('app_class_list') }}">Classes list</a>
                     </li>
-                    <li><a href="#" class="dropdown-toggle" data-toggle="dropdown">Properties <span class="caret"></span></a>
-                        <ul class="dropdown-menu">
-                            <li><a href="{{ url('app_property_list') }}">Properties list</a>
-                            </li>
-                            <li><a href="{{ url('app_property_gettree') }}">Properties tree</a>
-                            </li>
-                        </ul>
+                    <li><a href="{{ url('app_class_gettree') }}">Classes tree</a>
                     </li>
-                    <li><a href="{{ url('app_namespace_list') }}">Namespaces</a></li>
-                    <li><a href="{{ url('app_project_list') }}">Projects</a></li>
-                    <li><a href="{{ url('app_profile_list') }}">Profiles</a></li>
-                    {% if app.user %}
-                        <li><a href="{{ path('user_show', {
-                                'id': app.user.id
-                            }) }}"><i class="fas fa-tachometer-alt"></i>&nbsp;Dashboard</a></li>
-                    {% endif %}
-                    <li><a href="http://phn-wiki.ish-lyon.cnrs.fr/doku.php?id=ontome:index" target="_blank"><i class="fas fa-question-circle"></i> User guide</a></li>
                 </ul>
-            </div>
-        </nav>
-        <div class="main-content">
-            {% for msg in app.session.flashBag.get('success') %}
-                <div class="alert alert-success">
-                    {{ msg }}
-                </div>
-            {% endfor %}
-            {% block body %}{% endblock %}
+            </li>
+            <li class="{{ 'property' in route and 'text_property' not in route ? 'active' }}"><a href="#" class="dropdown-toggle" data-toggle="dropdown">Properties <span class="caret"></span></a>
+                <ul class="dropdown-menu">
+                    <li><a href="{{ url('app_property_list') }}">Properties list</a>
+                    </li>
+                    <li><a href="{{ url('app_property_gettree') }}">Properties tree</a>
+                    </li>
+                </ul>
+            </li>
+            <li class="{{ 'namespace' in route ? 'active' }}"><a href="{{ url('app_namespace_list') }}">Namespaces</a></li>
+            <li class="{{ 'project' in route ? 'active' }}"><a href="{{ url('app_project_list') }}">Projects</a></li>
+            <li class="{{ 'profile' in route ? 'active' }}"><a href="{{ url('app_profile_list') }}">Profiles</a></li>
+            {% if app.user %}
+                <li class="{{ 'user' in route ? 'active' }}"><a href="{{ path('user_show', {
+                        'id': app.user.id
+                    }) }}"><i class="fas fa-tachometer-alt"></i>&nbsp;Dashboard</a></li>
+            {% endif %}
+            <li><a href="http://phn-wiki.ish-lyon.cnrs.fr/doku.php?id=ontome:index" target="_blank"><i class="fas fa-question-circle"></i> User guide</a></li>
+        </ul>
+    </div>
+</nav>
+<div class="main-content">
+    {% for msg in app.session.flashBag.get('success') %}
+        <div class="alert alert-success">
+            {{ msg }}
         </div>
-        <div class="footer">
-            <div class="container">
-                <div class="row">
-                    <div class="footer-block col-sm-3">
-                        <div class="region region-footer-first">
-                            <div id="block-block-3" class="block block-block">
-                                <h3>MENU</h3>
-                                <div class="content">
-                                    <p><a href="{{ url('app_class_list') }}">Classes list</a></p>
-                                    <p><a href="{{ url('app_property_list') }}">Properties list</a></p>
-                                    <p><a href="{{ url('app_namespace_list') }}">Namespaces list</a></p>
-                                    <p><a href="{{ url('app_project_list') }}">Project list</a></p>
-                                    <p><a href="{{ url('app_profile_list') }}">Profiles list</a></p>
-                                    <p><a href="http://phn-wiki.ish-lyon.cnrs.fr/doku.php?id=ontome:index" target="_blank"><i class="fas fa-question-circle"></i> User guide</a></p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="footer-block col-sm-3">
-                        <div class="region region-footer-second">
-                            <div id="block-block-2" class="block block-block">
-                                <h3>ABOUT</h3>
-                                <div class="content">
-                                    <p><a href="http://dataforhistory.org" target="_blank">The Data for History Consortium</a></p>
-                                    <p><a href="{{ url('app_main_legalnotice') }}">Terms of Service</a></p>
-                                    <p><a href="#">Sitemap</a></p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="footer-block col-sm-3">
-                        <div class="region region-footer-third">
-                            <div id="block-block-4" class="block block-block">
-                                <h3>CREDITS</h3>
-                                <div class="content">
-                                <p>Powered by the <a href="http://larhra.ish-lyon.cnrs.fr/pole-histoire-numerique" target="_blank">Pôle Histoire Numérique</a> -  <a href="http://larhra.ish-lyon.cnrs.fr/" target="_blank">LARHRA</a></p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="footer-block col-sm-3">
-                    <div class="region region-footer-fourth">
-                        <div id="block-block-5" class="block block-block">
-                            <h3>CONTACT US</h3>
-                            <div class="content">
-                                <p>E-mail : <a href="mailto:ontome@dataforhistory.org?subject=Contact">ontome@dataforhistory.org</a></p>
-                            </div>
+    {% endfor %}
+    {% block body %}{% endblock %}
+</div>
+<div class="footer">
+    <div class="container">
+        <div class="row">
+            <div class="footer-block col-sm-3">
+                <div class="region region-footer-first">
+                    <div id="block-block-3" class="block block-block">
+                        <h3>MENU</h3>
+                        <div class="content">
+                            <p><a href="{{ url('app_class_list') }}">Classes list</a></p>
+                            <p><a href="{{ url('app_property_list') }}">Properties list</a></p>
+                            <p><a href="{{ url('app_namespace_list') }}">Namespaces list</a></p>
+                            <p><a href="{{ url('app_project_list') }}">Project list</a></p>
+                            <p><a href="{{ url('app_profile_list') }}">Profiles list</a></p>
+                            <p><a href="http://phn-wiki.ish-lyon.cnrs.fr/doku.php?id=ontome:index" target="_blank"><i class="fas fa-question-circle"></i> User guide</a></p>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="row">
-                <p class="footer-text">
-                    <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/" target="_blank"><img alt="Licence Creative Commons" style="border-width:0" src="http://i.creativecommons.org/l/by-sa/4.0/88x31.png"></a>
-                    All the contents of this website are licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/" target="_blank">Creative Commons Licence Attribution-ShareAlike 4.0 International</a>.
-                </p>
+            <div class="footer-block col-sm-3">
+                <div class="region region-footer-second">
+                    <div id="block-block-2" class="block block-block">
+                        <h3>ABOUT</h3>
+                        <div class="content">
+                            <p><a href="http://dataforhistory.org" target="_blank">The Data for History Consortium</a></p>
+                            <p><a href="{{ url('app_main_legalnotice') }}">Terms of Service</a></p>
+                            <p><a href="#">Sitemap</a></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-block col-sm-3">
+                <div class="region region-footer-third">
+                    <div id="block-block-4" class="block block-block">
+                        <h3>CREDITS</h3>
+                        <div class="content">
+                            <p>Powered by the <a href="http://larhra.ish-lyon.cnrs.fr/pole-histoire-numerique" target="_blank">Pôle Histoire Numérique</a> -  <a href="http://larhra.ish-lyon.cnrs.fr/" target="_blank">LARHRA</a></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-block col-sm-3">
+                <div class="region region-footer-fourth">
+                    <div id="block-block-5" class="block block-block">
+                        <h3>CONTACT US</h3>
+                        <div class="content">
+                            <p>E-mail : <a href="mailto:ontome@dataforhistory.org?subject=Contact">ontome@dataforhistory.org</a></p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-                <!--<p class="footer-text">Propulsé par le <a href="http://larhra.ish-lyon.cnrs.fr/pole-histoire-numerique">Pôle Histoire Numérique</a></p>!-->
-
-            </div>
+        <div class="row">
+            <p class="footer-text">
+                <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/" target="_blank"><img alt="Licence Creative Commons" style="border-width:0" src="http://i.creativecommons.org/l/by-sa/4.0/88x31.png"></a>
+                All the contents of this website are licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/" target="_blank">Creative Commons Licence Attribution-ShareAlike 4.0 International</a>.
+            </p>
         </div>
-        {% block javascripts %}
-            <script
-                    src="https://code.jquery.com/jquery-3.2.1.min.js"
-                    integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
-                    crossorigin="anonymous">
-            </script>
-            <script src="{{ asset('vendor/bootstrap/js/bootstrap.min.js') }}"></script>
-            <script src="https://cdn.datatables.net/1.10.15/js/jquery.dataTables.min.js"></script>
-            <script src="https://cdn.datatables.net/1.10.15/js/dataTables.bootstrap.min.js"></script>
-            <script>
-                $(function() {
-                    // Javascript to enable link to tab
-                    var hash = document.location.hash;
+    </div>
+    <!--<p class="footer-text">Propulsé par le <a href="http://larhra.ish-lyon.cnrs.fr/pole-histoire-numerique">Pôle Histoire Numérique</a></p>!-->
 
-                    if (hash) {
-                        console.log(hash);
-                        $('.nav-tabs a[href="'+hash+'"]').tab('show');
-                    }
+</div>
+</div>
+{% block javascripts %}
+    <script
+            src="https://code.jquery.com/jquery-3.2.1.min.js"
+            integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+            crossorigin="anonymous">
+    </script>
+    <script src="{{ asset('vendor/bootstrap/js/bootstrap.min.js') }}"></script>
+    <script src="https://cdn.datatables.net/1.10.15/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.15/js/dataTables.bootstrap.min.js"></script>
+    <script>
+        $(function() {
+            // Javascript to enable link to tab
+            var hash = document.location.hash;
 
-                    // Change hash for page-reload
-                    $('a[data-toggle="tab"]').on('show.bs.tab', function (e) {
-                        window.location.hash = e.target.hash;
-                    });
+            if (hash) {
+                console.log(hash);
+                $('.nav-tabs a[href="'+hash+'"]').tab('show');
+            }
 
-                    $('a.btn-edit').click(function(){
-                        $('a.btn-edit').attr('href', $('a.btn-edit').attr('href')+window.location.hash);
-                    });
-                });
-            </script>
-        {% endblock %}
-    </body>
+            // Change hash for page-reload
+            $('a[data-toggle="tab"]').on('show.bs.tab', function (e) {
+                window.location.hash = e.target.hash;
+            });
+
+            $('a.btn-edit').click(function(){
+                $('a.btn-edit').attr('href', $('a.btn-edit').attr('href')+window.location.hash);
+            });
+        });
+    </script>
+{% endblock %}
+</body>
 </html>
