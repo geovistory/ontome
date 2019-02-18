@@ -47,6 +47,9 @@ class TextPropertyController extends Controller
         else if(!is_null($textProperty->getProperty())){
             $object = $textProperty->getProperty();
         }
+        else if(!is_null($textProperty->getProject())){
+            $object = $textProperty->getProject();
+        }
         else throw $this->createNotFoundException('The related object for the text property  n° '.$textProperty->getId().' does not exist. Please contact an administrator.');
 
         $this->denyAccessUnlessGranted('edit', $object);
@@ -118,6 +121,14 @@ class TextPropertyController extends Controller
             $textProperty->setProperty($associatedEntity);
             $associatedObject = $associatedEntity;
         }
+        else if($object === 'project') {
+            $associatedEntity = $em->getRepository('AppBundle:Project')->find($objectId);
+            if (!$associatedEntity) {
+                throw $this->createNotFoundException('The project n° '.$objectId.' does not exist');
+            }
+            $textProperty->setProject($associatedEntity);
+            $associatedObject = $associatedEntity;
+        }
         else throw $this->createNotFoundException('The requested object "'.$object.'" does not exist!');
 
         if($type === 'scope-note') {
@@ -129,12 +140,18 @@ class TextPropertyController extends Controller
         else if($type === 'additional-note') {
             $systemType = $em->getRepository('AppBundle:SystemType')->find(12); //systemType 12 = additional-note
         }
+        else if($type === 'definition') {
+            $systemType = $em->getRepository('AppBundle:SystemType')->find(16); //systemType 16 = description
+        }
         else throw $this->createNotFoundException('The requested text property type "'.$type.'" does not exist!');
 
         $this->denyAccessUnlessGranted('edit', $associatedObject);
 
         $textProperty->setSystemType($systemType);
-        $textProperty->addNamespace($associatedObject->getOngoingNamespace());
+        if($object !== 'project')
+        {
+            $textProperty->addNamespace($associatedObject->getOngoingNamespace());
+        }
         $textProperty->setCreator($this->getUser());
         $textProperty->setModifier($this->getUser());
         $textProperty->setCreationTime(new \DateTime('now'));
@@ -148,7 +165,10 @@ class TextPropertyController extends Controller
         if ($form->isSubmitted() && $form->isValid()) {
             $textProperty = $form->getData();
             $textProperty->setSystemType($systemType);
-            $textProperty->addNamespace($associatedObject->getOngoingNamespace());
+            if($object !== 'project')
+            {
+                $textProperty->addNamespace($associatedObject->getOngoingNamespace());
+            }
             $textProperty->setCreator($this->getUser());
             $textProperty->setModifier($this->getUser());
             $textProperty->setCreationTime(new \DateTime('now'));

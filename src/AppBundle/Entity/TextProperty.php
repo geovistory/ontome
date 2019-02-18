@@ -11,13 +11,17 @@ namespace AppBundle\Entity;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\GroupSequenceProviderInterface;
+use AppBundle\Validator\Constraints\CharacterLength;
+
 
 /**
  * Class TextProperty
  * @ORM\Entity
  * @ORM\Table(schema="che", name="text_property")
+ * @Assert\GroupSequenceProvider()
  */
-class TextProperty
+class TextProperty implements GroupSequenceProviderInterface
 {
     /**
      * @ORM\Id
@@ -28,10 +32,10 @@ class TextProperty
 
     /**
      * @Assert\NotBlank()
-     * @Assert\Length(
+     * @CharacterLength(
      *      groups={"Description"},
      *      min = 80,
-     *      minMessage = "Your description must be at least {{ limit }} characters long",
+     *      message = "Your description must be at least 80 characters long",
      * )
      * @ORM\Column(type="text", nullable=false)
      */
@@ -432,4 +436,18 @@ class TextProperty
     }
 
 
+    /**
+     * Returns which validation groups should be used for a certain state
+     * of the object.
+     *
+     * @return array An array of validation groups
+     */
+    public function getGroupSequence()
+    {
+        if($this->systemType->getId() == 16)
+        {
+            return ['Default', 'Description'];
+        }
+        return ['Default'];
+    }
 }
