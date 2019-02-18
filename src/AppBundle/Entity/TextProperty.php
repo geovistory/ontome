@@ -11,13 +11,15 @@ namespace AppBundle\Entity;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\GroupSequenceProviderInterface;
 
 /**
  * Class TextProperty
  * @ORM\Entity
  * @ORM\Table(schema="che", name="text_property")
+ * @Assert\GroupSequenceProvider()
  */
-class TextProperty
+class TextProperty implements GroupSequenceProviderInterface
 {
     /**
      * @ORM\Id
@@ -432,4 +434,19 @@ class TextProperty
     }
 
 
+    /**
+     * Returns which validation groups should be used for a certain state
+     * of the object.
+     *
+     * @return array An array of validation groups
+     */
+    public function getGroupSequence()
+    {
+        // TODO: Implement getGroupSequence() method.
+        if($this->systemType->getId() == 16)
+        {
+            return ['Default', 'Description'];
+        }
+        return ['Default'];
+    }
 }

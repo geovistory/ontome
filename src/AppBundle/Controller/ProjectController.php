@@ -203,5 +203,19 @@ class ProjectController  extends Controller
         ));
     }
 
+    /**
+     * @Route("/project/{id}/edit", name="project_edit")
+     * @param Project $project
+     * @return Response the rendered template
+     */
+    public function editAction(Project $project)
+    {
+        $this->denyAccessUnlessGranted('edit', $project);
 
+        $em = $this->getDoctrine()->getManager();
+
+        return $this->render('project/edit.html.twig', array(
+            'project' => $project
+        ));
+    }
 }
