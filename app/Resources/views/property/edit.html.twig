@@ -176,7 +176,7 @@
                     {% if property.childPropertyAssociations|length > 1  %}
                         {% set tooltip_property = "rdfs:subpropertyOf the properties listed below" %}
                     {% endif %}
-                    <a data-toggle="popover" data-placement="right" data-html="true" title="{{ property }}" data-content="{{ tooltip_property }}">
+                    <a data-toggle="tooltip" data-placement="right" title="{{ property }} {{ tooltip_property }}">
                         <span class="fas fa-info-circle"></span>
                     </a>
                 </h3>
@@ -391,7 +391,7 @@
             });
             $('#profiles-table').DataTable();
 
-            $('[data-toggle="popover"]').popover();
+            $('[data-toggle="tooltip"]').tooltip();
 
             if (location.hash){
                 setTimeout(function(){
