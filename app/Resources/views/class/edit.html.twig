@@ -228,9 +228,9 @@
                     {% if class.childClassAssociations|length > 1  %}
                         {% set tooltip_class = "rdfs:subclassOf the classes listed below" %}
                     {% endif %}
-                    <button type="button" class="btn btn-primary" data-toggle="popover" data-placement="right" data-html="true" title="{{ class }}" data-content="{{ tooltip_class }}">
-                        <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
-                    </button>
+                    <a data-toggle="tooltip" data-placement="right" title="{{ class }} {{ tooltip_class }}">
+                        <span class="fas fa-info-circle"></span>
+                    </a>
                 </h3>
                 <table class="table table-striped" id="parent-classes-table">
                     <thead>
@@ -633,7 +633,7 @@
             $('#ingoing-inherited-properties-table').DataTable();
             $('#profiles-table').DataTable();
 
-            $('[data-toggle="popover"]').popover();
+            $('[data-toggle="tooltip"]').tooltip();
 
             if (location.hash){
                 setTimeout(function(){
