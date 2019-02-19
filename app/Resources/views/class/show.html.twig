@@ -173,7 +173,15 @@
                         <a href="{{ path('new_parent_class_form', {'childClass': class.id}) }}" class="btn btn-primary pull-right">Add <span class="fa fa-plus-circle"></span></a>
                     </div>
                 {% endif %}
-                <h3>Parent classes ({{ class }} rdfs:subclassOf this class)</h3>
+                <h3>Parent classes
+                    {% set tooltip_class = "rdfs:subclassOf the class below" %}
+                    {% if class.childClassAssociations|length > 1  %}
+                        {% set tooltip_class = "rdfs:subclassOf the classes listed below" %}
+                    {% endif %}
+                    <button type="button" class="btn btn-primary" data-toggle="tooltip" data-placement="right" title="{{ class }} {{ tooltip_class }}">
+                        <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
+                    </button>
+                </h3>
                 <table class="table table-striped" id="parent-classes-table">
                     <thead>
                     <tr>
@@ -565,6 +573,9 @@
             $('#ingoing-properties-table').DataTable();
             $('#ingoing-inherited-properties-table').DataTable();
             $('#profiles-table').DataTable();
+
+            $('[data-toggle="tooltip"]').tooltip({container: 'body'});
+
             if (location.hash){
                 setTimeout(function(){
                     window.scrollTo(0, 0);

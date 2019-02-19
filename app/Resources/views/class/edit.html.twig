@@ -49,11 +49,11 @@
                             <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
                             <td class="truncated-text">
                                 <span>{{ textProperty.textProperty|striptags|raw }}</span>
-                                    {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
+                                {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
                             </td>
                             <td>{{ textProperty.languageIsoCode}}</td>
                             <td>
-                               <!-- {% if textProperty.namespace is not null %}
+                                <!-- {% if textProperty.namespace is not null %}
                                     {% for label in textProperty.namespace.topLevelNamespace.labels %}
                                         {% if label.isStandardLabelForLanguage == true and label.languageIsoCode == 'en' %}
                                             {{ label.label }}
@@ -219,11 +219,19 @@
             </div>
             <div id="class-hierarchy" class="tab-pane fade">
                 {% if is_granted('edit', class) %}
-                <div class="pull-right add-div">
-                    <a href="{{ path('new_parent_class_form', {'childClass': class.id}) }}" class="btn btn-primary pull-right">Add <span class="fa fa-plus-circle"></span></a>
-                </div>
+                    <div class="pull-right add-div">
+                        <a href="{{ path('new_parent_class_form', {'childClass': class.id}) }}" class="btn btn-primary pull-right">Add <span class="fa fa-plus-circle"></span></a>
+                    </div>
                 {% endif %}
-                <h3>Parent classes ({{ class }} rdfs:subclassOf this class)</h3>
+                <h3>Parent classes
+                    {% set tooltip_class = "rdfs:subclassOf the class below" %}
+                    {% if class.childClassAssociations|length > 1  %}
+                        {% set tooltip_class = "rdfs:subclassOf the classes listed below" %}
+                    {% endif %}
+                    <button type="button" class="btn btn-primary" data-toggle="popover" data-placement="right" data-html="true" title="{{ class }}" data-content="{{ tooltip_class }}">
+                        <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
+                    </button>
+                </h3>
                 <table class="table table-striped" id="parent-classes-table">
                     <thead>
                     <tr>
@@ -232,7 +240,7 @@
                         <th>Root namespace</th>
                         <th>
                             {% if is_granted('edit', class) %}
-                               Edit association
+                                Edit association
                             {% else %}
                                 View association
                             {% endif %}
@@ -422,10 +430,10 @@
                             <td>
                                 {{ outgoingInheritedProperty.domain }} (is a
                                 <a
-                                    href="{{ path('class_show', {
-                                        'id': outgoingInheritedProperty.parentClassId
-                                    }) }}"
-                                    title="{{ outgoingInheritedProperty.ancestors }}">
+                                        href="{{ path('class_show', {
+                                            'id': outgoingInheritedProperty.parentClassId
+                                        }) }}"
+                                        title="{{ outgoingInheritedProperty.ancestors }}">
                                     {{ outgoingInheritedProperty.parentClass }}</a>)
                             </td>
                             <td>
@@ -517,10 +525,10 @@
                             <td>
                                 {{ class }} (is a
                                 <a
-                                    href="{{ path('class_show', {
-                                        'id': ingoingInheritedProperty.rangeId
-                                    }) }}"
-                                    title="{{ ingoingInheritedProperty.ancestors }}">
+                                        href="{{ path('class_show', {
+                                            'id': ingoingInheritedProperty.rangeId
+                                        }) }}"
+                                        title="{{ ingoingInheritedProperty.ancestors }}">
                                     {{ ingoingInheritedProperty.range }}</a>)
                             </td>
                             <td>{{ ingoingInheritedProperty.namespace }}</td>
@@ -562,7 +570,7 @@
                     <button id="reset-tree" onclick="reset();">Reset</button>
                 </p>
                 <div id="graph-container" data-url="{{ path('class_graph_json', {
-                                                    'class': class.id})
+                    'class': class.id})
                 }}">
                 </div>
                 <p><span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span><em>Use mouse wheel to zoom in/out.</em></p>
@@ -624,6 +632,9 @@
             $('#ingoing-properties-table').DataTable();
             $('#ingoing-inherited-properties-table').DataTable();
             $('#profiles-table').DataTable();
+
+            $('[data-toggle="popover"]').popover();
+
             if (location.hash){
                 setTimeout(function(){
                     window.scrollTo(0, 0);
