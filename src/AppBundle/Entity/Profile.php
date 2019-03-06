@@ -118,12 +118,22 @@ class Profile
      */
     private $projects;
 
+    /**
+     * @ORM\ManyToMany(targetEntity="OntoNamespace",  inversedBy="profiles", fetch="EXTRA_LAZY")
+     * @ORM\JoinTable(schema="che", name="associates_namespace",
+     *      joinColumns={@ORM\JoinColumn(name="fk_profile", referencedColumnName="pk_profile")},
+     *      inverseJoinColumns={@ORM\JoinColumn(name="fk_namespace", referencedColumnName="pk_namespace")}
+     *      )
+     */
+    private $namespaces;
+
     public function __construct()
     {
         $this->childProfiles = new ArrayCollection();
         $this->textProperties = new ArrayCollection();
         $this->labels = new ArrayCollection();
         $this->projects = new ArrayCollection();
+        $this->namespaces = new ArrayCollection();
     }
 
     /**
@@ -263,10 +273,26 @@ class Profile
     }
 
     /**
+     * @return ArrayCollection|OntoNamespace[]
+     */
+    public function getNamespaces()
+    {
+        return $this->namespaces;
+    }
+
+    /**
      * @return string a human readable identification of the object
      */
     public function getObjectIdentification()
     {
         return $this->standardLabel;
+    }
+
+    public function addNamespace(OntoNamespace $namespace)
+    {
+        if ($this->namespaces->contains($namespace)) {
+            return;
+        }
+        $this->namespaces[] = $namespace;
     }
 }

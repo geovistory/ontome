@@ -161,6 +161,12 @@ class OntoNamespace
      */
     private $propertyAssociations;
 
+    /**
+     * @ORM\ManyToMany(targetEntity="AppBundle\Entity\Profile", mappedBy="namespaces")
+     * @ORM\OrderBy({"standardLabel" = "ASC"})
+     */
+    private $profiles;
+
 
     /**
      * @ORM\OneToMany(targetEntity="OntoNamespace", mappedBy="referencedVersion")
@@ -176,6 +182,7 @@ class OntoNamespace
         $this->classAssociations = new ArrayCollection();
         $this->propertyAssociations = new ArrayCollection();
         $this->childVersions = new ArrayCollection();
+        $this->profiles = new ArrayCollection();
     }
 
     /**
@@ -368,6 +375,14 @@ class OntoNamespace
     public function getPropertyAssociations()
     {
         return $this->propertyAssociations;
+    }
+
+    /**
+     * @return ArrayCollection|Property[]
+     */
+    public function getProfiles()
+    {
+        return $this->profiles;
     }
 
     /**
