@@ -66,4 +66,19 @@ class NamespaceRepository extends EntityRepository
 
     }
 
+    /**
+     * @return array
+     */
+    public function findNamespacesGraph(){
+        $conn = $this->getEntityManager()
+            ->getConnection();
+
+        $sql = "SELECT get_webvowl_json_for_namespace AS json FROM api.get_webvowl_json_for_namespace(18)";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->execute();
+
+        return $stmt->fetchAll();
+    }
+
 }

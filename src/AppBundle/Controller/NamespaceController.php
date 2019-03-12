@@ -9,8 +9,10 @@
 namespace AppBundle\Controller;
 
 use AppBundle\Entity\OntoNamespace;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
 class NamespaceController  extends Controller
 {
@@ -41,6 +43,20 @@ class NamespaceController  extends Controller
         return $this->render('namespace/show.html.twig', array(
             'namespace' => $namespace
         ));
+    }
+
+    /**
+     * @Route("/namespaces-graph/json", name="namespaces_graph_json")
+     * @Method("GET")
+     * @return JsonResponse a Json formatted graph representation of Namespaces
+     */
+    public function getGraphJson()
+    {
+        $em = $this->getDoctrine()->getManager();
+        $namespaces = $em->getRepository('AppBundle:OntoNamespace')
+            ->findNamespacesGraph();
+
+        return new JsonResponse($namespaces[0]['json'],200, array(), true);
     }
 
 }

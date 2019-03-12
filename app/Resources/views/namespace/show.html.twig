@@ -6,8 +6,7 @@
 
     <div class="container">
         <h2 class="class-name">{{ namespace }}</h2>
-
-        <ul class="nav nav-tabs">
+       <ul class="nav nav-tabs">
             <li class="active"><a data-toggle="tab" href="#definition">Definition</a></li>
             <li><a data-toggle="tab" href="#identification">Identification</a></li>
             <li><a data-toggle="tab" href="#namespace-hierarchy">Hierarchy</a></li>
@@ -222,7 +221,7 @@
             </div>
             <div id="graph" class="tab-pane fade">
                 <h3>Graph</h3>
-
+                {{ url('namespaces_graph_json') }}
             </div>
             <div id="comments" class="tab-pane fade">
                 <h3>Comments</h3>
