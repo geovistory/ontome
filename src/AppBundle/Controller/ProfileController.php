@@ -54,4 +54,32 @@ class ProfileController  extends Controller
         ]);
     }
 
+    /**
+     * @Route("/profile/{id}/edit", name="profile_edit")
+     * @param Profile $profile
+     * @return Response the rendered template
+     */
+    public function editAction(Profile $profile)
+    {
+        $this->denyAccessUnlessGranted('edit', $profile);
+
+        $em = $this->getDoctrine()->getManager();
+
+        $classes = $em->getRepository('AppBundle:OntoClass')
+            ->findClassesByProfileId($profile);
+
+        $properties = $em->getRepository('AppBundle:Property')
+            ->findPropertiesByProfileId($profile);
+
+        $rootNamespaces = $em->getRepository('AppBundle:OntoNamespace')
+            ->findBy(array('isTopLevelNamespace' => true));
+
+        return $this->render('profile/edit.html.twig', array(
+            'profile' => $profile,
+            'classes' => $classes,
+            'rootNamespaces' => $rootNamespaces,
+            'properties' => $properties
+        ));
+    }
+
 }

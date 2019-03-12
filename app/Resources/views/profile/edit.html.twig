@@ -1,0 +1,294 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ profile.standardLabel }}{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.4/css/select2.min.css" rel="stylesheet" />
+{% endblock %}
+
+{% block body %}
+
+<div class="container">
+    <h2 class="profile-name">{{ profile.standardLabel }}</h2>
+    <ul class="nav nav-tabs" id="main-tabs">
+        <li class="active"><a data-toggle="tab" href="#identification">Profile identification</a></li>
+        <li><a data-toggle="tab" href="#classes">Classes</a></li>
+        <li><a data-toggle="tab" href="#properties">Properties</a></li>
+        <li><a data-toggle="tab" href="#projects">Projects</a></li>
+        <li><a data-toggle="tab" href="#namespaces">Namespaces</a></li>
+    </ul>
+
+    <div class="tab-content">
+        <div id="identification" class="tab-pane fade in active">
+            <h3>Identification</h3>
+            <p>Project of belonging: <a href="{{ path('project_show', {'id': profile.projectOfBelonging.id}) }}">{{ profile.projectOfBelonging.standardLabel }}</a></p>
+            <p>Start date: {{ profile.startDate }}</p>
+            <p>End date: {{ profile.endDate }}</p>
+            <h3>Labels</h3>
+            <table class="table table-striped" id="labels-table">
+                <thead>
+                <tr>
+                    <th>Label</th>
+                    <th>Language</th>
+                    <th>Last updated</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for label in profile.labels %}
+                <tr>
+                    <td>
+                        <a href="#">
+                            {{ label.label }}
+                        </a>
+                    </td>
+                    <td>{{ label.languageIsoCode}}</td>
+                    <td>{{ label.modificationTime|date('Y-m-d') }}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            <h3>Scope Notes</h3>
+            <table class="table table-striped" id="scope-notes-table">
+                <thead>
+                <tr>
+                    <th>Show</th>
+                    <th>Scope note</th>
+                    <th>Language</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for textProperty in profile.textProperties if textProperty.systemType.id == 1 %}
+                <tr>
+                    <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
+                    <td class="truncated-text">
+                        <span>{{ textProperty.textProperty}}</span>
+                        {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
+                    </td>
+                    <td>{{ textProperty.languageIsoCode}}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            <h3>Additional notes</h3>
+            <table class="table table-striped" id="additional-notes-table">
+                <thead>
+                <tr>
+                    <th>Show</th>
+                    <th>Notes</th>
+                    <th>Language</th>
+                    <th>Namespace</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for textProperty in profile.textProperties if textProperty.systemType.id == 12 %}
+                <tr>
+                    <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
+                    <td class="truncated-text">
+                        <span>{{ textProperty.textProperty|striptags|raw }}</span>
+                        {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
+                    </td>
+                    <td>{{ textProperty.languageIsoCode}}</td>
+                    <td>WIP</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div id="classes" class="tab-pane fade">
+            <h3>Associated classes</h3>
+            <table class="table table-striped" id="classes-table">
+                <thead>
+                <tr>
+                    <th>Class identifier</th>
+                    <th>Standard label</th>
+                    <th>Association type</th>
+                    <th>Namespace URI</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for class in classes %}
+                <tr>
+                    <td>
+                        <a href="{{ path('class_show', {
+                                'id': class.id
+                            }) }}">
+                            {{ class.identifierInNamespace }}
+                        </a>
+                    </td>
+                    <td>
+                        <a href="{{ path('class_show', {
+                                'id': class.id
+                            }) }}">
+                            {{ class.standardLabel }}</td>
+                    </a>
+                    <td>{{ class.associationType }}</td>
+                    <td>
+                        {{ class.rootNamespace }}
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div id="properties" class="tab-pane fade">
+            <h3>Associated properties</h3>
+            <table class="table table-striped" id="properties-table">
+                <thead>
+                <tr>
+                    <th>Property identifier</th>
+                    <th>Standard label</th>
+                    <th>Namespace URI</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for property in properties %}
+                <tr>
+                    <td>
+                        <a href="{{ path('property_show', {
+                                'id': property.id
+                            }) }}">
+                            {{ property.identifierInNamespace }}
+                        </a>
+                    </td>
+                    <td>
+                        <a href="{{ path('property_show', {
+                                'id': property.id
+                            }) }}">
+                            {{ property.standardLabel }}
+                        </a>
+                    </td>
+                    <td>
+                        {{ property.rootNamespace }}
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div id="projects" class="tab-pane fade">
+            <h3>Associated projects</h3>
+            <table class="table table-striped" id="projects-table">
+                <thead>
+                <tr>
+                    <th>Project identifier</th>
+                    <th>Last updated</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for project in profile.projects %}
+                <tr>
+                    <td>
+                        <a href="{{ path('project_show', {
+                                'id': project.id
+                            }) }}">
+                            {{ project.standardLabel }}
+                        </a>
+                    </td>
+                    <td>{{ project.modificationTime|date('Y-m-d') }}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div id="namespaces" class="tab-pane fade">
+            <h3>Namespaces list management</h3>
+            <h4>Namespaces used by this profile</h4>
+            <table class="table table-striped" id="namespaces-table">
+                <thead>
+                <tr>
+                    <th>Namespace URI</th>
+                    <th>Last updated</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for namespace in profile.namespaces %}
+                    <tr>
+                        <td>
+                            <a href="{{ path('namespace_show', {
+                                'id': namespace.id
+                            }) }}">
+                                {{ namespace.namespaceURI }}
+                            </a>
+                        </td>
+                        <td>{{ namespace.modificationTime|date('Y-m-d') }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            <h4>Pick a namespace to associate with the current profile</h4>
+            <div class="row">
+                <div class="col-sm-6">
+                    <select id="select-root-namespace">
+                    {% for rootNamespace in rootNamespaces %}
+                        <option value="{{ rootNamespace.id }}">{{ rootNamespace }}</option>
+                    {% endfor %}
+                    </select>
+                    <!--<ul id="root-namespaces-list" class="list-group">
+                    {% for rootNamespace in rootNamespaces %}
+                        <a class="list-group-item" id="{{ rootNamespace.id }}">{{ rootNamespace }}<i class="fas fa-angle-double-right"></i></a>
+                    {% endfor %}
+                    </ul>-->
+                </div>
+                <div class="col-sm-6">
+                    <ul class="list-group" id="chosable-namespaces-list">
+                        <a class="list-group-item pickable-namespace" id="999">Test 1</a>
+                        <a class="list-group-item pickable-namespace" id="998">Test 2</a>
+                        <a class="list-group-item pickable-namespace" id="997">Test 3</a>
+                        <a class="list-group-item pickable-namespace" id="996">Test 4</a>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.4/js/select2.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        $('#labels-table').DataTable();
+        $('#classes-table').DataTable();
+        $('#properties-table').DataTable();
+        $('#additional-notes-table').DataTable();
+        $('#namespaces-table').DataTable();
+
+        $('#select-root-namespace').select2({
+            width: '100%',
+            sorter: function(data) {
+                /* Sort data using lowercase comparison */
+                return data.sort(function (a, b) {
+                    a = a.text.toLowerCase();
+                    b = b.text.toLowerCase();
+                    if (a > b) {
+                        return 1;
+                    } else if (a < b) {
+                        return -1;
+                    }
+                    return 0;
+                });
+            }
+        });
+
+        $('#select-root-namespace').on('select2:select', function (e) {
+            $("#chosable-namespaces-list").append($("<a class=\"list-group-item pickable-namespace\" id=\"995\">Test 5</a>"));
+        });
+
+        $(document).on("mouseenter", ".pickable-namespace", function() {
+            $(this).prepend($("<span><i class=\"fas fa-check\"></i>&nbsp;</span>"));
+        });
+
+        $(document).on("mouseleave", ".pickable-namespace", function() {
+            $(this).find(":first-child").remove();
+        });
+
+    } );
+</script>
+
+
+{% endblock %}

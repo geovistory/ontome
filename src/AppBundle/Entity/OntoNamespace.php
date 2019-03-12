@@ -402,7 +402,7 @@ class OntoNamespace
      */
     public function getObjectIdentification()
     {
-        return $this->labels[0];
+        return $this->standardLabel;
     }
 
     /**
