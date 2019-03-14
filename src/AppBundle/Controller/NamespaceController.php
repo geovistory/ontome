@@ -46,15 +46,16 @@ class NamespaceController  extends Controller
     }
 
     /**
-     * @Route("/namespaces-graph/json", name="namespaces_graph_json")
+     * @Route("/namespaces-graph/json/{id}", name="namespaces_graph_json")
      * @Method("GET")
+     * @param OntoNamespace $namespace
      * @return JsonResponse a Json formatted graph representation of Namespaces
      */
-    public function getGraphJson()
+    public function getGraphJson(OntoNamespace $namespace)
     {
         $em = $this->getDoctrine()->getManager();
         $namespaces = $em->getRepository('AppBundle:OntoNamespace')
-            ->findNamespacesGraph();
+            ->findNamespacesGraph($namespace);
 
         return new JsonResponse($namespaces[0]['json'],200, array(), true);
     }

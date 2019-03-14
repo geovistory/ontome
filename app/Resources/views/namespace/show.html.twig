@@ -221,7 +221,7 @@
             </div>
             <div id="graph" class="tab-pane fade">
                 <h3>Graph</h3>
-                {{ url('namespaces_graph_json') }}
+                <embed src="http://visualdataweb.de/webvowl/#url={{ url('namespaces_graph_json', {'id': namespace.id}) }}" width="100%" height="1000px">
             </div>
             <div id="comments" class="tab-pane fade">
                 <h3>Comments</h3>
