@@ -194,28 +194,20 @@
         <div id="namespaces" class="tab-pane fade">
             <h3>Namespaces list management</h3>
             <h4>Namespaces used by this profile</h4>
-            <table class="table table-striped" id="namespaces-table">
-                <thead>
-                <tr>
-                    <th>Namespace URI</th>
-                    <th>Last updated</th>
-                </tr>
-                </thead>
-                <tbody>
+            {% if profile.namespaces|length == 0 %}
+                <em id="empty-namespace-list-message">There is currently no namespace used by this profile.</em>
+            {% endif %}
+            <ul class="list-group" id="used-namespaces-list">
                 {% for namespace in profile.namespaces %}
-                    <tr>
-                        <td>
-                            <a href="{{ path('namespace_show', {
-                                'id': namespace.id
-                            }) }}">
-                                {{ namespace.namespaceURI }}
-                            </a>
-                        </td>
-                        <td>{{ namespace.modificationTime|date('Y-m-d') }}</td>
-                    </tr>
+                <li>
+                    <a href="{{ path('namespace_show', {
+                        'id': namespace.id
+                    }) }}">
+                        {{ namespace }}
+                    </a>
+                </li>
                 {% endfor %}
-                </tbody>
-            </table>
+            </ul>
             <h4>Pick a namespace to associate with the current profile</h4>
             <div class="row">
                 <div class="col-sm-6">
@@ -232,10 +224,6 @@
                 </div>
                 <div class="col-sm-6">
                     <ul class="list-group" id="chosable-namespaces-list">
-                        <a class="list-group-item pickable-namespace" id="999">Test 1</a>
-                        <a class="list-group-item pickable-namespace" id="998">Test 2</a>
-                        <a class="list-group-item pickable-namespace" id="997">Test 3</a>
-                        <a class="list-group-item pickable-namespace" id="996">Test 4</a>
                     </ul>
                 </div>
             </div>
@@ -276,16 +264,65 @@
         });
 
         $('#select-root-namespace').on('select2:select', function (e) {
-            $("#chosable-namespaces-list").append($("<a class=\"list-group-item pickable-namespace\" id=\"995\">Test 5</a>"));
+            var selectedValue = e.params.data.id;
+            var url = '{{ path("namespaces_by_root_id_list_json", {'id': 'selectedValue'}) }}';
+            url = url.replace("selectedValue", selectedValue);
+            $.ajax({
+                url: url,
+                type: 'GET',
+                dataType: 'json',
+                success:function(data){
+
+                    // handling the response data from the controller
+                    if(data.status == 'Error'){
+                        console.log("[API] ERROR: "+data.message);
+                    }
+                    if(data.status == 'Success'){
+                        $.each(data.namespaces, function(key, val){
+                            $("#chosable-namespaces-list").append($("<a class=\"list-group-item pickable-namespace\" id="+val.id+">"+val.standardLabel+"</a>"));
+                        });
+                    }
+                }
+            });
         });
 
         $(document).on("mouseenter", ".pickable-namespace", function() {
-            $(this).prepend($("<span><i class=\"fas fa-check\"></i>&nbsp;</span>"));
+            $(this).prepend($("<span><i class=\"fas fa-plus\"></i>&nbsp;</span>"));
         });
 
         $(document).on("mouseleave", ".pickable-namespace", function() {
             $(this).find(":first-child").remove();
         });
+
+        $(document).on("click", ".pickable-namespace", function() {
+            var selectedValue = $(this).attr("id");
+            var profileID = {{ profile.id }}
+            var url = '{{ path("profile_namespace_association", {'profile' : 'profileID','namespace': 'selectedValue'}) }}';
+            url = url.replace("profileID", profileID);
+            url = url.replace("selectedValue", selectedValue);
+            /*$.ajax({
+                url: url,
+                type: 'GET',
+                dataType: 'json',
+                success:function(data){
+
+                    // handling the response data from the controller
+                    if(data.status == 'Error'){
+                        console.log("[API] ERROR: "+data.message);
+                    }
+                    if(data.status == 'Success'){
+                        $.each(data.namespaces, function(key, val){
+                            $("#chosable-namespaces-list").append($("<a class=\"list-group-item pickable-namespace\" id="+val.id+">"+val.standardLabel+"</a>"));
+                        });
+                    }
+                }
+            });*/
+            $("#empty-namespace-list-message").remove();
+            $("#select-root-namespace option:selected").remove();
+            $("#used-namespaces-list").append($("<a class=\"list-group-item associated-namespaces\" id="+selectedValue+">"+$(this).text()+"</a>"));
+            $("#chosable-namespaces-list").empty();
+        });
+
 
     } );
 </script>

@@ -8,10 +8,15 @@
 
 namespace AppBundle\Controller;
 
+use AppBundle\Entity\OntoNamespace;
 use AppBundle\Entity\Profile;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class ProfileController  extends Controller
 {
@@ -80,6 +85,45 @@ class ProfileController  extends Controller
             'rootNamespaces' => $rootNamespaces,
             'properties' => $properties
         ));
+    }
+
+    /**
+     * @Route("/profile/{profile}/namespace/{namespace}/add", name="profile_namespace_association")
+     * @Method({ "POST"})
+     * @param OntoNamespace  $namespace    The namespace to be associated with a profile
+     * @param Profile  $profile    The profile to be associated with a namespace
+     * @throws \Exception in case of unsuccessful association
+     * @return JsonResponse a Json formatted namespaces list
+     */
+    public function newProfileNamespaceAssociationAction(OntoNamespace $namespace, Profile $profile, Request $request)
+    {
+        $this->denyAccessUnlessGranted('edit', $profile);
+
+        if($namespace->getIsTopLevelNamespace()) {
+            $status = 'Error';
+            $message = 'This namespace is not valid';
+        }
+        else if ($profile->getNamespaces()->contains($profile)) {
+            $status = 'Error';
+            $message = 'This namespace is already used by this profile';
+        }
+        else {
+            $profile->addNamespace($namespace);
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($profile);
+            $em->flush();
+            $status = 'Success';
+            $message = 'Namespace successfully associated';
+        }
+
+
+        $response = array(
+            'status' => $status,
+            'message' => $message
+        );
+
+        return new JsonResponse($response);
+
     }
 
 }
