@@ -46,7 +46,7 @@ class NamespaceController  extends Controller
     }
 
     /**
-     * @Route("/namespaces-graph/json/{id}", name="namespaces_graph_json")
+     * @Route("/namespaces-graph/{id}/json", name="namespaces_graph_json")
      * @Method("GET")
      * @param OntoNamespace $namespace
      * @return JsonResponse a Json formatted graph representation of Namespaces
