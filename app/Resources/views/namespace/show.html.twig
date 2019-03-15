@@ -222,7 +222,10 @@
             <div id="graph" class="tab-pane fade">
                 <h3>Graph</h3>
                 {% if namespace.classes|length > 0 and namespace.properties|length > 0 %}
-                <embed src="http://visualdataweb.de/webvowl/#url={{ url('namespaces_graph_json', {'id': namespace.id}) }}" width="100%" height="1000px">
+                <a href="http://visualdataweb.de/webvowl/#url={{ url('namespace_json', {'id': namespace.id}) }}" target="_blank" class="btn btn-primary">Full screen (WebVOWL) <span class="fa fa-desktop"></span></a><br><br>
+                <embed src="http://visualdataweb.de/webvowl/#url={{ url('namespace_json', {'id': namespace.id}) }}" width="100%" height="1000px"><br><br>
+                <a href="http://visualdataweb.de/webvowl/#url={{ url('namespace_json', {'id': namespace.id}) }}" target="_blank" class="btn btn-primary">Full screen (WebVOWL) <span class="fa fa-desktop"></span></a>
+
                 {% else %}
                 <p>The webvowl graph cannot be displayed because there is no class or property in this namespace.</p>
                 {% endif %}
