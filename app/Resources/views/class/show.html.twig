@@ -210,9 +210,11 @@
                             </td>
                             <td>
                                 {% if association.textProperties is not null %}
-                                    {% for textProperty in association.textProperties if textProperty.systemType.id == 1 and textProperty.languageIsoCode == 'en' %}
-                                        <a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="fas fa-info-circle" aria-hidden="true"></span></a>
-                                        {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
+                                    {% for textProperty in association.textProperties if textProperty.systemType.id == 1 %}
+                                        {% if loop.index == 1 %}
+                                            <a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="fas fa-info-circle" aria-hidden="true"></span></a>
+                                            {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
+                                        {% endif %}
                                     {% endfor %}
                                 {% endif %}
                             </td>
