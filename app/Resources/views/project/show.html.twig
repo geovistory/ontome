@@ -27,7 +27,21 @@
 
         <div class="tab-content">
             <div id="summary" class="tab-pane fade in active">
-                <h3>Summary</h3>
+                {% set description, break = 'No description yet.', false %}
+                {% for textProperty in project.textProperties if textProperty.systemType.id == 16 %}
+                    {% if not break %}
+                        {% if textProperty.languageIsoCode == 'en' %}
+                            {% set break = true %}
+                            {% set description = textProperty.textProperty %}
+                        {% else %}
+                            {% if description == 'No description yet.' %}
+                                {% set description = textProperty.textProperty %}
+                            {% endif %}
+                        {% endif %}
+                    {% endif %}
+                {% endfor %}
+                <h3>Standard description</h3>
+                <p>{{ description|raw }}</p>
             </div>
             <div id="definition" class="tab-pane fade">
                 <h3>Description</h3>
