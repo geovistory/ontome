@@ -37,6 +37,49 @@
         <div class="tab-content">
             <div id="summary" class="tab-pane fade in active">
                 <h3>{{ class.identifierInNamespace ~ " " ~ class.standardLabel }}</h3>
+                <dl class="dl-horizontal">
+                    <dt>Subclass of :</dt>
+                    <dd>{{ class.childClassAssociations[0].parentClass.identifierInNamespace ~ " " ~ class.childClassAssociations[0].parentClass.standardLabel }}</dd>
+                    <dt>Superclass of :</dt>
+                    <dd>
+                        <ul class="list-unstyled">
+                            {% for descendant in descendants|sort %}
+                                <li>{{ descendant.identifier }}</li>
+                            {% endfor %}
+                        </ul>
+                    </dd>
+                    <dt>Scope note :</dt>
+                    {% set scopeNote, break = 'No scope note yet.', false %}
+                    {% for textProperty in class.textProperties if textProperty.systemType.id == 1 %}
+                        {% if not break %}
+                            {% if textProperty.languageIsoCode == 'en' %}
+                                {% set break = true %}
+                                {% set scopeNote = textProperty.textProperty %}
+                            {% else %}
+                                {% if scopeNote == 'No scope note yet.' %}
+                                    {% set scopeNote = textProperty.textProperty %}
+                                {% endif %}
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+                    <dd>{{ scopeNote|raw }}</dd>
+                    <dt>Examples :</dt>
+                    <dd>
+                    {% for textProperty in class.textProperties if textProperty.systemType.id == 7 %}
+                        <ul>
+                            <li>{{ textProperty.textProperty|raw }}</li>
+                        </ul>
+                    {% endfor %}
+                    </dd>
+                    <dt>In First Order Logic :</dt>
+                    <dd>{{ class.identifierInNamespace }}(x) ⊃ {{ class.childClassAssociations[0].parentClass.identifierInNamespace }}(x)</dd>
+                    <dt>Properties :</dt>
+                    <dd>
+                        {% for outgoingProperty in outgoingProperties|sort %}
+                            <p>{{ outgoingProperty.property }} : {{ outgoingProperty.range }}</p>
+                        {% endfor %}
+                    </dd>
+                </dl>
             </div>
             <div id="definition" class="tab-pane fade">
                 <h3>Scope Notes</h3>
