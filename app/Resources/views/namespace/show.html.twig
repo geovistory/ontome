@@ -6,8 +6,9 @@
 
     <div class="container">
         <h2 class="class-name">{{ namespace }}</h2>
-       <ul class="nav nav-tabs">
-            <li class="active"><a data-toggle="tab" href="#definition">Definition</a></li>
+        <ul class="nav nav-tabs">
+            <li class="active"><a data-toggle="tab" href="#summary">Summary</a></li>
+            <li><a data-toggle="tab" href="#definition">Definition</a></li>
             <li><a data-toggle="tab" href="#identification">Identification</a></li>
             <li><a data-toggle="tab" href="#namespace-hierarchy">Hierarchy</a></li>
             <li><a data-toggle="tab" href="#classes">Classes</a></li>
@@ -17,7 +18,10 @@
         </ul>
 
         <div class="tab-content">
-            <div id="definition" class="tab-pane fade in active">
+            <div id="summary" class="tab-pane fade in active">
+                <h3>Summary</h3>
+            </div>
+            <div id="definition" class="tab-pane fade">
                 <h3>Scope Notes</h3>
                 <table class="table table-striped" id="scope-notes-table">
                     <thead>

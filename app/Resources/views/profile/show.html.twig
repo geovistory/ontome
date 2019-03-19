@@ -11,14 +11,18 @@
 <div class="container">
     <h2 class="profile-name">{{ profile.standardLabel }}</h2>
     <ul class="nav nav-tabs" id="main-tabs">
-        <li class="active"><a data-toggle="tab" href="#identification">Profile identification</a></li>
+        <li class="active"><a data-toggle="tab" href="#summary">Summary</a></li>
+        <li><a data-toggle="tab" href="#identification">Profile identification</a></li>
         <li><a data-toggle="tab" href="#classes">Classes</a></li>
         <li><a data-toggle="tab" href="#properties">Properties</a></li>
         <li><a data-toggle="tab" href="#projects">Projects</a></li>
     </ul>
 
     <div class="tab-content">
-        <div id="identification" class="tab-pane fade in active">
+        <div id="summary" class="tab-pane fade in active">
+            <h3>Summary</h3>
+        </div>
+        <div id="identification" class="tab-pane fade">
             <h3>Identification</h3>
             <p>Project of belonging: <a href="{{ path('project_show', {'id': profile.projectOfBelonging.id}) }}">{{ profile.projectOfBelonging.standardLabel }}</a></p>
             <p>Start date: {{ profile.startDate }}</p>
