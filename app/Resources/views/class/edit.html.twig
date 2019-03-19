@@ -13,7 +13,8 @@
         <h2 class="class-name">{{ class }}</h2>
 
         <ul class="nav nav-tabs" id="main-tabs">
-            <li class="active"><a data-toggle="tab" href="#definition">Definition</a></li>
+            <li class="active"><a data-toggle="tab" href="#summary">Summary</a></li>
+            <li><a data-toggle="tab" href="#definition">Definition</a></li>
             <li><a data-toggle="tab" href="#properties">Properties</a></li>
             <li><a data-toggle="tab" href="#identification">Identification</a></li>
             <li><a data-toggle="tab" href="#namespaces">Namespace</a></li>
@@ -25,7 +26,10 @@
         </ul>
 
         <div class="tab-content">
-            <div id="definition" class="tab-pane fade in active">
+            <div id="summary" class="tab-pane fade in active">
+                <h3>Summary</h3>
+            </div>
+            <div id="definition" class="tab-pane fade">
                 <div class="pull-right add-div">
                     <a href="{{ path('text_property_new', {'type': 'scope-note', 'object': 'class', 'objectId': class.id })}}"
                        class="btn btn-primary pull-right">

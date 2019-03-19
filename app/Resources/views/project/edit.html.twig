@@ -8,21 +8,24 @@
         <h2 class="project-name">{{ project.standardLabel }}</h2>
 
         <ul class="nav nav-tabs">
-            <li class="active"><a data-toggle="tab" href="#definition">Definition</a></li>
+            <li class="active"><a data-toggle="tab" href="#summary">Summary</a></li>
+            <li><a data-toggle="tab" href="#definition">Definition</a></li>
             <li><a data-toggle="tab" href="#identification">Identification</a></li>
             <li><a data-toggle="tab" href="#project-hierarchy">Hierarchy</a></li>
             <li><a data-toggle="tab" href="#managed-namespaces">Namespaces</a></li>
             <li><a data-toggle="tab" href="#profiles">Profiles</a></li>
         </ul>
-
-        <div class="pull-right add-div">
-            <a href="{{ path('text_property_new', {'type': 'definition', 'object': 'project', 'objectId': project.id })}}"
-               class="btn btn-primary pull-right">
-                Add <span class="fa fa-plus-circle"></span>
-            </a>
-        </div>
         <div class="tab-content">
-            <div id="definition" class="tab-pane fade in active">
+            <div id="summary" class="tab-pane fade in active">
+                <h3>Summary</h3>
+            </div>
+            <div id="definition" class="tab-pane fade">
+                <div class="pull-right add-div">
+                    <a href="{{ path('text_property_new', {'type': 'definition', 'object': 'project', 'objectId': project.id })}}"
+                       class="btn btn-primary pull-right">
+                        Add <span class="fa fa-plus-circle"></span>
+                    </a>
+                </div>
                 <h3>Description</h3>
                 <table class="table table-striped" id="description-table">
                     <thead>
