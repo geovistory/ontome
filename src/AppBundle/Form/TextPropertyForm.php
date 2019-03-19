@@ -63,8 +63,7 @@ class TextPropertyForm extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults(array(
-            'data_class' => TextProperty::class,
-            //'validation_groups' => ['Default']
+            'data_class' => TextProperty::class
         ));
     }
 
