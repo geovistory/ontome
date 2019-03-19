@@ -36,7 +36,7 @@ class TextProperty implements GroupSequenceProviderInterface
      *      min = 80,
      *      message = "Your description must be at least 80 characters long",
      * )
-     * @Assert\NotBlank(groups={"Default", "Description"})
+     * @Assert\NotBlank()
      * @ORM\Column(type="text", nullable=false)
      */
     private $textProperty;
@@ -446,8 +446,8 @@ class TextProperty implements GroupSequenceProviderInterface
     {
         if($this->systemType->getId() == 16)
         {
-            return ['Default', 'Description'];
+            return ['TextProperty', 'Description'];
         }
-        return ['Default'];
+        return ['TextProperty'];
     }
 }

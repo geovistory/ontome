@@ -64,6 +64,7 @@ class TextPropertyType extends AbstractType
     {
         $resolver->setDefaults(array(
             'data_class' => TextProperty::class,
+            //'validation_groups' => ['Default']
         ));
     }
 
