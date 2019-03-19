@@ -54,11 +54,11 @@
                     </thead>
                     <tbody>
                     {% for textProperty in propertyAssociation.textProperties if textProperty.systemType.id == 1 %}
+                    {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
                         <tr>
                             <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
                             <td class="truncated-text">
                                 <span>{{ textProperty.textProperty|striptags|raw }}</span>
-                                {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
                             </td>
                             <td>{{ textProperty.languageIsoCode}}</td>
                             <td>
@@ -108,11 +108,11 @@
                     </thead>
                     <tbody>
                     {% for textProperty in propertyAssociation.textProperties if textProperty.systemType.id == 7 %}
+                    {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
                         <tr>
                             <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
                             <td class="truncated-text">
                                 <span>{{ textProperty.textProperty|striptags|raw }}</span>
-                                {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
                             </td>
                             <td>{{ textProperty.languageIsoCode}}</td>
                             <td>WIP</td>
