@@ -27,7 +27,110 @@
 
         <div class="tab-content">
             <div id="summary" class="tab-pane fade in active">
-                <h3>Summary</h3>
+                <h3>{{ class.identifierInNamespace }} {{ class.standardLabel }}</h3>
+                <table class="table">
+                    {% if class.childClassAssociations|length > 0 %}
+                        <tr>
+                            <td class="text-nowrap">Subclass of :</td>
+                            <td>
+                                <ul class="list-unstyled">
+                                    {% for association in class.childClassAssociations %}
+                                        <li>
+                                            <a href="{{ path('class_show', {
+                                                'id': association.parentClass.id
+                                            }) }}">
+                                                {{ association.parentClass.identifierInNamespace }} {{ association.parentClass.standardLabel }}
+                                            </a>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </td>
+                        </tr>
+                    {% endif %}
+                    {% if descendants|length > 0 %}
+                        <tr>
+                            <td class="text-nowrap">Superclass of :</td>
+                            <td>
+                                <ul class="list-unstyled">
+                                    {% set descendantsUniques = [] %}
+                                    {% for descendant in descendants|sort if descendant.id not in descendantsUniques %}
+                                        <li>
+                                            <a href="{{ path('class_show', {
+                                                'id': descendant.id
+                                            }) }}">
+                                                {{ descendant.identifier }}
+                                            </a>
+                                        </li>
+                                        {% set descendantsUniques = descendantsUniques|merge([descendant.id]) %}
+                                    {% endfor %}
+                                </ul>
+                            </td>
+                        </tr>
+                    {% endif %}
+                    <tr>
+                        <td class="text-nowrap">Scope note :</td>
+                        {% set scopeNote, break = '<i>No scope note yet.</i>', false %}
+                        {% for textProperty in class.textProperties if textProperty.systemType.id == 1 %}
+                            {% if not break %}
+                                {% if textProperty.languageIsoCode == 'en' %}
+                                    {% set break = true %}
+                                    {% set scopeNote = textProperty.textProperty %}
+                                {% else %}
+                                    {% if scopeNote == '<i>No scope note yet.</i>' %}
+                                        {% set scopeNote = textProperty.textProperty %}
+                                    {% endif %}
+                                {% endif %}
+                            {% endif %}
+                        {% endfor %}
+                        <td>{{ scopeNote|raw }}</td>
+                    </tr>
+                    <tr>
+                        <td class="text-nowrap">Examples</td>
+                        <td>
+                            {% set empty = true %}
+                            {% for textProperty in class.textProperties if textProperty.systemType.id == 7 %}
+                            {% set empty = false %}
+                            {% if loop.first %}<ul>{% endif %}
+                                <li>{{ textProperty.textProperty|raw }}</li>
+                                {% endfor %}
+                                {% if not empty %}
+                            </ul>
+                        {% else %}
+                            <p><i>No example yet</i></p>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="text-nowrap">In First Order Logic :</td>
+                        <td>
+                            {% for association in class.childClassAssociations %}
+                                <p>{{ class.identifierInNamespace }}(x) ⊃ {{ association.parentClass.identifierInNamespace }}(x)</p>
+                            {% endfor %}
+                        </td>
+                    </tr>
+                    {% if outgoingProperties|length > 0 %}
+                        <tr>
+                            <td class="text-nowrap">Properties :</td>
+                            <td>
+                                <ul class="list-unstyled">
+                                    {% for outgoingProperty in outgoingProperties|sort %}
+                                        <li>
+                                            <a href="{{ path('property_show', {
+                                                'id': outgoingProperty.propertyId
+                                            }) }}">
+                                                {{ outgoingProperty.property }}
+                                            </a> → <a href="{{ path('class_show', {
+                                                'id': outgoingProperty.rangeId
+                                            }) }}">
+                                                {{ outgoingProperty.range }}
+                                            </a>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </td>
+                        </tr>
+                    {% endif %}
+                </table>
             </div>
             <div id="definition" class="tab-pane fade">
                 <div class="pull-right add-div">
