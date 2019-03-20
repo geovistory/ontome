@@ -61,7 +61,8 @@
                         <td class="text-nowrap">Superclass of :</td>
                         <td>
                             <ul class="list-unstyled">
-                            {% for descendant in descendants|sort %}
+                            {% set descendantsUniques = [] %}
+                            {% for descendant in descendants|sort if descendant.id not in descendantsUniques %}
                                 <li>
                                     <a href="{{ path('class_show', {
                                         'id': descendant.id
@@ -69,6 +70,7 @@
                                         {{ descendant.identifier }}
                                     </a>
                                 </li>
+                            {% set descendantsUniques = descendantsUniques|merge([descendant.id]) %}
                             {% endfor %}
                             </ul>
                         </td>
