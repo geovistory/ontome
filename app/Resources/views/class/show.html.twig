@@ -36,50 +36,108 @@
 
         <div class="tab-content">
             <div id="summary" class="tab-pane fade in active">
-                <h3>{{ class.identifierInNamespace ~ " " ~ class.standardLabel }}</h3>
-                <dl class="dl-horizontal">
-                    <dt>Subclass of :</dt>
-                    <dd>{{ class.childClassAssociations[0].parentClass.identifierInNamespace ~ " " ~ class.childClassAssociations[0].parentClass.standardLabel }}</dd>
-                    <dt>Superclass of :</dt>
-                    <dd>
-                        <ul class="list-unstyled">
-                            {% for descendant in descendants|sort %}
-                                <li>{{ descendant.identifier }}</li>
+                <h3>{{ class.identifierInNamespace }} {{ class.standardLabel }}</h3>
+                <table class="table">
+                    {% if class.childClassAssociations|length > 0 %}
+                    <tr>
+                        <td class="text-nowrap">Subclass of :</td>
+                        <td>
+                            <ul class="list-unstyled">
+                            {% for association in class.childClassAssociations %}
+                                <li>
+                                    <a href="{{ path('class_show', {
+                                        'id': association.parentClass.id
+                                    }) }}">
+                                        {{ association.parentClass.identifierInNamespace }} {{ association.parentClass.standardLabel }}
+                                    </a>
+                                </li>
                             {% endfor %}
-                        </ul>
-                    </dd>
-                    <dt>Scope note :</dt>
-                    {% set scopeNote, break = 'No scope note yet.', false %}
-                    {% for textProperty in class.textProperties if textProperty.systemType.id == 1 %}
-                        {% if not break %}
-                            {% if textProperty.languageIsoCode == 'en' %}
-                                {% set break = true %}
-                                {% set scopeNote = textProperty.textProperty %}
-                            {% else %}
-                                {% if scopeNote == 'No scope note yet.' %}
+                            </ul>
+                        </td>
+                    </tr>
+                    {% endif %}
+                    {% if descendants|length > 0 %}
+                    <tr>
+                        <td class="text-nowrap">Superclass of :</td>
+                        <td>
+                            <ul class="list-unstyled">
+                            {% for descendant in descendants|sort %}
+                                <li>
+                                    <a href="{{ path('class_show', {
+                                        'id': descendant.id
+                                    }) }}">
+                                        {{ descendant.identifier }}
+                                    </a>
+                                </li>
+                            {% endfor %}
+                            </ul>
+                        </td>
+                    </tr>
+                    {% endif %}
+                    <tr>
+                        <td class="text-nowrap">Scope note :</td>
+                        {% set scopeNote, break = '<i>No scope note yet.</i>', false %}
+                        {% for textProperty in class.textProperties if textProperty.systemType.id == 1 %}
+                            {% if not break %}
+                                {% if textProperty.languageIsoCode == 'en' %}
+                                    {% set break = true %}
                                     {% set scopeNote = textProperty.textProperty %}
+                                {% else %}
+                                    {% if scopeNote == '<i>No scope note yet.</i>' %}
+                                        {% set scopeNote = textProperty.textProperty %}
+                                    {% endif %}
                                 {% endif %}
                             {% endif %}
-                        {% endif %}
-                    {% endfor %}
-                    <dd>{{ scopeNote|raw }}</dd>
-                    <dt>Examples :</dt>
-                    <dd>
-                    {% for textProperty in class.textProperties if textProperty.systemType.id == 7 %}
-                        <ul>
-                            <li>{{ textProperty.textProperty|raw }}</li>
-                        </ul>
-                    {% endfor %}
-                    </dd>
-                    <dt>In First Order Logic :</dt>
-                    <dd>{{ class.identifierInNamespace }}(x) ⊃ {{ class.childClassAssociations[0].parentClass.identifierInNamespace }}(x)</dd>
-                    <dt>Properties :</dt>
-                    <dd>
-                        {% for outgoingProperty in outgoingProperties|sort %}
-                            <p>{{ outgoingProperty.property }} : {{ outgoingProperty.range }}</p>
                         {% endfor %}
-                    </dd>
-                </dl>
+                        <td>{{ scopeNote|raw }}</td>
+                    </tr>
+                    <tr>
+                        <td class="text-nowrap">Examples</td>
+                        <td>
+                            {% set empty = true %}
+                            {% for textProperty in class.textProperties if textProperty.systemType.id == 7 %}
+                                {% set empty = false %}
+                                {% if loop.first %}<ul>{% endif %}
+                                <li>{{ textProperty.textProperty|raw }}</li>
+                            {% endfor %}
+                            {% if not empty %}
+                                </ul>
+                            {% else %}
+                                <p><i>No example yet</i></p>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="text-nowrap">In First Order Logic :</td>
+                        <td>
+                        {% for association in class.childClassAssociations %}
+                            <p>{{ class.identifierInNamespace }}(x) ⊃ {{ association.parentClass.identifierInNamespace }}(x)</p>
+                        {% endfor %}
+                        </td>
+                    </tr>
+                    {% if outgoingProperties|length > 0 %}
+                    <tr>
+                        <td class="text-nowrap">Properties :</td>
+                        <td>
+                            <ul class="list-unstyled">
+                            {% for outgoingProperty in outgoingProperties|sort %}
+                                <li>
+                                    <a href="{{ path('property_show', {
+                                        'id': outgoingProperty.propertyId
+                                    }) }}">
+                                        {{ outgoingProperty.property }}
+                                    </a> → <a href="{{ path('class_show', {
+                                        'id': outgoingProperty.rangeId
+                                    }) }}">
+                                        {{ outgoingProperty.range }}
+                                    </a>
+                                </li>
+                            {% endfor %}
+                            </ul>
+                        </td>
+                    </tr>
+                    {% endif %}
+                </table>
             </div>
             <div id="definition" class="tab-pane fade">
                 <h3>Scope Notes</h3>
