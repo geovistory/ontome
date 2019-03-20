@@ -47,21 +47,19 @@
                             </td>
                         </tr>
                     {% endif %}
-                    {% if descendants|length > 0 %}
+                    {% if class.parentClassAssociations|length > 0 %}
                         <tr>
                             <td class="text-nowrap">Superclass of :</td>
                             <td>
                                 <ul class="list-unstyled">
-                                    {% set descendantsUniques = [] %}
-                                    {% for descendant in descendants|sort if descendant.id not in descendantsUniques %}
+                                    {% for association in class.parentClassAssociations %}
                                         <li>
                                             <a href="{{ path('class_show', {
-                                                'id': descendant.id
+                                                'id': association.childClass.id
                                             }) }}">
-                                                {{ descendant.identifier }}
+                                                {{ association.childClass.identifierInNamespace }} {{ association.childClass.standardLabel }}
                                             </a>
                                         </li>
-                                        {% set descendantsUniques = descendantsUniques|merge([descendant.id]) %}
                                     {% endfor %}
                                 </ul>
                             </td>
