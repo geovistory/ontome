@@ -90,7 +90,7 @@
                             {% set empty = true %}
                             {% for textProperty in class.textProperties if textProperty.systemType.id == 7 %}
                             {% set empty = false %}
-                            {% if loop.first %}<ul>{% endif %}
+                            {% if loop.first %}<ul style="margin-left: -25px;">{% endif %}
                                 <li>{{ textProperty.textProperty|raw }}</li>
                                 {% endfor %}
                                 {% if not empty %}
