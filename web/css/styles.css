@@ -754,3 +754,16 @@ FOOTER Styling
 .heart {
     color: red;
 }
+
+#summary div.row {
+    border-bottom: solid 1px #DDDDDD;
+}
+
+#summary div.row:last-child {
+    border-bottom: none;
+}
+
+#summary div.row div
+{
+    padding: 10px;
+}

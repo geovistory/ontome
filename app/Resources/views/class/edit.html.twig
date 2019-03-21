@@ -28,45 +28,51 @@
         <div class="tab-content">
             <div id="summary" class="tab-pane fade in active">
                 <h3>{{ class.identifierInNamespace }} {{ class.standardLabel }}</h3>
-                <table class="table">
-                    {% if class.childClassAssociations|length > 0 %}
-                        <tr>
-                            <td class="text-nowrap">Subclass of :</td>
-                            <td>
-                                <ul class="list-unstyled">
-                                    {% for association in class.childClassAssociations %}
-                                        <li>
-                                            <a href="{{ path('class_show', {
-                                                'id': association.parentClass.id
-                                            }) }}">
-                                                {{ association.parentClass.identifierInNamespace }} {{ association.parentClass.standardLabel }}
-                                            </a>
-                                        </li>
-                                    {% endfor %}
-                                </ul>
-                            </td>
-                        </tr>
-                    {% endif %}
-                    {% if class.parentClassAssociations|length > 0 %}
-                        <tr>
-                            <td class="text-nowrap">Superclass of :</td>
-                            <td>
-                                <ul class="list-unstyled">
-                                    {% for association in class.parentClassAssociations %}
-                                        <li>
-                                            <a href="{{ path('class_show', {
-                                                'id': association.childClass.id
-                                            }) }}">
-                                                {{ association.childClass.identifierInNamespace }} {{ association.childClass.standardLabel }}
-                                            </a>
-                                        </li>
-                                    {% endfor %}
-                                </ul>
-                            </td>
-                        </tr>
-                    {% endif %}
-                    <tr>
-                        <td class="text-nowrap">Scope note :</td>
+                {% if class.childClassAssociations|length > 0 %}
+                    <div class="row">
+                        <div class="col-lg-2">
+                            <p>Subclass of :</p>
+                        </div>
+                        <div class="col-lg-10">
+                            <ul class="list-unstyled">
+                                {% for association in class.childClassAssociations %}
+                                    <li>
+                                        <a href="{{ path('class_show', {
+                                            'id': association.parentClass.id
+                                        }) }}">
+                                            {{ association.parentClass.identifierInNamespace }} {{ association.parentClass.standardLabel }}
+                                        </a>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                {% endif %}
+                {% if class.parentClassAssociations|length > 0 %}
+                    <div class="row">
+                        <div class="col-lg-2">
+                            <p>Superclass of :</p>
+                        </div>
+                        <div class="col-lg-10">
+                            <ul class="list-unstyled">
+                                {% for association in class.parentClassAssociations %}
+                                    <li>
+                                        <a href="{{ path('class_show', {
+                                            'id': association.childClass.id
+                                        }) }}">
+                                            {{ association.childClass.identifierInNamespace }} {{ association.childClass.standardLabel }}
+                                        </a>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                {% endif %}
+                <div class="row">
+                    <div class="col-lg-2">
+                        <p>Scope note :</p>
+                    </div>
+                    <div class="col-lg-10">
                         {% set scopeNote, break = '<i>No scope note yet.</i>', false %}
                         {% for textProperty in class.textProperties if textProperty.systemType.id == 1 %}
                             {% if not break %}
@@ -80,55 +86,65 @@
                                 {% endif %}
                             {% endif %}
                         {% endfor %}
-                        <td>{{ scopeNote|raw }}</td>
-                    </tr>
-                    <tr>
-                        <td class="text-nowrap">Examples</td>
-                        <td>
-                            {% set empty = true %}
-                            {% for textProperty in class.textProperties if textProperty.systemType.id == 7 %}
-                            {% set empty = false %}
-                            {% if loop.first %}<ul style="margin-left: -25px;">{% endif %}
-                                <li>{{ textProperty.textProperty|raw }}</li>
-                                {% endfor %}
-                                {% if not empty %}
-                            </ul>
-                        {% else %}
-                            <p><i>No example yet</i></p>
+                        <p>{{ scopeNote|raw }}</p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-2">
+                        <p>Examples :</p>
+                    </div>
+                    <div class="col-lg-10">
+                        {% set empty = true %}
+                        {% for textProperty in class.textProperties if textProperty.systemType.id == 7 %}
+                        {% set empty = false %}
+                        {% if loop.first %}
+                        <ul style="margin-left: -25px;">
                             {% endif %}
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="text-nowrap">In First Order Logic :</td>
-                        <td>
-                            {% for association in class.childClassAssociations %}
-                                <p>{{ class.identifierInNamespace }}(x) ⊃ {{ association.parentClass.identifierInNamespace }}(x)</p>
+                            <li>{{ textProperty.textProperty|raw }}</li>
                             {% endfor %}
-                        </td>
-                    </tr>
-                    {% if outgoingProperties|length > 0 %}
-                        <tr>
-                            <td class="text-nowrap">Properties :</td>
-                            <td>
-                                <ul class="list-unstyled">
-                                    {% for outgoingProperty in outgoingProperties|sort %}
-                                        <li>
-                                            <a href="{{ path('property_show', {
-                                                'id': outgoingProperty.propertyId
-                                            }) }}">
-                                                {{ outgoingProperty.property }}
-                                            </a> → <a href="{{ path('class_show', {
-                                                'id': outgoingProperty.rangeId
-                                            }) }}">
-                                                {{ outgoingProperty.range }}
-                                            </a>
-                                        </li>
-                                    {% endfor %}
-                                </ul>
-                            </td>
-                        </tr>
-                    {% endif %}
-                </table>
+                            {% if not empty %}
+                        </ul>
+                    {% else %}
+                        <p><i>No example yet.</i></p>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-2">
+                        <p>In First Order Logic :</p>
+                    </div>
+                    <div class="col-lg-10">
+                        <ul class="list-unstyled">
+                            {% for association in class.childClassAssociations %}
+                                <li>{{ class.identifierInNamespace }}(x) ⊃ {{ association.parentClass.identifierInNamespace }}(x)</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+                {% if outgoingProperties|length > 0 %}
+                    <div class="row">
+                        <div class="col-lg-2">
+                            <p>Properties :</p>
+                        </div>
+                        <div class="col-lg-10">
+                            <ul class="list-unstyled">
+                                {% for outgoingProperty in outgoingProperties|sort %}
+                                    <li>
+                                        <a href="{{ path('property_show', {
+                                            'id': outgoingProperty.propertyId
+                                        }) }}">
+                                            {{ outgoingProperty.property }}
+                                        </a> → <a href="{{ path('class_show', {
+                                            'id': outgoingProperty.rangeId
+                                        }) }}">
+                                            {{ outgoingProperty.range }}
+                                        </a>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                {% endif %}
             </div>
             <div id="definition" class="tab-pane fade">
                 <div class="pull-right add-div">
