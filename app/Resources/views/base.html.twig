@@ -175,6 +175,10 @@
             $('a.btn-edit').click(function(){
                 $('a.btn-edit').attr('href', $('a.btn-edit').attr('href')+window.location.hash);
             });
+
+            $('a[data-toggle="tab"]').on( 'shown.bs.tab', function (e) {
+                $.fn.dataTable.tables( {visible: true, api: true} ).columns.adjust();
+            } );
         });
     </script>
 {% endblock %}
