@@ -45,7 +45,7 @@
                     <div class="col-lg-10">
                         <ul class="list-unstyled">
                             {% for namespace in property.namespaces %}
-                                <li><a href="{{ path('namespace_show', {'id': namespace.id}) }}">{{ namespace.namespaceURI }}</a></li>
+                                <li><a href="{{ path('namespace_show', {'id': namespace.id}) }}">{{ namespace.standardLabel }}</a></li>
                             {% endfor %}
                         </ul>
                     </div>
