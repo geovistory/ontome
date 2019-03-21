@@ -34,7 +34,13 @@
 
         <div class="tab-content">
             <div id="summary" class="tab-pane fade in active">
-                <h3>{{ property.identifierInNamespace }} {{ property.standardLabel }}</h3>
+                <h3>
+                    {% if property.identifierInNamespace != property.standardLabel %}
+                        {{ property.identifierInNamespace }} {{ property.standardLabel }}
+                    {% else %}
+                        {{ property.standardLabel }}
+                    {% endif %}
+                </h3>
                 <div class="row">
                     <div class="col-lg-2">
                         <p>Domain:</p>
