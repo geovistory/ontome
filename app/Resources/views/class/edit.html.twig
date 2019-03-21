@@ -34,6 +34,7 @@
                         {{ class.standardLabel }}
                     {% endif %}
                 </h3>
+                </h3>
                 <div class="row">
                     <div class="col-lg-2">
                         <p>Namespace{% if class.namespaces|length > 1 %}s{% endif %}:</p>
@@ -56,7 +57,11 @@
                                 {% for association in class.childClassAssociations %}
                                     <li>
                                         <a href="{{ path('class_show', {'id': association.parentClass.id }) }}">
-                                            {{ association.parentClass.identifierInNamespace }} {{ association.parentClass.standardLabel }}
+                                            {% if association.parentClass.identifierInNamespace != association.parentClass.standardLabel %}
+                                                {{ association.parentClass.identifierInNamespace }} {{ association.parentClass.standardLabel }}
+                                            {% else %}
+                                                {{ association.parentClass.standardLabel }}
+                                            {% endif %}
                                         </a>
                                     </li>
                                 {% endfor %}
@@ -74,7 +79,11 @@
                                 {% for association in class.parentClassAssociations %}
                                     <li>
                                         <a href="{{ path('class_show', {'id': association.childClass.id}) }}">
-                                            {{ association.childClass.identifierInNamespace }} {{ association.childClass.standardLabel }}
+                                            {% if association.childClass.identifierInNamespace != association.childClass.standardLabel %}
+                                                {{ association.childClass.identifierInNamespace }} {{ association.childClass.standardLabel }}
+                                            {% else %}
+                                                {{ association.childClass.standardLabel }}
+                                            {% endif %}
                                         </a>
                                     </li>
                                 {% endfor %}
