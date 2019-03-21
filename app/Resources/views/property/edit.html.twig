@@ -34,7 +34,7 @@
                 <h3>{{ property.identifierInNamespace }} {{ property.standardLabel }}</h3>
                 <div class="row">
                     <div class="col-lg-2">
-                        <p>Domain :</p>
+                        <p>Domain:</p>
                     </div>
                     <div class="col-lg-10">
                         <p>
@@ -44,7 +44,7 @@
                 </div>
                 <div class="row">
                     <div class="col-lg-2">
-                        <p>Range :</p>
+                        <p>Range:</p>
                     </div>
                     <div class="col-lg-10">
                         <p>
@@ -53,56 +53,56 @@
                     </div>
                 </div>
                 {% if property.childPropertyAssociations|length > 0 %}
-                    <div class="row">
-                        <div class="col-lg-2">
-                            <p>Subproperty of :</p>
-                        </div>
-                        <div class="col-lg-10">
-                            <ul class="list-unstyled">
-                                {% for association in property.childPropertyAssociations %}
-                                    <li>
-                                        <a href="{{ path('class_show', {'id': association.parentProperty.domain.id}) }}">
-                                            {{ association.parentProperty.domain.identifierInNamespace }} {{ association.parentProperty.domain.standardLabel }}
-                                        </a> →
-                                        <a href="{{ path('property_show', {'id': association.parentProperty.id}) }}">
-                                            {{ association.parentProperty.identifierInNamespace }} {{ association.parentProperty.standardLabel }}
-                                        </a> →
-                                        <a href="{{ path('class_show', {'id': association.parentProperty.range.id}) }}">
-                                            {{ association.parentProperty.range.identifierInNamespace }} {{ association.parentProperty.range.standardLabel }}
-                                        </a>
-                                    </li>
-                                {% endfor %}
-                            </ul>
-                        </div>
+                <div class="row">
+                    <div class="col-lg-2">
+                        <p>Subproperty of:</p>
                     </div>
+                    <div class="col-lg-10">
+                        <ul class="list-unstyled">
+                            {% for association in property.childPropertyAssociations %}
+                                <li>
+                                    <a href="{{ path('class_show', {'id': association.parentProperty.domain.id}) }}">
+                                        {{ association.parentProperty.domain.identifierInNamespace }} {{ association.parentProperty.domain.standardLabel }}
+                                    </a> →
+                                    <a href="{{ path('property_show', {'id': association.parentProperty.id}) }}">
+                                        {{ association.parentProperty.identifierInNamespace }} {{ association.parentProperty.standardLabel }}
+                                    </a> →
+                                    <a href="{{ path('class_show', {'id': association.parentProperty.range.id}) }}">
+                                        {{ association.parentProperty.range.identifierInNamespace }} {{ association.parentProperty.range.standardLabel }}
+                                    </a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
                 {% endif %}
                 {% if property.parentPropertyAssociations|length > 0 %}
-                    <div class="row">
-                        <div class="col-lg-2">
-                            <p>Superproperty of :</p>
-                        </div>
-                        <div class="col-lg-10">
-                            <ul class="list-unstyled">
-                                {% for association in property.parentPropertyAssociations %}
-                                    <li>
-                                        <a href="{{ path('class_show', {'id': association.childProperty.domain.id}) }}">
-                                            {{ association.childProperty.domain.identifierInNamespace }} {{ association.childProperty.domain.standardLabel }}
-                                        </a> →
-                                        <a href="{{ path('property_show', {'id': association.childProperty.id}) }}">
-                                            {{ association.childProperty.identifierInNamespace }} {{ association.childProperty.standardLabel }}
-                                        </a> →
-                                        <a href="{{ path('class_show', {'id': association.childProperty.range.id}) }}">
-                                            {{ association.childProperty.range.identifierInNamespace }} {{ association.childProperty.range.standardLabel }}
-                                        </a>
-                                    </li>
-                                {% endfor %}
-                            </ul>
-                        </div>
+                <div class="row">
+                    <div class="col-lg-2">
+                        <p>Superproperty of:</p>
                     </div>
+                    <div class="col-lg-10">
+                        <ul class="list-unstyled">
+                            {% for association in property.parentPropertyAssociations %}
+                                <li>
+                                    <a href="{{ path('class_show', {'id': association.childProperty.domain.id}) }}">
+                                        {{ association.childProperty.domain.identifierInNamespace }} {{ association.childProperty.domain.standardLabel }}
+                                    </a> →
+                                    <a href="{{ path('property_show', {'id': association.childProperty.id}) }}">
+                                        {{ association.childProperty.identifierInNamespace }} {{ association.childProperty.standardLabel }}
+                                    </a> →
+                                    <a href="{{ path('class_show', {'id': association.childProperty.range.id}) }}">
+                                        {{ association.childProperty.range.identifierInNamespace }} {{ association.childProperty.range.standardLabel }}
+                                    </a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
                 {% endif %}
                 <div class="row">
                     <div class="col-lg-2">
-                        <p>Quantification :</p>
+                        <p>Quantification:</p>
                     </div>
                     <div class="col-lg-10">
                         {% if property.quantifiers is not null %}
@@ -114,7 +114,7 @@
                 </div>
                 <div class="row">
                     <div class="col-lg-2">
-                        <p>Scope note :</p>
+                        <p>Scope note:</p>
                     </div>
                     <div class="col-lg-10">
                         {% set scopeNote, break = '<i>No scope note yet.</i>', false %}
@@ -135,7 +135,7 @@
                 </div>
                 <div class="row">
                     <div class="col-lg-2">
-                        <p>Examples :</p>
+                        <p>Examples:</p>
                     </div>
                     <div class="col-lg-10">
                         {% set empty = true %}
@@ -155,7 +155,7 @@
                 </div>
                 <div class="row">
                     <div class="col-lg-2">
-                        <p>In First Order Logic :</p>
+                        <p>In First Order Logic:</p>
                     </div>
                     <div class="col-lg-10">
                         <ul class="list-unstyled">
