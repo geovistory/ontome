@@ -40,6 +40,18 @@
                 </h3>
                 <div class="row">
                     <div class="col-lg-2">
+                        <p>Namespace{% if property.namespaces|length > 1 %}s{% endif %}:</p>
+                    </div>
+                    <div class="col-lg-10">
+                        <ul class="list-unstyled">
+                            {% for namespace in property.namespaces %}
+                                <li><a href="{{ path('namespace_show', {'id': namespace.id}) }}">{{ namespace.namespaceURI }}</a></li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-2">
                         <p>Domain:</p>
                     </div>
                     <div class="col-lg-10">

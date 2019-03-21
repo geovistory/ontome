@@ -34,6 +34,18 @@
                         {{ class.standardLabel }}
                     {% endif %}
                 </h3>
+                <div class="row">
+                    <div class="col-lg-2">
+                        <p>Namespace{% if class.namespaces|length > 1 %}s{% endif %}:</p>
+                    </div>
+                    <div class="col-lg-10">
+                        <ul class="list-unstyled">
+                            {% for namespace in class.namespaces %}
+                                <li><a href="{{ path('namespace_show', {'id': namespace.id}) }}">{{ namespace.namespaceURI }}</a></li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
                 {% if class.childClassAssociations|length > 0 %}
                     <div class="row">
                         <div class="col-lg-2">
@@ -43,9 +55,7 @@
                             <ul class="list-unstyled">
                                 {% for association in class.childClassAssociations %}
                                     <li>
-                                        <a href="{{ path('class_show', {
-                                            'id': association.parentClass.id
-                                        }) }}">
+                                        <a href="{{ path('class_show', {'id': association.parentClass.id }) }}">
                                             {{ association.parentClass.identifierInNamespace }} {{ association.parentClass.standardLabel }}
                                         </a>
                                     </li>
@@ -63,9 +73,7 @@
                             <ul class="list-unstyled">
                                 {% for association in class.parentClassAssociations %}
                                     <li>
-                                        <a href="{{ path('class_show', {
-                                            'id': association.childClass.id
-                                        }) }}">
+                                        <a href="{{ path('class_show', {'id': association.childClass.id}) }}">
                                             {{ association.childClass.identifierInNamespace }} {{ association.childClass.standardLabel }}
                                         </a>
                                     </li>
@@ -136,15 +144,8 @@
                             <ul class="list-unstyled">
                                 {% for outgoingProperty in outgoingProperties|sort %}
                                     <li>
-                                        <a href="{{ path('property_show', {
-                                            'id': outgoingProperty.propertyId
-                                        }) }}">
-                                            {{ outgoingProperty.property }}
-                                        </a> → <a href="{{ path('class_show', {
-                                            'id': outgoingProperty.rangeId
-                                        }) }}">
-                                            {{ outgoingProperty.range }}
-                                        </a>
+                                        <a href="{{ path('property_show', {'id': outgoingProperty.propertyId}) }}">{{ outgoingProperty.property }}</a>
+                                        → <a href="{{ path('class_show', {'id': outgoingProperty.rangeId }) }}">{{ outgoingProperty.range }}</a>
                                     </li>
                                 {% endfor %}
                             </ul>
