@@ -8,207 +8,219 @@
 
 {% block body %}
 
-<div class="container">
-    <h2 class="profile-name">{{ profile.standardLabel }}</h2>
-    <ul class="nav nav-tabs" id="main-tabs">
-        <li class="active"><a data-toggle="tab" href="#summary">Summary</a></li>
-        <li><a data-toggle="tab" href="#identification">Profile identification</a></li>
-        <li><a data-toggle="tab" href="#classes">Classes</a></li>
-        <li><a data-toggle="tab" href="#properties">Properties</a></li>
-        <li><a data-toggle="tab" href="#projects">Projects</a></li>
-    </ul>
+    <div class="container">
+        <h2 class="profile-name">{{ profile.standardLabel }}</h2>
+        <ul class="nav nav-tabs" id="main-tabs">
+            <li class="active"><a data-toggle="tab" href="#summary">Summary</a></li>
+            <li><a data-toggle="tab" href="#identification">Profile identification</a></li>
+            <li><a data-toggle="tab" href="#classes">Classes</a></li>
+            <li><a data-toggle="tab" href="#properties">Properties</a></li>
+            <li><a data-toggle="tab" href="#projects">Projects</a></li>
+        </ul>
 
-    <div class="tab-content">
-        <div id="summary" class="tab-pane fade in active">
-            {% set description, break = 'No description yet.', false %}
-            {% for textProperty in profile.textProperties if textProperty.systemType.id == 16 %}
-                {% if not break %}
-                    {% if textProperty.languageIsoCode == 'en' %}
-                        {% set break = true %}
-                        {% set description = textProperty.textProperty %}
-                    {% else %}
-                        {% if description == 'No description yet.' %}
-                            {% set description = textProperty.textProperty %}
+        <div class="tab-content">
+            <div id="summary" class="tab-pane fade in active">
+                <h3>{{ profile.standardLabel }}</h3>
+                <div class="row">
+                    <div class="col-lg-2">
+                        <p>Description:</p>
+                    </div>
+                    <div class="col-lg-10">
+                        {% set description, break = null, false %}
+                        {% for textProperty in profile.textProperties if textProperty.systemType.id == 16 %}
+                            {% if not break %}
+                                {% if textProperty.languageIsoCode == 'en' %}
+                                    {% set break = true %}
+                                    {% set description = textProperty.textProperty %}
+                                {% else %}
+                                    {% if description == null %}
+                                        {% set description = textProperty.textProperty %}
+                                    {% endif %}
+                                {% endif %}
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if description is not null %}
+                            {{ description|raw }}
+                        {% else %}
+                            <p><i>No description yet.</i></p>
                         {% endif %}
-                    {% endif %}
-                {% endif %}
-            {% endfor %}
-            <h3>Standard description</h3>
-            <p>{{ description|raw }}</p>
-        </div>
-        <div id="identification" class="tab-pane fade">
-            <h3>Identification</h3>
-            <p>Project of belonging: <a href="{{ path('project_show', {'id': profile.projectOfBelonging.id}) }}">{{ profile.projectOfBelonging.standardLabel }}</a></p>
-            <p>Start date: {{ profile.startDate }}</p>
-            <p>End date: {{ profile.endDate }}</p>
-            <h3>Labels</h3>
-            <table class="table table-striped" id="labels-table">
-                <thead>
-                <tr>
-                    <th>Label</th>
-                    <th>Language</th>
-                    <th>Last updated</th>
-                </tr>
-                </thead>
-                <tbody>
-                {% for label in profile.labels %}
+                    </div>
+                </div>
+            </div>
+            <div id="identification" class="tab-pane fade">
+                <h3>Identification</h3>
+                <p>Project of belonging: <a href="{{ path('project_show', {'id': profile.projectOfBelonging.id}) }}">{{ profile.projectOfBelonging.standardLabel }}</a></p>
+                <p>Start date: {{ profile.startDate }}</p>
+                <p>End date: {{ profile.endDate }}</p>
+                <h3>Labels</h3>
+                <table class="table table-striped" id="labels-table">
+                    <thead>
                     <tr>
-                        <td>
-                            <a href="#">
-                                {{ label.label }}
-                            </a>
-                        </td>
-                        <td>{{ label.languageIsoCode}}</td>
-                        <td>{{ label.modificationTime|date('Y-m-d') }}</td>
+                        <th>Label</th>
+                        <th>Language</th>
+                        <th>Last updated</th>
                     </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-            <h3>Scope Notes</h3>
-            <table class="table table-striped" id="scope-notes-table">
-                <thead>
-                <tr>
-                    <th>Show</th>
-                    <th>Scope note</th>
-                    <th>Language</th>
-                </tr>
-                </thead>
-                <tbody>
-                {% for textProperty in profile.textProperties if textProperty.systemType.id == 1 %}
-                {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
+                    </thead>
+                    <tbody>
+                    {% for label in profile.labels %}
+                        <tr>
+                            <td>
+                                <a href="#">
+                                    {{ label.label }}
+                                </a>
+                            </td>
+                            <td>{{ label.languageIsoCode}}</td>
+                            <td>{{ label.modificationTime|date('Y-m-d') }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                <h3>Scope Notes</h3>
+                <table class="table table-striped" id="scope-notes-table">
+                    <thead>
                     <tr>
-                        <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
-                        <td class="truncated-text">
-                            <span>{{ textProperty.textProperty}}</span>
-                        </td>
-                        <td>{{ textProperty.languageIsoCode}}</td>
+                        <th>Show</th>
+                        <th>Scope note</th>
+                        <th>Language</th>
                     </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-            <h3>Additional notes</h3>
-            <table class="table table-striped" id="additional-notes-table">
-                <thead>
-                <tr>
-                    <th>Show</th>
-                    <th>Notes</th>
-                    <th>Language</th>
-                    <th>Namespace</th>
-                </tr>
-                </thead>
-                <tbody>
-                {% for textProperty in profile.textProperties if textProperty.systemType.id == 12 %}
-                {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
+                    </thead>
+                    <tbody>
+                    {% for textProperty in profile.textProperties if textProperty.systemType.id == 1 %}
+                        {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
+                        <tr>
+                            <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
+                            <td class="truncated-text">
+                                <span>{{ textProperty.textProperty}}</span>
+                            </td>
+                            <td>{{ textProperty.languageIsoCode}}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                <h3>Additional notes</h3>
+                <table class="table table-striped" id="additional-notes-table">
+                    <thead>
                     <tr>
-                        <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
-                        <td class="truncated-text">
-                            <span>{{ textProperty.textProperty|striptags|raw }}</span>
-                        </td>
-                        <td>{{ textProperty.languageIsoCode}}</td>
-                        <td>WIP</td>
+                        <th>Show</th>
+                        <th>Notes</th>
+                        <th>Language</th>
+                        <th>Namespace</th>
                     </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        <div id="classes" class="tab-pane fade">
-            <h3>Associated classes</h3>
-            <table class="table table-striped" id="classes-table">
-                <thead>
-                <tr>
-                    <th>Class identifier</th>
-                    <th>Standard label</th>
-                    <th>Association type</th>
-                    <th>Namespace URI</th>
-                </tr>
-                </thead>
-                <tbody>
-                {% for class in classes %}
+                    </thead>
+                    <tbody>
+                    {% for textProperty in profile.textProperties if textProperty.systemType.id == 12 %}
+                        {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
+                        <tr>
+                            <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
+                            <td class="truncated-text">
+                                <span>{{ textProperty.textProperty|striptags|raw }}</span>
+                            </td>
+                            <td>{{ textProperty.languageIsoCode}}</td>
+                            <td>WIP</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div id="classes" class="tab-pane fade">
+                <h3>Associated classes</h3>
+                <table class="table table-striped" id="classes-table">
+                    <thead>
                     <tr>
-                        <td>
-                            <a href="{{ path('class_show', {
-                                'id': class.id
-                            }) }}">
-                                {{ class.identifierInNamespace }}
-                            </a>
-                        </td>
-                        <td>
-                            <a href="{{ path('class_show', {
-                                'id': class.id
-                            }) }}">
+                        <th>Class identifier</th>
+                        <th>Standard label</th>
+                        <th>Association type</th>
+                        <th>Namespace URI</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for class in classes %}
+                        <tr>
+                            <td>
+                                <a href="{{ path('class_show', {
+                                    'id': class.id
+                                }) }}">
+                                    {{ class.identifierInNamespace }}
+                                </a>
+                            </td>
+                            <td>
+                                <a href="{{ path('class_show', {
+                                    'id': class.id
+                                }) }}">
                                 {{ class.standardLabel }}</td>
                             </a>
-                        <td>{{ class.associationType }}</td>
-                        <td>
-                            {{ class.rootNamespace }}
-                        </td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        <div id="properties" class="tab-pane fade">
-            <h3>Associated properties</h3>
-            <table class="table table-striped" id="properties-table">
-                <thead>
-                <tr>
-                    <th>Property identifier</th>
-                    <th>Standard label</th>
-                    <th>Namespace URI</th>
-                </tr>
-                </thead>
-                <tbody>
-                {% for property in properties %}
+                            <td>{{ class.associationType }}</td>
+                            <td>
+                                {{ class.rootNamespace }}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div id="properties" class="tab-pane fade">
+                <h3>Associated properties</h3>
+                <table class="table table-striped" id="properties-table">
+                    <thead>
                     <tr>
-                        <td>
-                            <a href="{{ path('property_show', {
-                                'id': property.id
-                            }) }}">
-                                {{ property.identifierInNamespace }}
-                            </a>
-                        </td>
-                        <td>
-                            <a href="{{ path('property_show', {
-                                'id': property.id
-                            }) }}">
-                                {{ property.standardLabel }}
-                            </a>
-                        </td>
-                        <td>
-                            {{ property.rootNamespace }}
-                        </td>
+                        <th>Property identifier</th>
+                        <th>Standard label</th>
+                        <th>Namespace URI</th>
                     </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        <div id="projects" class="tab-pane fade">
-            <h3>Associated projects</h3>
-            <table class="table table-striped" id="projects-table">
-                <thead>
-                <tr>
-                    <th>Project identifier</th>
-                    <th>Last updated</th>
-                </tr>
-                </thead>
-                <tbody>
-                {% for project in profile.projects %}
+                    </thead>
+                    <tbody>
+                    {% for property in properties %}
+                        <tr>
+                            <td>
+                                <a href="{{ path('property_show', {
+                                    'id': property.id
+                                }) }}">
+                                    {{ property.identifierInNamespace }}
+                                </a>
+                            </td>
+                            <td>
+                                <a href="{{ path('property_show', {
+                                    'id': property.id
+                                }) }}">
+                                    {{ property.standardLabel }}
+                                </a>
+                            </td>
+                            <td>
+                                {{ property.rootNamespace }}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div id="projects" class="tab-pane fade">
+                <h3>Associated projects</h3>
+                <table class="table table-striped" id="projects-table">
+                    <thead>
                     <tr>
-                        <td>
-                            <a href="{{ path('project_show', {
-                                'id': project.id
-                            }) }}">
-                                {{ project.standardLabel }}
-                            </a>
-                        </td>
-                        <td>{{ project.modificationTime|date('Y-m-d') }}</td>
+                        <th>Project identifier</th>
+                        <th>Last updated</th>
                     </tr>
-                {% endfor %}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                    {% for project in profile.projects %}
+                        <tr>
+                            <td>
+                                <a href="{{ path('project_show', {
+                                    'id': project.id
+                                }) }}">
+                                    {{ project.standardLabel }}
+                                </a>
+                            </td>
+                            <td>{{ project.modificationTime|date('Y-m-d') }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
-</div>
 
 
 {% endblock %}

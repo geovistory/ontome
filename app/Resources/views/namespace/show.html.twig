@@ -19,21 +19,33 @@
 
         <div class="tab-content">
             <div id="summary" class="tab-pane fade in active">
-                {% set description, break = 'No description yet.', false %}
-                {% for textProperty in namespace.textProperties if textProperty.systemType.id == 16 %}
-                    {% if not break %}
-                        {% if textProperty.languageIsoCode == 'en' %}
-                            {% set break = true %}
-                            {% set description = textProperty.textProperty %}
-                        {% else %}
-                            {% if description == 'No description yet.' %}
-                                {% set description = textProperty.textProperty %}
+                <h3>{{ namespace }}</h3>
+                <div class="row">
+                    <div class="col-lg-2">
+                        <p>Description:</p>
+                    </div>
+                    <div class="col-lg-10">
+                        {% set description, break = null, false %}
+                        {% for textProperty in namespace.textProperties if textProperty.systemType.id == 16 %}
+                            {% if not break %}
+                                {% if textProperty.languageIsoCode == 'en' %}
+                                    {% set break = true %}
+                                    {% set description = textProperty.textProperty %}
+                                {% else %}
+                                    {% if description == null %}
+                                        {% set description = textProperty.textProperty %}
+                                    {% endif %}
+                                {% endif %}
                             {% endif %}
+                        {% endfor %}
+
+                        {% if description is not null %}
+                            {{ description|raw }}
+                        {% else %}
+                            <p><i>No description yet.</i></p>
                         {% endif %}
-                    {% endif %}
-                {% endfor %}
-                <h3>Standard description</h3>
-                <p>{{ description|raw }}</p>
+                    </div>
+                </div>
             </div>
             <div id="definition" class="tab-pane fade">
                 <h3>Scope Notes</h3>
