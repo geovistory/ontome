@@ -48,18 +48,18 @@
                 </div>
             </div>
             <div id="definition" class="tab-pane fade">
-                <h3>Scope Notes</h3>
-                <table class="table table-striped" id="scope-notes-table">
+                <h3>Description</h3>
+                <table class="table table-striped" id="descriptions-table">
                     <thead>
                     <tr>
                         <th>Show</th>
-                        <th>Scope note</th>
+                        <th>Description</th>
                         <th>Language</th>
                         <th>Namespace</th>
                     </tr>
                     </thead>
                     <tbody>
-                    {% for textProperty in namespace.textProperties if textProperty.systemType.id == 1 %}
+                    {% for textProperty in namespace.textProperties if textProperty.systemType.id == 16 %}
                     {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
                         <tr>
                             <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
@@ -278,7 +278,7 @@
         $(document).ready(function() {
             $('#namespaces-table').DataTable();
             $('#labels-table').DataTable();
-            $('#scope-notes-table').DataTable();
+            $('#descriptions-table').DataTable();
             $('#additional-notes-table').DataTable();
             $('#properties-table').DataTable();
             $('#classes-table').DataTable();

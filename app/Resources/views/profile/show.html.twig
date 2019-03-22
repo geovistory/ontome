@@ -76,17 +76,17 @@
                     {% endfor %}
                     </tbody>
                 </table>
-                <h3>Scope Notes</h3>
-                <table class="table table-striped" id="scope-notes-table">
+                <h3>Description</h3>
+                <table class="table table-striped" id="descriptions-table">
                     <thead>
                     <tr>
                         <th>Show</th>
-                        <th>Scope note</th>
+                        <th>Description</th>
                         <th>Language</th>
                     </tr>
                     </thead>
                     <tbody>
-                    {% for textProperty in profile.textProperties if textProperty.systemType.id == 1 %}
+                    {% for textProperty in profile.textProperties if textProperty.systemType.id == 16 %}
                         {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
                         <tr>
                             <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
