@@ -19,11 +19,11 @@
         </h2>
 
         <ul class="nav nav-tabs" id="main-tabs">
-            <li class="active"><a data-toggle="tab" href="#scope-notes">Parent property and scope notes</a></li>
+            <li class="active"><a data-toggle="tab" href="#justifications">Parent property and justifications</a></li>
         </ul>
 
         <div class="tab-content">
-            <div id="scope-notes" class="tab-pane fade in active">
+            <div id="justifications" class="tab-pane fade in active">
                 <h3>Parent property</h3>
                 <h4>
                     <a href="{{ path('property_show', {
@@ -33,18 +33,18 @@
                 </h4>
                 {% if is_granted('edit', property) %}
                     <div class="pull-right add-div">
-                        <a href="{{ path('text_property_new', {'type': 'scope-note', 'object': 'property-association', 'objectId': propertyAssociation.id })}}"
+                        <a href="{{ path('text_property_new', {'type': 'justification', 'object': 'property-association', 'objectId': propertyAssociation.id })}}"
                            class="btn btn-primary pull-right">
                             Add <span class="fa fa-plus-circle"></span>
                         </a>
                     </div>
                 {% endif %}
-                <h3>Scope Notes</h3>
-                <table class="table table-striped" id="scope-notes-table">
+                <h3>Justifications</h3>
+                <table class="table table-striped" id="justifications-table">
                     <thead>
                     <tr>
                         <th>Show</th>
-                        <th>Scope note</th>
+                        <th>Justification</th>
                         <th>Language</th>
                         <th>Namespace</th>
                         {% if is_granted('edit', property) %}
@@ -53,7 +53,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for textProperty in propertyAssociation.textProperties if textProperty.systemType.id == 1 %}
+                    {% for textProperty in propertyAssociation.textProperties if textProperty.systemType.id == 15 %}
                     {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
                         <tr>
                             <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
@@ -142,7 +142,7 @@
     <script>
         $(document).ready(function() {
 
-            $('#scope-notes-table').DataTable();
+            $('#justifications-table').DataTable();
             $('#examples-table').DataTable();
 
         } );
