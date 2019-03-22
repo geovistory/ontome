@@ -13,7 +13,8 @@
         <h2 class="class-name">{{ class }}</h2>
 
         <ul class="nav nav-tabs" id="main-tabs">
-            <li class="active"><a data-toggle="tab" href="#definition">Definition</a></li>
+            <li class="active"><a data-toggle="tab" href="#summary">Summary</a></li>
+            <li><a data-toggle="tab" href="#definition">Definition</a></li>
             <li><a data-toggle="tab" href="#properties">Properties</a></li>
             <li><a data-toggle="tab" href="#identification">Identification</a></li>
             <li><a data-toggle="tab" href="#namespaces">Namespace</a></li>
@@ -25,7 +26,142 @@
         </ul>
 
         <div class="tab-content">
-            <div id="definition" class="tab-pane fade in active">
+            <div id="summary" class="tab-pane fade in active">
+                <h3>
+                    {% if class.identifierInNamespace != class.standardLabel %}
+                        {{ class.identifierInNamespace }} {{ class.standardLabel }}
+                    {% else %}
+                        {{ class.standardLabel }}
+                    {% endif %}
+                </h3>
+                <!-- <div class="row">
+                    <div class="col-lg-2">
+                        <p>Namespace:</p>
+                    </div>
+                    <div class="col-lg-10">
+                        <ul class="list-unstyled">
+                            {% for namespace in class.namespaces %}
+                                <li><a href="{{ path('namespace_show', {'id': namespace.id}) }}">{{ namespace.standardLabel }}</a></li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>-->
+                {% if class.childClassAssociations|length > 0 %}
+                <div class="row">
+                    <div class="col-lg-2">
+                        <p>Subclass of:</p>
+                    </div>
+                    <div class="col-lg-10">
+                        <ul class="list-unstyled">
+                            {% for association in class.childClassAssociations %}
+                                <li>
+                                    <a href="{{ path('class_show', {'id': association.parentClass.id }) }}">
+                                        {% if association.parentClass.identifierInNamespace != association.parentClass.standardLabel %}
+                                            {{ association.parentClass.identifierInNamespace }} {{ association.parentClass.standardLabel }}
+                                        {% else %}
+                                            {{ association.parentClass.standardLabel }}
+                                        {% endif %}
+                                    </a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+                {% endif %}
+                {% if class.parentClassAssociations|length > 0 %}
+                <div class="row">
+                    <div class="col-lg-2">
+                        <p>Superclass of:</p>
+                    </div>
+                    <div class="col-lg-10">
+                        <ul class="list-unstyled">
+                            {% for association in class.parentClassAssociations %}
+                                <li>
+                                    <a href="{{ path('class_show', {'id': association.childClass.id}) }}">
+                                        {% if association.childClass.identifierInNamespace != association.childClass.standardLabel %}
+                                            {{ association.childClass.identifierInNamespace }} {{ association.childClass.standardLabel }}
+                                        {% else %}
+                                            {{ association.childClass.standardLabel }}
+                                        {% endif %}
+                                    </a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+                {% endif %}
+                <div class="row">
+                    <div class="col-lg-2">
+                        <p>Scope note:</p>
+                    </div>
+                    <div class="col-lg-10">
+                        {% set scopeNote, break = '<i>No scope note yet.</i>', false %}
+                        {% for textProperty in class.textProperties if textProperty.systemType.id == 1 %}
+                            {% if not break %}
+                                {% if textProperty.languageIsoCode == 'en' %}
+                                    {% set break = true %}
+                                    {% set scopeNote = textProperty.textProperty %}
+                                {% else %}
+                                    {% if scopeNote == '<i>No scope note yet.</i>' %}
+                                        {% set scopeNote = textProperty.textProperty %}
+                                    {% endif %}
+                                {% endif %}
+                            {% endif %}
+                        {% endfor %}
+                        <p>{{ scopeNote|raw }}</p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-2">
+                        <p>Examples:</p>
+                    </div>
+                    <div class="col-lg-10">
+                        {% set empty = true %}
+                        {% for textProperty in class.textProperties if textProperty.systemType.id == 7 %}
+                        {% set empty = false %}
+                        {% if loop.first %}
+                        <ul style="margin-left: -25px;">
+                            {% endif %}
+                            <li>{{ textProperty.textProperty|raw }}</li>
+                            {% endfor %}
+                            {% if not empty %}
+                        </ul>
+                    {% else %}
+                        <p><i>No example yet.</i></p>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-2">
+                        <p>In First Order Logic:</p>
+                    </div>
+                    <div class="col-lg-10">
+                        <ul class="list-unstyled">
+                            {% for association in class.childClassAssociations %}
+                                <li>{{ class.identifierInNamespace }}(x) ⊃ {{ association.parentClass.identifierInNamespace }}(x)</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+                {% if outgoingProperties|length > 0 %}
+                    <div class="row">
+                        <div class="col-lg-2">
+                            <p>Properties:</p>
+                        </div>
+                        <div class="col-lg-10">
+                            <ul class="list-unstyled">
+                                {% for outgoingProperty in outgoingProperties|sort %}
+                                    <li>
+                                        <a href="{{ path('property_show', {'id': outgoingProperty.propertyId}) }}">{{ outgoingProperty.property }}</a>
+                                        → <a href="{{ path('class_show', {'id': outgoingProperty.rangeId }) }}">{{ outgoingProperty.range }}</a>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+            <div id="definition" class="tab-pane fade">
                 <div class="pull-right add-div">
                     <a href="{{ path('text_property_new', {'type': 'scope-note', 'object': 'class', 'objectId': class.id })}}"
                        class="btn btn-primary pull-right">
