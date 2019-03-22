@@ -31,19 +31,19 @@ class PropertyAssociationController extends Controller
 
 
         $em = $this->getDoctrine()->getManager();
-        $systemTypeScopeNote = $em->getRepository('AppBundle:SystemType')->find(1); //systemType 1 = scope note
-        $systemTypeExample = $em->getRepository('AppBundle:SystemType')->find(7); //systemType 1 = scope note
+        $systemTypeJustification = $em->getRepository('AppBundle:SystemType')->find(15); //systemType 15 = justification
+        $systemTypeExample = $em->getRepository('AppBundle:SystemType')->find(7); //systemType 7 = example
 
-        $scopeNote = new TextProperty();
-        $scopeNote->setPropertyAssociation($propertyAssociation);
-        $scopeNote->setSystemType($systemTypeScopeNote);
-        $scopeNote->addNamespace($childProperty->getOngoingNamespace());
-        $scopeNote->setCreator($this->getUser());
-        $scopeNote->setModifier($this->getUser());
-        $scopeNote->setCreationTime(new \DateTime('now'));
-        $scopeNote->setModificationTime(new \DateTime('now'));
+        $justification = new TextProperty();
+        $justification->setPropertyAssociation($propertyAssociation);
+        $justification->setSystemType($systemTypeJustification);
+        $justification->addNamespace($childProperty->getOngoingNamespace());
+        $justification->setCreator($this->getUser());
+        $justification->setModifier($this->getUser());
+        $justification->setCreationTime(new \DateTime('now'));
+        $justification->setModificationTime(new \DateTime('now'));
 
-        $propertyAssociation->addTextProperty($scopeNote);
+        $propertyAssociation->addTextProperty($justification);
         $propertyAssociation->setChildProperty($childProperty);
 
         $form = $this->createForm(ParentPropertyAssociationForm::class, $propertyAssociation);

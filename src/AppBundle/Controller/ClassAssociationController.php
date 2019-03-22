@@ -31,19 +31,19 @@ class ClassAssociationController extends Controller
 
 
         $em = $this->getDoctrine()->getManager();
-        $systemTypeScopeNote = $em->getRepository('AppBundle:SystemType')->find(1); //systemType 1 = scope note
-        $systemTypeExample = $em->getRepository('AppBundle:SystemType')->find(7); //systemType 1 = scope note
+        $systemTypeJustification = $em->getRepository('AppBundle:SystemType')->find(15); //systemType 15 = justification
+        $systemTypeExample = $em->getRepository('AppBundle:SystemType')->find(7); //systemType 1 = example
 
-        $scopeNote = new TextProperty();
-        $scopeNote->setClassAssociation($classAssociation);
-        $scopeNote->setSystemType($systemTypeScopeNote);
-        $scopeNote->addNamespace($childClass->getOngoingNamespace());
-        $scopeNote->setCreator($this->getUser());
-        $scopeNote->setModifier($this->getUser());
-        $scopeNote->setCreationTime(new \DateTime('now'));
-        $scopeNote->setModificationTime(new \DateTime('now'));
+        $justification = new TextProperty();
+        $justification->setClassAssociation($classAssociation);
+        $justification->setSystemType($systemTypeJustification);
+        $justification->addNamespace($childClass->getOngoingNamespace());
+        $justification->setCreator($this->getUser());
+        $justification->setModifier($this->getUser());
+        $justification->setCreationTime(new \DateTime('now'));
+        $justification->setModificationTime(new \DateTime('now'));
 
-        $classAssociation->addTextProperty($scopeNote);
+        $classAssociation->addTextProperty($justification);
         $classAssociation->setChildClass($childClass);
 
         $form = $this->createForm(ParentClassAssociationForm::class, $classAssociation);
