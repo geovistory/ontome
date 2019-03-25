@@ -103,6 +103,7 @@ class PropertyRepository extends EntityRepository
                         pk_property AS \"propertyId\",
                         pk_range AS \"rangeId\",
                         identifier_range AS range,
+                        che.get_root_namespace(nsp.pk_namespace) AS \"rootNamespaceId\",
                         (SELECT label FROM che.get_namespace_labels(nsp.pk_namespace) WHERE language_iso_code = 'en') AS namespace
                 FROM  che.v_properties_with_domain_range,
                       che.associates_namespace asnsp,

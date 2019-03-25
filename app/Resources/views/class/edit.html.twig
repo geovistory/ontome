@@ -116,18 +116,13 @@
                         <p>Examples:</p>
                     </div>
                     <div class="col-lg-10">
-                        {% set empty = true %}
+                        {% set isExamplesEmpty = true %}
                         {% for textProperty in class.textProperties if textProperty.systemType.id == 7 %}
-                        {% set empty = false %}
-                        {% if loop.first %}
-                        <ul style="margin-left: -25px;">
-                            {% endif %}
-                            <li>{{ textProperty.textProperty|raw }}</li>
-                            {% endfor %}
-                            {% if not empty %}
-                        </ul>
-                    {% else %}
-                        <p><i>No example yet.</i></p>
+                            {% set isExamplesEmpty = false %}
+                            <p>{{ textProperty.textProperty|raw }}</p>
+                        {% endfor %}
+                        {% if isExamplesEmpty %}
+                            <p><i>No example yet.</i></p>
                         {% endif %}
                     </div>
                 </div>
@@ -146,14 +141,30 @@
                 {% if outgoingProperties|length > 0 %}
                     <div class="row">
                         <div class="col-lg-2">
-                            <p>Properties:</p>
+                            <p>Ongoing properties:</p>
                         </div>
                         <div class="col-lg-10">
                             <ul class="list-unstyled">
-                                {% for outgoingProperty in outgoingProperties|sort %}
+                                {% for outgoingProperty in outgoingProperties|sort if outgoingProperty.rootNamespaceId == class.ongoingNamespace.topLevelNamespace.id %}
                                     <li>
                                         <a href="{{ path('property_show', {'id': outgoingProperty.propertyId}) }}">{{ outgoingProperty.property }}</a>
                                         → <a href="{{ path('class_show', {'id': outgoingProperty.rangeId }) }}">{{ outgoingProperty.range }}</a>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                {% endif %}
+                {% if ingoingProperties|length > 0 %}
+                    <div class="row">
+                        <div class="col-lg-2">
+                            <p>Incoming properties:</p>
+                        </div>
+                        <div class="col-lg-10">
+                            <ul class="list-unstyled">
+                                {% for ingoingProperty in ingoingProperties|sort if ingoingProperty.rootNamespaceId == class.ongoingNamespace.topLevelNamespace.id %}
+                                    <li><a href="{{ path('class_show', {'id': ingoingProperty.domainId }) }}">{{ ingoingProperty.domain }}</a>
+                                        → <a href="{{ path('property_show', {'id': ingoingProperty.propertyId}) }}">{{ ingoingProperty.property }}</a>
                                     </li>
                                 {% endfor %}
                             </ul>

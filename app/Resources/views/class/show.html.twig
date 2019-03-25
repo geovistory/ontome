@@ -125,19 +125,14 @@
                         <p>Examples:</p>
                     </div>
                     <div class="col-lg-10">
-                    {% set empty = true %}
-                    {% for textProperty in class.textProperties if textProperty.systemType.id == 7 %}
-                        {% set empty = false %}
-                        {% if loop.first %}
-                        <ul style="margin-left: -25px;">
+                        {% set isExamplesEmpty = true %}
+                        {% for textProperty in class.textProperties if textProperty.systemType.id == 7 %}
+                            {% set isExamplesEmpty = false %}
+                            <p>{{ textProperty.textProperty|raw }}</p>
+                        {% endfor %}
+                        {% if isExamplesEmpty %}
+                            <p><i>No example yet.</i></p>
                         {% endif %}
-                            <li>{{ textProperty.textProperty|raw }}</li>
-                    {% endfor %}
-                    {% if not empty %}
-                        </ul>
-                    {% else %}
-                        <p><i>No example yet.</i></p>
-                    {% endif %}
                     </div>
                 </div>
                 <div class="row">
@@ -153,21 +148,37 @@
                     </div>
                 </div>
                 {% if outgoingProperties|length > 0 %}
-                <div class="row">
-                    <div class="col-lg-2">
-                        <p>Properties:</p>
+                    <div class="row">
+                        <div class="col-lg-2">
+                            <p>Ongoing properties:</p>
+                        </div>
+                        <div class="col-lg-10">
+                            <ul class="list-unstyled">
+                                {% for outgoingProperty in outgoingProperties|sort if outgoingProperty.rootNamespaceId == class.ongoingNamespace.topLevelNamespace.id %}
+                                    <li>
+                                        <a href="{{ path('property_show', {'id': outgoingProperty.propertyId}) }}">{{ outgoingProperty.property }}</a>
+                                        → <a href="{{ path('class_show', {'id': outgoingProperty.rangeId }) }}">{{ outgoingProperty.range }}</a>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
                     </div>
-                    <div class="col-lg-10">
-                        <ul class="list-unstyled">
-                        {% for outgoingProperty in outgoingProperties|sort if outgoingProperty.rootNamespaceId == class.ongoingNamespace.topLevelNamespace.id %}
-                            <li>
-                                <a href="{{ path('property_show', {'id': outgoingProperty.propertyId}) }}">{{ outgoingProperty.property }}</a>
-                                → <a href="{{ path('class_show', {'id': outgoingProperty.rangeId }) }}">{{ outgoingProperty.range }}</a>
-                            </li>
-                        {% endfor %}
-                        </ul>
+                {% endif %}
+                {% if ingoingProperties|length > 0 %}
+                    <div class="row">
+                        <div class="col-lg-2">
+                            <p>Incoming properties:</p>
+                        </div>
+                        <div class="col-lg-10">
+                            <ul class="list-unstyled">
+                                {% for ingoingProperty in ingoingProperties|sort if ingoingProperty.rootNamespaceId == class.ongoingNamespace.topLevelNamespace.id %}
+                                    <li><a href="{{ path('class_show', {'id': ingoingProperty.domainId }) }}">{{ ingoingProperty.domain }}</a>
+                                        → <a href="{{ path('property_show', {'id': ingoingProperty.propertyId}) }}">{{ ingoingProperty.property }}</a>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
                     </div>
-                </div>
                 {% endif %}
             </div>
             <div id="definition" class="tab-pane fade">
