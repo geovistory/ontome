@@ -159,7 +159,7 @@
                     </div>
                     <div class="col-lg-10">
                         <ul class="list-unstyled">
-                        {% for outgoingProperty in outgoingProperties|sort %}
+                        {% for outgoingProperty in outgoingProperties|sort if outgoingProperty.rootNamespaceId == class.ongoingNamespace.topLevelNamespace.id %}
                             <li>
                                 <a href="{{ path('property_show', {'id': outgoingProperty.propertyId}) }}">{{ outgoingProperty.property }}</a>
                                 → <a href="{{ path('class_show', {'id': outgoingProperty.rangeId }) }}">{{ outgoingProperty.range }}</a>
