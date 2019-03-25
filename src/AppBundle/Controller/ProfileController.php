@@ -10,6 +10,7 @@ namespace AppBundle\Controller;
 
 use AppBundle\Entity\OntoNamespace;
 use AppBundle\Entity\Profile;
+use Doctrine\Common\Collections\ArrayCollection;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -78,6 +79,15 @@ class ProfileController  extends Controller
 
         $rootNamespaces = $em->getRepository('AppBundle:OntoNamespace')
             ->findBy(array('isTopLevelNamespace' => true));
+
+        $rootNamespaces = new ArrayCollection($rootNamespaces);
+
+        $rootNamespaces = $rootNamespaces
+            ->filter(function(OntoNamespace $namespace) use($profile) {
+                $referencedNamespaces = $namespace->getReferencedVersion();
+                $intersect = array_intersect($referencedNamespaces->toArray(), $profile->getNamespaces()->toArray());
+                return is_null($intersect);
+            });
 
         return $this->render('profile/edit.html.twig', array(
             'profile' => $profile,

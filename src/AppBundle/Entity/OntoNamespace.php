@@ -226,7 +226,7 @@ class OntoNamespace
     }
 
     /**
-     * @return mixed
+     * @return ArrayCollection|OntoNamespace
      */
     public function getReferencedVersion()
     {
