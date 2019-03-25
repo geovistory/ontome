@@ -11,7 +11,7 @@
         <thead>
         <tr>
             <th>Domain</th>
-            <th>Property identifier</th>
+            <th>Property</th>
             <th>Range</th>
             <th>Namespace URI</th>
             <th>Last updated</th>
@@ -20,7 +20,7 @@
         <tbody>
         {% for property in properties %}
             <tr>
-                <td>
+                <td class="text-nowrap">
                     {% if property.domain is not null %}
                         <a href="{{ path('class_show', {'id': property.domain.id }) }}">
                             {% if property.domain.identifierInNamespace != property.domain.standardLabel %}
@@ -35,14 +35,14 @@
                         </a>
                     {% endif %}
                 </td>
-                <td>
+                <td class="text-nowrap">
                     <a href="{{ path('property_show', {
                         'id': property.id
                     }) }}">
                         {{ property.identifierInNamespace }} {{ property.standardLabel }}
                     </a>
                 </td>
-                <td>
+                <td class="text-nowrap">
                     {% if property.range is not null %}
                         <a href="{{ path('class_show', {'id': property.range.id }) }}">
                             {% if property.range.identifierInNamespace != property.range.standardLabel %}
@@ -74,7 +74,11 @@
     <script>
         $(document).ready(function() {
             $('#property-table').DataTable({
-                "order": [[1, 'asc']]
+                "order": [[1, 'asc']],
+                "columnDefs": [
+                    { "width": "100%", "targets": 3 },
+                    { "width": "1%", "targets": 4 }],
+                "autoWidth": false
             });
         } );
     </script>
