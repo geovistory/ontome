@@ -9,6 +9,7 @@
 namespace AppBundle\Controller;
 
 use AppBundle\Entity\OntoNamespace;
+use AppBundle\Entity\Profile;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -78,6 +79,36 @@ class NamespaceController  extends Controller
             'status' => $status,
             'message' => $message,
             'namespaces' => $namespaces
+        );
+
+        return new JsonResponse($response);
+    }
+
+    /**
+     * @Route("/namespace/profile/{id}/json", name="root_namespaces_list_for_profile_json")
+     * @Method("GET")
+     * @param Profile  $profile    The profile to be associated with a namespace
+     * @return JsonResponse a Json formatted namespaces list
+     */
+    public function getRootNamespacesForAssociationWithProfile(Profile $profile)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $rootNamespaces = $em->getRepository('AppBundle:OntoNamespace')
+            ->findAllNonAssociatedToProfileByProfileId($profile);
+
+        if(!is_null($rootNamespaces)) {
+            $status = 'Success';
+            $message = 'Root namespaces list retrieved';
+        }
+        else {
+            $status = 'Error';
+            $message = 'This profile cannot be associated with another namespace';
+        }
+
+        $response = array(
+            'status' => $status,
+            'message' => $message,
+            'namespaces' => $rootNamespaces
         );
 
         return new JsonResponse($response);

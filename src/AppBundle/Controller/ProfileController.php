@@ -127,4 +127,24 @@ class ProfileController  extends Controller
 
     }
 
+    /**
+     * @Route("/profile/{profile}/namespace/{namespace}/delete", name="profile_namespace_disassociation")
+     * @Method({ "DELETE"})
+     * @param OntoNamespace  $namespace    The namespace to be disassociated from a profile
+     * @param Profile  $profile    The profile to be disassociated from a namespace
+     * @return JsonResponse a Json 204 HTTP response
+     */
+    public function deleteProfileNamespaceAssociationAction(OntoNamespace $namespace, Profile $profile, Request $request)
+    {
+        $this->denyAccessUnlessGranted('edit', $profile);
+
+        $profile->removeNamespace($namespace);
+        $em = $this->getDoctrine()->getManager();
+        $em->persist($profile);
+        $em->flush();
+
+        return new JsonResponse(null, 204);
+
+    }
+
 }

@@ -42,6 +42,11 @@ class Profile
     private $endDate;
 
     /**
+     * @ORM\Column(type="boolean")
+     */
+    private $isOngoing;
+
+    /**
      * @ORM\ManyToOne(targetEntity="Profile",  inversedBy="childProfiles")
      * @ORM\JoinColumn(name="fk_is_subprofile_of", referencedColumnName="pk_profile", nullable=true)
      */
@@ -171,6 +176,14 @@ class Profile
     /**
      * @return mixed
      */
+    public function getisOngoing()
+    {
+        return $this->isOngoing;
+    }
+
+    /**
+     * @return mixed
+     */
     public function getParentProfile()
     {
         return $this->parentProfile;
@@ -294,5 +307,10 @@ class Profile
             return;
         }
         $this->namespaces[] = $namespace;
+    }
+
+    public function removeNamespace(OntoNamespace $namespace)
+    {
+        $this->namespaces->removeElement($namespace);
     }
 }
