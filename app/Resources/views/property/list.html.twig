@@ -45,14 +45,14 @@
                 <td class="text-nowrap">
                     {% if property.range is not null %}
                         <a href="{{ path('class_show', {'id': property.range.id }) }}">
+                            {% if property.rangeMinQuantifier is not null and property.rangeMaxQuantifier is not null %}
+                                ({% if  property.rangeMinQuantifier != -1 %}{{ property.rangeMinQuantifier }}{% else %}n{% endif %},{% if  property.rangeMaxQuantifier != -1 %}{{ property.rangeMaxQuantifier }}{% else %}n{% endif %})
+                            {% endif %}
+
                             {% if property.range.identifierInNamespace != property.range.standardLabel %}
                                 {{ property.range.identifierInNamespace }} {{ property.range.standardLabel }}
                             {% else %}
                                 {{ property.range.identifierInNamespace }}
-                            {% endif %}
-
-                            {% if property.rangeMinQuantifier is not null and property.rangeMaxQuantifier is not null %}
-                                ({% if  property.rangeMinQuantifier != -1 %}{{ property.rangeMinQuantifier }}{% else %}n{% endif %},{% if  property.rangeMaxQuantifier != -1 %}{{ property.rangeMaxQuantifier }}{% else %}n{% endif %})
                             {% endif %}
                         </a>
                     {% endif %}
