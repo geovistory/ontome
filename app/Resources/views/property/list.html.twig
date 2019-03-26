@@ -29,8 +29,8 @@
                                 {{ property.domain.identifierInNamespace }}
                             {% endif %}
 
-                            {% if property.domainMinQuantifier is not null and property.domainMaxQuantifier is not null %}
-                                ({% if  property.domainMinQuantifier != -1 %}{{ property.domainMinQuantifier }}{% else %}n{% endif %},{% if  property.domainMaxQuantifier != -1 %}{{ property.domainMaxQuantifier }}{% else %}n{% endif %})
+                            {% if property.rangeMinQuantifier is not null and property.rangeMaxQuantifier is not null %}
+                                ({% if  property.rangeMinQuantifier != -1 %}{{ property.rangeMinQuantifier }}{% else %}n{% endif %},{% if  property.rangeMaxQuantifier != -1 %}{{ property.rangeMaxQuantifier }}{% else %}n{% endif %})
                             {% endif %}
                         </a>
                     {% endif %}
@@ -51,8 +51,8 @@
                                 {{ property.range.identifierInNamespace }}
                             {% endif %}
 
-                            {% if property.rangeMinQuantifier is not null and property.rangeMaxQuantifier is not null %}
-                                ({% if  property.rangeMinQuantifier != -1 %}{{ property.rangeMinQuantifier }}{% else %}n{% endif %},{% if  property.rangeMaxQuantifier != -1 %}{{ property.rangeMaxQuantifier }}{% else %}n{% endif %})
+                            {% if property.domainMinQuantifier is not null and property.domainMaxQuantifier is not null %}
+                                ({% if  property.domainMinQuantifier != -1 %}{{ property.domainMinQuantifier }}{% else %}n{% endif %},{% if  property.domainMaxQuantifier != -1 %}{{ property.domainMaxQuantifier }}{% else %}n{% endif %})
                             {% endif %}
                         </a>
                     {% endif %}
