@@ -211,7 +211,7 @@
                 <div class="col-sm-6">
                     <select id="select-root-namespace">
                     {% for rootNamespace in rootNamespaces %}
-                        <option value="{{ rootNamespace.id }}">{{ rootNamespace }}</option>
+                        <option value="{{ rootNamespace.id }}">{{ rootNamespace.standardLabel }}</option>
                     {% endfor %}
                     </select>
                 </div>

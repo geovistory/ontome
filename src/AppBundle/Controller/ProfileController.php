@@ -78,16 +78,7 @@ class ProfileController  extends Controller
             ->findPropertiesByProfileId($profile);
 
         $rootNamespaces = $em->getRepository('AppBundle:OntoNamespace')
-            ->findBy(array('isTopLevelNamespace' => true));
-
-        $rootNamespaces = new ArrayCollection($rootNamespaces);
-
-        $rootNamespaces = $rootNamespaces
-            ->filter(function(OntoNamespace $namespace) use($profile) {
-                $referencedNamespaces = $namespace->getReferencedVersion();
-                $intersect = array_intersect($referencedNamespaces->toArray(), $profile->getNamespaces()->toArray());
-                return is_null($intersect);
-            });
+            ->findAllNonAssociatedToProfileByProfileId($profile);
 
         return $this->render('profile/edit.html.twig', array(
             'profile' => $profile,
