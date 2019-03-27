@@ -55,11 +55,11 @@ class ProfileVoter extends Voter
     /**
      * @param Profile $profile
      * @param User $user
-     * @return bool TRUE if $user is the creator of $profile
+     * @return bool TRUE if $user is the creator of $profile and the project is still ongoing
      */
     private function canEdit(Profile $profile, User $user)
     {
-        if($user->getId() == $profile->getCreator()->getId())
+        if($user->getId() == $profile->getCreator()->getId() && $profile->getisOngoing())
         {
             return true;
         }
