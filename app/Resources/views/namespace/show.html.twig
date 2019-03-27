@@ -147,6 +147,32 @@
                 <h3>Hierarchy</h3>
                 {% if namespace.isTopLevelNamespace %}
                     <p>{{ namespace.standardLabel }} is a <b>root namespace</b>.</p>
+                <h3>Child namespaces</h3>
+                <table class="table table-striped" id="child-namespaces-table">
+                    <thead>
+                    <tr>
+                        <th>Namespaces URI</th>
+                        <th>Namespaces identifier</th>
+                        <th>Last updated</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for childNamespace in namespace.childVersions  %}
+                        <tr>
+                            <td>{{ childNamespace.namespaceUri }}</td>
+                            <td>
+                                <a href="{{ path('namespace_show', {
+                                    'id': childNamespace.id,
+                                    '_fragment': 'namespace-hierarchy'
+                                }) }}">
+                                    {{ childNamespace.standardLabel }}
+                                </a>
+                            </td>
+                            <td>{{ childNamespace.modificationTime|date('Y-m-d') }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
                 {% else %}
                     <p>Root namespace: <a href="{{ path('namespace_show', {
                             'id': namespace.topLevelNamespace.id,
@@ -156,31 +182,6 @@
                         </a>
                     </p>
                 {% endif %}
-                <h3>Child namespaces</h3>
-                <table class="table table-striped" id="child-namespaces-table">
-                    <thead>
-                        <tr>
-                            <th>Namespaces URI</th>
-                            <th>Namespaces identifier</th>
-                            <th>Last updated</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for childNamespace in namespace.childVersions  %}
-                        <tr>
-                            <td>{{ childNamespace.namespaceUri }}</td>
-                            <td>
-                                <a href="{{ path('namespace_show', {
-                                    'id': childNamespace.id
-                                }) }}">
-                                    {{ childNamespace.standardLabel }}
-                                </a>
-                            </td>
-                            <td>{{ childNamespace.modificationTime|date('Y-m-d') }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
             </div>
             <div id="classes" class="tab-pane fade">
                 {% if is_granted('edit', namespace) %}
@@ -271,9 +272,7 @@
             $('#additional-notes-table').DataTable();
             $('#properties-table').DataTable();
             $('#classes-table').DataTable();
-            $('#parent-namespaces-table').DataTable();
             $('#child-namespaces-table').DataTable();
-
         } );
     </script>
 
