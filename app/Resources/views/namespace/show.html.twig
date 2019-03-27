@@ -144,31 +144,18 @@
                 </table>
             </div>
             <div id="namespace-hierarchy" class="tab-pane fade">
-                <h3>Parent namespaces</h3>
-                <table class="table table-striped" id="parent-namespaces-table">
-                    <thead>
-                        <tr>
-                            <th>Namespaces URI</th>
-                            <th>Namespaces identifier</th>
-                            <th>Last updated</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% if namespace.referencedVersion is not null  %}
-                        <tr>
-                            <td>{{ namespace.referencedVersion.namespaceUri }}</td>
-                            <td>
-                                <a href="{{ path('namespace_show', {
-                                    'id': namespace.referencedVersion.id
-                                }) }}">
-                                    {{ namespace.standardLabel }}
-                                </a>
-                            </td>
-                            <td>{{ namespace.referencedVersion.modificationTime|date('Y-m-d') }}</td>
-                        </tr>
-                        {% endif %}
-                    </tbody>
-                </table>
+                <h3>Hierarchy</h3>
+                {% if namespace.isTopLevelNamespace %}
+                    <p>{{ namespace.standardLabel }} is a <b>root namespace</b>.</p>
+                {% else %}
+                    <p>Root namespace: <a href="{{ path('namespace_show', {
+                            'id': namespace.topLevelNamespace.id,
+                            '_fragment':'namespace-hierarchy'
+                        }) }}">
+                            {{ namespace.topLevelNamespace.standardLabel }}
+                        </a>
+                    </p>
+                {% endif %}
                 <h3>Child namespaces</h3>
                 <table class="table table-striped" id="child-namespaces-table">
                     <thead>
