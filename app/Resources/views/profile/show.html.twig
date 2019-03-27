@@ -9,13 +9,23 @@
 {% block body %}
 
     <div class="container">
-        <h2 class="profile-name">{{ profile.standardLabel }}</h2>
+        <h2 class="profile-name">
+            {{ profile.standardLabel }}
+            {% if is_granted('edit', profile) %}
+                <a href="{{ path('profile_edit', {
+                    id: profile.id
+                }) }}" class="pull-right btn btn-success btn-edit">
+                    <i class="fa fa-edit"></i>
+                </a>
+            {% endif %}
+        </h2>
         <ul class="nav nav-tabs" id="main-tabs">
             <li class="active"><a data-toggle="tab" href="#summary">Summary</a></li>
             <li><a data-toggle="tab" href="#identification">Profile identification</a></li>
             <li><a data-toggle="tab" href="#classes">Classes</a></li>
             <li><a data-toggle="tab" href="#properties">Properties</a></li>
             <li><a data-toggle="tab" href="#projects">Projects</a></li>
+            <li><a data-toggle="tab" href="#namespaces">Namespaces</a></li>
         </ul>
 
         <div class="tab-content">
@@ -218,6 +228,23 @@
                     {% endfor %}
                     </tbody>
                 </table>
+            </div>
+            <div id="namespaces" class="tab-pane fade">
+                <h4>Namespaces used by this profile</h4>
+                {% if profile.namespaces|length == 0 %}
+                    <em id="empty-namespace-list-message">There is currently no namespace used by this profile.</em>
+                {% endif %}
+                <ul id="used-namespaces-list">
+                    {% for namespace in profile.namespaces %}
+                        <li>
+                            <a href="{{ path('namespace_show', {
+                                'id': namespace.id
+                            }) }}">
+                                {{ namespace }}
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
             </div>
         </div>
     </div>

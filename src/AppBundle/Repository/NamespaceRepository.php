@@ -11,6 +11,7 @@ namespace AppBundle\Repository;
 
 use AppBundle\Entity\OntoClass;
 use AppBundle\Entity\OntoNamespace;
+use AppBundle\Entity\Profile;
 use Doctrine\ORM\EntityRepository;
 
 class NamespaceRepository extends EntityRepository
@@ -43,6 +44,30 @@ class NamespaceRepository extends EntityRepository
 
         $stmt = $conn->prepare($sql);
         $stmt->execute();
+
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * @param Profile $profile the profile to be checked for association
+     * @return array
+     */
+    public function findAllNonAssociatedToProfileByProfileId(Profile $profile){
+        $conn = $this->getEntityManager()
+            ->getConnection();
+
+        $sql = "SELECT pk_namespace AS id, 
+                       standard_label AS \"standardLabel\" 
+                FROM che.namespace
+                WHERE pk_namespace NOT IN (
+                    SELECT nsp.fk_top_level_namespace FROM che.associates_namespace ansp
+                    JOIN che.namespace nsp ON ansp.fk_namespace = nsp.pk_namespace
+                    WHERE ansp.fk_profile = :profile AND ansp.fk_namespace IS NOT NULL
+                    )
+                AND is_top_level_namespace;";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->execute(array('profile' => $profile->getId()));
 
         return $stmt->fetchAll();
     }

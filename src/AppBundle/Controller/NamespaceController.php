@@ -9,9 +9,11 @@
 namespace AppBundle\Controller;
 
 use AppBundle\Entity\OntoNamespace;
+use AppBundle\Entity\Profile;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
 class NamespaceController  extends Controller
@@ -33,7 +35,7 @@ class NamespaceController  extends Controller
 
     /**
      * @Route("/namespace/{id}", name="namespace_show")
-     * @param string $id
+     * @param string $namespace
      * @return Response the rendered template
      */
     public function showAction(OntoNamespace $namespace)
@@ -44,6 +46,75 @@ class NamespaceController  extends Controller
             'namespace' => $namespace
         ));
     }
+
+    /**
+     * @Route("/namespace/root-namespace/{id}/json", name="namespaces_by_root_id_list_json")
+     * @Method("GET")
+     * @param OntoNamespace  $rootNamespace    The root namespace
+     * @return JsonResponse a Json formatted namespaces list
+     */
+    public function getNamespacesByRootNamespaceID(OntoNamespace $rootNamespace)
+    {
+        $namespaces = [];
+
+        if($rootNamespace->getIsTopLevelNamespace()) {
+            $status = 'Success';
+            $message = 'This namespace is valid';
+            foreach ($rootNamespace->getChildVersions() as $namespace) {
+                $namespaces[] = [
+                    'id' => $namespace->getId(),
+                    'standardLabel' => $namespace->getStandardLabel()
+                ];
+            }
+        }
+
+        else {
+            $status = 'Error';
+            $message = 'This namespace is not a top level namespace';
+        }
+
+
+
+        $response = array(
+            'status' => $status,
+            'message' => $message,
+            'namespaces' => $namespaces
+        );
+
+        return new JsonResponse($response);
+    }
+
+    /**
+     * @Route("/namespace/profile/{id}/json", name="root_namespaces_list_for_profile_json")
+     * @Method("GET")
+     * @param Profile  $profile    The profile to be associated with a namespace
+     * @return JsonResponse a Json formatted namespaces list
+     */
+    public function getRootNamespacesForAssociationWithProfile(Profile $profile)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $rootNamespaces = $em->getRepository('AppBundle:OntoNamespace')
+            ->findAllNonAssociatedToProfileByProfileId($profile);
+
+        if(!is_null($rootNamespaces)) {
+            $status = 'Success';
+            $message = 'Root namespaces list retrieved';
+        }
+        else {
+            $status = 'Error';
+            $message = 'This profile cannot be associated with another namespace';
+        }
+
+        $response = array(
+            'status' => $status,
+            'message' => $message,
+            'namespaces' => $rootNamespaces
+        );
+
+        return new JsonResponse($response);
+    }
+
+
 
     /**
      * @Route("/namespace/{id}/json", name="namespace_json")
