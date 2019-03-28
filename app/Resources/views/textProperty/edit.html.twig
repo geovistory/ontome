@@ -28,7 +28,7 @@
                 {% elseif  textProperty.class is not null %}
                     <a href="{{ path('class_edit', {
                         id: textProperty.class.id
-                    }) }}"
+                    }) }}#definition"
                        class="pull-right btn btn-link"
                        role="button">
                         <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
@@ -36,7 +36,7 @@
                 {% elseif  textProperty.property is not null %}
                     <a href="{{ path('property_edit', {
                         id: textProperty.property.id
-                    }) }}"
+                    }) }}#definition"
                        class="pull-right btn btn-link"
                        role="button">
                         <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
@@ -44,7 +44,7 @@
                 {% elseif  textProperty.project is not null %}
                     <a href="{{ path('project_edit', {
                         id: textProperty.project.id
-                    }) }}"
+                    }) }}#definition"
                        class="pull-right btn btn-link"
                        role="button">
                         <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
@@ -76,7 +76,7 @@
                 {% elseif  textProperty.class is not null %}
                     <a href="{{ path('class_edit', {
                         id: textProperty.class.id
-                    }) }}#scopes-notes"
+                    }) }}#definition"
                        class="btn btn-default"
                        role="button">
                         Back <i class="fas fa-arrow-left"></i>
@@ -84,7 +84,7 @@
                 {% elseif  textProperty.property is not null %}
                     <a href="{{ path('property_edit', {
                         id: textProperty.property.id
-                    }) }}#scopes-notes"
+                    }) }}#definition"
                        class="btn btn-default"
                        role="button">
                         Back <i class="fas fa-arrow-left"></i>
@@ -92,7 +92,7 @@
                 {% elseif  textProperty.project is not null %}
                     <a href="{{ path('project_edit', {
                         id: textProperty.project.id
-                    }) }}#description-notes"
+                    }) }}#definition"
                        class="btn btn-default"
                        role="button">
                         Back <i class="fas fa-arrow-left"></i>

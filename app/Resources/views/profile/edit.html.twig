@@ -23,34 +23,36 @@
     <div class="tab-content">
         <div id="summary" class="tab-pane fade in active">
             <h3>{{ profile.standardLabel }}</h3>
-            <div class="row">
-                <div class="col-lg-2">
-                    <p>Description:</p>
-                </div>
-                <div class="col-lg-10">
-                    {% set description, break = null, false %}
-                    {% for textProperty in profile.textProperties if textProperty.systemType.id == 16 %}
-                        {% if not break %}
-                            {% if textProperty.languageIsoCode == 'en' %}
-                                {% set break = true %}
-                                {% set description = textProperty.textProperty %}
-                            {% else %}
-                                {% if description == null %}
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-2">
+                        <p>Description:</p>
+                    </div>
+                    <div class="col-lg-10">
+                        {% set description, break = null, false %}
+                        {% for textProperty in profile.textProperties if textProperty.systemType.id == 16 %}
+                            {% if not break %}
+                                {% if textProperty.languageIsoCode == 'en' %}
+                                    {% set break = true %}
                                     {% set description = textProperty.textProperty %}
+                                {% else %}
+                                    {% if description == null %}
+                                        {% set description = textProperty.textProperty %}
+                                    {% endif %}
                                 {% endif %}
                             {% endif %}
-                        {% endif %}
-                    {% endfor %}
+                        {% endfor %}
 
-                    {% if description is not null %}
-                        {{ description|raw }}
-                    {% else %}
-                        <p><i>No description yet.</i></p>
-                    {% endif %}
+                        {% if description is not null %}
+                            {{ description|raw }}
+                        {% else %}
+                            <p><i>No description yet.</i></p>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
         </div>
-        <div id="identification" class="tab-pane fade in active">
+        <div id="identification" class="tab-pane fade">
             <h3>Identification</h3>
             <p>Project of belonging: <a href="{{ path('project_show', {'id': profile.projectOfBelonging.id}) }}">{{ profile.projectOfBelonging.standardLabel }}</a></p>
             <p>Start date: {{ profile.startDate }}</p>

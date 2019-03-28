@@ -9,30 +9,62 @@
     <h3>Properties</h3>
     <table class="table table-striped" id="property-table">
         <thead>
-            <tr>
-                <th>Property identifier</th>
-                <th>Namespace URI</th>
-                <th>Last updated</th>
-            </tr>
+        <tr>
+            <th>Domain</th>
+            <th>Property identifier</th>
+            <th>Range</th>
+            <th>Namespace URI</th>
+            <th>Last updated</th>
+        </tr>
         </thead>
         <tbody>
-            {% for property in properties %}
-                <tr>
-                    <td>
-                        <a href="{{ path('property_show', {
-                            'id': property.id
-                        }) }}">
-                            {{ property }}
+        {% for property in properties %}
+            <tr>
+                <td>
+                    {% if property.domain is not null %}
+                        <a href="{{ path('class_show', {'id': property.domain.id }) }}">
+                            {% if property.domain.identifierInNamespace != property.domain.standardLabel %}
+                                {{ property.domain.identifierInNamespace }} {{ property.domain.standardLabel }}
+                            {% else %}
+                                {{ property.domain.identifierInNamespace }}
+                            {% endif %}
+
+                            {% if property.domainMinQuantifier is not null and property.domainMaxQuantifier is not null %}
+                                ({% if  property.domainMinQuantifier != -1 %}{{ property.domainMinQuantifier }}{% else %}n{% endif %},{% if  property.domainMaxQuantifier != -1 %}{{ property.domainMaxQuantifier }}{% else %}n{% endif %})
+                            {% endif %}
                         </a>
-                    </td>
-                    <td>
-                        {% if property.namespaces|first.referencedVersion is not null %}
-                            {{ property.namespaces|first.referencedVersion.namespaceURI }}
-                        {% endif %}
-                    </td>
-                    <td>{{ property.modificationTime|date('Y-m-d') }}</td>
-                </tr>
-            {% endfor %}
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{{ path('property_show', {
+                        'id': property.id
+                    }) }}">
+                        {{ property.identifierInNamespace }} {{ property.standardLabel }}
+                    </a>
+                </td>
+                <td>
+                    {% if property.range is not null %}
+                        <a href="{{ path('class_show', {'id': property.range.id }) }}">
+                            {% if property.range.identifierInNamespace != property.range.standardLabel %}
+                                {{ property.range.identifierInNamespace }} {{ property.range.standardLabel }}
+                            {% else %}
+                                {{ property.range.identifierInNamespace }}
+                            {% endif %}
+
+                            {% if property.rangeMinQuantifier is not null and property.rangeMaxQuantifier is not null %}
+                                ({% if  property.rangeMinQuantifier != -1 %}{{ property.rangeMinQuantifier }}{% else %}n{% endif %},{% if  property.rangeMaxQuantifier != -1 %}{{ property.rangeMaxQuantifier }}{% else %}n{% endif %})
+                            {% endif %}
+                        </a>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if property.namespaces|first.referencedVersion is not null %}
+                        {{ property.namespaces|first.referencedVersion.namespaceURI }}
+                    {% endif %}
+                </td>
+                <td>{{ property.modificationTime|date('Y-m-d') }}</td>
+            </tr>
+        {% endfor %}
         </tbody>
     </table>
 {% endblock %}
@@ -41,7 +73,9 @@
 
     <script>
         $(document).ready(function() {
-        $('#property-table').DataTable();
-    } );
+            $('#property-table').DataTable({
+                "order": [[1, 'asc']]
+            });
+        } );
     </script>
 {% endblock %}
