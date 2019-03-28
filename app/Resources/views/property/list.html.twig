@@ -11,7 +11,9 @@
         <thead>
         <tr>
             <th>Domain</th>
+            <th></th>
             <th>Property</th>
+            <th></th>
             <th>Range</th>
             <th>Namespace URI</th>
             <th>Last updated</th>
@@ -20,7 +22,7 @@
         <tbody>
         {% for property in properties %}
             <tr>
-                <td class="text-nowrap">
+                <td class="text-nowrap text-right small">
                     {% if property.domain is not null %}
                         <a href="{{ path('class_show', {'id': property.domain.id }) }}">
                             {% if property.domain.identifierInNamespace != property.domain.standardLabel %}
@@ -28,27 +30,29 @@
                             {% else %}
                                 {{ property.domain.identifierInNamespace }}
                             {% endif %}
-
-                            {% if property.domainMinQuantifier is not null and property.domainMaxQuantifier is not null %}
-                                ({% if  property.domainMinQuantifier != -1 %}{{ property.domainMinQuantifier }}{% else %}n{% endif %},{% if  property.domainMaxQuantifier != -1 %}{{ property.domainMaxQuantifier }}{% else %}n{% endif %})
-                            {% endif %}
                         </a>
                     {% endif %}
                 </td>
-                <td class="text-nowrap">
+                <td class="text-nowrap small" style="padding-left: 30px;">
+                    {% if property.domainMinQuantifier is not null and property.domainMaxQuantifier is not null %}
+                        ({% if  property.domainMinQuantifier != -1 %}{{ property.domainMinQuantifier }}{% else %}n{% endif %},{% if  property.domainMaxQuantifier != -1 %}{{ property.domainMaxQuantifier }}{% else %}n{% endif %})
+                    {% endif %}
+                </td>
+                <td class="text-nowrap text-center">
                     <a href="{{ path('property_show', {
                         'id': property.id
                     }) }}">
                         {{ property.identifierInNamespace }} {{ property.standardLabel }}
                     </a>
                 </td>
-                <td class="text-nowrap">
+                <td class="text-nowrap small" style="padding-right: 30px;">
+                    {% if property.rangeMinQuantifier is not null and property.rangeMaxQuantifier is not null %}
+                        ({% if  property.rangeMinQuantifier != -1 %}{{ property.rangeMinQuantifier }}{% else %}n{% endif %},{% if  property.rangeMaxQuantifier != -1 %}{{ property.rangeMaxQuantifier }}{% else %}n{% endif %})
+                    {% endif %}
+                </td>
+                <td class="text-nowrap small">
                     {% if property.range is not null %}
                         <a href="{{ path('class_show', {'id': property.range.id }) }}">
-                            {% if property.rangeMinQuantifier is not null and property.rangeMaxQuantifier is not null %}
-                                ({% if  property.rangeMinQuantifier != -1 %}{{ property.rangeMinQuantifier }}{% else %}n{% endif %},{% if  property.rangeMaxQuantifier != -1 %}{{ property.rangeMaxQuantifier }}{% else %}n{% endif %})
-                            {% endif %}
-
                             {% if property.range.identifierInNamespace != property.range.standardLabel %}
                                 {{ property.range.identifierInNamespace }} {{ property.range.standardLabel }}
                             {% else %}
@@ -74,10 +78,14 @@
     <script>
         $(document).ready(function() {
             $('#property-table').DataTable({
-                "order": [[1, 'asc']],
+                "order": [[2, 'asc']],
                 "columnDefs": [
-                    { "width": "100%", "targets": 3 },
-                    { "width": "1%", "targets": 4 }],
+                    { "width": "1%", "targets": 0 },
+                    { "width": "1%", "orderable": false, "targets": 1 },
+                    { "width": "1%", "targets": 2 },
+                    { "width": "1%", "orderable": false, "targets": 3 },
+                    { "width": "1%", "targets": 4 },
+                    { "width": "1%", "targets": 6 }],
                 "autoWidth": false
             });
         } );
