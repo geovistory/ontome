@@ -111,6 +111,12 @@ class TextProperty implements GroupSequenceProviderInterface
     private $namespaces;
 
     /**
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Comment", mappedBy="textProperty")
+     * @ORM\OrderBy({"creationTime" = "DESC"})
+     */
+    private $comments;
+
+    /**
      * @ORM\Column(type="text", nullable=true)
      */
     private $notes;
@@ -249,6 +255,14 @@ class TextProperty implements GroupSequenceProviderInterface
         elseif (!is_null($this->propertyAssociation))
             $object = $this->propertyAssociation;
         return $object;
+    }
+
+    /**
+     * @return ArrayCollection|Comment[]
+     */
+    public function getComments()
+    {
+        return $this->comments;
     }
 
     /**

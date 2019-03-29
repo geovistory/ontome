@@ -1,17 +1,69 @@
-{% extends 'baseMin.html.twig' %}
-
-{% block title %}{{ textProperty.class.identifierInNamespace }} {{ textProperty.systemType.standardLabel }}{% endblock %}
-
+{% extends 'base.html.twig' %}
 {% block body %}
-
     <div class="container">
-        <h2 class="text-propery-class">{{ textProperty.class.identifierInNamespace }} {{ textProperty.systemType.standardLabel }}</h2>
-        <p>{{ textProperty.textProperty }}</p>
+        <div class="row">
+            <div class="col-xs-12">
+                <h2>
+                    {% if textProperty.object is not null %}
+                        {{ textProperty.object.objectIdentification }} - {{ textProperty.systemType.standardLabel }}
+                    {% else %}
+                        {{ textProperty.systemType.standardLabel }}
+                    {% endif %}
+
+                    <a href="{{ app.request.headers.get('referer') }}"
+                       class="pull-right btn btn-link"
+                       role="button">
+                        <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
+                    </a>
+                </h2>
+                <ul class="nav nav-tabs" id="main-tabs">
+                    <li class="active"><a data-toggle="tab" href="#text-property">{{ textProperty.systemType }}</a></li>
+                    <li><a data-toggle="tab" href="#comments">Comments</a></li>
+                </ul>
+                <div class="tab-content">
+                    <div id="text-property" class="tab-pane fade in active">
+                        <div class="container">
+                            <dl class="object-details-list">
+                                <dt>Text</dt>
+                                <dd>{{ textProperty.textProperty|raw}}</dd>
+                                <dt>Language</dt>
+                                <dd>{{ textProperty.languageIsoCode}}</dd>
+                            </dl>
+                        </div>
+                    </div>
+                    <div id="comments" class="tab-pane fade">
+                        <h3>Comments</h3>
+                        <div class="comment-box js-user-info" data-fullname="{{ app.user }}">
+                            <div class="action-box">
+                                {% if textProperty.comments is empty %}
+                                    <p id="comment-not-found"><em>No comment found.</em></p>
+                                {% endif %}
+                                <ul id="comments-list" class="comments-list">
+                                    {% for comment in textProperty.comments %}
+                                        <li>
+                                            <div class="comment-text">
+                                                <p><strong><a href="#">{{ comment.creator.fullName }}</a></strong></p>
+                                                <p>{{ comment.comment }}</p>
+                                                <span class="date sub-comment-text">on {{ comment.creationTime|date() }}</span>
+                                            </div>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+
+                                {% if app.user %}
+                                    <div class="new-comment-form" id="new-comment-form">
+                                        {{ render(controller('AppBundle:Comment:new', {'object' : 'text-property', 'objectId' : textProperty.id})) }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-
 {% endblock %}
-
 {% block javascripts %}
     {{ parent() }}
-
+    {% include 'comment/js-bock.html.twig'  with {'objectType': 'text-property', 'objectId' : textProperty.id  } %}
 {% endblock %}

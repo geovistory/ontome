@@ -156,4 +156,9 @@ class SystemType
     {
         return $this->standardLabel;
     }
+
+    public function __toString()
+    {
+        return (string) $this->standardLabel;
+    }
 }

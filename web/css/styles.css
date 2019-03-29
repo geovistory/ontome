@@ -2,7 +2,7 @@
 Flexbox Layout
 *******************************/
 
-.header, .navi, .sea-creature-container, .object-details, .notes-container, .footer {
+.header, .navi, .object-details, .notes-container, .footer {
     display: -webkit-flex;
     display: flex;
 }
@@ -21,14 +21,6 @@ Flexbox Layout
     padding: 0 10px;
 }
 
-.sea-creature-container {
-    flex-direction: column;
-    -webkit-align-items: center;
-    align-items: center;
-    -webkit-justify-content: center;
-    justify-content: center;
-}
-
 .notes-container {
     justify-content: space-between;
     border-top: 1px solid #ECF0F1;
@@ -38,16 +30,6 @@ Flexbox Layout
     justify-content: center;
 }
 
-@media all and (min-width: 700px) {
-    .sea-creature-container {
-        flex-direction: row;
-        -webkit-align-items: center;
-        align-items: center;
-        -webkit-justify-content: center;
-        justify-content: center;
-        margin: 30px;
-    }
-}
 
 /******************************
 Top Nav General Styling
@@ -62,12 +44,6 @@ body {
     height: 50px;
     width: 100%;
     display: none;
-}
-
-.sea-search > input {
-    width: 100%;
-    padding: 10px 20px;
-    font-size: 22px;
 }
 
 .search-input {
@@ -134,10 +110,6 @@ body {
         min-width: 768px;
     }
 
-    .sea-creature-container {
-        justify-content: flex-start;
-    }
-
     .object-name {
         text-align: left;
         margin-left: 60px;
@@ -154,7 +126,6 @@ BODY Styling
 }
 
 .object-details-list > dt {
-    text-transform: uppercase;
     padding-top: 10px;
 }
 
