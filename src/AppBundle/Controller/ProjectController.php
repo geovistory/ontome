@@ -156,7 +156,7 @@ class ProjectController  extends Controller
             $namespace->addLabel($namespaceLabel);
 
             $ongoingNamespaceLabel->setIsStandardLabelForLanguage(true);
-            $ongoingNamespaceLabel->setLabel($projectLabel->getLabel());
+            $ongoingNamespaceLabel->setLabel($projectLabel->getLabel() . " ongoing");
             $ongoingNamespaceLabel->setLanguageIsoCode($projectLabel->getLanguageIsoCode());
             $ongoingNamespaceLabel->setCreator($this->getUser());
             $ongoingNamespaceLabel->setModifier($this->getUser());
