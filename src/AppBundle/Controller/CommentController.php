@@ -92,13 +92,13 @@ class CommentController extends Controller
             }
             $comment->setClass($associatedEntity);
         }
-        /*else if($object === 'property') {
+        else if($object === 'property') {
             $associatedEntity = $em->getRepository('AppBundle:Property')->find($objectId);
             if (!$associatedEntity) {
                 throw $this->createNotFoundException('The property n° '.$objectId.' does not exist');
             }
             $comment->setProperty($associatedEntity);
-        }*/
+        }
         else if($object === 'class-association') {
             $associatedEntity = $em->getRepository('AppBundle:ClassAssociation')->find($objectId);
             if (!$associatedEntity) {
