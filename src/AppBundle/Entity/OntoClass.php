@@ -330,13 +330,8 @@ class OntoClass
      */
     public function getTopLevelNamespace()
     {
-        $topLevelNamespace = null;
-        foreach($this->getNamespaces() as $namespace)
-        {
-            $topLevelNamespace = $namespace->getTopLevelNamespace();
-            break;
-        }
-        return $topLevelNamespace;
+        /** On n'a besoin que d'un seul namespace, donc on pioche le 1er */
+        return $this->getNamespaces()[0]->getTopLevelNamespace();
     }
 
     /**
