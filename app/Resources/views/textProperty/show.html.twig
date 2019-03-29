@@ -10,7 +10,7 @@
                         {{ textProperty.systemType.standardLabel }}
                     {% endif %}
 
-                    <a href="{{ app.request.headers.get('referer') }}"
+                    <a href="{{ app.request.headers.get('referer') }}#definition"
                        class="pull-right btn btn-link"
                        role="button">
                         <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
@@ -23,9 +23,10 @@
                 <div class="tab-content">
                     <div id="text-property" class="tab-pane fade in active">
                         <div class="container">
+                            <h3>{{ textProperty.systemType }}</h3>
                             <dl class="object-details-list">
                                 <dt>Text</dt>
-                                <dd>{{ textProperty.textProperty|raw}}</dd>
+                                <dd class="well">{{ textProperty.textProperty|raw}}</dd>
                                 <dt>Language</dt>
                                 <dd>{{ textProperty.languageIsoCode}}</dd>
                             </dl>
