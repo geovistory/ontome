@@ -326,6 +326,20 @@ class OntoClass
     }
 
     /**
+     * @return OntoNamespace
+     */
+    public function getTopLevelNamespace()
+    {
+        $topLevelNamespace = null;
+        foreach($this->getNamespaces() as $namespace)
+        {
+            $topLevelNamespace = $namespace->getTopLevelNamespace();
+            break;
+        }
+        return $topLevelNamespace;
+    }
+
+    /**
      * @return Property
      */
     public function getPropertiesAsDomain()

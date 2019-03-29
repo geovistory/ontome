@@ -146,7 +146,7 @@
                             </div>
                             <div class="col-lg-10">
                                 <ul class="list-unstyled">
-                                    {% for outgoingProperty in outgoingProperties|sort if outgoingProperty.rootNamespaceId == class.ongoingNamespace.topLevelNamespace.id %}
+                                    {% for outgoingProperty in outgoingProperties|sort if outgoingProperty.rootNamespaceId == class.topLevelNamespace.id %}
                                         <li>
                                             <a href="{{ path('property_show', {'id': outgoingProperty.propertyId}) }}">{{ outgoingProperty.property }}</a>
                                             → <a href="{{ path('class_show', {'id': outgoingProperty.rangeId }) }}">{{ outgoingProperty.range }}</a>
@@ -163,7 +163,7 @@
                             </div>
                             <div class="col-lg-10">
                                 <ul class="list-unstyled">
-                                    {% for ingoingProperty in ingoingProperties|sort if ingoingProperty.rootNamespaceId == class.ongoingNamespace.topLevelNamespace.id %}
+                                    {% for ingoingProperty in ingoingProperties|sort if ingoingProperty.rootNamespaceId == class.topLevelNamespace.id %}
                                         <li><a href="{{ path('class_show', {'id': ingoingProperty.domainId }) }}">{{ ingoingProperty.domain }}</a>
                                             → <a href="{{ path('property_show', {'id': ingoingProperty.propertyId}) }}">{{ ingoingProperty.property }}</a>
                                         </li>
