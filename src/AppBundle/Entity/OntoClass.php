@@ -326,6 +326,15 @@ class OntoClass
     }
 
     /**
+     * @return OntoNamespace
+     */
+    public function getTopLevelNamespace()
+    {
+        /** On n'a besoin que d'un seul namespace, donc on pioche le 1er */
+        return $this->getNamespaces()[0]->getTopLevelNamespace();
+    }
+
+    /**
      * @return Property
      */
     public function getPropertiesAsDomain()
