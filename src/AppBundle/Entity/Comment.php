@@ -219,7 +219,7 @@ class Comment
      */
     public function setTextProperty($textProperty)
     {
-        $this->class = $textProperty;
+        $this->textProperty = $textProperty;
     }
 
     /**
