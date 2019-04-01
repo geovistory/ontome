@@ -93,10 +93,10 @@
                 }
             });
 
-            if($('[for=property_quick_add_form_textProperties_1_textProperty]').length) {
+            if($('[for=outgoing_property_quick_add_form_textProperties_1_textProperty]').length) {
                 //we hide the button in order to prevent the add of more than 2 text properties
                 $('.js-example-add').hide();
-                $('[for=property_quick_add_form_textProperties_1_textProperty]').text('Example');
+                $('[for=outgoing_property_quick_add_form_textProperties_1_textProperty]').text('Example');
             }
             var $wrapper = $('.js-text-property-wrapper');
             $wrapper.on('click', '.js-example-add', function(e) {
@@ -117,10 +117,10 @@
 
                 // Display the form in the page before the "new" link
                 $(this).before(newForm);
-                $('#property_quick_add_form_textProperties_1_creator').val($('#property_quick_add_form_labels_0_creator').val());
-                $('#property_quick_add_form_textProperties_1_modifier').val($('#property_quick_add_form_labels_0_creator').val());
+                $('#outgoing_property_quick_add_form_textProperties_1_creator').val($('#outgoing_property_quick_add_form_labels_0_creator').val());
+                $('#outgoing_property_quick_add_form_textProperties_1_modifier').val($('#outgoing_property_quick_add_form_labels_0_creator').val());
                 $('.js-example-add').hide();
-                $('[for=property_quick_add_form_textProperties_1_textProperty]').text('Example');
+                $('[for=outgoing_property_quick_add_form_textProperties_1_textProperty]').text('Example');
             });
         } );
     </script>

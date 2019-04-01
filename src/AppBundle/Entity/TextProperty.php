@@ -444,7 +444,7 @@ class TextProperty implements GroupSequenceProviderInterface
      */
     public function getGroupSequence()
     {
-        if($this->systemType->getId() == 16)
+        if(!is_null($this->systemType) && $this->systemType->getId() == 16)
         {
             return ['TextProperty', 'Description'];
         }
