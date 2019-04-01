@@ -109,7 +109,7 @@
                                     {% endif %}
                                 {% endif %}
                             {% endfor %}
-                            <p>{{ scopeNote|raw }}</p>
+                            {{ scopeNote|raw }}
                         </div>
                     </div>
                     <div class="row">
@@ -120,7 +120,7 @@
                             {% set isExamplesEmpty = true %}
                             {% for textProperty in class.textProperties if textProperty.systemType.id == 7 %}
                                 {% set isExamplesEmpty = false %}
-                                <p>{{ textProperty.textProperty|raw }}</p>
+                                {{ textProperty.textProperty|raw }}
                             {% endfor %}
                             {% if isExamplesEmpty %}
                                 <p><i>No example yet.</i></p>

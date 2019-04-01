@@ -159,16 +159,11 @@
                         <div class="col-lg-10">
                             {% set empty = true %}
                             {% for textProperty in property.textProperties if textProperty.systemType.id == 7 %}
-                            {% set empty = false %}
-                            {% if loop.first %}
-                            <ul style="margin-left: -25px;">
-                                {% endif %}
-                                <li>{{ textProperty.textProperty|raw }}</li>
-                                {% endfor %}
-                                {% if not empty %}
-                            </ul>
-                        {% else %}
-                            <p><i>No example yet.</i></p>
+                                {% set empty = false %}
+                                {{ textProperty.textProperty|raw }}
+                            {% endfor %}
+                            {% if empty %}
+                                <p><i>No example yet.</i></p>
                             {% endif %}
                         </div>
                     </div>
