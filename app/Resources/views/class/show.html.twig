@@ -192,7 +192,7 @@
                         <th>Scope note</th>
                         <th>Language</th>
                         <th>Namespace</th>
-                        <th>View details</th>
+                        <th>View details and comments</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -233,7 +233,7 @@
                         <th>Example</th>
                         <th>Language</th>
                         <th>Namespace</th>
-                        <th>View details</th>
+                        <th>View details and comments</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -265,7 +265,7 @@
                         <th>Notes</th>
                         <th>Language</th>
                         <th>Namespace</th>
-                        <th>View details</th>
+                        <th>View details and comments</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -298,6 +298,7 @@
                         <th>Label</th>
                         <th>Language</th>
                         <th>Last updated</th>
+                        <th>View details and comments</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -312,6 +313,13 @@
                             </td>
                             <td>{{ label.languageIsoCode}}</td>
                             <td>{{ label.modificationTime|date('Y-m-d') }}</td>
+                            <td>
+                                <a class="btn" href="{{ path('label_show', {
+                                    'id': label.id
+                                }) }}">
+                                    <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
+                                </a>
+                            </td>
                         </tr>
                     {% endfor %}
                     </tbody>
