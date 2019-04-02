@@ -94,6 +94,12 @@ class OntoNamespace
     private $endDate;
 
     /**
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Comment", mappedBy="namespace")
+     * @ORM\OrderBy({"creationTime" = "DESC"})
+     */
+    private $comments;
+
+    /**
      * @ORM\Column(type="text")
      */
     private $notes;
@@ -183,6 +189,7 @@ class OntoNamespace
         $this->propertyAssociations = new ArrayCollection();
         $this->childVersions = new ArrayCollection();
         $this->profiles = new ArrayCollection();
+        $this->comments = new ArrayCollection();
     }
 
     /**
@@ -287,6 +294,14 @@ class OntoNamespace
     public function getEndDate()
     {
         return $this->endDate;
+    }
+
+    /**
+     * @return ArrayCollection|Comment[]
+     */
+    public function getComments()
+    {
+        return $this->comments;
     }
 
     /**

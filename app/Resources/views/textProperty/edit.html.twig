@@ -51,55 +51,94 @@
                     </a>
                 {% endif %}
             </h2>
+            <ul class="nav nav-tabs" id="main-tabs">
+                <li class="active"><a data-toggle="tab" href="#text-property">{{ textProperty.systemType }}</a></li>
+                <li><a data-toggle="tab" href="#comments">Comments</a></li>
+            </ul>
+            <div class="tab-content">
+                <div id="text-property" class="tab-pane fade in active">
+                    <h3>{{ textProperty.systemType }}</h3>
+                    {{ form_start(textPropertyForm) }}
+                        {{ form_row(textPropertyForm.textProperty) }}
+                        {{ form_row(textPropertyForm.languageIsoCode) }}
 
-            {{ form_start(textPropertyForm) }}
-                {{ form_row(textPropertyForm.textProperty) }}
-                {{ form_row(textPropertyForm.languageIsoCode) }}
+                        <button type="submit" class="btn btn-primary" formnovalidate>Save <span class="far fa-save"></span></button>
+                        {% if textProperty.classAssociation is not null %}
+                            <a href="{{ path('class_association_edit', {
+                                id: textProperty.classAssociation.id
+                            }) }}"
+                               class="btn btn-default"
+                               role="button">
+                                Back <i class="fas fa-arrow-left"></i>
+                            </a>
+                        {% elseif  textProperty.propertyAssociation is not null %}
+                            <a href="{{ path('property_association_edit', {
+                                id: textProperty.propertyAssociation.id
+                            }) }}"
+                               class="btn btn-default"
+                               role="button">
+                                Back <i class="fas fa-arrow-left"></i>
+                            </a>
+                        {% elseif  textProperty.class is not null %}
+                            <a href="{{ path('class_edit', {
+                                id: textProperty.class.id
+                            }) }}#definition"
+                               class="btn btn-default"
+                               role="button">
+                                Back <i class="fas fa-arrow-left"></i>
+                            </a>
+                        {% elseif  textProperty.property is not null %}
+                            <a href="{{ path('property_edit', {
+                                id: textProperty.property.id
+                            }) }}#definition"
+                               class="btn btn-default"
+                               role="button">
+                                Back <i class="fas fa-arrow-left"></i>
+                            </a>
+                        {% elseif  textProperty.project is not null %}
+                            <a href="{{ path('project_edit', {
+                                id: textProperty.project.id
+                            }) }}#definition"
+                               class="btn btn-default"
+                               role="button">
+                                Back <i class="fas fa-arrow-left"></i>
+                            </a>
+                        {% endif %}
+                    {{ form_end(textPropertyForm) }}
+                </div>
+                <div id="comments" class="tab-pane fade">
+                    <h3>Comments</h3>
+                    <div class="comment-box js-user-info" data-fullname="{{ app.user }}">
+                        <div class="action-box">
+                            {% if textProperty.comments is empty %}
+                                <p id="comment-not-found"><em>No comment found.</em></p>
+                            {% endif %}
+                            <ul id="comments-list" class="comments-list">
+                                {% for comment in textProperty.comments %}
+                                    <li>
+                                        <div class="comment-text">
+                                            <p><strong><a href="#">{{ comment.creator.fullName }}</a></strong></p>
+                                            <p>{{ comment.comment }}</p>
+                                            <span class="date sub-comment-text">on {{ comment.creationTime|date() }}</span>
+                                        </div>
+                                    </li>
+                                {% endfor %}
+                            </ul>
 
-                <button type="submit" class="btn btn-primary" formnovalidate>Save <span class="far fa-save"></span></button>
-                {% if textProperty.classAssociation is not null %}
-                    <a href="{{ path('class_association_edit', {
-                        id: textProperty.classAssociation.id
-                    }) }}"
-                       class="btn btn-default"
-                       role="button">
-                        Back <i class="fas fa-arrow-left"></i>
-                    </a>
-                {% elseif  textProperty.propertyAssociation is not null %}
-                    <a href="{{ path('property_association_edit', {
-                        id: textProperty.propertyAssociation.id
-                    }) }}"
-                       class="btn btn-default"
-                       role="button">
-                        Back <i class="fas fa-arrow-left"></i>
-                    </a>
-                {% elseif  textProperty.class is not null %}
-                    <a href="{{ path('class_edit', {
-                        id: textProperty.class.id
-                    }) }}#definition"
-                       class="btn btn-default"
-                       role="button">
-                        Back <i class="fas fa-arrow-left"></i>
-                    </a>
-                {% elseif  textProperty.property is not null %}
-                    <a href="{{ path('property_edit', {
-                        id: textProperty.property.id
-                    }) }}#definition"
-                       class="btn btn-default"
-                       role="button">
-                        Back <i class="fas fa-arrow-left"></i>
-                    </a>
-                {% elseif  textProperty.project is not null %}
-                    <a href="{{ path('project_edit', {
-                        id: textProperty.project.id
-                    }) }}#definition"
-                       class="btn btn-default"
-                       role="button">
-                        Back <i class="fas fa-arrow-left"></i>
-                    </a>
-                {% endif %}
-            {{ form_end(textPropertyForm) }}
+                            {% if app.user %}
+                                <div class="new-comment-form" id="new-comment-form">
+                                    {{ render(controller('AppBundle:Comment:new', {'object' : 'text-property', 'objectId' : textProperty.id})) }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
+{% endblock %}
+{% block javascripts %}
+    {{ parent() }}
+    {% include 'comment/js-bock.html.twig'  with {'objectType': 'text-property', 'objectId' : textProperty.id  } %}
 {% endblock %}

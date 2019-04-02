@@ -8,6 +8,7 @@
 
 namespace AppBundle\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -56,6 +57,24 @@ class Comment
     private $propertyAssociation;
 
     /**
+     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\TextProperty", inversedBy="comments")
+     * @ORM\JoinColumn(name="fk_text_property", referencedColumnName="pk_text_property")
+     */
+    private $textProperty;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Label", inversedBy="comments")
+     * @ORM\JoinColumn(name="fk_label", referencedColumnName="pk_label")
+     */
+    private $label;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\OntoNamespace", inversedBy="comments")
+     * @ORM\JoinColumn(name="fk_namespace", referencedColumnName="pk_namespace")
+     */
+    private $namespace;
+
+    /**
      * @Assert\NotBlank()
      * @ORM\ManyToOne(targetEntity="User")
      * @ORM\JoinColumn(name="creator", referencedColumnName="pk_user", nullable=false)
@@ -96,14 +115,6 @@ class Comment
     }
 
     /**
-     * @return mixed
-     */
-    public function getLanguageIsoCode()
-    {
-        return $this->languageIsoCode;
-    }
-
-    /**
      * @return OntoClass
      */
     public function getClass()
@@ -133,6 +144,30 @@ class Comment
     public function getPropertyAssociation()
     {
         return $this->propertyAssociation;
+    }
+
+    /**
+     * @return TextProperty
+     */
+    public function getTextProperty()
+    {
+        return $this->textProperty;
+    }
+
+    /**
+     * @return Label
+     */
+    public function getLabel()
+    {
+        return $this->label;
+    }
+
+    /**
+     * @return OntoNamespace
+     */
+    public function getNamespace()
+    {
+        return $this->namespace;
     }
 
     /**
@@ -176,14 +211,6 @@ class Comment
     }
 
     /**
-     * @param mixed $languageIsoCode
-     */
-    public function setLanguageIsoCode($languageIsoCode)
-    {
-        $this->languageIsoCode = $languageIsoCode;
-    }
-
-    /**
      * @param mixed $class
      */
     public function setClass($class)
@@ -215,7 +242,29 @@ class Comment
         $this->propertyAssociation = $propertyAssociation;
     }
 
+    /**
+     * @param mixed $textProperty
+     */
+    public function setTextProperty($textProperty)
+    {
+        $this->textProperty = $textProperty;
+    }
 
+    /**
+     * @param mixed $label
+     */
+    public function setLabel($label)
+    {
+        $this->label = $label;
+    }
+
+    /**
+     * @param mixed $namespace
+     */
+    public function setNamespace($namespace)
+    {
+        $this->namespace = $namespace;
+    }
 
     /**
      * @param mixed $creator
