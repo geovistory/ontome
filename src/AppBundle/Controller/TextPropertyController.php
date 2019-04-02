@@ -96,6 +96,8 @@ class TextPropertyController extends Controller
             }
             $textProperty->setClassAssociation($associatedEntity);
             $associatedObject = $associatedEntity->getChildClass();
+            $redirectToRoute = 'class_association_edit';
+            $redirectToRouteFragment = 'justifications';
         }
         else if($object === 'property-association') {
             $associatedEntity = $em->getRepository('AppBundle:PropertyAssociation')->find($objectId);
@@ -104,6 +106,8 @@ class TextPropertyController extends Controller
             }
             $textProperty->setPropertyAssociation($associatedEntity);
             $associatedObject = $associatedEntity->getChildProperty();
+            $redirectToRoute = 'property_association_edit';
+            $redirectToRouteFragment = 'justifications';
         }
         else if($object === 'class') {
             $associatedEntity = $em->getRepository('AppBundle:OntoClass')->find($objectId);
@@ -112,6 +116,8 @@ class TextPropertyController extends Controller
             }
             $textProperty->setClass($associatedEntity);
             $associatedObject = $associatedEntity;
+            $redirectToRoute = 'class_edit';
+            $redirectToRouteFragment = 'definition';
         }
         else if($object === 'property') {
             $associatedEntity = $em->getRepository('AppBundle:Property')->find($objectId);
@@ -120,6 +126,8 @@ class TextPropertyController extends Controller
             }
             $textProperty->setProperty($associatedEntity);
             $associatedObject = $associatedEntity;
+            $redirectToRoute = 'property_edit';
+            $redirectToRouteFragment = 'definition';
         }
         else if($object === 'project') {
             $associatedEntity = $em->getRepository('AppBundle:Project')->find($objectId);
@@ -128,6 +136,8 @@ class TextPropertyController extends Controller
             }
             $textProperty->setProject($associatedEntity);
             $associatedObject = $associatedEntity;
+            $redirectToRoute = 'project_edit';
+            $redirectToRouteFragment = 'definition';
         }
         else throw $this->createNotFoundException('The requested object "'.$object.'" does not exist!');
 
@@ -183,8 +193,9 @@ class TextPropertyController extends Controller
 
             $this->addFlash('success', 'Text property Created!');
 
-            return $this->redirectToRoute('text_property_edit', [
-                'id' => $textProperty->getId()
+            return $this->redirectToRoute($redirectToRoute, [
+                'id' => $objectId,
+                '_fragment' => $redirectToRouteFragment
             ]);
 
         }
