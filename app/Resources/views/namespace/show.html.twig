@@ -255,7 +255,30 @@
             </div>
             <div id="comments" class="tab-pane fade">
                 <h3>Comments</h3>
+                <div class="comment-box js-user-info" data-fullname="{{ app.user }}">
+                    <div class="action-box">
+                        {% if namespace.comments is empty %}
+                            <p id="comment-not-found"><em>No comment found.</em></p>
+                        {% endif %}
+                        <ul id="comments-list" class="comments-list">
+                            {% for comment in namespace.comments %}
+                                <li>
+                                    <div class="comment-text">
+                                        <p><strong><a href="#">{{ comment.creator.fullName }}</a></strong></p>
+                                        <p>{{ comment.comment }}</p>
+                                        <span class="date sub-comment-text">on {{ comment.creationTime|date() }}</span>
+                                    </div>
+                                </li>
+                            {% endfor %}
+                        </ul>
 
+                        {% if app.user %}
+                            <div class="new-comment-form" id="new-comment-form">
+                                {{ render(controller('AppBundle:Comment:new', {'object' : 'namespace', 'objectId' : namespace.id})) }}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -277,5 +300,5 @@
             $('#child-namespaces-table').DataTable();
         } );
     </script>
-
+    {% include 'comment/js-bock.html.twig'  with {'objectType': 'class', 'objectId' : class.id  } %}
 {% endblock %}

@@ -69,6 +69,12 @@ class Comment
     private $label;
 
     /**
+     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\OntoNamespace", inversedBy="comments")
+     * @ORM\JoinColumn(name="fk_namespace", referencedColumnName="pk_namespace")
+     */
+    private $namespace;
+
+    /**
      * @Assert\NotBlank()
      * @ORM\ManyToOne(targetEntity="User")
      * @ORM\JoinColumn(name="creator", referencedColumnName="pk_user", nullable=false)
@@ -156,6 +162,13 @@ class Comment
         return $this->label;
     }
 
+    /**
+     * @return OntoNamespace
+     */
+    public function getNamespace()
+    {
+        return $this->namespace;
+    }
 
     /**
      * @return User
@@ -243,6 +256,14 @@ class Comment
     public function setLabel($label)
     {
         $this->label = $label;
+    }
+
+    /**
+     * @param mixed $namespace
+     */
+    public function setNamespace($namespace)
+    {
+        $this->namespace = $namespace;
     }
 
     /**
