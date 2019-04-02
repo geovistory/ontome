@@ -6,7 +6,7 @@
             <div class="col-xs-12">
                 <h2>
                     {{ label.label }}
-                    <a href="{{ app.request.headers.get('referer') }}#definition"
+                    <a href="{{ app.request.headers.get('referer') }}#identification"
                        class="pull-right btn btn-link"
                        role="button">
                         <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
@@ -19,10 +19,8 @@
                 <div class="tab-content">
                     <div id="label" class="tab-pane fade in active">
                         <div class="container">
-                            <h3>Label</h3>
+                            <h3>{{ label.label}}</h3>
                             <dl class="object-details-list">
-                                <dt>Label</dt>
-                                <dd class="well">{{ label.label}}</dd>
                                 <dt>Language</dt>
                                 <dd>{{ label.languageIsoCode}}</dd>
                                 <dt>Is standard label for language</dt>
