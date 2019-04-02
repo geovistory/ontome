@@ -88,6 +88,12 @@ class Label
     private $namespaces;
 
     /**
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Comment", mappedBy="label")
+     * @ORM\OrderBy({"creationTime" = "DESC"})
+     */
+    private $comments;
+
+    /**
      * @ORM\Column(type="text")
      */
     private $notes;
@@ -230,6 +236,14 @@ class Label
     public function getObjectIdentification()
     {
         return $this->label;
+    }
+
+    /**
+     * @return ArrayCollection|Comment[]
+     */
+    public function getComments()
+    {
+        return $this->comments;
     }
 
     /**

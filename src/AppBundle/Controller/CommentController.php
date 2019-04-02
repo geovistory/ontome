@@ -62,6 +62,12 @@ class CommentController extends Controller
                 throw $this->createNotFoundException('The text property n° '.$objectId.' does not exist');
             }
         }
+        else if($objectType === 'label') {
+            $associatedEntity = $em->getRepository('AppBundle:Label')->find($objectId);
+            if (!$associatedEntity) {
+                throw $this->createNotFoundException('The label n° '.$objectId.' does not exist');
+            }
+        }
         else throw $this->createNotFoundException('The requested object "'.$objectType.'" does not exist!');
 
         $comments = [];
@@ -125,6 +131,13 @@ class CommentController extends Controller
                 throw $this->createNotFoundException('The text property n° '.$objectId.' does not exist');
             }
             $comment->setTextProperty($associatedEntity);
+        }
+        else if($object === 'label') {
+            $associatedEntity = $em->getRepository('AppBundle:Label')->find($objectId);
+            if (!$associatedEntity) {
+                throw $this->createNotFoundException('The label n° '.$objectId.' does not exist');
+            }
+            $comment->setLabel($associatedEntity);
         }
         else throw $this->createNotFoundException('The requested object "'.$object.'" does not exist!');
 

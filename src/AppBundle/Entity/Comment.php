@@ -63,6 +63,12 @@ class Comment
     private $textProperty;
 
     /**
+     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Label", inversedBy="comments")
+     * @ORM\JoinColumn(name="fk_label", referencedColumnName="pk_label")
+     */
+    private $label;
+
+    /**
      * @Assert\NotBlank()
      * @ORM\ManyToOne(targetEntity="User")
      * @ORM\JoinColumn(name="creator", referencedColumnName="pk_user", nullable=false)
@@ -143,6 +149,15 @@ class Comment
     }
 
     /**
+     * @return Label
+     */
+    public function getLabel()
+    {
+        return $this->label;
+    }
+
+
+    /**
      * @return User
      */
     public function getCreator()
@@ -220,6 +235,14 @@ class Comment
     public function setTextProperty($textProperty)
     {
         $this->textProperty = $textProperty;
+    }
+
+    /**
+     * @param mixed $label
+     */
+    public function setLabel($label)
+    {
+        $this->label = $label;
     }
 
     /**
