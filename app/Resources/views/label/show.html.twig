@@ -21,12 +21,18 @@
                         <div class="container">
                             <h3>Label</h3>
                             <dl class="object-details-list">
-                                <dt>Text</dt>
+                                <dt>Label</dt>
                                 <dd class="well">{{ label.label}}</dd>
                                 <dt>Language</dt>
                                 <dd>{{ label.languageIsoCode}}</dd>
                                 <dt>Is standard label for language</dt>
-                                <dd>{{ label.isStandardLabelForLanguage}}</dd>
+                                <dd>
+                                    {% if label.isStandardLabelForLanguage %}
+                                        Yes
+                                    {% else %}
+                                        No
+                                    {% endif %}
+                                </dd>
                             </dl>
                         </div>
                     </div>
