@@ -32,8 +32,15 @@ class ClassController extends Controller
     {
         $em = $this->getDoctrine()->getManager();
 
-        $classes = $em->getRepository('AppBundle:OntoClass')
-            ->findAllOrderedById();
+        if (!is_null($this->getUser())) {
+
+            $classes = $em->getRepository('AppBundle:OntoClass')
+                ->findAllOrderedById();
+        }
+        else{
+            $classes = $em->getRepository('AppBundle:OntoClass')
+                ->findFilteredByPublicProjectOrderedById();
+        }
 
         return $this->render('class/list.html.twig', [
             'classes' => $classes

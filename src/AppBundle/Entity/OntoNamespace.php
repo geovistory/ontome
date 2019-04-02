@@ -173,6 +173,12 @@ class OntoNamespace
      */
     private $profiles;
 
+    /**
+     * @ORM\ManyToMany(targetEntity="AppBundle\Entity\Project", mappedBy="namespaces")
+     * @ORM\OrderBy({"standardLabel" = "ASC"})
+     */
+    private $projects;
+
 
     /**
      * @ORM\OneToMany(targetEntity="OntoNamespace", mappedBy="referencedVersion")
@@ -189,6 +195,7 @@ class OntoNamespace
         $this->propertyAssociations = new ArrayCollection();
         $this->childVersions = new ArrayCollection();
         $this->profiles = new ArrayCollection();
+        $this->projects = new ArrayCollection();
         $this->comments = new ArrayCollection();
     }
 
@@ -393,11 +400,19 @@ class OntoNamespace
     }
 
     /**
-     * @return ArrayCollection|Property[]
+     * @return ArrayCollection|Project[]
      */
     public function getProfiles()
     {
         return $this->profiles;
+    }
+
+    /**
+     * @return ArrayCollection|Project[]
+     */
+    public function getProjects()
+    {
+        return $this->projects;
     }
 
     /**

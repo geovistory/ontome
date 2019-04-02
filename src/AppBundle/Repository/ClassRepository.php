@@ -32,6 +32,22 @@ class ClassRepository extends EntityRepository
     }
 
     /**
+     * @return OntoClass[]
+     */
+    public function findFilteredByPublicProjectOrderedById()
+    {
+        return $this->createQueryBuilder('class')
+            ->join('class.namespaces','nspc')
+            ->join('nspc.projects', 'prj')
+            ->addSelect('nspc')
+            ->leftJoin('nspc.referencedVersion', 'referencedVersion')
+            ->addSelect('referencedVersion')
+            ->orderBy('class.id','DESC')
+            ->getQuery()
+            ->execute();
+    }
+
+    /**
      * @param OntoClass $class
      * @return array
      */

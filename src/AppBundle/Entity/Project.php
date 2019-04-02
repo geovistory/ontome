@@ -96,6 +96,15 @@ class Project
     private $profiles;
 
     /**
+     * @ORM\ManyToMany(targetEntity="OntoNamespace",  inversedBy="projects", fetch="EXTRA_LAZY")
+     * @ORM\JoinTable(schema="che", name="associates_project",
+     *      joinColumns={@ORM\JoinColumn(name="fk_project", referencedColumnName="pk_project")},
+     *      inverseJoinColumns={@ORM\JoinColumn(name="fk_namespace", referencedColumnName="pk_namespace")}
+     *      )
+     */
+    private $namespaces;
+
+    /**
      * @Assert\Valid()
      * @Assert\NotNull()
      * @ORM\OneToMany(targetEntity="AppBundle\Entity\TextProperty", mappedBy="project", cascade={"persist"})
@@ -127,6 +136,7 @@ class Project
         $this->ownedProfiles = new ArrayCollection();
         $this->managedNamespaces = new ArrayCollection();
         $this->profiles = new ArrayCollection();
+        $this->namespaces = new ArrayCollection();
         $this->textProperties = new ArrayCollection();
         $this->labels = new ArrayCollection();
         $this->childProjects = new ArrayCollection();
@@ -276,6 +286,14 @@ class Project
     public function getProfiles()
     {
         return $this->profiles;
+    }
+
+    /**
+     * @return ArrayCollection|OntoNamespace[]
+     */
+    public function getNamespaces()
+    {
+        return $this->namespaces;
     }
 
     /**
