@@ -36,6 +36,13 @@ class OntoNamespace
     private $namespaceURI;
 
     /**
+     * @Assert\NotBlank()
+     * @Assert\Url()
+     * @ORM\Column(type="text", nullable=false, unique=true)
+     */
+    private $originalNamespaceURI;
+
+    /**
      * @ORM\Column(type="text")
      */
     private $classPrefix;
@@ -213,6 +220,14 @@ class OntoNamespace
     public function getNamespaceURI()
     {
         return $this->namespaceURI;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getOriginalNamespaceURI()
+    {
+        return $this->originalNamespaceURI;
     }
 
     /**
@@ -441,6 +456,14 @@ class OntoNamespace
     public function setNamespaceURI($namespaceURI)
     {
         $this->namespaceURI = $namespaceURI;
+    }
+
+    /**
+     * @param mixed $originalNamespaceURI
+     */
+    public function setOriginalNamespaceURI($originalNamespaceURI)
+    {
+        $this->originalNamespaceURI = $originalNamespaceURI;
     }
 
     /**
