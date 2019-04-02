@@ -5,7 +5,11 @@
         <div class="row">
             <div class="col-xs-12">
                 <h2>
-                    {{ label.label }}
+                    {% if label.object is not null %}
+                        {{ label.object }} label
+                    {% else %}
+                        label
+                    {% endif %}
                     <a href="{{ app.request.headers.get('referer') }}#identification"
                        class="pull-right btn btn-link"
                        role="button">
