@@ -668,7 +668,9 @@
                     {% for profile in class.profiles %}
                         <tr>
                             <td>
-                                <a href="#">
+                                <a href="{{ path('label_show', {
+                                    'id': label.id
+                                }) }}">
                                     {{ profile.standardLabel }}
                                 </a>
                             </td>
