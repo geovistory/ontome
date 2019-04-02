@@ -148,6 +148,7 @@ class TextProperty implements GroupSequenceProviderInterface
     public function __construct()
     {
         $this->namespaces = new ArrayCollection();
+        $this->comments = new ArrayCollection();
     }
 
     /**

@@ -125,6 +125,7 @@ class Label
     public function __construct()
     {
         $this->namespaces = new ArrayCollection();
+        $this->comments = new ArrayCollection();
     }
 
     /**
