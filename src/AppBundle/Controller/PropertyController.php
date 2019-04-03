@@ -35,8 +35,14 @@ class PropertyController extends Controller
     {
         $em = $this->getDoctrine()->getManager();
 
-        $properties = $em->getRepository('AppBundle:Property')
-            ->findAllOrderedById();
+        if (!is_null($this->getUser())) {
+            $properties = $em->getRepository('AppBundle:Property')
+                ->findAllOrderedById();
+        }
+        else{
+            $properties = $em->getRepository('AppBundle:Property')
+                ->findFilteredByPublicProjectOrderedById();
+        }
 
         return $this->render('property/list.html.twig', [
             'properties' => $properties

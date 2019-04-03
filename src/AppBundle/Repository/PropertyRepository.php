@@ -33,6 +33,22 @@ class PropertyRepository extends EntityRepository
     }
 
     /**
+     * @return Property[]
+     */
+    public function findFilteredByPublicProjectOrderedById()
+    {
+        return $this->createQueryBuilder('property')
+            ->join('property.namespaces','nspc')
+            ->join('nspc.projects', 'prj')
+            ->addSelect('nspc')
+            ->leftJoin('nspc.referencedVersion', 'referencedVersion')
+            ->addSelect('referencedVersion')
+            ->orderBy('property.id','DESC')
+            ->getQuery()
+            ->execute();
+    }
+
+    /**
      * @param OntoClass $class
      * @return array
      */

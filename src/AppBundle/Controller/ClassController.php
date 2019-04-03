@@ -33,7 +33,6 @@ class ClassController extends Controller
         $em = $this->getDoctrine()->getManager();
 
         if (!is_null($this->getUser())) {
-
             $classes = $em->getRepository('AppBundle:OntoClass')
                 ->findAllOrderedById();
         }
