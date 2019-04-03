@@ -5,16 +5,7 @@
 {% block body %}
 
     <div class="container">
-        <h2 class="class-name">
-            {{ namespace }}
-            {% if is_granted('edit_manager', namespace) %}
-                <a href="{{ path('namespace_edit', {
-                    id: namespace.id
-                }) }}" class="pull-right btn btn-success btn-edit">
-                    <i class="fa fa-edit"></i>
-                </a>
-            {% endif %}
-        </h2>
+        <h2 class="class-name">{{ namespace }}</h2>
         <ul class="nav nav-tabs">
             <li class="active"><a data-toggle="tab" href="#summary">Summary</a></li>
             <li><a data-toggle="tab" href="#definition">Definition</a></li>
@@ -110,8 +101,20 @@
             </div>
             <div id="identification" class="tab-pane fade">
                 <h3>Identification</h3>
-                <p>OntoME URI: {{ namespace.namespaceURI }}</p>
-                <p>Original URI: {{ namespace.originalNamespaceUri|default('<i>No original URI yet.</i>')|raw }}</p>
+                {{ form_start(namespaceForm) }}
+                    {{ form_errors(namespaceForm) }}
+                    {{ form_row(namespaceForm.namespaceURI) }}
+                    {{ form_row(namespaceForm.originalNamespaceURI) }}
+                    <button type="submit" class="btn btn-primary" formnovalidate>Save <span class="far fa-save"></span></button>
+                    <a href="{{ path('namespace_show', {
+                        id: namespace.id,
+                        '_fragment': 'identification'
+                    }) }}"
+                       class="btn btn-default"
+                       role="button">
+                        Back <i class="fas fa-arrow-left"></i>
+                    </a>
+                {{ form_end(namespaceForm) }}
                 {% if namespace.projectForTopLevelNamespace is not null %}
                 <p>
                     Project: <a href="{{ path('project_show', {

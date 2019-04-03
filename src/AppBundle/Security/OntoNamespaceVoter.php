@@ -16,11 +16,12 @@ use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 class OntoNamespaceVoter extends Voter
 {
     const EDIT = 'edit';
+    const EDITMANAGER = 'edit_manager';
 
     protected function supports($attribute, $subject)
     {
         // if the attribute isn't one we support, return false
-        if (!in_array($attribute, array(self::EDIT))) {
+        if (!in_array($attribute, array(self::EDIT, self::EDITMANAGER))) {
             return false;
         }
 
@@ -47,6 +48,8 @@ class OntoNamespaceVoter extends Voter
         switch ($attribute) {
             case self::EDIT:
                 return $this->canEdit($namespace, $user);
+            case self::EDITMANAGER:
+                return $this->canEditManager($namespace, $user);
         }
 
         throw new \LogicException('This code should not be reached!');
@@ -64,6 +67,24 @@ class OntoNamespaceVoter extends Voter
                 return false;
             }
             else if($userProjectAssociation->getProject() === $namespace->getProjectForTopLevelNamespace() && $userProjectAssociation->getPermission() === 1){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * @param OntoNamespace $namespace
+     * @param User $user
+     * @return bool TRUE if $user and $namespace have matching namespace (thanks to the $userProjectAssociation) and $user is a project manager
+     */
+    private function canEditManager(OntoNamespace $namespace, User $user)
+    {
+        foreach($user->getUserProjectAssociations()->getIterator() as $i => $userProjectAssociation) {
+            if(!$namespace->getisOngoing()) {
+                return false;
+            }
+            else if($userProjectAssociation->getProject() === $namespace->getProjectForTopLevelNamespace() && $userProjectAssociation->getPermission() === 2){
                 return true;
             }
         }
