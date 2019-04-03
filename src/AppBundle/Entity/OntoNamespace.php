@@ -36,9 +36,8 @@ class OntoNamespace
     private $namespaceURI;
 
     /**
-     * @Assert\NotBlank()
      * @Assert\Url()
-     * @ORM\Column(type="text", nullable=false, unique=true)
+     * @ORM\Column(type="text", nullable=true, unique=true)
      */
     private $originalNamespaceURI;
 
