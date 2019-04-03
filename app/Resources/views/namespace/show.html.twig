@@ -102,7 +102,7 @@
             <div id="identification" class="tab-pane fade">
                 <h3>Identification</h3>
                 <p>OntoME URI: {{ namespace.namespaceURI }}</p>
-                <p>Original URI: WIP</p>
+                <p>Original URI: {{ namespace.originalNamespaceUri|default('<i>No original URI yet.</i>')|raw }}</p>
                 {% if namespace.projectForTopLevelNamespace is not null %}
                 <p>
                     Project: <a href="{{ path('project_show', {
