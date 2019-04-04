@@ -10,11 +10,13 @@ namespace AppBundle\Controller;
 
 use AppBundle\Entity\OntoNamespace;
 use AppBundle\Entity\Profile;
+use AppBundle\Form\NamespaceForm;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 
 class NamespaceController  extends Controller
 {
@@ -45,6 +47,45 @@ class NamespaceController  extends Controller
         return $this->render('namespace/show.html.twig', array(
             'namespace' => $namespace
         ));
+    }
+
+    /**
+     * @Route("/namespace/{id}/edit", name="namespace_edit")
+     * @param string $namespace
+     * @return Response the rendered template
+     */
+    public function editAction(OntoNamespace $namespace, Request $request)
+    {
+        if(is_null($namespace))
+        {
+            throw $this->createNotFoundException('The namespace n° '.$namespace->getId().' does not exist. Please contact an administrator.');
+        }
+
+        $this->denyAccessUnlessGranted('edit_manager', $namespace);
+
+        $namespace->setModifier($this->getUser());
+
+        $form = $this->createForm(NamespaceForm::class, $namespace);
+
+        $em = $this->getDoctrine()->getManager();
+
+        $form->handleRequest($request);
+        if ($form->isValid()) {
+            $namespace->setModifier($this->getUser());
+            $em->persist($namespace);
+            $em->flush();
+
+            $this->addFlash('success', 'Namespace Updated!');
+
+            return $this->redirectToRoute('namespace_edit', [
+                'id' => $namespace->getId()
+            ]);
+        }
+
+        return $this->render('namespace/edit.html.twig', [
+            'namespaceForm' => $form->createView(),
+            'namespace' => $namespace
+        ]);
     }
 
     /**
