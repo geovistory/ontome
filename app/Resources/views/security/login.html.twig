@@ -26,3 +26,12 @@
     </div>
 </div>
 {% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        $(function() {
+            $('input[name=_target_path]').attr('value', $('input[name=_target_path]').attr('value')+window.location.hash);
+        });
+    </script>
+{% endblock %}

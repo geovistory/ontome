@@ -56,6 +56,17 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator
 
     public function getCredentials(Request $request)
     {
+        if(!is_null($request->request->get('_target_path')))
+        {
+            $session = $request->getSession();
+            $referer = $request->request->get('_target_path');
+
+            if(explode("#", basename($referer))[0] != 'login')
+            {
+                $session->set('trueReferer', $referer);
+            }
+        }
+
         $isLoginSubmit = $request->getPathInfo() === '/login' && $request->isMethod('POST');
         if (!$isLoginSubmit) {
             //skip authentication
@@ -100,10 +111,18 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, $providerKey)
     {
-        $targetPath = $this->getTargetPath($request->getSession(), $providerKey);
+        $session = $request->getSession();
+        $targetPath = null;
 
-        if(!$targetPath && $request->request->get('_target_path')) {
-            $targetPath = $request->request->get('_target_path');
+        if(is_null($session->get('trueReferer')))
+        {
+            if($request->request->get('_target_path')) {
+                $targetPath = $request->request->get('_target_path');
+            }
+        }
+        else
+        {
+            $targetPath = $session->get('trueReferer');
         }
 
         if (!$targetPath) {
@@ -112,5 +131,4 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator
 
         return new RedirectResponse($targetPath);
     }
-
 }

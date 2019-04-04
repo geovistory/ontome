@@ -175,6 +175,10 @@
             $('a.btn-edit').click(function(){
                 $('a.btn-edit').attr('href', $('a.btn-edit').attr('href')+window.location.hash);
             });
+
+            $('ul.navi a').click(function(){
+                $('ul.navi a').attr('href', $('ul.navi a').attr('href')+window.location.hash);
+            })
         });
     </script>
 {% endblock %}
