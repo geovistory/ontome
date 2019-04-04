@@ -140,25 +140,19 @@
                 </thead>
                 <tbody>
                 {% for class in classes %}
-                <tr>
-                    <td>
-                        <a href="{{ path('class_show', {
+                    <tr>
+                        <td>
+                            <a href="{{ path('class_show', {
                                 'id': class.id
                             }) }}">
-                            {{ class.identifierInNamespace }}
-                        </a>
-                    </td>
-                    <td>
-                        <a href="{{ path('class_show', {
-                                'id': class.id
-                            }) }}">
-                            {{ class.standardLabel }}</td>
-                    </a>
-                    <td>{{ class.associationType }}</td>
-                    <td>
-                        {{ class.rootNamespace }}
-                    </td>
-                </tr>
+                                {{ class.standardLabel }} – {{ class.identifierInNamespace }}
+                            </a>
+                        </td>
+                        <td>{{ class.associationType }}</td>
+                        <td>
+                            {{ class.rootNamespace }}
+                        </td>
+                    </tr>
                 {% endfor %}
                 </tbody>
             </table>
@@ -175,25 +169,18 @@
                 </thead>
                 <tbody>
                 {% for property in properties %}
-                <tr>
-                    <td>
-                        <a href="{{ path('property_show', {
+                    <tr>
+                        <td>
+                            <a href="{{ path('property_show', {
                                 'id': property.id
                             }) }}">
-                            {{ property.identifierInNamespace }}
-                        </a>
-                    </td>
-                    <td>
-                        <a href="{{ path('property_show', {
-                                'id': property.id
-                            }) }}">
-                            {{ property.standardLabel }}
-                        </a>
-                    </td>
-                    <td>
-                        {{ property.rootNamespace }}
-                    </td>
-                </tr>
+                                {{ property.standardLabel }} – {{ property.identifierInNamespace }}
+                            </a>
+                        </td>
+                        <td>
+                            {{ property.rootNamespace }}
+                        </td>
+                    </tr>
                 {% endfor %}
                 </tbody>
             </table>

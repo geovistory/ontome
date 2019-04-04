@@ -384,7 +384,7 @@
                 <table class="table table-striped" id="parent-classes-table">
                     <thead>
                     <tr>
-                        <th>Class identifier</th>
+                        <th>Class</th>
                         <th>Justification</th>
                         <th>Root namespace</th>
                         <th>
@@ -404,7 +404,11 @@
                                     'id': association.parentClass.id,
                                     '_fragment': 'class-hierarchy'
                                 }) }}">
-                                    {{ association.parentClass }}
+                                    {% if association.parentClass.identifierInNamespace != association.parentClass.standardLabel and association.parentClass.standardLabel is not null %}
+                                        {{ association.parentClass.identifierInNamespace }} {{ association.parentClass.standardLabel }}
+                                    {% else %}
+                                        {{ association.parentClass.standardLabel }}
+                                    {% endif %}
                                 </a>
                             </td>
                             <td>
@@ -449,7 +453,7 @@
                 <table class="table table-striped" id="ancestors-table">
                     <thead>
                     <tr>
-                        <th>Class identifier</th>
+                        <th>Class</th>
                         <th>Depth</th>
                         <th>Root namespace</th>
                     </tr>
@@ -701,7 +705,9 @@
                     {% for profile in class.profiles %}
                         <tr>
                             <td>
-                                <a href="#">
+                                <a href="{{ path('profile_show', {
+                                    'id': profile.id
+                                }) }}">
                                     {{ profile.standardLabel }}
                                 </a>
                             </td>

@@ -25,8 +25,8 @@
                 <td class="text-nowrap text-right small">
                     {% if property.domain is not null %}
                         <a href="{{ path('class_show', {'id': property.domain.id }) }}">
-                            {% if property.domain.identifierInNamespace != property.domain.standardLabel %}
-                                {{ property.domain.identifierInNamespace }} {{ property.domain.standardLabel }}
+                            {% if property.domain.identifierInNamespace != property.domain.standardLabel and property.domain.standardLabel is not null %}
+                                {{ property.domain.standardLabel }} – {{ property.domain.identifierInNamespace }}
                             {% else %}
                                 {{ property.domain.identifierInNamespace }}
                             {% endif %}
@@ -42,7 +42,11 @@
                     <a href="{{ path('property_show', {
                         'id': property.id
                     }) }}">
-                        {{ property.identifierInNamespace }} {{ property.standardLabel }}
+                        {% if property.identifierInNamespace != property.standardLabel and property.standardLabel is not null %}
+                            {{ property.standardLabel }} – {{ property.identifierInNamespace }}
+                        {% else %}
+                            {{ property.identifierInNamespace }}
+                        {% endif %}
                     </a>
                 </td>
                 <td class="text-nowrap small" style="padding-right: 30px;">
@@ -53,8 +57,8 @@
                 <td class="text-nowrap small">
                     {% if property.range is not null %}
                         <a href="{{ path('class_show', {'id': property.range.id }) }}">
-                            {% if property.range.identifierInNamespace != property.range.standardLabel %}
-                                {{ property.range.identifierInNamespace }} {{ property.range.standardLabel }}
+                            {% if property.range.identifierInNamespace != property.range.standardLabel and property.range.standardLabel is not null %}
+                                {{ property.range.standardLabel }} – {{ property.range.identifierInNamespace }}
                             {% else %}
                                 {{ property.range.identifierInNamespace }}
                             {% endif %}
