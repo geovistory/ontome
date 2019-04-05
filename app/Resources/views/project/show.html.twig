@@ -192,20 +192,18 @@
                 <table class="table table-striped" id="managed-namespaces-table">
                     <thead>
                     <tr>
-                        <th>Namespaces URI</th>
-                        <th>Namespaces identifier</th>
+                        <th>Namespace</th>
                         <th>Last updated</th>
                     </tr>
                     </thead>
                     <tbody>
                     {% for namespace in project.managedNamespaces if namespace.isTopLevelNamespace %}
                         <tr>
-                            <td>{{ namespace.namespaceUri }}</td>
                             <td>
                                 <a href="{{ path('namespace_show', {
                                     'id': namespace.id
                                 }) }}">
-                                    {{ namespace.objectIdentification }}
+                                    {{ namespace }}
                                 </a>
                             </td>
                             <td>{{ namespace.modificationTime|date('Y-m-d') }}</td>

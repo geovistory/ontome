@@ -161,6 +161,12 @@
                                     {% endif %}
                                 </a>
                             </td>
+                            <td>
+                                <a href="{{ path('class_show', {
+                                    'id': class.id
+                                }) }}">
+                                {{ class.standardLabel }}</td>
+                            </a>
                             <td>{{ class.associationType }}</td>
                             <td>
                                 {{ class.rootNamespace }}
@@ -176,7 +182,7 @@
                     <thead>
                     <tr>
                         <th>Property</th>
-                        <th>Namespace URI</th>
+                        <th>Namespace</th>
                     </tr>
                     </thead>
                     <tbody>

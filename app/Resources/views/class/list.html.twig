@@ -13,7 +13,7 @@
         <thead>
         <tr>
             <th>Class name</th>
-            <th>Namespace URI</th>
+            <th>Namespace</th>
             <th>Last updated</th>
         </tr>
         </thead>
@@ -29,7 +29,7 @@
                     </td>
                     <td>
                         {% if class.namespaces|first.referencedVersion is not null %}
-                            {{ class.namespaces|first.referencedVersion.namespaceURI }}
+                            {{ class.namespaces|first.referencedVersion }}
                         {% endif %}
                     </td>
                     <td>{{ class.modificationTime|date('Y-m-d') }}</td>

@@ -418,7 +418,7 @@
                             <td>
                                 {% if association.parentClass.namespaces is not null %}
                                     {% if association.parentClass.namespaces|first.topLevelNamespace is not null %}
-                                        {{ association.parentClass.namespaces|first.topLevelNamespace.namespaceURI }}
+                                        {{ association.parentClass.namespaces|first.topLevelNamespace }}
                                     {% endif %}
                                 {% else %}
                                     WIP

@@ -15,7 +15,7 @@
             <th class="text-center">Property</th>
             <th></th>
             <th>Range</th>
-            <th>Namespace URI</th>
+            <th>Namespace</th>
             <th>Last updated</th>
         </tr>
         </thead>
@@ -53,7 +53,7 @@
                 </td>
                 <td>
                     {% if property.namespaces|first.referencedVersion is not null %}
-                        {{ property.namespaces|first.referencedVersion.namespaceURI }}
+                        {{ property.namespaces|first.referencedVersion }}
                     {% endif %}
                 </td>
                 <td>{{ property.modificationTime|date('Y-m-d') }}</td>
