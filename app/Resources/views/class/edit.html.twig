@@ -404,11 +404,7 @@
                                     'id': association.parentClass.id,
                                     '_fragment': 'class-hierarchy'
                                 }) }}">
-                                    {% if association.parentClass.identifierInNamespace != association.parentClass.standardLabel and association.parentClass.standardLabel is not null %}
-                                        {{ association.parentClass.identifierInNamespace }} {{ association.parentClass.standardLabel }}
-                                    {% else %}
-                                        {{ association.parentClass.standardLabel }}
-                                    {% endif %}
+                                    {{ association.parentClass.invertedLabel }}
                                 </a>
                             </td>
                             <td>
