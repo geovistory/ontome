@@ -192,7 +192,8 @@
                         <th>Scope note</th>
                         <th>Language</th>
                         <th>Namespace</th>
-                        <th>View details and comments</th>
+                        <th>View details</th>
+                        <th>Comments</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -218,6 +219,13 @@
                                     'id': textProperty.id
                                 }) }}">
                                     <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
+                                </a>
+                            </td>
+                            <td>
+                                <a class="btn" href="{{ path('text_property_show', {
+                                    'id': textProperty.id
+                                }) }}#comments">
+                                    <span class="badge">{{ textProperty.comments|length }}</span></a>
                                 </a>
                             </td>
                         </tr>
