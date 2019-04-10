@@ -50,35 +50,39 @@ class OutgoingPropertyQuickAddForm extends AbstractType
             ->add('range')
             ->add('domainMinQuantifier',ChoiceType::class, array(
                 'choices'  => array(
-                    '' => null,
+                    'Min' => null,
                     '0' => 0,
                     '1' => 1,
                     'n' => -1,
                 ),
+                'label' => 'Min'
             ))
             ->add('domainMaxQuantifier',ChoiceType::class, array(
                 'choices'  => array(
-                    '' => null,
+                    'Max' => null,
                     '0' => 0,
                     '1' => 1,
                     'n' => -1,
                 ),
+                'label' => 'Max'
             ))
             ->add('rangeMinQuantifier',ChoiceType::class, array(
                 'choices'  => array(
-                    '' => null,
+                    'Min' => null,
                     '0' => 0,
                     '1' => 1,
                     'n' => -1,
                 ),
+                'label' => 'Min'
             ))
             ->add('rangeMaxQuantifier',ChoiceType::class, array(
                 'choices'  => array(
-                    '' => null,
+                    'Max' => null,
                     '0' => 0,
                     '1' => 1,
                     'n' => -1,
                 ),
+                'label' => 'Max'
             ))
             ->add('textProperties', CollectionType::class, array(
                 'entry_type' => TextPropertyType::class,
