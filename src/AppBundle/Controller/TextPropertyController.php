@@ -80,7 +80,7 @@ class TextPropertyController extends Controller
             $em->persist($textProperty);
             $em->flush();
 
-            $this->addFlash('success', $textProperty->getSystemType().' Updated!');
+            $this->addFlash('success', $textProperty->getSystemType().' updated!');
 
             return $this->redirectToRoute($redirectToRoute, [
                 'id' => $object->getId(),
@@ -217,7 +217,7 @@ class TextPropertyController extends Controller
             $em->persist($textProperty);
             $em->flush();
 
-            $this->addFlash('success',  $textProperty->getSystemType().' Created!');
+            $this->addFlash('success',  $textProperty->getSystemType().' created!');
 
             return $this->redirectToRoute($redirectToRoute, [
                 'id' => $objectId,
