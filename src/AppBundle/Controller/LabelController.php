@@ -147,7 +147,7 @@ class LabelController  extends Controller
             $this->addFlash('success', 'Label created!');
 
             return $this->redirectToRoute($redirectToRoute, [
-                'id' => $object->getId(),
+                'id' => $objectId,
                 '_fragment' => $redirectToRouteFragment
             ]);
 
