@@ -330,7 +330,7 @@
                 <table class="table table-striped" id="namespaces-table">
                     <thead>
                     <tr>
-                        <th>Namespace URI</th>
+                        <th>Namespace</th>
                         <th>Last updated</th>
                     </tr>
                     </thead>
@@ -341,7 +341,7 @@
                                 <a href="{{ path('namespace_show', {
                                     'id': namespace.id
                                 }) }}">
-                                    {{ namespace.namespaceURI }}
+                                    {{ namespace }}
                                 </a>
                             </td>
                             <td>{{ namespace.modificationTime|date('Y-m-d') }}</td>
@@ -404,7 +404,7 @@
                             <td>
                                 {% if association.parentClass.namespaces is not null %}
                                     {% if association.parentClass.namespaces|first.topLevelNamespace is not null %}
-                                        {{ association.parentClass.namespaces|first.topLevelNamespace.namespaceURI }}
+                                        {{ association.parentClass.namespaces|first.topLevelNamespace }}
                                     {% endif %}
                                 {% else %}
                                     WIP
