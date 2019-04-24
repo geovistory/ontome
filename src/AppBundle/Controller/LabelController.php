@@ -39,11 +39,15 @@ class LabelController  extends Controller
     {
         if(!is_null($label->getClass())){
             $object = $label->getClass();
+            $redirectToRoute = 'class_edit';
+            $redirectToRouteFragment = 'identification';
         }
         else if(!is_null($label->getProperty())){
             $object = $label->getProperty();
+            $redirectToRoute = 'property_edit';
+            $redirectToRouteFragment = 'identification';
         }
-        else throw $this->createNotFoundException('The related object for the text property  n° '.$label->getId().' does not exist. Please contact an administrator.');
+        else throw $this->createNotFoundException('The related object for the label n° '.$label->getId().' does not exist. Please contact an administrator.');
 
         $this->denyAccessUnlessGranted('edit', $object);
 
@@ -58,10 +62,11 @@ class LabelController  extends Controller
             $em->persist($label);
             $em->flush();
 
-            $this->addFlash('success', 'Label Updated!');
+            $this->addFlash('success', 'Label updated!');
 
-            return $this->redirectToRoute('label_edit', [
-                'id' => $label->getId()
+            return $this->redirectToRoute($redirectToRoute, [
+                'id' => $object->getId(),
+                '_fragment' => $redirectToRouteFragment
             ]);
         }
 
@@ -89,6 +94,8 @@ class LabelController  extends Controller
             }
             $label->setClass($associatedEntity);
             $associatedObject = $associatedEntity;
+            $redirectToRoute = 'class_edit';
+            $redirectToRouteFragment = 'identification';
         }
         else if($object === 'property') {
             $associatedEntity = $em->getRepository('AppBundle:Property')->find($objectId);
@@ -97,6 +104,18 @@ class LabelController  extends Controller
             }
             $label->setProperty($associatedEntity);
             $associatedObject = $associatedEntity;
+            $redirectToRoute = 'property_edit';
+            $redirectToRouteFragment = 'identification';
+        }
+        else if($object === 'property') {
+            $associatedEntity = $em->getRepository('AppBundle:Property')->find($objectId);
+            if (!$associatedEntity) {
+                throw $this->createNotFoundException('The property n° '.$objectId.' does not exist');
+            }
+            $label->setProperty($associatedEntity);
+            $associatedObject = $associatedEntity;
+            $redirectToRoute = 'property_edit';
+            $redirectToRouteFragment = 'identification';
         }
         else throw $this->createNotFoundException('The requested object "'.$object.'" does not exist!');
 
@@ -125,10 +144,11 @@ class LabelController  extends Controller
             $em->persist($label);
             $em->flush();
 
-            $this->addFlash('success', 'Label Created!');
+            $this->addFlash('success', 'Label created!');
 
-            return $this->redirectToRoute('label_edit', [
-                'id' => $label->getId()
+            return $this->redirectToRoute($redirectToRoute, [
+                'id' => $objectId,
+                '_fragment' => $redirectToRouteFragment
             ]);
 
         }
