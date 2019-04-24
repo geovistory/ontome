@@ -475,6 +475,18 @@ class OntoClass
         $this->propertiesAsDomain[] = $property;
     }
 
+    public function getInvertedLabel()
+    {
+        if($this->getIdentifierInNamespace() === $this->getStandardLabel()){
+            $s = $this->getIdentifierInNamespace();
+        }
+        else if(!is_null($this->getStandardLabel())) {
+            $s = $this->getIdentifierInNamespace().' '.$this->getStandardLabel();
+        }
+        else $s = $this->getIdentifierInNamespace();
+        return (string) $s;
+    }
+
     public function __toString()
     {
         if($this->getIdentifierInNamespace() === $this->getStandardLabel()){

@@ -368,7 +368,7 @@
                 <table class="table table-striped" id="parent-classes-table">
                     <thead>
                     <tr>
-                        <th>Class identifier</th>
+                        <th>Class</th>
                         <th>Justification</th>
                         <th>Root namespace</th>
                         <th>
@@ -388,7 +388,7 @@
                                     'id': association.parentClass.id,
                                     '_fragment': 'class-hierarchy'
                                 }) }}">
-                                    {{ association.parentClass }}
+                                    {{ association.parentClass.invertedLabel }}
                                 </a>
                             </td>
                             <td>
@@ -435,7 +435,7 @@
                 <table class="table table-striped" id="ancestors-table">
                     <thead>
                     <tr>
-                        <th>Class identifier</th>
+                        <th>Class</th>
                         <th>Depth</th>
                         <th>Root namespace</th>
                     </tr>
@@ -649,7 +649,7 @@
                                 </a>
                             </td>
                             <td>
-                                {{ class }} (is a
+                                {{ class.invertedLabel }} (is a
                                 <a
                                         href="{{ path('class_show', {
                                             'id': ingoingInheritedProperty.rangeId
@@ -678,8 +678,8 @@
                     {% for profile in class.profiles %}
                         <tr>
                             <td>
-                                <a href="{{ path('label_show', {
-                                    'id': label.id
+                                <a href="{{ path('profile_show', {
+                                    'id': profile.id
                                 }) }}">
                                     {{ profile.standardLabel }}
                                 </a>

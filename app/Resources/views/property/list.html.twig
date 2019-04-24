@@ -25,11 +25,7 @@
                 <td class="text-nowrap text-right small">
                     {% if property.domain is not null %}
                         <a href="{{ path('class_show', {'id': property.domain.id }) }}">
-                            {% if property.domain.identifierInNamespace != property.domain.standardLabel %}
-                                {{ property.domain.identifierInNamespace }} {{ property.domain.standardLabel }}
-                            {% else %}
-                                {{ property.domain.identifierInNamespace }}
-                            {% endif %}
+                            {{ property.domain }}
                         </a>
                     {% endif %}
                 </td>
@@ -39,10 +35,8 @@
                     {% endif %}
                 </td>
                 <td class="text-nowrap text-center">
-                    <a href="{{ path('property_show', {
-                        'id': property.id
-                    }) }}">
-                        {{ property.identifierInNamespace }} {{ property.standardLabel }}
+                    <a href="{{ path('property_show', {'id': property.id}) }}">
+                        {{ property }}
                     </a>
                 </td>
                 <td class="text-nowrap small" style="padding-right: 30px;">
@@ -53,11 +47,7 @@
                 <td class="text-nowrap small">
                     {% if property.range is not null %}
                         <a href="{{ path('class_show', {'id': property.range.id }) }}">
-                            {% if property.range.identifierInNamespace != property.range.standardLabel %}
-                                {{ property.range.identifierInNamespace }} {{ property.range.standardLabel }}
-                            {% else %}
-                                {{ property.range.identifierInNamespace }}
-                            {% endif %}
+                            {{ property.range }}
                         </a>
                     {% endif %}
                 </td>

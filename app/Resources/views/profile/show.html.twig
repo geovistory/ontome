@@ -142,8 +142,7 @@
                 <table class="table table-striped" id="classes-table">
                     <thead>
                     <tr>
-                        <th>Class identifier</th>
-                        <th>Standard label</th>
+                        <th>Class</th>
                         <th>Association type</th>
                         <th>Namespace URI</th>
                     </tr>
@@ -155,15 +154,13 @@
                                 <a href="{{ path('class_show', {
                                     'id': class.id
                                 }) }}">
-                                    {{ class.identifierInNamespace }}
+                                    {% if class.identifierInNamespace != class.standardLabel and class.standardLabel is not null %}
+                                        {{ class.standardLabel }} – {{ class.identifierInNamespace }}
+                                    {% else %}
+                                        {{ class.identifierInNamespace }}
+                                    {% endif %}
                                 </a>
                             </td>
-                            <td>
-                                <a href="{{ path('class_show', {
-                                    'id': class.id
-                                }) }}">
-                                {{ class.standardLabel }}</td>
-                            </a>
                             <td>{{ class.associationType }}</td>
                             <td>
                                 {{ class.rootNamespace }}
@@ -178,8 +175,7 @@
                 <table class="table table-striped" id="properties-table">
                     <thead>
                     <tr>
-                        <th>Property identifier</th>
-                        <th>Standard label</th>
+                        <th>Property</th>
                         <th>Namespace URI</th>
                     </tr>
                     </thead>
@@ -190,14 +186,11 @@
                                 <a href="{{ path('property_show', {
                                     'id': property.id
                                 }) }}">
-                                    {{ property.identifierInNamespace }}
-                                </a>
-                            </td>
-                            <td>
-                                <a href="{{ path('property_show', {
-                                    'id': property.id
-                                }) }}">
-                                    {{ property.standardLabel }}
+                                    {% if property.identifierInNamespace != property.standardLabel and property.standardLabel is not null %}
+                                        {{ property.standardLabel }} – {{ property.identifierInNamespace }}
+                                    {% else %}
+                                        {{ property.identifierInNamespace }}
+                                    {% endif %}
                                 </a>
                             </td>
                             <td>
