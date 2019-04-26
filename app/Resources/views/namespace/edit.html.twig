@@ -151,6 +151,9 @@
                                     'id': label.id
                                 }) }}">
                                     {{ label.label }}
+                                    {% if label.isStandardLabelForLanguage %}
+                                        <span class="glyphicon glyphicon-asterisk" aria-hidden="true" title="Standard label for this language"></span>
+                                    {% endif %}
                                 </a>
                             </td>
                             <td>{{ label.languageIsoCode}}</td>
@@ -159,6 +162,10 @@
                     {% endfor %}
                     </tbody>
                 </table>
+                <p>
+                    <span class="glyphicon glyphicon-asterisk" aria-hidden="true"></span>
+                    : Standard label for this language
+                </p>
             </div>
             <div id="namespace-hierarchy" class="tab-pane fade">
                 <h3>Hierarchy</h3>
