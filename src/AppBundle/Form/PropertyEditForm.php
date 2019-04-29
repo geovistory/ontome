@@ -31,7 +31,7 @@ class PropertyEditForm extends AbstractType
             ->add('range')
             ->add('domainMinQuantifier',ChoiceType::class, array(
                 'choices'  => array(
-                    '' => null,
+                    'Min' => null,
                     '0' => 0,
                     '1' => 1,
                     'n' => -1,
@@ -39,7 +39,7 @@ class PropertyEditForm extends AbstractType
             ))
             ->add('domainMaxQuantifier',ChoiceType::class, array(
                 'choices'  => array(
-                    '' => null,
+                    'Max' => null,
                     '0' => 0,
                     '1' => 1,
                     'n' => -1,
@@ -47,7 +47,7 @@ class PropertyEditForm extends AbstractType
             ))
             ->add('rangeMinQuantifier',ChoiceType::class, array(
                 'choices'  => array(
-                    '' => null,
+                    'Min' => null,
                     '0' => 0,
                     '1' => 1,
                     'n' => -1,
@@ -55,7 +55,7 @@ class PropertyEditForm extends AbstractType
             ))
             ->add('rangeMaxQuantifier',ChoiceType::class, array(
                 'choices'  => array(
-                    '' => null,
+                    'Max' => null,
                     '0' => 0,
                     '1' => 1,
                     'n' => -1,

@@ -36,34 +36,56 @@
                 </h2>
 
                 {{ form_start(propertyForm) }}
-                    {{ form_errors(propertyForm) }}
-                    {% if  property.isManualIdentifier %}
-                        {{ form_row(propertyForm.identifierInNamespace) }}
-                    {% else %}
-                        {{ form_widget(propertyForm.identifierInNamespace, { 'attr': {'style': 'display:none'} }) }}
-                    {% endif %}
-                    {{ form_row(propertyForm.domain) }}
-                    {{ form_row(propertyForm.domainMinQuantifier) }}
-                    {{ form_row(propertyForm.domainMaxQuantifier) }}
-                    {{ form_row(propertyForm.rangeMinQuantifier) }}
-                    {{ form_row(propertyForm.rangeMaxQuantifier) }}
-                    {{ form_row(propertyForm.labels) }}
-
-                    <div class="js-text-property-wrapper"
-                         data-prototype="{{ formMacros.printTextPropertyRow(propertyForm.textProperties.vars.prototype)|e('html_attr') }}"
-                         data-index="{{ propertyForm.textProperties|length }}"
-                    >
-                        {% for textPropertyForm in propertyForm.textProperties %}
-                            {{ formMacros.printTextPropertyRow(textPropertyForm) }}
-                        {% endfor %}
-                        <a href="#" class="js-example-add">
-                            <span class="fa fa-plus-circle"></span>
-                            Add an example
-                        </a>
-
+                {{ form_errors(propertyForm) }}
+                {% if  property.isManualIdentifier %}
+                    {{ form_row(propertyForm.identifierInNamespace) }}
+                {% else %}
+                    {{ form_widget(propertyForm.identifierInNamespace, { 'attr': {'style': 'display:none'} }) }}
+                {% endif %}
+                {{ form_row(propertyForm.labels) }}
+                <div class="row well well-sm" style="margin: 19px 0;">
+                    <div class="col-lg-2">
+                        <p class="text-center"><label>Domain</label></p>
+                        <p>{{ form_widget(propertyForm.domain) }}</p>
                     </div>
+                    <div class="col-lg-2">
+                        <p class="text-center"><label>Domain quantifiers</label></p>
+                        <div>
+                            {{ form_widget(propertyForm.domainMinQuantifier, {'attr' : {'style': 'background-color: white; width: 49%; float: left;'}}) }}
+                            {{ form_widget(propertyForm.domainMaxQuantifier, {'attr' : {'style': 'background-color: white; width: 49%; float: right;'}}) }}
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <p class="text-center"><label>Property</label></p>
+                        <p id="js-propertyLabel" class="text-center">→ Property Label →</p>
+                    </div>
+                    <div class="col-lg-2">
+                        <p class="text-center"><label>Range quantifiers</label></p>
+                        <div>
+                            {{ form_widget(propertyForm.rangeMinQuantifier, {'attr' : {'style': 'background-color: white; width: 49%; float: left;'}}) }}
+                            {{ form_widget(propertyForm.rangeMaxQuantifier, {'attr' : {'style': 'background-color: white; width: 49%; float: right;'}}) }}
+                        </div>
+                    </div>
+                    <div class="col-lg-2">
+                        <p class="text-center"><label>Range</label></p>
+                        <p class="text-center">{{ app.request.get('class') }}</p>
+                    </div>
+                </div>
+                <div class="js-text-property-wrapper"
+                     data-prototype="{{ formMacros.printTextPropertyRow(propertyForm.textProperties.vars.prototype)|e('html_attr') }}"
+                     data-index="{{ propertyForm.textProperties|length }}"
+                >
+                    {% for textPropertyForm in propertyForm.textProperties %}
+                        {{ formMacros.printTextPropertyRow(textPropertyForm) }}
+                    {% endfor %}
+                    <a href="#" class="js-example-add">
+                        <span class="fa fa-plus-circle"></span>
+                        Add an example
+                    </a>
 
-                    <button type="submit" class="btn btn-primary" formnovalidate>Save</button>
+                </div>
+
+                <button type="submit" class="btn btn-primary" formnovalidate>Save</button>
                 {{ form_end(propertyForm) }}
             </div>
         </div>
@@ -121,6 +143,18 @@
                 $('#ingoing_property_quick_add_form_textProperties_1_modifier').val($('#ingoing_property_quick_add_form_labels_0_creator').val());
                 $('.js-example-add').hide();
                 $('[for=ingoing_property_quick_add_form_textProperties_1_textProperty]').text('Example');
+            });
+
+            $('#ingoing_property_quick_add_form_labels_0_label').keyup(function()
+            {
+                if($('#ingoing_property_quick_add_form_labels_0_label').val() != '')
+                {
+                    $('#js-propertyLabel').text('→ '+$('#ingoing_property_quick_add_form_labels_0_label').val()+' →');
+                }
+                else
+                {
+                    $('#js-propertyLabel').text('→ Property Label →');
+                }
             });
         } );
     </script>
