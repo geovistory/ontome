@@ -172,6 +172,10 @@
                 window.location.hash = e.target.hash;
             });
 
+            $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+                window.scrollTo(0, 0);
+            });
+
             $('a.btn-edit').click(function(){
                 $('a.btn-edit').attr('href', $('a.btn-edit').attr('href')+window.location.hash);
             });

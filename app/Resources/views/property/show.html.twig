@@ -618,12 +618,6 @@
             $('#profiles-table').DataTable();
 
             $('[data-toggle="tooltip"]').tooltip();
-
-            if (location.hash){
-                setTimeout(function(){
-                    window.scrollTo(0, 0);
-                }, 1);
-            }
         } );
     </script>
     {% include 'comment/js-bock.html.twig'  with {'objectType': 'property', 'objectId' : property.id  } %}
