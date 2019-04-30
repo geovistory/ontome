@@ -33,8 +33,8 @@ class TextProperty implements GroupSequenceProviderInterface
     /**
      * @CharacterLength(
      *      groups={"Description"},
-     *      min = 80,
-     *      message = "Your description must be at least 80 characters long",
+     *      min = 40,
+     *      message = "Your description must be at least 40 characters long",
      * )
      * @Assert\NotBlank()
      * @ORM\Column(type="text", nullable=false)
