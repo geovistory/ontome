@@ -97,4 +97,13 @@
 {% block javascripts %}
     {{ parent() }}
     {% include 'comment/js-bock.html.twig'  with {'objectType': 'label', 'objectId' : label.id  } %}
+    <script>
+    $(document).ready(function() {
+        if($('#label_form_isStandardLabelForLanguage').attr('checked'))
+        {
+            console.log("OK");
+            $('#label_form_isStandardLabelForLanguage').prop("disabled", true);
+        }
+    });
+    </script>
 {% endblock %}
