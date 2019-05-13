@@ -28,7 +28,7 @@
             <li><a data-toggle="tab" href="#equivalences">Equivalences</a></li>
             <li><a data-toggle="tab" href="#profiles">Profiles</a></li>
             {%  if property.ongoingNamespace is not null %}
-                <li><a data-toggle="tab" href="#comments">Comments</a></li>
+                <li><a data-toggle="tab" href="#comments">Comments <span class="badge {% if property.comments|length > 0  %}progress-bar-danger {% endif %}">{{ property.comments|length }}</span></a></li>
             {% endif %}
         </ul>
 
@@ -195,7 +195,8 @@
                         <th>Scope note</th>
                         <th>Language</th>
                         <th>Namespace</th>
-                        <th>View details and comments</th>
+                        <th>View details</th>
+                        <th>Comments</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -215,6 +216,13 @@
                                     <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
                                 </a>
                             </td>
+                            <td>
+                                <a class="btn" href="{{ path('text_property_show', {
+                                    'id': textProperty.id
+                                }) }}#comments">
+                                    <span class="badge {% if textProperty.comments|length > 0  %}progress-bar-danger {% endif %}">{{ textProperty.comments|length }}</span>
+                                </a>
+                            </td>
                         </tr>
                     {% endfor %}
                     </tbody>
@@ -227,7 +235,8 @@
                         <th>Example</th>
                         <th>Language</th>
                         <th>Namespace</th>
-                        <th>View details and comments</th>
+                        <th>View details</th>
+                        <th>Comments</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -247,6 +256,13 @@
                                     <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
                                 </a>
                             </td>
+                            <td>
+                                <a class="btn" href="{{ path('text_property_show', {
+                                    'id': textProperty.id
+                                }) }}#comments">
+                                    <span class="badge {% if textProperty.comments|length > 0  %}progress-bar-danger {% endif %}">{{ textProperty.comments|length }}</span>
+                                </a>
+                            </td>
                         </tr>
                     {% endfor %}
                     </tbody>
@@ -259,7 +275,8 @@
                         <th>Notes</th>
                         <th>Language</th>
                         <th>Namespace</th>
-                        <th>View details and comments</th>
+                        <th>View details</th>
+                        <th>Comments</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -277,6 +294,13 @@
                                     'id': textProperty.id
                                 }) }}">
                                     <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
+                                </a>
+                            </td>
+                            <td>
+                                <a class="btn" href="{{ path('text_property_show', {
+                                    'id': textProperty.id
+                                }) }}#comments">
+                                    <span class="badge {% if textProperty.comments|length > 0  %}progress-bar-danger {% endif %}">{{ textProperty.comments|length }}</span>
                                 </a>
                             </td>
                         </tr>
@@ -301,7 +325,8 @@
                         <th>Label</th>
                         <th>Language</th>
                         <th>Last updated</th>
-                        <th>View details and comments</th>
+                        <th>View details</th>
+                        <th>Comments</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -321,6 +346,13 @@
                                     'id': label.id
                                 }) }}">
                                     <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
+                                </a>
+                            </td>
+                            <td>
+                                <a class="btn" href="{{ path('label_show', {
+                                    'id': label.id
+                                }) }}#comments">
+                                    <span class="badge {% if label.comments|length > 0  %}progress-bar-danger {% endif %}">{{ label.comments|length }}</span>
                                 </a>
                             </td>
                         </tr>

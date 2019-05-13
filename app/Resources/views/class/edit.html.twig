@@ -22,7 +22,7 @@
             <li><a data-toggle="tab" href="#equivalences">Equivalences</a></li>
             <li><a data-toggle="tab" href="#profiles">Profiles</a></li>
             <li><a data-toggle="tab" href="#graph">Graph</a></li>
-            <li><a data-toggle="tab" href="#comments">Comments</a></li>
+            <li><a data-toggle="tab" href="#comments">Comments <span class="badge {% if class.comments|length > 0  %}progress-bar-danger {% endif %}">{{ class.comments|length }}</span></a></li>
         </ul>
 
         <div class="tab-content">
@@ -190,6 +190,7 @@
                         <th>Language</th>
                         <th>Namespace</th>
                         <th>Edit</th>
+                        <th>Comments</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -218,6 +219,13 @@
                                     <span class="fa fa-edit"></span>
                                 </a>
                             </td>
+                            <td>
+                                <a class="btn" href="{{ path('text_property_edit', {
+                                    'id': textProperty.id
+                                }) }}#comments">
+                                    <span class="badge {% if textProperty.comments|length > 0  %}progress-bar-danger {% endif %}">{{ textProperty.comments|length }}</span>
+                                </a>
+                            </td>
                         </tr>
                     {% endfor %}
                     </tbody>
@@ -238,6 +246,7 @@
                         <th>Language</th>
                         <th>Namespace</th>
                         <th>Edit</th>
+                        <th>Comments</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -256,6 +265,13 @@
                                 }) }}"
                                    class="btn btn-xs btn-success">
                                     <span class="fa fa-edit"></span>
+                                </a>
+                            </td>
+                            <td>
+                                <a class="btn" href="{{ path('text_property_edit', {
+                                    'id': textProperty.id
+                                }) }}#comments">
+                                    <span class="badge {% if textProperty.comments|length > 0  %}progress-bar-danger {% endif %}">{{ textProperty.comments|length }}</span>
                                 </a>
                             </td>
                         </tr>
@@ -278,6 +294,7 @@
                         <th>Language</th>
                         <th>Namespace</th>
                         <th>Edit</th>
+                        <th>Comments</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -296,6 +313,13 @@
                                 }) }}"
                                    class="btn btn-xs btn-success">
                                     <span class="fa fa-edit"></span>
+                                </a>
+                            </td>
+                            <td>
+                                <a class="btn" href="{{ path('text_property_edit', {
+                                    'id': textProperty.id
+                                }) }}#comments">
+                                    <span class="badge {% if textProperty.comments|length > 0  %}progress-bar-danger {% endif %}">{{ textProperty.comments|length }}</span>
                                 </a>
                             </td>
                         </tr>
@@ -318,6 +342,7 @@
                         <th>Language</th>
                         <th>Last updated</th>
                         <th>Edit</th>
+                        <th>Comments</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -336,6 +361,13 @@
                                 }) }}"
                                    class="btn btn-xs btn-success">
                                     <span class="fa fa-edit"></span>
+                                </a>
+                            </td>
+                            <td>
+                                <a class="btn" href="{{ path('label_edit', {
+                                    'id': label.id
+                                }) }}#comments">
+                                    <span class="badge {% if label.comments|length > 0  %}progress-bar-danger {% endif %}">{{ label.comments|length }}</span>
                                 </a>
                             </td>
                         </tr>
