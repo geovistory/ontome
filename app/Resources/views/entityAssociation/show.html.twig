@@ -1,0 +1,30 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ entityAssociation }}{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+{% endblock %}
+
+{% block body %}
+
+    <div class="container">
+        <h2 class="class-name">
+            {{ entityAssociation }}
+        </h2>
+    </div>
+
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+
+    <script>
+        $(document).ready(function() {
+            $('#justifications-table').DataTable();
+            $('#examples-table').DataTable();
+
+        } );
+    </script>
+
+{% endblock %}

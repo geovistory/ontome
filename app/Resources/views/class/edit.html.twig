@@ -19,7 +19,7 @@
             <li><a data-toggle="tab" href="#identification">Identification</a></li>
             <li><a data-toggle="tab" href="#namespaces">Namespace</a></li>
             <li><a data-toggle="tab" href="#class-hierarchy">Hierarchy</a></li>
-            <li><a data-toggle="tab" href="#equivalences">Equivalences</a></li>
+            <li><a data-toggle="tab" href="#relations">Relations</a></li>
             <li><a data-toggle="tab" href="#profiles">Profiles</a></li>
             <li><a data-toggle="tab" href="#graph">Graph</a></li>
             <li><a data-toggle="tab" href="#comments">Comments <span class="badge {% if class.comments|length > 0  %}progress-bar-danger {% endif %}">{{ class.comments|length }}</span></a></li>
@@ -531,28 +531,26 @@
                     </tbody>
                 </table>
             </div>
-            <div id="equivalences" class="tab-pane fade">
-                <h3>Equivalent classes</h3>
-                <table class="table table-striped" id="equivalences-table">
+            <div id="relations" class="tab-pane fade">
+                <h3>Related classes</h3>
+                <table class="table table-striped" id="relations-table">
                     <thead>
-                    <tr>
-                        <th>Class identifier</th>
-                        <th>Root namespace</th>
-                    </tr>
+                        <tr>
+                            <th>Relation</th>
+                            <th>Class</th>
+                            <th>Justification</th>
+                            <th>Root namespace</th>
+                            <th>View relation</th>
+                        </tr>
                     </thead>
                     <tbody>
-                    {% for equivalence in equivalences|sort %}
                         <tr>
-                            <td>
-                                <a href="{{ path('class_show', {
-                                    'id': equivalence.id
-                                }) }}">
-                                    {{ equivalence.identifier }}
-                                </a>
-                            </td>
-                            <td>{{ equivalence.rootNamespaceLabel }}</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
                         </tr>
-                    {% endfor %}
                     </tbody>
                 </table>
             </div>
@@ -808,7 +806,7 @@
             $('#descendants-table').DataTable({
                 "order": [[ 1, "asc" ]]
             });
-            $('#equivalences-table').DataTable({
+            $('#relations-table').DataTable({
                 "order": [[ 0, "asc" ]]
             });
             $('#outgoing-properties-table').DataTable();

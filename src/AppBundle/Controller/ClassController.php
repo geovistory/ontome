@@ -144,6 +144,9 @@ class ClassController extends Controller
         $equivalences = $em->getRepository('AppBundle:OntoClass')
             ->findEquivalencesById($class);
 
+        $relations = $em->getRepository('AppBundle:OntoClass')
+            ->findRelationsById($class);
+
         $outgoingProperties = $em->getRepository('AppBundle:Property')
             ->findOutgoingPropertiesById($class);
 
@@ -165,6 +168,7 @@ class ClassController extends Controller
             'ancestors' => $ancestors,
             'descendants' => $descendants,
             'equivalences' => $equivalences,
+            'relations' => $relations,
             'outgoingProperties' => $outgoingProperties,
             'outgoingInheritedProperties' => $outgoingInheritedProperties,
             'ingoingProperties' => $ingoingProperties,

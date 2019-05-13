@@ -138,6 +138,70 @@ class ClassRepository extends EntityRepository
     }
 
     /**
+     * @param OntoClass $class
+     * @return array
+     */
+    public function findRelationsById(OntoClass $class){
+        $conn = $this->getEntityManager()
+            ->getConnection();
+
+        $sql = "SELECT
+                ea.pk_entity_association,
+                ea.fk_target_class AS fk_related_class,
+                c.identifier_in_namespace,
+                c.standard_label,
+                st.standard_label AS relation,
+                txtp.pk_text_property,
+                ns.pk_namespace AS \"rootNamespaceId\",
+                ns.standard_label AS \"standardLabelNamespace\"
+                FROM
+                che.entity_association AS ea
+                LEFT JOIN che.system_type AS st
+                ON st.pk_system_type = ea.fk_system_type
+                LEFT JOIN che.class AS c
+                ON ea.fk_target_class = c.pk_class
+                LEFT JOIN (SELECT * FROM che.text_property WHERE fk_text_property_type = 15) AS txtp
+                ON txtp.fk_entity_association = ea.pk_entity_association
+                LEFT JOIN che.associates_namespace AS ans
+                ON ans.fk_entity_association = ea.pk_entity_association
+                LEFT JOIN che.namespace AS ns
+                ON ans.fk_namespace = ns.pk_namespace
+                WHERE
+                ea.fk_system_type IN (4, 18, 19, 20)
+                AND ea.fk_source_class = :class
+                UNION
+                SELECT
+                ea.pk_entity_association,
+                ea.fk_source_class AS fk_related_class,
+                c.identifier_in_namespace,
+                c.standard_label,
+                st.standard_label AS relation,
+                txtp.pk_text_property,
+                ns.pk_namespace AS \"rootNamespaceId\",
+                ns.standard_label AS \"standardLabelNamespace\"
+                FROM
+                che.entity_association AS ea
+                LEFT JOIN che.system_type AS st
+                ON st.pk_system_type = ea.fk_system_type
+                LEFT JOIN che.class AS c
+                ON ea.fk_source_class = c.pk_class
+                LEFT JOIN (SELECT * FROM che.text_property WHERE fk_text_property_type = 15) AS txtp
+                ON txtp.fk_entity_association = ea.pk_entity_association
+                LEFT JOIN che.associates_namespace AS ans
+                ON ans.fk_entity_association = ea.pk_entity_association
+                LEFT JOIN che.namespace AS ns
+                ON ans.fk_namespace = ns.pk_namespace
+                WHERE
+                ea.fk_system_type IN (4, 18, 19, 20)
+                AND ea.fk_target_class = :class";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->execute(array('class' => $class->getId()));
+
+        return $stmt->fetchAll();
+    }
+
+    /**
      * @return array
      */
     public function findClassesTree(){

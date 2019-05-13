@@ -28,7 +28,7 @@
             <li><a data-toggle="tab" href="#identification">Identification</a></li>
             <li><a data-toggle="tab" href="#namespaces">Namespace</a></li>
             <li><a data-toggle="tab" href="#class-hierarchy">Hierarchy</a></li>
-            <li><a data-toggle="tab" href="#equivalences">Equivalences</a></li>
+            <li><a data-toggle="tab" href="#relations">Relations</a></li>
             <li><a data-toggle="tab" href="#profiles">Profiles</a></li>
             <li><a data-toggle="tab" href="#graph">Graph</a></li>
             <li><a data-toggle="tab" href="#comments">Comments <span class="badge {% if class.comments|length > 0  %}progress-bar-danger {% endif %}">{{ class.comments|length }}</span></a></li>
@@ -516,27 +516,38 @@
                     </tbody>
                 </table>
             </div>
-            <div id="equivalences" class="tab-pane fade">
-                <h3>Equivalent classes</h3>
-                <table class="table table-striped" id="equivalences-table">
+            <div id="relations" class="tab-pane fade">
+                <h3>Related classes</h3>
+                <table class="table table-striped" id="relations-table">
                     <thead>
-                    <tr>
-                        <th>Class identifier</th>
-                        <th>Root namespace</th>
-                    </tr>
+                        <tr>
+                            <th>Relation</th>
+                            <th>Class</th>
+                            <th>Justification</th>
+                            <th>Root namespace</th>
+                            <th>View details</th>
+                        </tr>
                     </thead>
                     <tbody>
-                    {% for equivalence in equivalences|sort %}
-                        <tr>
-                            <td>
-                                <a href="{{ path('class_show', {
-                                    'id': equivalence.id
-                                }) }}">
-                                    {{ equivalence.identifier }}
-                                </a>
-                            </td>
-                            <td>{{ equivalence.rootNamespaceLabel }}</td>
-                        </tr>
+                    {% for relation in relations|sort %}
+                    <tr>
+                        <td>{{ relation.relation }}</td>
+                        <td>
+                            <a href="{{ path('class_show', {
+                                'id': relation.fk_related_class
+                            }) }}">
+                                {{ relation.identifier_in_namespace }} - {{ relation.standard_label }}
+                            </a>
+                        </td>
+                        <td>{{ relation.pk_text_property }}</td>
+                        <td>{{ relation.standardLabelNamespace }}</td>
+                        <td> <a href="{{ path('entity_association_show', {
+                                'id': relation.pk_entity_association,
+                                'idClass': class.id
+                            }) }}">
+                                <span class="fa fa-eye"></span>
+                            </a></td>
+                    </tr>
                     {% endfor %}
                     </tbody>
                 </table>
@@ -794,7 +805,7 @@
             $('#descendants-table').DataTable({
                 "order": [[ 1, "asc" ]]
             });
-            $('#equivalences-table').DataTable({
+            $('#relations-table').DataTable({
                 "order": [[ 0, "asc" ]]
             });
             $('#outgoing-properties-table').DataTable();
