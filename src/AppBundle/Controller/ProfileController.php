@@ -74,6 +74,9 @@ class ProfileController  extends Controller
         $classes = $em->getRepository('AppBundle:OntoClass')
             ->findClassesByProfileId($profile);
 
+        $selectableClasses = $em->getRepository('AppBundle:OntoClass')
+            ->findClassesForAssociationWithProfileByProfileId($profile);
+
         $properties = $em->getRepository('AppBundle:Property')
             ->findPropertiesByProfileId($profile);
 
@@ -83,6 +86,7 @@ class ProfileController  extends Controller
         return $this->render('profile/edit.html.twig', array(
             'profile' => $profile,
             'classes' => $classes,
+            'selectableClasses' => $selectableClasses,
             'rootNamespaces' => $rootNamespaces,
             'properties' => $properties
         ));
@@ -145,6 +149,33 @@ class ProfileController  extends Controller
 
         return new JsonResponse(null, 204);
 
+    }
+
+    /**
+     * @Route("/selectable-classes/profile/{profile}/json", name="selectable_classes_profile_json")
+     * @Method("GET")
+     * @param Profile $profile
+     * @return JsonResponse a Json formatted list representation of OntoClasses selectable by Profile
+     */
+    public function getSelectableClassesByProfile(Profile $profile)
+    {
+        try{
+            $em = $this->getDoctrine()->getManager();
+            $classes = $em->getRepository('AppBundle:OntoClass')
+                ->findClassesForAssociationWithProfileByProfileId($profile);
+            $data['data'] = $classes;
+            $data = json_encode($data);
+        }
+        catch (NotFoundHttpException $e) {
+            return new JsonResponse(null,404, 'content-type:application/problem+json');
+        }
+
+        if(empty($classes)) {
+            return new JsonResponse(null,204, array());
+        }
+
+        //return new JsonResponse(null,404, array('content-type'=>'application/problem+json'));
+        return new JsonResponse($data,200, array(), true);
     }
 
 }

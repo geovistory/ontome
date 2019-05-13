@@ -125,9 +125,9 @@ class Profile
 
     /**
      * @ORM\ManyToMany(targetEntity="OntoNamespace",  inversedBy="profiles", fetch="EXTRA_LAZY")
-     * @ORM\JoinTable(schema="che", name="associates_namespace",
+     * @ORM\JoinTable(schema="che", name="associates_referenced_namespace",
      *      joinColumns={@ORM\JoinColumn(name="fk_profile", referencedColumnName="pk_profile")},
-     *      inverseJoinColumns={@ORM\JoinColumn(name="fk_namespace", referencedColumnName="pk_namespace")}
+     *      inverseJoinColumns={@ORM\JoinColumn(name="fk_referenced_namespace", referencedColumnName="pk_namespace")}
      *      )
      */
     private $namespaces;

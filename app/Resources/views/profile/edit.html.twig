@@ -128,33 +128,48 @@
             </table>
         </div>
         <div id="classes" class="tab-pane fade">
-            <h3>Associated classes</h3>
-            <table class="table table-striped" id="classes-table">
-                <thead>
-                <tr>
-                    <th>Class</th>
-                    <th>Association type</th>
-                    <th>Namespace</th>
-                </tr>
-                </thead>
-                <tbody>
-                {% for class in classes %}
-                    <tr>
-                        <td>
-                            <a href="{{ path('class_show', {
-                                'id': class.id
-                            }) }}">
-                                {{ class.standardLabel }} – {{ class.identifierInNamespace }}
-                            </a>
-                        </td>
-                        <td>{{ class.associationType }}</td>
-                        <td>
-                            {{ class.rootNamespace }}
-                        </td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
+            <div class="row">
+                <div class="col-md-6">
+                    <h3>Associated classes</h3>
+                    <table class="table table-striped" id="classes-table">
+                        <thead>
+                        <tr>
+                            <th>Class</th>
+                            <th>Association type</th>
+                            <th>Namespace</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for class in classes %}
+                            <tr>
+                                <td>
+                                    <a href="{{ path('class_show', {
+                                        'id': class.id
+                                    }) }}">
+                                        {{ class.standardLabel }} – {{ class.identifierInNamespace }}
+                                    </a>
+                                </td>
+                                <td>{{ class.associationType }}</td>
+                                <td>
+                                    {{ class.rootNamespace }}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col-md-6">
+                    <h3>Selectable classes</h3>
+                    <table class="table table-striped" id="selectable-classes-table">
+                        <thead>
+                        <tr>
+                            <th>Class</th>
+                            <th>Namespace</th>
+                        </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
         </div>
         <div id="properties" class="tab-pane fade">
             <h3>Associated properties</h3>
@@ -255,8 +270,19 @@
 
 <script>
     $(document).ready(function() {
+        var profileID = {{ profile.id }};
+        var url = '{{ path("selectable_classes_profile_json", {'profile' : 'profileID'}) }}';
+        url = url.replace("profileID", profileID);
         $('#labels-table').DataTable();
         $('#classes-table').DataTable();
+        var selectableClassesTable = $('#selectable-classes-table').DataTable({
+            ajax: url,
+            dataSrc: 'data',
+            columns: [
+                { data: 'standardLabel' },
+                { data: 'rootNamespace' }
+            ]
+        });
         $('#properties-table').DataTable();
         $('#additional-notes-table').DataTable();
         $('#namespaces-table').DataTable();
