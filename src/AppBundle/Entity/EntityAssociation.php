@@ -10,6 +10,7 @@ namespace AppBundle\Entity;
 
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Class EntityAssociation
@@ -48,6 +49,79 @@ class EntityAssociation
      * @ORM\JoinColumn(name="fk_source_property", referencedColumnName="pk_property")
      */
     private $targetProperty;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="SystemType", inversedBy="entityAssociations")
+     * @ORM\JoinColumn(name="fk_system_type", referencedColumnName="pk_system_type")
+     */
+    private $systemType;
+
+    /**
+     * @Assert\NotNull()
+     * @Assert\Valid()
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\TextProperty", mappedBy="entityAssociation", cascade={"persist"})
+     * @ORM\OrderBy({"languageIsoCode" = "ASC"})
+     */
+    private $textProperties;
+
+    /**
+     * @ORM\ManyToMany(targetEntity="OntoNamespace",  inversedBy="EntityAssociation", fetch="EXTRA_LAZY")
+     * @ORM\JoinTable(schema="che", name="associates_namespace",
+     *      joinColumns={@ORM\JoinColumn(name="fk_entity_association", referencedColumnName="pk_entity_association")},
+     *      inverseJoinColumns={@ORM\JoinColumn(name="fk_namespace", referencedColumnName="pk_namespace")}
+     *      )
+     */
+    private $namespaces;
+
+    /**
+     * @return mixed
+     */
+    public function getNamespaces()
+    {
+        return $this->namespaces;
+    }
+
+    /**
+     * @param mixed $namespaces
+     */
+    public function setNamespaces($namespaces)
+    {
+        $this->namespaces = $namespaces;
+    }
+
+
+
+    /**
+     * @return ArrayCollection|TextProperty[]
+     */
+    public function getTextProperties()
+    {
+        return $this->textProperties;
+    }
+
+    /**
+     * @param mixed $textProperties
+     */
+    public function setTextProperties($textProperties)
+    {
+        $this->textProperties = $textProperties;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getSystemType()
+    {
+        return $this->systemType;
+    }
+
+    /**
+     * @param mixed $systemType
+     */
+    public function setSystemType($systemType)
+    {
+        $this->systemType = $systemType;
+    }
 
     /**
      * @ORM\Column(type="boolean")
@@ -154,6 +228,32 @@ class EntityAssociation
             $temp = $this->sourceClass;
             $this->sourceClass = $this->targetClass;
             $this->targetClass = $temp;
+        }
+    }
+
+    public function getSource()
+    {
+        if($this->getSourceClass() != null)
+        {
+            return $this->getSourceClass();
+        }
+
+        if($this->getSourceProperty() != null)
+        {
+            return $this->getSourceProperty();
+        }
+    }
+
+    public function getTarget()
+    {
+        if($this->getTargetClass() != null)
+        {
+            return $this->getTargetClass();
+        }
+
+        if($this->getTargetProperty() != null)
+        {
+            return $this->getTargetProperty();
         }
     }
 }

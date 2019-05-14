@@ -168,6 +168,28 @@ class OntoNamespace
     private $classAssociations;
 
     /**
+     * @ORM\ManyToMany(targetEntity="EntityAssociation", mappedBy="namespaces")
+     * @ORM\OrderBy({"id" = "ASC"})
+     */
+    private $entityAssociations;
+
+    /**
+     * @return mixed
+     */
+    public function getEntityAssociations()
+    {
+        return $this->entityAssociations;
+    }
+
+    /**
+     * @param mixed $entityAssociations
+     */
+    public function setEntityAssociations($entityAssociations)
+    {
+        $this->entityAssociations = $entityAssociations;
+    }
+
+    /**
      * @ORM\ManyToMany(targetEntity="PropertyAssociation", mappedBy="namespaces")
      * @ORM\OrderBy({"id" = "ASC"})
      */

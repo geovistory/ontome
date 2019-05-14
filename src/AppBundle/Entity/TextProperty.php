@@ -94,6 +94,14 @@ class TextProperty implements GroupSequenceProviderInterface
     private $classAssociation;
 
     /**
+     * @ORM\ManyToOne(targetEntity="EntityAssociation", inversedBy="textProperties")
+     * @ORM\JoinColumn(name="fk_entity_association", referencedColumnName="pk_entity_association")
+     * @Assert\Type(type="AppBundle\Entity\EntityAssociation")
+     * @Assert\Valid()
+     */
+    private $entityAssociation;
+
+    /**
      * @ORM\ManyToOne(targetEntity="PropertyAssociation", inversedBy="textProperties")
      * @ORM\JoinColumn(name="fk_is_subproperty_of", referencedColumnName="pk_is_subproperty_of")
      * @Assert\Type(type="AppBundle\Entity\PropertyAssociation")
@@ -448,6 +456,22 @@ class TextProperty implements GroupSequenceProviderInterface
     public function setModificationTime($modificationTime)
     {
         $this->modificationTime = $modificationTime;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getEntityAssociation()
+    {
+        return $this->entityAssociation;
+    }
+
+    /**
+     * @param mixed $entityAssociation
+     */
+    public function setEntityAssociation($entityAssociation)
+    {
+        $this->entityAssociation = $entityAssociation;
     }
 
 

@@ -165,7 +165,7 @@ class ClassRepository extends EntityRepository
                 LEFT JOIN che.associates_namespace AS ans
                 ON ans.fk_entity_association = ea.pk_entity_association
                 LEFT JOIN che.namespace AS ns
-                ON ans.fk_namespace = ns.pk_namespace
+                ON ns.pk_namespace= che.get_root_namespace(ans.fk_namespace)
                 WHERE
                 ea.fk_system_type IN (4, 18, 19, 20)
                 AND ea.fk_source_class = :class
@@ -190,7 +190,7 @@ class ClassRepository extends EntityRepository
                 LEFT JOIN che.associates_namespace AS ans
                 ON ans.fk_entity_association = ea.pk_entity_association
                 LEFT JOIN che.namespace AS ns
-                ON ans.fk_namespace = ns.pk_namespace
+                ON ns.pk_namespace= che.get_root_namespace(ans.fk_namespace)
                 WHERE
                 ea.fk_system_type IN (4, 18, 19, 20)
                 AND ea.fk_target_class = :class";

@@ -19,7 +19,8 @@ class EntityAssociationController extends Controller
     /**
      * @Route("/entity-association/{id}", name="entity_association_show")
      * @Route("/entity-association/{id}/{idClass}", name="entity_association_show")
-     * @param EntityAssociation $entityAssociation, $idClass
+     * @param EntityAssociation $entityAssociation
+     * @param $idClass
      * @return Response the rendered template
      */
     public function showAction(EntityAssociation $entityAssociation, $idClass=null)
@@ -29,9 +30,9 @@ class EntityAssociationController extends Controller
             $entityAssociation->inverseClasses();
         }
 
-        return $this->render('entityAssociation/show.html.twig', [
+        return $this->render('entityAssociation/show.html.twig', array(
             'entityAssociation' => $entityAssociation
-        ]);
+        ));
 
     }
 }

@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}{{ entityAssociation }}{% endblock %}
+{% block title %}{{ entityAssociation.source }}: {{ entityAssociation.systemType.standardLabel }}{% endblock %}
 
 {% block stylesheets %}
     {{ parent() }}
@@ -10,8 +10,140 @@
 
     <div class="container">
         <h2 class="class-name">
-            {{ entityAssociation }}
+            {{ entityAssociation.source }}: {{ entityAssociation.systemType.standardLabel }}
+            <a href="{{ path('class_show', {
+                id: entityAssociation.source.id,
+                '_fragment': "relations"
+            }) }}" class="pull-right btn btn-link">
+                <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
+            </a>
         </h2>
+
+        <ul class="nav nav-tabs" id="main-tabs">
+            <li class="active"><a data-toggle="tab" href="#justifications">Related class and justifications</a></li>
+        </ul>
+
+        <div class="tab-content">
+            <div id="justifications" class="tab-pane fade in active">
+                <h3>Related class</h3>
+                <h4>
+                    <a href="{{ path('class_show', {
+                        'id': entityAssociation.target.id
+                    }) }}">{{ entityAssociation.target }}
+                    </a>
+                </h4>
+                <h3>Relation</h3>
+                <h4>{{ entityAssociation.systemType.standardLabel }}</h4>
+                <h3>Namespace</h3>
+                <h4>
+                    {% for ns in entityAssociation.namespaces %}
+                        {{ ns.topLevelNamespace.standardLabel }}
+                    {% endfor %}
+                </h4>
+                {% if is_granted('edit', entityAssociation) %}
+                    <div class="pull-right add-div">
+                        <a href="{{ path('text_property_new', {'type': 'justification', 'object': 'entity-association', 'objectId': entityAssociation.id })}}"
+                           class="btn btn-primary pull-right">
+                            Add <span class="fa fa-plus-circle"></span>
+                        </a>
+                    </div>
+                {% endif %}
+                <h3>Justification</h3>
+                <table class="table table-striped" id="justifications-table">
+                    <thead>
+                    <tr>
+                        <th>Show</th>
+                        <th>Justification</th>
+                        <th>Language</th>
+                        <th>Namespace</th>
+                        {% if is_granted('edit', entityAssociation) %}
+                            <th>Edit</th>
+                        {% endif %}
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for textProperty in entityAssociation.textProperties %}test
+                    {% endfor %}
+                    {% for textProperty in entityAssociation.textProperties if textProperty.systemType.id == 15 %}
+                        {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
+                        <tr>
+                            <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
+                            <td class="truncated-text">
+                                <span>{{ textProperty.textProperty|striptags|raw }}</span>
+                            </td>
+                            <td>{{ textProperty.languageIsoCode}}</td>
+                            <td>
+                                <!-- {% if textProperty.namespace is not null %}
+                                    {% for label in textProperty.namespace.topLevelNamespace.labels %}
+                                        {% if label.isStandardLabelForLanguage == true and label.languageIsoCode == 'en' %}
+                                            {{ label.label }}
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endif %} -->
+                            </td>
+                            {% if is_granted('edit', entityAssociation) %}
+                                <td>
+                                    <a href="{{ path('text_property_edit', {
+                                        'id': textProperty.id
+                                    }) }}"
+                                       class="btn btn-xs btn-success">
+                                        <span class="fa fa-edit"></span>
+                                    </a>
+                                </td>
+                            {% endif %}
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+
+                {% if is_granted('edit', entityAssociation) %}
+                    <div class="pull-right add-div">
+                        <a href="{{ path('text_property_new', {'type': 'example', 'object': 'entity-association', 'objectId': entityAssociation.id })}}"
+                           class="btn btn-primary pull-right">
+                            Add <span class="fa fa-plus-circle"></span>
+                        </a>
+                    </div>
+                {% endif %}
+                <h3>Examples</h3>
+                <table class="table table-striped" id="examples-table">
+                    <thead>
+                    <tr>
+                        <th>Show</th>
+                        <th>Example</th>
+                        <th>Language</th>
+                        <th>Namespace</th>
+                        {% if is_granted('edit', entityAssociation) %}
+                            <th>Edit</th>
+                        {% endif %}
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for textProperty in entityAssociation.textProperties if textProperty.systemType.id == 7 %}
+                        {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
+                        <tr>
+                            <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
+                            <td class="truncated-text">
+                                <span>{{ textProperty.textProperty|striptags|raw }}</span>
+                            </td>
+                            <td>{{ textProperty.languageIsoCode}}</td>
+                            <td>WIP</td>
+                            {% if is_granted('edit', entityAssociation) %}
+                                <td>
+                                    <a href="{{ path('text_property_edit', {
+                                        'id': textProperty.id
+                                    }) }}"
+                                       class="btn btn-xs btn-success">
+                                        <span class="fa fa-edit"></span>
+                                    </a>
+                                </td>
+                            {% endif %}
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            </div>
+        </div>
     </div>
 
 {% endblock %}
