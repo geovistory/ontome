@@ -315,7 +315,7 @@ class Profile
 
     public function addClass(OntoClass $class)
     {
-        if ($this->namespaces->contains($class)) {
+        if ($this->classes->contains($class)) {
             return;
         }
         $this->classes[] = $class;

@@ -131,36 +131,21 @@
             <div class="row">
                 <div class="col-md-6">
                     <h3>Associated classes</h3>
-                    <table class="table table-striped" id="classes-table">
+                    <table class="table table-striped" id="classes-table" style="width:100%">
                         <thead>
                         <tr>
+                            <th>ID</th>
+                            <th>Identifier in namespace</th>
                             <th>Class</th>
                             <th>Association type</th>
                             <th>Namespace</th>
                         </tr>
                         </thead>
-                        <tbody>
-                        {% for class in classes %}
-                            <tr>
-                                <td>
-                                    <a href="{{ path('class_show', {
-                                        'id': class.id
-                                    }) }}">
-                                        {{ class.standardLabel }} – {{ class.identifierInNamespace }}
-                                    </a>
-                                </td>
-                                <td>{{ class.associationType }}</td>
-                                <td>
-                                    {{ class.rootNamespace }}
-                                </td>
-                            </tr>
-                        {% endfor %}
-                        </tbody>
                     </table>
                 </div>
                 <div class="col-md-6">
                     <h3>Selectable classes</h3>
-                    <table class="table table-striped" id="selectable-classes-table">
+                    <table class="table table-striped" id="selectable-classes-table" style="width:100%">
                         <thead>
                         <tr>
                             <th>Select</th>
@@ -272,13 +257,45 @@
 <script>
     $(document).ready(function() {
         var profileID = {{ profile.id }};
-        var url = '{{ path("selectable_classes_profile_json", {'profile' : 'profileID'}) }}';
-        url = url.replace("profileID", profileID);
+        var urlSelectableClasses = '{{ path("selectable_classes_profile_json", {'profile' : 'profileID'}) }}';
+        urlSelectableClasses = urlSelectableClasses.replace("profileID", profileID);
+
+        var urlAssociatedClasses = '{{ path("associated_classes_profile_json", {'profile' : 'profileID'}) }}';
+        urlAssociatedClasses = urlAssociatedClasses.replace("profileID", profileID);
 
         $('#labels-table').DataTable();
-        $('#classes-table').DataTable();
+        var associatedClassesTable = $('#classes-table').DataTable({
+            ajax: urlAssociatedClasses,
+            dataSrc: 'data',
+            columns: [
+                { data: 'id' },
+                { data: 'identifierInNamespace' },
+                { data: 'standardLabel' },
+                { data: 'associationType' },
+                { data: 'rootNamespace' }
+            ],
+            columnDefs: [
+                {
+                    targets: 2,
+                    render: function ( data, type, row, meta ) {
+                        var urlClass = '{{ path("class_show", {'id' : 'classID'}) }}';
+                        urlClass = urlClass.replace("classID", row.id);
+
+                        var urlRemoveClass = '{{ path("profile_class_disassociation", {'profile' : 'profileID', 'class' : 'classID'}) }}';
+                        urlRemoveClass = urlRemoveClass.replace("profileID", profileID);
+                        urlRemoveClass = urlRemoveClass.replace("classID", row.id);
+
+                        return '<a data-id="'+row.id+'" data-url="'+urlRemoveClass+'" class="remove-class"><span class="glyphicon glyphicon-remove text-danger" aria-hidden="true"></span></a><span class="remove-class-loading-icon" data-id="'+row.id+'" style="display: none"><span class="fas fa-spinner fa-spin"></span></span>&nbsp;<a href="'+urlClass+'">'+data+' – '+row.identifierInNamespace+'</a>';
+                    }
+                },
+                {
+                    visible: false,
+                    targets: [0,1]
+                }
+            ]
+        });
         var selectableClassesTable = $('#selectable-classes-table').DataTable({
-            ajax: url,
+            ajax: urlSelectableClasses,
             dataSrc: 'data',
             columns: [
                 { data: 'classId' },
@@ -292,7 +309,7 @@
                         var urlSelectClass = '{{ path("profile_class_association", {'profile' : 'profileID', 'class' : 'classID'}) }}';
                         urlSelectClass = urlSelectClass.replace("profileID", profileID);
                         urlSelectClass = urlSelectClass.replace("classID", row.classId);
-                        return '<a href="#" data-id="'+row.classId+'" data-url="'+urlSelectClass+'" class="select-class-button"><span class="fas fa-plus"></span></a>&nbsp;' + data;
+                        return '<a data-id="'+row.classId+'" data-url="'+urlSelectClass+'" class="select-class"><span class="plus-icon" data-id="'+row.classId+'"><span class="fas fa-plus"></span></span><span class="select-class-loading-icon" data-id="'+row.classId+'" style="display: none"><span class="fas fa-spinner fa-spin"></span></span></a>&nbsp;' + data;
                     }
                 },
                 {
@@ -410,6 +427,40 @@
                 }
             });
 
+        });
+
+        $(document).on("click", ".select-class", function() {
+            var selectedValue = $(this).data("id");
+            $(".plus-icon[data-id='"+selectedValue+"']").hide(0);
+            $(".select-class-loading-icon[data-id='"+selectedValue+"']").css('display','inline');
+            var url =  $(this).data("url");
+            console.log(url);
+            $.ajax({
+                url: url ,
+                type: 'POST',
+                dataType: 'json',
+                success:function(data){
+                    selectableClassesTable.ajax.reload();
+                    associatedClassesTable.ajax.reload();
+                }
+            });
+        });
+
+        $(document).on("click", ".remove-class", function() {
+            var selectedValue = $(this).data("id");
+            $(".remove-class[data-id='"+selectedValue+"']").hide(0);
+            $(".remove-class-loading-icon[data-id='"+selectedValue+"']").css('display','inline');
+            var url =  $(this).data("url");
+            console.log(url);
+            $.ajax({
+                url: url ,
+                type: 'DELETE',
+                dataType: 'json',
+                success:function(data){
+                    associatedClassesTable.ajax.reload();
+                    selectableClassesTable.ajax.reload();
+                }
+            });
         });
 
 

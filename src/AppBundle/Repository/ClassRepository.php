@@ -228,7 +228,6 @@ class ClassRepository extends EntityRepository
 
         $sql = "SELECT DISTINCT cls.pk_class AS \"classId\",
                         cls.standard_label AS \"standardLabel\",
-                        identifier_in_namespace AS \"identifierInNamespace\" ,
                         rnsp.standard_label AS \"rootNamespace\"
                 FROM che.class cls
                 JOIN che.associates_namespace asnsp ON cls.pk_class = asnsp.fk_class
@@ -237,7 +236,7 @@ class ClassRepository extends EntityRepository
                 JOIN che.namespace rnsp ON rnsp.pk_namespace = nsp.fk_top_level_namespace
                 WHERE arfnsp.fk_profile = :profile
                 EXCEPT
-                SELECT pk_class, class_standard_label, identifier_in_namespace, root_namespace
+                SELECT pk_class, class_standard_label, root_namespace
                 FROM api.v_classes_all_profile_project WHERE pk_profile = :profile;";
         $stmt = $conn->prepare($sql);
         $stmt->execute(array('profile' => $profile->getId()));

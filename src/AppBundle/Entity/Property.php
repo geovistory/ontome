@@ -55,7 +55,7 @@ class Property
     private $standardLabel;
 
     /**
-     * @ORM\ManyToOne(targetEntity="OntoClass")
+     * @ORM\ManyToOne(targetEntity="OntoClass", inversedBy="propertiesAsDomain")
      * @ORM\JoinColumn(name="has_domain", referencedColumnName="pk_class", nullable=false)
      */
     private $domain;

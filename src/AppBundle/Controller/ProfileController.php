@@ -180,6 +180,33 @@ class ProfileController  extends Controller
     }
 
     /**
+     * @Route("/associated-classes/profile/{profile}/json", name="associated_classes_profile_json")
+     * @Method("GET")
+     * @param Profile $profile
+     * @return JsonResponse a Json formatted list representation of OntoClasses selectable by Profile
+     */
+    public function getAssociatedClassesByProfile(Profile $profile)
+    {
+        try{
+            $em = $this->getDoctrine()->getManager();
+            $classes = $em->getRepository('AppBundle:OntoClass')
+                ->findClassesByProfileId($profile);
+            $data['data'] = $classes;
+            $data = json_encode($data);
+        }
+        catch (NotFoundHttpException $e) {
+            return new JsonResponse(null,404, 'content-type:application/problem+json');
+        }
+
+        if(empty($classes)) {
+            return new JsonResponse(null,204, array());
+        }
+
+        //return new JsonResponse(null,404, array('content-type'=>'application/problem+json'));
+        return new JsonResponse($data,200, array(), true);
+    }
+
+    /**
      * @Route("/profile/{profile}/class/{class}/add", name="profile_class_association")
      * @Method({ "POST"})
      * @param OntoClass  $class    The class to be associated with a profile
@@ -199,6 +226,7 @@ class ProfileController  extends Controller
             $profile->addClass($class);
             $em = $this->getDoctrine()->getManager();
             $em->persist($profile);
+            $em->persist($class);
             $em->flush();
             $status = 'Success';
             $message = 'Class successfully associated';
@@ -211,6 +239,25 @@ class ProfileController  extends Controller
         );
 
         return new JsonResponse($response);
+    }
+
+    /**
+     * @Route("/profile/{profile}/class/{class}/delete", name="profile_class_disassociation")
+     * @Method({ "DELETE"})
+     * @param OntoClass  $class    The class to be disassociated from a profile
+     * @param Profile  $profile    The profile to be disassociated from a namespace
+     * @return JsonResponse a Json 204 HTTP response
+     */
+    public function deleteProfileClasseAssociationAction(OntoClass $class, Profile $profile, Request $request)
+    {
+        $this->denyAccessUnlessGranted('edit', $profile);
+
+        $profile->removeClass($class);
+        $em = $this->getDoctrine()->getManager();
+        $em->persist($profile);
+        $em->flush();
+
+        return new JsonResponse(null, 204);
 
     }
 

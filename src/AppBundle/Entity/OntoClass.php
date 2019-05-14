@@ -95,7 +95,7 @@ class OntoClass
 
 
     /**
-     * @ORM\ManyToMany(targetEntity="OntoNamespace",  inversedBy="OntoClass", fetch="EXTRA_LAZY")
+     * @ORM\ManyToMany(targetEntity="OntoNamespace",  inversedBy="classes", fetch="EXTRA_LAZY")
      * @ORM\JoinTable(schema="che", name="associates_namespace",
      *      joinColumns={@ORM\JoinColumn(name="fk_class", referencedColumnName="pk_class")},
      *      inverseJoinColumns={@ORM\JoinColumn(name="fk_namespace", referencedColumnName="pk_namespace")}
@@ -120,7 +120,7 @@ class OntoClass
     private $textProperties;
 
     /**
-     * @ORM\ManyToMany(targetEntity="Profile",  inversedBy="OntoClass", fetch="EXTRA_LAZY")
+     * @ORM\ManyToMany(targetEntity="Profile",  mappedBy="classes", fetch="EXTRA_LAZY")
      * @ORM\JoinTable(schema="che", name="associates_profile",
      *      joinColumns={@ORM\JoinColumn(name="fk_class", referencedColumnName="pk_class")},
      *      inverseJoinColumns={@ORM\JoinColumn(name="fk_profile", referencedColumnName="pk_profile")}
@@ -473,6 +473,14 @@ class OntoClass
             return;
         }
         $this->propertiesAsDomain[] = $property;
+    }
+
+    public function addProfile(Profile $profile)
+    {
+        if ($this->profiles->contains($profile)) {
+            return;
+        }
+        $this->profiles[] = $profile;
     }
 
     public function getInvertedLabel()
