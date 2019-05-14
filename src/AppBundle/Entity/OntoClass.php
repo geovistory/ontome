@@ -141,6 +141,13 @@ class OntoClass
     private $ongoingNamespace;
 
     /**
+     * @Assert\Valid()
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\ProfileAssociation", mappedBy="class", cascade={"persist"})
+     * @ORM\OrderBy({"systemType" = "ASC"})
+     */
+    private $profileAssociations;
+
+    /**
      * @ORM\OneToMany(targetEntity="Property", mappedBy="domain", cascade={"persist"})
      */
     private $propertiesAsDomain;
@@ -359,6 +366,14 @@ class OntoClass
     }
 
     /**
+     * @return ArrayCollection|ProfileAssociation[]
+     */
+    public function getProfileAssociations()
+    {
+        return $this->profileAssociations;
+    }
+
+    /**
      * @return string a human readable identification of the object
      */
     public function getObjectIdentification()
@@ -481,6 +496,16 @@ class OntoClass
             return;
         }
         $this->profiles[] = $profile;
+    }
+
+    public function addProfileAssociation(ProfileAssociation $profileAssociation)
+    {
+        if ($this->profileAssociations->contains($profileAssociation)) {
+            return;
+        }
+        $this->profileAssociations[] = $profileAssociation;
+        // needed to update the owning side of the relationship!
+        $profileAssociation->setClass($this);
     }
 
     public function getInvertedLabel()

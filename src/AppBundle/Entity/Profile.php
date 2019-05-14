@@ -135,6 +135,13 @@ class Profile
      */
     private $namespaces;
 
+    /**
+     * @Assert\Valid()
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\ProfileAssociation", mappedBy="profile", cascade={"persist"})
+     * @ORM\OrderBy({"systemType" = "ASC"})
+     */
+    private $profileAssociations;
+
     public function __construct()
     {
         $this->childProfiles = new ArrayCollection();
@@ -143,6 +150,7 @@ class Profile
         $this->projects = new ArrayCollection();
         $this->namespaces = new ArrayCollection();
         $this->classes = new ArrayCollection();
+        $this->profileAssociations = new ArrayCollection();
     }
 
     /**

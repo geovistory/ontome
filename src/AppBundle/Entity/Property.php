@@ -173,6 +173,13 @@ class Property
     private $labels;
 
     /**
+     * @Assert\Valid()
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\ProfileAssociation", mappedBy="property", cascade={"persist"})
+     * @ORM\OrderBy({"systemType" = "ASC"})
+     */
+    private $profileAssociations;
+
+    /**
      * @ORM\ManyToOne(targetEntity="OntoNamespace")
      * @ORM\JoinColumn(name="fk_ongoing_namespace", referencedColumnName="pk_namespace", nullable=true)
      */
@@ -185,6 +192,7 @@ class Property
         $this->textProperties = new ArrayCollection();
         $this->profiles = new ArrayCollection();
         $this->comments = new ArrayCollection();
+        $this->profileAssociations = new ArrayCollection();
     }
 
     /**
@@ -443,6 +451,15 @@ class Property
     }
 
     /**
+     * @return ArrayCollection|ProfileAssociation[]
+     */
+    public function getProfileAssociations()
+    {
+        return $this->profileAssociations;
+    }
+
+
+    /**
      * @return string a human readable identification of the object
      */
     public function getObjectIdentification()
@@ -605,6 +622,16 @@ class Property
             return;
         }
         $this->namespaces[] = $namespace;
+    }
+
+    public function addProfileAssociation(ProfileAssociation $profileAssociation)
+    {
+        if ($this->profileAssociations->contains($profileAssociation)) {
+            return;
+        }
+        $this->profileAssociations[] = $profileAssociation;
+        // needed to update the owning side of the relationship!
+        $profileAssociation->setProperty($this);
     }
 
     public function getInvertedLabel()

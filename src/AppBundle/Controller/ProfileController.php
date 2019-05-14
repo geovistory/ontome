@@ -11,6 +11,7 @@ namespace AppBundle\Controller;
 use AppBundle\Entity\OntoClass;
 use AppBundle\Entity\OntoNamespace;
 use AppBundle\Entity\Profile;
+use AppBundle\Entity\ProfileAssociation;
 use Doctrine\Common\Collections\ArrayCollection;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
@@ -218,15 +219,39 @@ class ProfileController  extends Controller
     {
         $this->denyAccessUnlessGranted('edit', $profile);
 
-        if ($profile->getClasses()->contains($class)) {
-            $status = 'Error';
-            $message = 'This class is already used by this profile';
+        $em = $this->getDoctrine()->getManager();
+        $profileAssociation = $em->getRepository('AppBundle:ProfileAssociation')
+            ->findOneBy(array('profile' => $profile->getId(), 'class' => $class->getId()));
+
+        if (!is_null($profileAssociation)) {
+            if($profileAssociation->getSystemType()->getId() == 5) {
+                $status = 'Error';
+                $message = 'This class is already used by this profile';
+            }
+            else {
+                $systemType = $em->getRepository('AppBundle:SystemType')->find(5); //systemType 5 = selected
+                $profileAssociation->setSystemType($systemType);
+                $em->persist($profileAssociation);
+
+                $em->flush();
+                $status = 'Success';
+                $message = 'Class successfully re-associated';
+            }
         }
         else {
-            $profile->addClass($class);
             $em = $this->getDoctrine()->getManager();
-            $em->persist($profile);
-            $em->persist($class);
+
+            $profileAssociation = new ProfileAssociation();
+            $profileAssociation->setProfile($profile);
+            $profileAssociation->setClass($class);
+            $systemType = $em->getRepository('AppBundle:SystemType')->find(5); //systemType 5 = selected
+            $profileAssociation->setSystemType($systemType);
+            $profileAssociation->setCreator($this->getUser());
+            $profileAssociation->setModifier($this->getUser());
+            $profileAssociation->setCreationTime(new \DateTime('now'));
+            $profileAssociation->setModificationTime(new \DateTime('now'));
+            $em->persist($profileAssociation);
+
             $em->flush();
             $status = 'Success';
             $message = 'Class successfully associated';
@@ -243,7 +268,7 @@ class ProfileController  extends Controller
 
     /**
      * @Route("/profile/{profile}/class/{class}/delete", name="profile_class_disassociation")
-     * @Method({ "DELETE"})
+     * @Method({ "POST"})
      * @param OntoClass  $class    The class to be disassociated from a profile
      * @param Profile  $profile    The profile to be disassociated from a namespace
      * @return JsonResponse a Json 204 HTTP response
@@ -251,9 +276,19 @@ class ProfileController  extends Controller
     public function deleteProfileClasseAssociationAction(OntoClass $class, Profile $profile, Request $request)
     {
         $this->denyAccessUnlessGranted('edit', $profile);
-
-        $profile->removeClass($class);
         $em = $this->getDoctrine()->getManager();
+
+        /*$profile->removeClass($class);
+        $em->persist($profile);*/
+
+
+        $profileAssociation = $em->getRepository('AppBundle:ProfileAssociation')
+            ->findOneBy(array('profile' => $profile->getId(), 'class' => $class->getId()));
+
+        $systemType = $em->getRepository('AppBundle:SystemType')->find(6); //systemType 6 = rejected
+
+        $profileAssociation->setSystemType($systemType);
+        
         $em->persist($profile);
         $em->flush();
 
