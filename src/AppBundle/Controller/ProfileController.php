@@ -8,6 +8,7 @@
 
 namespace AppBundle\Controller;
 
+use AppBundle\Entity\OntoClass;
 use AppBundle\Entity\OntoNamespace;
 use AppBundle\Entity\Profile;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -108,7 +109,7 @@ class ProfileController  extends Controller
             $status = 'Error';
             $message = 'This namespace is not valid';
         }
-        else if ($profile->getNamespaces()->contains($profile)) {
+        else if ($profile->getNamespaces()->contains($namespace)) {
             $status = 'Error';
             $message = 'This namespace is already used by this profile';
         }
@@ -176,6 +177,41 @@ class ProfileController  extends Controller
 
         //return new JsonResponse(null,404, array('content-type'=>'application/problem+json'));
         return new JsonResponse($data,200, array(), true);
+    }
+
+    /**
+     * @Route("/profile/{profile}/class/{class}/add", name="profile_class_association")
+     * @Method({ "POST"})
+     * @param OntoClass  $class    The class to be associated with a profile
+     * @param Profile  $profile    The profile to be associated with a namespace
+     * @throws \Exception in case of unsuccessful association
+     * @return JsonResponse a Json formatted namespaces list
+     */
+    public function newProfileClassAssociationAction(OntoClass $class, Profile $profile, Request $request)
+    {
+        $this->denyAccessUnlessGranted('edit', $profile);
+
+        if ($profile->getClasses()->contains($class)) {
+            $status = 'Error';
+            $message = 'This class is already used by this profile';
+        }
+        else {
+            $profile->addClass($class);
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($profile);
+            $em->flush();
+            $status = 'Success';
+            $message = 'Class successfully associated';
+        }
+
+
+        $response = array(
+            'status' => $status,
+            'message' => $message
+        );
+
+        return new JsonResponse($response);
+
     }
 
 }

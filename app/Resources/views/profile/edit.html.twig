@@ -163,6 +163,7 @@
                     <table class="table table-striped" id="selectable-classes-table">
                         <thead>
                         <tr>
+                            <th>Select</th>
                             <th>Class</th>
                             <th>Namespace</th>
                         </tr>
@@ -273,14 +274,31 @@
         var profileID = {{ profile.id }};
         var url = '{{ path("selectable_classes_profile_json", {'profile' : 'profileID'}) }}';
         url = url.replace("profileID", profileID);
+
         $('#labels-table').DataTable();
         $('#classes-table').DataTable();
         var selectableClassesTable = $('#selectable-classes-table').DataTable({
             ajax: url,
             dataSrc: 'data',
             columns: [
+                { data: 'classId' },
                 { data: 'standardLabel' },
                 { data: 'rootNamespace' }
+            ],
+            columnDefs: [
+                {
+                    targets: 1,
+                    render: function ( data, type, row, meta ) {
+                        var urlSelectClass = '{{ path("profile_class_association", {'profile' : 'profileID', 'class' : 'classID'}) }}';
+                        urlSelectClass = urlSelectClass.replace("profileID", profileID);
+                        urlSelectClass = urlSelectClass.replace("classID", row.classId);
+                        return '<a href="#" data-id="'+row.classId+'" data-url="'+urlSelectClass+'" class="select-class-button"><span class="fas fa-plus"></span></a>&nbsp;' + data;
+                    }
+                },
+                {
+                    visible: false,
+                    targets: [0]
+                }
             ]
         });
         $('#properties-table').DataTable();
@@ -358,8 +376,7 @@
                         console.log("[API] ERROR: "+data.message);
                     }
                     if(data.status == 'Success'){
-
-
+                        selectableClassesTable.ajax.reload();
                     }
                 }
             });
@@ -384,7 +401,7 @@
                 type: 'DELETE',
                 dataType: 'json',
                 success:function(data){
-
+                    selectableClassesTable.ajax.reload();
                 },
                 statusCode: {
                     204: function () {

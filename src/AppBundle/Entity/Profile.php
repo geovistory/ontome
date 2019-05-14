@@ -107,8 +107,11 @@ class Profile
     private $labels;
 
     /**
-     * @ORM\ManyToMany(targetEntity="OntoClass", mappedBy="profiles")
-     * @ORM\OrderBy({"identifierInNamespace" = "ASC"})
+     * @ORM\ManyToMany(targetEntity="AppBundle\Entity\OntoClass",  inversedBy="profiles", fetch="EXTRA_LAZY")
+     * @ORM\JoinTable(schema="che", name="associates_profile",
+     *      joinColumns={@ORM\JoinColumn(name="fk_profile", referencedColumnName="pk_profile")},
+     *      inverseJoinColumns={@ORM\JoinColumn(name="fk_class", referencedColumnName="pk_class")}
+     *      )
      */
     private $classes;
 
@@ -139,6 +142,7 @@ class Profile
         $this->labels = new ArrayCollection();
         $this->projects = new ArrayCollection();
         $this->namespaces = new ArrayCollection();
+        $this->classes = new ArrayCollection();
     }
 
     /**
@@ -309,8 +313,21 @@ class Profile
         $this->namespaces[] = $namespace;
     }
 
+    public function addClass(OntoClass $class)
+    {
+        if ($this->namespaces->contains($class)) {
+            return;
+        }
+        $this->classes[] = $class;
+    }
+
     public function removeNamespace(OntoNamespace $namespace)
     {
         $this->namespaces->removeElement($namespace);
+    }
+
+    public function removeClass(OntoClass $class)
+    {
+        $this->classes->removeElement($class);
     }
 }
