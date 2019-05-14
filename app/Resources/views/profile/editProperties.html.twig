@@ -1,0 +1,65 @@
+{% extends 'base.html.twig' %}
+{% block body %}
+    <div class="container">
+        <div class="row">
+            <div class="col-xs-12">
+                <h2>
+                    Pick the properties from {{ class }} for the {{ profile }} profile
+                    <a href="{{ path('profile_edit', {
+                        id: profile.id
+                    }) }}#classes"
+                       class="pull-right btn btn-link"
+                       role="button">
+                        <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
+                    </a>
+                </h2>
+                <h3>Outgoing properties (this class is domain)</h3>
+                <table class="table table-striped" id="outgoing-properties-table" style="width: 100%">
+                    <thead>
+                    <tr>
+                        <th>Domain</th>
+                        <th>Property identifier</th>
+                        <th>Range</th>
+                        <th>Associate</th>
+                    </tr>
+                    </thead>
+                </table>
+
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+    $(document).ready(function() {
+        var profileID = {{ profile.id }};
+        var classID = {{ class.id }};
+        var urlSelectableOutgoingProperties = '{{ path("selectable_outgoing_properties_class_profile_json", {'profile' : 'profileID', 'class' : 'classID'}) }}';
+        urlSelectableOutgoingProperties = urlSelectableOutgoingProperties.replace("profileID", profileID);
+        urlSelectableOutgoingProperties = urlSelectableOutgoingProperties.replace("classID", classID);
+        $('#outgoing-properties-table').DataTable({
+            ajax: urlSelectableOutgoingProperties,
+            dataSrc: 'data',
+            columns: [
+                { data: 'domain' },
+                { data: 'property' },
+                { data: 'range' },
+                { data: 'fk_system_type' }
+            ],
+            columnDefs: [
+                {
+                    targets: -1,
+                    render: function ( data, type, row, meta ) {
+                        var checkIcon = '<a><span class="glyphicon glyphicon-unchecked"></span></a>';
+                        if(data != null) {
+                            checkIcon = '<a><span class="glyphicon glyphicon-check"></span></a>';
+                        }
+                        return checkIcon;
+                    }
+                }
+            ]
+        });
+    });
+    </script>
+{% endblock %}

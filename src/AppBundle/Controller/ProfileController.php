@@ -12,7 +12,6 @@ use AppBundle\Entity\OntoClass;
 use AppBundle\Entity\OntoNamespace;
 use AppBundle\Entity\Profile;
 use AppBundle\Entity\ProfileAssociation;
-use Doctrine\Common\Collections\ArrayCollection;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -176,7 +175,6 @@ class ProfileController  extends Controller
             return new JsonResponse(null,204, array());
         }
 
-        //return new JsonResponse(null,404, array('content-type'=>'application/problem+json'));
         return new JsonResponse($data,200, array(), true);
     }
 
@@ -203,7 +201,6 @@ class ProfileController  extends Controller
             return new JsonResponse(null,204, array());
         }
 
-        //return new JsonResponse(null,404, array('content-type'=>'application/problem+json'));
         return new JsonResponse($data,200, array(), true);
     }
 
@@ -294,6 +291,48 @@ class ProfileController  extends Controller
 
         return new JsonResponse(null, 204);
 
+    }
+
+    /**
+     * @Route("/profile/{profile}/class/{class}/properties/edit", name="profile_properties_edit")
+     * @param Profile $profile
+     * @param OntoClass $class
+     * @return Response the rendered template
+     */
+    public function editProfilePropertiesAction(OntoClass $class, Profile $profile)
+    {
+        $this->denyAccessUnlessGranted('edit', $profile);
+        return $this->render('profile/editProperties.html.twig', array(
+            'class' => $class,
+            'profile' => $profile
+        ));
+    }
+
+    /**
+     * @Route("/selectable-outgoing-properties/profile/{profile}/class/{class}/json", name="selectable_outgoing_properties_class_profile_json")
+     * @Method("GET")
+     * @param Profile $profile
+     * @param OntoClass $class
+     * @return JsonResponse a Json formatted list representation of outgoing Properties selectable by Class and Profile
+     */
+    public function getSelectableOutgoingPropertiesByClassAndProfile(OntoClass $class, Profile $profile)
+    {
+        try{
+            $em = $this->getDoctrine()->getManager();
+            $properties = $em->getRepository('AppBundle:Property')
+                ->findOutgoingPropertiesByClassAndProfileId($class, $profile);
+            $data['data'] = $properties;
+            $data = json_encode($data);
+        }
+        catch (NotFoundHttpException $e) {
+            return new JsonResponse(null,404, 'content-type:application/problem+json');
+        }
+
+        if(empty($properties)) {
+            return new JsonResponse(null,204, array());
+        }
+
+        return new JsonResponse($data,200, array(), true);
     }
 
 }

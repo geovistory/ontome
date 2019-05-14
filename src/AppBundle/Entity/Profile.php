@@ -313,6 +313,12 @@ class Profile
         return $this->standardLabel;
     }
 
+    public function __toString()
+    {
+        return $this->standardLabel;
+    }
+
+
     public function addNamespace(OntoNamespace $namespace)
     {
         if ($this->namespaces->contains($namespace)) {

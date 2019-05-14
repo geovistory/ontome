@@ -151,6 +151,7 @@
                             <th>Select</th>
                             <th>Class</th>
                             <th>Namespace</th>
+                            <th>Pick properties</th>
                         </tr>
                         </thead>
                     </table>
@@ -300,7 +301,8 @@
             columns: [
                 { data: 'classId' },
                 { data: 'standardLabel' },
-                { data: 'rootNamespace' }
+                { data: 'rootNamespace' },
+                { data: null }
             ],
             columnDefs: [
                 {
@@ -310,6 +312,16 @@
                         urlSelectClass = urlSelectClass.replace("profileID", profileID);
                         urlSelectClass = urlSelectClass.replace("classID", row.classId);
                         return '<a data-id="'+row.classId+'" data-url="'+urlSelectClass+'" class="select-class"><span class="plus-icon" data-id="'+row.classId+'"><span class="fas fa-plus"></span></span><span class="select-class-loading-icon" data-id="'+row.classId+'" style="display: none"><span class="fas fa-spinner fa-spin"></span></span></a>&nbsp;' + data;
+                    }
+                },
+                {
+                    targets: -1,
+                    "data": null,
+                    render: function ( data, type, row, meta ) {
+                        var urlSelectProperties = '{{ path("profile_properties_edit", {'profile' : 'profileID', 'class' : 'classID'}) }}';
+                        urlSelectProperties = urlSelectProperties.replace("profileID", profileID);
+                        urlSelectProperties = urlSelectProperties.replace("classID", row.classId);
+                        return '<a href="'+urlSelectProperties+'"><span class="glyphicon glyphicon-th-list"></span></a>';
                     }
                 },
                 {
