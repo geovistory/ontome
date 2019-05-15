@@ -102,7 +102,7 @@
         if($('#label_form_isStandardLabelForLanguage').attr('checked'))
         {
             console.log("OK");
-            $('#label_form_isStandardLabelForLanguage').prop("disabled", true);
+            $('#label_form_isStandardLabelForLanguage').attr("onclick", "this.checked=true");
         }
     });
     </script>
