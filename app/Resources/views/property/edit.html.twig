@@ -391,12 +391,9 @@
                     {% for label in property.labels %}
                         <tr>
                             <td>
-                                <a href="#">
-                                    {{ label.label }}
-                                    {% if label.isStandardLabelForLanguage %}
-                                        <span class="glyphicon glyphicon-asterisk" aria-hidden="true" title="Standard label for this language"></span>
-                                    {% endif %}
-                                </a>
+                                <a href="{{ path('label_show', {
+                                    'id': label.id
+                                }) }}">{{ label.label }}</a> {% if label.isStandardLabelForLanguage %}*{% endif %}
                             </td>
                             <td>{{ label.languageIsoCode}}</td>
                             <td>{{ label.modificationTime|date('Y-m-d') }}</td>
