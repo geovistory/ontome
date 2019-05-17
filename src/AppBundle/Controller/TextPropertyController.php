@@ -36,12 +36,12 @@ class TextPropertyController extends Controller
     public function editAction(TextProperty $textProperty, Request $request)
     {
         if(!is_null($textProperty->getClassAssociation())){
-            $object = $textProperty->getClassAssociation()->getChildClass();
+            $object = $textProperty->getClassAssociation();
             $redirectToRoute = 'class_association_edit';
             $redirectToRouteFragment = 'justifications';
         }
         else if(!is_null($textProperty->getPropertyAssociation())){
-            $object = $textProperty->getPropertyAssociation()->getChildProperty();
+            $object = $textProperty->getPropertyAssociation();
             $redirectToRoute = 'property_association_edit';
             $redirectToRouteFragment = 'justifications';
         }
@@ -67,7 +67,15 @@ class TextPropertyController extends Controller
         }
         else throw $this->createNotFoundException('The related object for the text property  n° '.$textProperty->getId().' does not exist. Please contact an administrator.');
 
-        $this->denyAccessUnlessGranted('edit', $object);
+        if(!is_null($textProperty->getClassAssociation())){
+            $this->denyAccessUnlessGranted('edit', $object->getChildClass());
+        }
+        else if(!is_null($textProperty->getPropertyAssociation())){
+            $this->denyAccessUnlessGranted('edit', $object->getChildProperty());
+        }
+        else{
+            $this->denyAccessUnlessGranted('edit', $object);
+        }
 
         $textProperty->setModifier($this->getUser());
 
