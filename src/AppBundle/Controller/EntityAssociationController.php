@@ -12,6 +12,7 @@ namespace AppBundle\Controller;
 use AppBundle\Entity\EntityAssociation;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 class EntityAssociationController extends Controller
@@ -33,6 +34,16 @@ class EntityAssociationController extends Controller
         return $this->render('entityAssociation/show.html.twig', array(
             'entityAssociation' => $entityAssociation
         ));
+    }
 
+    /**
+     * @Route("/entity-association/new/{object}/{objectId}", name="new_entity_association_form")
+     * @param $request
+     * @param $object
+     * @param $objectId
+     */
+    public function newEntityAssociationAction(Request $request, $object, $objectId)
+    {
+        return $this->render('entityAssociation/new.html.twig', array());
     }
 }

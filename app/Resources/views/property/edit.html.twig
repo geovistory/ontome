@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}{{ parent() }} - {{ property }}{% endblock %}
+{% block title %}{{ property }}{% endblock %}
 
 {% block stylesheets %}
     {{ parent() }}
@@ -24,7 +24,7 @@
             <li><a data-toggle="tab" href="#identification">Identification</a></li>
             <li><a data-toggle="tab" href="#namespaces">Namespace</a></li>
             <li><a data-toggle="tab" href="#property-hierarchy">Hierarchy</a></li>
-            <li><a data-toggle="tab" href="#equivalences">Equivalences</a></li>
+            <li><a data-toggle="tab" href="#relations">Relations</a></li>
             <li><a data-toggle="tab" href="#profiles">Profiles</a></li>
             <li><a data-toggle="tab" href="#comments">Comments <span class="badge {% if property.comments|length > 0  %}progress-bar-danger {% endif %}">{{ property.comments|length }}</span></a></li>
         </ul>
@@ -681,9 +681,48 @@
                     </tbody>
                 </table>
             </div>
-            <div id="equivalences" class="tab-pane fade">
-                <h3>Equivalent properties</h3>
-
+            <div id="relations" class="tab-pane fade">
+                {% if is_granted('edit', property) %}
+                    <div class="pull-right add-div">
+                        <a href="{{ path('new_entity_association_form', {
+                            'object': 'property',
+                            'objectId': property.id}) }}" class="btn btn-primary pull-right">Add <span class="fa fa-plus-circle"></span></a>
+                    </div>
+                {% endif %}
+                <h3>Related properties</h3>
+                <table class="table table-striped" id="relations-table">
+                    <thead>
+                    <tr>
+                        <th>Relation</th>
+                        <th>Property</th>
+                        <th>Justification</th>
+                        <th>Root namespace</th>
+                        <th>Edit relations</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for relation in relations|sort %}
+                        <tr>
+                            <td>{{ relation.relation }}</td>
+                            <td>
+                                <a href="{{ path('property_show', {
+                                    'id': relation.fk_related_property
+                                }) }}">
+                                    {{ relation.identifier_in_namespace }} - {{ relation.standard_label }}
+                                </a>
+                            </td>
+                            <td>{{ relation.pk_text_property }}</td>
+                            <td>{{ relation.standardLabelNamespace }}</td>
+                            <td> <a href="{{ path('entity_association_show', {
+                                    'id': relation.pk_entity_association,
+                                    'idProperty': property.id
+                                }) }}" class="btn btn-xs btn-success">
+                                    <span class="fa fa-edit"></span>
+                                </a></td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
             </div>
             <div id="profiles" class="tab-pane fade">
                 <h3>Profiles using this class</h3>
@@ -775,6 +814,7 @@
             $('#descendants-table').DataTable({
                 "order": [[ 5, "asc" ]]
             });
+            $('#relations-table').DataTable();
             $('#profiles-table').DataTable();
 
             $('#property_edit_form_domain').select2({

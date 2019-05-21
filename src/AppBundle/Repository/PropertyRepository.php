@@ -559,7 +559,7 @@ class PropertyRepository extends EntityRepository
                 LEFT JOIN che.namespace AS ns
                 ON ns.pk_namespace= che.get_root_namespace(ans.fk_namespace)
                 WHERE
-                ea.fk_system_type IN (4, 18, 19, 20)
+                ea.fk_system_type IN (18, 20)
                 AND p.pk_property IS NOT NULL
                 AND ea.fk_source_property = :property
                 UNION
@@ -585,7 +585,7 @@ class PropertyRepository extends EntityRepository
                 LEFT JOIN che.namespace AS ns
                 ON ns.pk_namespace= che.get_root_namespace(ans.fk_namespace)
                 WHERE
-                ea.fk_system_type IN (4, 18, 19, 20)
+                ea.fk_system_type IN (18, 20)
                 AND p.pk_property IS NOT NULL
                 AND ea.fk_target_property = :property";
 

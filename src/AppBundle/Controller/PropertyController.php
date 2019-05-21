@@ -226,6 +226,9 @@ class PropertyController extends Controller
         $domainRange = $em->getRepository('AppBundle:Property')
             ->findDomainRangeById($property);
 
+        $relations = $em->getRepository('AppBundle:Property')
+            ->findRelationsById($property);
+
 
         $this->get('logger')
             ->info('Showing property: '.$property->getIdentifierInNamespace());
@@ -236,6 +239,7 @@ class PropertyController extends Controller
             'ancestors' => $ancestors,
             'descendants' => $descendants,
             'domainRange' => $domainRange,
+            'relations' => $relations,
             'propertyForm' => $form->createView()
         ));
     }
