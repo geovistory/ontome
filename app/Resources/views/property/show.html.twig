@@ -25,7 +25,7 @@
             <li><a data-toggle="tab" href="#identification">Identification</a></li>
             <li><a data-toggle="tab" href="#namespaces">Namespace</a></li>
             <li><a data-toggle="tab" href="#property-hierarchy">Hierarchy</a></li>
-            <li><a data-toggle="tab" href="#equivalences">Equivalences</a></li>
+            <li><a data-toggle="tab" href="#relations">Relations</a></li>
             <li><a data-toggle="tab" href="#profiles">Profiles</a></li>
             {%  if property.ongoingNamespace is not null %}
                 <li><a data-toggle="tab" href="#comments">Comments <span class="badge {% if property.comments|length > 0  %}progress-bar-danger {% endif %}">{{ property.comments|length }}</span></a></li>
@@ -621,9 +621,41 @@
                     </tbody>
                 </table>
             </div>
-            <div id="equivalences" class="tab-pane fade">
-                <h3>Equivalent properties</h3>
-
+            <div id="relations" class="tab-pane fade">
+                <h3>Related properties</h3>
+                <table class="table table-striped" id="relations-table">
+                    <thead>
+                    <tr>
+                        <th>Relation</th>
+                        <th>Property</th>
+                        <th>Justification</th>
+                        <th>Root namespace</th>
+                        <th>View details</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for relation in relations|sort %}
+                        <tr>
+                            <td>{{ relation.relation }}</td>
+                            <td>
+                                <a href="{{ path('property_show', {
+                                    'id': relation.fk_related_property
+                                }) }}">
+                                    {{ relation.identifier_in_namespace }} - {{ relation.standard_label }}
+                                </a>
+                            </td>
+                            <td>{{ relation.pk_text_property }}</td>
+                            <td>{{ relation.standardLabelNamespace }}</td>
+                            <td> <a href="{{ path('entity_association_show', {
+                                    'id': relation.pk_entity_association,
+                                    'idProperty': property.id
+                                }) }}">
+                                    <span class="fa fa-eye"></span>
+                                </a></td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
             </div>
             <div id="profiles" class="tab-pane fade">
                 <h3>Profiles using this class</h3>
@@ -715,6 +747,7 @@
             $('#descendants-table').DataTable({
                 "order": [[ 5, "asc" ]]
             });
+            $('#relations-table').DataTable();
             $('#profiles-table').DataTable();
 
             $('[data-toggle="tooltip"]').tooltip();

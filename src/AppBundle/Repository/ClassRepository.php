@@ -169,6 +169,7 @@ class ClassRepository extends EntityRepository
                 WHERE
                 ea.fk_system_type IN (4, 18, 19, 20)
                 AND ea.fk_source_class = :class
+                AND c.pk_class IS NOT NULL
                 UNION
                 SELECT
                 ea.pk_entity_association,
@@ -193,7 +194,8 @@ class ClassRepository extends EntityRepository
                 ON ns.pk_namespace= che.get_root_namespace(ans.fk_namespace)
                 WHERE
                 ea.fk_system_type IN (4, 18, 19, 20)
-                AND ea.fk_target_class = :class";
+                AND ea.fk_target_class = :class
+                AND c.pk_class IS NOT NULL";
 
         $stmt = $conn->prepare($sql);
         $stmt->execute(array('class' => $class->getId()));

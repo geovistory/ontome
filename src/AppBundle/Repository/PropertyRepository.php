@@ -23,11 +23,11 @@ class PropertyRepository extends EntityRepository
     public function findAllOrderedById()
     {
         return $this->createQueryBuilder('property')
-            ->join('property.namespaces','nspc')
+            ->join('property.namespaces', 'nspc')
             ->addSelect('nspc')
             ->leftJoin('nspc.referencedVersion', 'referencedVersion')
             ->addSelect('referencedVersion')
-            ->orderBy('property.id','DESC')
+            ->orderBy('property.id', 'DESC')
             ->getQuery()
             ->execute();
     }
@@ -38,12 +38,12 @@ class PropertyRepository extends EntityRepository
     public function findFilteredByPublicProjectOrderedById()
     {
         return $this->createQueryBuilder('property')
-            ->join('property.namespaces','nspc')
+            ->join('property.namespaces', 'nspc')
             ->join('nspc.projects', 'prj')
             ->addSelect('nspc')
             ->leftJoin('nspc.referencedVersion', 'referencedVersion')
             ->addSelect('referencedVersion')
-            ->orderBy('property.id','DESC')
+            ->orderBy('property.id', 'DESC')
             ->getQuery()
             ->execute();
     }
@@ -52,7 +52,8 @@ class PropertyRepository extends EntityRepository
      * @param OntoClass $class
      * @return array
      */
-    public function findOutgoingPropertiesById(OntoClass $class){
+    public function findOutgoingPropertiesById(OntoClass $class)
+    {
         $conn = $this->getEntityManager()
             ->getConnection();
 
@@ -80,7 +81,8 @@ class PropertyRepository extends EntityRepository
      * @param OntoClass $class
      * @return array
      */
-    public function findOutgoingInheritedPropertiesById(OntoClass $class){
+    public function findOutgoingInheritedPropertiesById(OntoClass $class)
+    {
         $conn = $this->getEntityManager()
             ->getConnection();
 
@@ -109,7 +111,8 @@ class PropertyRepository extends EntityRepository
      * @param OntoClass $class
      * @return array
      */
-    public function findIngoingPropertiesById(OntoClass $class){
+    public function findIngoingPropertiesById(OntoClass $class)
+    {
         $conn = $this->getEntityManager()
             ->getConnection();
 
@@ -138,7 +141,8 @@ class PropertyRepository extends EntityRepository
      * @param OntoClass $class
      * @return array
      */
-    public function findIngoingInheritedPropertiesById(OntoClass $class){
+    public function findIngoingInheritedPropertiesById(OntoClass $class)
+    {
         $conn = $this->getEntityManager()
             ->getConnection();
 
@@ -166,7 +170,8 @@ class PropertyRepository extends EntityRepository
      * @param Property $property
      * @return array
      */
-    public function findAncestorsById(Property $property){
+    public function findAncestorsById(Property $property)
+    {
         $conn = $this->getEntityManager()
             ->getConnection();
 
@@ -232,7 +237,8 @@ class PropertyRepository extends EntityRepository
      * @param Property $property
      * @return array
      */
-    public function findDescendantsById(Property $property){
+    public function findDescendantsById(Property $property)
+    {
         $conn = $this->getEntityManager()
             ->getConnection();
 
@@ -275,7 +281,8 @@ class PropertyRepository extends EntityRepository
      * @param Property $property
      * @return array
      */
-    public function findDomainRangeById(Property $property){
+    public function findDomainRangeById(Property $property)
+    {
         $conn = $this->getEntityManager()
             ->getConnection();
 
@@ -296,7 +303,8 @@ class PropertyRepository extends EntityRepository
     /**
      * @return array
      */
-    public function findPropertiesTree(){
+    public function findPropertiesTree()
+    {
         $conn = $this->getEntityManager()
             ->getConnection();
 
@@ -311,7 +319,8 @@ class PropertyRepository extends EntityRepository
     /**
      * @return array
      */
-    public function findPropertiesTreeLegend(){
+    public function findPropertiesTreeLegend()
+    {
         $conn = $this->getEntityManager()
             ->getConnection();
 
@@ -327,7 +336,8 @@ class PropertyRepository extends EntityRepository
      * @param Project $project
      * @return array
      */
-    public function findPropertiesByProjectId(Project $project){
+    public function findPropertiesByProjectId(Project $project)
+    {
         $conn = $this->getEntityManager()
             ->getConnection();
 
@@ -514,6 +524,73 @@ class PropertyRepository extends EntityRepository
 
         $stmt = $conn->prepare($sql);
         $stmt->execute(array('class' => $class->getId(), 'profile' => $profile->getId()));
+
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * @param Property $property
+     * @return array
+     */
+    public function findRelationsById(Property $property)
+    {
+        $conn = $this->getEntityManager()
+            ->getConnection();
+
+        $sql = "SELECT
+                ea.pk_entity_association,
+                ea.fk_target_property AS fk_related_property,
+                p.identifier_in_namespace,
+                p.standard_label,
+                st.standard_label AS relation,
+                txtp.pk_text_property,
+                ns.pk_namespace AS \"rootNamespaceId\",
+                ns.standard_label AS \"standardLabelNamespace\"
+                FROM
+                che.entity_association AS ea
+                LEFT JOIN che.system_type AS st
+                ON st.pk_system_type = ea.fk_system_type
+                LEFT JOIN che.property AS p
+                ON ea.fk_target_property = p.pk_property
+                LEFT JOIN (SELECT * FROM che.text_property WHERE fk_text_property_type = 15) AS txtp
+                ON txtp.fk_entity_association = ea.pk_entity_association
+                LEFT JOIN che.associates_namespace AS ans
+                ON ans.fk_entity_association = ea.pk_entity_association
+                LEFT JOIN che.namespace AS ns
+                ON ns.pk_namespace= che.get_root_namespace(ans.fk_namespace)
+                WHERE
+                ea.fk_system_type IN (4, 18, 19, 20)
+                AND p.pk_property IS NOT NULL
+                AND ea.fk_source_property = :property
+                UNION
+                SELECT
+                ea.pk_entity_association,
+                ea.fk_source_property AS fk_related_property,
+                p.identifier_in_namespace,
+                p.standard_label,
+                st.standard_label AS relation,
+                txtp.pk_text_property,
+                ns.pk_namespace AS \"rootNamespaceId\",
+                ns.standard_label AS \"standardLabelNamespace\"
+                FROM
+                che.entity_association AS ea
+                LEFT JOIN che.system_type AS st
+                ON st.pk_system_type = ea.fk_system_type
+                LEFT JOIN che.property AS p
+                ON ea.fk_source_property = p.pk_property
+                LEFT JOIN (SELECT * FROM che.text_property WHERE fk_text_property_type = 15) AS txtp
+                ON txtp.fk_entity_association = ea.pk_entity_association
+                LEFT JOIN che.associates_namespace AS ans
+                ON ans.fk_entity_association = ea.pk_entity_association
+                LEFT JOIN che.namespace AS ns
+                ON ns.pk_namespace= che.get_root_namespace(ans.fk_namespace)
+                WHERE
+                ea.fk_system_type IN (4, 18, 19, 20)
+                AND p.pk_property IS NOT NULL
+                AND ea.fk_target_property = :property";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->execute(array('property' => $property->getId()));
 
         return $stmt->fetchAll();
     }
