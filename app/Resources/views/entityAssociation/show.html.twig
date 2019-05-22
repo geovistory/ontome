@@ -11,7 +11,7 @@
     <div class="container">
         <h2 class="class-name">
             {{ entityAssociation.source }}: {{ entityAssociation.systemType.standardLabel }}
-            <a href="{{ path('class_show', {
+            <a href="{{ path(object~'_show', {
                 id: entityAssociation.source.id,
                 '_fragment': "relations"
             }) }}" class="pull-right btn btn-link">
@@ -25,9 +25,9 @@
 
         <div class="tab-content">
             <div id="justifications" class="tab-pane fade in active">
-                <h3>Related class</h3>
+                <h3>Related {{ object }}</h3>
                 <h4>
-                    <a href="{{ path('class_show', {
+                    <a href="{{ path(object~'_show', {
                         'id': entityAssociation.target.id
                     }) }}">{{ entityAssociation.target }}
                     </a>

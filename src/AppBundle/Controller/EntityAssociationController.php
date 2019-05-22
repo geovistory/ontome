@@ -19,20 +19,35 @@ class EntityAssociationController extends Controller
 {
     /**
      * @Route("/entity-association/{id}", name="entity_association_show")
-     * @Route("/entity-association/{id}/{idClass}", name="entity_association_show")
+     * @Route("/entity-association/{id}/{object}/{objectId}", name="entity_association_show")
      * @param EntityAssociation $entityAssociation
-     * @param $idClass
+     * @param $object
+     * @param $objectId
      * @return Response the rendered template
      */
-    public function showAction(EntityAssociation $entityAssociation, $idClass=null)
+    public function showAction(EntityAssociation $entityAssociation, $object=null, $objectId=null)
     {
-        if($idClass != null && $entityAssociation->getSourceClass()->getId() != $idClass && !$entityAssociation->getDirected())
+        if($object != null && $objectId != null)
         {
-            $entityAssociation->inverseClasses();
+            if($object == 'class')
+            {
+                if($entityAssociation->getSourceClass()->getId() != $objectId && !$entityAssociation->getDirected())
+                {
+                    $entityAssociation->inverseClasses();
+                }
+            }
+            elseif($object == 'property')
+            {
+                if($entityAssociation->getSourceProperty()->getId() != $objectId && !$entityAssociation->getDirected())
+                {
+                    $entityAssociation->inverseProperties();
+                }
+            }
         }
 
         return $this->render('entityAssociation/show.html.twig', array(
-            'entityAssociation' => $entityAssociation
+            'entityAssociation' => $entityAssociation,
+            'object' => $object
         ));
     }
 

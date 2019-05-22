@@ -648,7 +648,8 @@
                             <td>{{ relation.standardLabelNamespace }}</td>
                             <td> <a href="{{ path('entity_association_show', {
                                     'id': relation.pk_entity_association,
-                                    'idProperty': property.id
+                                    'object': 'property',
+                                    'objectId': property.id
                                 }) }}">
                                     <span class="fa fa-eye"></span>
                                 </a></td>

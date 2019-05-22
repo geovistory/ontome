@@ -46,7 +46,7 @@ class EntityAssociation
 
     /**
      * @ORM\ManyToOne(targetEntity="Property", inversedBy="entityAssociations")
-     * @ORM\JoinColumn(name="fk_source_property", referencedColumnName="pk_property")
+     * @ORM\JoinColumn(name="fk_target_property", referencedColumnName="pk_property")
      */
     private $targetProperty;
 
@@ -228,6 +228,16 @@ class EntityAssociation
             $temp = $this->sourceClass;
             $this->sourceClass = $this->targetClass;
             $this->targetClass = $temp;
+        }
+    }
+
+    public function inverseProperties()
+    {
+        if(!$this->directed)
+        {
+            $temp = $this->sourceProperty;
+            $this->sourceProperty = $this->targetProperty;
+            $this->targetProperty = $temp;
         }
     }
 
