@@ -12,6 +12,7 @@ use AppBundle\Entity\OntoClass;
 use AppBundle\Entity\OntoNamespace;
 use AppBundle\Entity\Profile;
 use AppBundle\Entity\ProfileAssociation;
+use AppBundle\Entity\Property;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -264,6 +265,65 @@ class ProfileController  extends Controller
     }
 
     /**
+     * @Route("/profile/{profile}/property/{property}/add", name="profile_property_association")
+     * @Method({ "POST"})
+     * @param Property  $property    The property to be associated with a profile
+     * @param Profile  $profile    The profile to be associated with a namespace
+     * @throws \Exception in case of unsuccessful association
+     * @return JsonResponse a Json formatted namespaces list
+     */
+    public function newProfilePropertyAssociationAction(Property $property, Profile $profile, Request $request)
+    {
+        $this->denyAccessUnlessGranted('edit', $profile);
+
+        $em = $this->getDoctrine()->getManager();
+        $profileAssociation = $em->getRepository('AppBundle:ProfileAssociation')
+            ->findOneBy(array('profile' => $profile->getId(), 'property' => $property->getId()));
+
+        if (!is_null($profileAssociation)) {
+            if($profileAssociation->getSystemType()->getId() == 5) {
+                $status = 'Error';
+                $message = 'This property is already used by this profile';
+            }
+            else {
+                $systemType = $em->getRepository('AppBundle:SystemType')->find(5); //systemType 5 = selected
+                $profileAssociation->setSystemType($systemType);
+                $em->persist($profileAssociation);
+
+                $em->flush();
+                $status = 'Success';
+                $message = 'property successfully re-associated';
+            }
+        }
+        else {
+            $em = $this->getDoctrine()->getManager();
+
+            $profileAssociation = new ProfileAssociation();
+            $profileAssociation->setProfile($profile);
+            $profileAssociation->setProperty($property);
+            $systemType = $em->getRepository('AppBundle:SystemType')->find(5); //systemType 5 = selected
+            $profileAssociation->setSystemType($systemType);
+            $profileAssociation->setCreator($this->getUser());
+            $profileAssociation->setModifier($this->getUser());
+            $profileAssociation->setCreationTime(new \DateTime('now'));
+            $profileAssociation->setModificationTime(new \DateTime('now'));
+            $em->persist($profileAssociation);
+
+            $em->flush();
+            $status = 'Success';
+            $message = 'Property successfully associated';
+        }
+
+
+        $response = array(
+            'status' => $status,
+            'message' => $message
+        );
+
+        return new JsonResponse($response);
+    }
+
+    /**
      * @Route("/profile/{profile}/class/{class}/delete", name="profile_class_disassociation")
      * @Method({ "POST"})
      * @param OntoClass  $class    The class to be disassociated from a profile
@@ -294,6 +354,33 @@ class ProfileController  extends Controller
     }
 
     /**
+     * @Route("/profile/{profile}/property/{property}/delete", name="profile_property_disassociation")
+     * @Method({ "POST"})
+     * @param Property  $property    The property to be disassociated from a profile
+     * @param Profile  $profile    The profile to be disassociated from a namespace
+     * @return JsonResponse a Json 204 HTTP response
+     */
+    public function deleteProfilePropertyAssociationAction(Property $property, Profile $profile, Request $request)
+    {
+        $this->denyAccessUnlessGranted('edit', $profile);
+        $em = $this->getDoctrine()->getManager();
+
+
+        $profileAssociation = $em->getRepository('AppBundle:ProfileAssociation')
+            ->findOneBy(array('profile' => $profile->getId(), 'property' => $property->getId()));
+
+        $systemType = $em->getRepository('AppBundle:SystemType')->find(6); //systemType 6 = rejected
+
+        $profileAssociation->setSystemType($systemType);
+
+        $em->persist($profile);
+        $em->flush();
+
+        return new JsonResponse(null, 204);
+
+    }
+
+    /**
      * @Route("/profile/{profile}/class/{class}/properties/edit", name="profile_properties_edit")
      * @param Profile $profile
      * @param OntoClass $class
@@ -302,6 +389,7 @@ class ProfileController  extends Controller
     public function editProfilePropertiesAction(OntoClass $class, Profile $profile)
     {
         $this->denyAccessUnlessGranted('edit', $profile);
+        //TODO: mettre erreur 403 en cas d'accès à une classe non associée au profil
         return $this->render('profile/editProperties.html.twig', array(
             'class' => $class,
             'profile' => $profile

@@ -38,7 +38,7 @@
         var urlSelectableOutgoingProperties = '{{ path("selectable_outgoing_properties_class_profile_json", {'profile' : 'profileID', 'class' : 'classID'}) }}';
         urlSelectableOutgoingProperties = urlSelectableOutgoingProperties.replace("profileID", profileID);
         urlSelectableOutgoingProperties = urlSelectableOutgoingProperties.replace("classID", classID);
-        $('#outgoing-properties-table').DataTable({
+        var outgoingPropertiesTable = $('#outgoing-properties-table').DataTable({
             ajax: urlSelectableOutgoingProperties,
             dataSrc: 'data',
             columns: [
@@ -51,14 +51,52 @@
                 {
                     targets: -1,
                     render: function ( data, type, row, meta ) {
-                        var checkIcon = '<a><span class="glyphicon glyphicon-unchecked"></span></a>';
-                        if(data != null) {
-                            checkIcon = '<a><span class="glyphicon glyphicon-check"></span></a>';
+                        var urlSelectProperty = '{{ path("profile_property_association", {'profile' : 'profileID', 'property' : 'propertyID'}) }}';
+                        urlSelectProperty = urlSelectProperty.replace("profileID", profileID);
+                        urlSelectProperty = urlSelectProperty.replace("propertyID", row.propertyId);
+
+                        var urlRemoveProperty = '{{ path("profile_property_disassociation", {'profile' : 'profileID', 'property' : 'propertyID'}) }}';
+                        urlRemoveProperty = urlRemoveProperty.replace("profileID", profileID);
+                        urlRemoveProperty = urlRemoveProperty.replace("propertyID", row.propertyId);
+
+                        var checkIcon = '<a data-id="'+row.propertyId+'" data-url="'+urlSelectProperty+'" class="select-property"><span class="outgoing-unchecked-icon glyphicon glyphicon-unchecked" data-id="'+row.propertyId+'"></span></a><span class="select-outgoing-property-loading-icon" data-id="'+row.propertyId+'" style="display: none"><span class="fas fa-spinner fa-spin"></span>';
+                        if(data == '5') {
+                            checkIcon = '<a data-id="'+row.propertyId+'" data-url="'+urlRemoveProperty+'" class="remove-property"><span class="outgoing-checked-icon glyphicon glyphicon-check"  data-id="'+row.propertyId+'"></span></a><span class="remove-outgoing-property-loading-icon" data-id="'+row.propertyId+'" style="display: none"><span class="fas fa-spinner fa-spin"></span>';
                         }
                         return checkIcon;
                     }
                 }
             ]
+        });
+
+        $(document).on("click", ".select-property", function() {
+            var selectedValue = $(this).data("id");
+            $(".outgoing-unchecked-icon[data-id='"+selectedValue+"']").hide(0);
+            $(".select-outgoing-property-loading-icon[data-id='"+selectedValue+"']").css('display','inline');
+            var url =  $(this).data("url");
+            $.ajax({
+                url: url ,
+                type: 'POST',
+                dataType: 'json',
+                success:function(data){
+                    outgoingPropertiesTable.ajax.reload();
+                }
+            });
+        });
+
+        $(document).on("click", ".remove-property", function() {
+            var selectedValue = $(this).data("id");
+            $(".outgoing-checked-icon[data-id='"+selectedValue+"']").hide(0);
+            $(".remove-outgoing-property-loading-icon[data-id='"+selectedValue+"']").css('display','inline');
+            var url =  $(this).data("url");
+            $.ajax({
+                url: url ,
+                type: 'POST',
+                dataType: 'json',
+                success:function(data){
+                    outgoingPropertiesTable.ajax.reload();
+                }
+            });
         });
     });
     </script>
