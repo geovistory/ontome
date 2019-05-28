@@ -43,6 +43,18 @@ class ProfileAssociation
     private $class;
 
     /**
+     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\OntoClass")
+     * @ORM\JoinColumn(name="fk_inheriting_domain_class", referencedColumnName="pk_class")
+     */
+    private $domain;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\OntoClass")
+     * @ORM\JoinColumn(name="fk_inheriting_range_class", referencedColumnName="pk_class")
+     */
+    private $range;
+
+    /**
      * @ORM\ManyToOne(targetEntity="SystemType", inversedBy="profileAssociations")
      * @ORM\JoinColumn(name="fk_system_type", referencedColumnName="pk_system_type")
      */
@@ -105,6 +117,22 @@ class ProfileAssociation
     public function getClass()
     {
         return $this->class;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getDomain()
+    {
+        return $this->domain;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getRange()
+    {
+        return $this->range;
     }
 
     /**
@@ -180,13 +208,28 @@ class ProfileAssociation
     }
 
     /**
+     * @param mixed $domain
+     */
+    public function setDomain($domain)
+    {
+        $this->domain = $domain;
+    }
+
+    /**
+     * @param mixed $range
+     */
+    public function setRange($range)
+    {
+        $this->range = $range;
+    }
+
+    /**
      * @param mixed $systemType
      */
     public function setSystemType($systemType)
     {
         $this->systemType = $systemType;
     }
-
 
     /**
      * @param mixed $notes

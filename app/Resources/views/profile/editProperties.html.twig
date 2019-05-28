@@ -24,6 +24,17 @@
                     </tr>
                     </thead>
                 </table>
+                <h3>Outgoing properties (inherited from ancestors)</h3>
+                <table class="table table-striped" id="outgoing-inherited-properties-table" style="width: 100%">
+                    <thead>
+                    <tr>
+                        <th>Domain</th>
+                        <th>Property identifier</th>
+                        <th>Range</th>
+                        <th>Associate</th>
+                    </tr>
+                    </thead>
+                </table>
 
             </div>
         </div>
@@ -69,6 +80,44 @@
             ]
         });
 
+        var urlSelectableOutgoingInheritedProperties = '{{ path("selectable_outgoing_inherited_properties_class_profile_json", {'profile' : 'profileID', 'class' : 'classID'}) }}';
+        urlSelectableOutgoingInheritedProperties = urlSelectableOutgoingInheritedProperties.replace("profileID", profileID);
+        urlSelectableOutgoingInheritedProperties = urlSelectableOutgoingInheritedProperties.replace("classID", classID);
+        var outgoingInheritedPropertiesTable = $('#outgoing-inherited-properties-table').DataTable({
+            ajax: urlSelectableOutgoingInheritedProperties,
+            dataSrc: 'data',
+            columns: [
+                { data: 'domain' },
+                { data: 'property' },
+                { data: 'range' },
+                { data: 'fk_system_type' }
+            ],
+            columnDefs: [
+                {
+                    targets: -1,
+                    render: function ( data, type, row, meta ) {
+                        var urlSelectProperty = '{{ path("profile_inherited_property_association", {'profile' : 'profileID', 'property' : 'propertyID', 'domain' : 'domainID', 'range' : 'rangeID'}) }}';
+                        urlSelectProperty = urlSelectProperty.replace("profileID", profileID);
+                        urlSelectProperty = urlSelectProperty.replace("propertyID", row.propertyId);
+                        urlSelectProperty = urlSelectProperty.replace("domainID", classID);
+                        urlSelectProperty = urlSelectProperty.replace("rangeID", row.rangeId);
+
+                        var urlRemoveProperty = '{{ path("profile_inherited_property_disassociation", {'profile' : 'profileID', 'property' : 'propertyID', 'domain' : 'domainID', 'range' : 'rangeID'}) }}';
+                        urlRemoveProperty = urlRemoveProperty.replace("profileID", profileID);
+                        urlRemoveProperty = urlRemoveProperty.replace("propertyID", row.propertyId);
+                        urlRemoveProperty = urlRemoveProperty.replace("domainID", classID);
+                        urlRemoveProperty = urlRemoveProperty.replace("rangeID", row.rangeId);
+
+                        var checkIcon = '<a data-id="'+row.propertyId+'" data-url="'+urlSelectProperty+'" class="select-outgoing-inherited-property"><span class="outgoing-inherited-unchecked-icon glyphicon glyphicon-unchecked" data-id="'+row.propertyId+'"></span></a><span class="select-outgoing-inherited-property-loading-icon" data-id="'+row.propertyId+'" style="display: none"><span class="fas fa-spinner fa-spin"></span>';
+                        if(data == '5') {
+                            checkIcon = '<a data-id="'+row.propertyId+'" data-url="'+urlRemoveProperty+'" class="remove-outgoing-inherited-property"><span class="outgoing-inherited-checked-icon glyphicon glyphicon-check"  data-id="'+row.propertyId+'"></span></a><span class="remove-outgoing-inherited-property-loading-icon" data-id="'+row.propertyId+'" style="display: none"><span class="fas fa-spinner fa-spin"></span>';
+                        }
+                        return checkIcon;
+                    }
+                }
+            ]
+        });
+
         $(document).on("click", ".select-property", function() {
             var selectedValue = $(this).data("id");
             $(".outgoing-unchecked-icon[data-id='"+selectedValue+"']").hide(0);
@@ -84,6 +133,21 @@
             });
         });
 
+        $(document).on("click", ".select-outgoing-inherited-property", function() {
+            var selectedValue = $(this).data("id");
+            $(".outgoing-inherited-unchecked-icon[data-id='"+selectedValue+"']").hide(0);
+            $(".select-outgoing-inherited-property-loading-icon[data-id='"+selectedValue+"']").css('display','inline');
+            var url =  $(this).data("url");
+            $.ajax({
+                url: url ,
+                type: 'POST',
+                dataType: 'json',
+                success:function(data){
+                    outgoingInheritedPropertiesTable.ajax.reload();
+                }
+            });
+        });
+
         $(document).on("click", ".remove-property", function() {
             var selectedValue = $(this).data("id");
             $(".outgoing-checked-icon[data-id='"+selectedValue+"']").hide(0);
@@ -95,6 +159,21 @@
                 dataType: 'json',
                 success:function(data){
                     outgoingPropertiesTable.ajax.reload();
+                }
+            });
+        });
+
+        $(document).on("click", ".remove-outgoing-inherited-property", function() {
+            var selectedValue = $(this).data("id");
+            $(".outgoing-inherited-checked-icon[data-id='"+selectedValue+"']").hide(0);
+            $(".remove-outgoing-inherited-property-loading-icon[data-id='"+selectedValue+"']").css('display','inline');
+            var url =  $(this).data("url");
+            $.ajax({
+                url: url ,
+                type: 'POST',
+                dataType: 'json',
+                success:function(data){
+                    outgoingInheritedPropertiesTable.ajax.reload();
                 }
             });
         });
