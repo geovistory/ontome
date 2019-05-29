@@ -713,9 +713,10 @@
                             </td>
                             <td>{{ relation.pk_text_property }}</td>
                             <td>{{ relation.standardLabelNamespace }}</td>
-                            <td> <a href="{{ path('entity_association_show', {
+                            <td> <a href="{{ path('entity_association_edit', {
                                     'id': relation.pk_entity_association,
-                                    'idProperty': property.id
+                                    'object': 'property',
+                                    'objectId': property.id
                                 }) }}" class="btn btn-xs btn-success">
                                     <span class="fa fa-edit"></span>
                                 </a></td>

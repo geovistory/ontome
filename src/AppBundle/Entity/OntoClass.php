@@ -93,6 +93,16 @@ class OntoClass
      */
     private $parentClassAssociations;
 
+    /**
+     * @ORM\OneToMany(targetEntity="EntityAssociation", mappedBy="sourceClass")
+     */
+    private $sourceEntityAssociations;
+
+    /**
+     * @ORM\OneToMany(targetEntity="EntityAssociation", mappedBy="targetClass")
+     */
+    private $targetEntityAssociations;
+
 
     /**
      * @ORM\ManyToMany(targetEntity="OntoNamespace",  inversedBy="classes", fetch="EXTRA_LAZY")
@@ -530,6 +540,38 @@ class OntoClass
         }
         else $s = $this->getIdentifierInNamespace();
         return (string) $s;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getSourceEntityAssociations()
+    {
+        return $this->sourceEntityAssociations;
+    }
+
+    /**
+     * @param mixed $sourceEntityAssociations
+     */
+    public function setSourceEntityAssociations($sourceEntityAssociations)
+    {
+        $this->sourceEntityAssociations = $sourceEntityAssociations;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getTargetEntityAssociations()
+    {
+        return $this->targetEntityAssociations;
+    }
+
+    /**
+     * @param mixed $targetEntityAssociations
+     */
+    public function setTargetEntityAssociations($targetEntityAssociations)
+    {
+        $this->targetEntityAssociations = $targetEntityAssociations;
     }
 
 }
