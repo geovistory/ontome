@@ -39,13 +39,13 @@ class EntityAssociation
     private $targetClass;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Property", inversedBy="entityAssociations")
+     * @ORM\ManyToOne(targetEntity="Property", inversedBy="sourceEntityAssociations")
      * @ORM\JoinColumn(name="fk_source_property", referencedColumnName="pk_property")
      */
     private $sourceProperty;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Property", inversedBy="entityAssociations")
+     * @ORM\ManyToOne(targetEntity="Property", inversedBy="targetEntityAssociations")
      * @ORM\JoinColumn(name="fk_target_property", referencedColumnName="pk_property")
      */
     private $targetProperty;

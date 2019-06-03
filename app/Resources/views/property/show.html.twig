@@ -634,25 +634,41 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for relation in relations|sort %}
+                    {% for relation in property.entityAssociations %}
                         <tr>
-                            <td>{{ relation.relation }}</td>
-                            <td>
-                                <a href="{{ path('property_show', {
-                                    'id': relation.fk_related_property
+                            <td>{{ relation.systemType }}</td>
+                            <td><a href="{{ path('property_show', {
+                                    'id': relation.targetProperty.id
                                 }) }}">
-                                    {{ relation.identifier_in_namespace }} - {{ relation.standard_label }}
+                                    {{ relation.targetProperty.invertedLabel }}
                                 </a>
                             </td>
-                            <td>{{ relation.pk_text_property }}</td>
-                            <td>{{ relation.standardLabelNamespace }}</td>
-                            <td> <a href="{{ path('entity_association_show', {
-                                    'id': relation.pk_entity_association,
+                            <td>
+                                {% if relation.textProperties is not null %}
+                                    {% for textProperty in relation.textProperties if textProperty.systemType.id == 15 %}
+                                        {% if loop.index == 1 %}
+                                            <a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="fas fa-info-circle" aria-hidden="true"></span></a>
+                                            {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if relation.namespaces is not null %}
+                                    {% if relation.namespaces|first.topLevelNamespace is not null %}
+                                        {{ relation.namespaces|first.topLevelNamespace }}
+                                    {% endif %}
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{{ path('entity_association_show', {
+                                    'id': relation.id,
                                     'object': 'property',
                                     'objectId': property.id
                                 }) }}">
                                     <span class="fa fa-eye"></span>
-                                </a></td>
+                                </a>
+                            </td>
                         </tr>
                     {% endfor %}
                     </tbody>

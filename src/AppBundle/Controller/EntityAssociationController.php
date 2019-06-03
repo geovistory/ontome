@@ -167,7 +167,7 @@ class EntityAssociationController extends Controller
 
         $this->denyAccessUnlessGranted('edit', $source);
 
-        $form = $this->createForm(EntityAssociationForm::class, $entityAssociation);
+        $form = $this->createForm(EntityAssociationForm::class, $entityAssociation, ['object' => $object]);
 
         // only handles data on POST
         $form->handleRequest($request);

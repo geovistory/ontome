@@ -156,6 +156,16 @@ class Property
     private $parentPropertyAssociations;
 
     /**
+     * @ORM\OneToMany(targetEntity="EntityAssociation", mappedBy="sourceProperty")
+     */
+    private $sourceEntityAssociations;
+
+    /**
+     * @ORM\OneToMany(targetEntity="EntityAssociation", mappedBy="targetProperty")
+     */
+    private $targetEntityAssociations;
+
+    /**
      * @ORM\ManyToMany(targetEntity="OntoNamespace",  inversedBy="Property", fetch="EXTRA_LAZY")
      * @ORM\JoinTable(schema="che", name="associates_namespace",
      *      joinColumns={@ORM\JoinColumn(name="fk_property", referencedColumnName="pk_property")},
@@ -656,6 +666,43 @@ class Property
         }
         else $s = $this->getIdentifierInNamespace();
         return (string) $s;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getSourceEntityAssociations()
+    {
+        return $this->sourceEntityAssociations;
+    }
+
+    /**
+     * @param mixed $sourceEntityAssociations
+     */
+    public function setSourceEntityAssociations($sourceEntityAssociations)
+    {
+        $this->sourceEntityAssociations = $sourceEntityAssociations;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getTargetEntityAssociations()
+    {
+        return $this->targetEntityAssociations;
+    }
+
+    /**
+     * @param mixed $targetEntityAssociations
+     */
+    public function setTargetEntityAssociations($targetEntityAssociations)
+    {
+        $this->targetEntityAssociations = $targetEntityAssociations;
+    }
+
+    public function getEntityAssociations()
+    {
+        return array_merge($this->getSourceEntityAssociations()->toArray(), $this->getTargetEntityAssociations()->toArray());
     }
 
 }

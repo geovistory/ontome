@@ -574,4 +574,9 @@ class OntoClass
         $this->targetEntityAssociations = $targetEntityAssociations;
     }
 
+    public function getEntityAssociations()
+    {
+        return array_merge($this->getSourceEntityAssociations()->toArray(), $this->getTargetEntityAssociations()->toArray());
+    }
+
 }
