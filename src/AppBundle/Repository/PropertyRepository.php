@@ -326,14 +326,17 @@ class PropertyRepository extends EntityRepository
         $conn = $this->getEntityManager()
             ->getConnection();
 
-        $sql = "SELECT identifier_property AS property,
-                       identifier_range AS range,
-                       pk_property AS \"propertyId\",
-                       pk_range AS \"rangeId\",
-                       identifier_domain AS domain,
-                       che.get_root_namespace(nsp.pk_namespace) AS \"rootNamespaceId\",
-                      (SELECT label FROM che.get_namespace_labels(nsp.pk_namespace) WHERE language_iso_code = 'en') AS namespace,
-                      aspro.fk_system_type
+        $sql = "SELECT DISTINCT identifier_property AS property,
+                                identifier_range AS range,
+                                pk_property AS \"propertyId\",
+                                pk_range AS \"rangeId\",
+                                identifier_domain AS domain,
+                                che.get_root_namespace(nsp.pk_namespace) AS \"rootNamespaceId\",
+                                (SELECT label FROM che.get_namespace_labels(nsp.pk_namespace) WHERE language_iso_code = 'en') AS namespace,
+                                CASE
+                                    WHEN aspro.fk_system_type IS NULL THEN 999
+                                    ELSE aspro.fk_system_type
+                                    END AS fk_system_type
                 FROM  che.v_properties_with_domain_range
                 JOIN che.associates_namespace asnsp ON asnsp.fk_property = pk_property
                 JOIN che.namespace nsp ON nsp.pk_namespace = asnsp.fk_namespace 
@@ -356,16 +359,19 @@ class PropertyRepository extends EntityRepository
         $conn = $this->getEntityManager()
             ->getConnection();
 
-        $sql = "SELECT  identifier_in_namespace AS domain,
-                        pk_parent AS \"parentClassId\",
-                        parent_identifier AS \"parentClass\",
-                        pk_property AS \"propertyId\",
-                        identifier_property AS property,
-                        pk_range AS \"rangeId\",
-                        identifier_range AS range,
-                        replace(ancestors, '|', '→') AS ancestors,
-                        (SELECT label FROM che.get_namespace_labels(nsp.pk_namespace) WHERE language_iso_code = 'en') AS namespace,
-                        aspro.fk_system_type
+        $sql = "SELECT DISTINCT identifier_in_namespace AS domain,
+                                pk_parent AS \"parentClassId\",
+                                parent_identifier AS \"parentClass\",
+                                pk_property AS \"propertyId\",
+                                identifier_property AS property,
+                                pk_range AS \"rangeId\",
+                                identifier_range AS range,
+                                replace(ancestors, '|', '→') AS ancestors,
+                                (SELECT label FROM che.get_namespace_labels(nsp.pk_namespace) WHERE language_iso_code = 'en') AS namespace,
+                                CASE
+                                    WHEN aspro.fk_system_type IS NULL THEN 999
+                                    ELSE aspro.fk_system_type
+                                    END AS fk_system_type
                 FROM che.class_outgoing_inherited_properties(:class)
                 JOIN che.associates_namespace asnsp ON asnsp.fk_property = pk_property
                 JOIN che.namespace nsp ON nsp.pk_namespace = asnsp.fk_namespace

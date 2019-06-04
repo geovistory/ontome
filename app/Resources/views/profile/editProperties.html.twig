@@ -51,6 +51,7 @@
         urlSelectableOutgoingProperties = urlSelectableOutgoingProperties.replace("classID", classID);
         var outgoingPropertiesTable = $('#outgoing-properties-table').DataTable({
             ajax: urlSelectableOutgoingProperties,
+            serverSide: false,
             dataSrc: 'data',
             columns: [
                 { data: 'domain' },
@@ -58,6 +59,7 @@
                 { data: 'range' },
                 { data: 'fk_system_type' }
             ],
+            order: [[3, 'asc']],
             columnDefs: [
                 {
                     targets: -1,
@@ -74,7 +76,10 @@
                         if(data == '5') {
                             checkIcon = '<a data-id="'+row.propertyId+'" data-url="'+urlRemoveProperty+'" class="remove-property"><span class="outgoing-checked-icon glyphicon glyphicon-check"  data-id="'+row.propertyId+'"></span></a><span class="remove-outgoing-property-loading-icon" data-id="'+row.propertyId+'" style="display: none"><span class="fas fa-spinner fa-spin"></span>';
                         }
-                        return checkIcon;
+                        if(type == 'display')
+                            return checkIcon;
+                        else
+                            return data;
                     }
                 }
             ]
@@ -92,6 +97,7 @@
                 { data: 'range' },
                 { data: 'fk_system_type' }
             ],
+            order: [[3, 'asc']],
             columnDefs: [
                 {
                     targets: -1,
@@ -112,7 +118,10 @@
                         if(data == '5') {
                             checkIcon = '<a data-id="'+row.propertyId+'" data-url="'+urlRemoveProperty+'" class="remove-outgoing-inherited-property"><span class="outgoing-inherited-checked-icon glyphicon glyphicon-check"  data-id="'+row.propertyId+'"></span></a><span class="remove-outgoing-inherited-property-loading-icon" data-id="'+row.propertyId+'" style="display: none"><span class="fas fa-spinner fa-spin"></span>';
                         }
-                        return checkIcon;
+                        if(type == 'display')
+                            return checkIcon;
+                        else
+                            return data;
                     }
                 }
             ]
