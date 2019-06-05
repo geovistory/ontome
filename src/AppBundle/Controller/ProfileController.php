@@ -516,6 +516,33 @@ class ProfileController  extends Controller
     }
 
     /**
+     * @Route("/selectable-incoming-properties/profile/{profile}/class/{class}/json", name="selectable_incoming_properties_class_profile_json")
+     * @Method("GET")
+     * @param Profile $profile
+     * @param OntoClass $class
+     * @return JsonResponse a Json formatted list representation of incoming Properties selectable by Class and Profile
+     */
+    public function getSelectableIncomingPropertiesByClassAndProfile(OntoClass $class, Profile $profile)
+    {
+        try{
+            $em = $this->getDoctrine()->getManager();
+            $properties = $em->getRepository('AppBundle:Property')
+                ->findIncomingPropertiesByClassAndProfileId($class, $profile);
+            $data['data'] = $properties;
+            $data = json_encode($data);
+        }
+        catch (NotFoundHttpException $e) {
+            return new JsonResponse(null,404, 'content-type:application/problem+json');
+        }
+
+        if(empty($properties)) {
+            return new JsonResponse(null,204, array());
+        }
+
+        return new JsonResponse($data,200, array(), true);
+    }
+
+    /**
      * @Route("/selectable-outgoing-inherited-properties/profile/{profile}/class/{class}/json", name="selectable_outgoing_inherited_properties_class_profile_json")
      * @Method("GET")
      * @param Profile $profile
@@ -528,6 +555,33 @@ class ProfileController  extends Controller
             $em = $this->getDoctrine()->getManager();
             $properties = $em->getRepository('AppBundle:Property')
                 ->findOutgoingInheritedPropertiesByClassAndProfileId($class, $profile);
+            $data['data'] = $properties;
+            $data = json_encode($data);
+        }
+        catch (NotFoundHttpException $e) {
+            return new JsonResponse(null,404, 'content-type:application/problem+json');
+        }
+
+        if(empty($properties)) {
+            return new JsonResponse(null,204, array());
+        }
+
+        return new JsonResponse($data,200, array(), true);
+    }
+
+    /**
+     * @Route("/selectable-incoming-inherited-properties/profile/{profile}/class/{class}/json", name="selectable_incoming_inherited_properties_class_profile_json")
+     * @Method("GET")
+     * @param Profile $profile
+     * @param OntoClass $class
+     * @return JsonResponse a Json formatted list representation of incoming inherited Properties selectable by Class and Profile
+     */
+    public function getSelectableIncomingInheritedPropertiesByClassAndProfile(OntoClass $class, Profile $profile)
+    {
+        try{
+            $em = $this->getDoctrine()->getManager();
+            $properties = $em->getRepository('AppBundle:Property')
+                ->findIncomingInheritedPropertiesByClassAndProfileId($class, $profile);
             $data['data'] = $properties;
             $data = json_encode($data);
         }

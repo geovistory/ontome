@@ -35,6 +35,28 @@
                     </tr>
                     </thead>
                 </table>
+                <h3>Incoming properties (this class is range)</h3>
+                <table class="table table-striped" id="incoming-properties-table">
+                    <thead>
+                    <tr>
+                        <th>Domain</th>
+                        <th>Property identifier</th>
+                        <th>Range</th>
+                        <th>Associate</th>
+                    </tr>
+                    </thead>
+                </table>
+                <h3>Incoming properties (inherited from ancestors)</h3>
+                <table class="table table-striped" id="incoming-inherited-properties-table">
+                    <thead>
+                    <tr>
+                        <th>Domain</th>
+                        <th>Property identifier</th>
+                        <th>Range</th>
+                        <th>Associate</th>
+                    </tr>
+                    </thead>
+                </table>
 
             </div>
         </div>
@@ -51,7 +73,6 @@
         urlSelectableOutgoingProperties = urlSelectableOutgoingProperties.replace("classID", classID);
         var outgoingPropertiesTable = $('#outgoing-properties-table').DataTable({
             ajax: urlSelectableOutgoingProperties,
-            serverSide: false,
             dataSrc: 'data',
             columns: [
                 { data: 'domain' },
@@ -127,6 +148,87 @@
             ]
         });
 
+        var urlSelectableIncomingProperties = '{{ path("selectable_incoming_properties_class_profile_json", {'profile' : 'profileID', 'class' : 'classID'}) }}';
+        urlSelectableIncomingProperties = urlSelectableIncomingProperties.replace("profileID", profileID);
+        urlSelectableIncomingProperties = urlSelectableIncomingProperties.replace("classID", classID);
+        var incomingPropertiesTable = $('#incoming-properties-table').DataTable({
+            ajax: urlSelectableIncomingProperties,
+            dataSrc: 'data',
+            columns: [
+                { data: 'domain' },
+                { data: 'property' },
+                { data: 'range' },
+                { data: 'fk_system_type' }
+            ],
+            order: [[3, 'asc']],
+            columnDefs: [
+                {
+                    targets: -1,
+                    render: function ( data, type, row, meta ) {
+                        var urlSelectProperty = '{{ path("profile_property_association", {'profile' : 'profileID', 'property' : 'propertyID'}) }}';
+                        urlSelectProperty = urlSelectProperty.replace("profileID", profileID);
+                        urlSelectProperty = urlSelectProperty.replace("propertyID", row.propertyId);
+
+                        var urlRemoveProperty = '{{ path("profile_property_disassociation", {'profile' : 'profileID', 'property' : 'propertyID'}) }}';
+                        urlRemoveProperty = urlRemoveProperty.replace("profileID", profileID);
+                        urlRemoveProperty = urlRemoveProperty.replace("propertyID", row.propertyId);
+
+                        var checkIcon = '<a data-id="'+row.propertyId+'" data-url="'+urlSelectProperty+'" class="select-incoming-property"><span class="incoming-unchecked-icon glyphicon glyphicon-unchecked" data-id="'+row.propertyId+'"></span></a><span class="select-incoming-property-loading-icon" data-id="'+row.propertyId+'" style="display: none"><span class="fas fa-spinner fa-spin"></span>';
+                        if(data == '5') {
+                            checkIcon = '<a data-id="'+row.propertyId+'" data-url="'+urlRemoveProperty+'" class="remove-incoming-property"><span class="incoming-checked-icon glyphicon glyphicon-check"  data-id="'+row.propertyId+'"></span></a><span class="remove-incoming-property-loading-icon" data-id="'+row.propertyId+'" style="display: none"><span class="fas fa-spinner fa-spin"></span>';
+                        }
+                        if(type == 'display')
+                            return checkIcon;
+                        else
+                            return data;
+                    }
+                }
+            ]
+        });
+
+        var urlSelectableIncomingInheritedProperties = '{{ path("selectable_incoming_inherited_properties_class_profile_json", {'profile' : 'profileID', 'class' : 'classID'}) }}';
+        urlSelectableIncomingInheritedProperties = urlSelectableIncomingInheritedProperties.replace("profileID", profileID);
+        urlSelectableIncomingInheritedProperties = urlSelectableIncomingInheritedProperties.replace("classID", classID);
+        var incomingInheritedPropertiesTable = $('#incoming-inherited-properties-table').DataTable({
+            ajax: urlSelectableIncomingInheritedProperties,
+            dataSrc: 'data',
+            columns: [
+                { data: 'domain' },
+                { data: 'property' },
+                { data: 'range' },
+                { data: 'fk_system_type' }
+            ],
+            order: [[3, 'asc']],
+            columnDefs: [
+                {
+                    targets: -1,
+                    render: function ( data, type, row, meta ) {
+                        var urlSelectProperty = '{{ path("profile_inherited_property_association", {'profile' : 'profileID', 'property' : 'propertyID', 'domain' : 'domainID', 'range' : 'rangeID'}) }}';
+                        urlSelectProperty = urlSelectProperty.replace("profileID", profileID);
+                        urlSelectProperty = urlSelectProperty.replace("propertyID", row.propertyId);
+                        urlSelectProperty = urlSelectProperty.replace("domainID", classID);
+                        urlSelectProperty = urlSelectProperty.replace("rangeID", row.rangeId);
+
+                        var urlRemoveProperty = '{{ path("profile_inherited_property_disassociation", {'profile' : 'profileID', 'property' : 'propertyID', 'domain' : 'domainID', 'range' : 'rangeID'}) }}';
+                        urlRemoveProperty = urlRemoveProperty.replace("profileID", profileID);
+                        urlRemoveProperty = urlRemoveProperty.replace("propertyID", row.propertyId);
+                        urlRemoveProperty = urlRemoveProperty.replace("domainID", classID);
+                        urlRemoveProperty = urlRemoveProperty.replace("rangeID", row.rangeId);
+
+                        var checkIcon = '<a data-id="'+row.propertyId+'" data-url="'+urlSelectProperty+'" class="select-incoming-inherited-property"><span class="incoming-inherited-unchecked-icon glyphicon glyphicon-unchecked" data-id="'+row.propertyId+'"></span></a><span class="select-incoming-inherited-property-loading-icon" data-id="'+row.propertyId+'" style="display: none"><span class="fas fa-spinner fa-spin"></span>';
+                        if(data == '5') {
+                            checkIcon = '<a data-id="'+row.propertyId+'" data-url="'+urlRemoveProperty+'" class="remove-incoming-inherited-property"><span class="incoming-inherited-checked-icon glyphicon glyphicon-check"  data-id="'+row.propertyId+'"></span></a><span class="remove-incoming-inherited-property-loading-icon" data-id="'+row.propertyId+'" style="display: none"><span class="fas fa-spinner fa-spin"></span>';
+                        }
+                        if(type == 'display')
+                            return checkIcon;
+                        else
+                            return data;
+                    }
+                }
+            ]
+        });
+
+
         $(document).on("click", ".select-property", function() {
             var selectedValue = $(this).data("id");
             $(".outgoing-unchecked-icon[data-id='"+selectedValue+"']").hide(0);
@@ -183,6 +285,66 @@
                 dataType: 'json',
                 success:function(data){
                     outgoingInheritedPropertiesTable.ajax.reload();
+                }
+            });
+        });
+
+        $(document).on("click", ".select-incoming-property", function() {
+            var selectedValue = $(this).data("id");
+            $(".incoming-unchecked-icon[data-id='"+selectedValue+"']").hide(0);
+            $(".select-incoming-property-loading-icon[data-id='"+selectedValue+"']").css('display','inline');
+            var url =  $(this).data("url");
+            $.ajax({
+                url: url ,
+                type: 'POST',
+                dataType: 'json',
+                success:function(data){
+                    incomingPropertiesTable.ajax.reload();
+                }
+            });
+        });
+
+        $(document).on("click", ".select-incoming-inherited-property", function() {
+            var selectedValue = $(this).data("id");
+            $(".incoming-inherited-unchecked-icon[data-id='"+selectedValue+"']").hide(0);
+            $(".select-incoming-inherited-property-loading-icon[data-id='"+selectedValue+"']").css('display','inline');
+            var url =  $(this).data("url");
+            $.ajax({
+                url: url ,
+                type: 'POST',
+                dataType: 'json',
+                success:function(data){
+                    incomingInheritedPropertiesTable.ajax.reload();
+                }
+            });
+        });
+
+        $(document).on("click", ".remove-incoming-property", function() {
+            var selectedValue = $(this).data("id");
+            $(".incoming-checked-icon[data-id='"+selectedValue+"']").hide(0);
+            $(".remove-incoming-property-loading-icon[data-id='"+selectedValue+"']").css('display','inline');
+            var url =  $(this).data("url");
+            $.ajax({
+                url: url ,
+                type: 'POST',
+                dataType: 'json',
+                success:function(data){
+                    incomingPropertiesTable.ajax.reload();
+                }
+            });
+        });
+
+        $(document).on("click", ".remove-incoming-inherited-property", function() {
+            var selectedValue = $(this).data("id");
+            $(".incoming-inherited-checked-icon[data-id='"+selectedValue+"']").hide(0);
+            $(".remove-incoming-inherited-property-loading-icon[data-id='"+selectedValue+"']").css('display','inline');
+            var url =  $(this).data("url");
+            $.ajax({
+                url: url ,
+                type: 'POST',
+                dataType: 'json',
+                success:function(data){
+                    incomingInheritedPropertiesTable.ajax.reload();
                 }
             });
         });
