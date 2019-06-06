@@ -86,6 +86,11 @@ class EntityAssociationController extends Controller
             $em->flush();
 
             $this->addFlash('success', 'Relation created !');
+
+            return $this->redirectToRoute($object.'_edit', [
+                'id' => $objectId,
+                '_fragment' => 'relations'
+            ]);
         }
         if($object == 'class') {
             $relations = $em->getRepository('AppBundle:OntoClass')->findRelationsById($source);
@@ -182,10 +187,11 @@ class EntityAssociationController extends Controller
             $em->persist($entityAssociation);
             $em->flush();
 
-            return $this->redirectToRoute('entity_association_edit', [
-                'id' => $entityAssociation->getId(),
-                'object' => $object,
-                'objectId' => $objectId
+            $this->addFlash('success', 'Relation edited !');
+
+            return $this->redirectToRoute($object.'_edit', [
+                'id' => $objectId,
+                '_fragment' => 'relations'
             ]);
 
         }

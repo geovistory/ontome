@@ -122,7 +122,7 @@
                             </td>
                             <td>{{ textProperty.languageIsoCode}}</td>
                             <td>WIP</td>
-                            {% if is_granted('edit', class) %}
+                            {% if is_granted('edit', source) %}
                                 <td>
                                     <a href="{{ path('text_property_edit', {
                                         'id': textProperty.id
