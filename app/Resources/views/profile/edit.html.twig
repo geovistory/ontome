@@ -128,55 +128,94 @@
             </table>
         </div>
         <div id="classes" class="tab-pane fade">
-            <h3>Associated classes</h3>
-            <table class="table table-striped" id="classes-table">
-                <thead>
-                <tr>
-                    <th>Class</th>
-                    <th>Association type</th>
-                    <th>Namespace</th>
-                </tr>
-                </thead>
-                <tbody>
-                {% for class in classes %}
-                    <tr>
-                        <td>
-                            <a href="{{ path('class_show', {
-                                'id': class.id
-                            }) }}">
-                                {{ class.standardLabel }} – {{ class.identifierInNamespace }}
-                            </a>
-                        </td>
-                        <td>{{ class.associationType }}</td>
-                        <td>
-                            {{ class.rootNamespace }}
-                        </td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
+            <div class="row">
+                <div class="col-md-6">
+                    <h3>Associated classes</h3>
+                    <table class="table table-striped" id="classes-table" style="width:100%">
+                        <thead>
+                        <tr>
+                            <th></th>
+                            <th>ID</th>
+                            <th>Identifier in namespace</th>
+                            <th>Class</th>
+                            <th>Association type</th>
+                            <th>Namespace</th>
+                            <th>Pick properties</th>
+                        </tr>
+                        </thead>
+                    </table>
+                </div>
+                <div class="col-md-6">
+                    <h3>Selectable classes</h3>
+                    <table class="table table-striped" id="selectable-classes-table" style="width:100%">
+                        <thead>
+                        <tr>
+                            <th>Select</th>
+                            <th>Class</th>
+                            <th>Namespace</th>
+                        </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
         </div>
         <div id="properties" class="tab-pane fade">
             <h3>Associated properties</h3>
             <table class="table table-striped" id="properties-table">
                 <thead>
                 <tr>
-                    <th>Property</th>
+                    <th class="text-right">Domain</th>
+                    <th></th>
+                    <th class="text-center">Property</th>
+                    <th></th>
+                    <th>Range</th>
                     <th>Namespace</th>
+                    <th>Status</th>
                 </tr>
                 </thead>
                 <tbody>
                 {% for property in properties %}
                     <tr>
-                        <td>
-                            <a href="{{ path('property_show', {
-                                'id': property.id
-                            }) }}">
-                                {{ property.standardLabel }} – {{ property.identifierInNamespace }}
+                        <td class="text-nowrap text-right small">
+                            {% if property.domain is not null %}
+                                <a href="{{ path('class_show', {'id': property.domain.id }) }}">
+                                    {{ property.domain }}
+                                </a>
+                            {% endif %}
+                        </td>
+                        <td class="text-nowrap small" style="padding-left: 30px;">
+                            {% if property.domainMinQuantifier is not null and property.domainMaxQuantifier is not null %}
+                                ({% if  property.domainMinQuantifier != -1 %}{{ property.domainMinQuantifier }}{% else %}n{% endif %},{% if  property.domainMaxQuantifier != -1 %}{{ property.domainMaxQuantifier }}{% else %}n{% endif %})
+                            {% endif %}
+                        </td>
+                        <td class="text-nowrap text-center">
+                            <a href="{{ path('property_show', {'id': property.id}) }}">
+                                {{ property }}
                             </a>
                         </td>
+                        <td class="text-nowrap small" style="padding-right: 30px;">
+                            {% if property.rangeMinQuantifier is not null and property.rangeMaxQuantifier is not null %}
+                                ({% if  property.rangeMinQuantifier != -1 %}{{ property.rangeMinQuantifier }}{% else %}n{% endif %},{% if  property.rangeMaxQuantifier != -1 %}{{ property.rangeMaxQuantifier }}{% else %}n{% endif %})
+                            {% endif %}
+                        </td>
+                        <td class="text-nowrap small">
+                            {% if property.range is not null %}
+                                <a href="{{ path('class_show', {'id': property.range.id }) }}">
+                                    {{ property.range }}
+                                </a>
+                            {% endif %}
+                        </td>
                         <td>
-                            {{ property.rootNamespace }}
+                            {% if property.namespaces|first.referencedVersion is not null %}
+                                {{ property.namespaces|first.referencedVersion }}
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% for profileAssociation in property.profileAssociations %}
+                                {% if profileAssociation.profile.id == profile.id %}
+                                    {{ profileAssociation.systemType }}
+                                {% endif %}
+                            {% endfor %}
                         </td>
                     </tr>
                 {% endfor %}
@@ -255,9 +294,120 @@
 
 <script>
     $(document).ready(function() {
+        var profileID = {{ profile.id }};
+        var urlSelectableClasses = '{{ path("selectable_classes_profile_json", {'profile' : 'profileID'}) }}';
+        urlSelectableClasses = urlSelectableClasses.replace("profileID", profileID);
+
+        var urlAssociatedClasses = '{{ path("associated_classes_profile_json", {'profile' : 'profileID'}) }}';
+        urlAssociatedClasses = urlAssociatedClasses.replace("profileID", profileID);
+
         $('#labels-table').DataTable();
-        $('#classes-table').DataTable();
-        $('#properties-table').DataTable();
+        var associatedClassesTable = $('#classes-table').DataTable({
+            ajax: urlAssociatedClasses,
+            dataSrc: 'data',
+            columns: [
+                { data: null },
+                { data: 'id' },
+                { data: 'identifierInNamespace' },
+                { data: 'standardLabel' },
+                { data: 'associationType' },
+                { data: 'rootNamespace' },
+                { data: null }
+            ],
+            columnDefs: [
+                {
+                    targets: 0,
+                    render: function ( data, type, row, meta ) {
+
+                        var urlRemoveClass = '{{ path("profile_class_disassociation", {'profile' : 'profileID', 'class' : 'classID'}) }}';
+                        urlRemoveClass = urlRemoveClass.replace("profileID", profileID);
+                        urlRemoveClass = urlRemoveClass.replace("classID", row.id);
+                        if(row.associationType == 'selected') {
+                            return '<a data-id="' + row.id + '" data-url="' + urlRemoveClass + '" class="remove-class"><span class="glyphicon glyphicon-remove text-danger" aria-hidden="true"></span></a><span class="remove-class-loading-icon" data-id="' + row.id + '" style="display: none"><span class="fas fa-spinner fa-spin"></span></span>';
+                        }
+                        else return '';
+                    }
+                },
+                {
+                    targets: 3,
+                    render: function ( data, type, row, meta ) {
+                        var urlClass = '{{ path("class_show", {'id' : 'classID'}) }}';
+                        urlClass = urlClass.replace("classID", row.id);
+
+                        return '<a href="' + urlClass + '">' + data + ' – ' + row.identifierInNamespace + '</a>';
+
+                    }
+                },
+                {
+                    targets: -1,
+                    "data": null,
+                    render: function ( data, type, row, meta ) {
+                        if(row.associationType == 'selected'){
+                            var urlSelectProperties = '{{ path("profile_properties_edit", {'profile' : 'profileID', 'class' : 'classID'}) }}';
+                            urlSelectProperties = urlSelectProperties.replace("profileID", profileID);
+                            urlSelectProperties = urlSelectProperties.replace("classID", row.id);
+                            return '<a href="' + urlSelectProperties + '"><span class="glyphicon glyphicon-th-list"></span></a>';
+                        }
+                        else return '';
+                    }
+                },
+                {
+                    visible: false,
+                    targets: [1,2]
+                }
+            ]
+        });
+        var selectableClassesTable = $('#selectable-classes-table').DataTable({
+            ajax: urlSelectableClasses,
+            dataSrc: 'data',
+            columns: [
+                { data: 'classId' },
+                { data: 'standardLabel' },
+                { data: 'rootNamespace' }
+            ],
+            columnDefs: [
+                {
+                    targets: 1,
+                    render: function ( data, type, row, meta ) {
+                        var urlSelectClass = '{{ path("profile_class_association", {'profile' : 'profileID', 'class' : 'classID'}) }}';
+                        urlSelectClass = urlSelectClass.replace("profileID", profileID);
+                        urlSelectClass = urlSelectClass.replace("classID", row.classId);
+                        return '<a data-id="'+row.classId+'" data-url="'+urlSelectClass+'" class="select-class"><span class="plus-icon" data-id="'+row.classId+'"><span class="fas fa-plus"></span></span><span class="select-class-loading-icon" data-id="'+row.classId+'" style="display: none"><span class="fas fa-spinner fa-spin"></span></span></a>&nbsp;' + data;
+                    }
+                },
+                {
+                    visible: false,
+                    targets: [0]
+                }
+            ]
+        });
+        $('#properties-table').DataTable({
+            initComplete: function(){
+                this.api().columns([6]).every(function(){
+                    var column = this;
+                    var select = $('<select id="properties-status-select"><option value=""></option></select>')
+                        .appendTo($(column.header()))
+                        .on('change', function(){
+                            var val = $.fn.dataTable.util.escapeRegex(
+                                $(this).val()
+                            );
+
+                            column
+                                .search(val ? '^'+val+'$' : '', true, false)
+                                .draw();
+                        });
+
+                    $(select).click(function(e){
+                        e.stopPropagation();
+                    });
+
+                    column.data().unique().sort().each(function(d, j){
+                        select.append('<option value="'+d+'">'+d+'</option>')
+                    });
+                });
+            }
+        });
+        $("#properties-status-select").val('Selected in profile');
         $('#additional-notes-table').DataTable();
         $('#namespaces-table').DataTable();
 
@@ -332,8 +482,7 @@
                         console.log("[API] ERROR: "+data.message);
                     }
                     if(data.status == 'Success'){
-
-
+                        selectableClassesTable.ajax.reload();
                     }
                 }
             });
@@ -358,7 +507,7 @@
                 type: 'DELETE',
                 dataType: 'json',
                 success:function(data){
-
+                    selectableClassesTable.ajax.reload();
                 },
                 statusCode: {
                     204: function () {
@@ -367,6 +516,40 @@
                 }
             });
 
+        });
+
+        $(document).on("click", ".select-class", function() {
+            var selectedValue = $(this).data("id");
+            $(".plus-icon[data-id='"+selectedValue+"']").hide(0);
+            $(".select-class-loading-icon[data-id='"+selectedValue+"']").css('display','inline');
+            var url =  $(this).data("url");
+            console.log(url);
+            $.ajax({
+                url: url ,
+                type: 'POST',
+                dataType: 'json',
+                success:function(data){
+                    selectableClassesTable.ajax.reload();
+                    associatedClassesTable.ajax.reload();
+                }
+            });
+        });
+
+        $(document).on("click", ".remove-class", function() {
+            var selectedValue = $(this).data("id");
+            $(".remove-class[data-id='"+selectedValue+"']").hide(0);
+            $(".remove-class-loading-icon[data-id='"+selectedValue+"']").css('display','inline');
+            var url =  $(this).data("url");
+            console.log(url);
+            $.ajax({
+                url: url ,
+                type: 'POST',
+                dataType: 'json',
+                success:function(data){
+                    associatedClassesTable.ajax.reload();
+                    selectableClassesTable.ajax.reload();
+                }
+            });
         });
 
 

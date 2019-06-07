@@ -8,9 +8,11 @@
 
 namespace AppBundle\Controller;
 
+use AppBundle\Entity\OntoClass;
 use AppBundle\Entity\OntoNamespace;
 use AppBundle\Entity\Profile;
-use Doctrine\Common\Collections\ArrayCollection;
+use AppBundle\Entity\ProfileAssociation;
+use AppBundle\Entity\Property;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -74,6 +76,9 @@ class ProfileController  extends Controller
         $classes = $em->getRepository('AppBundle:OntoClass')
             ->findClassesByProfileId($profile);
 
+        $selectableClasses = $em->getRepository('AppBundle:OntoClass')
+            ->findClassesForAssociationWithProfileByProfileId($profile);
+
         $properties = $em->getRepository('AppBundle:Property')
             ->findPropertiesByProfileId($profile);
 
@@ -83,6 +88,7 @@ class ProfileController  extends Controller
         return $this->render('profile/edit.html.twig', array(
             'profile' => $profile,
             'classes' => $classes,
+            'selectableClasses' => $selectableClasses,
             'rootNamespaces' => $rootNamespaces,
             'properties' => $properties
         ));
@@ -104,7 +110,7 @@ class ProfileController  extends Controller
             $status = 'Error';
             $message = 'This namespace is not valid';
         }
-        else if ($profile->getNamespaces()->contains($profile)) {
+        else if ($profile->getNamespaces()->contains($namespace)) {
             $status = 'Error';
             $message = 'This namespace is already used by this profile';
         }
@@ -145,6 +151,449 @@ class ProfileController  extends Controller
 
         return new JsonResponse(null, 204);
 
+    }
+
+    /**
+     * @Route("/selectable-classes/profile/{profile}/json", name="selectable_classes_profile_json")
+     * @Method("GET")
+     * @param Profile $profile
+     * @return JsonResponse a Json formatted list representation of OntoClasses selectable by Profile
+     */
+    public function getSelectableClassesByProfile(Profile $profile)
+    {
+        try{
+            $em = $this->getDoctrine()->getManager();
+            $classes = $em->getRepository('AppBundle:OntoClass')
+                ->findClassesForAssociationWithProfileByProfileId($profile);
+            $data['data'] = $classes;
+            $data = json_encode($data);
+        }
+        catch (NotFoundHttpException $e) {
+            return new JsonResponse(null,404, 'content-type:application/problem+json');
+        }
+
+        if(empty($classes)) {
+            return new JsonResponse(null,204, array());
+        }
+
+        return new JsonResponse($data,200, array(), true);
+    }
+
+    /**
+     * @Route("/associated-classes/profile/{profile}/json", name="associated_classes_profile_json")
+     * @Method("GET")
+     * @param Profile $profile
+     * @return JsonResponse a Json formatted list representation of OntoClasses selectable by Profile
+     */
+    public function getAssociatedClassesByProfile(Profile $profile)
+    {
+        try{
+            $em = $this->getDoctrine()->getManager();
+            $classes = $em->getRepository('AppBundle:OntoClass')
+                ->findClassesByProfileId($profile);
+            $data['data'] = $classes;
+            $data = json_encode($data);
+        }
+        catch (NotFoundHttpException $e) {
+            return new JsonResponse(null,404, 'content-type:application/problem+json');
+        }
+
+        if(empty($classes)) {
+            return new JsonResponse(null,204, array());
+        }
+
+        return new JsonResponse($data,200, array(), true);
+    }
+
+    /**
+     * @Route("/profile/{profile}/class/{class}/add", name="profile_class_association")
+     * @Method({ "POST"})
+     * @param OntoClass  $class    The class to be associated with a profile
+     * @param Profile  $profile    The profile to be associated with a namespace
+     * @throws \Exception in case of unsuccessful association
+     * @return JsonResponse a Json formatted namespaces list
+     */
+    public function newProfileClassAssociationAction(OntoClass $class, Profile $profile, Request $request)
+    {
+        $this->denyAccessUnlessGranted('edit', $profile);
+
+        $em = $this->getDoctrine()->getManager();
+        $profileAssociation = $em->getRepository('AppBundle:ProfileAssociation')
+            ->findOneBy(array('profile' => $profile->getId(), 'class' => $class->getId()));
+
+        if (!is_null($profileAssociation)) {
+            if($profileAssociation->getSystemType()->getId() == 5) {
+                $status = 'Error';
+                $message = 'This class is already used by this profile';
+            }
+            else {
+                $systemType = $em->getRepository('AppBundle:SystemType')->find(5); //systemType 5 = selected
+                $profileAssociation->setSystemType($systemType);
+                $em->persist($profileAssociation);
+
+                $em->flush();
+                $status = 'Success';
+                $message = 'Class successfully re-associated';
+            }
+        }
+        else {
+            $em = $this->getDoctrine()->getManager();
+
+            $profileAssociation = new ProfileAssociation();
+            $profileAssociation->setProfile($profile);
+            $profileAssociation->setClass($class);
+            $systemType = $em->getRepository('AppBundle:SystemType')->find(5); //systemType 5 = selected
+            $profileAssociation->setSystemType($systemType);
+            $profileAssociation->setCreator($this->getUser());
+            $profileAssociation->setModifier($this->getUser());
+            $profileAssociation->setCreationTime(new \DateTime('now'));
+            $profileAssociation->setModificationTime(new \DateTime('now'));
+            $em->persist($profileAssociation);
+
+            $em->flush();
+            $status = 'Success';
+            $message = 'Class successfully associated';
+        }
+
+
+        $response = array(
+            'status' => $status,
+            'message' => $message
+        );
+
+        return new JsonResponse($response);
+    }
+
+    /**
+     * @Route("/profile/{profile}/property/{property}/add", name="profile_property_association")
+     * @Method({ "POST"})
+     * @param Property  $property    The property to be associated with a profile
+     * @param Profile  $profile    The profile to be associated with a namespace
+     * @throws \Exception in case of unsuccessful association
+     * @return JsonResponse a Json formatted namespaces list
+     */
+    public function newProfilePropertyAssociationAction(Property $property, Profile $profile, Request $request)
+    {
+        $this->denyAccessUnlessGranted('edit', $profile);
+
+        $em = $this->getDoctrine()->getManager();
+        $profileAssociation = $em->getRepository('AppBundle:ProfileAssociation')
+            ->findOneBy(array('profile' => $profile->getId(), 'property' => $property->getId()));
+
+        if (!is_null($profileAssociation)) {
+            if($profileAssociation->getSystemType()->getId() == 5) {
+                $status = 'Error';
+                $message = 'This property is already used by this profile';
+            }
+            else {
+                $systemType = $em->getRepository('AppBundle:SystemType')->find(5); //systemType 5 = selected
+                $profileAssociation->setSystemType($systemType);
+                $em->persist($profileAssociation);
+
+                $em->flush();
+                $status = 'Success';
+                $message = 'property successfully re-associated';
+            }
+        }
+        else {
+            $em = $this->getDoctrine()->getManager();
+
+            $profileAssociation = new ProfileAssociation();
+            $profileAssociation->setProfile($profile);
+            $profileAssociation->setProperty($property);
+            $systemType = $em->getRepository('AppBundle:SystemType')->find(5); //systemType 5 = selected
+            $profileAssociation->setSystemType($systemType);
+            $profileAssociation->setCreator($this->getUser());
+            $profileAssociation->setModifier($this->getUser());
+            $profileAssociation->setCreationTime(new \DateTime('now'));
+            $profileAssociation->setModificationTime(new \DateTime('now'));
+            $em->persist($profileAssociation);
+
+            $em->flush();
+            $status = 'Success';
+            $message = 'Property successfully associated';
+        }
+
+
+        $response = array(
+            'status' => $status,
+            'message' => $message
+        );
+
+        return new JsonResponse($response);
+    }
+
+    /**
+     * @Route("/profile/{profile}/property/{property}/domain/{domain}/range/{range}/add", name="profile_inherited_property_association")
+     * @Method({ "POST"})
+     * @param Property  $property    The property to be associated with a profile
+     * @param Profile  $profile    The profile to be associated with a property
+     * @param OntoClass  $domain    The domain to be associated
+     * @param OntoClass  $range    The range to be associated
+     * @throws \Exception in case of unsuccessful association
+     * @return JsonResponse a Json formatted namespaces list
+     */
+    public function newProfileInheritedPropertyAssociationAction(Property $property, Profile $profile, OntoClass $domain, OntoClass $range, Request $request)
+    {
+        $this->denyAccessUnlessGranted('edit', $profile);
+
+        $em = $this->getDoctrine()->getManager();
+        $profileAssociation = $em->getRepository('AppBundle:ProfileAssociation')
+            ->findOneBy(array('profile' => $profile->getId(), 'property' => $property->getId(), 'domain' => $domain->getId(), 'range' => $range->getId()));
+
+        if (!is_null($profileAssociation)) {
+            if($profileAssociation->getSystemType()->getId() == 5) {
+                $status = 'Error';
+                $message = 'This property is already used by this profile';
+            }
+            else {
+                $systemType = $em->getRepository('AppBundle:SystemType')->find(5); //systemType 5 = selected
+                $profileAssociation->setSystemType($systemType);
+                $em->persist($profileAssociation);
+
+                $em->flush();
+                $status = 'Success';
+                $message = 'property successfully re-associated';
+            }
+        }
+        else {
+            $em = $this->getDoctrine()->getManager();
+
+            $profileAssociation = new ProfileAssociation();
+            $profileAssociation->setProfile($profile);
+            $profileAssociation->setProperty($property);
+            $profileAssociation->setDomain($domain);
+            $profileAssociation->setRange($range);
+            $systemType = $em->getRepository('AppBundle:SystemType')->find(5); //systemType 5 = selected
+            $profileAssociation->setSystemType($systemType);
+            $profileAssociation->setCreator($this->getUser());
+            $profileAssociation->setModifier($this->getUser());
+            $profileAssociation->setCreationTime(new \DateTime('now'));
+            $profileAssociation->setModificationTime(new \DateTime('now'));
+            $em->persist($profileAssociation);
+
+            $em->flush();
+            $status = 'Success';
+            $message = 'Property successfully associated';
+        }
+
+
+        $response = array(
+            'status' => $status,
+            'message' => $message
+        );
+
+        return new JsonResponse($response);
+    }
+
+    /**
+     * @Route("/profile/{profile}/class/{class}/delete", name="profile_class_disassociation")
+     * @Method({ "POST"})
+     * @param OntoClass  $class    The class to be disassociated from a profile
+     * @param Profile  $profile    The profile to be disassociated from a namespace
+     * @return JsonResponse a Json 204 HTTP response
+     */
+    public function deleteProfileClassAssociationAction(OntoClass $class, Profile $profile, Request $request)
+    {
+        $this->denyAccessUnlessGranted('edit', $profile);
+        $em = $this->getDoctrine()->getManager();
+
+        /*$profile->removeClass($class);
+        $em->persist($profile);*/
+
+
+        $profileAssociation = $em->getRepository('AppBundle:ProfileAssociation')
+            ->findOneBy(array('profile' => $profile->getId(), 'class' => $class->getId()));
+
+        $systemType = $em->getRepository('AppBundle:SystemType')->find(6); //systemType 6 = rejected
+
+        $profileAssociation->setSystemType($systemType);
+        
+        $em->persist($profile);
+        $em->flush();
+
+        return new JsonResponse(null, 204);
+
+    }
+
+    /**
+     * @Route("/profile/{profile}/property/{property}/delete", name="profile_property_disassociation")
+     * @Method({ "POST"})
+     * @param Property  $property    The property to be disassociated from a profile
+     * @param Profile  $profile    The profile to be disassociated from a namespace
+     * @return JsonResponse a Json 204 HTTP response
+     */
+    public function deleteProfilePropertyAssociationAction(Property $property, Profile $profile, Request $request)
+    {
+        $this->denyAccessUnlessGranted('edit', $profile);
+        $em = $this->getDoctrine()->getManager();
+
+
+        $profileAssociation = $em->getRepository('AppBundle:ProfileAssociation')
+            ->findOneBy(array('profile' => $profile->getId(), 'property' => $property->getId()));
+
+        $systemType = $em->getRepository('AppBundle:SystemType')->find(6); //systemType 6 = rejected
+
+        $profileAssociation->setSystemType($systemType);
+
+        $em->persist($profile);
+        $em->flush();
+
+        return new JsonResponse(null, 204);
+
+    }
+
+    /**
+     * @Route("/profile/{profile}/property/{property}/domain/{domain}/range/{range}/delete", name="profile_inherited_property_disassociation")
+     * @Method({ "POST"})
+     * @param Property  $property    The property to be disassociated from a profile
+     * @param Profile  $profile    The profile to be disassociated from a namespace
+     * @param OntoClass  $domain    The domain to be disassociated
+     * @param OntoClass  $range    The range to be disassociated
+     * @return JsonResponse a Json 204 HTTP response
+     */
+    public function deleteProfileInheritedPropertyAssociationAction(Property $property, Profile $profile, OntoClass $domain, OntoClass $range, Request $request)
+    {
+        $this->denyAccessUnlessGranted('edit', $profile);
+        $em = $this->getDoctrine()->getManager();
+
+
+        $profileAssociation = $em->getRepository('AppBundle:ProfileAssociation')
+            ->findOneBy(array('profile' => $profile->getId(), 'property' => $property->getId(), 'domain' => $domain->getId(), 'range' => $range->getId()));
+
+        $systemType = $em->getRepository('AppBundle:SystemType')->find(6); //systemType 6 = rejected
+
+        $profileAssociation->setSystemType($systemType);
+
+        $em->persist($profile);
+        $em->flush();
+
+        return new JsonResponse(null, 204);
+
+    }
+
+    /**
+     * @Route("/profile/{profile}/class/{class}/properties/edit", name="profile_properties_edit")
+     * @param Profile $profile
+     * @param OntoClass $class
+     * @return Response the rendered template
+     */
+    public function editProfilePropertiesAction(OntoClass $class, Profile $profile)
+    {
+        $this->denyAccessUnlessGranted('edit', $profile);
+        //TODO: mettre erreur 403 en cas d'accès à une classe non associée au profil
+        return $this->render('profile/editProperties.html.twig', array(
+            'class' => $class,
+            'profile' => $profile
+        ));
+    }
+
+    /**
+     * @Route("/selectable-outgoing-properties/profile/{profile}/class/{class}/json", name="selectable_outgoing_properties_class_profile_json")
+     * @Method("GET")
+     * @param Profile $profile
+     * @param OntoClass $class
+     * @return JsonResponse a Json formatted list representation of outgoing Properties selectable by Class and Profile
+     */
+    public function getSelectableOutgoingPropertiesByClassAndProfile(OntoClass $class, Profile $profile)
+    {
+        try{
+            $em = $this->getDoctrine()->getManager();
+            $properties = $em->getRepository('AppBundle:Property')
+                ->findOutgoingPropertiesByClassAndProfileId($class, $profile);
+            $data['data'] = $properties;
+            $data = json_encode($data);
+        }
+        catch (NotFoundHttpException $e) {
+            return new JsonResponse(null,404, 'content-type:application/problem+json');
+        }
+
+        if(empty($properties)) {
+            return new JsonResponse(null,204, array());
+        }
+
+        return new JsonResponse($data,200, array(), true);
+    }
+
+    /**
+     * @Route("/selectable-incoming-properties/profile/{profile}/class/{class}/json", name="selectable_incoming_properties_class_profile_json")
+     * @Method("GET")
+     * @param Profile $profile
+     * @param OntoClass $class
+     * @return JsonResponse a Json formatted list representation of incoming Properties selectable by Class and Profile
+     */
+    public function getSelectableIncomingPropertiesByClassAndProfile(OntoClass $class, Profile $profile)
+    {
+        try{
+            $em = $this->getDoctrine()->getManager();
+            $properties = $em->getRepository('AppBundle:Property')
+                ->findIncomingPropertiesByClassAndProfileId($class, $profile);
+            $data['data'] = $properties;
+            $data = json_encode($data);
+        }
+        catch (NotFoundHttpException $e) {
+            return new JsonResponse(null,404, 'content-type:application/problem+json');
+        }
+
+        if(empty($properties)) {
+            return new JsonResponse(null,204, array());
+        }
+
+        return new JsonResponse($data,200, array(), true);
+    }
+
+    /**
+     * @Route("/selectable-outgoing-inherited-properties/profile/{profile}/class/{class}/json", name="selectable_outgoing_inherited_properties_class_profile_json")
+     * @Method("GET")
+     * @param Profile $profile
+     * @param OntoClass $class
+     * @return JsonResponse a Json formatted list representation of outgoing inherited Properties selectable by Class and Profile
+     */
+    public function getSelectableOutgoingInheritedPropertiesByClassAndProfile(OntoClass $class, Profile $profile)
+    {
+        try{
+            $em = $this->getDoctrine()->getManager();
+            $properties = $em->getRepository('AppBundle:Property')
+                ->findOutgoingInheritedPropertiesByClassAndProfileId($class, $profile);
+            $data['data'] = $properties;
+            $data = json_encode($data);
+        }
+        catch (NotFoundHttpException $e) {
+            return new JsonResponse(null,404, 'content-type:application/problem+json');
+        }
+
+        if(empty($properties)) {
+            return new JsonResponse(null,204, array());
+        }
+
+        return new JsonResponse($data,200, array(), true);
+    }
+
+    /**
+     * @Route("/selectable-incoming-inherited-properties/profile/{profile}/class/{class}/json", name="selectable_incoming_inherited_properties_class_profile_json")
+     * @Method("GET")
+     * @param Profile $profile
+     * @param OntoClass $class
+     * @return JsonResponse a Json formatted list representation of incoming inherited Properties selectable by Class and Profile
+     */
+    public function getSelectableIncomingInheritedPropertiesByClassAndProfile(OntoClass $class, Profile $profile)
+    {
+        try{
+            $em = $this->getDoctrine()->getManager();
+            $properties = $em->getRepository('AppBundle:Property')
+                ->findIncomingInheritedPropertiesByClassAndProfileId($class, $profile);
+            $data['data'] = $properties;
+            $data = json_encode($data);
+        }
+        catch (NotFoundHttpException $e) {
+            return new JsonResponse(null,404, 'content-type:application/problem+json');
+        }
+
+        if(empty($properties)) {
+            return new JsonResponse(null,204, array());
+        }
+
+        return new JsonResponse($data,200, array(), true);
     }
 
 }

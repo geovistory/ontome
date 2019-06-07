@@ -44,6 +44,12 @@ class SystemType
     private $textProperties;
 
     /**
+     * @Assert\NotBlank()
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\ProfileAssociation", mappedBy="systemType")
+     */
+    private $profileAssociations;
+
+    /**
      * @ORM\Column(type="text", nullable=true)
      */
     private $notes;
@@ -75,6 +81,7 @@ class SystemType
     public function __construct()
     {
         $this->textProperties = new ArrayCollection();
+        $this->profileAssociations = new ArrayCollection();
     }
 
     /**
@@ -148,6 +155,16 @@ class SystemType
     {
         return $this->textProperties;
     }
+
+    /**
+     * @return ArrayCollection|ProfileAssociation[]
+     */
+    public function getProfileAssociations()
+    {
+        return $this->profileAssociations;
+    }
+
+
 
     /**
      * @return string a human readable identification of the object

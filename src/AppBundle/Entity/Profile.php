@@ -107,8 +107,11 @@ class Profile
     private $labels;
 
     /**
-     * @ORM\ManyToMany(targetEntity="OntoClass", mappedBy="profiles")
-     * @ORM\OrderBy({"identifierInNamespace" = "ASC"})
+     * @ORM\ManyToMany(targetEntity="AppBundle\Entity\OntoClass",  inversedBy="profiles", fetch="EXTRA_LAZY")
+     * @ORM\JoinTable(schema="che", name="associates_profile",
+     *      joinColumns={@ORM\JoinColumn(name="fk_profile", referencedColumnName="pk_profile")},
+     *      inverseJoinColumns={@ORM\JoinColumn(name="fk_class", referencedColumnName="pk_class")}
+     *      )
      */
     private $classes;
 
@@ -125,12 +128,19 @@ class Profile
 
     /**
      * @ORM\ManyToMany(targetEntity="OntoNamespace",  inversedBy="profiles", fetch="EXTRA_LAZY")
-     * @ORM\JoinTable(schema="che", name="associates_namespace",
+     * @ORM\JoinTable(schema="che", name="associates_referenced_namespace",
      *      joinColumns={@ORM\JoinColumn(name="fk_profile", referencedColumnName="pk_profile")},
-     *      inverseJoinColumns={@ORM\JoinColumn(name="fk_namespace", referencedColumnName="pk_namespace")}
+     *      inverseJoinColumns={@ORM\JoinColumn(name="fk_referenced_namespace", referencedColumnName="pk_namespace")}
      *      )
      */
     private $namespaces;
+
+    /**
+     * @Assert\Valid()
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\ProfileAssociation", mappedBy="profile", cascade={"persist"})
+     * @ORM\OrderBy({"systemType" = "ASC"})
+     */
+    private $profileAssociations;
 
     public function __construct()
     {
@@ -139,6 +149,8 @@ class Profile
         $this->labels = new ArrayCollection();
         $this->projects = new ArrayCollection();
         $this->namespaces = new ArrayCollection();
+        $this->classes = new ArrayCollection();
+        $this->profileAssociations = new ArrayCollection();
     }
 
     /**
@@ -301,6 +313,12 @@ class Profile
         return $this->standardLabel;
     }
 
+    public function __toString()
+    {
+        return $this->standardLabel;
+    }
+
+
     public function addNamespace(OntoNamespace $namespace)
     {
         if ($this->namespaces->contains($namespace)) {
@@ -309,8 +327,21 @@ class Profile
         $this->namespaces[] = $namespace;
     }
 
+    public function addClass(OntoClass $class)
+    {
+        if ($this->classes->contains($class)) {
+            return;
+        }
+        $this->classes[] = $class;
+    }
+
     public function removeNamespace(OntoNamespace $namespace)
     {
         $this->namespaces->removeElement($namespace);
+    }
+
+    public function removeClass(OntoClass $class)
+    {
+        $this->classes->removeElement($class);
     }
 }

@@ -95,7 +95,7 @@ class OntoClass
 
 
     /**
-     * @ORM\ManyToMany(targetEntity="OntoNamespace",  inversedBy="OntoClass", fetch="EXTRA_LAZY")
+     * @ORM\ManyToMany(targetEntity="OntoNamespace",  inversedBy="classes", fetch="EXTRA_LAZY")
      * @ORM\JoinTable(schema="che", name="associates_namespace",
      *      joinColumns={@ORM\JoinColumn(name="fk_class", referencedColumnName="pk_class")},
      *      inverseJoinColumns={@ORM\JoinColumn(name="fk_namespace", referencedColumnName="pk_namespace")}
@@ -120,7 +120,7 @@ class OntoClass
     private $textProperties;
 
     /**
-     * @ORM\ManyToMany(targetEntity="Profile",  inversedBy="OntoClass", fetch="EXTRA_LAZY")
+     * @ORM\ManyToMany(targetEntity="Profile",  mappedBy="classes", fetch="EXTRA_LAZY")
      * @ORM\JoinTable(schema="che", name="associates_profile",
      *      joinColumns={@ORM\JoinColumn(name="fk_class", referencedColumnName="pk_class")},
      *      inverseJoinColumns={@ORM\JoinColumn(name="fk_profile", referencedColumnName="pk_profile")}
@@ -139,6 +139,13 @@ class OntoClass
      * @ORM\JoinColumn(name="fk_ongoing_namespace", referencedColumnName="pk_namespace", nullable=true)
      */
     private $ongoingNamespace;
+
+    /**
+     * @Assert\Valid()
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\ProfileAssociation", mappedBy="class", cascade={"persist"})
+     * @ORM\OrderBy({"systemType" = "ASC"})
+     */
+    private $profileAssociations;
 
     /**
      * @ORM\OneToMany(targetEntity="Property", mappedBy="domain", cascade={"persist"})
@@ -359,6 +366,14 @@ class OntoClass
     }
 
     /**
+     * @return ArrayCollection|ProfileAssociation[]
+     */
+    public function getProfileAssociations()
+    {
+        return $this->profileAssociations;
+    }
+
+    /**
      * @return string a human readable identification of the object
      */
     public function getObjectIdentification()
@@ -473,6 +488,24 @@ class OntoClass
             return;
         }
         $this->propertiesAsDomain[] = $property;
+    }
+
+    public function addProfile(Profile $profile)
+    {
+        if ($this->profiles->contains($profile)) {
+            return;
+        }
+        $this->profiles[] = $profile;
+    }
+
+    public function addProfileAssociation(ProfileAssociation $profileAssociation)
+    {
+        if ($this->profileAssociations->contains($profileAssociation)) {
+            return;
+        }
+        $this->profileAssociations[] = $profileAssociation;
+        // needed to update the owning side of the relationship!
+        $profileAssociation->setClass($this);
     }
 
     public function getInvertedLabel()

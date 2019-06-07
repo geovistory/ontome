@@ -302,17 +302,146 @@ class PropertyRepository extends EntityRepository
      * @return array
      */
     public function findPropertiesByProfileId(Profile $profile){
+        return $this->createQueryBuilder('property')
+            ->join('property.namespaces','nspc')
+            ->join('property.profiles', 'profile')
+            ->where('profile.id = :profile')
+            ->addSelect('profile')
+            ->addSelect('nspc')
+            ->leftJoin('nspc.referencedVersion', 'referencedVersion')
+            ->addSelect('referencedVersion')
+            ->orderBy('property.id','DESC')
+            ->setParameter('profile', $profile->getId())
+            ->getQuery()
+            ->execute();
+    }
+
+    /**
+     * @param OntoClass $class
+     * @param Profile $profile
+     * @return array
+     */
+    public function findOutgoingPropertiesByClassAndProfileId(OntoClass $class, Profile $profile){
         $conn = $this->getEntityManager()
             ->getConnection();
 
-        $sql = "SELECT DISTINCT pk_property AS id,
-                        standard_label AS \"standardLabel\",
-                        identifier_in_namespace AS \"identifierInNamespace\",
-                        root_namespace AS \"rootNamespace\"                     
-                FROM api.v_property_profile_project WHERE pk_profile = :profile;";
+        $sql = "SELECT DISTINCT identifier_property AS property,
+                                identifier_range AS range,
+                                pk_property AS \"propertyId\",
+                                pk_range AS \"rangeId\",
+                                identifier_domain AS domain,
+                                che.get_root_namespace(nsp.pk_namespace) AS \"rootNamespaceId\",
+                                (SELECT label FROM che.get_namespace_labels(nsp.pk_namespace) WHERE language_iso_code = 'en') AS namespace,
+                                CASE
+                                    WHEN aspro.fk_system_type IS NULL THEN 999
+                                    ELSE aspro.fk_system_type
+                                END AS fk_system_type
+                FROM  che.v_properties_with_domain_range
+                JOIN che.associates_namespace asnsp ON asnsp.fk_property = pk_property
+                JOIN che.namespace nsp ON nsp.pk_namespace = asnsp.fk_namespace 
+                LEFT JOIN che.associates_profile aspro ON aspro.fk_property = pk_property AND aspro.fk_profile = :profile
+                
+                WHERE pk_domain = :class;";
 
         $stmt = $conn->prepare($sql);
-        $stmt->execute(array('profile' => $profile->getId()));
+        $stmt->execute(array('class' => $class->getId(), 'profile' => $profile->getId()));
+
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * @param OntoClass $class
+     * @param Profile $profile
+     * @return array
+     */
+    public function findIncomingPropertiesByClassAndProfileId(OntoClass $class, Profile $profile){
+        $conn = $this->getEntityManager()
+            ->getConnection();
+
+        $sql = "SELECT  pk_domain AS \"domainId\",
+                        identifier_domain AS domain,
+                        identifier_property AS property,
+                        pk_property AS \"propertyId\",
+                        pk_range AS \"rangeId\",
+                        identifier_range AS range,
+                        che.get_root_namespace(nsp.pk_namespace) AS \"rootNamespaceId\",
+                        (SELECT label FROM che.get_namespace_labels(nsp.pk_namespace) WHERE language_iso_code = 'en') AS namespace,
+                        CASE
+                            WHEN aspro.fk_system_type IS NULL THEN 999
+                            ELSE aspro.fk_system_type
+                        END AS fk_system_type
+                FROM  che.v_properties_with_domain_range
+                JOIN che.associates_namespace asnsp ON asnsp.fk_property = pk_property
+                JOIN che.namespace nsp ON nsp.pk_namespace = asnsp.fk_namespace 
+                LEFT JOIN che.associates_profile aspro ON aspro.fk_property = pk_property AND aspro.fk_profile = :profile
+                WHERE pk_range = :class;";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->execute(array('class' => $class->getId(), 'profile' => $profile->getId()));
+
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * @param OntoClass $class
+     * @param Profile $profile
+     * @return array
+     */
+    public function findOutgoingInheritedPropertiesByClassAndProfileId(OntoClass $class, Profile $profile){
+        $conn = $this->getEntityManager()
+            ->getConnection();
+
+        $sql = "SELECT DISTINCT identifier_in_namespace AS domain,
+                                pk_parent AS \"parentClassId\",
+                                parent_identifier AS \"parentClass\",
+                                pk_property AS \"propertyId\",
+                                identifier_property AS property,
+                                pk_range AS \"rangeId\",
+                                identifier_range AS range,
+                                replace(ancestors, '|', '→') AS ancestors,
+                                (SELECT label FROM che.get_namespace_labels(nsp.pk_namespace) WHERE language_iso_code = 'en') AS namespace,
+                                CASE
+                                    WHEN aspro.fk_system_type IS NULL THEN 999
+                                    ELSE aspro.fk_system_type
+                                    END AS fk_system_type
+                FROM che.class_outgoing_inherited_properties(:class)
+                JOIN che.associates_namespace asnsp ON asnsp.fk_property = pk_property
+                JOIN che.namespace nsp ON nsp.pk_namespace = asnsp.fk_namespace
+                LEFT JOIN che.associates_profile aspro ON aspro.fk_property = pk_property AND aspro.fk_inheriting_domain_class = :class AND aspro.fk_inheriting_range_class = pk_range AND aspro.fk_profile = :profile;";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->execute(array('class' => $class->getId(), 'profile' => $profile->getId()));
+
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * @param OntoClass $class
+     * @return array
+     */
+    public function findincomingInheritedPropertiesByClassAndProfileId(OntoClass $class, Profile $profile){
+        $conn = $this->getEntityManager()
+            ->getConnection();
+
+        $sql = "SELECT  pk_domain AS \"domainId\",
+                        identifier_domain AS domain,
+                        identifier_property AS property,
+                        pk_property AS \"propertyId\",
+                        pk_parent AS \"rangeId\",
+                        parent_identifier AS range,
+                        replace(ancestors, '|', '→') AS ancestors,
+                        (SELECT label FROM che.get_namespace_labels(nsp.pk_namespace) WHERE language_iso_code = 'en') AS namespace,
+                        CASE
+                            WHEN aspro.fk_system_type IS NULL THEN 999
+                            ELSE aspro.fk_system_type
+                        END AS fk_system_type
+                FROM che.class_ingoing_inherited_properties(:class)
+                JOIN che.associates_namespace asnsp ON asnsp.fk_property = pk_property
+                JOIN che.namespace nsp ON nsp.pk_namespace = asnsp.fk_namespace
+                LEFT JOIN che.associates_profile aspro ON aspro.fk_property = pk_property AND aspro.fk_inheriting_domain_class = :class AND aspro.fk_inheriting_range_class = pk_parent AND aspro.fk_profile = :profile;";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->execute(array('class' => $class->getId(), 'profile' => $profile->getId()));
 
         return $stmt->fetchAll();
     }
