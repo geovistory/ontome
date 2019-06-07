@@ -163,22 +163,58 @@
             <table class="table table-striped" id="properties-table">
                 <thead>
                 <tr>
-                    <th>Property</th>
+                    <th class="text-right">Domain</th>
+                    <th></th>
+                    <th class="text-center">Property</th>
+                    <th></th>
+                    <th>Range</th>
                     <th>Namespace</th>
+                    <th>Status</th>
                 </tr>
                 </thead>
                 <tbody>
                 {% for property in properties %}
                     <tr>
-                        <td>
-                            <a href="{{ path('property_show', {
-                                'id': property.id
-                            }) }}">
-                                {{ property.standardLabel }} – {{ property.identifierInNamespace }}
+                        <td class="text-nowrap text-right small">
+                            {% if property.domain is not null %}
+                                <a href="{{ path('class_show', {'id': property.domain.id }) }}">
+                                    {{ property.domain }}
+                                </a>
+                            {% endif %}
+                        </td>
+                        <td class="text-nowrap small" style="padding-left: 30px;">
+                            {% if property.domainMinQuantifier is not null and property.domainMaxQuantifier is not null %}
+                                ({% if  property.domainMinQuantifier != -1 %}{{ property.domainMinQuantifier }}{% else %}n{% endif %},{% if  property.domainMaxQuantifier != -1 %}{{ property.domainMaxQuantifier }}{% else %}n{% endif %})
+                            {% endif %}
+                        </td>
+                        <td class="text-nowrap text-center">
+                            <a href="{{ path('property_show', {'id': property.id}) }}">
+                                {{ property }}
                             </a>
                         </td>
+                        <td class="text-nowrap small" style="padding-right: 30px;">
+                            {% if property.rangeMinQuantifier is not null and property.rangeMaxQuantifier is not null %}
+                                ({% if  property.rangeMinQuantifier != -1 %}{{ property.rangeMinQuantifier }}{% else %}n{% endif %},{% if  property.rangeMaxQuantifier != -1 %}{{ property.rangeMaxQuantifier }}{% else %}n{% endif %})
+                            {% endif %}
+                        </td>
+                        <td class="text-nowrap small">
+                            {% if property.range is not null %}
+                                <a href="{{ path('class_show', {'id': property.range.id }) }}">
+                                    {{ property.range }}
+                                </a>
+                            {% endif %}
+                        </td>
                         <td>
-                            {{ property.rootNamespace }}
+                            {% if property.namespaces|first.referencedVersion is not null %}
+                                {{ property.namespaces|first.referencedVersion }}
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% for profileAssociation in property.profileAssociations %}
+                                {% if profileAssociation.profile.id == profile.id %}
+                                    {{ profileAssociation.systemType }}
+                                {% endif %}
+                            {% endfor %}
                         </td>
                     </tr>
                 {% endfor %}
@@ -269,6 +305,7 @@
             ajax: urlAssociatedClasses,
             dataSrc: 'data',
             columns: [
+                { data: null },
                 { data: 'id' },
                 { data: 'identifierInNamespace' },
                 { data: 'standardLabel' },
@@ -278,26 +315,39 @@
             ],
             columnDefs: [
                 {
-                    targets: 2,
+                    targets: 0,
                     render: function ( data, type, row, meta ) {
-                        var urlClass = '{{ path("class_show", {'id' : 'classID'}) }}';
-                        urlClass = urlClass.replace("classID", row.id);
 
                         var urlRemoveClass = '{{ path("profile_class_disassociation", {'profile' : 'profileID', 'class' : 'classID'}) }}';
                         urlRemoveClass = urlRemoveClass.replace("profileID", profileID);
                         urlRemoveClass = urlRemoveClass.replace("classID", row.id);
+                        if(row.associationType == 'selected') {
+                            return '<a data-id="' + row.id + '" data-url="' + urlRemoveClass + '" class="remove-class"><span class="glyphicon glyphicon-remove text-danger" aria-hidden="true"></span></a><span class="remove-class-loading-icon" data-id="' + row.id + '" style="display: none"><span class="fas fa-spinner fa-spin"></span></span>';
+                        }
+                        else return '';
+                    }
+                },
+                {
+                    targets: 3,
+                    render: function ( data, type, row, meta ) {
+                        var urlClass = '{{ path("class_show", {'id' : 'classID'}) }}';
+                        urlClass = urlClass.replace("classID", row.id);
 
-                        return '<a data-id="'+row.id+'" data-url="'+urlRemoveClass+'" class="remove-class"><span class="glyphicon glyphicon-remove text-danger" aria-hidden="true"></span></a><span class="remove-class-loading-icon" data-id="'+row.id+'" style="display: none"><span class="fas fa-spinner fa-spin"></span></span>&nbsp;<a href="'+urlClass+'">'+data+' – '+row.identifierInNamespace+'</a>';
+                        return '<a href="' + urlClass + '">' + data + ' – ' + row.identifierInNamespace + '</a>';
+
                     }
                 },
                 {
                     targets: -1,
                     "data": null,
                     render: function ( data, type, row, meta ) {
-                        var urlSelectProperties = '{{ path("profile_properties_edit", {'profile' : 'profileID', 'class' : 'classID'}) }}';
-                        urlSelectProperties = urlSelectProperties.replace("profileID", profileID);
-                        urlSelectProperties = urlSelectProperties.replace("classID", row.id);
-                        return '<a href="'+urlSelectProperties+'"><span class="glyphicon glyphicon-th-list"></span></a>';
+                        if(row.associationType == 'selected'){
+                            var urlSelectProperties = '{{ path("profile_properties_edit", {'profile' : 'profileID', 'class' : 'classID'}) }}';
+                            urlSelectProperties = urlSelectProperties.replace("profileID", profileID);
+                            urlSelectProperties = urlSelectProperties.replace("classID", row.id);
+                            return '<a href="' + urlSelectProperties + '"><span class="glyphicon glyphicon-th-list"></span></a>';
+                        }
+                        else return '';
                     }
                 },
                 {
@@ -330,7 +380,33 @@
                 }
             ]
         });
-        $('#properties-table').DataTable();
+        $('#properties-table').DataTable({
+            initComplete: function(){
+                this.api().columns([6]).every(function(){
+                    var column = this;
+                    var select = $('<select id="properties-status-select"><option value=""></option></select>')
+                        .appendTo($(column.header()))
+                        .on('change', function(){
+                            var val = $.fn.dataTable.util.escapeRegex(
+                                $(this).val()
+                            );
+
+                            column
+                                .search(val ? '^'+val+'$' : '', true, false)
+                                .draw();
+                        });
+
+                    $(select).click(function(e){
+                        e.stopPropagation();
+                    });
+
+                    column.data().unique().sort().each(function(d, j){
+                        select.append('<option value="'+d+'">'+d+'</option>')
+                    });
+                });
+            }
+        });
+        $("#properties-status-select").val('Selected in profile');
         $('#additional-notes-table').DataTable();
         $('#namespaces-table').DataTable();
 

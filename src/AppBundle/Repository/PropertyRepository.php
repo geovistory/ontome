@@ -302,19 +302,18 @@ class PropertyRepository extends EntityRepository
      * @return array
      */
     public function findPropertiesByProfileId(Profile $profile){
-        $conn = $this->getEntityManager()
-            ->getConnection();
-
-        $sql = "SELECT DISTINCT pk_property AS id,
-                        standard_label AS \"standardLabel\",
-                        identifier_in_namespace AS \"identifierInNamespace\",
-                        root_namespace AS \"rootNamespace\"                     
-                FROM api.v_property_profile_project WHERE pk_profile = :profile;";
-
-        $stmt = $conn->prepare($sql);
-        $stmt->execute(array('profile' => $profile->getId()));
-
-        return $stmt->fetchAll();
+        return $this->createQueryBuilder('property')
+            ->join('property.namespaces','nspc')
+            ->join('property.profiles', 'profile')
+            ->where('profile.id = :profile')
+            ->addSelect('profile')
+            ->addSelect('nspc')
+            ->leftJoin('nspc.referencedVersion', 'referencedVersion')
+            ->addSelect('referencedVersion')
+            ->orderBy('property.id','DESC')
+            ->setParameter('profile', $profile->getId())
+            ->getQuery()
+            ->execute();
     }
 
     /**
