@@ -327,6 +327,14 @@
                 }
             });
             $('#additional-notes-table').DataTable();
+
+
+            $("a[href='#graph']").click(
+                function(){
+                    $(document).ready(function(){
+                        window.location.reload();
+                    });
+                });
         } );
     </script>
 
