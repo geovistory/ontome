@@ -21,7 +21,7 @@ class ProfileRepository extends EntityRepository
         $conn = $this->getEntityManager()
             ->getConnection();
 
-        $sql = "SELECT get_webvowl_json_for_profile AS json FROM api.get_webvowl_json_for_profile(:profile)";
+        $sql = "SELECT get_webvowl_json_for_profile AS json FROM che.get_webvowl_json_for_profile(:profile)";
 
         $stmt = $conn->prepare($sql);
         $stmt->execute(array('profile' => $profile->getId()));
