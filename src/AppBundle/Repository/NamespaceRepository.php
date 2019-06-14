@@ -98,7 +98,7 @@ class NamespaceRepository extends EntityRepository
         $conn = $this->getEntityManager()
             ->getConnection();
 
-        $sql = "SELECT get_webvowl_json_for_namespace AS json FROM api.get_webvowl_json_for_namespace(:namespace)";
+        $sql = "SELECT get_webvowl_json_for_namespace AS json FROM che.get_webvowl_json_for_namespace(:namespace)";
 
         $stmt = $conn->prepare($sql);
         $stmt->execute(array('namespace' => $namespace->getId()));
