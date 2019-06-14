@@ -179,6 +179,10 @@
             $('ul.navi a').click(function(){
                 $('ul.navi a').attr('href', $('ul.navi a').attr('href')+window.location.hash);
             })
+
+            $.extend( true, $.fn.dataTable.defaults, {
+                "pageLength": 50
+            } );
         });
     </script>
 {% endblock %}

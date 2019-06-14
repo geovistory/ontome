@@ -408,7 +408,7 @@ class ProfileController  extends Controller
         $systemType = $em->getRepository('AppBundle:SystemType')->find(6); //systemType 6 = rejected
 
         $profileAssociation->setSystemType($systemType);
-        
+
         $em->persist($profile);
         $em->flush();
 
@@ -594,6 +594,21 @@ class ProfileController  extends Controller
         }
 
         return new JsonResponse($data,200, array(), true);
+    }
+
+    /**
+     * @Route("/profile/{id}/json", name="profile_json")
+     * @Method("GET")
+     * @param Profile $profile
+     * @return JsonResponse a Json formatted graph representation of Profile
+     */
+    public function getGraphJson(Profile $profile)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $profile = $em->getRepository('AppBundle:Profile')
+            ->findProfileGraph($profile);
+
+        return new JsonResponse($profile[0]['json'],200, array(), true);
     }
 
 }

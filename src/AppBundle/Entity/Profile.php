@@ -14,7 +14,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Class Profile
- * @ORM\Entity
+ * @ORM\Entity(repositoryClass="AppBundle\Repository\ProfileRepository")
  * @ORM\Table(schema="che", name="profile")
  */
 class Profile

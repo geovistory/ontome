@@ -336,7 +336,7 @@ class PropertyRepository extends EntityRepository
                                     WHEN aspro.fk_system_type IS NULL THEN 999
                                     ELSE aspro.fk_system_type
                                 END AS fk_system_type
-                FROM  che.v_properties_with_domain_range
+                FROM che.v_properties_with_domain_range
                 JOIN che.associates_namespace asnsp ON asnsp.fk_property = pk_property
                 JOIN che.namespace nsp ON nsp.pk_namespace = asnsp.fk_namespace 
                 LEFT JOIN che.associates_profile aspro ON aspro.fk_property = pk_property AND aspro.fk_profile = :profile
@@ -419,7 +419,7 @@ class PropertyRepository extends EntityRepository
      * @param OntoClass $class
      * @return array
      */
-    public function findincomingInheritedPropertiesByClassAndProfileId(OntoClass $class, Profile $profile){
+    public function findIncomingInheritedPropertiesByClassAndProfileId(OntoClass $class, Profile $profile){
         $conn = $this->getEntityManager()
             ->getConnection();
 
