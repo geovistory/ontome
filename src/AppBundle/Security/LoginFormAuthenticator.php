@@ -56,15 +56,13 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator
 
     public function getCredentials(Request $request)
     {
-        if(!is_null($request->request->get('_target_path')))
+        $session = $request->getSession();
+        if(!is_null($request->get('_target_path'))
+            && explode("#", basename($request->request->get('_target_path')))[0] != ''
+            && is_null($session->get('trueReferer'))
+            && is_null($session->get('_security.main.target_path')))
         {
-            $session = $request->getSession();
-            $referer = $request->request->get('_target_path');
-
-            if(explode("#", basename($referer))[0] != 'login')
-            {
-                $session->set('trueReferer', $referer);
-            }
+            $session->set('trueReferer', $request->get('_target_path'));
         }
 
         $isLoginSubmit = $request->getPathInfo() === '/login' && $request->isMethod('POST');
@@ -114,18 +112,30 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator
         $session = $request->getSession();
         $targetPath = null;
 
-        if(is_null($session->get('trueReferer')))
+        if(!is_null($session->get('_security.main.target_path')))
         {
-            if($request->request->get('_target_path')) {
-                $targetPath = $request->request->get('_target_path');
-            }
-        }
-        else
-        {
-            $targetPath = $session->get('trueReferer');
+            $targetPath = $session->get('_security.main.target_path');
         }
 
-        if (!$targetPath) {
+        if(is_null($targetPath) && !is_null($session->get('trueReferer')))
+        {
+            if(explode("#", basename($session->get('trueReferer')))[0] != 'login')
+            {
+                $targetPath = $session->get('trueReferer');
+            }
+        }
+
+        if(is_null($targetPath) && !is_null($request->get('_target_path'))
+            && explode("#", basename($request->get('_target_path')))[0] != ''
+            && is_null($targetPath))
+        {
+            if(explode("#", basename($request->get('_target_path')))[0] != 'login')
+            {
+                $targetPath = $request->get('_target_path');
+            }
+        }
+
+        if (is_null($targetPath)) {
             $targetPath = $this->router->generate('home');
         }
 
