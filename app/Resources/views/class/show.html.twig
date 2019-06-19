@@ -100,6 +100,30 @@
                         </div>
                     </div>
                     {% endif %}
+                    {% if class.entityAssociations|length > 0 %}
+                    <div class="row">
+                        <div class="col-lg-2">
+                            <p>Relations:</p>
+                        </div>
+                        <div class="col-lg-10">
+                            <ul class="list-unstyled">
+                            {% for relation in class.entityAssociations %}
+                                <li>{{ relation.systemType.standardLabel }}
+                                    {% if relation.sourceClass.id == class.id %}
+                                    <a href="{{ path("class_show", {'id': relation.targetClass.id }) }}">
+                                        {{ relation.targetClass.invertedLabel }}
+                                    </a>
+                                    {% else %}
+                                    <a href="{{ path("class_show", {'id': relation.sourceClass.id }) }}">
+                                        {{ relation.sourceClass.invertedLabel }}
+                                    </a>
+                                    {% endif %}
+                                </li>
+                            {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                    {% endif %}
                     <div class="row">
                         <div class="col-lg-2">
                             <p>Scope note:</p>

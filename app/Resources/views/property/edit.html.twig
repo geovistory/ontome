@@ -131,6 +131,30 @@
                             {% endif %}
                         </div>
                     </div>
+                    {% if property.entityAssociations|length > 0 %}
+                    <div class="row">
+                        <div class="col-lg-2">
+                            <p>Relations:</p>
+                        </div>
+                        <div class="col-lg-10">
+                            <ul class="list-unstyled">
+                                {% for relation in property.entityAssociations %}
+                                    <li>{{ relation.systemType.standardLabel }}
+                                        {% if relation.sourceProperty.id == property.id %}
+                                            <a href="{{ path("property_show", {'id': relation.targetProperty.id }) }}">
+                                                {{ relation.targetProperty.invertedLabel }}
+                                            </a>
+                                        {% else %}
+                                            <a href="{{ path("property_show", {'id': relation.sourceProperty.id }) }}">
+                                                {{ relation.sourceProperty.invertedLabel }}
+                                            </a>
+                                        {% endif %}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                    {% endif %}
                     <div class="row">
                         <div class="col-lg-2">
                             <p>Scope note:</p>
