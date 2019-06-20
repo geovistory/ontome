@@ -209,9 +209,9 @@ class ClassRepository extends EntityRepository
         $sql = "SELECT DISTINCT pk_class AS id,
                         class_standard_label AS \"standardLabel\",
                         identifier_in_namespace AS \"identifierInNamespace\" ,
-                        root_namespace AS \"rootNamespace\" ,
+                        namespace AS \"namespace\" ,
                         profile_association_type AS \"associationType\"
-                FROM che.v_classes_all_profile_project WHERE pk_profile = :profile;";
+                FROM che.v_all_classes_profile WHERE fk_profile = :profile;";
         $stmt = $conn->prepare($sql);
         $stmt->execute(array('profile' => $profile->getId()));
 
@@ -227,21 +227,47 @@ class ClassRepository extends EntityRepository
             ->getConnection();
 
         $sql = "SELECT DISTINCT cls.pk_class AS \"classId\",
+                        cls.identifier_in_namespace AS \"identifierInNamespace\",
                         cls.standard_label AS \"standardLabel\",
-                        rnsp.standard_label AS \"rootNamespace\"
+                        nsp.standard_label AS \"namespace\"
                 FROM che.class cls
                 JOIN che.associates_namespace asnsp ON cls.pk_class = asnsp.fk_class
                 JOIN che.associates_referenced_namespace arfnsp ON asnsp.fk_namespace = arfnsp.fk_referenced_namespace
                 JOIN che.namespace nsp ON asnsp.fk_namespace = nsp.pk_namespace
-                JOIN che.namespace rnsp ON rnsp.pk_namespace = nsp.fk_top_level_namespace
                 WHERE arfnsp.fk_profile = :profile
                 EXCEPT
-                SELECT pk_class, class_standard_label, root_namespace
-                FROM che.v_classes_all_profile_project WHERE pk_profile = :profile;";
+                SELECT pk_class, identifier_in_namespace, class_standard_label, namespace
+                FROM che.v_all_classes_profile WHERE fk_profile = :profile AND profile_association_type = 'selected';";
         $stmt = $conn->prepare($sql);
         $stmt->execute(array('profile' => $profile->getId()));
 
         return $stmt->fetchAll();
+    }
+
+    /**
+     * @param Profile $profile
+     * @param OntoClass $class
+     * @return array
+     */
+    public function findInferredClassesByProfileAndClassId(Profile $profile, OntoClass $class){
+        $conn = $this->getEntityManager()
+            ->getConnection();
+
+        $sql = "SELECT DISTINCT cls.pk_class
+                FROM che.associates_profile aspro
+                JOIN che.property prop ON aspro.fk_property = prop.pk_property
+                JOIN che.class cls ON prop.has_domain = cls.pk_class
+                WHERE aspro.fk_profile = :profile AND fk_property IS NOT NULL AND aspro.fk_system_type = 5 AND cls.pk_class = :class
+                UNION
+                SELECT DISTINCT cls.pk_class
+                FROM che.associates_profile aspro
+                JOIN che.property prop ON aspro.fk_property = prop.pk_property
+                JOIN che.class cls ON prop.has_range = cls.pk_class
+                WHERE aspro.fk_profile = :profile AND fk_property IS NOT NULL AND aspro.fk_system_type = 5 AND cls.pk_class = :class;";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute(array('profile' => $profile->getId(), 'class' => $class->getId()));
+
+        return $stmt->fetchColumn();
     }
 
 

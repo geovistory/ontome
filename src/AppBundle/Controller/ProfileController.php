@@ -39,10 +39,14 @@ class ProfileController  extends Controller
         $properties = $em->getRepository('AppBundle:Property')
             ->findPropertiesByProfileId($profile);
 
+        $profileAssociations = $em->getRepository('AppBundle:ProfileAssociation')
+            ->findBy(array('profile' => $profile));
+
         return $this->render('profile/show.html.twig', array(
             'profile' => $profile,
             'classes' => $classes,
-            'properties' => $properties
+            'properties' => $properties,
+            'profileAssociations' => $profileAssociations
         ));
 
     }
@@ -85,12 +89,16 @@ class ProfileController  extends Controller
         $rootNamespaces = $em->getRepository('AppBundle:OntoNamespace')
             ->findAllNonAssociatedToProfileByProfileId($profile);
 
+        $profileAssociations = $em->getRepository('AppBundle:ProfileAssociation')
+            ->findBy(array('profile' => $profile));
+
         return $this->render('profile/edit.html.twig', array(
             'profile' => $profile,
             'classes' => $classes,
             'selectableClasses' => $selectableClasses,
             'rootNamespaces' => $rootNamespaces,
-            'properties' => $properties
+            'properties' => $properties,
+            'profileAssociations' => $profileAssociations
         ));
     }
 
@@ -401,14 +409,21 @@ class ProfileController  extends Controller
         /*$profile->removeClass($class);
         $em->persist($profile);*/
 
+        $inferredClassId = $em->getRepository('AppBundle:OntoClass')
+            ->findInferredClassesByProfileAndClassId($profile, $class);
 
-        $profileAssociation = $em->getRepository('AppBundle:ProfileAssociation')
-            ->findOneBy(array('profile' => $profile->getId(), 'class' => $class->getId()));
 
-        $systemType = $em->getRepository('AppBundle:SystemType')->find(6); //systemType 6 = rejected
+        if($class->getId() == $inferredClassId) {
+            $profile->removeClass($class);
+        }
+        else {
+            $profileAssociation = $em->getRepository('AppBundle:ProfileAssociation')
+                ->findOneBy(array('profile' => $profile->getId(), 'class' => $class->getId()));
 
-        $profileAssociation->setSystemType($systemType);
+            $systemType = $em->getRepository('AppBundle:SystemType')->find(6); //systemType 6 = rejected
 
+            $profileAssociation->setSystemType($systemType);
+        }
         $em->persist($profile);
         $em->flush();
 
@@ -497,7 +512,7 @@ class ProfileController  extends Controller
      */
     public function getSelectableOutgoingPropertiesByClassAndProfile(OntoClass $class, Profile $profile)
     {
-        try{
+        try {
             $em = $this->getDoctrine()->getManager();
             $properties = $em->getRepository('AppBundle:Property')
                 ->findOutgoingPropertiesByClassAndProfileId($class, $profile);

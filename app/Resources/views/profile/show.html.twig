@@ -164,7 +164,7 @@
                             </td>
                             <td>{{ class.associationType }}</td>
                             <td>
-                                {{ class.rootNamespace }}
+                                {{ class.namespace }}
                             </td>
                         </tr>
                     {% endfor %}
@@ -186,48 +186,52 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for property in properties %}
+                    {% for profileAssociation in profileAssociations if profileAssociation.property is not null %}
                         <tr>
                             <td class="text-nowrap text-right small">
-                                {% if property.domain is not null %}
-                                    <a href="{{ path('class_show', {'id': property.domain.id }) }}">
-                                        {{ property.domain }}
+                                {% if profileAssociation.domain is not null %}
+                                    <a href="{{ path('class_show', {'id': profileAssociation.domain.id }) }}">
+                                        {{ profileAssociation.domain }}
+                                    </a>
+                                {% elseif profileAssociation.property.domain is not null  %}
+                                    <a href="{{ path('class_show', {'id': profileAssociation.property.domain.id }) }}">
+                                        {{ profileAssociation.property.domain }}
                                     </a>
                                 {% endif %}
                             </td>
                             <td class="text-nowrap small" style="padding-left: 30px;">
-                                {% if property.domainMinQuantifier is not null and property.domainMaxQuantifier is not null %}
-                                    ({% if  property.domainMinQuantifier != -1 %}{{ property.domainMinQuantifier }}{% else %}n{% endif %},{% if  property.domainMaxQuantifier != -1 %}{{ property.domainMaxQuantifier }}{% else %}n{% endif %})
+                                {% if profileAssociation.property.domainMinQuantifier is not null and  profileAssociation.property.domainMaxQuantifier is not null %}
+                                    ({% if profileAssociation.property.domainMinQuantifier != -1 %}{{ profileAssociation.property.domainMinQuantifier }}{% else %}n{% endif %},{% if  profileAssociation.property.domainMaxQuantifier != -1 %}{{ profileAssociation.property.domainMaxQuantifier }}{% else %}n{% endif %})
                                 {% endif %}
                             </td>
                             <td class="text-nowrap text-center">
-                                <a href="{{ path('property_show', {'id': property.id}) }}">
-                                    {{ property }}
+                                <a href="{{ path('property_show', {'id': profileAssociation.property.id}) }}">
+                                    {{ profileAssociation.property }}
                                 </a>
                             </td>
                             <td class="text-nowrap small" style="padding-right: 30px;">
-                                {% if property.rangeMinQuantifier is not null and property.rangeMaxQuantifier is not null %}
-                                    ({% if  property.rangeMinQuantifier != -1 %}{{ property.rangeMinQuantifier }}{% else %}n{% endif %},{% if  property.rangeMaxQuantifier != -1 %}{{ property.rangeMaxQuantifier }}{% else %}n{% endif %})
+                                {% if profileAssociation.property.rangeMinQuantifier is not null and profileAssociation.property.rangeMaxQuantifier is not null %}
+                                    ({% if  profileAssociation.property.rangeMinQuantifier != -1 %}{{ profileAssociation.property.rangeMinQuantifier }}{% else %}n{% endif %},{% if  profileAssociation.property.rangeMaxQuantifier != -1 %}{{ profileAssociation.property.rangeMaxQuantifier }}{% else %}n{% endif %})
                                 {% endif %}
                             </td>
                             <td class="text-nowrap small">
-                                {% if property.range is not null %}
-                                    <a href="{{ path('class_show', {'id': property.range.id }) }}">
-                                        {{ property.range }}
+                                {% if profileAssociation.range is not null %}
+                                    <a href="{{ path('class_show', {'id': profileAssociation.range.id }) }}">
+                                        {{ profileAssociation.range }}
+                                    </a>
+                                {% elseif profileAssociation.property.range is not null %}
+                                    <a href="{{ path('class_show', {'id': profileAssociation.property.range.id }) }}">
+                                        {{ profileAssociation.property.range }}
                                     </a>
                                 {% endif %}
                             </td>
                             <td>
-                                {% if property.namespaces|first.referencedVersion is not null %}
-                                    {{ property.namespaces|first.referencedVersion }}
+                                {% if profileAssociation.property.namespaces|first.referencedVersion is not null %}
+                                    {{ profileAssociation.property.namespaces|first.referencedVersion }}
                                 {% endif %}
                             </td>
                             <td>
-                                {% for profileAssociation in property.profileAssociations %}
-                                    {% if profileAssociation.profile.id == profile.id %}
-                                        {{ profileAssociation.systemType }}
-                                    {% endif %}
-                                {% endfor %}
+                                {{ profileAssociation.systemType }}
                             </td>
                         </tr>
                     {% endfor %}

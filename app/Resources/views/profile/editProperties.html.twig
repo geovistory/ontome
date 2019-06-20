@@ -201,19 +201,25 @@
             order: [[3, 'asc']],
             columnDefs: [
                 {
+                    targets: 2,
+                    render: function (data, type, row, meta) {
+                        return '{{ class }}';
+                    }
+                },
+                {
                     targets: -1,
                     render: function ( data, type, row, meta ) {
                         var urlSelectProperty = '{{ path("profile_inherited_property_association", {'profile' : 'profileID', 'property' : 'propertyID', 'domain' : 'domainID', 'range' : 'rangeID'}) }}';
                         urlSelectProperty = urlSelectProperty.replace("profileID", profileID);
                         urlSelectProperty = urlSelectProperty.replace("propertyID", row.propertyId);
-                        urlSelectProperty = urlSelectProperty.replace("domainID", classID);
-                        urlSelectProperty = urlSelectProperty.replace("rangeID", row.rangeId);
+                        urlSelectProperty = urlSelectProperty.replace("domainID", row.domainId);
+                        urlSelectProperty = urlSelectProperty.replace("rangeID", classID);
 
                         var urlRemoveProperty = '{{ path("profile_inherited_property_disassociation", {'profile' : 'profileID', 'property' : 'propertyID', 'domain' : 'domainID', 'range' : 'rangeID'}) }}';
                         urlRemoveProperty = urlRemoveProperty.replace("profileID", profileID);
                         urlRemoveProperty = urlRemoveProperty.replace("propertyID", row.propertyId);
-                        urlRemoveProperty = urlRemoveProperty.replace("domainID", classID);
-                        urlRemoveProperty = urlRemoveProperty.replace("rangeID", row.rangeId);
+                        urlRemoveProperty = urlRemoveProperty.replace("domainID", row.domainId);
+                        urlRemoveProperty = urlRemoveProperty.replace("rangeID", classID);
 
                         var checkIcon = '<a data-id="'+row.propertyId+'" data-url="'+urlSelectProperty+'" class="select-incoming-inherited-property"><span class="incoming-inherited-unchecked-icon glyphicon glyphicon-unchecked" data-id="'+row.propertyId+'"></span></a><span class="select-incoming-inherited-property-loading-icon" data-id="'+row.propertyId+'" style="display: none"><span class="fas fa-spinner fa-spin"></span>';
                         if(data == '5') {

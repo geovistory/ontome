@@ -438,7 +438,7 @@ class PropertyRepository extends EntityRepository
                 FROM che.class_ingoing_inherited_properties(:class)
                 JOIN che.associates_namespace asnsp ON asnsp.fk_property = pk_property
                 JOIN che.namespace nsp ON nsp.pk_namespace = asnsp.fk_namespace
-                LEFT JOIN che.associates_profile aspro ON aspro.fk_property = pk_property AND aspro.fk_inheriting_domain_class = :class AND aspro.fk_inheriting_range_class = pk_parent AND aspro.fk_profile = :profile;";
+                LEFT JOIN che.associates_profile aspro ON aspro.fk_property = pk_property AND aspro.fk_profile = :profile;";
 
         $stmt = $conn->prepare($sql);
         $stmt->execute(array('class' => $class->getId(), 'profile' => $profile->getId()));
