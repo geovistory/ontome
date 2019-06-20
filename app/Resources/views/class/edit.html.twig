@@ -349,9 +349,9 @@
                     {% for label in class.labels %}
                         <tr>
                             <td>
-                                <a href="#">
-                                    {{ label.label }}
-                                </a>
+                                <a href="{{ path('label_show', {
+                                    'id': label.id
+                                }) }}">{{ label.label }}</a> {% if label.isStandardLabelForLanguage %}*{% endif %}
                             </td>
                             <td>{{ label.languageIsoCode}}</td>
                             <td>{{ label.modificationTime|date('Y-m-d') }}</td>
@@ -374,6 +374,7 @@
                     {% endfor %}
                     </tbody>
                 </table>
+                <p>* : Standard label for this language</p>
             </div>
             <div id="namespaces" class="tab-pane fade">
                 <h3>Namespace</h3>
