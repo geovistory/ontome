@@ -138,7 +138,7 @@
                         </div>
                         <div class="col-lg-10">
                             <ul class="list-unstyled">
-                                {% for relation in property.entityAssociations %}
+                                {% for relation in property.entityAssociations if relation.systemType.id == 19 or relation.systemType.id == 20 %}
                                     <li>{{ relation.systemType.standardLabel }}
                                         {% if relation.sourceProperty.id == property.id %}
                                             <a href="{{ path("property_show", {'id': relation.targetProperty.id }) }}">
@@ -720,7 +720,7 @@
                         <th>Relation</th>
                         <th>Property</th>
                         <th>Justification</th>
-                        <th>Root namespace</th>
+                        <th>Defined in namespace</th>
                         <th>Edit relations</th>
                     </tr>
                     </thead>
