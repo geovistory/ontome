@@ -75,9 +75,7 @@
                             'id': label.id
                         }) }}">
                             {{ label.label }}
-                            {% if label.isStandardLabelForLanguage %}
-                                <span class="glyphicon glyphicon-asterisk" aria-hidden="true" title="Standard label for this language"></span>
-                            {% endif %}
+                            {% if label.isStandardLabelForLanguage %}*{% endif %}
                         </a>
                     </td>
                     <td>{{ label.languageIsoCode}}</td>
@@ -86,10 +84,7 @@
                 {% endfor %}
                 </tbody>
             </table>
-            <p>
-                <span class="glyphicon glyphicon-asterisk" aria-hidden="true"></span>
-                : Standard label for this language
-            </p>
+            <p>* : Standard label for this language</p>
             <h3>Description</h3>
             <table class="table table-striped" id="descriptions-table">
                 <thead>
