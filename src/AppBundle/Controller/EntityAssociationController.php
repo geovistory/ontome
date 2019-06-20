@@ -92,19 +92,11 @@ class EntityAssociationController extends Controller
                 '_fragment' => 'relations'
             ]);
         }
-        if($object == 'class') {
-            $relations = $em->getRepository('AppBundle:OntoClass')->findRelationsById($source);
-        }
-        elseif($object == 'property')
-        {
-            $relations = $em->getRepository('AppBundle:Property')->findRelationsById($source);
-        }
 
         return $this->render('entityAssociation/new.html.twig', array(
             'object' => $object,
             'source' => $source,
-            'entityAssociationForm' => $form->createView(),
-            'relations' => $relations
+            'entityAssociationForm' => $form->createView()
         ));
     }
 
