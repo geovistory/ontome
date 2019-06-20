@@ -17,6 +17,7 @@ use AppBundle\Entity\TextProperty;
 use AppBundle\Form\IngoingPropertyQuickAddForm;
 use AppBundle\Form\OutgoingPropertyQuickAddForm;
 use AppBundle\Form\PropertyEditForm;
+use AppBundle\Form\PropertyEditIdentifierForm;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
@@ -214,6 +215,20 @@ class PropertyController extends Controller
             ]);
         }
 
+        $formIdentifier = $this->createForm(PropertyEditIdentifierForm::class, $property);
+        $formIdentifier->handleRequest($request);
+        if ($formIdentifier->isSubmitted() && $formIdentifier->isValid()) {
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($property);
+            $em->flush();
+
+            $this->addFlash('success', 'Property updated!');
+            return $this->redirectToRoute('property_edit', [
+                'id' => $property->getId(),
+                '_fragment' => 'identification'
+            ]);
+        }
+
         $em = $this->getDoctrine()->getManager();
 
         $ancestors = $em->getRepository('AppBundle:Property')
@@ -239,7 +254,8 @@ class PropertyController extends Controller
             'descendants' => $descendants,
             'domainRange' => $domainRange,
             'relations' => $relations,
-            'propertyForm' => $form->createView()
+            'propertyForm' => $form->createView(),
+            'propertyIdentifierForm' => $formIdentifier->createView()
         ));
     }
 
