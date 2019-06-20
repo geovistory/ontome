@@ -146,8 +146,7 @@
                                     'id': label.id
                                 }) }}">
                                     {{ label.label }}
-                                    {% if label.isStandardLabelForLanguage %}*{% endif %}
-                                </a>
+                                </a> {% if label.isStandardLabelForLanguage %}*{% endif %}
                             </td>
                             <td>{{ label.languageIsoCode}}</td>
                             <td>{{ label.modificationTime|date('Y-m-d') }}</td>
