@@ -575,7 +575,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for relation in class.entityAssociations %}
+                    {% for relation in class.entityAssociations if relation.systemType.id == 4 or relation.systemType.id == 19 %}
                         <tr>
                             <td>{{ relation.systemType }}</td>
                             <td><a href="{{ path('class_show', {

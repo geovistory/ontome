@@ -658,7 +658,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for relation in property.entityAssociations %}
+                    {% for relation in property.entityAssociations if relation.systemType.id == 19 or relation.systemType.id == 20 %}
                         <tr>
                             <td>{{ relation.systemType }}</td>
                             <td><a href="{{ path('property_show', {
