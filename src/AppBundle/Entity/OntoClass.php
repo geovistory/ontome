@@ -120,7 +120,7 @@ class OntoClass
     private $textProperties;
 
     /**
-     * @ORM\ManyToMany(targetEntity="Profile",  mappedBy="classes", fetch="EXTRA_LAZY")
+     * @ORM\ManyToMany(targetEntity="Profile",  mappedBy="classes", fetch="LAZY")
      * @ORM\JoinTable(schema="che", name="associates_profile",
      *      joinColumns={@ORM\JoinColumn(name="fk_class", referencedColumnName="pk_class")},
      *      inverseJoinColumns={@ORM\JoinColumn(name="fk_profile", referencedColumnName="pk_profile")}
