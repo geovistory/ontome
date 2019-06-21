@@ -188,6 +188,30 @@
                     </thead>
                     <tbody>
                     {% for profileAssociation in profileAssociations if profileAssociation.property is not null %}
+                        {% set showProperty = true %}
+                        {% if profileAssociation.property.domain is not null %}
+
+                            {% for profileAssociationClass in profileAssociation.property.domain.profileAssociations if profileAssociationClass.profile.id == profileAssociation.profile.id and profileAssociationClass.systemType.id == 6 %}
+                                {% set showProperty = false %}
+                            {% endfor %}
+                        {% endif %}
+                        {% if profileAssociation.property.range is not null %}
+                            {% for profileAssociationClass in profileAssociation.property.range.profileAssociations if profileAssociationClass.profile.id == profileAssociation.profile.id and profileAssociationClass.systemType.id == 6 %}
+                                {% set showProperty = false %}
+                            {% endfor %}
+                        {% endif %}
+                        {% if profileAssociation.domain is not null %}
+                            {% for profileAssociationClass in profileAssociation.domain.profileAssociations if profileAssociationClass.profile.id == profileAssociation.profile.id and profileAssociationClass.systemType.id == 6 %}
+                                {% set showProperty = false %}
+                            {% endfor %}
+                        {% endif %}
+                        {% if profileAssociation.range is not null %}
+                            {% for profileAssociationClass in profileAssociation.range.profileAssociations if profileAssociationClass.profile.id == profileAssociation.profile.id and profileAssociationClass.systemType.id == 6 %}
+                                {% set showProperty = false %}
+                            {% endfor %}
+                        {% endif %}
+
+                        {% if showProperty == true %}
                         <tr>
                             <td class="text-nowrap text-right small">
                                 {% if profileAssociation.domain is not null %}
@@ -235,6 +259,7 @@
                                 {{ profileAssociation.systemType }}
                             </td>
                         </tr>
+                        {% endif %}
                     {% endfor %}
                     </tbody>
                 </table>

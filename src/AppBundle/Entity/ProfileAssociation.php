@@ -271,6 +271,10 @@ class ProfileAssociation
         $this->modificationTime = $modificationTime;
     }
 
+    public function __toString()
+    {
+        return (string) $this->id;
+    }
 
 
 }
