@@ -186,11 +186,19 @@ class ClassController extends Controller
     {
         $this->denyAccessUnlessGranted('edit', $class);
 
-        $class->setIsManualIdentifier(is_null($class->getOngoingNamespace()->getTopLevelNamespace()->getClassPrefix()));
+        $classTemp = new OntoClass();
+        $classTemp->addNamespace($class->getOngoingNamespace());
+        $classTemp->setIdentifierInNamespace($class->getIdentifierInNamespace());
+        $classTemp->setIsManualIdentifier(is_null($class->getOngoingNamespace()->getTopLevelNamespace()->getClassPrefix()));
+        $classTemp->setCreator($this->getUser());
+        $classTemp->setModifier($this->getUser());
+        $classTemp->setCreationTime(new \DateTime('now'));
+        $classTemp->setModificationTime(new \DateTime('now'));
 
-        $formIdentifier = $this->createForm(ClassEditIdentifierForm::class, $class);
+        $formIdentifier = $this->createForm(ClassEditIdentifierForm::class, $classTemp);
         $formIdentifier->handleRequest($request);
         if ($formIdentifier->isSubmitted() && $formIdentifier->isValid()) {
+            $class->setIdentifierInNamespace($classTemp->getIdentifierInNamespace());
             $em = $this->getDoctrine()->getManager();
             $em->persist($class);
             $em->flush();

@@ -215,9 +215,21 @@ class PropertyController extends Controller
             ]);
         }
 
-        $formIdentifier = $this->createForm(PropertyEditIdentifierForm::class, $property);
+        $propertyTemp = new Property();
+        $propertyTemp->addNamespace($property->getOngoingNamespace());
+        $propertyTemp->setIdentifierInNamespace($property->getIdentifierInNamespace());
+        $propertyTemp->setIsManualIdentifier(is_null($property->getOngoingNamespace()->getTopLevelNamespace()->getClassPrefix()));
+        $propertyTemp->setCreator($this->getUser());
+        $propertyTemp->setModifier($this->getUser());
+        $propertyTemp->setCreationTime(new \DateTime('now'));
+        $propertyTemp->setModificationTime(new \DateTime('now'));
+        $propertyTemp->setDomain($property->getDomain());
+        $propertyTemp->setRange($property->getRange());
+
+        $formIdentifier = $this->createForm(PropertyEditIdentifierForm::class, $propertyTemp);
         $formIdentifier->handleRequest($request);
         if ($formIdentifier->isSubmitted() && $formIdentifier->isValid()) {
+            $property->setIdentifierInNamespace($propertyTemp->getIdentifierInNamespace());
             $em = $this->getDoctrine()->getManager();
             $em->persist($property);
             $em->flush();

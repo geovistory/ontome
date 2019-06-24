@@ -219,6 +219,18 @@ class Property
                 ->atPath('identifierInNamespace')
                 ->addViolation();
         }
+        else if($this->isManualIdentifier) {
+            foreach ($this->getNamespaces() as $namespace) {
+                foreach ($namespace->getProperties() as $property) {
+                    if ($property->identifierInNamespace == $this->identifierInNamespace) {
+                        $context->buildViolation('The identifier must be unique. Please choose another one.')
+                            ->atPath('identifierInNamespace')
+                            ->addViolation();
+                        break;
+                    }
+                }
+            }
+        }
     }
 
     /**
