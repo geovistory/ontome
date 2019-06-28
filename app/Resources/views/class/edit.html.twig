@@ -352,7 +352,18 @@
                 </table>
             </div>
             <div id="identification" class="tab-pane fade">
-                {% if class.ongoingNamespace.topLevelNamespace.classPrefix is null %}
+                {# Test de vérification si cet identifiant existe déjà dans un namespace fermé (il n'est donc plus éditable #}
+                {% set isIdentifierExistAndPublished = false %}
+                {% for namespace in class.namespaces %}
+                    {% if not namespace.isOngoing %}
+                        {% for class_ns in namespace.classes %}
+                            {% if class_ns.identifierInNamespace == class.identifierInNamespace %}
+                                {% set isIdentifierExistAndPublished = true %}
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                {% endfor %}
+                {% if class.ongoingNamespace.topLevelNamespace.classPrefix is null and not isIdentifierExistAndPublished %}
                     <div id="identifier-form-block">
                         {{ form_start(classIdentifierForm) }}
                         {{ form_errors(classIdentifierForm) }}
@@ -426,7 +437,9 @@
                     {% for namespace in class.namespaces %}
                         <tr>
                             <td>
-                                <a href="#">
+                                <a href="{{ path('namespace_show', {
+                                    'id': namespace.id
+                                }) }}">
                                     {{ namespace }}
                                 </a>
                             </td>
