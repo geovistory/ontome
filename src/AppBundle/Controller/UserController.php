@@ -10,6 +10,7 @@ namespace AppBundle\Controller;
 
 
 use AppBundle\Entity\User;
+use AppBundle\Form\MyEnvironmentForm;
 use AppBundle\Form\UserEditForm;
 use AppBundle\Form\UserRegistrationForm;
 use AppBundle\Form\UserRequestPasswordForm;
@@ -277,7 +278,7 @@ class UserController extends Controller
      * @param $user User
      * @return Response
      */
-    public function showAction(User $user)
+    public function showAction(Request $request, User $user)
     {
         if (!$this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) {
             throw $this->createAccessDeniedException();
@@ -286,15 +287,44 @@ class UserController extends Controller
             throw $this->createAccessDeniedException();
         }
 
+        $form = $this->createForm(MyEnvironmentForm::class, $user);
+
+        // only handles data on POST
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($user);
+            $em->flush();
+
+            $this->addFlash('success', 'Active project updated!');
+
+            return $this->redirectToRoute('user_show', [
+                'id' => $user->getId(),
+                '_fragment' => 'my-environment'
+            ]);
+        }
+
         $em = $this->getDoctrine()->getManager();
         $userProjectAssociations = $em->getRepository('AppBundle:UserProjectAssociation')
             ->findBy(array('user' => $user->getId()));
         $namespaces = $em->getRepository('AppBundle:OntoNamespace')
             ->findBy(array('creator' => $user->getId()));
+
+
+        $projectNamespacesSelectable = $em->getRepository('AppBundle:OntoNamespace')->findAll();
+        $projectNamespacesSelected = $em->getRepository('AppBundle:OntoNamespace')->findAll();
+        $additionalNamespacesSelectable = $em->getRepository('AppBundle:OntoNamespace')->findAll();
+        $additionalNamespacesSelected = $em->getRepository('AppBundle:OntoNamespace')->findAll();
+
         return $this->render('user/show.html.twig', array(
             'userProjectAssociations' => $userProjectAssociations,
+            'projectNamespacesSelectable' => $projectNamespacesSelectable,
+            'projectNamespacesSelected' => $projectNamespacesSelected,
+            'additionalNamespacesSelectable' => $additionalNamespacesSelectable,
+            'additionalNamespacesSelected' => $additionalNamespacesSelected,
             'namespaces' => $namespaces,
-            'user' => $user
+            'user' => $user,
+            'myEnvironmentForm' => $form->createView()
         ));
     }
 

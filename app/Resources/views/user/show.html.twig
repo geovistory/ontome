@@ -19,8 +19,9 @@
             </h1>
             <ul class="nav nav-tabs" id="main-tabs">
                 <li class="active"><a data-toggle="tab" href="#user-info">My account</a></li>
+                <li><a data-toggle="tab" href="#my-environment">My environment</a></li>
                 <li><a data-toggle="tab" href="#my-projects">My projects</a></li>
-                <li><a data-toggle="tab" href="#my-namespaces">My namespaces</a></li>
+                <li><a data-toggle="tab" href="#my-current-namespaces">My current namespaces</a></li>
             </ul>
             <div class="tab-content">
                 <div id="user-info" class="tab-pane fade in active">
@@ -41,6 +42,127 @@
                         </tr>
                         </tbody>
                     </table>
+                </div>
+                <div id="my-environment" class="tab-pane fade">
+                <h3>My environment</h3>
+                <h3>Current active project</h3>
+                {{ form_start(myEnvironmentForm) }}
+                    {{ form_errors(myEnvironmentForm) }}
+                    {{ form_row(myEnvironmentForm.activeProject) }}
+                    <button type="submit" class="btn btn-primary" formnovalidate>Save</button>
+                {{ form_end(myEnvironmentForm) }}
+                <h3>Project namespaces</h3>
+                <div class="row">
+                    <div class="col-lg-6">
+                        <table class="table table-striped" id="project-namespaces-selected-table">
+                            <thead>
+                            <tr>
+                                <th></th>
+                                <th>Namespaces URI</th>
+                                <th>Namespaces identifier</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for namespace in projectNamespacesSelected %}
+                                <tr>
+                                    <td></td>
+                                    <td>{{ namespace.namespaceUri }}</td>
+                                    <td>
+                                        <a href="{{ path('namespace_show', {
+                                            'id': namespace.id
+                                        }) }}">
+                                            {{ namespace }}
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="col-lg-6">
+                        <table class="table table-striped" id="project-namespaces-selectable-table">
+                            <thead>
+                            <tr>
+                                <th>Namespaces URI</th>
+                                <th>Namespaces identifier</th>
+                                <th>Associate</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for namespace in projectNamespacesSelectable %}
+                                <tr>
+                                    <td>{{ namespace.namespaceUri }}</td>
+                                    <td>
+                                        <a href="{{ path('namespace_show', {
+                                            'id': namespace.id
+                                        }) }}">
+                                            {{ namespace }}
+                                        </a>
+                                    </td>
+                                    <td></td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <h3>Additional namespaces</h3>
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <table class="table table-striped" id="additionnal-namespaces-selectable-table">
+                                <thead>
+                                <tr>
+                                    <th></th>
+                                    <th>Namespaces URI</th>
+                                    <th>Namespaces identifier</th>
+
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for namespace in additionalNamespacesSelectable %}
+                                    <tr>
+                                        <td></td>
+                                        <td>{{ namespace.namespaceUri }}</td>
+                                        <td>
+                                            <a href="{{ path('namespace_show', {
+                                                'id': namespace.id
+                                            }) }}">
+                                                {{ namespace }}
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="col-lg-6">
+                            <table class="table table-striped" id="additionnal-namespaces-selected-table">
+                                <thead>
+                                <tr>
+                                    <th>Namespaces URI</th>
+                                    <th>Namespaces identifier</th>
+                                    <th>Associate</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for namespace in additionalNamespacesSelected %}
+                                    <tr>
+                                        <td>{{ namespace.namespaceUri }}</td>
+                                        <td>
+                                            <a href="{{ path('namespace_show', {
+                                                'id': namespace.id
+                                            }) }}">
+                                                {{ namespace }}
+                                            </a>
+                                        </td>
+                                        <td></td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
                 </div>
                 <div id="my-projects" class="tab-pane fade">
                     {% if namespaces|length < 1 %}
@@ -78,8 +200,8 @@
                         <p><i class="fas fa-info-circle"></i>&nbsp;If you are interested in joining an <a href="{{ path('app_project_list') }}" target="_blank">existing project</a>, please write to <a href="mailto:ontome@dataforhistory.org">ontome@dataforhistory.org</a> indicating the name of the <a href="{{ path('app_project_list') }}" target="_blank">project</a> and the reason of your request. </p>
                     </div>
                 </div>
-                <div id="my-namespaces" class="tab-pane fade">
-                    <h3>My namespaces</h3>
+                <div id="my-current-namespaces" class="tab-pane fade">
+                    <h3>My current namespaces</h3>
                     <table class="table table-striped" id="namespaces-table">
                         <thead>
                         <tr>
@@ -116,6 +238,10 @@
     <script>
         $(document).ready(function() {
             $('#namespaces-table').DataTable();
+            $('#project-namespaces-selected-table').DataTable();
+            $('#project-namespaces-selectable-table').DataTable();
+            $('#additionnal-namespaces-selected-table').DataTable();
+            $('#additionnal-namespaces-selectable-table').DataTable();
             $('#projects-table').DataTable();
         } );
     </script>
