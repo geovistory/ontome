@@ -180,18 +180,44 @@ class PropertyRepository extends EntityRepository
                 )
                 SELECT tw1.pk_parent  AS id,
                        tw1.parent_identifier AS identifier,
+                       p.has_domain,
+                       domain.identifier_in_namespace AS \"domainIdentifier\",
+                       domain.standard_label AS \"domainStandardLabel\",
+                       p.domain_instances_min_quantifier,
+                       p.domain_instances_max_quantifier,
+                       p.has_range,
+                       range.identifier_in_namespace AS \"rangeIdentifier\",
+                       range.standard_label AS \"rangeStandardLabel\",
+                       p.range_instances_min_quantifier,
+                       p.range_instances_max_quantifier,
                        tw1.DEPTH,
                        replace(tw1.ancestors, '|', '→') AS ancestors,
                        che.get_root_namespace(nsp.pk_namespace) AS \"rootNamespaceId\",
                        (SELECT label FROM che.get_namespace_labels(che.get_root_namespace(nsp.pk_namespace)) WHERE language_iso_code = 'en') AS \"rootNamespaceLabel\"
                 FROM tw1,
                      che.associates_namespace asnsp,
-                     che.namespace nsp
+                     che.namespace nsp,
+                     che.property p,
+                     che.class domain,
+                     che.class range
                 WHERE asnsp.fk_property = tw1.pk_parent
                 AND   nsp.pk_namespace = asnsp.fk_namespace
                 AND depth > 1 
+                AND p.pk_property = tw1.pk_parent
+                AND p.has_domain = domain.pk_class
+                AND p.has_range = range.pk_class
                 GROUP BY tw1.pk_parent,
                      tw1.parent_identifier,
+                     p.has_domain,
+                       domain.identifier_in_namespace,
+                       domain.standard_label,
+                       p.domain_instances_min_quantifier,
+                       p.domain_instances_max_quantifier,
+                       p.has_range,
+                       range.identifier_in_namespace,
+                       range.standard_label,
+                       p.range_instances_min_quantifier,
+                       p.range_instances_max_quantifier,
                      tw1.depth,
                      tw1.ancestors,
                      nsp.pk_namespace";
@@ -212,15 +238,31 @@ class PropertyRepository extends EntityRepository
 
         $sql = "SELECT  pk_child AS id,
                         child_identifier as identifier,
+                       p.has_domain,
+                       domain.identifier_in_namespace AS \"domainIdentifier\",
+                       domain.standard_label AS \"domainStandardLabel\",
+                       p.domain_instances_min_quantifier,
+                       p.domain_instances_max_quantifier,
+                       p.has_range,
+                       range.identifier_in_namespace AS \"rangeIdentifier\",
+                       range.standard_label AS \"rangeStandardLabel\",
+                       p.range_instances_min_quantifier,
+                       p.range_instances_max_quantifier,
                         depth,
                         replace(descendants, '|', '→') AS descendants,
                         che.get_root_namespace(nsp.pk_namespace) AS \"rootNamespaceId\",
                        (SELECT label FROM che.get_namespace_labels(che.get_root_namespace(nsp.pk_namespace)) WHERE language_iso_code = 'en') AS \"rootNamespaceLabel\"                        
                     FROM che.descendant_property_hierarchy((:property)),
                          che.associates_namespace asnsp,
-                         che.namespace nsp
+                         che.namespace nsp,
+                         che.property p,
+                         che.class domain,
+                         che.class range
                     WHERE asnsp.fk_property = pk_child
                     AND   nsp.pk_namespace = asnsp.fk_namespace    
+                    AND p.pk_property = pk_child
+                    AND p.has_domain = domain.pk_class
+                    AND p.has_range = range.pk_class
                          ";
 
         $stmt = $conn->prepare($sql);

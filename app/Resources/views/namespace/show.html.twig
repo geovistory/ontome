@@ -232,19 +232,45 @@
                 <table class="table table-striped" id="properties-table">
                     <thead>
                     <tr>
-                        <th>Property identifier</th>
+                        <th class="text-right">Domain</th>
+                        <th></th>
+                        <th class="text-center">Property</th>
+                        <th></th>
+                        <th>Range</th>
                         <th>Last updated</th>
                     </tr>
                     </thead>
                     <tbody>
                     {% for property in namespace.properties %}
                         <tr>
-                            <td>
-                                <a href="{{ path('property_show', {
-                                    'id': property.id
-                                }) }}">
+                            <td class="text-nowrap text-right small">
+                                {% if property.domain is not null %}
+                                    <a href="{{ path('class_show', {'id': property.domain.id }) }}">
+                                        {{ property.domain }}
+                                    </a>
+                                {% endif %}
+                            </td>
+                            <td class="text-nowrap small" style="padding-left: 30px;">
+                                {% if property.domainMinQuantifier is not null and property.domainMaxQuantifier is not null %}
+                                    ({% if  property.domainMinQuantifier != -1 %}{{ property.domainMinQuantifier }}{% else %}n{% endif %},{% if  property.domainMaxQuantifier != -1 %}{{ property.domainMaxQuantifier }}{% else %}n{% endif %})
+                                {% endif %}
+                            </td>
+                            <td class="text-nowrap text-center">
+                                <a href="{{ path('property_show', {'id': property.id}) }}">
                                     {{ property }}
                                 </a>
+                            </td>
+                            <td class="text-nowrap small" style="padding-right: 30px;">
+                                {% if property.rangeMinQuantifier is not null and property.rangeMaxQuantifier is not null %}
+                                    ({% if  property.rangeMinQuantifier != -1 %}{{ property.rangeMinQuantifier }}{% else %}n{% endif %},{% if  property.rangeMaxQuantifier != -1 %}{{ property.rangeMaxQuantifier }}{% else %}n{% endif %})
+                                {% endif %}
+                            </td>
+                            <td class="text-nowrap small">
+                                {% if property.range is not null %}
+                                    <a href="{{ path('class_show', {'id': property.range.id }) }}">
+                                        {{ property.range }}
+                                    </a>
+                                {% endif %}
                             </td>
                             <td>{{ property.modificationTime|date('Y-m-d') }}</td>
                         </tr>
