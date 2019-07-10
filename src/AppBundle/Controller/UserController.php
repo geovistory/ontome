@@ -17,6 +17,7 @@ use AppBundle\Form\UserRequestPasswordForm;
 use AppBundle\Form\UserResetPasswordForm;
 use AppBundle\Form\UserSelfEditForm;
 use AppBundle\Security\LoginFormAuthenticator;
+use Doctrine\Common\Collections\ArrayCollection;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
@@ -296,7 +297,7 @@ class UserController extends Controller
             $em->persist($user);
             $em->flush();
 
-            $this->addFlash('success', 'Active project updated!');
+            $this->addFlash('success', 'Current active project updated!');
 
             return $this->redirectToRoute('user_show', [
                 'id' => $user->getId(),
@@ -311,10 +312,31 @@ class UserController extends Controller
             ->findBy(array('creator' => $user->getId()));
 
 
-        $projectNamespacesSelectable = $em->getRepository('AppBundle:OntoNamespace')->findAll();
-        $projectNamespacesSelected = $em->getRepository('AppBundle:OntoNamespace')->findAll();
-        $additionalNamespacesSelectable = $em->getRepository('AppBundle:OntoNamespace')->findAll();
-        $additionalNamespacesSelected = $em->getRepository('AppBundle:OntoNamespace')->findAll();
+        $projectNamespacesSelectable = new ArrayCollection($em->getRepository('AppBundle:OntoNamespace')
+            ->findBy(array('projectForTopLevelNamespace' => $user->getCurrentActiveProject())));
+
+        $projectNamespacesSelected = new ArrayCollection($em->getRepository('AppBundle:OntoNamespace')
+            ->findBy(array('projectForTopLevelNamespace' => $user->getCurrentActiveProject())));
+
+        $additionalNamespacesSelectable = new ArrayCollection($em->getRepository('AppBundle:OntoNamespace')->findAll());
+        $additionalNamespacesSelected = new ArrayCollection($em->getRepository('AppBundle:OntoNamespace')->findAll());
+
+        foreach ($projectNamespacesSelectable as $namespace)
+        {
+            $additionalNamespacesSelectable->removeElement($namespace);
+            $additionalNamespacesSelected->removeElement($namespace);
+        }
+
+        foreach ($projectNamespacesSelected as $namespace)
+        {
+            $additionalNamespacesSelectable->removeElement($namespace);
+            $additionalNamespacesSelected->removeElement($namespace);
+        }
+
+        foreach ($additionalNamespacesSelected as $namespace)
+        {
+            $additionalNamespacesSelectable->removeElement($namespace);
+        }
 
         return $this->render('user/show.html.twig', array(
             'userProjectAssociations' => $userProjectAssociations,

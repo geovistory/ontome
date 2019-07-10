@@ -126,7 +126,7 @@ class User implements UserInterface
      * @ORM\ManyToOne(targetEntity="Project", inversedBy="UserProjectAssociation")
      * @ORM\JoinColumn(name="fk_current_active_project", referencedColumnName="pk_project", nullable=false)
      */
-    private $activeProject;
+    private $currentActiveProject;
 
     /**
      * User constructor.
@@ -378,17 +378,17 @@ class User implements UserInterface
     /**
      * @return mixed
      */
-    public function getActiveProject()
+    public function getCurrentActiveProject()
     {
-        return $this->activeProject;
+        return $this->currentActiveProject;
     }
 
     /**
-     * @param mixed $activeProject
+     * @param mixed $currentActiveProject
      */
-    public function setActiveProject($activeProject)
+    public function setCurrentActiveProject($currentActiveProject)
     {
-        $this->activeProject = $activeProject;
+        $this->currentActiveProject = $currentActiveProject;
     }
 
     public function __toString()

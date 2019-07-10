@@ -45,10 +45,9 @@
                 </div>
                 <div id="my-environment" class="tab-pane fade">
                 <h3>My environment</h3>
-                <h3>Current active project</h3>
                 {{ form_start(myEnvironmentForm) }}
                     {{ form_errors(myEnvironmentForm) }}
-                    {{ form_row(myEnvironmentForm.activeProject) }}
+                    {{ form_row(myEnvironmentForm.currentActiveProject) }}
                     <button type="submit" class="btn btn-primary" formnovalidate>Save</button>
                 {{ form_end(myEnvironmentForm) }}
                 <h3>Project namespaces</h3>
@@ -63,9 +62,9 @@
                             </tr>
                             </thead>
                             <tbody>
-                            {% for namespace in projectNamespacesSelected %}
+                            {% for namespace in projectNamespacesSelected if namespace.isOngoing %}
                                 <tr>
-                                    <td></td>
+                                    <td><span class="glyphicon glyphicon-remove text-danger" aria-hidden="true"></span></td>
                                     <td>{{ namespace.namespaceUri }}</td>
                                     <td>
                                         <a href="{{ path('namespace_show', {
@@ -83,14 +82,15 @@
                         <table class="table table-striped" id="project-namespaces-selectable-table">
                             <thead>
                             <tr>
+                                <th></th>
                                 <th>Namespaces URI</th>
                                 <th>Namespaces identifier</th>
-                                <th>Associate</th>
                             </tr>
                             </thead>
                             <tbody>
-                            {% for namespace in projectNamespacesSelectable %}
+                            {% for namespace in projectNamespacesSelectable if not namespace.isOngoing  %}
                                 <tr>
+                                    <td><span class="fas fa-plus"></span></td>
                                     <td>{{ namespace.namespaceUri }}</td>
                                     <td>
                                         <a href="{{ path('namespace_show', {
@@ -99,7 +99,6 @@
                                             {{ namespace }}
                                         </a>
                                     </td>
-                                    <td></td>
                                 </tr>
                             {% endfor %}
                             </tbody>
@@ -120,7 +119,7 @@
                                 <tbody>
                                 {% for namespace in additionalNamespacesSelectable %}
                                     <tr>
-                                        <td></td>
+                                        <td><span class="glyphicon glyphicon-remove text-danger" aria-hidden="true"></span></td>
                                         <td>{{ namespace.namespaceUri }}</td>
                                         <td>
                                             <a href="{{ path('namespace_show', {
@@ -138,14 +137,15 @@
                             <table class="table table-striped" id="additionnal-namespaces-selected-table">
                                 <thead>
                                 <tr>
+                                    <th></th>
                                     <th>Namespaces URI</th>
                                     <th>Namespaces identifier</th>
-                                    <th>Associate</th>
                                 </tr>
                                 </thead>
                                 <tbody>
                                 {% for namespace in additionalNamespacesSelected %}
                                     <tr>
+                                        <td><span class="fas fa-plus"></span></td>
                                         <td>{{ namespace.namespaceUri }}</td>
                                         <td>
                                             <a href="{{ path('namespace_show', {
@@ -154,7 +154,6 @@
                                                 {{ namespace }}
                                             </a>
                                         </td>
-                                        <td></td>
                                     </tr>
                                 {% endfor %}
                                 </tbody>

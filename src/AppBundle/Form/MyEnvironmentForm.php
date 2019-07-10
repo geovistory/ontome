@@ -38,7 +38,7 @@ class MyEnvironmentForm extends AbstractType
             $userProjects[] = $userProject->getProject();
 
         $builder
-            ->add('activeProject', EntityType::class, [
+            ->add('currentActiveProject', EntityType::class, [
                 'class' => Project::class,
                 'choices' => $userProjects
                 ]
