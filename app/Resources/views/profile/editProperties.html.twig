@@ -196,6 +196,19 @@
             order: [[3, 'asc']],
             columnDefs: [
                 {
+                    targets: 0,
+                    render: function ( data, type, row, meta ) {
+                        if(row.fk_system_type != '5') {
+                            var urlGetDescendentClasses = '{{ path("selectable_descendent_class_profile_json", {'profile' : 'profileID', 'class' : 'classID', 'property' : 'propertyID'}) }}';
+                            urlGetDescendentClasses = urlGetDescendentClasses.replace("profileID", profileID);
+                            urlGetDescendentClasses = urlGetDescendentClasses.replace("classID", row.domainId);
+                            urlGetDescendentClasses = urlGetDescendentClasses.replace("propertyID", row.propertyId);
+                            return '<span class = "incoming-property-domain-switch" data-id="' + row.propertyId + '">' + data + '</span><span id="incoming-property-domain-select-' + row.propertyId + '" data-id="' + row.propertyId + '"></span>&nbsp;<a data-id="' + row.propertyId + '" data-url="' + urlGetDescendentClasses + '" class="select-subclass-domain"><i class="fas fa-exchange-alt"></i></a>';
+                        }
+                        else return data;
+                    }
+                },
+                {
                     targets: -1,
                     render: function ( data, type, row, meta ) {
                         var urlSelectProperty = '{{ path("profile_property_association", {'profile' : 'profileID', 'property' : 'propertyID'}) }}';
@@ -206,7 +219,7 @@
                         urlRemoveProperty = urlRemoveProperty.replace("profileID", profileID);
                         urlRemoveProperty = urlRemoveProperty.replace("propertyID", row.propertyId);
 
-                        var checkIcon = '<a data-id="'+row.propertyId+'" data-url="'+urlSelectProperty+'" class="select-incoming-property"><span class="incoming-unchecked-icon glyphicon glyphicon-unchecked" data-id="'+row.propertyId+'"></span></a><span class="select-incoming-property-loading-icon" data-id="'+row.propertyId+'" style="display: none"><span class="fas fa-spinner fa-spin"></span>';
+                        var checkIcon = '<a id="incoming-property-a-'+row.propertyId+'" data-id="'+row.propertyId+'" data-url="'+urlSelectProperty+'" class="select-incoming-property"><span class="incoming-unchecked-icon glyphicon glyphicon-unchecked" data-id="'+row.propertyId+'"></span></a><span class="select-incoming-property-loading-icon" data-id="'+row.propertyId+'" style="display: none"><span class="fas fa-spinner fa-spin"></span>';
                         if(data == '5') {
                             checkIcon = '<a data-id="'+row.propertyId+'" data-url="'+urlRemoveProperty+'" class="remove-incoming-property"><span class="incoming-checked-icon glyphicon glyphicon-check"  data-id="'+row.propertyId+'"></span></a><span class="remove-incoming-property-loading-icon" data-id="'+row.propertyId+'" style="display: none"><span class="fas fa-spinner fa-spin"></span>';
                         }
@@ -234,6 +247,19 @@
             order: [[3, 'asc']],
             columnDefs: [
                 {
+                    targets: 0,
+                    render: function ( data, type, row, meta ) {
+                        if(row.fk_system_type != '5') {
+                            var urlGetDescendentClasses = '{{ path("selectable_descendent_class_profile_json", {'profile' : 'profileID', 'class' : 'classID', 'property' : 'propertyID'}) }}';
+                            urlGetDescendentClasses = urlGetDescendentClasses.replace("profileID", profileID);
+                            urlGetDescendentClasses = urlGetDescendentClasses.replace("classID", row.domainId);
+                            urlGetDescendentClasses = urlGetDescendentClasses.replace("propertyID", row.propertyId);
+                            return '<span class = "incoming-inherited-property-domain-switch" data-id="'+row.propertyId+'-'+row.domainId+'">'+data+'</span><span id="incoming-inherited-property-domain-select-'+row.propertyId+'-'+row.domainId+'" data-id="'+row.propertyId+'-'+row.domainId+'"></span>&nbsp;<a data-id="'+row.propertyId+'-'+row.domainId+'" data-url="'+urlGetDescendentClasses+'" class="select-subclass-domain-inherited"><i class="fas fa-exchange-alt"></i></a>';
+                        }
+                        else return data;
+                    }
+                },
+                {
                     targets: 2,
                     render: function (data, type, row, meta) {
                         return '{{ class }}';
@@ -254,9 +280,9 @@
                         urlRemoveProperty = urlRemoveProperty.replace("domainID", row.domainId);
                         urlRemoveProperty = urlRemoveProperty.replace("rangeID", classID);
 
-                        var checkIcon = '<a data-id="'+row.propertyId+'" data-url="'+urlSelectProperty+'" class="select-incoming-inherited-property"><span class="incoming-inherited-unchecked-icon glyphicon glyphicon-unchecked" data-id="'+row.propertyId+'"></span></a><span class="select-incoming-inherited-property-loading-icon" data-id="'+row.propertyId+'" style="display: none"><span class="fas fa-spinner fa-spin"></span>';
+                        var checkIcon = '<a id="incoming-inherited-property-a-'+row.propertyId+'-'+row.domainId+'" data-id="'+row.propertyId+'-'+row.domainId+'" data-url="'+urlSelectProperty+'" class="select-incoming-inherited-property"><span class="incoming-inherited-unchecked-icon glyphicon glyphicon-unchecked" data-id="'+row.propertyId+'-'+row.domainId+'"></span></a><span class="select-incoming-inherited-property-loading-icon" data-id="'+row.propertyId+'-'+row.domainId+'" style="display: none"><span class="fas fa-spinner fa-spin"></span>';
                         if(data == '5') {
-                            checkIcon = '<a data-id="'+row.propertyId+'" data-url="'+urlRemoveProperty+'" class="remove-incoming-inherited-property"><span class="incoming-inherited-checked-icon glyphicon glyphicon-check"  data-id="'+row.propertyId+'"></span></a><span class="remove-incoming-inherited-property-loading-icon" data-id="'+row.propertyId+'" style="display: none"><span class="fas fa-spinner fa-spin"></span>';
+                            checkIcon = '<a data-id="'+row.propertyId+'-'+row.domainId+'" data-url="'+urlRemoveProperty+'" class="remove-incoming-inherited-property"><span class="incoming-inherited-checked-icon glyphicon glyphicon-check"  data-id="'+row.propertyId+'-'+row.domainId+'"></span></a><span class="remove-incoming-inherited-property-loading-icon" data-id="'+row.propertyId+'-'+row.domainId+'" style="display: none"><span class="fas fa-spinner fa-spin"></span>';
                         }
                         if(type == 'display')
                             return checkIcon;
@@ -355,6 +381,7 @@
                 dataType: 'json',
                 success:function(data){
                     incomingPropertiesTable.ajax.reload();
+                    incomingInheritedPropertiesTable.ajax.reload();
                 }
             });
         });
@@ -428,6 +455,30 @@
             initializeSelect2(newSelect, url);
         });
 
+        $(document).on("click", ".select-subclass-domain", function() {
+            var selectedValue = $(this).data("id");
+            var currentClassLabel = $(".incoming-property-domain-switch[data-id='"+selectedValue+"']").text();
+            $(".incoming-property-domain-switch[data-id='"+selectedValue+"']").hide(0);
+            $(".select-subclass-domain[data-id='"+selectedValue+"']").hide(0);
+            var url =  $(this).data("url");
+            var newSelect = $("<select class='select-to-select2 select-subclass-incoming-properties' data-id='"+selectedValue+"' style='width: 100%'><option>"+currentClassLabel+"</option></select>");
+            $("#incoming-property-domain-select-"+selectedValue).append(newSelect);
+            incomingPropertiesTable.columns.adjust().draw();
+            initializeSelect2(newSelect, url);
+        });
+
+        $(document).on("click", ".select-subclass-domain-inherited", function() {
+            var selectedValue = $(this).data("id");
+            var currentClassLabel = $(".incoming-inherited-property-domain-switch[data-id='"+selectedValue+"']").text();
+            $(".incoming-inherited-property-domain-switch[data-id='"+selectedValue+"']").hide(0);
+            $(".select-subclass-domain-inherited[data-id='"+selectedValue+"']").hide(0);
+            var url =  $(this).data("url");
+            var newSelect = $("<select class='select-to-select2 select-subclass-incoming-inherited-properties' data-id='"+selectedValue+"' style='width: 100%'><option>"+currentClassLabel+"</option></select>");
+            $("#incoming-inherited-property-domain-select-"+selectedValue).append(newSelect);
+            incomingInheritedPropertiesTable.columns.adjust().draw();
+            initializeSelect2(newSelect, url);
+        });
+
         $(document).on("change", ".select-to-select2", function() {
             var selectedID = $(this).data("id");
             var selectedValue =  $(this).val();
@@ -451,6 +502,28 @@
                 urlSelectProperty = urlSelectProperty.replace("domainID", classID);
                 urlSelectProperty = urlSelectProperty.replace("rangeID", selectedValue);
                 var aElement = $('#outgoing-inherited-property-a-' + selectedID);
+                aElement.data("url", urlSelectProperty);
+            }
+            else if ($(this).hasClass("select-subclass-incoming-properties")) {
+                var propertyID = selectedID;
+                var urlSelectProperty = '{{ path("profile_inherited_property_association", {'profile' : 'profileID', 'property' : 'propertyID', 'domain' : 'domainID', 'range' : 'rangeID'}) }}';
+                urlSelectProperty = urlSelectProperty.replace("profileID", profileID);
+                urlSelectProperty = urlSelectProperty.replace("propertyID", propertyID);
+                urlSelectProperty = urlSelectProperty.replace("domainID", selectedValue);
+                urlSelectProperty = urlSelectProperty.replace("rangeID", classID);
+                var aElement = $('#incoming-property-a-' + selectedID);
+                aElement.data("url", urlSelectProperty);
+            }
+            else if ($(this).hasClass("select-subclass-incoming-inherited-properties")) {
+                var propertyID = selectedID.split('-')[0];
+                var urlSelectProperty = '{{ path("profile_inherited_property_association", {'profile' : 'profileID', 'property' : 'propertyID', 'domain' : 'domainID', 'range' : 'rangeID'}) }}';
+                urlSelectProperty = urlSelectProperty.replace("profileID", profileID);
+                urlSelectProperty = urlSelectProperty.replace("propertyID", propertyID);
+                urlSelectProperty = urlSelectProperty.replace("domainID", selectedValue);
+                urlSelectProperty = urlSelectProperty.replace("rangeID", classID);
+                var aElement = $('#incoming-inherited-property-a-' + selectedID);
+                console.log(urlSelectProperty);
+                console.log('#incoming-inherited-property-a-' + selectedID);
                 aElement.data("url", urlSelectProperty);
             }
         });
