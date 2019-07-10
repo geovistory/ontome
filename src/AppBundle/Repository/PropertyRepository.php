@@ -339,7 +339,7 @@ class PropertyRepository extends EntityRepository
                 FROM che.v_properties_with_domain_range
                 JOIN che.associates_namespace asnsp ON asnsp.fk_property = pk_property
                 JOIN che.namespace nsp ON nsp.pk_namespace = asnsp.fk_namespace 
-                LEFT JOIN che.associates_profile aspro ON aspro.fk_property = pk_property AND aspro.fk_profile = :profile
+                LEFT JOIN che.associates_profile aspro ON aspro.fk_property = pk_property AND aspro.fk_profile = :profile AND aspro.fk_inheriting_range_class IS NULL AND aspro.fk_inheriting_domain_class IS NULL
                 
                 WHERE pk_domain = :class;";
 
@@ -392,22 +392,39 @@ class PropertyRepository extends EntityRepository
             ->getConnection();
 
         $sql = "SELECT DISTINCT identifier_in_namespace AS domain,
-                                pk_parent AS \"parentClassId\",
-                                parent_identifier AS \"parentClass\",
-                                pk_property AS \"propertyId\",
-                                identifier_property AS property,
-                                pk_range AS \"rangeId\",
-                                identifier_range AS range,
-                                replace(ancestors, '|', '→') AS ancestors,
-                                (SELECT label FROM che.get_namespace_labels(nsp.pk_namespace) WHERE language_iso_code = 'en') AS namespace,
-                                CASE
-                                    WHEN aspro.fk_system_type IS NULL THEN 999
-                                    ELSE aspro.fk_system_type
-                                    END AS fk_system_type
+                --pk_parent AS \"parentClassId\",
+                --parent_identifier AS \"parentClass\",
+                pk_property AS \"propertyId\",
+                identifier_property AS property,
+                pk_range AS \"rangeId\",
+                identifier_range AS range,
+                --replace(ancestors, '|', '→') AS ancestors,
+                --(SELECT label FROM che.get_namespace_labels(nsp.pk_namespace) WHERE language_iso_code = 'en') AS namespace,
+                CASE
+                    WHEN aspro.fk_system_type IS NULL THEN 999
+                    ELSE aspro.fk_system_type
+                    END AS fk_system_type
                 FROM che.class_outgoing_inherited_properties(:class)
                 JOIN che.associates_namespace asnsp ON asnsp.fk_property = pk_property
                 JOIN che.namespace nsp ON nsp.pk_namespace = asnsp.fk_namespace
-                LEFT JOIN che.associates_profile aspro ON aspro.fk_property = pk_property AND aspro.fk_inheriting_domain_class = :class AND aspro.fk_inheriting_range_class = pk_range AND aspro.fk_profile = :profile;";
+                LEFT JOIN che.associates_profile aspro ON aspro.fk_property = pk_property AND aspro.fk_inheriting_domain_class = :class AND aspro.fk_inheriting_range_class = pk_range AND aspro.fk_profile = :profile
+                
+                UNION DISTINCT
+                
+                SELECT clsdmn.identifier_in_namespace || ' ' || clsdmn.standard_label AS domain,
+                       aspro.fk_property AS \"propertyId\",
+                       prop.identifier_in_namespace  || ' ' ||  prop.standard_label,
+                       aspro.fk_inheriting_range_class AS \"rangeId\",
+                       clsrng.identifier_in_namespace || ' ' || clsrng.standard_label AS range,
+                       CASE
+                           WHEN aspro.fk_system_type IS NULL THEN 999
+                           ELSE aspro.fk_system_type
+                           END AS fk_system_type
+                FROM che.associates_profile aspro
+                JOIN che.property prop ON aspro.fk_property = prop.pk_property
+                JOIN che.class clsdmn ON aspro.fk_inheriting_domain_class = clsdmn.pk_class
+                JOIN che.class clsrng ON aspro.fk_inheriting_range_class = clsrng.pk_class
+                WHERE aspro.fk_profile = :profile AND aspro.fk_inheriting_domain_class = :class;";
 
         $stmt = $conn->prepare($sql);
         $stmt->execute(array('class' => $class->getId(), 'profile' => $profile->getId()));

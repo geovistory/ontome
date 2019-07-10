@@ -612,6 +612,34 @@ class ProfileController  extends Controller
     }
 
     /**
+     * @Route("/selectable-descendent-class/profile/{profile}/class/{class}/property/{property}/json", name="selectable_descendent_class_profile_json")
+     * @Method("GET")
+     * @param Profile $profile
+     * @param OntoClass $class
+     * @param Property $property
+     * @return JsonResponse a Json formatted list representation of selectable descendent classes for properties by Class, Property and Profile
+     */
+    public function getSelectableDescendentClassByClassAndProfile(OntoClass $class, Profile $profile, Property $property)
+    {
+        try {
+            $em = $this->getDoctrine()->getManager();
+            $classes = $em->getRepository('AppBundle:OntoClass')
+                ->findDescendantsByProfileAndClassId($profile, $class, $property);
+            $data['results'] = $classes;
+            $data = json_encode($data);
+        }
+        catch (NotFoundHttpException $e) {
+            return new JsonResponse(null,404, 'content-type:application/problem+json');
+        }
+
+        if(empty($classes)) {
+            return new JsonResponse(null,204, array());
+        }
+
+        return new JsonResponse($data,200, array(), true);
+    }
+
+    /**
      * @Route("/profile/{id}/json", name="profile_json")
      * @Method("GET")
      * @param Profile $profile
