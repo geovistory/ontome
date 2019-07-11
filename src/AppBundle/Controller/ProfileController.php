@@ -614,14 +614,17 @@ class ProfileController  extends Controller
      * @param Profile $profile
      * @param OntoClass $class
      * @param Property $property
+     * @param Request $request
      * @return JsonResponse a Json formatted list representation of selectable descendent classes for properties by Class, Property and Profile
      */
-    public function getSelectableDescendentClassByClassAndProfile(OntoClass $class, Profile $profile, Property $property)
+    public function getSelectableDescendentClassByClassAndProfile(OntoClass $class, Profile $profile, Property $property, Request $request)
     {
         try {
+            $searchTerm = $request->get('term'); //récupération du paramètre "term" envoyé par select2 pour la requête AJAX
+
             $em = $this->getDoctrine()->getManager();
             $classes = $em->getRepository('AppBundle:OntoClass')
-                ->findDescendantsByProfileAndClassId($profile, $class, $property);
+                ->findDescendantsByProfileAndClassId($profile, $class, $property, $searchTerm);
             $data['results'] = $classes;
             $data = json_encode($data);
         }

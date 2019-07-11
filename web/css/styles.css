@@ -176,6 +176,18 @@ BODY Styling
 Main components
 
 -------------------------------- */
+
+.myAlert-top{
+    position: fixed;
+    top: 5px;
+    left:2%;
+    width: 96%;
+}
+
+.myAlert-top.alert{
+    display: none;
+}
+
 #cd-timeline {
     position: relative;
     padding: 2em 0;

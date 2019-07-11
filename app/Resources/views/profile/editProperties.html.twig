@@ -67,6 +67,10 @@
             </div>
         </div>
     </div>
+    <div class="myAlert-top alert alert-success">
+        <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+        <span><strong>Success!</strong> Inherited property successfully created.</span>
+    </div>
 {% endblock %}
 {% block javascripts %}
     {{ parent() }}
@@ -118,7 +122,7 @@
                             urlGetDescendentClasses = urlGetDescendentClasses.replace("profileID", profileID);
                             urlGetDescendentClasses = urlGetDescendentClasses.replace("classID", row.rangeId);
                             urlGetDescendentClasses = urlGetDescendentClasses.replace("propertyID", row.propertyId);
-                            return '<span class = "outgoing-property-range-switch" data-id="' + row.propertyId + '">' + data + '</span><span id="outgoing-property-range-select-' + row.propertyId + '" data-id="' + row.propertyId + '"></span>&nbsp;<a data-id="' + row.propertyId + '" data-url="' + urlGetDescendentClasses + '" class="select-subclass-range"><i class="fas fa-exchange-alt"></i></a>';
+                            return '<span class = "outgoing-property-range-switch" data-id="' + row.propertyId + '">' + data + '</span><span id="outgoing-property-range-select-' + row.propertyId + '" data-id="' + row.propertyId + '"></span>&nbsp;<a data-id="' + row.propertyId + '" data-url="' + urlGetDescendentClasses + '" class="select-subclass-range" data-toggle="tooltip" title="Select a child class"><i class="far fa-caret-square-down"></i></a>';
                         }
                         else return data;
                     }
@@ -173,7 +177,7 @@
                             urlGetDescendentClasses = urlGetDescendentClasses.replace("profileID", profileID);
                             urlGetDescendentClasses = urlGetDescendentClasses.replace("classID", row.rangeId);
                             urlGetDescendentClasses = urlGetDescendentClasses.replace("propertyID", row.propertyId);
-                            return '<span class = "outgoing-inherited-property-range-switch" data-id="'+row.propertyId+'-'+row.rangeId+'">'+data+'</span><span id="outgoing-inherited-property-range-select-'+row.propertyId+'-'+row.rangeId+'" data-id="'+row.propertyId+'-'+row.rangeId+'"></span>&nbsp;<a data-id="'+row.propertyId+'-'+row.rangeId+'" data-url="'+urlGetDescendentClasses+'" class="select-subclass-range-inherited"><i class="fas fa-exchange-alt"></i></a>';
+                            return '<span class = "outgoing-inherited-property-range-switch" data-id="'+row.propertyId+'-'+row.rangeId+'">'+data+'</span><span id="outgoing-inherited-property-range-select-'+row.propertyId+'-'+row.rangeId+'" data-id="'+row.propertyId+'-'+row.rangeId+'"></span>&nbsp;<a data-id="'+row.propertyId+'-'+row.rangeId+'" data-url="'+urlGetDescendentClasses+'" class="select-subclass-range-inherited" data-toggle="tooltip" title="Select a child class"><i class="far fa-caret-square-down"></i></a>';
                         }
                         else return data;
                     }
@@ -203,7 +207,7 @@
                             urlGetDescendentClasses = urlGetDescendentClasses.replace("profileID", profileID);
                             urlGetDescendentClasses = urlGetDescendentClasses.replace("classID", row.domainId);
                             urlGetDescendentClasses = urlGetDescendentClasses.replace("propertyID", row.propertyId);
-                            return '<span class = "incoming-property-domain-switch" data-id="' + row.propertyId + '">' + data + '</span><span id="incoming-property-domain-select-' + row.propertyId + '" data-id="' + row.propertyId + '"></span>&nbsp;<a data-id="' + row.propertyId + '" data-url="' + urlGetDescendentClasses + '" class="select-subclass-domain"><i class="fas fa-exchange-alt"></i></a>';
+                            return '<span class = "incoming-property-domain-switch" data-id="' + row.propertyId + '">' + data + '</span><span id="incoming-property-domain-select-' + row.propertyId + '" data-id="' + row.propertyId + '"></span>&nbsp;<a data-id="' + row.propertyId + '" data-url="' + urlGetDescendentClasses + '" class="select-subclass-domain" data-toggle="tooltip" title="Select a child class"><i class="far fa-caret-square-down"></i></a>';
                         }
                         else return data;
                     }
@@ -254,7 +258,7 @@
                             urlGetDescendentClasses = urlGetDescendentClasses.replace("profileID", profileID);
                             urlGetDescendentClasses = urlGetDescendentClasses.replace("classID", row.domainId);
                             urlGetDescendentClasses = urlGetDescendentClasses.replace("propertyID", row.propertyId);
-                            return '<span class = "incoming-inherited-property-domain-switch" data-id="'+row.propertyId+'-'+row.domainId+'">'+data+'</span><span id="incoming-inherited-property-domain-select-'+row.propertyId+'-'+row.domainId+'" data-id="'+row.propertyId+'-'+row.domainId+'"></span>&nbsp;<a data-id="'+row.propertyId+'-'+row.domainId+'" data-url="'+urlGetDescendentClasses+'" class="select-subclass-domain-inherited"><i class="fas fa-exchange-alt"></i></a>';
+                            return '<span class = "incoming-inherited-property-domain-switch" data-id="'+row.propertyId+'-'+row.domainId+'">'+data+'</span><span id="incoming-inherited-property-domain-select-'+row.propertyId+'-'+row.domainId+'" data-id="'+row.propertyId+'-'+row.domainId+'"></span>&nbsp;<a data-id="'+row.propertyId+'-'+row.domainId+'" data-url="'+urlGetDescendentClasses+'" class="select-subclass-domain-inherited" data-toggle="tooltip" title="Select a child class"><i class="far fa-caret-square-down"></i></a>';
                         }
                         else return data;
                     }
@@ -293,6 +297,13 @@
             ]
         });
 
+        function myAlertTop(){
+            $(".myAlert-top").show();
+            setTimeout(function(){
+                $(".myAlert-top").hide();
+            }, 2000);
+        }
+
         //function to initialize select2
         function initializeSelect2(selectElementObj, url) {
             selectElementObj.select2({
@@ -321,6 +332,7 @@
                 success:function(data){
                     outgoingPropertiesTable.ajax.reload();
                     outgoingInheritedPropertiesTable.ajax.reload();
+                    myAlertTop();
                 }
             });
         });

@@ -392,14 +392,10 @@ class PropertyRepository extends EntityRepository
             ->getConnection();
 
         $sql = "SELECT DISTINCT identifier_in_namespace AS domain,
-                --pk_parent AS \"parentClassId\",
-                --parent_identifier AS \"parentClass\",
                 pk_property AS \"propertyId\",
                 identifier_property AS property,
                 pk_range AS \"rangeId\",
                 identifier_range AS range,
-                --replace(ancestors, '|', '→') AS ancestors,
-                --(SELECT label FROM che.get_namespace_labels(nsp.pk_namespace) WHERE language_iso_code = 'en') AS namespace,
                 CASE
                     WHEN aspro.fk_system_type IS NULL THEN 999
                     ELSE aspro.fk_system_type
@@ -424,7 +420,7 @@ class PropertyRepository extends EntityRepository
                 JOIN che.property prop ON aspro.fk_property = prop.pk_property
                 JOIN che.class clsdmn ON aspro.fk_inheriting_domain_class = clsdmn.pk_class
                 JOIN che.class clsrng ON aspro.fk_inheriting_range_class = clsrng.pk_class
-                WHERE aspro.fk_profile = :profile AND aspro.fk_inheriting_domain_class = :class;";
+                WHERE aspro.fk_profile = :profile AND aspro.fk_system_type = 5 AND aspro.fk_inheriting_domain_class = :class;";
 
         $stmt = $conn->prepare($sql);
         $stmt->execute(array('class' => $class->getId(), 'profile' => $profile->getId()));
@@ -472,7 +468,7 @@ class PropertyRepository extends EntityRepository
                          JOIN che.property prop ON aspro.fk_property = prop.pk_property
                          JOIN che.class clsdmn ON aspro.fk_inheriting_domain_class = clsdmn.pk_class
                          JOIN che.class clsrng ON aspro.fk_inheriting_range_class = clsrng.pk_class
-                WHERE aspro.fk_profile = :profile AND aspro.fk_inheriting_range_class = :class;";
+                WHERE aspro.fk_profile = :profile AND aspro.fk_system_type = 5 AND aspro.fk_inheriting_range_class = :class;";
 
         $stmt = $conn->prepare($sql);
         $stmt->execute(array('class' => $class->getId(), 'profile' => $profile->getId()));
