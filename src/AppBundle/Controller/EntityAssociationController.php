@@ -12,6 +12,7 @@ namespace AppBundle\Controller;
 use AppBundle\Entity\EntityAssociation;
 use AppBundle\Entity\TextProperty;
 use AppBundle\Form\EntityAssociationForm;
+use AppBundle\Form\EntityAssociationEditForm;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
@@ -164,7 +165,7 @@ class EntityAssociationController extends Controller
 
         $this->denyAccessUnlessGranted('edit', $source);
 
-        $form = $this->createForm(EntityAssociationForm::class, $entityAssociation, ['object' => $object]);
+        $form = $this->createForm(EntityAssociationEditForm::class, $entityAssociation, ['object' => $object]);
 
         // only handles data on POST
         $form->handleRequest($request);

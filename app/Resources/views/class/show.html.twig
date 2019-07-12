@@ -556,12 +556,21 @@
                     {% for relation in class.entityAssociations if relation.systemType.id == 4 or relation.systemType.id == 19 %}
                         <tr>
                             <td>{{ relation.systemType }}</td>
+                            {% if class.id == relation.sourceClass.id %}
                             <td><a href="{{ path('class_show', {
                                     'id': relation.targetClass.id
                                 }) }}">
                                     {{ relation.targetClass.invertedLabel }}
                                 </a>
                             </td>
+                            {% else %}
+                            <td><a href="{{ path('class_show', {
+                                    'id': relation.sourceClass.id
+                                }) }}">
+                                    {{ relation.sourceClass.invertedLabel }}
+                                </a>
+                            </td>
+                            {% endif %}
                             <td>
                                 {% if relation.textProperties is not null %}
                                     {% for textProperty in relation.textProperties if textProperty.systemType.id == 15 %}

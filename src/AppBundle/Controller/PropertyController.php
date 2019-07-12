@@ -178,7 +178,6 @@ class PropertyController extends Controller
         $relations = $em->getRepository('AppBundle:Property')
             ->findRelationsById($property);
 
-
         $this->get('logger')
             ->info('Showing property: '.$property->getIdentifierInNamespace());
 

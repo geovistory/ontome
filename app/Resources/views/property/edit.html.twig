@@ -138,7 +138,7 @@
                         </div>
                         <div class="col-lg-10">
                             <ul class="list-unstyled">
-                                {% for relation in property.entityAssociations if relation.systemType.id == 19 or relation.systemType.id == 20 %}
+                                {% for relation in property.entityAssociations if relation.systemType.id == 18 or relation.systemType.id == 20 %}
                                     <li>{{ relation.systemType.standardLabel }}
                                         {% if relation.sourceProperty.id == property.id %}
                                             <a href="{{ path("property_show", {'id': relation.targetProperty.id }) }}">
@@ -725,15 +725,24 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for relation in property.entityAssociations if relation.systemType.id == 19 or relation.systemType.id == 20 %}
+                    {% for relation in property.entityAssociations if relation.systemType.id == 18 or relation.systemType.id == 20 %}
                         <tr>
                             <td>{{ relation.systemType }}</td>
-                            <td><a href="{{ path('property_show', {
-                                    'id': relation.targetProperty.id
-                                }) }}">
-                                    {{ relation.targetProperty.invertedLabel }}
-                                </a>
-                            </td>
+                            {% if property.id == relation.sourceProperty.id %}
+                                <td><a href="{{ path('property_show', {
+                                        'id': relation.targetProperty.id
+                                    }) }}">
+                                        {{ relation.targetProperty.invertedLabel }}
+                                    </a>
+                                </td>
+                            {% else %}
+                                <td><a href="{{ path('property_show', {
+                                        'id': relation.sourceProperty.id
+                                    }) }}">
+                                        {{ relation.sourceProperty.invertedLabel }}
+                                    </a>
+                                </td>
+                            {% endif %}
                             <td>
                                 {% if relation.textProperties is not null %}
                                     {% for textProperty in relation.textProperties if textProperty.systemType.id == 15 %}
