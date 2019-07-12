@@ -12,6 +12,7 @@ namespace AppBundle\Repository;
 use AppBundle\Entity\OntoClass;
 use AppBundle\Entity\Profile;
 use AppBundle\Entity\Project;
+use AppBundle\Entity\Property;
 use Doctrine\ORM\EntityRepository;
 
 class ClassRepository extends EntityRepository
@@ -268,6 +269,64 @@ class ClassRepository extends EntityRepository
         $stmt->execute(array('profile' => $profile->getId(), 'class' => $class->getId()));
 
         return $stmt->fetchColumn();
+    }
+
+    /**
+     * @param Profile $profile
+     * @param OntoClass $class
+     * @param Property $property
+     * @param String $searchTerm
+     * @return array
+     */
+    public function findDescendantsByProfileAndClassId(Profile $profile, OntoClass $class, Property $property, $searchTerm = null){
+        $conn = $this->getEntityManager()
+            ->getConnection();
+
+        $iLike = '';
+        $queryParams = array(
+            'profile' => $profile->getId(),
+            'class' => $class->getId(),
+            'property' => $property->getId()
+        );
+        if(!empty($searchTerm)) {
+            $iLike = ' AND text ILIKE :searchTerm';
+            $queryParams['searchTerm'] = '%'.$searchTerm.'%';
+        }
+
+        $sql = "SELECT * 
+                FROM (
+                    SELECT DISTINCT	pk_child AS id,
+                                       child_identifier AS \"text\"
+                    FROM che.descendant_class_hierarchy(:class) cls
+                             JOIN che.associates_namespace asnsp ON asnsp.fk_class = cls.pk_child
+                             JOIN che.associates_referenced_namespace asrefnsp ON asrefnsp.fk_referenced_namespace = asnsp.fk_namespace AND asrefnsp.fk_profile = :profile
+                    
+                        EXCEPT
+                    
+                    SELECT  aspro.fk_inheriting_range_class AS id,
+                            cls.identifier_in_namespace || ' ' || cls.standard_label AS \"text\"
+                    FROM che.associates_profile aspro
+                             JOIN che.class cls ON aspro.fk_inheriting_range_class = cls.pk_class
+                    WHERE aspro.fk_profile = :profile AND aspro.fk_property = :property AND aspro.fk_system_type = 5
+                    
+                        EXCEPT
+                    
+                    SELECT  aspro.fk_inheriting_domain_class AS id,
+                            cls.identifier_in_namespace || ' ' || cls.standard_label AS \"text\"
+                    FROM che.associates_profile aspro
+                             JOIN che.class cls ON aspro.fk_inheriting_domain_class = cls.pk_class
+                    WHERE aspro.fk_profile = :profile AND aspro.fk_property = :property  AND aspro.fk_system_type = 5
+                    
+                    ORDER BY id ASC
+                ) AS result
+                WHERE TRUE".$iLike.";";
+
+        //echo $sql;die;
+
+        $stmt = $conn->prepare($sql);
+        $stmt->execute($queryParams);
+
+        return $stmt->fetchAll();
     }
 
 

@@ -188,6 +188,12 @@
                 "pageLength": 25
             } );
         });
+
+        //add tooltip to all elements with the data-toggle="tooltip" attr
+        $("body").tooltip({
+            selector: '[data-toggle="tooltip"]'
+        });
+
     </script>
 {% endblock %}
 </body>

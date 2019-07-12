@@ -286,7 +286,7 @@ class ProfileController  extends Controller
 
         $em = $this->getDoctrine()->getManager();
         $profileAssociation = $em->getRepository('AppBundle:ProfileAssociation')
-            ->findOneBy(array('profile' => $profile->getId(), 'property' => $property->getId()));
+            ->findOneBy(array('profile' => $profile->getId(), 'property' => $property->getId(), 'domain' => null, 'range' => null));
 
         if (!is_null($profileAssociation)) {
             if($profileAssociation->getSystemType()->getId() == 5) {
@@ -445,7 +445,7 @@ class ProfileController  extends Controller
 
 
         $profileAssociation = $em->getRepository('AppBundle:ProfileAssociation')
-            ->findOneBy(array('profile' => $profile->getId(), 'property' => $property->getId()));
+            ->findOneBy(array('profile' => $profile->getId(), 'property' => $property->getId(), 'domain' => null, 'range' => null));
 
         $systemType = $em->getRepository('AppBundle:SystemType')->find(6); //systemType 6 = rejected
 
@@ -473,16 +473,21 @@ class ProfileController  extends Controller
         $em = $this->getDoctrine()->getManager();
 
 
-        $profileAssociation = $em->getRepository('AppBundle:ProfileAssociation')
-            ->findOneBy(array('profile' => $profile->getId(), 'property' => $property->getId(), 'domain' => $domain->getId(), 'range' => $range->getId()));
+        try {
+            $profileAssociation = $em->getRepository('AppBundle:ProfileAssociation')
+                ->findOneBy(array('profile' => $profile->getId(), 'property' => $property->getId(), 'domain' => $domain->getId(), 'range' => $range->getId()));
 
-        $systemType = $em->getRepository('AppBundle:SystemType')->find(6); //systemType 6 = rejected
+            $systemType = $em->getRepository('AppBundle:SystemType')->find(6); //systemType 6 = rejected
 
-        $profileAssociation->setSystemType($systemType);
+            $profileAssociation->setSystemType($systemType);
 
-        $em->persist($profile);
-        $em->flush();
+            $em->persist($profile);
+            $em->flush();
+        }
 
+        catch (\Exception $e) {
+            return new JsonResponse(null, 400, 'content-type:application/problem+json');
+        }
         return new JsonResponse(null, 204);
 
     }
@@ -516,15 +521,13 @@ class ProfileController  extends Controller
             $em = $this->getDoctrine()->getManager();
             $properties = $em->getRepository('AppBundle:Property')
                 ->findOutgoingPropertiesByClassAndProfileId($class, $profile);
+            $data['recordsTotal'] = count($properties); //mandatory for datatable
+            $data['recordsFiltered'] = count($properties); //mandatory for datatable
             $data['data'] = $properties;
             $data = json_encode($data);
         }
         catch (NotFoundHttpException $e) {
             return new JsonResponse(null,404, 'content-type:application/problem+json');
-        }
-
-        if(empty($properties)) {
-            return new JsonResponse(null,204, array());
         }
 
         return new JsonResponse($data,200, array(), true);
@@ -543,15 +546,13 @@ class ProfileController  extends Controller
             $em = $this->getDoctrine()->getManager();
             $properties = $em->getRepository('AppBundle:Property')
                 ->findIncomingPropertiesByClassAndProfileId($class, $profile);
+            $data['recordsTotal'] = count($properties); //mandatory for datatable
+            $data['recordsFiltered'] = count($properties); //mandatory for datatable
             $data['data'] = $properties;
             $data = json_encode($data);
         }
         catch (NotFoundHttpException $e) {
             return new JsonResponse(null,404, 'content-type:application/problem+json');
-        }
-
-        if(empty($properties)) {
-            return new JsonResponse(null,204, array());
         }
 
         return new JsonResponse($data,200, array(), true);
@@ -570,15 +571,13 @@ class ProfileController  extends Controller
             $em = $this->getDoctrine()->getManager();
             $properties = $em->getRepository('AppBundle:Property')
                 ->findOutgoingInheritedPropertiesByClassAndProfileId($class, $profile);
+            $data['recordsTotal'] = count($properties); //mandatory for datatable
+            $data['recordsFiltered'] = count($properties); //mandatory for datatable
             $data['data'] = $properties;
             $data = json_encode($data);
         }
         catch (NotFoundHttpException $e) {
             return new JsonResponse(null,404, 'content-type:application/problem+json');
-        }
-
-        if(empty($properties)) {
-            return new JsonResponse(null,204, array());
         }
 
         return new JsonResponse($data,200, array(), true);
@@ -597,6 +596,8 @@ class ProfileController  extends Controller
             $em = $this->getDoctrine()->getManager();
             $properties = $em->getRepository('AppBundle:Property')
                 ->findIncomingInheritedPropertiesByClassAndProfileId($class, $profile);
+            $data['recordsTotal'] = count($properties); //mandatory for datatable
+            $data['recordsFiltered'] = count($properties); //mandatory for datatable
             $data['data'] = $properties;
             $data = json_encode($data);
         }
@@ -604,7 +605,34 @@ class ProfileController  extends Controller
             return new JsonResponse(null,404, 'content-type:application/problem+json');
         }
 
-        if(empty($properties)) {
+        return new JsonResponse($data,200, array(), true);
+    }
+
+    /**
+     * @Route("/selectable-descendent-class/profile/{profile}/class/{class}/property/{property}/json", name="selectable_descendent_class_profile_json")
+     * @Method("GET")
+     * @param Profile $profile
+     * @param OntoClass $class
+     * @param Property $property
+     * @param Request $request
+     * @return JsonResponse a Json formatted list representation of selectable descendent classes for properties by Class, Property and Profile
+     */
+    public function getSelectableDescendentClassByClassAndProfile(OntoClass $class, Profile $profile, Property $property, Request $request)
+    {
+        try {
+            $searchTerm = $request->get('term'); //récupération du paramètre "term" envoyé par select2 pour la requête AJAX
+
+            $em = $this->getDoctrine()->getManager();
+            $classes = $em->getRepository('AppBundle:OntoClass')
+                ->findDescendantsByProfileAndClassId($profile, $class, $property, $searchTerm);
+            $data['results'] = $classes;
+            $data = json_encode($data);
+        }
+        catch (NotFoundHttpException $e) {
+            return new JsonResponse(null,404, 'content-type:application/problem+json');
+        }
+
+        if(empty($classes)) {
             return new JsonResponse(null,204, array());
         }
 
