@@ -212,7 +212,6 @@ class Property
      */
     public function validate(ExecutionContextInterface $context, $payload)
     {
-
         // check if the identifier is set when needed
         if ($this->isManualIdentifier && empty($this->identifierInNamespace)) {
             $context->buildViolation('The identifier cannot be null.')
@@ -223,7 +222,7 @@ class Property
             foreach ($this->getNamespaces() as $namespace) {
                 foreach ($namespace->getProperties() as $property) {
                     if ($property->identifierInNamespace == $this->identifierInNamespace) {
-                        $context->buildViolation('The identifier must be unique. Please choose another one.')
+                        $context->buildViolation('The identifier must be unique. Please enter another one.')
                             ->atPath('identifierInNamespace')
                             ->addViolation();
                         break;

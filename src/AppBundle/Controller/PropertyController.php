@@ -92,7 +92,8 @@ class PropertyController extends Controller
             $property->setRange($class);
         }
 
-        $property->setIsManualIdentifier(is_null($class->getOngoingNamespace()->getTopLevelNamespace()->getClassPrefix()));
+        $property->setIsManualIdentifier(is_null($class->getOngoingNamespace()->getTopLevelNamespace()->getPropertyPrefix()));
+        $property->addNamespace($class->getOngoingNamespace());
         $property->setCreator($this->getUser());
         $property->setModifier($this->getUser());
 
@@ -109,8 +110,6 @@ class PropertyController extends Controller
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $property = $form->getData();
-            $property->setIsManualIdentifier(is_null($class->getOngoingNamespace()->getTopLevelNamespace()->getClassPrefix()));
-            $property->addNamespace($class->getOngoingNamespace());
             if($type == 'outgoing') {
                 $property->setDomain($class);
             }
@@ -218,7 +217,7 @@ class PropertyController extends Controller
         $propertyTemp = new Property();
         $propertyTemp->addNamespace($property->getOngoingNamespace());
         $propertyTemp->setIdentifierInNamespace($property->getIdentifierInNamespace());
-        $propertyTemp->setIsManualIdentifier(is_null($property->getOngoingNamespace()->getTopLevelNamespace()->getClassPrefix()));
+        $propertyTemp->setIsManualIdentifier(is_null($property->getOngoingNamespace()->getTopLevelNamespace()->getPropertyPrefix()));
         $propertyTemp->setCreator($this->getUser());
         $propertyTemp->setModifier($this->getUser());
         $propertyTemp->setCreationTime(new \DateTime('now'));

@@ -334,6 +334,7 @@
             </div>
             <div id="identification" class="tab-pane fade">
                 {% if domainRange is not empty %}
+                    <h3>Identifier : {{ property.identifierInNamespace }}</h3>
                     <h3>Domain and range</h3>
                     <p>
                         <a href="{{ path('class_show', {'id': domainRange.domainId}) }}">{{ domainRange.domainIdentifier }}</a> → {{ domainRange.propertyIdentifier }} → <a href="{{ path('class_show', {'id': domainRange.rangeId}) }}">{{ domainRange.rangeIdentifier }}</a>
@@ -342,7 +343,6 @@
                         {% endif %}
                     </p>
                 {% endif %}
-                <h3>Identifier : {{ property.identifierInNamespace }}</h3>
                 <h3>Labels</h3>
                 <table class="table table-striped" id="labels-table">
                     <thead>
