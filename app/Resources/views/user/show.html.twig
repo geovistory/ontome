@@ -50,6 +50,21 @@
                     {{ form_row(myEnvironmentForm.currentActiveProject) }}
                     <button type="submit" class="btn btn-primary" formnovalidate>Save</button>
                 {{ form_end(myEnvironmentForm) }}
+
+                    <h3>Namespaces of the profiles belonging to the current active project</h3>
+                    <ul>
+                    {% for namespace in namespacesOfProfilesOfCurrentActiveProject %}
+                        <li class="list-unstyled">{{ namespace }}</li>
+                    {% endfor %}
+                    </ul>
+                <h3>Espaces de nom ongoing gérés par le projet</h3>
+                <ul>
+                {% for namespace in namespacesOfCurrentActiveProject %}
+                    {% if not namespace.isTopLevelNamespace %}
+                    <li>{{ namespace }}</li>
+                    {% endif %}
+                {% endfor %}
+                </ul>
                 <h3>Project namespaces</h3>
                 <div class="row">
                     <div class="col-lg-6">

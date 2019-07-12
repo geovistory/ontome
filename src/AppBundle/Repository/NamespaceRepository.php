@@ -11,6 +11,7 @@ namespace AppBundle\Repository;
 
 use AppBundle\Entity\OntoNamespace;
 use AppBundle\Entity\Profile;
+use AppBundle\Entity\Project;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\QueryBuilder;
 
@@ -88,7 +89,18 @@ class NamespaceRepository extends EntityRepository
             ->orderBy('nsp.id','DESC');
             //->getQuery()
             //->execute();
+    }
 
+    public function findAllNamespacesManagedByProfilesOfProjectOfBelonging(Project $project)
+    {
+        return $this->createQueryBuilder('ns')
+            ->leftJoin('ns.profiles', 'prf')
+            ->leftJoin('prf.projectOfBelonging', 'pj')
+            ->andWhere('pj.id = :project')
+            ->setParameter('project', $project->getId())
+            ->distinct()
+            ->getQuery()
+            ->execute();
     }
 
     /**

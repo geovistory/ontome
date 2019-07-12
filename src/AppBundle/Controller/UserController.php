@@ -306,11 +306,21 @@ class UserController extends Controller
         }
 
         $em = $this->getDoctrine()->getManager();
+
         $userProjectAssociations = $em->getRepository('AppBundle:UserProjectAssociation')
             ->findBy(array('user' => $user->getId()));
+
         $namespaces = $em->getRepository('AppBundle:OntoNamespace')
             ->findBy(array('creator' => $user->getId()));
 
+        $namespacesOfProfilesOfCurrentActiveProject = $em->getRepository('AppBundle:OntoNamespace')
+            ->findAllNamespacesManagedByProfilesOfProjectOfBelonging($user->getCurrentActiveProject());
+
+        //$em->getRepository('AppBundle:Profile')
+            //->findBy(array('projectOfBelonging' => $user->getCurrentActiveProject()));
+
+        $namespacesOfCurrentActiveProject = $em->getRepository('AppBundle:OntoNamespace')
+            ->findBy(array('projectForTopLevelNamespace' => $user->getCurrentActiveProject()));
 
         $projectNamespacesSelectable = new ArrayCollection($em->getRepository('AppBundle:OntoNamespace')
             ->findBy(array('projectForTopLevelNamespace' => $user->getCurrentActiveProject())));
@@ -346,6 +356,8 @@ class UserController extends Controller
             'additionalNamespacesSelected' => $additionalNamespacesSelected,
             'namespaces' => $namespaces,
             'user' => $user,
+            'namespacesOfProfilesOfCurrentActiveProject' => $namespacesOfProfilesOfCurrentActiveProject,
+            'namespacesOfCurrentActiveProject' => $namespacesOfCurrentActiveProject,
             'myEnvironmentForm' => $form->createView()
         ));
     }
