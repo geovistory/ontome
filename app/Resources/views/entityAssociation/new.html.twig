@@ -1,0 +1,168 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Add new related {{ object }} for {{ source }}{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.4/css/select2.min.css" rel="stylesheet" />
+{%  endblock %}
+
+{% block body %}
+
+    {% import _self as formMacros %}
+    {% macro printTextPropertyRow(textPropertyForm) %}
+        {{ form_errors(textPropertyForm) }}
+        {{ form_row(textPropertyForm.textProperty, {
+            'label': 'Justification'
+        }) }}
+        {{ form_row(textPropertyForm.languageIsoCode, {
+            'label': 'Language'
+        }) }}
+        {{ form_row(textPropertyForm.creator) }}
+        {{ form_row(textPropertyForm.modifier) }}
+    {% endmacro %}
+
+    <div class="container">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="pull-right reset-div">
+                    <a href="{{ path('new_entity_association_form', {object: object, objectId: source.id}) }}" class="btn btn-primary pull-right">Reset <span class="fa fa-undo"></span></a>
+                </div>
+                <h2>
+                    Add new related {{ object }} for {{ source }}
+                    <a href="{{ path(object~'_edit', {
+                        id: source.id,
+                        '_fragment': 'relations'
+                    }) }}" class="pull-right btn btn-link">
+                        <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
+                    </a>
+                </h2>
+
+                {{ form_start(entityAssociationForm) }}
+                {{ form_errors(entityAssociationForm) }}
+
+                {{ form_row(entityAssociationForm.systemType) }}
+                {% if object == 'class' %}
+                {{ form_row(entityAssociationForm.targetClass) }}
+                {% elseif object == 'property' %}
+                {{ form_row(entityAssociationForm.targetProperty) }}
+                {% endif %}
+
+                <div class="js-text-property-wrapper"
+                     data-prototype="{{ formMacros.printTextPropertyRow(entityAssociationForm.textProperties.vars.prototype)|e('html_attr') }}"
+                     data-index="{{ entityAssociationForm.textProperties|length }}"
+                >
+                    {% for textPropertyForm in entityAssociationForm.textProperties %}
+                        {{ formMacros.printTextPropertyRow(textPropertyForm) }}
+                    {% endfor %}
+                    <a href="#" class="js-example-add">
+                        <span class="fa fa-plus-circle"></span>
+                        Add an example
+                    </a>
+
+                </div>
+
+                <button type="submit" class="btn btn-primary" formnovalidate>Save</button>
+                {{ form_end(entityAssociationForm) }}
+                <br>
+                <h3>Related {% if object == 'class' %}classes{% elseif object == 'property' %}properties{% endif %}</h3>
+                <table class="table table-striped" id="relations-table">
+                    <thead>
+                    <tr>
+                        <th>Relation</th>
+                        <th>{{ object }}</th>
+                        <th>Justification</th>
+                        <th>Root namespace</th>
+                        <th>View details</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for relation in source.entityAssociations %}
+                        <tr>
+                            <td>{{ relation.systemType.standardLabel }}</td>
+                            <td>
+                                {% if object == 'class' %}
+                                <a href="{{ path('class_show', {
+                                    'id': relation.targetClass.id
+                                }) }}">
+                                    {{ relation.targetClass.identifierInNamespace }} - {{ relation.targetClass.standardLabel }}
+                                </a>
+                                {% elseif object == 'property' %}
+                                    <a href="{{ path('property_show', {
+                                        'id': relation.targetProperty.id
+                                    }) }}">
+                                        {{ relation.targetProperty.identifierInNamespace }} - {{ relation.targetProperty.standardLabel }}
+                                    </a>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if relation.textProperties is not null %}
+                                    {% for textProperty in relation.textProperties if textProperty.systemType.id == 15 %}
+                                        {% if loop.index == 1 %}
+                                            <a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="fas fa-info-circle" aria-hidden="true"></span></a>
+                                            {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if relation.namespaces is not null %}
+                                    {% if relation.namespaces|first.topLevelNamespace is not null %}
+                                        {{ relation.namespaces|first.topLevelNamespace }}
+                                    {% endif %}
+                                {% endif %}
+                            </td>
+                            <td> <a href="{{ path('entity_association_show', {
+                                    'id': relation.id,
+                                    'object': object,
+                                    'objectId': source.id
+                                }) }}">
+                                    <span class="fa fa-eye"></span>
+                                </a></td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.4/js/select2.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#relations-table').DataTable();
+            if($('[for=entity_association_form_textProperties_1_textProperty]').length) {
+                //we hide the button in order to prevent the add of more than 2 text properties
+                $('.js-example-add').hide();
+                $('[for=entity_association_form_textProperties_1_textProperty]').text('Example');
+            }
+            var $wrapper = $('.js-text-property-wrapper');
+            $wrapper.on('click', '.js-example-add', function(e) {
+                e.preventDefault();
+
+                // Get the data-prototype explained earlier
+                var prototype = $wrapper.data('prototype');
+
+                // get the new index
+                var index = $wrapper.data('index');
+
+                // Replace '__name__' in the prototype's HTML to
+                // instead be a number based on how many items we have
+                var newForm = prototype.replace(/__name__/g, index);
+
+                // increase the index with one for the next item
+                $wrapper.data('index', index + 1);
+
+                // Display the form in the page before the "new" link
+                $(this).before(newForm);
+                $('#entity_association_form_textProperties_1_creator').val($('#entity_association_form_textProperties_0_creator').val());
+                $('#entity_association_form_textProperties_1_modifier').val($('#entity_association_form_textProperties_0_creator').val());
+                $('.js-example-add').hide();
+                $('[for=entity_association_form_textProperties_1_textProperty]').text('Example');
+            });
+        } );
+    </script>
+{% endblock %}

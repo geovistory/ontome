@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}{{ parent() }} - {{ property }}{% endblock %}
+{% block title %}{{ property }}{% endblock %}
 
 {% block body %}
 
@@ -25,7 +25,7 @@
             <li><a data-toggle="tab" href="#identification">Identification</a></li>
             <li><a data-toggle="tab" href="#namespaces">Namespace</a></li>
             <li><a data-toggle="tab" href="#property-hierarchy">Hierarchy</a></li>
-            <li><a data-toggle="tab" href="#equivalences">Equivalences</a></li>
+            <li><a data-toggle="tab" href="#relations">Relations</a></li>
             <li><a data-toggle="tab" href="#profiles">Profiles</a></li>
             {%  if property.ongoingNamespace is not null %}
                 <li><a data-toggle="tab" href="#comments">Comments <span class="badge {% if property.comments|length > 0  %}progress-bar-danger {% endif %}">{{ property.comments|length }}</span></a></li>
@@ -134,6 +134,30 @@
                             {% endif %}
                         </div>
                     </div>
+                    {% if property.entityAssociations|length > 0 %}
+                    <div class="row">
+                        <div class="col-lg-2">
+                            <p>Relations:</p>
+                        </div>
+                        <div class="col-lg-10">
+                            <ul class="list-unstyled">
+                                {% for relation in property.entityAssociations if relation.systemType.id == 18 or relation.systemType.id == 20 %}
+                                    <li>{{ relation.systemType.standardLabel }}
+                                        {% if relation.sourceProperty.id == property.id %}
+                                            <a href="{{ path("property_show", {'id': relation.targetProperty.id }) }}">
+                                                {{ relation.targetProperty.invertedLabel }}
+                                            </a>
+                                        {% else %}
+                                            <a href="{{ path("property_show", {'id': relation.sourceProperty.id }) }}">
+                                                {{ relation.sourceProperty.invertedLabel }}
+                                            </a>
+                                        {% endif %}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                    {% endif %}
                     <div class="row">
                         <div class="col-lg-2">
                             <p>Scope note:</p>
@@ -621,9 +645,67 @@
                     </tbody>
                 </table>
             </div>
-            <div id="equivalences" class="tab-pane fade">
-                <h3>Equivalent properties</h3>
-
+            <div id="relations" class="tab-pane fade">
+                <h3>Related properties</h3>
+                <table class="table table-striped" id="relations-table">
+                    <thead>
+                    <tr>
+                        <th>Relation</th>
+                        <th>Property</th>
+                        <th>Justification</th>
+                        <th>Defined in namespace</th>
+                        <th>View details</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for relation in property.entityAssociations if relation.systemType.id == 18 or relation.systemType.id == 20 %}
+                        <tr>
+                            <td>{{ relation.systemType }}</td>
+                            {% if property.id == relation.sourceProperty.id %}
+                                <td><a href="{{ path('property_show', {
+                                        'id': relation.targetProperty.id
+                                    }) }}">
+                                        {{ relation.targetProperty.invertedLabel }}
+                                    </a>
+                                </td>
+                            {% else %}
+                                <td><a href="{{ path('property_show', {
+                                        'id': relation.sourceProperty.id
+                                    }) }}">
+                                        {{ relation.sourceProperty.invertedLabel }}
+                                    </a>
+                                </td>
+                            {% endif %}
+                            <td>
+                                {% if relation.textProperties is not null %}
+                                    {% for textProperty in relation.textProperties if textProperty.systemType.id == 15 %}
+                                        {% if loop.index == 1 %}
+                                            <a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="fas fa-info-circle" aria-hidden="true"></span></a>
+                                            {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if relation.namespaces is not null %}
+                                    {% if relation.namespaces|first.topLevelNamespace is not null %}
+                                        {{ relation.namespaces|first.topLevelNamespace }}
+                                    {% endif %}
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{{ path('entity_association_show', {
+                                    'id': relation.id,
+                                    'object': 'property',
+                                    'objectId': property.id
+                                }) }}">
+                                    <span class="fa fa-eye"></span>
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
             </div>
             <div id="profiles" class="tab-pane fade">
                 <h3>Profiles using this class</h3>
@@ -715,6 +797,7 @@
             $('#descendants-table').DataTable({
                 "order": [[ 5, "asc" ]]
             });
+            $('#relations-table').DataTable();
             $('#profiles-table').DataTable();
 
             $('[data-toggle="tooltip"]').tooltip();
