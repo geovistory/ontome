@@ -17,6 +17,7 @@ use AppBundle\Entity\TextProperty;
 use AppBundle\Form\IngoingPropertyQuickAddForm;
 use AppBundle\Form\OutgoingPropertyQuickAddForm;
 use AppBundle\Form\PropertyEditForm;
+use AppBundle\Form\PropertyEditIdentifierForm;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
@@ -91,7 +92,8 @@ class PropertyController extends Controller
             $property->setRange($class);
         }
 
-        $property->setIsManualIdentifier(is_null($class->getOngoingNamespace()->getTopLevelNamespace()->getClassPrefix()));
+        $property->setIsManualIdentifier(is_null($class->getOngoingNamespace()->getTopLevelNamespace()->getPropertyPrefix()));
+        $property->addNamespace($class->getOngoingNamespace());
         $property->setCreator($this->getUser());
         $property->setModifier($this->getUser());
 
@@ -108,8 +110,6 @@ class PropertyController extends Controller
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $property = $form->getData();
-            $property->setIsManualIdentifier(is_null($class->getOngoingNamespace()->getTopLevelNamespace()->getClassPrefix()));
-            $property->addNamespace($class->getOngoingNamespace());
             if($type == 'outgoing') {
                 $property->setDomain($class);
             }
@@ -214,6 +214,32 @@ class PropertyController extends Controller
             ]);
         }
 
+        $propertyTemp = new Property();
+        $propertyTemp->addNamespace($property->getOngoingNamespace());
+        $propertyTemp->setIdentifierInNamespace($property->getIdentifierInNamespace());
+        $propertyTemp->setIsManualIdentifier(is_null($property->getOngoingNamespace()->getTopLevelNamespace()->getPropertyPrefix()));
+        $propertyTemp->setCreator($this->getUser());
+        $propertyTemp->setModifier($this->getUser());
+        $propertyTemp->setCreationTime(new \DateTime('now'));
+        $propertyTemp->setModificationTime(new \DateTime('now'));
+        $propertyTemp->setDomain($property->getDomain());
+        $propertyTemp->setRange($property->getRange());
+
+        $formIdentifier = $this->createForm(PropertyEditIdentifierForm::class, $propertyTemp);
+        $formIdentifier->handleRequest($request);
+        if ($formIdentifier->isSubmitted() && $formIdentifier->isValid()) {
+            $property->setIdentifierInNamespace($propertyTemp->getIdentifierInNamespace());
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($property);
+            $em->flush();
+
+            $this->addFlash('success', 'Property updated!');
+            return $this->redirectToRoute('property_edit', [
+                'id' => $property->getId(),
+                '_fragment' => 'identification'
+            ]);
+        }
+
         $em = $this->getDoctrine()->getManager();
 
         $ancestors = $em->getRepository('AppBundle:Property')
@@ -239,7 +265,8 @@ class PropertyController extends Controller
             'descendants' => $descendants,
             'domainRange' => $domainRange,
             'relations' => $relations,
-            'propertyForm' => $form->createView()
+            'propertyForm' => $form->createView(),
+            'propertyIdentifierForm' => $formIdentifier->createView()
         ));
     }
 

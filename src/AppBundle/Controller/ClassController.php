@@ -14,6 +14,7 @@ use AppBundle\Entity\OntoClass;
 use AppBundle\Entity\OntoNamespace;
 use AppBundle\Entity\Project;
 use AppBundle\Entity\TextProperty;
+use AppBundle\Form\ClassEditIdentifierForm;
 use AppBundle\Form\ClassQuickAddForm;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -181,9 +182,33 @@ class ClassController extends Controller
      * @param OntoClass $class
      * @return Response the rendered template
      */
-    public function editAction(OntoClass $class)
+    public function editAction(OntoClass $class, Request $request)
     {
         $this->denyAccessUnlessGranted('edit', $class);
+
+        $classTemp = new OntoClass();
+        $classTemp->addNamespace($class->getOngoingNamespace());
+        $classTemp->setIdentifierInNamespace($class->getIdentifierInNamespace());
+        $classTemp->setIsManualIdentifier(is_null($class->getOngoingNamespace()->getTopLevelNamespace()->getClassPrefix()));
+        $classTemp->setCreator($this->getUser());
+        $classTemp->setModifier($this->getUser());
+        $classTemp->setCreationTime(new \DateTime('now'));
+        $classTemp->setModificationTime(new \DateTime('now'));
+
+        $formIdentifier = $this->createForm(ClassEditIdentifierForm::class, $classTemp);
+        $formIdentifier->handleRequest($request);
+        if ($formIdentifier->isSubmitted() && $formIdentifier->isValid()) {
+            $class->setIdentifierInNamespace($classTemp->getIdentifierInNamespace());
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($class);
+            $em->flush();
+
+            $this->addFlash('success', 'Class updated!');
+            return $this->redirectToRoute('class_edit', [
+                'id' => $class->getId(),
+                '_fragment' => 'identification'
+            ]);
+        }
 
         $em = $this->getDoctrine()->getManager();
 
@@ -224,7 +249,8 @@ class ClassController extends Controller
             'outgoingProperties' => $outgoingProperties,
             'outgoingInheritedProperties' => $outgoingInheritedProperties,
             'ingoingProperties' => $ingoingProperties,
-            'ingoingInheritedProperties' => $ingoingInheritedProperties
+            'ingoingInheritedProperties' => $ingoingInheritedProperties,
+            'classIdentifierForm' => $formIdentifier->createView()
         ));
     }
 

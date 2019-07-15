@@ -352,6 +352,30 @@
                 </table>
             </div>
             <div id="identification" class="tab-pane fade">
+                {# Test de vérification si cet identifiant existe déjà dans un namespace fermé (il n'est donc plus éditable #}
+                {% set isIdentifierExistAndPublished = false %}
+                {% for namespace in class.namespaces %}
+                    {% if not namespace.isOngoing %}
+                        {% for class_ns in namespace.classes %}
+                            {% if class_ns.identifierInNamespace == class.identifierInNamespace %}
+                                {% set isIdentifierExistAndPublished = true %}
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                {% endfor %}
+                {% if class.ongoingNamespace.topLevelNamespace.classPrefix is null and not isIdentifierExistAndPublished %}
+                    <div id="identifier-form-block">
+                        {{ form_start(classIdentifierForm) }}
+                        {{ form_errors(classIdentifierForm) }}
+                        <p>{{ form_row(classIdentifierForm.identifierInNamespace) }}</p>
+                        <button type="submit" class="btn btn-primary" formnovalidate>Save</button>
+                        <button type="button" id="identifier-edit-btn-close" class="btn">Close</button>
+                        {{ form_end(classIdentifierForm) }}
+                    </div>
+                    <h3 id="identifier-details-block">Identifier : {{ class.identifierInNamespace }}<a class="btn" id="identifier-edit-btn" href="#identification"><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span></a></h3>
+                {% else %}
+                    <h3 id="identifier-details-block">Identifier : {{ class.identifierInNamespace }}</h3>
+                {% endif %}
                 <div class="pull-right add-div">
                     <a href="{{ path('label_new', {'object': 'class', 'objectId': class.id })}}"
                        class="btn btn-primary pull-right">
@@ -413,7 +437,9 @@
                     {% for namespace in class.namespaces %}
                         <tr>
                             <td>
-                                <a href="#">
+                                <a href="{{ path('namespace_show', {
+                                    'id': namespace.id
+                                }) }}">
                                     {{ namespace }}
                                 </a>
                             </td>
@@ -886,6 +912,22 @@
             $('#profiles-table').DataTable();
 
             $('[data-toggle="tooltip"]').tooltip();
+
+            {% if not classIdentifierForm.vars.valid %}
+            $('#identifier-details-block').hide(0);
+            {% else %}
+            $('#identifier-form-block').hide(0);
+            {% endif %}
+
+            $('#identifier-edit-btn').click(function(){
+                $('#identifier-details-block').hide(200);
+                $('#identifier-form-block').show(200);
+            });
+
+            $('#identifier-edit-btn-close').click(function(){
+                $('#identifier-details-block').show(200);
+                $('#identifier-form-block').hide(200);
+            });
         } );
     </script>
     {% include 'comment/js-bock.html.twig'  with {'objectType': 'class', 'objectId' : class.id  } %}

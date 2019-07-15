@@ -193,8 +193,8 @@ class OntoClass
         else if($this->isManualIdentifier) {
             foreach ($this->getNamespaces() as $namespace) {
                 foreach ($namespace->getClasses() as $class) {
-                    if ($class->identifierInNamespace === $this->identifierInNamespace) {
-                        $context->buildViolation('The identifier must be unique. Please choose another one.')
+                    if ($class->identifierInNamespace == $this->identifierInNamespace) {
+                        $context->buildViolation('The identifier must be unique. Please enter another one.')
                             ->atPath('identifierInNamespace')
                             ->addViolation();
                         break;

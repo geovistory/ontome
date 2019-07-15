@@ -13,7 +13,8 @@
         <h2 class="class-name">
             {{ classAssociation }}
             <a href="{{ path('class_show', {
-                id: classAssociation.childClass.id
+                id: classAssociation.childClass.id,
+                '_fragment': 'class-hierarchy'
             }) }}" class="pull-right btn btn-link">
                 <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
             </a>
