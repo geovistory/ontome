@@ -9,6 +9,7 @@
 namespace AppBundle\Controller;
 
 
+use AppBundle\Entity\Project;
 use AppBundle\Entity\User;
 use AppBundle\Form\MyEnvironmentForm;
 use AppBundle\Form\UserEditForm;
@@ -360,6 +361,28 @@ class UserController extends Controller
             'namespacesOfCurrentActiveProject' => $namespacesOfCurrentActiveProject,
             'myEnvironmentForm' => $form->createView()
         ));
+    }
+
+    /**
+     * @Route("/user/editCurrentActiveProject/{project}", name="user_edit_current_active_project")
+     * @param $project Project
+     * @return Response
+     */
+    public function editCurrentActiveProjectAction(Project $project)
+    {
+        $user = $this->getUser();
+        $user->setCurrentActiveProject($project);
+
+        $em = $this->getDoctrine()->getManager();
+        $em->persist($user);
+        $em->flush();
+
+        $this->addFlash('success', 'Current active project updated!');
+
+        return $this->redirectToRoute('user_show', [
+            'id' => $user->getId(),
+            '_fragment' => 'my-projects'
+        ]);
     }
 
     /**

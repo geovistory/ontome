@@ -45,11 +45,6 @@
                 </div>
                 <div id="my-environment" class="tab-pane fade">
                 <h3>My environment</h3>
-                {{ form_start(myEnvironmentForm) }}
-                    {{ form_errors(myEnvironmentForm) }}
-                    {{ form_row(myEnvironmentForm.currentActiveProject) }}
-                    <button type="submit" class="btn btn-primary" formnovalidate>Save</button>
-                {{ form_end(myEnvironmentForm) }}
 
                     <h3>Namespaces of the profiles belonging to the current active project</h3>
                     <ul>
@@ -176,42 +171,72 @@
                         </div>
                     </div>
                 </div>
-
                 </div>
                 <div id="my-projects" class="tab-pane fade">
-                    {% if namespaces|length < 1 %}
-                        <div class="pull-right add-div">
-                            <a href="{{ path('project_new_user')}}"
-                               class="btn btn-primary pull-right">
-                                Add <span class="fa fa-plus-circle"></span>
-                            </a>
+                    <div class="row">
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <h3>My current active project</h3>
                         </div>
-                    {% endif %}
-                    <h3>My projects</h3>
-                    <table class="table table-striped" id="projects-table">
-                        <thead>
-                        <tr>
-                            <th>Project identifier</th>
-                            <th>Last updated</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {% for userProjectAssociation in userProjectAssociations %}
-                            <tr>
-                                <td>
-                                    <a href="{{ path('project_show', {
-                                        'id': userProjectAssociation.project.id
-                                    }) }}">
-                                        {{ userProjectAssociation.project.standardLabel }}
+                        {{ form_start(myEnvironmentForm, {'attr': {'class' : 'inline-form'}} ) }}
+                        <div class="col-lg-12">
+                            {{ form_errors(myEnvironmentForm) }}
+                            {{ form_row(myEnvironmentForm.currentActiveProject) }}
+                            <button type="submit" class="btn btn-primary" formnovalidate>
+                                <i class="fas fa-save"></i> Save
+                            </button>
+                        </div>
+                        {{ form_end(myEnvironmentForm) }}
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-12">
+                            {% if namespaces|length < 1 %}
+                                <div class="pull-right add-div">
+                                    <a href="{{ path('project_new_user')}}"
+                                       class="btn btn-primary pull-right">
+                                        Add <span class="fa fa-plus-circle"></span>
                                     </a>
-                                </td>
-                                <td>{{ userProjectAssociation.project.modificationTime|date('Y-m-d') }}</td>
-                            </tr>
-                        {% endfor %}
-                        </tbody>
-                    </table>
-                    <div class="alert alert-info">
-                        <p><i class="fas fa-info-circle"></i>&nbsp;If you are interested in joining an <a href="{{ path('app_project_list') }}" target="_blank">existing project</a>, please write to <a href="mailto:ontome@dataforhistory.org">ontome@dataforhistory.org</a> indicating the name of the <a href="{{ path('app_project_list') }}" target="_blank">project</a> and the reason of your request. </p>
+                                </div>
+                            {% endif %}
+                            <h3>My projects</h3>
+                            <table class="table table-striped" id="projects-table">
+                                <thead>
+                                <tr>
+                                    <th>Project identifier</th>
+                                    <th>Last updated</th>
+                                    <th>Action</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for userProjectAssociation in userProjectAssociations %}
+                                    <tr>
+                                        <td>
+                                            <a href="{{ path('project_show', {
+                                                'id': userProjectAssociation.project.id
+                                            }) }}">
+                                                {{ userProjectAssociation.project.standardLabel }}
+                                            </a>
+                                            {% if userProjectAssociation.project.standardLabel == app.user.currentActiveProject.standardLabel %}
+                                                <span class="label label-success">Active</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ userProjectAssociation.project.modificationTime|date('Y-m-d') }}</td>
+                                        <td>
+                                            {% if userProjectAssociation.project.standardLabel != app.user.currentActiveProject.standardLabel %}
+                                            <a href="{{ path('user_edit_current_active_project', {'project': userProjectAssociation.project.id}) }}" class="btn btn-primary">
+                                                Active
+                                            </a>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                            <div class="alert alert-info">
+                                <p><i class="fas fa-info-circle"></i>&nbsp;If you are interested in joining an <a href="{{ path('app_project_list') }}" target="_blank">existing project</a>, please write to <a href="mailto:ontome@dataforhistory.org">ontome@dataforhistory.org</a> indicating the name of the <a href="{{ path('app_project_list') }}" target="_blank">project</a> and the reason of your request. </p>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div id="my-current-namespaces" class="tab-pane fade">
