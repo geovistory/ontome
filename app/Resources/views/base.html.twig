@@ -78,7 +78,7 @@
         </ul>
         {% if app.user.currentActiveProject is not null %}
         <p class="navbar-text navbar-right" style="margin-right: 15px;">
-            <strong>Current project :</strong> {{ app.user.currentActiveProject }} <a href="{{ path('user_show', {'id': app.user.id, '_fragment': 'my-environment'}) }}"><i class="fas fa-edit"></i></a>
+            <strong>Current project :</strong> {{ app.user.currentActiveProject }} <a href="{{ path('user_show', {'id': app.user.id, '_fragment': 'my-projects'}) }}"><i class="fas fa-edit"></i></a>
         </p>
         {% endif %}
     </div>

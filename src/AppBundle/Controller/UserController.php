@@ -314,9 +314,19 @@ class UserController extends Controller
 
         $publicProject = $em->getRepository('AppBundle:Project')->find(21);
 
-        $userProjectPublicAssociation = new UserProjectAssociation();
-        $userProjectPublicAssociation->setUser($user);
-        $userProjectPublicAssociation->setProject($publicProject);
+        $testUserProjectPublicAssociation = $em->getRepository('AppBundle:UserProjectAssociation')
+                                            ->findOneBy(array('user'=>$user->getId(), 'project'=>21));
+
+        if(is_null($testUserProjectPublicAssociation))
+        {
+            $userProjectPublicAssociation = new UserProjectAssociation();
+            $userProjectPublicAssociation->setUser($user);
+            $userProjectPublicAssociation->setProject($publicProject);
+        }
+        else
+        {
+            $userProjectPublicAssociation = $testUserProjectPublicAssociation;
+        }
 
         $namespaces = $em->getRepository('AppBundle:OntoNamespace')
             ->findBy(array('creator' => $user->getId()));
@@ -324,7 +334,9 @@ class UserController extends Controller
         $userProjects = new ArrayCollection($userProjectAssociations);
 
         if(!$userProjects->contains($userProjectPublicAssociation))
+        {
             $userProjects->add($userProjectPublicAssociation);
+        }
 
         return $this->render('user/show.html.twig', array(
             'userProjects' => $userProjects,
