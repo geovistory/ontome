@@ -11,6 +11,7 @@ namespace AppBundle\Controller;
 
 use AppBundle\Entity\Project;
 use AppBundle\Entity\User;
+use AppBundle\Entity\UserProjectAssociation;
 use AppBundle\Form\MyEnvironmentForm;
 use AppBundle\Form\UserEditForm;
 use AppBundle\Form\UserRegistrationForm;
@@ -311,55 +312,22 @@ class UserController extends Controller
         $userProjectAssociations = $em->getRepository('AppBundle:UserProjectAssociation')
             ->findBy(array('user' => $user->getId()));
 
+        $publicProject = $em->getRepository('AppBundle:Project')->find(21);
+
+        $userProjectPublicAssociation = new UserProjectAssociation();
+        $userProjectPublicAssociation->setUser($user);
+        $userProjectPublicAssociation->setProject($publicProject);
+
         $namespaces = $em->getRepository('AppBundle:OntoNamespace')
             ->findBy(array('creator' => $user->getId()));
 
-        $namespacesOfProfilesOfCurrentActiveProject = $em->getRepository('AppBundle:OntoNamespace')
-            ->findAllNamespacesManagedByProfilesOfProjectOfBelonging($user->getCurrentActiveProject());
-
-        //$em->getRepository('AppBundle:Profile')
-            //->findBy(array('projectOfBelonging' => $user->getCurrentActiveProject()));
-
-        $namespacesOfCurrentActiveProject = $em->getRepository('AppBundle:OntoNamespace')
-            ->findBy(array('projectForTopLevelNamespace' => $user->getCurrentActiveProject()));
-
-        $projectNamespacesSelectable = new ArrayCollection($em->getRepository('AppBundle:OntoNamespace')
-            ->findBy(array('projectForTopLevelNamespace' => $user->getCurrentActiveProject())));
-
-        $projectNamespacesSelected = new ArrayCollection($em->getRepository('AppBundle:OntoNamespace')
-            ->findBy(array('projectForTopLevelNamespace' => $user->getCurrentActiveProject())));
-
-        $additionalNamespacesSelectable = new ArrayCollection($em->getRepository('AppBundle:OntoNamespace')->findAll());
-        $additionalNamespacesSelected = new ArrayCollection($em->getRepository('AppBundle:OntoNamespace')->findAll());
-
-        foreach ($projectNamespacesSelectable as $namespace)
-        {
-            $additionalNamespacesSelectable->removeElement($namespace);
-            $additionalNamespacesSelected->removeElement($namespace);
-        }
-
-        foreach ($projectNamespacesSelected as $namespace)
-        {
-            $additionalNamespacesSelectable->removeElement($namespace);
-            $additionalNamespacesSelected->removeElement($namespace);
-        }
-
-        foreach ($additionalNamespacesSelected as $namespace)
-        {
-            $additionalNamespacesSelectable->removeElement($namespace);
-        }
+        $userProjects = new ArrayCollection($userProjectAssociations);
+        $userProjects->add($userProjectPublicAssociation);
 
         return $this->render('user/show.html.twig', array(
-            'userProjectAssociations' => $userProjectAssociations,
-            'projectNamespacesSelectable' => $projectNamespacesSelectable,
-            'projectNamespacesSelected' => $projectNamespacesSelected,
-            'additionalNamespacesSelectable' => $additionalNamespacesSelectable,
-            'additionalNamespacesSelected' => $additionalNamespacesSelected,
+            'userProjects' => $userProjects,
             'namespaces' => $namespaces,
-            'user' => $user,
-            'namespacesOfProfilesOfCurrentActiveProject' => $namespacesOfProfilesOfCurrentActiveProject,
-            'namespacesOfCurrentActiveProject' => $namespacesOfCurrentActiveProject,
-            'myEnvironmentForm' => $form->createView()
+            'user' => $user
         ));
     }
 
