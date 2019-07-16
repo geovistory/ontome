@@ -322,7 +322,9 @@ class UserController extends Controller
             ->findBy(array('creator' => $user->getId()));
 
         $userProjects = new ArrayCollection($userProjectAssociations);
-        $userProjects->add($userProjectPublicAssociation);
+
+        if(!$userProjects->contains($userProjectPublicAssociation))
+            $userProjects->add($userProjectPublicAssociation);
 
         return $this->render('user/show.html.twig', array(
             'userProjects' => $userProjects,
