@@ -355,14 +355,14 @@
                 {% set isIdentifierExistAndPublished = false %}
                 {% for namespace in property.namespaces %}
                     {% if not namespace.isOngoing %}
-                        {% for property_ns in namespace.properties %}
-                            {% if property_ns.identifierInNamespace == property.identifierInNamespace %}
+                        {% for propertyNamespace in namespace.properties %}
+                            {% if propertyNamespace.identifierInNamespace == property.identifierInNamespace %}
                                 {% set isIdentifierExistAndPublished = true %}
                             {% endif %}
                         {% endfor %}
                     {% endif %}
                 {% endfor %}
-                {% if property.ongoingNamespace.topLevelNamespace.classPrefix is null and not isIdentifierExistAndPublished %}
+                {% if property.ongoingNamespace.topLevelNamespace.propertyPrefix is null and not isIdentifierExistAndPublished %}
                     <div id="identifier-form-block">
                         {{ form_start(propertyIdentifierForm) }}
                         {{ form_errors(propertyIdentifierForm) }}
