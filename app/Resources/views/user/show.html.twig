@@ -127,7 +127,9 @@
     <script>
         $(document).ready(function() {
             // Onglet My Projects
-            $('#projects-table').DataTable();
+            $('#projects-table').DataTable({
+                "order": [[2, 'asc']]
+            });
 
             // Onglet My current namespaces
             $('#namespaces-table').DataTable();
