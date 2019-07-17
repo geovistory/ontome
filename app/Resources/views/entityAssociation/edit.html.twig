@@ -148,7 +148,7 @@
     <script>
         $(document).ready(function() {
             {% if object == 'class' %}
-            $('#entity_association_form_targetClass').select2({
+            $('#entity_association_edit_form_targetClass').select2({
                 sorter: function(data) {
                     /* Sort data using lowercase comparison */
                     return data.sort(function (a, b) {
@@ -164,7 +164,7 @@
                 }
             });
             {% elseif object == 'property' %}
-            $('#entity_association_form_targetProperty').select2({
+            $('#entity_association_edit_form_targetProperty').select2({
                 sorter: function(data) {
                     /* Sort data using lowercase comparison */
                     return data.sort(function (a, b) {
