@@ -76,7 +76,7 @@
             {% endif %}
             <li><a href="http://phn-wiki.ish-lyon.cnrs.fr/doku.php?id=ontome:index" target="_blank"><i class="fas fa-question-circle"></i> User guide</a></li>
         </ul>
-        {% if app.user.currentActiveProject is not null %}
+        {% if app.user is not null and app.user.currentActiveProject is not null %}
         <p class="navbar-text navbar-right" style="margin-right: 15px;">
             <strong>Current project :</strong> {{ app.user.currentActiveProject }} <a href="{{ path('user_show', {'id': app.user.id, '_fragment': 'my-projects'}) }}"><i class="fas fa-edit"></i></a>
         </p>
