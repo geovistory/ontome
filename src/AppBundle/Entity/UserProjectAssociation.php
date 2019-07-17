@@ -59,6 +59,12 @@ class UserProjectAssociation
     private $endDate;
 
     /**
+     * @ORM\OneToMany(targetEntity="EntityUserProjectAssociation", mappedBy="userProjectAssociation")
+     * @ORM\OrderBy({"id" = "ASC"})
+     */
+    private $entityUserProjectAssociations;
+
+    /**
      * @ORM\Column(type="text")
      */
     private $notes;
@@ -84,6 +90,22 @@ class UserProjectAssociation
      * @ORM\Column(type="datetime")
      */
     private $modificationTime;
+
+    /**
+     * @return mixed
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * @param mixed $id
+     */
+    public function setId($id)
+    {
+        $this->id = $id;
+    }
 
     /**
      * @return mixed

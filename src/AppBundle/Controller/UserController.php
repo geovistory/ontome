@@ -290,23 +290,6 @@ class UserController extends Controller
             throw $this->createAccessDeniedException();
         }
 
-        $form = $this->createForm(MyEnvironmentForm::class, $user);
-
-        // only handles data on POST
-        $form->handleRequest($request);
-        if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
-            $em->persist($user);
-            $em->flush();
-
-            $this->addFlash('success', 'Current active project updated!');
-
-            return $this->redirectToRoute('user_show', [
-                'id' => $user->getId(),
-                '_fragment' => 'my-environment'
-            ]);
-        }
-
         $em = $this->getDoctrine()->getManager();
 
         // Pour l'onglet My Project
@@ -330,14 +313,21 @@ class UserController extends Controller
         }
 
         // Pour l'onglet My Current Namespaces
+        $defaultNamespace = $em->getRepository('AppBundle:OntoNamespace')->findDefaultNamespaceForProject($user->getCurrentActiveProject());
 
-        $firstNamespace = $em->getRepository('AppBundle:OntoNamespace')->findFirstNamespaceForProject($user->getCurrentActiveProject());
-        $referencedNamespacesForFirstNamespace = $em->getRepository('AppBundle:OntoNamespace')->findAllReferencedNamespacesForNamespace($firstNamespace);
+        // userProjectAssociation with current active project
+        $userCurrentActiveProjectAssociation =$em->getRepository('AppBundle:UserProjectAssociation')
+            ->findOneBy(array(
+                'user' => $user->getId(),
+                'project' => $user->getCurrentActiveProject()->getId())
+            );
+
+        $additionalNamespaces = $em->getRepository('AppBundle:OntoNamespace')->findAdditionalNamespacesForUserProject($userCurrentActiveProjectAssociation);
 
         return $this->render('user/show.html.twig', array(
             'userProjects' => $userProjects,
-            'firstNamespace' => $firstNamespace,
-            'referencedNamespacesForFirstNamespace' => $referencedNamespacesForFirstNamespace,
+            'defaultNamespace' => $defaultNamespace,
+            'additionalNamespaces' => $additionalNamespaces,
             'user' => $user
         ));
     }

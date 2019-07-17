@@ -12,6 +12,7 @@ namespace AppBundle\Repository;
 use AppBundle\Entity\OntoNamespace;
 use AppBundle\Entity\Profile;
 use AppBundle\Entity\Project;
+use AppBundle\Entity\UserProjectAssociation;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\QueryBuilder;
 
@@ -98,7 +99,7 @@ class NamespaceRepository extends EntityRepository
     /**
      * @return OntoNamespace
      */
-    public function findFirstNamespaceForProject(Project $project)
+    public function findDefaultNamespaceForProject(Project $project)
     {
          $namespaceOngoing = $this->createQueryBuilder('nsp')
             ->andWhere('nsp.isOngoing = true')
@@ -124,23 +125,22 @@ class NamespaceRepository extends EntityRepository
         return $latestNamespace;
     }
 
-    // A remplacer par l'ORM dès l'implémentation des Referenced namespaces
-    public function findAllReferencedNamespacesForNamespace(OntoNamespace $namespace)
+    /**
+     * @return OntoNamespace[]
+     */
+    public function findAdditionalNamespacesForUserProject(UserProjectAssociation $userProjectAssociation)
     {
-        $conn =  $this->getEntityManager()->getConnection();
+        $additionalNamespaces = $this->createQueryBuilder('nsp')
+            ->join('nsp.namespaceUserProjectAssociation', 'nupa')
+            ->join('nupa.userProjectAssociation', 'upa')
+            ->join('nupa.systemType', 'st')
+            ->andWhere('upa.id = :pk_user_project_association')
+            ->andWhere('st.id = 25')
+            ->setParameter('pk_user_project_association', $userProjectAssociation->getId())
+            ->getQuery()
+            ->execute();
 
-        $sql = "  SELECT standard_label AS \"standardLabel\"   
-                  FROM che.namespace 
-                  WHERE pk_namespace IN(
-                    SELECT fk_namespace 
-                    FROM che.associates_referenced_namespace 
-                    WHERE fk_referenced_namespace = :fk_referenced_namespace
-                    )";
-
-        $stmt = $conn->prepare($sql);
-        $stmt->execute(array('fk_referenced_namespace' => $namespace->getId()));
-
-        return $stmt->fetchAll();
+        return $additionalNamespaces;
     }
 
     /**

@@ -196,6 +196,28 @@ class OntoNamespace
     private $propertyAssociations;
 
     /**
+     * @ORM\ManyToMany(targetEntity="EntityUserProjectAssociation", mappedBy="namespace")
+     * @ORM\OrderBy({"id" = "ASC"})
+     */
+    private $namespaceUserProjectAssociation;
+
+    /**
+     * @return mixed
+     */
+    public function getNamespaceUserProjectAssociation()
+    {
+        return $this->namespaceUserProjectAssociation;
+    }
+
+    /**
+     * @param mixed $namespaceUserProjectAssociation
+     */
+    public function setNamespaceUserProjectAssociation($namespaceUserProjectAssociation)
+    {
+        $this->namespaceUserProjectAssociation = $namespaceUserProjectAssociation;
+    }
+
+    /**
      * @ORM\ManyToMany(targetEntity="AppBundle\Entity\Profile", mappedBy="namespaces")
      * @ORM\OrderBy({"standardLabel" = "ASC"})
      */
@@ -217,6 +239,12 @@ class OntoNamespace
      */
     private $childVersions;
 
+    /**
+     * @ORM\OneToMany(targetEntity="ReferencedNamespaceAssociation", mappedBy="referencedNamespace")
+     * @ORM\OrderBy({"id" = "ASC"})
+     */
+    private $referencedNamespaceAssociations;
+
     public function __construct()
     {
         $this->classes = new ArrayCollection();
@@ -225,6 +253,7 @@ class OntoNamespace
         $this->textProperties = new ArrayCollection();
         $this->classAssociations = new ArrayCollection();
         $this->propertyAssociations = new ArrayCollection();
+        $this->referencedNamespaceAssociations = new ArrayCollection();
         $this->childVersions = new ArrayCollection();
         $this->profiles = new ArrayCollection();
         $this->projects = new ArrayCollection();
@@ -604,7 +633,37 @@ class OntoNamespace
         $this->modificationTime = $modificationTime;
     }
 
+    /**
+     * @return mixed
+     */
+    public function getReferencedNamespaceAssociations()
+    {
+        return $this->referencedNamespaceAssociations;
+    }
 
+    /**
+     * @param mixed $referencedNamespaceAssociations
+     */
+    public function setReferencedNamespaceAssociations($referencedNamespaceAssociations)
+    {
+        $this->referencedNamespaceAssociations = $referencedNamespaceAssociations;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getEntityAssociations()
+    {
+        return $this->entityAssociations;
+    }
+
+    /**
+     * @param mixed $entityAssociations
+     */
+    public function setEntityAssociations($entityAssociations)
+    {
+        $this->entityAssociations = $entityAssociations;
+    }
 
     public function addClassAssociation(ClassAssociation $classAssociation)
     {

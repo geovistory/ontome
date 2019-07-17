@@ -94,12 +94,20 @@
                     <div class="row">
                         <div class="col-lg-6">
                             <h4>Managed by the project and additional ones</h4>
-                            {{ firstNamespace.standardLabel }}
+                            {{ defaultNamespace.standardLabel }}
                             <ul>
-                            {% for referencedNamespace in referencedNamespacesForFirstNamespace %}
-                                <li>{{ referencedNamespace.standardLabel }}</li>
-                            {% endfor %}
+                                {% for referencedNamespaceAssociation in defaultNamespace.referencedNamespaceAssociations %}
+                                    <li>{{ referencedNamespaceAssociation.namespace.standardLabel }}</li>
+                                {% endfor %}
                             </ul>
+                            {% for additionalNamespace in additionalNamespaces %}
+                                {{ additionalNamespace.standardLabel }}
+                                <ul>
+                                    {% for referencedNamespaceAssociation in additionalNamespace.referencedNamespaceAssociations %}
+                                        <li>{{ referencedNamespaceAssociation.namespace.standardLabel }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endfor %}
                         </div>
                         <div class="col-lg-6">
                             <h4>Selected from project profiles</h4>
