@@ -322,6 +322,11 @@ class UserController extends Controller
                 'project' => $user->getCurrentActiveProject()->getId())
             );
 
+        if(is_null($userCurrentActiveProjectAssociation))
+        {
+            $userCurrentActiveProjectAssociation = $userProjectPublicAssociation;
+        }
+
         $additionalNamespaces = $em->getRepository('AppBundle:OntoNamespace')->findAdditionalNamespacesForUserProject($userCurrentActiveProjectAssociation);
 
         return $this->render('user/show.html.twig', array(
