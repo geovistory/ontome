@@ -155,6 +155,12 @@ class Profile
      */
     private $profileAssociations;
 
+    /**
+     * @ORM\ManyToMany(targetEntity="EntityUserProjectAssociation", mappedBy="profile")
+     * @ORM\OrderBy({"id" = "ASC"})
+     */
+    private $profileUserProjectAssociation;
+
     public function __construct()
     {
         $this->childProfiles = new ArrayCollection();
@@ -332,6 +338,38 @@ class Profile
     public function getNamespaces()
     {
         return $this->namespaces;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getProfileAssociations()
+    {
+        return $this->profileAssociations;
+    }
+
+    /**
+     * @param mixed $profileAssociations
+     */
+    public function setProfileAssociations($profileAssociations)
+    {
+        $this->profileAssociations = $profileAssociations;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getProfileUserProjectAssociation()
+    {
+        return $this->profileUserProjectAssociation;
+    }
+
+    /**
+     * @param mixed $profileUserProjectAssociation
+     */
+    public function setProfileUserProjectAssociation($profileUserProjectAssociation)
+    {
+        $this->profileUserProjectAssociation = $profileUserProjectAssociation;
     }
 
     /**

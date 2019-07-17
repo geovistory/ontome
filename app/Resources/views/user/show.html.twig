@@ -111,6 +111,14 @@
                         </div>
                         <div class="col-lg-6">
                             <h4>Selected from project profiles</h4>
+                            {% for profile in app.user.currentActiveProject.profiles %}
+                                {{ profile }}
+                                <ul>
+                                {% for namespace in profile.namespaces %}
+                                    <li>{{ namespace.standardLabel }}</li>
+                                {% endfor %}
+                                </ul>
+                            {% endfor %}
                         </div>
                     </div>
                 </div>
