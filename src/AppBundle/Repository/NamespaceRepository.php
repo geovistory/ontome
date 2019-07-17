@@ -91,16 +91,56 @@ class NamespaceRepository extends EntityRepository
             //->execute();
     }
 
-    public function findAllNamespacesManagedByProfilesOfProjectOfBelonging(Project $project)
+    // Pour le choix par défaut dans My current namepaces
+    // // 1/ En 1er choix : le namespace ongoing du projet
+    // // 2/ S'il n'existe pas, en 2nd choix : le namespace publié le plus récent
+    // // 3/ S'il ne peut être déterminé : le premier namespace trouvé
+    /**
+     * @return OntoNamespace
+     */
+    public function findFirstNamespaceForProject(Project $project)
     {
-        return $this->createQueryBuilder('ns')
-            ->leftJoin('ns.profiles', 'prf')
-            ->leftJoin('prf.projectOfBelonging', 'pj')
-            ->andWhere('pj.id = :project')
-            ->setParameter('project', $project->getId())
-            ->distinct()
+         $namespaceOngoing = $this->createQueryBuilder('nsp')
+            ->andWhere('nsp.isOngoing = true')
+            ->andWhere('nsp.isTopLevelNamespace = false')
+            ->join('nsp.projectForTopLevelNamespace','proj')
+            ->andWhere('proj.id = :pk_project')
+            ->setParameter('pk_project', $project->getId())
             ->getQuery()
             ->execute();
+
+        if(!empty($namespaceOngoing))
+            return $namespaceOngoing[0];
+
+        $latestNamespace = $this->createQueryBuilder('nsp')
+            ->andWhere('nsp.isTopLevelNamespace = false')
+            ->join('nsp.projectForTopLevelNamespace','proj')
+            ->andWhere('proj.id = :pk_project')
+            ->setParameter('pk_project', $project->getId())
+            ->orderBy('nsp.creationTime', 'DESC')
+            ->getQuery()
+            ->execute()[0];
+
+        return $latestNamespace;
+    }
+
+    // A remplacer par l'ORM dès l'implémentation des Referenced namespaces
+    public function findAllReferencedNamespacesForNamespace(OntoNamespace $namespace)
+    {
+        $conn =  $this->getEntityManager()->getConnection();
+
+        $sql = "  SELECT standard_label AS \"standardLabel\"   
+                  FROM che.namespace 
+                  WHERE pk_namespace IN(
+                    SELECT fk_namespace 
+                    FROM che.associates_referenced_namespace 
+                    WHERE fk_referenced_namespace = :fk_referenced_namespace
+                    )";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->execute(array('fk_referenced_namespace' => $namespace->getId()));
+
+        return $stmt->fetchAll();
     }
 
     /**

@@ -309,38 +309,35 @@ class UserController extends Controller
 
         $em = $this->getDoctrine()->getManager();
 
-        $userProjectAssociations = $em->getRepository('AppBundle:UserProjectAssociation')
-            ->findBy(array('user' => $user->getId()));
+        // Pour l'onglet My Project
+        // On récupère tous les userProjects associations de l'utilisateur dans un ArrayCollection
+        $userProjects = new ArrayCollection($em->getRepository('AppBundle:UserProjectAssociation')
+            ->findBy(array('user' => $user->getId())));
 
-        $publicProject = $em->getRepository('AppBundle:Project')->find(21);
-
+        // Vérifier si l'utilisateur a déjà le projet public dans ses associations userProject
         $testUserProjectPublicAssociation = $em->getRepository('AppBundle:UserProjectAssociation')
                                             ->findOneBy(array('user'=>$user->getId(), 'project'=>21));
 
+        // Non il ne l'a pas : on le rajoute manuellement
         if(is_null($testUserProjectPublicAssociation))
         {
+            // On crée l'entité Projet public et son association userProject "fictif"
+            $publicProject = $em->getRepository('AppBundle:Project')->find(21);
             $userProjectPublicAssociation = new UserProjectAssociation();
             $userProjectPublicAssociation->setUser($user);
             $userProjectPublicAssociation->setProject($publicProject);
-        }
-        else
-        {
-            $userProjectPublicAssociation = $testUserProjectPublicAssociation;
-        }
-
-        $namespaces = $em->getRepository('AppBundle:OntoNamespace')
-            ->findBy(array('creator' => $user->getId()));
-
-        $userProjects = new ArrayCollection($userProjectAssociations);
-
-        if(!$userProjects->contains($userProjectPublicAssociation))
-        {
             $userProjects->add($userProjectPublicAssociation);
         }
 
+        // Pour l'onglet My Current Namespaces
+
+        $firstNamespace = $em->getRepository('AppBundle:OntoNamespace')->findFirstNamespaceForProject($user->getCurrentActiveProject());
+        $referencedNamespacesForFirstNamespace = $em->getRepository('AppBundle:OntoNamespace')->findAllReferencedNamespacesForNamespace($firstNamespace);
+
         return $this->render('user/show.html.twig', array(
             'userProjects' => $userProjects,
-            'namespaces' => $namespaces,
+            'firstNamespace' => $firstNamespace,
+            'referencedNamespacesForFirstNamespace' => $referencedNamespacesForFirstNamespace,
             'user' => $user
         ));
     }

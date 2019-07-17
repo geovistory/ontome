@@ -43,7 +43,7 @@
                     </table>
                 </div>
                 <div id="my-projects" class="tab-pane fade">
-                    {% if namespaces|length < 1 %}
+                    {% if userProjects|length < 1 or userProjects|length == 1 %}
                         <div class="pull-right add-div">
                             <a href="{{ path('project_new_user')}}"
                                class="btn btn-primary pull-right">
@@ -91,30 +91,20 @@
                 </div>
                 <div id="my-current-namespaces" class="tab-pane fade">
                     <h3>Namespaces whose classes and properties are displayed</h3>
-                    <table class="table table-striped" id="namespaces-table">
-                        <thead>
-                        <tr>
-                            <th>Namespaces URI</th>
-                            <th>Namespaces identifier</th>
-                            <th>Last updated</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {% for namespace in namespaces %}
-                            <tr>
-                                <td>{{ namespace.namespaceUri }}</td>
-                                <td>
-                                    <a href="{{ path('namespace_show', {
-                                        'id': namespace.id
-                                    }) }}">
-                                        {{ namespace }}
-                                    </a>
-                                </td>
-                                <td>{{ namespace.modificationTime|date('Y-m-d') }}</td>
-                            </tr>
-                        {% endfor %}
-                        </tbody>
-                    </table>
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <h4>Managed by the project and additional ones</h4>
+                            {{ firstNamespace.standardLabel }}
+                            <ul>
+                            {% for referencedNamespace in referencedNamespacesForFirstNamespace %}
+                                <li>{{ referencedNamespace.standardLabel }}</li>
+                            {% endfor %}
+                            </ul>
+                        </div>
+                        <div class="col-lg-6">
+                            <h4>Selected from project profiles</h4>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -132,7 +122,6 @@
             });
 
             // Onglet My current namespaces
-            $('#namespaces-table').DataTable();
         } );
     </script>
 {% endblock %}
