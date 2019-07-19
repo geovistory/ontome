@@ -17,7 +17,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @ORM\Entity
  * @ORM\Table(name="che.entity_association")
  */
-class EntityAssociation
+class EntityAssociation //TODO réorganiser les getters et setters : comme dans les autres classes, les getters doivent être ensemble, puis les setters ensuite, puis les add/remove pour les ArrayCollection
 {
     /**
      * @ORM\Id
@@ -200,7 +200,7 @@ class EntityAssociation
     }
 
     /**
-     * @return mixed
+     * @return OntoClass
      */
     public function getSourceClass()
     {
@@ -208,7 +208,7 @@ class EntityAssociation
     }
 
     /**
-     * @return mixed
+     * @return OntoClass
      */
     public function getTargetClass()
     {
@@ -326,7 +326,7 @@ class EntityAssociation
         return (string) $this->sourceClass.$this->targetClass;
     }
 
-    public function inverseClasses()
+    public function inverseClasses() //TODO: cette fonction ne retourne rien. Que fait elle ?? merci de commenter et d'adapter le code s'il ne correspond pas à une bonne pratique. Toute modification d'un attribut de la classe doit se faire avec un setter ou un (adder dans le cas des ArrayCollection)
     {
         if(!$this->directed)
         {
@@ -336,7 +336,7 @@ class EntityAssociation
         }
     }
 
-    public function inverseProperties()
+    public function inverseProperties() //TODO: cette fonction ne retourne rien. Que fait elle ?? merci de commenter et d'adapter le code s'il ne correspond pas à une bonne pratique. Toute modification d'un attribut de la classe doit se faire avec un setter ou un (adder dans le cas des ArrayCollection)
     {
         if(!$this->directed)
         {
@@ -346,43 +346,56 @@ class EntityAssociation
         }
     }
 
+    /**
+     *
+     */
     public function inverseEntities()
     {
-        if($this->getSourceClass() != null)
-        {
-            return $this->inverseClasses();
+        if(!is_null($this->getSourceClass())) {
+            return $this->inverseClasses(); //TODO: ?????
         }
 
-        if($this->getSourceProperty() != null)
-        {
+        else if(!is_null($this->getSourceProperty())) {
             return $this->inverseProperties();
         }
     }
 
+    /**
+     * @return mixed OntoClass or Property
+     */
     public function getSource()
     {
-        if($this->getSourceClass() != null)
-        {
-            return $this->getSourceClass();
+        $source = null;
+        if(!is_null($this->getSourceClass())) {
+            $source = $this->getSourceClass();
         }
-
-        if($this->getSourceProperty() != null)
-        {
-            return $this->getSourceProperty();
+        else if(!is_null($this->getSourceProperty())) {
+            $source = $this->getSourceProperty();
         }
+        return $source;
     }
 
     public function getTarget()
     {
-        if($this->getTargetClass() != null)
-        {
+        if(!is_null($this->getTargetClass())) {
             return $this->getTargetClass();
         }
 
-        if($this->getTargetProperty() != null)
-        {
+        else if(!is_null($this->getTargetProperty())) {
             return $this->getTargetProperty();
         }
+    }
+
+    /**
+     * return String the source object's type
+     */
+    public function getSourceObjectType()
+    {
+        $objectType = null;
+        if(!is_null($this->getSourceClass())) {
+            $objectType = 'class';
+        }
+        return $objectType; //TODO: enrichir la fonction avec le type property
     }
 
     public function addNamespace(OntoNamespace $namespace)

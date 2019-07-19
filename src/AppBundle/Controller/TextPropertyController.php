@@ -45,6 +45,11 @@ class TextPropertyController extends Controller
             $redirectToRoute = 'property_association_edit';
             $redirectToRouteFragment = 'justifications';
         }
+        else if(!is_null($textProperty->getEntityAssociation())){
+            $object = $textProperty->getEntityAssociation();
+            $redirectToRoute = 'entity_association_edit';
+            $redirectToRouteFragment = 'justifications';
+        }
         else if(!is_null($textProperty->getClass())){
             $object = $textProperty->getClass();
             $redirectToRoute = 'class_edit';
@@ -72,6 +77,9 @@ class TextPropertyController extends Controller
         }
         else if(!is_null($textProperty->getPropertyAssociation())){
             $this->denyAccessUnlessGranted('edit', $object->getChildProperty());
+        }
+        else if(!is_null($textProperty->getEntityAssociation())){
+            $this->denyAccessUnlessGranted('edit', $object->getSource());
         }
         else{
             $this->denyAccessUnlessGranted('edit', $object);
@@ -172,6 +180,16 @@ class TextPropertyController extends Controller
             $associatedObject = $associatedEntity;
             $redirectToRoute = 'profile_edit';
             $redirectToRouteFragment = 'identification';
+        }
+        else if($object === 'entity-association') {
+            $associatedEntity = $em->getRepository('AppBundle:EntityAssociation')->find($objectId);
+            if (!$associatedEntity) {
+                throw $this->createNotFoundException('The entity association n° '.$objectId.' does not exist');
+            }
+            $textProperty->setEntityAssociation($associatedEntity);
+            $associatedObject = $associatedEntity->getSource();
+            $redirectToRoute = 'entity_association_edit';
+            $redirectToRouteFragment = 'justifications';
         }
         else throw $this->createNotFoundException('The requested object "'.$object.'" does not exist!');
 
