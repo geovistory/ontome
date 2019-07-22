@@ -32,7 +32,7 @@ class TextPropertyController extends Controller
 
     /**
      * @Route("/text-property/{id}/edit", name="text_property_edit")
-     * @Route("/text-property/{id}/{objectId}/edit", name="text_property_with_objectId_edit")
+     * @Route("/text-property/{id}/edit", name="text_property_inverse_edit")
      */
     public function editAction(TextProperty $textProperty, Request $request)
     {
@@ -48,7 +48,12 @@ class TextPropertyController extends Controller
         }
         else if(!is_null($textProperty->getEntityAssociation())){
             $object = $textProperty->getEntityAssociation();
+
             $redirectToRoute = 'entity_association_edit';
+            if($request->attributes->get('_route') == 'text_property_inverse_edit'){
+                $redirectToRoute = 'entity_association_inverse_edit';
+            }
+
             $redirectToRouteFragment = 'justifications';
         }
         else if(!is_null($textProperty->getClass())){
@@ -99,14 +104,6 @@ class TextPropertyController extends Controller
 
             $this->addFlash('success', $textProperty->getSystemType().' updated!');
 
-            if(!is_null($textProperty->getEntityAssociation())){
-                return $this->redirectToRoute($redirectToRoute, [
-                    'id' => $object->getId(),
-                    'object' => $textProperty->getEntityAssociation()->getSourceObjectType(),
-                    'objectId' => $request->get('objectId'),
-                    '_fragment' => $redirectToRouteFragment
-                ]);
-            }
             return $this->redirectToRoute($redirectToRoute, [
                 'id' => $object->getId(),
                 '_fragment' => $redirectToRouteFragment

@@ -10,7 +10,7 @@
 {% block body %}
     <div class="container">
         <h2 class="class-name">
-            {% if app.request.get('objectId') is null or app.request.get('objectId') == entityAssociation.source.id %}
+            {% if not inverse %}
                 {{ entityAssociation.source }}: {{ entityAssociation.systemType.standardLabel }}
                 <a href="{{ path(entityAssociation.sourceObjectType~'_show', {
                     id: entityAssociation.source.id,
@@ -41,20 +41,20 @@
 
                 {{ form_row(entityAssociationForm.systemType) }}
                 {% if entityAssociation.sourceObjectType == 'class' %}
-                    {% if app.request.get('objectId') == entityAssociation.source.id %}
+                    {% if not inverse %}
                         {{ form_row(entityAssociationForm.targetClass, {'label': 'Related class'}) }}
                     {% else %}
                         {{ form_row(entityAssociationForm.sourceClass, {'label': 'Related class'}) }}
                     {% endif %}
                 {% elseif entityAssociation.sourceObjectType == 'property' %}
-                    {% if app.request.get('objectId') == entityAssociation.source.id %}
+                    {% if not inverse %}
                         {{ form_row(entityAssociationForm.targetProperty, {'label': 'Related property'}) }}
                     {% else %}
                         {{ form_row(entityAssociationForm.sourceProperty, {'label': 'Related property'}) }}
                     {% endif %}
                 {% endif %}
                 <button type="submit" class="btn btn-primary" formnovalidate>Save <span class="far fa-save"></span></button>
-                {{ form_end(entityAssociationForm, {'render_rest': false}) }}
+                {{ form_end(entityAssociationForm) }}
                 {% if is_granted('edit', entityAssociation.source) %}
                     <div class="pull-right add-div">
                         <a href="{{ path('text_property_new', {'type': 'justification', 'object': 'entity-association', 'objectId': entityAssociation.id })}}"
@@ -96,9 +96,8 @@
                             </td>
                             {% if is_granted('edit', entityAssociation.source) %}
                                 <td>
-                                    <a href="{{ path('text_property_with_objectId_edit', {
-                                        'id': textProperty.id,
-                                        'objectId': app.request.get('objectId')
+                                    <a href="{{ path('text_property_inverse_edit', {
+                                        'id': textProperty.id
                                     }) }}"
                                        class="btn btn-xs btn-success">
                                         <span class="fa fa-edit"></span>

@@ -695,13 +695,19 @@
                                 {% endif %}
                             </td>
                             <td>
-                                <a href="{{ path('entity_association_show', {
-                                    'id': relation.id,
-                                    'object': 'property',
-                                    'objectId': property.id
-                                }) }}">
-                                    <span class="fa fa-eye"></span>
-                                </a>
+                                {% if property.id == relation.sourceProperty.id %}
+                                    <a href="{{ path('entity_association_show', {
+                                        'id': relation.id
+                                    }) }}">
+                                        <span class="fa fa-eye"></span>
+                                    </a>
+                                {% else %}
+                                    <a href="{{ path('entity_association_inverse_show', {
+                                        'id': relation.id
+                                    }) }}">
+                                        <span class="fa fa-eye"></span>
+                                    </a>
+                                {% endif %}
                             </td>
                         </tr>
                     {% endfor %}
