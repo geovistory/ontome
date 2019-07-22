@@ -105,67 +105,66 @@ class EntityAssociationController extends Controller
      * @Route("/entity-association/{id}", name="entity_association_show")
      * @Route("/entity-association/{id}/{object}/{objectId}", name="entity_association_show")
      * @param EntityAssociation $entityAssociation
-     * @param $object
-     * @param $objectId
      * @return Response the rendered template
      */
-    public function showAction(EntityAssociation $entityAssociation, $object=null, $objectId=null)
+    public function showAction(EntityAssociation $entityAssociation)
     {
-        if($object != null && $objectId != null)
-        {
-            if($object == 'class')
-            {
-                if($entityAssociation->getSourceClass()->getId() != $objectId && !$entityAssociation->getDirected())
-                {
-                    $entityAssociation->inverseClasses();
-                }
-            }
-            elseif($object == 'property')
-            {
-                if($entityAssociation->getSourceProperty()->getId() != $objectId && !$entityAssociation->getDirected())
-                {
-                    $entityAssociation->inverseProperties();
-                }
-            }
-        }
-
         return $this->render('entityAssociation/show.html.twig', array(
-            'entityAssociation' => $entityAssociation,
-            'object' => $object
+            'entityAssociation' => $entityAssociation
         ));
     }
 
     /**
      * @Route("/entity-association/{id}/edit", name="entity_association_edit")
-     * @Route("/entity-association/{id}/{object}/{objectId}/edit", name="entity_association_edit")
+     * @Route("/entity-association/{id}/{object}/{objectId}/edit", name="entity_association_objectId_edit")
      */
-    public function editAction(Request $request, EntityAssociation $entityAssociation, $object=null, $objectId=null)
+    public function editAction(Request $request, EntityAssociation $entityAssociation)
     {
         $em = $this->getDoctrine()->getManager();
 
-        if($object == 'class')
+        if($entityAssociation->getSourceObjectType() == 'class')
         {
-            $source = $em->getRepository('AppBundle:OntoClass')->find($objectId);
+            $source = $em->getRepository('AppBundle:OntoClass')->find($entityAssociation->getSourceClass()->getId());
             if (!$source) {
-                throw $this->createNotFoundException('The class n° '.$objectId.' does not exist');
+                throw $this->createNotFoundException('The class n° '.$entityAssociation->getSourceClass()->getId().' does not exist');
             }
         }
-        elseif($object == 'property')
+        elseif($entityAssociation->getSourceObjectType() == 'property')
         {
-            $source = $em->getRepository('AppBundle:Property')->find($objectId);
+            $source = $em->getRepository('AppBundle:Property')->find($entityAssociation->getSourceProperty()->getId());
             if (!$source) {
-                throw $this->createNotFoundException('The property n° '.$objectId.' does not exist');
+                throw $this->createNotFoundException('The property n° '.$entityAssociation->getSourceProperty()->getId().' does not exist');
             }
-        }
-
-        if($entityAssociation->getSource() !== $source)
-        {
-            $entityAssociation->inverseEntities();
         }
 
         $this->denyAccessUnlessGranted('edit', $source);
 
-        $form = $this->createForm(EntityAssociationEditForm::class, $entityAssociation, ['object' => $object]);
+        $form = $this->createForm(EntityAssociationEditForm::class, $entityAssociation, ['object' => $entityAssociation->getSourceObjectType()]);
+
+        if(is_null($request->get('objectId')) and $request->get('objectId') == $entityAssociation->getSource()->getId())
+        {
+            if($entityAssociation->getSourceObjectType() == 'class')
+            {
+                $form->remove('sourceClass');
+            }
+
+            if($entityAssociation->getSourceObjectType() == 'property')
+            {
+                $form->remove('sourceProperty');
+            }
+        }
+        elseif(is_null($request->get('objectId')) and $request->get('objectId') == $entityAssociation->getTarget()->getId())
+        {
+            if($entityAssociation->getTargetObjectType() == 'class')
+            {
+                $form->remove('targetClass');
+            }
+
+            if($entityAssociation->getTargetObjectType() == 'property')
+            {
+                $form->remove('targetProperty');
+            }
+        }
 
         // only handles data on POST
         $form->handleRequest($request);
@@ -182,7 +181,11 @@ class EntityAssociationController extends Controller
 
             $this->addFlash('success', 'Relation edited !');
 
-            return $this->redirectToRoute($object.'_edit', [
+            $objectId = $entityAssociation->getSource()->getId();
+            if(!is_null($request->get('objectId')))
+                $objectId = $request->get('objectId');
+
+            return $this->redirectToRoute($entityAssociation->getSourceObjectType().'_edit', [
                 'id' => $objectId,
                 '_fragment' => 'relations'
             ]);
@@ -190,10 +193,8 @@ class EntityAssociationController extends Controller
         }
 
         $em = $this->getDoctrine()->getManager();
-
         return $this->render('entityAssociation/edit.html.twig', array(
             'source' => $entityAssociation->getSource(),
-            'object' => $object,
             'entityAssociation' => $entityAssociation,
             'entityAssociationForm' => $form->createView(),
         ));

@@ -32,6 +32,7 @@ class TextPropertyController extends Controller
 
     /**
      * @Route("/text-property/{id}/edit", name="text_property_edit")
+     * @Route("/text-property/{id}/{objectId}/edit", name="text_property_with_objectId_edit")
      */
     public function editAction(TextProperty $textProperty, Request $request)
     {
@@ -98,6 +99,14 @@ class TextPropertyController extends Controller
 
             $this->addFlash('success', $textProperty->getSystemType().' updated!');
 
+            if(!is_null($textProperty->getEntityAssociation())){
+                return $this->redirectToRoute($redirectToRoute, [
+                    'id' => $object->getId(),
+                    'object' => $textProperty->getEntityAssociation()->getSourceObjectType(),
+                    'objectId' => $request->get('objectId'),
+                    '_fragment' => $redirectToRouteFragment
+                ]);
+            }
             return $this->redirectToRoute($redirectToRoute, [
                 'id' => $object->getId(),
                 '_fragment' => $redirectToRouteFragment

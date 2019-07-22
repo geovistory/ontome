@@ -28,7 +28,8 @@ class EntityAssociationEditForm extends AbstractType
                         'owl:disjointWith' => 19
                     ),
                     'label' => 'Type relation'))
-                ->add('targetClass');
+                ->add('targetClass')
+                ->add('sourceClass');
         }
         elseif($options['object'] == 'property')
         {
@@ -39,7 +40,8 @@ class EntityAssociationEditForm extends AbstractType
                         'owl:inverseOf' => 20
                     ),
                     'label' => 'Type relation'))
-                ->add('targetProperty');
+                ->add('targetProperty')
+                ->add('sourceProperty');
         }
 
         $builder->get('systemType')
