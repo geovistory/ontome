@@ -57,10 +57,17 @@
                 {{ form_end(entityAssociationForm) }}
                 {% if is_granted('edit', entityAssociation.source) %}
                     <div class="pull-right add-div">
+                        {% if not inverse %}
                         <a href="{{ path('text_property_new', {'type': 'justification', 'object': 'entity-association', 'objectId': entityAssociation.id })}}"
                            class="btn btn-primary pull-right">
                             Add <span class="fa fa-plus-circle"></span>
                         </a>
+                        {% else %}
+                        <a href="{{ path('text_property_inverse_new', {'type': 'justification', 'object': 'entity-association', 'objectId': entityAssociation.id })}}"
+                           class="btn btn-primary pull-right">
+                            Add <span class="fa fa-plus-circle"></span>
+                        </a>
+                        {% endif %}
                     </div>
                 {% endif %}
                 <h3>Justifications</h3>
@@ -120,10 +127,17 @@
 
                 {% if is_granted('edit', entityAssociation.source) %}
                     <div class="pull-right add-div">
+                        {% if not inverse %}
                         <a href="{{ path('text_property_new', {'type': 'example', 'object': 'entity-association', 'objectId': entityAssociation.id })}}"
                            class="btn btn-primary pull-right">
                             Add <span class="fa fa-plus-circle"></span>
                         </a>
+                        {% else %}
+                        <a href="{{ path('text_property_inverse_new', {'type': 'example', 'object': 'entity-association', 'objectId': entityAssociation.id })}}"
+                           class="btn btn-primary pull-right">
+                            Add <span class="fa fa-plus-circle"></span>
+                        </a>
+                        {% endif %}
                     </div>
                 {% endif %}
                 <h3>Examples</h3>

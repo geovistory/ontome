@@ -44,6 +44,22 @@
                        role="button">
                         <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
                     </a>
+                {% elseif  textProperty.entityAssociation is not null and app.request.attributes.get('_route') == 'text_property_inverse_new' %}
+                    <a href="{{ path('entity_association_inverse_edit', {
+                        id: textProperty.entityAssociation.id
+                    }) }}#definition"
+                       class="pull-right btn btn-link"
+                       role="button">
+                        <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
+                    </a>
+                {% elseif  textProperty.entityAssociation is not null %}
+                    <a href="{{ path('entity_association_edit', {
+                        id: textProperty.entityAssociation.id
+                    }) }}#definition"
+                       class="pull-right btn btn-link"
+                       role="button">
+                        <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
+                    </a>
                 {% endif %}
             </h2>
 

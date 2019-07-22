@@ -120,6 +120,7 @@ class TextPropertyController extends Controller
 
     /**
      * @Route("/text-property/{type}/new/{object}/{objectId}", name="text_property_new")
+     * @Route("/text-property/{type}/new/{object}/{objectId}/inverse", name="text_property_inverse_new")
      */
     public function newAction($type, $object, $objectId, Request $request)
     {
@@ -194,7 +195,12 @@ class TextPropertyController extends Controller
             }
             $textProperty->setEntityAssociation($associatedEntity);
             $associatedObject = $associatedEntity->getSource();
+
             $redirectToRoute = 'entity_association_edit';
+            if($request->attributes->get('_route') == 'text_property_inverse_new'){
+                $redirectToRoute = 'entity_association_inverse_edit';
+            }
+
             $redirectToRouteFragment = 'justifications';
         }
         else throw $this->createNotFoundException('The requested object "'.$object.'" does not exist!');
