@@ -32,7 +32,7 @@ class TextPropertyController extends Controller
 
     /**
      * @Route("/text-property/{id}/edit", name="text_property_edit")
-     * @Route("/text-property/{id}/edit", name="text_property_inverse_edit")
+     * @Route("/text-property/{id}/inverse/edit", name="text_property_inverse_edit")
      */
     public function editAction(TextProperty $textProperty, Request $request)
     {

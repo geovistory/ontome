@@ -94,7 +94,16 @@
                                     {% endfor %}
                                 {% endif %} -->
                             </td>
-                            {% if is_granted('edit', entityAssociation.source) %}
+                            {% if is_granted('edit', entityAssociation.source) and not inverse%}
+                                <td>
+                                    <a href="{{ path('text_property_edit', {
+                                        'id': textProperty.id
+                                    }) }}"
+                                       class="btn btn-xs btn-success">
+                                        <span class="fa fa-edit"></span>
+                                    </a>
+                                </td>
+                            {% elseif is_granted('edit', entityAssociation.source) and inverse %}
                                 <td>
                                     <a href="{{ path('text_property_inverse_edit', {
                                         'id': textProperty.id

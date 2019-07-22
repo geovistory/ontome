@@ -133,22 +133,36 @@ class EntityAssociationController extends Controller
 
         $em = $this->getDoctrine()->getManager();
 
-        if($entityAssociation->getSourceObjectType() == 'class')
+        if($entityAssociation->getSourceObjectType() == 'class' and !$inverse)
         {
-            $source = $em->getRepository('AppBundle:OntoClass')->find($entityAssociation->getSourceClass()->getId());
-            if (!$source) {
+            $firstEntity = $em->getRepository('AppBundle:OntoClass')->find($entityAssociation->getSourceClass()->getId());
+            if (!$firstEntity) {
                 throw $this->createNotFoundException('The class n° '.$entityAssociation->getSourceClass()->getId().' does not exist');
             }
         }
-        elseif($entityAssociation->getSourceObjectType() == 'property')
+        elseif($entityAssociation->getSourceObjectType() == 'property' and !$inverse)
         {
-            $source = $em->getRepository('AppBundle:Property')->find($entityAssociation->getSourceProperty()->getId());
-            if (!$source) {
+            $firstEntity = $em->getRepository('AppBundle:Property')->find($entityAssociation->getSourceProperty()->getId());
+            if (!$firstEntity) {
                 throw $this->createNotFoundException('The property n° '.$entityAssociation->getSourceProperty()->getId().' does not exist');
             }
         }
+        elseif($entityAssociation->getTargetObjectType() == 'class' and $inverse)
+        {
+            $firstEntity = $em->getRepository('AppBundle:OntoClass')->find($entityAssociation->getTargetClass()->getId());
+            if (!$firstEntity) {
+                throw $this->createNotFoundException('The class n° '.$entityAssociation->getTargetClass()->getId().' does not exist');
+            }
+        }
+        elseif($entityAssociation->getTargetObjectType() == 'property' and $inverse)
+        {
+            $firstEntity = $em->getRepository('AppBundle:Property')->find($entityAssociation->getTargetProperty()->getId());
+            if (!$firstEntity) {
+                throw $this->createNotFoundException('The property n° '.$entityAssociation->getTargetProperty()->getId().' does not exist');
+            }
+        }
 
-        $this->denyAccessUnlessGranted('edit', $source);
+        $this->denyAccessUnlessGranted('edit', $firstEntity);
 
         $form = $this->createForm(EntityAssociationEditForm::class, $entityAssociation, ['object' => $entityAssociation->getSourceObjectType()]);
 
