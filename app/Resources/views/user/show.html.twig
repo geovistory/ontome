@@ -93,8 +93,11 @@
                     <h3>Namespaces whose classes and properties are displayed</h3>
                     <div class="row">
                         <div class="col-lg-6">
-                            <h4>Managed by the project and additional ones</h4>
-                            {{ defaultNamespace.standardLabel }}
+                            <h4>Managed by the project</h4>
+                            <div>
+                                <span class="glyphicon glyphicon-eye-open text-primary" aria-hidden="true"></span>
+                                <a href="{{ path('namespace_show', {'id': defaultNamespace.id}) }}">{{ defaultNamespace.standardLabel }}</a>
+                            </div>
                             <ul>
                                 {% for referencedNamespaceAssociation in defaultNamespace.referencedNamespaceAssociations %}
                                     <li>{{ referencedNamespaceAssociation.namespace.standardLabel }}</li>
@@ -108,15 +111,29 @@
                                     {% endfor %}
                                 </ul>
                             {% endfor %}
+                            <h4>Additional namespaces</h4>
+                            <div>
+                                <span class="glyphicon glyphicon-remove text-danger" aria-hidden="true"></span>
+                                <a href="{{ path('namespace_show', {'id': defaultNamespace.id}) }}">{{ defaultNamespace.standardLabel }}</a>
+                            </div>
+                            <h4>Pick an additional namespace</h4>
                         </div>
                         <div class="col-lg-6">
                             <h4>Selected from project profiles</h4>
                             {% for profile in app.user.currentActiveProject.profiles %}
-                                {{ profile }}
-                                <ul>
+                                <div>
+                                    <span class="glyphicon {% if random(1) == 1 %}glyphicon-eye-close text-muted{% else %}glyphicon-eye-open text-primary"{% endif %}" aria-hidden="true"></span>
+                                    <strong {% if random(1) == 1 %}class="text-muted"{% endif %}>Profile : <a href="{{ path('profile_show', {'id': profile.id}) }}">{{ profile }}</a></strong>
+                                </div>
+                                {% if profile.namespaces|length == 0 %}
+                                    <p class="text-muted"><em>No namespace is associated with this profile.</em></p>
+                                {% endif %}
+                                <p>
                                 {% for namespace in profile.namespaces %}
-                                    <li>{{ namespace.standardLabel }}</li>
+                                    <span class="glyphicon {% if random(1) == 1 %}glyphicon-eye-close text-muted{% else %}glyphicon-eye-open text-primary"{% endif %}" aria-hidden="true"></span>
+                                    <a href="{{ path('namespace_show', {'id': namespace.id}) }}">{{ namespace.standardLabel }}</a><br/>
                                 {% endfor %}
+                                </p>
                                 </ul>
                             {% endfor %}
                         </div>
