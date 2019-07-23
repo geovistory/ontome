@@ -17,7 +17,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @ORM\Entity
  * @ORM\Table(name="che.entity_association")
  */
-class EntityAssociation //TODO réorganiser les getters et setters : comme dans les autres classes, les getters doivent être ensemble, puis les setters ensuite, puis les add/remove pour les ArrayCollection
+class EntityAssociation
 {
     /**
      * @ORM\Id
@@ -230,13 +230,15 @@ class EntityAssociation //TODO réorganiser les getters et setters : comme dans 
 
     public function getTarget()
     {
+        $target = null;
         if(!is_null($this->getTargetClass())) {
-            return $this->getTargetClass();
+            $target = $this->getTargetClass();
         }
 
         if(!is_null($this->getTargetProperty())) {
-            return $this->getTargetProperty();
+            $target = $this->getTargetProperty();
         }
+        return $target;
     }
 
     /**
