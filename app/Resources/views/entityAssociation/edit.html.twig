@@ -163,7 +163,7 @@
                             </td>
                             <td>{{ textProperty.languageIsoCode}}</td>
                             <td>WIP</td>
-                            {% if is_granted('edit', source) %}
+                            {% if is_granted('edit', entityAssociation.source) %}
                                 <td>
                                     <a href="{{ path('text_property_edit', {
                                         'id': textProperty.id
