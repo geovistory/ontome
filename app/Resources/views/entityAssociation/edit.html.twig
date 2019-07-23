@@ -165,12 +165,21 @@
                             <td>WIP</td>
                             {% if is_granted('edit', entityAssociation.source) %}
                                 <td>
+                                    {% if not inverse %}
                                     <a href="{{ path('text_property_edit', {
                                         'id': textProperty.id
                                     }) }}"
                                        class="btn btn-xs btn-success">
                                         <span class="fa fa-edit"></span>
                                     </a>
+                                    {% else %}
+                                    <a href="{{ path('text_property_inverse_edit', {
+                                        'id': textProperty.id
+                                    }) }}"
+                                       class="btn btn-xs btn-success">
+                                        <span class="fa fa-edit"></span>
+                                    </a>
+                                    {% endif %}
                                 </td>
                             {% endif %}
                         </tr>
