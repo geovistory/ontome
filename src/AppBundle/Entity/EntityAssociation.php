@@ -393,6 +393,6 @@ class EntityAssociation //TODO réorganiser les getters et setters : comme dans 
 
     public function __toString()
     {
-        return (string) $this->sourceClass.$this->targetClass;
+        return (string) $this->sourceClass.' - '.$this->targetClass.' : '.$this->systemType;
     }
 }
