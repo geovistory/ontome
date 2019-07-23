@@ -85,13 +85,13 @@
                                 <a href="{{ path('class_show', {
                                     'id': relation.targetClass.id
                                 }) }}">
-                                    {{ relation.targetClass.identifierInNamespace }} - {{ relation.targetClass.standardLabel }}
+                                    {{ relation.targetClass }}
                                 </a>
                                 {% elseif object == 'property' %}
                                     <a href="{{ path('property_show', {
                                         'id': relation.targetProperty.id
                                     }) }}">
-                                        {{ relation.targetProperty.identifierInNamespace }} - {{ relation.targetProperty.standardLabel }}
+                                        {{ relation.targetProperty }}
                                     </a>
                                 {% endif %}
                             </td>
