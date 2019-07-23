@@ -785,13 +785,19 @@
                                 {% endif %}
                             </td>
                             <td>
-                                <a href="{{ path('entity_association_edit', {
-                                    'id': relation.id,
-                                    'object': 'property',
-                                    'objectId': property.id
-                                }) }}" class="btn btn-xs btn-success">
-                                    <span class="fa fa-edit"></span>
-                                </a>
+                                {% if property.id == relation.sourceProperty.id %}
+                                    <a href="{{ path('entity_association_edit', {
+                                        'id': relation.id
+                                    }) }}" class="btn btn-xs btn-success">
+                                        <span class="fa fa-edit"></span>
+                                    </a>
+                                {% else %}
+                                    <a href="{{ path('entity_association_inverse_edit', {
+                                        'id': relation.id
+                                    }) }}" class="btn btn-xs btn-success">
+                                        <span class="fa fa-edit"></span>
+                                    </a>
+                                {% endif %}
                             </td>
                         </tr>
                     {% endfor %}

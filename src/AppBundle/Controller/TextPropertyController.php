@@ -32,6 +32,7 @@ class TextPropertyController extends Controller
 
     /**
      * @Route("/text-property/{id}/edit", name="text_property_edit")
+     * @Route("/text-property/{id}/inverse/edit", name="text_property_inverse_edit")
      */
     public function editAction(TextProperty $textProperty, Request $request)
     {
@@ -43,6 +44,16 @@ class TextPropertyController extends Controller
         else if(!is_null($textProperty->getPropertyAssociation())){
             $object = $textProperty->getPropertyAssociation();
             $redirectToRoute = 'property_association_edit';
+            $redirectToRouteFragment = 'justifications';
+        }
+        else if(!is_null($textProperty->getEntityAssociation())){
+            $object = $textProperty->getEntityAssociation();
+
+            $redirectToRoute = 'entity_association_edit';
+            if($request->attributes->get('_route') == 'text_property_inverse_edit'){
+                $redirectToRoute = 'entity_association_inverse_edit';
+            }
+
             $redirectToRouteFragment = 'justifications';
         }
         else if(!is_null($textProperty->getClass())){
@@ -72,6 +83,9 @@ class TextPropertyController extends Controller
         }
         else if(!is_null($textProperty->getPropertyAssociation())){
             $this->denyAccessUnlessGranted('edit', $object->getChildProperty());
+        }
+        else if(!is_null($textProperty->getEntityAssociation())){
+            $this->denyAccessUnlessGranted('edit', $object->getSource());
         }
         else{
             $this->denyAccessUnlessGranted('edit', $object);
@@ -106,6 +120,7 @@ class TextPropertyController extends Controller
 
     /**
      * @Route("/text-property/{type}/new/{object}/{objectId}", name="text_property_new")
+     * @Route("/text-property/{type}/new/{object}/{objectId}/inverse", name="text_property_inverse_new")
      */
     public function newAction($type, $object, $objectId, Request $request)
     {
@@ -172,6 +187,21 @@ class TextPropertyController extends Controller
             $associatedObject = $associatedEntity;
             $redirectToRoute = 'profile_edit';
             $redirectToRouteFragment = 'identification';
+        }
+        else if($object === 'entity-association') {
+            $associatedEntity = $em->getRepository('AppBundle:EntityAssociation')->find($objectId);
+            if (!$associatedEntity) {
+                throw $this->createNotFoundException('The entity association n° '.$objectId.' does not exist');
+            }
+            $textProperty->setEntityAssociation($associatedEntity);
+            $associatedObject = $associatedEntity->getSource();
+
+            $redirectToRoute = 'entity_association_edit';
+            if($request->attributes->get('_route') == 'text_property_inverse_new'){
+                $redirectToRoute = 'entity_association_inverse_edit';
+            }
+
+            $redirectToRouteFragment = 'justifications';
         }
         else throw $this->createNotFoundException('The requested object "'.$object.'" does not exist!');
 

@@ -57,6 +57,11 @@ class EntityAssociation
     private $systemType;
 
     /**
+     * @ORM\Column(type="boolean", name="directed")
+     */
+    private $directed;
+
+    /**
      * @Assert\NotNull()
      * @Assert\Valid()
      * @ORM\OneToMany(targetEntity="AppBundle\Entity\TextProperty", mappedBy="entityAssociation", cascade={"persist"})
@@ -107,35 +112,41 @@ class EntityAssociation
     /**
      * @return mixed
      */
-    public function getNamespaces()
+    public function getId()
     {
-        return $this->namespaces;
+        return $this->id;
     }
 
     /**
-     * @param mixed $namespaces
+     * @return mixed
      */
-    public function setNamespaces($namespaces)
+    public function getSourceClass()
     {
-        $this->namespaces = $namespaces;
-    }
-
-
-
-    /**
-     * @return ArrayCollection|TextProperty[]
-     */
-    public function getTextProperties()
-    {
-        return $this->textProperties;
+        return $this->sourceClass;
     }
 
     /**
-     * @param mixed $textProperties
+     * @return mixed
      */
-    public function setTextProperties($textProperties)
+    public function getTargetClass()
     {
-        $this->textProperties = $textProperties;
+        return $this->targetClass;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getSourceProperty()
+    {
+        return $this->sourceProperty;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getTargetProperty()
+    {
+        return $this->targetProperty;
     }
 
     /**
@@ -147,17 +158,126 @@ class EntityAssociation
     }
 
     /**
-     * @param mixed $systemType
+     * @return mixed
      */
-    public function setSystemType($systemType)
+    public function getDirected()
     {
-        $this->systemType = $systemType;
+        return $this->directed;
     }
 
     /**
-     * @ORM\Column(type="boolean")
+     * @return mixed
      */
-    private $directed;
+    public function getTextProperties()
+    {
+        return $this->textProperties;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getNamespaces()
+    {
+        return $this->namespaces;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getCreator()
+    {
+        return $this->creator;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getModifier()
+    {
+        return $this->modifier;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getCreationTime()
+    {
+        return $this->creationTime;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getModificationTime()
+    {
+        return $this->modificationTime;
+    }
+
+    /**
+     * @return mixed OntoClass or Property
+     */
+    public function getSource()
+    {
+        $source = null;
+        if(!is_null($this->getSourceClass())) {
+            $source = $this->getSourceClass();
+        }
+        else if(!is_null($this->getSourceProperty())) {
+            $source = $this->getSourceProperty();
+        }
+        return $source;
+    }
+
+    public function getTarget()
+    {
+        $target = null;
+        if(!is_null($this->getTargetClass())) {
+            $target = $this->getTargetClass();
+        }
+
+        if(!is_null($this->getTargetProperty())) {
+            $target = $this->getTargetProperty();
+        }
+        return $target;
+    }
+
+    /**
+     * return String the source object's type
+     */
+    public function getSourceObjectType()
+    {
+        $objectType = null;
+        if(!is_null($this->getSourceClass())) {
+            $objectType = 'class';
+        }
+        if(!is_null($this->getSourceProperty())) {
+            $objectType = 'property';
+        }
+        return $objectType;
+    }
+
+    /**
+     * return String the source object's type
+     */
+    public function getTargetObjectType()
+    {
+        $objectType = null;
+        if(!is_null($this->getTargetClass())) {
+            $objectType = 'class';
+        }
+        if(!is_null($this->getTargetProperty())) {
+            $objectType = 'property';
+        }
+        return $objectType;
+    }
+
+    /**
+     * @param mixed $id
+     */
+    public function setId($id)
+    {
+        $this->id = $id;
+    }
 
     /**
      * @param mixed $sourceClass
@@ -192,43 +312,35 @@ class EntityAssociation
     }
 
     /**
-     * @return mixed
+     * @param mixed $systemType
      */
-    public function getId()
+    public function setSystemType($systemType)
     {
-        return $this->id;
+        $this->systemType = $systemType;
     }
 
     /**
-     * @return mixed
+     * @param mixed $directed
      */
-    public function getSourceClass()
+    public function setDirected($directed)
     {
-        return $this->sourceClass;
+        $this->directed = $directed;
     }
 
     /**
-     * @return mixed
+     * @param mixed $textProperties
      */
-    public function getTargetClass()
+    public function setTextProperties($textProperties)
     {
-        return $this->targetClass;
+        $this->textProperties = $textProperties;
     }
 
     /**
-     * @return mixed
+     * @param mixed $namespaces
      */
-    public function getSourceProperty()
+    public function setNamespaces($namespaces)
     {
-        return $this->sourceProperty;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getCreator()
-    {
-        return $this->creator;
+        $this->namespaces = $namespaces;
     }
 
     /**
@@ -240,27 +352,11 @@ class EntityAssociation
     }
 
     /**
-     * @return mixed
-     */
-    public function getModifier()
-    {
-        return $this->modifier;
-    }
-
-    /**
      * @param mixed $modifier
      */
     public function setModifier($modifier)
     {
         $this->modifier = $modifier;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getCreationTime()
-    {
-        return $this->creationTime;
     }
 
     /**
@@ -272,43 +368,11 @@ class EntityAssociation
     }
 
     /**
-     * @return mixed
-     */
-    public function getModificationTime()
-    {
-        return $this->modificationTime;
-    }
-
-    /**
      * @param mixed $modificationTime
      */
     public function setModificationTime($modificationTime)
     {
         $this->modificationTime = $modificationTime;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getTargetProperty()
-    {
-        return $this->targetProperty;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getDirected()
-    {
-        return $this->directed;
-    }
-
-    /**
-     * @param mixed $directed
-     */
-    public function setDirected($directed)
-    {
-        $this->directed = $directed;
     }
 
     public function addTextProperty(TextProperty $textProperty)
@@ -321,75 +385,16 @@ class EntityAssociation
         $textProperty->setEntityAssociation($this);
     }
 
-    public function __toString()
-    {
-        return (string) $this->sourceClass.$this->targetClass;
-    }
-
-    public function inverseClasses()
-    {
-        if(!$this->directed)
-        {
-            $temp = $this->sourceClass;
-            $this->sourceClass = $this->targetClass;
-            $this->targetClass = $temp;
-        }
-    }
-
-    public function inverseProperties()
-    {
-        if(!$this->directed)
-        {
-            $temp = $this->sourceProperty;
-            $this->sourceProperty = $this->targetProperty;
-            $this->targetProperty = $temp;
-        }
-    }
-
-    public function inverseEntities()
-    {
-        if($this->getSourceClass() != null)
-        {
-            return $this->inverseClasses();
-        }
-
-        if($this->getSourceProperty() != null)
-        {
-            return $this->inverseProperties();
-        }
-    }
-
-    public function getSource()
-    {
-        if($this->getSourceClass() != null)
-        {
-            return $this->getSourceClass();
-        }
-
-        if($this->getSourceProperty() != null)
-        {
-            return $this->getSourceProperty();
-        }
-    }
-
-    public function getTarget()
-    {
-        if($this->getTargetClass() != null)
-        {
-            return $this->getTargetClass();
-        }
-
-        if($this->getTargetProperty() != null)
-        {
-            return $this->getTargetProperty();
-        }
-    }
-
     public function addNamespace(OntoNamespace $namespace)
     {
         if ($this->namespaces->contains($namespace)) {
             return;
         }
         $this->namespaces[] = $namespace;
+    }
+
+    public function __toString()
+    {
+        return (string) $this->sourceClass.' - '.$this->targetClass.' : '.$this->systemType;
     }
 }
