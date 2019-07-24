@@ -118,6 +118,8 @@
                     <th>Show</th>
                     <th>Description</th>
                     <th>Language</th>
+                    <th>Edit</th>
+                    <th>Comments</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -129,6 +131,21 @@
                         {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
                     </td>
                     <td>{{ textProperty.languageIsoCode}}</td>
+                    <td>
+                        <a href="{{ path('text_property_edit', {
+                            'id': textProperty.id
+                        }) }}"
+                           class="btn btn-xs btn-success">
+                            <span class="fa fa-edit"></span>
+                        </a>
+                    </td>
+                    <td>
+                        <a class="btn" href="{{ path('text_property_edit', {
+                            'id': textProperty.id
+                        }) }}#comments">
+                            <span class="badge {% if textProperty.comments|length > 0  %}progress-bar-danger {% endif %}">{{ textProperty.comments|length }}</span>
+                        </a>
+                    </td>
                 </tr>
                 {% endfor %}
                 </tbody>
@@ -146,7 +163,8 @@
                     <th>Show</th>
                     <th>Notes</th>
                     <th>Language</th>
-                    <th>Namespace</th>
+                    <th>Edit</th>
+                    <th>Comment</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -158,7 +176,21 @@
                         {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
                     </td>
                     <td>{{ textProperty.languageIsoCode}}</td>
-                    <td>WIP</td>
+                    <td>
+                        <a href="{{ path('text_property_edit', {
+                            'id': textProperty.id
+                        }) }}"
+                           class="btn btn-xs btn-success">
+                            <span class="fa fa-edit"></span>
+                        </a>
+                    </td>
+                    <td>
+                        <a class="btn" href="{{ path('text_property_edit', {
+                            'id': textProperty.id
+                        }) }}#comments">
+                            <span class="badge {% if textProperty.comments|length > 0  %}progress-bar-danger {% endif %}">{{ textProperty.comments|length }}</span>
+                        </a>
+                    </td>
                 </tr>
                 {% endfor %}
                 </tbody>
