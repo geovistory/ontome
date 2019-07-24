@@ -84,6 +84,12 @@
                 </tbody>
             </table>
             <p>* : Standard label for this language</p>
+            <div class="pull-right add-div">
+                <a href="{{ path('text_property_new', {'type': 'definition', 'object': 'profile', 'objectId': profile.id })}}"
+                   class="btn btn-primary pull-right">
+                    Add <span class="fa fa-plus-circle"></span>
+                </a>
+            </div>
             <h3>Description</h3>
             <table class="table table-striped" id="descriptions-table">
                 <thead>
@@ -106,6 +112,12 @@
                 {% endfor %}
                 </tbody>
             </table>
+            <div class="pull-right add-div">
+                <a href="{{ path('text_property_new', {'type': 'additional-note', 'object': 'profile', 'objectId': profile.id })}}"
+                   class="btn btn-primary pull-right">
+                    Add <span class="fa fa-plus-circle"></span>
+                </a>
+            </div>
             <h3>Additional notes</h3>
             <table class="table table-striped" id="additional-notes-table">
                 <thead>
