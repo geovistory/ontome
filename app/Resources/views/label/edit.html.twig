@@ -26,6 +26,14 @@
                            role="button">
                             <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
                         </a>
+                    {% elseif  label.profile is not null %}
+                        <a href="{{ path('profile_edit', {
+                            id: label.profile.id
+                        }) }}#identification"
+                           class="pull-right btn btn-link"
+                           role="button">
+                            <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
+                        </a>
                     {% endif %}
                 </h2>
                 <ul class="nav nav-tabs" id="main-tabs">
@@ -53,6 +61,14 @@
                                 {% elseif label.property is not null %}
                                     <a href="{{ path('property_edit', {
                                         id: label.property.id
+                                    }) }}#identification"
+                                       class="btn btn-default"
+                                       role="button">
+                                        Back <i class="fas fa-arrow-left"></i>
+                                    </a>
+                                {% elseif label.profile is not null %}
+                                    <a href="{{ path('profile_edit', {
+                                        id: label.profile.id
                                     }) }}#identification"
                                        class="btn btn-default"
                                        role="button">
