@@ -76,12 +76,15 @@ class TextProperty implements GroupSequenceProviderInterface
     /**
      * @ORM\ManyToOne(targetEntity="SystemType", inversedBy="textProperties")
      * @ORM\JoinColumn(name="fk_text_property_type", referencedColumnName="pk_system_type")
+     * @Assert\Type(type="AppBundle\Entity\SystemType")
      */
     private $systemType;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Profile", inversedBy="textProperties")
+     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Profile", inversedBy="textProperties")
      * @ORM\JoinColumn(name="fk_profile", referencedColumnName="pk_profile")
+     * @Assert\Type(type="AppBundle\Entity\Profile")
+     * @Assert\Valid()
      */
     private $profile;
 

@@ -93,15 +93,17 @@ class Profile
     private $childProfiles;
 
     /**
-     * @Assert\NotBlank()
-     * @ORM\OneToMany(targetEntity="AppBundle\Entity\TextProperty", mappedBy="profile")
+     * @Assert\Valid()
+     * @Assert\NotNull()
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\TextProperty", mappedBy="profile", cascade={"persist"})
      * @ORM\OrderBy({"languageIsoCode" = "ASC"})
      */
     private $textProperties;
 
     /**
-     * @Assert\NotBlank()
-     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Label", mappedBy="profile")
+     * @Assert\Valid()
+     * @Assert\NotNull()
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Label", mappedBy="profile", cascade={"persist"})
      * @ORM\OrderBy({"languageIsoCode" = "ASC"})
      */
     private $labels;
@@ -313,11 +315,41 @@ class Profile
         return $this->standardLabel;
     }
 
-    public function __toString()
+    /**
+     * @param mixed $textProperties
+     */
+    public function setTextProperties($textProperties)
     {
-        return $this->standardLabel;
+        $this->textProperties = $textProperties;
     }
 
+    /**
+     * @param mixed $labels
+     */
+    public function setLabels($labels)
+    {
+        $this->labels = $labels;
+    }
+
+    public function addTextProperty(TextProperty $textProperty)
+    {
+        if ($this->textProperties->contains($textProperty)) {
+            return;
+        }
+        $this->textProperties[] = $textProperty;
+        // needed to update the owning side of the relationship!
+        $textProperty->setProperty($this);
+    }
+
+    public function addLabel(Label $label)
+    {
+        if ($this->labels->contains($label)) {
+            return;
+        }
+        $this->labels[] = $label;
+        // needed to update the owning side of the relationship!
+        $label->setProperty($this);
+    }
 
     public function addNamespace(OntoNamespace $namespace)
     {
@@ -343,5 +375,10 @@ class Profile
     public function removeClass(OntoClass $class)
     {
         $this->classes->removeElement($class);
+    }
+
+    public function __toString()
+    {
+        return $this->standardLabel;
     }
 }
