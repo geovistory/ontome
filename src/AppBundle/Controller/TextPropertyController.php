@@ -96,7 +96,7 @@ class TextPropertyController extends Controller
         $form = $this->createForm(TextPropertyForm::class, $textProperty);
 
         $form->handleRequest($request);
-        if ($form->isValid()) {
+        if ($form->isSubmitted() && $form->isValid()) {
             $em = $this->getDoctrine()->getManager();
             $textProperty->setModifier($this->getUser());
             $em->persist($textProperty);
