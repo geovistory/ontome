@@ -313,7 +313,8 @@ class UserController extends Controller
         }
 
         // Pour l'onglet My Current Namespaces
-        $defaultNamespace = $em->getRepository('AppBundle:OntoNamespace')->findDefaultNamespaceForProject($user->getCurrentActiveProject());
+        $defaultNamespace = $em->getRepository('AppBundle:OntoNamespace')
+            ->findDefaultNamespaceForProject($user->getCurrentActiveProject());
 
         // userProjectAssociation with current active project
         $userCurrentActiveProjectAssociation =$em->getRepository('AppBundle:UserProjectAssociation')
@@ -327,12 +328,19 @@ class UserController extends Controller
             $userCurrentActiveProjectAssociation = $userProjectPublicAssociation;
         }
 
-        $additionalNamespaces = $em->getRepository('AppBundle:OntoNamespace')->findAdditionalNamespacesForUserProject($userCurrentActiveProjectAssociation);
+        $additionalNamespaces = $em->getRepository('AppBundle:OntoNamespace')
+            ->findAdditionalNamespacesForUserProject($userCurrentActiveProjectAssociation);
+
+        $rootNamespaces = $em->getRepository('AppBundle:OntoNamespace')
+            ->findBy(array(
+                'isTopLevelNamespace' => true
+            ));
 
         return $this->render('user/show.html.twig', array(
             'userProjects' => $userProjects,
             'defaultNamespace' => $defaultNamespace,
             'additionalNamespaces' => $additionalNamespaces,
+            'rootNamespaces' => $rootNamespaces,
             'user' => $user
         ));
     }
