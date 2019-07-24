@@ -59,10 +59,16 @@ class ProjectVoter extends Voter
      */
     private function canEdit(Project $project, User $user)
     {
-        if($user->getId() == $project->getCreator()->getId())
+        foreach ($user->getUserProjectAssociations()->getIterator() as $i => $userProjectAssociation) {
+            if ($userProjectAssociation->getProject() == $project && $userProjectAssociation->getPermission() <= 2 ) { //permission <= means that the user is a project admin or manager
+                return true;
+            }
+        }
+
+        /*if($user->getId() == $project->getCreator()->getId()) //TODO: à enlever après tests
         {
             return true;
-        }
+        }*/
         return false;
     }
 }

@@ -59,10 +59,22 @@ class ProfileVoter extends Voter
      */
     private function canEdit(Profile $profile, User $user)
     {
-        if($user->getId() == $profile->getCreator()->getId() && $profile->getisOngoing())
+        $canEdit = false;
+        if(!$profile->getIsOngoing()) {
+            $canEdit = false;
+        }
+        else {
+            foreach ($user->getUserProjectAssociations()->getIterator() as $i => $userProjectAssociation) {
+                if ($userProjectAssociation->getProject()->getProfiles()->contains($profile) && $userProjectAssociation->getPermission() <= 2 ) { //permission <= means that the user is a project admin or manager
+                    $canEdit = true;
+                }
+            }
+        }
+
+        /*if($user->getId() == $profile->getCreator()->getId() && $profile->getIsOngoing())
         {
             return true;
-        }
-        return false;
+        }*/
+        return $canEdit;
     }
 }
