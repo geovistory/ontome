@@ -266,6 +266,10 @@ class TextProperty implements GroupSequenceProviderInterface
             $object = $this->classAssociation;
         elseif (!is_null($this->propertyAssociation))
             $object = $this->propertyAssociation;
+        elseif (!is_null($this->profile))
+            $object = $this->profile;
+        elseif (!is_null($this->project))
+            $object = $this->project;
         return $object;
     }
 
