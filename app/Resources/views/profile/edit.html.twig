@@ -71,21 +71,36 @@
                     <th>Label</th>
                     <th>Language</th>
                     <th>Last updated</th>
+                    <th>Edit</th>
+                    <th>Comments</th>
                 </tr>
                 </thead>
                 <tbody>
                 {% for label in profile.labels %}
-                <tr>
-                    <td>
-                        <a href="{{ path('label_show', {
-                            'id': label.id
-                        }) }}">
-                            {{ label.label }}
-                        </a> {% if label.isStandardLabelForLanguage %}*{% endif %}
-                    </td>
-                    <td>{{ label.languageIsoCode}}</td>
-                    <td>{{ label.modificationTime|date('Y-m-d') }}</td>
-                </tr>
+                    <tr>
+                        <td>
+                            <a href="{{ path('label_show', {
+                                'id': label.id
+                            }) }}">{{ label.label }}</a> {% if label.isStandardLabelForLanguage %}*{% endif %}
+                        </td>
+                        <td>{{ label.languageIsoCode}}</td>
+                        <td>{{ label.modificationTime|date('Y-m-d') }}</td>
+                        <td>
+                            <a href="{{ path('label_edit', {
+                                'id': label.id
+                            }) }}"
+                               class="btn btn-xs btn-success">
+                                <span class="fa fa-edit"></span>
+                            </a>
+                        </td>
+                        <td>
+                            <a class="btn" href="{{ path('label_edit', {
+                                'id': label.id
+                            }) }}#comments">
+                                <span class="badge {% if label.comments|length > 0  %}progress-bar-danger {% endif %}">{{ label.comments|length }}</span>
+                            </a>
+                        </td>
+                    </tr>
                 {% endfor %}
                 </tbody>
             </table>
