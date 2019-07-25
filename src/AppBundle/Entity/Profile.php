@@ -316,6 +316,86 @@ class Profile
     }
 
     /**
+     * @param mixed $startDate
+     */
+    public function setStartDate($startDate)
+    {
+        $this->startDate = $startDate;
+    }
+
+    /**
+     * @param mixed $endDate
+     */
+    public function setEndDate($endDate)
+    {
+        $this->endDate = $endDate;
+    }
+
+    /**
+     * @param boolean $isOngoing
+     */
+    public function setIsOngoing($isOngoing)
+    {
+        $this->isOngoing = $isOngoing;
+    }
+
+    /**
+     * @param Profile $parentProfile
+     */
+    public function setParentProfile($parentProfile)
+    {
+        $this->parentProfile = $parentProfile;
+    }
+
+    /**
+     * @param Project $projectOfBelonging
+     */
+    public function setProjectOfBelonging($projectOfBelonging)
+    {
+        $this->projectOfBelonging = $projectOfBelonging;
+    }
+
+    /**
+     * @param mixed $notes
+     */
+    public function setNotes($notes)
+    {
+        $this->notes = $notes;
+    }
+
+    /**
+     * @param mixed $creator
+     */
+    public function setCreator($creator)
+    {
+        $this->creator = $creator;
+    }
+
+    /**
+     * @param mixed $modifier
+     */
+    public function setModifier($modifier)
+    {
+        $this->modifier = $modifier;
+    }
+
+    /**
+     * @param mixed $creationTime
+     */
+    public function setCreationTime($creationTime)
+    {
+        $this->creationTime = $creationTime;
+    }
+
+    /**
+     * @param mixed $modificationTime
+     */
+    public function setModificationTime($modificationTime)
+    {
+        $this->modificationTime = $modificationTime;
+    }
+
+    /**
      * @param mixed $textProperties
      */
     public function setTextProperties($textProperties)

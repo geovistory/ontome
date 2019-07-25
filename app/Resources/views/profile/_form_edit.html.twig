@@ -1,0 +1,19 @@
+<div class="object-identification-edit-form">
+    {{ form_start(profileIdentificationForm) }}
+    {{ form_errors(profileIdentificationForm) }}
+    {{ form_row(profileIdentificationForm.projectOfBelonging) }}
+    {{ form_row(profileIdentificationForm.isOngoing) }}
+    {{ form_row(profileIdentificationForm.startDate) }}
+    {{ form_row(profileIdentificationForm.endDate) }}
+    {{ form_row(profileIdentificationForm.parentProfile) }}
+    <button type="submit" class="btn btn-primary" formnovalidate>Save <span class="far fa-save"></span></button>
+    <a href="{{ path('profile_edit', {
+        id: profile.id,
+        '_fragment': 'identification'
+    }) }}"
+       class="btn btn-default"
+       role="button">
+        Back <i class="fas fa-arrow-left"></i>
+    </a>
+    {{ form_end(profileIdentificationForm) }}
+</div>

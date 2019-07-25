@@ -40,8 +40,8 @@ class ProfileEditForm extends AbstractType
         }
 
         $builder
-            ->add('isOngoing', CheckboxType::class, ['label' => 'Is ongoing'])
             ->add('projectOfBelonging')
+            ->add('isOngoing', CheckboxType::class, ['label' => 'Is ongoing'])
             ->add('startDate', DateType::class, ['label' => 'Start date'])
             ->add('endDate', DateType::class, ['label' => 'End date'])
             ->add('parentProfile')
