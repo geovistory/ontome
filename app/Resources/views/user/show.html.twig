@@ -75,7 +75,7 @@
                                         {{ userProject.project.standardLabel }}
                                     </a>
                                     {% if userProject.project.standardLabel == app.user.currentActiveProject.standardLabel %}
-                                        <span class="label label-success"><i class="fas fa-dot-circle"></i> Active</span>
+                                        <span class="label label-success" style="margin-left: 10px;"><i class="fas fa-dot-circle"></i> Active</span>
                                     {% endif %}
                                 </td>
                                 <td>{{ userProject.project.modificationTime|date('Y-m-d') }}</td>
@@ -100,27 +100,33 @@
                         <div class="col-lg-6">
                             <h4>Managed by the project</h4>
                             <div>
-                                {% set isActive = true %}
+                                {% set isActive = false %}
                                 {% if isActive %}
-                                <a href="#"><span class="glyphicon glyphicon-eye-open text-primary" aria-hidden="true"></span></a>
+                                <a href="#"><span class="glyphicon glyphicon-check text-primary" aria-hidden="true"></span></a>
                                 <a href="{{ path('namespace_show', {'id': defaultNamespace.id}) }}">{{ defaultNamespace.standardLabel }}</a>
                                 {% else %}
-                                <a href="#"><span class="glyphicon glyphicon-eye-close text-muted" aria-hidden="true"></span></a>
+                                <a href="#"><span class="glyphicon glyphicon-unchecked text-muted" aria-hidden="true"></span></a>
                                 <a class="text-muted" href="{{ path('namespace_show', {'id': defaultNamespace.id}) }}">{{ defaultNamespace.standardLabel }}</a>
                                 {% endif %}
                             </div>
+                            {% if defaultNamespace.referencedNamespaceAssociations|length > 0 %}
+                                <div class="small text-muted"><strong><em>Referenced :</em></strong></div>
+                            {% endif %}
                             <ul>
                                 {% for referencedNamespaceAssociation in defaultNamespace.referencedNamespaceAssociations %}
-                                    <li class="list-unstyled"><em>{{ referencedNamespaceAssociation.namespace.standardLabel }}</em></li>
+                                    <li class="list-unstyled"><em class="text-muted">{{ referencedNamespaceAssociation.namespace.standardLabel }}</em></li>
                                 {% endfor %}
                             </ul>
                             <h4>Additional namespaces</h4>
                             {% if additionalNamespaces|length == 0 %}
-                                <p class="text-muted"><em>No additional namespaces was added. Please pick one below.</em></p>
+                                <p class="text-muted"><em>No additional namespace added, please pick one below.</em></p>
                             {% endif %}
                             {% for additionalNamespace in additionalNamespaces %}
                                 <a href="#"><span class="glyphicon glyphicon-remove text-danger" aria-hidden="true"></span></a>
                                 <a href="{{ path('namespace_show', {'id': additionalNamespace.id}) }}">{{ additionalNamespace.standardLabel }}</a>
+                                {% if additionalNamespace.referencedNamespaceAssociations|length > 0 %}
+                                    <div class="small"><strong><em>Referenced :</em></strong></div>
+                                {% endif %}
                                 <ul>
                                     {% for referencedNamespaceAssociation in additionalNamespace.referencedNamespaceAssociations %}
                                         <li class="list-unstyled"><em>{{ referencedNamespaceAssociation.namespace.standardLabel }}</em></li>
@@ -148,28 +154,32 @@
                                 <div>
                                     {% set isActive = true %}
                                     {% if isActive %}
-                                    <a href="#"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a>
+                                    <a href="#"><span class="glyphicon glyphicon-check" aria-hidden="true"></span></a>
                                     <strong>Profile : <a href="{{ path('profile_show', {'id': profile.id}) }}">{{ profile }}</a></strong>
                                     {% else %}
-                                    <a href="#"><span class="glyphicon glyphicon-eye-close text-muted" aria-hidden="true"></span></a>
+                                    <a href="#"><span class="glyphicon glyphicon-unchecked text-muted" aria-hidden="true"></span></a>
                                     <strong class="text-muted">Profile : <a href="{{ path('profile_show', {'id': profile.id}) }}">{{ profile }}</a></strong>
                                     {% endif %}
                                 </div>
                                 {% if profile.namespaces|length == 0 %}
                                     <p class="text-muted"><em>No namespace is associated with this profile.</em></p>
                                 {% endif %}
-                                <p>
+                                <ul style="margin-bottom: 20px;">
                                 {% for namespace in profile.namespaces %}
-                                    {% set isActive = true %}
+                                    {% set isActive = false %}
                                     {% if isActive %}
-                                    <a href="#"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a>
-                                    <a href="{{ path('namespace_show', {'id': namespace.id}) }}">{{ namespace.standardLabel }}</a><br/>
+                                        <li class="list-unstyled" style="margin-left: -30px;">
+                                            <a href="#"><span class="glyphicon glyphicon-check" aria-hidden="true"></span></a>
+                                            <a href="{{ path('namespace_show', {'id': namespace.id}) }}">{{ namespace.standardLabel }}</a>
+                                        </li>
                                     {% else %}
-                                    <a href="#"><span class="glyphicon glyphicon-eye-close text-muted" aria-hidden="true"></span></a>
-                                    <a class="text-muted" href="{{ path('namespace_show', {'id': namespace.id}) }}">{{ namespace.standardLabel }}</a><br/>
+                                        <li class="list-unstyled" style="margin-left: -30px;">
+                                            <a href="#"><span class="glyphicon glyphicon-unchecked text-muted" aria-hidden="true"></span></a>
+                                            <a class="text-muted" href="{{ path('namespace_show', {'id': namespace.id}) }}">{{ namespace.standardLabel }}</a>
+                                        </li>
                                     {% endif %}
                                 {% endfor %}
-                                </p>
+                                </ul>
                             {% endfor %}
                         </div>
                     </div>
@@ -242,7 +252,7 @@
                 $(this).find(":first-child").remove();
             });
 
-            /*
+            {#
             $(document).on("click", ".pickable-namespace", function() {
                 var selectedValue = $(this).attr("id");
                 var profileID = {{ profile.id }}
@@ -294,7 +304,7 @@
                     }
                 });
 
-            });*/
+            });#}
         } );
     </script>
 {% endblock %}
