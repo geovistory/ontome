@@ -1050,7 +1050,7 @@ class UserController extends Controller
                 }
             }
         }
-        
+
         // rediriger sur la page showAction
         return $this->redirectToRoute('user_show', [
             'id' => $user->getId(),
