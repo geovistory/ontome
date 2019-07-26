@@ -53,6 +53,7 @@ class Profile
     private $parentProfile;
 
     /**
+     * @Assert\NotNull
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Project", inversedBy="ownedProfiles")
      * @ORM\JoinColumn(name="fk_project_of_belonging", referencedColumnName="pk_project")
      */
