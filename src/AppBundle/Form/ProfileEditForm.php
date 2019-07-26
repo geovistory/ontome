@@ -42,8 +42,18 @@ class ProfileEditForm extends AbstractType
         $builder
             ->add('projectOfBelonging')
             ->add('isOngoing', CheckboxType::class, ['label' => 'Is ongoing'])
-            ->add('startDate', DateType::class, ['label' => 'Start date'])
-            ->add('endDate', DateType::class, ['label' => 'End date'])
+            ->add('startDate', DateType::class, [
+                'label' => 'Start date',
+                'widget' => 'single_text',
+                'attr' => ['class' => 'js-datepicker'],
+                'html5' => false
+            ])
+            ->add('endDate', DateType::class, [
+                'label' => 'End date',
+                'widget' => 'single_text',
+                'attr' => ['class' => 'js-datepicker'],
+                'html5' => false
+            ])
             ->add('parentProfile')
             ->add('creator', HiddenType::class)
             ->add('modifier', HiddenType::class);
