@@ -24,7 +24,7 @@
                     <thead>
                     <tr>
                         <th>Domain</th>
-                        <th>Property identifier</th>
+                        <th>Property</th>
                         <th>Range</th>
                         <th>Associate</th>
                     </tr>
@@ -35,7 +35,7 @@
                     <thead>
                     <tr>
                         <th>Domain</th>
-                        <th>Property identifier</th>
+                        <th>Property</th>
                         <th>Range</th>
                         <th>Associate</th>
                     </tr>
@@ -46,7 +46,7 @@
                     <thead>
                     <tr>
                         <th>Domain</th>
-                        <th>Property identifier</th>
+                        <th>Property</th>
                         <th>Range</th>
                         <th>Associate</th>
                     </tr>
@@ -57,7 +57,7 @@
                     <thead>
                     <tr>
                         <th>Domain</th>
-                        <th>Property identifier</th>
+                        <th>Property</th>
                         <th>Range</th>
                         <th>Associate</th>
                     </tr>
@@ -112,6 +112,14 @@
                             return checkIcon;
                         else
                             return data;
+                    }
+                },
+                {
+                    targets: 1,
+                    render: function ( data, type, row, meta ) {
+                        var urlShowProperty = '{{ path("property_show", {"id" : "propertyID"}) }}';
+                        urlShowProperty = urlShowProperty.replace("propertyID", row.propertyId);
+                        return '<a href="'+urlShowProperty+'">'+data+'</a>';
                     }
                 },
                 {
@@ -170,6 +178,14 @@
                     }
                 },
                 {
+                    targets: 1,
+                    render: function ( data, type, row, meta ) {
+                        var urlShowProperty = '{{ path("property_show", {"id" : "propertyID"}) }}';
+                        urlShowProperty = urlShowProperty.replace("propertyID", row.propertyId);
+                        return '<a href="'+urlShowProperty+'">'+data+'</a>';
+                    }
+                },
+                {
                     targets: 2,
                     render: function ( data, type, row, meta ) {
                         if(row.fk_system_type != '5') {
@@ -210,6 +226,14 @@
                             return '<span class = "incoming-property-domain-switch" data-id="' + row.propertyId + '">' + data + '</span><span id="incoming-property-domain-select-' + row.propertyId + '" data-id="' + row.propertyId + '"></span>&nbsp;<a data-id="' + row.propertyId + '" data-url="' + urlGetDescendentClasses + '" class="select-subclass-domain" data-toggle="tooltip" title="Select a child class"><i class="far fa-caret-square-down"></i></a>';
                         }
                         else return data;
+                    }
+                },
+                {
+                    targets: 1,
+                    render: function ( data, type, row, meta ) {
+                        var urlShowProperty = '{{ path("property_show", {"id" : "propertyID"}) }}';
+                        urlShowProperty = urlShowProperty.replace("propertyID", row.propertyId);
+                        return '<a href="'+urlShowProperty+'">'+data+'</a>';
                     }
                 },
                 {
@@ -261,6 +285,14 @@
                             return '<span class = "incoming-inherited-property-domain-switch" data-id="'+row.propertyId+'-'+row.domainId+'">'+data+'</span><span id="incoming-inherited-property-domain-select-'+row.propertyId+'-'+row.domainId+'" data-id="'+row.propertyId+'-'+row.domainId+'"></span>&nbsp;<a data-id="'+row.propertyId+'-'+row.domainId+'" data-url="'+urlGetDescendentClasses+'" class="select-subclass-domain-inherited" data-toggle="tooltip" title="Select a child class"><i class="far fa-caret-square-down"></i></a>';
                         }
                         else return data;
+                    }
+                },
+                {
+                    targets: 1,
+                    render: function ( data, type, row, meta ) {
+                        var urlShowProperty = '{{ path("property_show", {"id" : "propertyID"}) }}';
+                        urlShowProperty = urlShowProperty.replace("propertyID", row.propertyId);
+                        return '<a href="'+urlShowProperty+'">'+data+'</a>';
                     }
                 },
                 {

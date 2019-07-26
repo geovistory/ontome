@@ -47,6 +47,11 @@ class LabelController  extends Controller
             $redirectToRoute = 'property_edit';
             $redirectToRouteFragment = 'identification';
         }
+        else if(!is_null($label->getProfile())){
+            $object = $label->getProfile();
+            $redirectToRoute = 'profile_edit';
+            $redirectToRouteFragment = 'identification';
+        }
         else throw $this->createNotFoundException('The related object for the label n° '.$label->getId().' does not exist. Please contact an administrator.');
 
         $this->denyAccessUnlessGranted('edit', $object);
@@ -107,21 +112,25 @@ class LabelController  extends Controller
             $redirectToRoute = 'property_edit';
             $redirectToRouteFragment = 'identification';
         }
-        else if($object === 'property') {
-            $associatedEntity = $em->getRepository('AppBundle:Property')->find($objectId);
+        else if($object === 'profile') {
+            $associatedEntity = $em->getRepository('AppBundle:Profile')->find($objectId);
             if (!$associatedEntity) {
-                throw $this->createNotFoundException('The property n° '.$objectId.' does not exist');
+                throw $this->createNotFoundException('The profile n° '.$objectId.' does not exist');
             }
-            $label->setProperty($associatedEntity);
+            $label->setProfile($associatedEntity);
             $associatedObject = $associatedEntity;
-            $redirectToRoute = 'property_edit';
+            $redirectToRoute = 'profile_edit';
             $redirectToRouteFragment = 'identification';
         }
         else throw $this->createNotFoundException('The requested object "'.$object.'" does not exist!');
 
         $this->denyAccessUnlessGranted('edit', $associatedObject);
-        
-        $label->addNamespace($associatedObject->getOngoingNamespace());
+
+        //ongoingNamespace associated to the label for any kind of object, except Project or Profile
+        if($object !== 'project' && $object !== 'profile') {
+            $label->addNamespace($associatedObject->getOngoingNamespace());
+        }
+
         $label->setCreator($this->getUser());
         $label->setModifier($this->getUser());
         $label->setCreationTime(new \DateTime('now'));
@@ -134,7 +143,12 @@ class LabelController  extends Controller
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $label = $form->getData();
-            $label->addNamespace($associatedObject->getOngoingNamespace());
+
+            //ongoingNamespace associated to the label for any kind of object, except Project or Profile
+            if($object !== 'project' && $object !== 'profile') {
+                $label->addNamespace($associatedObject->getOngoingNamespace());
+            }
+
             $label->setCreator($this->getUser());
             $label->setModifier($this->getUser());
             $label->setCreationTime(new \DateTime('now'));

@@ -1,0 +1,12 @@
+<div class="object-identification-edit-form">
+    {{ form_start(profileIdentificationForm) }}
+    {{ form_errors(profileIdentificationForm) }}
+    {{ form_row(profileIdentificationForm.projectOfBelonging) }}
+    {{ form_row(profileIdentificationForm.isOngoing) }}
+    {{ form_row(profileIdentificationForm.startDate) }}
+    {{ form_row(profileIdentificationForm.endDate) }}
+    {{ form_row(profileIdentificationForm.parentProfile) }}
+    <button type="submit" class="btn btn-primary" formnovalidate>Save <span class="far fa-save"></span></button>
+    <button type="button" class="btn btn-default" onclick="window.location.reload();">Cancel&nbsp;<i class="fas fa-undo-alt"></i></button>
+    {{ form_end(profileIdentificationForm) }}
+</div>

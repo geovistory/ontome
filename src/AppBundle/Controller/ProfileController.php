@@ -13,6 +13,7 @@ use AppBundle\Entity\OntoNamespace;
 use AppBundle\Entity\Profile;
 use AppBundle\Entity\ProfileAssociation;
 use AppBundle\Entity\Property;
+use AppBundle\Form\ProfileEditForm;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -69,11 +70,38 @@ class ProfileController  extends Controller
     /**
      * @Route("/profile/{id}/edit", name="profile_edit")
      * @param Profile $profile
+     * @param Request $request
      * @return Response the rendered template
      */
-    public function editAction(Profile $profile)
+    public function editAction(Profile $profile, Request $request)
     {
+
+        if(is_null($profile))
+        {
+            throw $this->createNotFoundException('The profile n° '.$profile->getId().' does not exist. Please contact an administrator.');
+        }
+
         $this->denyAccessUnlessGranted('edit', $profile);
+
+        $profile->setModifier($this->getUser());
+
+        $form = $this->createForm(ProfileEditForm::class, $profile);
+
+        $em = $this->getDoctrine()->getManager();
+
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $profile->setModifier($this->getUser());
+            $em->persist($profile);
+            $em->flush();
+
+            $this->addFlash('success', 'Profile Updated!');
+
+            return $this->redirectToRoute('profile_edit', [
+                'id' => $profile->getId(),
+                '_fragment' => 'identification'
+            ]);
+        }
 
         $em = $this->getDoctrine()->getManager();
 
@@ -94,6 +122,7 @@ class ProfileController  extends Controller
 
         return $this->render('profile/edit.html.twig', array(
             'profile' => $profile,
+            'profileIdentificationForm' => $form->createView(),
             'classes' => $classes,
             'selectableClasses' => $selectableClasses,
             'rootNamespaces' => $rootNamespaces,

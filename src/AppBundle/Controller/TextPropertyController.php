@@ -96,7 +96,7 @@ class TextPropertyController extends Controller
         $form = $this->createForm(TextPropertyForm::class, $textProperty);
 
         $form->handleRequest($request);
-        if ($form->isValid()) {
+        if ($form->isSubmitted() && $form->isValid()) {
             $em = $this->getDoctrine()->getManager();
             $textProperty->setModifier($this->getUser());
             $em->persist($textProperty);
@@ -225,10 +225,12 @@ class TextPropertyController extends Controller
         $this->denyAccessUnlessGranted('edit', $associatedObject);
 
         $textProperty->setSystemType($systemType);
-        if($object !== 'project')
-        {
+
+        //ongoingNamespace associated to the textProperty for any kind of object, except Project or Profile
+        if($object !== 'project' && $object !== 'profile') {
             $textProperty->addNamespace($associatedObject->getOngoingNamespace());
         }
+
         $textProperty->setCreator($this->getUser());
         $textProperty->setModifier($this->getUser());
         $textProperty->setCreationTime(new \DateTime('now'));
@@ -242,10 +244,12 @@ class TextPropertyController extends Controller
         if ($form->isSubmitted() && $form->isValid()) {
             $textProperty = $form->getData();
             $textProperty->setSystemType($systemType);
-            if($object !== 'project')
-            {
+
+            //ongoingNamespace associated to the textProperty for any kind of object, except Project or Profile
+            if($object !== 'project' && $object !== 'profile') {
                 $textProperty->addNamespace($associatedObject->getOngoingNamespace());
             }
+
             $textProperty->setCreator($this->getUser());
             $textProperty->setModifier($this->getUser());
             $textProperty->setCreationTime(new \DateTime('now'));

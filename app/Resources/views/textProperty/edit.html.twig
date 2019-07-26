@@ -17,7 +17,7 @@
                        role="button">
                         <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
                     </a>
-                {% elseif  textProperty.propertyAssociation is not null %}
+                {% elseif textProperty.propertyAssociation is not null %}
                     <a href="{{ path('property_association_edit', {
                         id: textProperty.propertyAssociation.id
                     }) }}"
@@ -25,7 +25,7 @@
                        role="button">
                         <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
                     </a>
-                {% elseif  textProperty.class is not null %}
+                {% elseif textProperty.class is not null %}
                     <a href="{{ path('class_edit', {
                         id: textProperty.class.id
                     }) }}#definition"
@@ -33,7 +33,7 @@
                        role="button">
                         <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
                     </a>
-                {% elseif  textProperty.property is not null %}
+                {% elseif textProperty.property is not null %}
                     <a href="{{ path('property_edit', {
                         id: textProperty.property.id
                     }) }}#definition"
@@ -41,7 +41,7 @@
                        role="button">
                         <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
                     </a>
-                {% elseif  textProperty.project is not null %}
+                {% elseif textProperty.project is not null %}
                     <a href="{{ path('project_edit', {
                         id: textProperty.project.id
                     }) }}#definition"
@@ -49,15 +49,23 @@
                        role="button">
                         <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
                     </a>
-                {% elseif  textProperty.entityAssociation is not null and app.request.attributes.get('_route') == 'text_property_inverse_edit' %}
-                    <a href="{{ path('entity_association_inverse_edit', {
-                        id: textProperty.entityAssociation.id
-                    }) }}#definition"
+                {% elseif textProperty.profile is not null %}
+                    <a href="{{ path('profile_edit', {
+                        id: textProperty.profile.id
+                    }) }}"
                        class="pull-right btn btn-link"
                        role="button">
                         <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
                     </a>
-                {% elseif  textProperty.entityAssociation is not null %}
+                {% elseif textProperty.entityAssociation is not null and app.request.attributes.get('_route') == 'text_property_inverse_new' %}
+                    <a href="{{ path('entity_association_inverse_edit', {
+                    id: textProperty.entityAssociation.id
+                }) }}#definition"
+                           class="pull-right btn btn-link"
+                           role="button">
+                    <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
+                </a>
+                {% elseif textProperty.entityAssociation is not null %}
                     <a href="{{ path('entity_association_edit', {
                         id: textProperty.entityAssociation.id
                     }) }}#definition"
@@ -87,7 +95,7 @@
                                role="button">
                                 Back <i class="fas fa-arrow-left"></i>
                             </a>
-                        {% elseif  textProperty.propertyAssociation is not null %}
+                        {% elseif textProperty.propertyAssociation is not null %}
                             <a href="{{ path('property_association_edit', {
                                 id: textProperty.propertyAssociation.id
                             }) }}"
@@ -95,7 +103,7 @@
                                role="button">
                                 Back <i class="fas fa-arrow-left"></i>
                             </a>
-                        {% elseif  textProperty.class is not null %}
+                        {% elseif textProperty.class is not null %}
                             <a href="{{ path('class_edit', {
                                 id: textProperty.class.id
                             }) }}#definition"
@@ -103,7 +111,7 @@
                                role="button">
                                 Back <i class="fas fa-arrow-left"></i>
                             </a>
-                        {% elseif  textProperty.property is not null %}
+                        {% elseif textProperty.property is not null %}
                             <a href="{{ path('property_edit', {
                                 id: textProperty.property.id
                             }) }}#definition"
@@ -111,9 +119,33 @@
                                role="button">
                                 Back <i class="fas fa-arrow-left"></i>
                             </a>
-                        {% elseif  textProperty.project is not null %}
+                        {% elseif textProperty.project is not null %}
                             <a href="{{ path('project_edit', {
                                 id: textProperty.project.id
+                            }) }}#definition"
+                               class="btn btn-default"
+                               role="button">
+                                Back <i class="fas fa-arrow-left"></i>
+                            </a>
+                        {% elseif textProperty.profile is not null %}
+                            <a href="{{ path('profile_edit', {
+                                id: textProperty.profile.id
+                            }) }}#identification"
+                               class="btn btn-default"
+                               role="button">
+                                Back <i class="fas fa-arrow-left"></i>
+                            </a>
+                        {% elseif textProperty.entityAssociation is not null and app.request.attributes.get('_route') == 'text_property_inverse_new' %}
+                            <a href="{{ path('entity_association_inverse_edit', {
+                                id: textProperty.entityAssociation.id
+                            }) }}#definition"
+                               class="btn btn-default"
+                               role="button">
+                                Back <i class="fas fa-arrow-left"></i>
+                            </a>
+                        {% elseif textProperty.entityAssociation is not null %}
+                            <a href="{{ path('entity_association_edit', {
+                                id: textProperty.entityAssociation.id
                             }) }}#definition"
                                class="btn btn-default"
                                role="button">

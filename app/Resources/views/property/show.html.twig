@@ -733,8 +733,8 @@
                                     {{ profile.standardLabel }}
                                 </a>
                             </td>
-                            <td>{{ profile.startDate}}</td>
-                            <td>{{ profile.endDate}}</td>
+                            <td>{{ profile.startDate is empty ? '' : profile.startDate|date('Y-m-d') }}</td>
+                            <td>{{ profile.endDate is empty ? '' : profile.endDate|date('Y-m-d') }}</td>
                             <td>{{ profile.modificationTime|date('Y-m-d') }}</td>
                         </tr>
                     {% endfor %}

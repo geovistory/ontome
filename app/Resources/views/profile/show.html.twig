@@ -64,8 +64,8 @@
             <div id="identification" class="tab-pane fade">
                 <h3>Identification</h3>
                 <p>Project of belonging: <a href="{{ path('project_show', {'id': profile.projectOfBelonging.id}) }}">{{ profile.projectOfBelonging.standardLabel }}</a></p>
-                <p>Start date: {{ profile.startDate }}</p>
-                <p>End date: {{ profile.endDate }}</p>
+                <p>Start date: {{ profile.startDate is empty ? '' : profile.startDate|date('Y-m-d') }}</p>
+                <p>End date: {{ profile.endDate is empty ? '' : profile.endDate|date('Y-m-d') }}</p>
                 <h3>Labels</h3>
                 <table class="table table-striped" id="labels-table">
                     <thead>
@@ -107,7 +107,7 @@
                         <tr>
                             <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
                             <td class="truncated-text">
-                                <span>{{ textProperty.textProperty}}</span>
+                                <span>{{ textProperty.textProperty|striptags|raw }}</span>
                             </td>
                             <td>{{ textProperty.languageIsoCode}}</td>
                         </tr>
