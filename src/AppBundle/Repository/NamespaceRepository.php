@@ -104,28 +104,16 @@ class NamespaceRepository extends EntityRepository
      */
     public function findDefaultNamespaceForProject(Project $project)
     {
-         $namespaceOngoing = $this->createQueryBuilder('nsp')
-            ->andWhere('nsp.isOngoing = true')
-            ->andWhere('nsp.isTopLevelNamespace = false')
+         $defaultNamespace = $this->createQueryBuilder('nsp')
             ->join('nsp.projectForTopLevelNamespace','proj')
             ->andWhere('proj.id = :pk_project')
+            ->orderBy('nsp.isOngoing', 'DESC')
+            ->addOrderBy('nsp.creationTime', 'DESC')
             ->setParameter('pk_project', $project->getId())
             ->getQuery()
             ->execute();
 
-        if(!empty($namespaceOngoing))
-            return $namespaceOngoing[0];
-
-        $latestNamespace = $this->createQueryBuilder('nsp')
-            ->andWhere('nsp.isTopLevelNamespace = false')
-            ->join('nsp.projectForTopLevelNamespace','proj')
-            ->andWhere('proj.id = :pk_project')
-            ->setParameter('pk_project', $project->getId())
-            ->orderBy('nsp.creationTime', 'DESC')
-            ->getQuery()
-            ->execute()[0];
-
-        return $latestNamespace;
+        return $defaultNamespace[0];
     }
 
     /**
@@ -160,7 +148,7 @@ class NamespaceRepository extends EntityRepository
           WHERE ns.pk_namespace IN(
 	        -- Retourne l'espace de nom géré par le projet
 	        (SELECT pk_namespace FROM che.namespace
-	        WHERE fk_project_for_top_level_namespace = 6
+	        WHERE fk_project_for_top_level_namespace = :id_project
 	        ORDER BY is_ongoing DESC, creation_time DESC
 	        LIMIT 1 OFFSET 0)
 	        UNION
@@ -169,40 +157,23 @@ class NamespaceRepository extends EntityRepository
 	        LEFT JOIN che.associates_entity_to_user_project aseup2 ON aseup2.fk_profile = asrefns.fk_profile 
 	        WHERE asrefns.fk_profile IN(
 	          SELECT fk_profile FROM che.associates_project
-		      WHERE fk_project = 6)
+		      WHERE fk_project = :id_project)
 	          AND ((aseup2.fk_system_type = 25 AND aseup2.fk_associate_user_to_project IN(
 	            SELECT pk_associate_user_to_project FROM che.associate_user_to_project
-		        WHERE fk_user = 7 AND fk_project = 6)) 
+		        WHERE fk_user = :id_user AND fk_project = :id_project)) 
 	          OR aseup2.fk_system_type IS NULL)
 	        )
           )
           AND ((aseup.fk_system_type = 25 AND aseup.fk_associate_user_to_project IN(
             SELECT pk_associate_user_to_project FROM che.associate_user_to_project
-	        WHERE fk_user = 7 AND fk_project = 6)) 
+	        WHERE fk_user = :id_user AND fk_project = :id_project)) 
 	      OR aseup.fk_system_type IS NULL)
         ";
 
         $query = $this->getEntityManager()->createNativeQuery($sql, $rsm);
+        $query->setParameter('id_project', $userProjectAssociation->getProject()->getId());
+        $query->setParameter('id_user', $userProjectAssociation->getUser()->getId());
         return $query->getResult();
-    }
-
-    // Retrouve tous les espaces de noms inactifs (système type 26)
-    /**
-     * @return OntoNamespace[]
-     */
-    public function findAllInactiveNamespacesForUserProject(UserProjectAssociation $userProjectAssociation)
-    {
-        $inactiveNamespaces = $this->createQueryBuilder('nsp')
-            ->join('nsp.namespaceUserProjectAssociation', 'nupa')
-            ->join('nupa.userProjectAssociation', 'upa')
-            ->join('nupa.systemType', 'st')
-            ->andWhere('upa.id = :pk_user_project_association')
-            ->andWhere('st.id = 26')
-            ->setParameter('pk_user_project_association', $userProjectAssociation->getId())
-            ->getQuery()
-            ->execute();
-
-        return $inactiveNamespaces;
     }
 
     /**

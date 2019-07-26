@@ -155,7 +155,10 @@
                             {% endif %}
                             {% for profile in app.user.currentActiveProject.profiles %}
                                 <div>
-                                    {% set isActiveProfile = true %}
+                                    {% set isActiveProfile = false %}
+                                    {% if profile in activeProfiles %}
+                                        {% set isActiveProfile = true %}
+                                    {% endif %}
                                     {% if isActiveProfile %}
                                     <a href="#"><span class="glyphicon glyphicon-check" aria-hidden="true"></span></a>
                                     <strong>Profile : <a href="{{ path('profile_show', {'id': profile.id}) }}">{{ profile }}</a></strong>

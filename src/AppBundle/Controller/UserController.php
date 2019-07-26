@@ -334,6 +334,9 @@ class UserController extends Controller
         $activeNamespaces = $em->getRepository('AppBundle:OntoNamespace')
             ->findAllActiveNamespacesForUserProject($userCurrentActiveProjectAssociation);
 
+        $activeProfiles = $em->getRepository('AppBundle:Profile')
+            ->findAllActiveProfilesForUserProject($userCurrentActiveProjectAssociation);
+
         $rootNamespaces = $em->getRepository('AppBundle:OntoNamespace')
             ->findBy(array(
                 'isTopLevelNamespace' => true
@@ -344,6 +347,7 @@ class UserController extends Controller
             'defaultNamespace' => $defaultNamespace,
             'additionalNamespaces' => $additionalNamespaces,
             'activeNamespaces' => $activeNamespaces,
+            'activeProfiles' => $activeProfiles,
             'rootNamespaces' => $rootNamespaces,
             'user' => $user
         ));
