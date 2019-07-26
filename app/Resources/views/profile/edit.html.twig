@@ -523,7 +523,10 @@
                 });
             }
         });
-        $("#properties-status-select").val('Selected in profile').change(); //default filter on this column
+        var existsSelectedInProfile = $("#properties-status-select option[value='Selected in profile']").length !== 0; //détermine si cette valeur est dans le select
+        if (existsSelectedInProfile) {
+            $("#properties-status-select").val('Selected in profile').change(); //default filter on this column
+        }
         $('#additional-notes-table').DataTable();
         $('#namespaces-table').DataTable();
 
