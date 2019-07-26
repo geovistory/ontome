@@ -46,12 +46,14 @@ class ProfileEditForm extends AbstractType
                 'label' => 'Start date',
                 'widget' => 'single_text',
                 'attr' => ['class' => 'js-datepicker'],
+                'format' => 'yyyy-MM-dd',
                 'html5' => false
             ])
             ->add('endDate', DateType::class, [
                 'label' => 'End date',
                 'widget' => 'single_text',
                 'attr' => ['class' => 'js-datepicker'],
+                'format' => 'yyyy-MM-dd',
                 'html5' => false
             ])
             ->add('parentProfile')

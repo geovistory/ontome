@@ -403,7 +403,9 @@
 
 <script>
     $(document).ready(function() {
-        $('.js-datepicker').datepicker();
+        $('.js-datepicker').datepicker({
+            format: 'yyyy-mm-dd'
+        });
 
         var profileID = {{ profile.id }};
         var urlSelectableClasses = '{{ path("selectable_classes_profile_json", {'profile' : 'profileID'}) }}';
