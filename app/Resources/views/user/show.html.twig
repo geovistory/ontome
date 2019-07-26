@@ -101,6 +101,9 @@
                             <h4>Managed by the project</h4>
                             <div>
                                 {% set isActive = false %}
+                                {% if defaultNamespace in activeNamespaces %}
+                                    {% set isActive = true %}
+                                {% endif %}
                                 {% if isActive %}
                                 <a href="#"><span class="glyphicon glyphicon-check text-primary" aria-hidden="true"></span></a>
                                 <a href="{{ path('namespace_show', {'id': defaultNamespace.id}) }}">{{ defaultNamespace.standardLabel }}</a>
@@ -121,14 +124,14 @@
                             {% if additionalNamespaces|length == 0 %}
                                 <p class="text-muted"><em>No additional namespace added, please pick one below.</em></p>
                             {% endif %}
-                            {% for additionalNamespace in additionalNamespaces %}
+                            {% for additionalNamespace in additionalNamespaces if additionalNamespace != defaultNamespace %}
                                 <a href="#"><span class="glyphicon glyphicon-remove text-danger" aria-hidden="true"></span></a>
                                 <a href="{{ path('namespace_show', {'id': additionalNamespace.id}) }}">{{ additionalNamespace.standardLabel }}</a>
                                 {% if additionalNamespace.referencedNamespaceAssociations|length > 0 %}
                                     <div class="small"><strong><em>Referenced :</em></strong></div>
                                 {% endif %}
                                 <ul>
-                                    {% for referencedNamespaceAssociation in additionalNamespace.referencedNamespaceAssociations %}
+                                    {% for referencedNamespaceAssociation in additionalNamespace.referencedNamespaceAssociations if referencedNamespaceAssociation.namespace is not null %}
                                         <li class="list-unstyled"><em>{{ referencedNamespaceAssociation.namespace.standardLabel }}</em></li>
                                     {% endfor %}
                                 </ul>
@@ -152,13 +155,13 @@
                             {% endif %}
                             {% for profile in app.user.currentActiveProject.profiles %}
                                 <div>
-                                    {% set isActive = true %}
-                                    {% if isActive %}
+                                    {% set isActiveProfile = true %}
+                                    {% if isActiveProfile %}
                                     <a href="#"><span class="glyphicon glyphicon-check" aria-hidden="true"></span></a>
                                     <strong>Profile : <a href="{{ path('profile_show', {'id': profile.id}) }}">{{ profile }}</a></strong>
                                     {% else %}
                                     <a href="#"><span class="glyphicon glyphicon-unchecked text-muted" aria-hidden="true"></span></a>
-                                    <strong class="text-muted">Profile : <a href="{{ path('profile_show', {'id': profile.id}) }}">{{ profile }}</a></strong>
+                                    <strong class="text-muted">Profile : <a class="text-muted" href="{{ path('profile_show', {'id': profile.id}) }}">{{ profile }}</a></strong>
                                     {% endif %}
                                 </div>
                                 {% if profile.namespaces|length == 0 %}
@@ -167,6 +170,9 @@
                                 <ul style="margin-bottom: 20px;">
                                 {% for namespace in profile.namespaces %}
                                     {% set isActive = false %}
+                                    {% if namespace in activeNamespaces %}
+                                        {% set isActive = true %}
+                                    {% endif %}
                                     {% if isActive %}
                                         <li class="list-unstyled" style="margin-left: -30px;">
                                             <a href="#"><span class="glyphicon glyphicon-check" aria-hidden="true"></span></a>

@@ -9,11 +9,30 @@
 namespace AppBundle\Repository;
 
 use AppBundle\Entity\Profile;
+use AppBundle\Entity\UserProjectAssociation;
 use AppBundle\Entity\Project;
 use Doctrine\ORM\EntityRepository;
 
 class ProfileRepository extends EntityRepository
 {
+    // Retrouve tous les profils inactifs (système type 26)
+    /**
+     * @return Profile[]
+     */
+    public function findAllInactiveProfilesForUserProject(UserProjectAssociation $userProjectAssociation)
+    {
+        $inactiveProfiles = $this->createQueryBuilder('prf')
+            ->join('prf.profileUserProjectAssociation', 'prfupa')
+            ->join('prfupa.userProjectAssociation', 'upa')
+            ->join('prfupa.systemType', 'st')
+            ->andWhere('upa.id = :pk_user_project_association')
+            ->andWhere('st.id = 26')
+            ->setParameter('pk_user_project_association', $userProjectAssociation->getId())
+            ->getQuery()
+            ->execute();
+
+        return $inactiveProfiles;
+    }
 
     /**
      * @return array

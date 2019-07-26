@@ -9,11 +9,14 @@
 namespace AppBundle\Repository;
 
 
+use AppBundle\Entity\OntoClass;
 use AppBundle\Entity\OntoNamespace;
 use AppBundle\Entity\Profile;
 use AppBundle\Entity\Project;
 use AppBundle\Entity\UserProjectAssociation;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Query\ResultSetMapping;
+use Doctrine\ORM\Query\ResultSetMappingBuilder;
 use Doctrine\ORM\QueryBuilder;
 
 class NamespaceRepository extends EntityRepository
@@ -141,6 +144,65 @@ class NamespaceRepository extends EntityRepository
             ->execute();
 
         return $additionalNamespaces;
+    }
+
+    /**
+     * @return OntoNamespace[]
+     */
+    public function findAllActiveNamespacesForUserProject(UserProjectAssociation $userProjectAssociation)
+    {
+        $rsm = new ResultSetMappingBuilder($this->getEntityManager());
+        $rsm->addRootEntityFromClassMetadata('AppBundle\Entity\OntoNamespace', 'ns');
+
+        $sql = "
+          SELECT ns.* FROM che.namespace ns
+          LEFT JOIN che.associates_entity_to_user_project aseup ON aseup.fk_namespace = ns.pk_namespace 
+          WHERE ns.pk_namespace IN(
+	        -- Retourne l'espace de nom géré par le projet
+	        (SELECT pk_namespace FROM che.namespace
+	        WHERE fk_project_for_top_level_namespace = 6
+	        ORDER BY is_ongoing DESC, creation_time DESC
+	        LIMIT 1 OFFSET 0)
+	        UNION
+	        -- Retourne les espaces de nom utilisés par les profils actifs du projet
+	        (SELECT DISTINCT fk_referenced_namespace FROM che.associates_referenced_namespace asrefns
+	        LEFT JOIN che.associates_entity_to_user_project aseup2 ON aseup2.fk_profile = asrefns.fk_profile 
+	        WHERE asrefns.fk_profile IN(
+	          SELECT fk_profile FROM che.associates_project
+		      WHERE fk_project = 6)
+	          AND ((aseup2.fk_system_type = 25 AND aseup2.fk_associate_user_to_project IN(
+	            SELECT pk_associate_user_to_project FROM che.associate_user_to_project
+		        WHERE fk_user = 7 AND fk_project = 6)) 
+	          OR aseup2.fk_system_type IS NULL)
+	        )
+          )
+          AND ((aseup.fk_system_type = 25 AND aseup.fk_associate_user_to_project IN(
+            SELECT pk_associate_user_to_project FROM che.associate_user_to_project
+	        WHERE fk_user = 7 AND fk_project = 6)) 
+	      OR aseup.fk_system_type IS NULL)
+        ";
+
+        $query = $this->getEntityManager()->createNativeQuery($sql, $rsm);
+        return $query->getResult();
+    }
+
+    // Retrouve tous les espaces de noms inactifs (système type 26)
+    /**
+     * @return OntoNamespace[]
+     */
+    public function findAllInactiveNamespacesForUserProject(UserProjectAssociation $userProjectAssociation)
+    {
+        $inactiveNamespaces = $this->createQueryBuilder('nsp')
+            ->join('nsp.namespaceUserProjectAssociation', 'nupa')
+            ->join('nupa.userProjectAssociation', 'upa')
+            ->join('nupa.systemType', 'st')
+            ->andWhere('upa.id = :pk_user_project_association')
+            ->andWhere('st.id = 26')
+            ->setParameter('pk_user_project_association', $userProjectAssociation->getId())
+            ->getQuery()
+            ->execute();
+
+        return $inactiveNamespaces;
     }
 
     /**
