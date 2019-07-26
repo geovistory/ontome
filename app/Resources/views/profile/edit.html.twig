@@ -417,6 +417,7 @@
         $('#labels-table').DataTable();
         $('#descriptions-table').DataTable();
         var associatedClassesTable = $('#classes-table').DataTable({
+            order: [[ 6, "desc" ]],
             ajax: urlAssociatedClasses,
             dataSrc: 'data',
             columns: [
@@ -522,7 +523,7 @@
                 });
             }
         });
-        $("#properties-status-select").val('Selected in profile');
+        $("#properties-status-select").val('Selected in profile').change(); //default filter on this column
         $('#additional-notes-table').DataTable();
         $('#namespaces-table').DataTable();
 
