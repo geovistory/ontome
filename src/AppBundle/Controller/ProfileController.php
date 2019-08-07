@@ -8,12 +8,16 @@
 
 namespace AppBundle\Controller;
 
+use AppBundle\Entity\Label;
 use AppBundle\Entity\OntoClass;
 use AppBundle\Entity\OntoNamespace;
 use AppBundle\Entity\Profile;
 use AppBundle\Entity\ProfileAssociation;
+use AppBundle\Entity\Project;
 use AppBundle\Entity\Property;
+use AppBundle\Entity\TextProperty;
 use AppBundle\Form\ProfileEditForm;
+use AppBundle\Form\ProfileQuickAddForm;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -64,6 +68,86 @@ class ProfileController  extends Controller
 
         return $this->render('profile/list.html.twig', [
             'profiles' => $profiles
+        ]);
+    }
+
+    /**
+     * @Route("profile/new/{project}", name="profile_new")
+     */
+    public function newAction(Request $request, Project $project)
+    {
+        $profile = new Profile();
+
+        $this->denyAccessUnlessGranted('edit', $project);
+
+
+        $em = $this->getDoctrine()->getManager();
+        $systemTypeDescription = $em->getRepository('AppBundle:SystemType')->find(16); //systemType 16 = description
+        $systemTypeAdditionalNote = $em->getRepository('AppBundle:SystemType')->find(12); //systemType 12 = additional note
+
+        $description = new TextProperty();
+        $description->setClass($profile);
+        $description->setSystemType($systemTypeDescription);
+        $description->addNamespace($project);
+        $description->setCreator($this->getUser());
+        $description->setModifier($this->getUser());
+        $description->setCreationTime(new \DateTime('now'));
+        $description->setModificationTime(new \DateTime('now'));
+
+        $profile->addTextProperty($description);
+
+        $label = new Label();
+        $label->setClass($profile);
+        $label->setIsStandardLabelForLanguage(true);
+        $label->setCreator($this->getUser());
+        $label->setModifier($this->getUser());
+        $label->setCreationTime(new \DateTime('now'));
+        $label->setModificationTime(new \DateTime('now'));
+
+        $profile->setIsOngoing(true);
+        $profile->setProjectOfBelonging($project);
+        $profile->addLabel($label);
+        $profile->setCreator($this->getUser());
+        $profile->setModifier($this->getUser());
+
+        $form = $this->createForm(ProfileQuickAddForm::class, $profile);
+
+        // only handles data on POST
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $profile = $form->getData();
+            $profile->setIsOngoing(true);
+            $profile->setProjectOfBelonging($project);
+            $profile->setCreator($this->getUser());
+            $profile->setModifier($this->getUser());
+            $profile->setCreationTime(new \DateTime('now'));
+            $profile->setModificationTime(new \DateTime('now'));
+
+            if($profile->getTextProperties()->containsKey(1)){
+                $profile->getTextProperties()[1]->setCreationTime(new \DateTime('now'));
+                $profile->getTextProperties()[1]->setModificationTime(new \DateTime('now'));
+                $profile->getTextProperties()[1]->setSystemType($systemTypeAdditionalNote);
+                $profile->getTextProperties()[1]->addNamespace($project);
+                $profile->getTextProperties()[1]->setClass($profile);
+            }
+
+
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($profile);
+            $em->flush();
+
+            return $this->redirectToRoute('profile_show', [
+                'id' => $profile->getId()
+            ]);
+
+        }
+
+        $em = $this->getDoctrine()->getManager();
+
+
+        return $this->render('profile/new.html.twig', [
+            'profile' => $profile,
+            'profileForm' => $form->createView()
         ]);
     }
 
