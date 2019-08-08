@@ -233,7 +233,30 @@
                 </table>
             </div>
             <div id="profiles" class="tab-pane fade">
-                <h3>Profiles</h3>
+                <h3>Profiles owned by this project</h3>
+                <table class="table table-striped" id="profile-table">
+                    <thead>
+                    <tr>
+                        <th>Profile</th>
+                        <th>Creation date</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for profile in project.ownedProfiles %}
+                        <tr>
+                            <td>
+                                <a href="{{ path('profile_show', {
+                                    'id': profile.id
+                                }) }}">
+                                    {{ profile.standardLabel }}
+                                </a>
+                            </td>
+                            <td>{{ profile.creationTime|date('Y-m-d') }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                <h3>Profiles used by this project</h3>
                 <table class="table table-striped" id="profile-table">
                     <thead>
                     <tr>
