@@ -501,11 +501,11 @@
                     </div>
                 {% endif %}
                 <h3>Parent properties
-                    {% set tooltip_property = "rdfs:subpropertyOf the property below" %}
+                    {% set tooltipProperty = "rdfs:subpropertyOf the property below" %}
                     {% if property.childPropertyAssociations|length > 1  %}
-                        {% set tooltip_property = "rdfs:subpropertyOf the properties listed below" %}
+                        {% set tooltipProperty = "rdfs:subpropertyOf the properties listed below" %}
                     {% endif %}
-                    <a data-toggle="tooltip" data-placement="right" title="{{ property }} {{ tooltip_property }}">
+                    <a data-toggle="tooltip" data-placement="right" title="{{ property }} {{ tooltipProperty }}">
                         <span class="fas fa-info-circle"></span>
                     </a>
                 </h3>

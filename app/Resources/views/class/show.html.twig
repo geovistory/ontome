@@ -414,11 +414,11 @@
                     </div>
                 {% endif %}
                 <h3>Parent classes
-                    {% set tooltip_class = "rdfs:subclassOf the class below" %}
+                    {% set tooltipClass = "rdfs:subclassOf the class below" %}
                     {% if class.childClassAssociations|length > 1  %}
-                        {% set tooltip_class = "rdfs:subclassOf the classes listed below" %}
+                        {% set tooltipClass = "rdfs:subclassOf the classes listed below" %}
                     {% endif %}
-                    <a data-toggle="tooltip" data-placement="right" title="{{ class }} {{ tooltip_class }}">
+                    <a data-toggle="tooltip" data-placement="right" title="{{ class }} {{ tooltipClass }}">
                         <span class="fas fa-info-circle"></span>
                     </a>
                 </h3>
