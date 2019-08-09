@@ -1,0 +1,102 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Add new profile{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.4/css/select2.min.css" rel="stylesheet" />
+{%  endblock %}
+
+{% block body %}
+
+    {% import _self as formMacros %}
+    {% macro printTextPropertyRow(textPropertyForm) %}
+        {{ form_errors(textPropertyForm) }}
+        {{ form_row(textPropertyForm.textProperty, {
+            'label': 'Scope note'
+        }) }}
+        {{ form_row(textPropertyForm.languageIsoCode, {
+            'label': 'Language'
+        }) }}
+        {{ form_row(textPropertyForm.creator) }}
+        {{ form_row(textPropertyForm.modifier) }}
+    {% endmacro %}
+
+    <div class="container">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="pull-right reset-div">
+                    <a href="{{ path('profile_new', {'project': app.request.get('project').id}) }}" class="btn btn-primary pull-right">Reset <span class="fa fa-undo"></span></a>
+                </div>
+                <h2>
+                    Add new profile in the {{ app.request.get('project') }} project
+                    <a href="{{ path('project_edit', {'id': app.request.get('project').id}) }}#profiles" class="pull-right btn btn-link">
+                        <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
+                    </a>
+                </h2>
+
+                {{ form_start(profileForm) }}
+                {{ form_errors(profileForm) }}
+                {{ form_row(profileForm.labels) }}
+
+
+                <div class="js-text-property-wrapper"
+                     data-prototype="{{ formMacros.printTextPropertyRow(profileForm.textProperties.vars.prototype)|e('html_attr') }}"
+                     data-index="{{ profileForm.textProperties|length }}"
+                >
+                    {% for textPropertyForm in profileForm.textProperties %}
+                        {{ formMacros.printTextPropertyRow(textPropertyForm) }}
+                    {% endfor %}
+                    <a href="#" class="js-additional-note-add">
+                        <span class="fa fa-plus-circle"></span>
+                        Add an additional note
+                    </a>
+
+                </div>
+
+                <button type="submit" class="btn btn-primary" formnovalidate>Save</button>
+                {{ form_end(profileForm) }}
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.4/js/select2.min.js"></script>
+    <script>
+
+        $(document).ready(function() {
+            if($('[for=profile_quick_add_form_textProperties_1_textProperty]').length) {
+                //we hide the button in order to prevent the add of more than 2 text properties
+                $('.js-additional-note-add').hide();
+                $('[for=profile_quick_add_form_textProperties_1_textProperty]').text('Additional note');
+            }
+            var $wrapper = $('.js-text-property-wrapper');
+            $wrapper.on('click', '.js-additional-note-add', function(e) {
+                e.preventDefault();
+
+                // Get the data-prototype explained earlier
+                var prototype = $wrapper.data('prototype');
+
+                // get the new index
+                var index = $wrapper.data('index');
+
+                // Replace '__name__' in the prototype's HTML to
+                // instead be a number based on how many items we have
+                var newForm = prototype.replace(/__name__/g, index);
+
+                // increase the index with one for the next item
+                $wrapper.data('index', index + 1);
+
+                // Display the form in the page before the "new" link
+                $(this).before(newForm);
+                $('#profile_quick_add_form_textProperties_1_creator').val($('#profile_quick_add_form_textProperties_0_creator').val());
+                $('#profile_quick_add_form_textProperties_1_modifier').val($('#profile_quick_add_form_textProperties_0_creator').val());
+                $('.js-additional-note-add').hide();
+                $('[for=profile_quick_add_form_textProperties_1_textProperty]').text('Additional note');
+            });
+        } );
+    </script>
+{% endblock %}

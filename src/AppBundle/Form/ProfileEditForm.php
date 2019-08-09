@@ -56,7 +56,6 @@ class ProfileEditForm extends AbstractType
                 'format' => 'yyyy-MM-dd',
                 'html5' => false
             ])
-            ->add('parentProfile')
             ->add('creator', HiddenType::class)
             ->add('modifier', HiddenType::class);
         $builder->get('creator')
