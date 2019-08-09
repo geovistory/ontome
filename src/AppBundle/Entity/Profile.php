@@ -419,7 +419,7 @@ class Profile
         }
         $this->textProperties[] = $textProperty;
         // needed to update the owning side of the relationship!
-        $textProperty->setProperty($this);
+        $textProperty->setProfile($this);
     }
 
     public function addLabel(Label $label)
@@ -429,7 +429,7 @@ class Profile
         }
         $this->labels[] = $label;
         // needed to update the owning side of the relationship!
-        $label->setProperty($this);
+        $label->setProfile($this);
     }
 
     public function addNamespace(OntoNamespace $namespace)

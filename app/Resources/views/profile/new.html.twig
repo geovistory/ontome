@@ -22,16 +22,16 @@
         {{ form_row(textPropertyForm.modifier) }}
     {% endmacro %}
 
-    <div profile="container">
-        <div profile="row">
-            <div profile="col-xs-12">
-                <div profile="pull-right reset-div">
-                    <a href="{{ path('profile_new', {'project': app.request.get('project').id}) }}" profile="btn btn-primary pull-right">Reset <span profile="fa fa-undo"></span></a>
+    <div class="container">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="pull-right reset-div">
+                    <a href="{{ path('profile_new', {'project': app.request.get('project').id}) }}" class="btn btn-primary pull-right">Reset <span class="fa fa-undo"></span></a>
                 </div>
                 <h2>
                     Add new profile in the {{ app.request.get('project') }} project
-                    <a href="{{ path('project_edit', {'id': app.request.get('project').id}) }}#profilees" profile="pull-right btn btn-link">
-                        <i profile="fas fa-arrow-left"></i><span>&nbsp;Back</span>
+                    <a href="{{ path('project_edit', {'id': app.request.get('project').id}) }}#profiles" class="pull-right btn btn-link">
+                        <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
                     </a>
                 </h2>
 
@@ -40,21 +40,21 @@
                 {{ form_row(profileForm.labels) }}
 
 
-                <div profile="js-text-property-wrapper"
+                <div class="js-text-property-wrapper"
                      data-prototype="{{ formMacros.printTextPropertyRow(profileForm.textProperties.vars.prototype)|e('html_attr') }}"
                      data-index="{{ profileForm.textProperties|length }}"
                 >
                     {% for textPropertyForm in profileForm.textProperties %}
                         {{ formMacros.printTextPropertyRow(textPropertyForm) }}
                     {% endfor %}
-                    <a href="#" profile="js-example-add">
-                        <span profile="fa fa-plus-circle"></span>
-                        Add an example
+                    <a href="#" class="js-additional-note-add">
+                        <span class="fa fa-plus-circle"></span>
+                        Add an additional note
                     </a>
 
                 </div>
 
-                <button type="submit" profile="btn btn-primary" formnovalidate>Save</button>
+                <button type="submit" class="btn btn-primary" formnovalidate>Save</button>
                 {{ form_end(profileForm) }}
             </div>
         </div>
@@ -68,29 +68,13 @@
     <script>
 
         $(document).ready(function() {
-            $('#profile_form_parentClass').select2({
-                sorter: function(data) {
-                    /* Sort data using lowercase comparison */
-                    return data.sort(function (a, b) {
-                        a = a.text.toLowerCase();
-                        b = b.text.toLowerCase();
-                        if (a > b) {
-                            return 1;
-                        } else if (a < b) {
-                            return -1;
-                        }
-                        return 0;
-                    });
-                }
-            });
-
             if($('[for=profile_quick_add_form_textProperties_1_textProperty]').length) {
                 //we hide the button in order to prevent the add of more than 2 text properties
-                $('.js-example-add').hide();
-                $('[for=profile_quick_add_form_textProperties_1_textProperty]').text('Example');
+                $('.js-additional-note-add').hide();
+                $('[for=profile_quick_add_form_textProperties_1_textProperty]').text('Additional note');
             }
             var $wrapper = $('.js-text-property-wrapper');
-            $wrapper.on('click', '.js-example-add', function(e) {
+            $wrapper.on('click', '.js-additional-note-add', function(e) {
                 e.preventDefault();
 
                 // Get the data-prototype explained earlier
@@ -110,8 +94,8 @@
                 $(this).before(newForm);
                 $('#profile_quick_add_form_textProperties_1_creator').val($('#profile_quick_add_form_textProperties_0_creator').val());
                 $('#profile_quick_add_form_textProperties_1_modifier').val($('#profile_quick_add_form_textProperties_0_creator').val());
-                $('.js-example-add').hide();
-                $('[for=profile_quick_add_form_textProperties_1_textProperty]').text('Example');
+                $('.js-additional-note-add').hide();
+                $('[for=profile_quick_add_form_textProperties_1_textProperty]').text('Additional note');
             });
         } );
     </script>

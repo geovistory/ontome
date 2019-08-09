@@ -216,7 +216,7 @@
             </div>
             <div id="profiles" class="tab-pane fade">
                 <h3>Profiles owned by this project</h3>
-                <table class="table table-striped" id="profile-table">
+                <table class="table table-striped" id="owned-profiles-table">
                     <thead>
                     <tr>
                         <th>Profile</th>
@@ -244,7 +244,7 @@
                         <span class="fas fa-info-circle"></span>
                     </a>
                 </h3>
-                <table class="table table-striped" id="profile-table">
+                <table class="table table-striped" id="associated-profiles-table">
                     <thead>
                     <tr>
                         <th>Profile</th>
@@ -284,8 +284,8 @@
             $('#parent-projects-table').DataTable();
             $('#child-projects-table').DataTable();
             $('#managed-namespaces-table').DataTable();
-            $('#profile-table').DataTable();
-
+            $('#owned-profiles-table').DataTable();
+            $('#associated-profiles-table').DataTable();
         } );
     </script>
 

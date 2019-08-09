@@ -86,9 +86,8 @@ class ProfileController  extends Controller
         $systemTypeAdditionalNote = $em->getRepository('AppBundle:SystemType')->find(12); //systemType 12 = additional note
 
         $description = new TextProperty();
-        $description->setClass($profile);
+        $description->setProfile($profile);
         $description->setSystemType($systemTypeDescription);
-        $description->addNamespace($project);
         $description->setCreator($this->getUser());
         $description->setModifier($this->getUser());
         $description->setCreationTime(new \DateTime('now'));
@@ -97,7 +96,7 @@ class ProfileController  extends Controller
         $profile->addTextProperty($description);
 
         $label = new Label();
-        $label->setClass($profile);
+        $label->setProfile($profile);
         $label->setIsStandardLabelForLanguage(true);
         $label->setCreator($this->getUser());
         $label->setModifier($this->getUser());
@@ -127,7 +126,6 @@ class ProfileController  extends Controller
                 $profile->getTextProperties()[1]->setCreationTime(new \DateTime('now'));
                 $profile->getTextProperties()[1]->setModificationTime(new \DateTime('now'));
                 $profile->getTextProperties()[1]->setSystemType($systemTypeAdditionalNote);
-                $profile->getTextProperties()[1]->addNamespace($project);
                 $profile->getTextProperties()[1]->setClass($profile);
             }
 
