@@ -65,7 +65,7 @@ class ProfileVoter extends Voter
         }
         else {
             foreach ($user->getUserProjectAssociations()->getIterator() as $i => $userProjectAssociation) {
-                if ($userProjectAssociation->getProject()->getProfiles()->contains($profile) && $userProjectAssociation->getPermission() <= 2 ) { //permission <= means that the user is a project admin or manager
+                if ($userProjectAssociation->getProject()->getOwnedProfiles()->contains($profile) && $userProjectAssociation->getPermission() <= 2 ) { //permission <= means that the user is a project admin or manager
                     $canEdit = true;
                 }
             }
