@@ -121,6 +121,7 @@
                                 {% endfor %}
                             </ul>
                             <h4>Additional namespaces</h4>
+                            <div id="additional-namespaces-list">
                             {% if additionalNamespaces|length == 0 %}
                                 <p class="text-muted"><em>No additional namespace added, please pick one below.</em></p>
                             {% endif %}
@@ -136,6 +137,7 @@
                                     {% endfor %}
                                 </ul>
                             {% endfor %}
+                            </div>
                             <h4>Pick an additional namespace</h4>
                             <select id="select-root-namespace">
                             {% for rootNamespace in rootNamespaces %}
@@ -261,12 +263,11 @@
                 $(this).find(":first-child").remove();
             });
 
-            {#
             $(document).on("click", ".pickable-namespace", function() {
                 var selectedValue = $(this).attr("id");
-                var profileID = {{ profile.id }}
-                var url = '{{ path("profile_namespace_association", {'profile' : 'profileID','namespace': 'selectedValue'}) }}';
-                url = url.replace("profileID", profileID);
+                var userCurrentActiveProjectAssociationID = {{ userCurrentActiveProjectAssociation.id }}
+                var url = '{{ path("user_project_namespace_association", {'userProjectAssociation' : 'userProjectID','namespace': 'selectedValue'}) }}';
+                url = url.replace("userProjectID", userCurrentActiveProjectAssociationID);
                 url = url.replace("selectedValue", selectedValue);
                 $.ajax({
                     url: url,
@@ -281,23 +282,24 @@
                         if(data.status == 'Success'){
                             selectableClassesTable.ajax.reload();
                         }
+                        console.log("OK OK OK 3");
                     }
                 });
                 var urlNamespace = '{{ path('namespace_show', {'id' : 'selectedValue'}) }}';
                 urlNamespace = urlNamespace.replace('selectedValue', selectedValue);
                 $("#empty-namespace-list-message").remove();
                 $("#select-root-namespace option:selected").remove();
-                $("#used-namespaces-list").append($('<div class="row"><a href="#namespaces" class="remove-namespace" data-id="'+selectedValue+'"><span class="glyphicon glyphicon-remove text-danger" aria-hidden="true"></span></a><a href="'+urlNamespace+'">'+$(this).text()+'</a><span class="loading-icon2" data-id="'+selectedValue+'">&nbsp;<span class="fas fa-spinner fa-spin"></span></span></div>'));
+                $("#additional-namespaces-list").append($('<a href="#namespaces" class="remove-namespace" data-id="'+selectedValue+'"><span class="glyphicon glyphicon-remove text-danger" aria-hidden="true"></span></a><a href="'+urlNamespace+'">'+$(this).text()+'</a><span class="loading-icon2" data-id="'+selectedValue+'">&nbsp;<span class="fas fa-spinner fa-spin"></span></span>'));
                 $(".loading-icon2[data-id='"+selectedValue+"']").hide(0);
                 $("#chosable-namespaces-list").empty();
             });
 
             $(document).on("click", ".remove-namespace", function() {
                 var selectedValue = $(this).data("id");
-                var profileID = {{ profile.id }}
+                var userCurrentActiveProjectAssociationID = {{ userCurrentActiveProjectAssociation.id }}
                     $(".loading-icon2[data-id='"+selectedValue+"']").show(0);
-                var url = '{{ path("profile_namespace_disassociation", {'profile' : 'profileID','namespace': 'selectedValue'}) }}';
-                url = url.replace("profileID", profileID);
+                var url = '{{ path("user_project_namespace_disassociation", {'userProjectAssociation' : 'userProjectID','namespace': 'selectedValue'}) }}';
+                url = url.replace("userProjectID", userCurrentActiveProjectAssociationID);
                 url = url.replace("selectedValue", selectedValue);
                 $.ajax({
                     url: url,
@@ -313,7 +315,7 @@
                     }
                 });
 
-            });#}
+            });
         } );
     </script>
 {% endblock %}

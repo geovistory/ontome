@@ -9,6 +9,7 @@
 namespace AppBundle\Controller;
 
 
+use AppBundle\Entity\OntoNamespace;
 use AppBundle\Entity\Project;
 use AppBundle\Entity\User;
 use AppBundle\Entity\UserProjectAssociation;
@@ -20,8 +21,10 @@ use AppBundle\Form\UserResetPasswordForm;
 use AppBundle\Form\UserSelfEditForm;
 use AppBundle\Security\LoginFormAuthenticator;
 use Doctrine\Common\Collections\ArrayCollection;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -344,6 +347,7 @@ class UserController extends Controller
 
         return $this->render('user/show.html.twig', array(
             'userProjects' => $userProjects,
+            'userCurrentActiveProjectAssociation' => $userCurrentActiveProjectAssociation,
             'defaultNamespace' => $defaultNamespace,
             'additionalNamespaces' => $additionalNamespaces,
             'activeNamespaces' => $activeNamespaces,
@@ -413,6 +417,65 @@ class UserController extends Controller
             'user' => $user
         ]);
 
+
+    }
+
+    /**
+     * @Route("/user/{userProjectAssociation}/namespace/{namespace}/add", name="user_project_namespace_association")
+     * @Method({ "POST"})
+     * @param OntoNamespace  $namespace    The namespace to be associated with an userProjectAssociation
+     * @param UserProjectAssociation  $userProjectAssociation    The userProjectAssociation to be associated with a namespace
+     * @throws \Exception in case of unsuccessful association
+     * @return JsonResponse a Json formatted namespaces list
+     */
+    public function newUserProjectNamespaceAssociationAction(OntoNamespace $namespace, UserProjectAssociation $userProjectAssociation, Request $request)
+    {
+        //$this->denyAccessUnlessGranted('edit', $userProjectAssociation);
+
+        if($namespace->getIsTopLevelNamespace()) {
+            $status = 'Error';
+            $message = 'This namespace is not valid';
+        }
+        else if ($userProjectAssociation->getNamespaces()->contains($namespace)) {
+            $status = 'Error';
+            $message = 'This namespace is already used';
+        }
+        else {
+            $userProjectAssociation->addNamespace($namespace);
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($userProjectAssociation);
+            $em->flush();
+            $status = 'Success';
+            $message = 'Namespace successfully associated';
+        }
+
+
+        $response = array(
+            'status' => $status,
+            'message' => $message
+        );
+
+        return new JsonResponse($response);
+
+    }
+
+    /**
+     * @Route("/user/{userProjectAssociation}/namespace/{namespace}/delete", name="user_project_namespace_disassociation")
+     * @Method({ "DELETE"})
+     * @param OntoNamespace  $namespace    The namespace to be disassociated from a userProjectAssociation
+     * @param UserProjectAssociation  $userProjectAssociation    The userProjectAssociation to be disassociated from a namespace
+     * @return JsonResponse a Json 204 HTTP response
+     */
+    public function deleteUserProjectNamespaceAssociationAction(OntoNamespace $namespace, UserProjectAssociation $userProjectAssociation, Request $request)
+    {
+        $this->denyAccessUnlessGranted('edit', $userProjectAssociation);
+
+        $userProjectAssociation->removeNamespace($namespace);
+        $em = $this->getDoctrine()->getManager();
+        $em->persist($userProjectAssociation);
+        $em->flush();
+
+        return new JsonResponse(null, 204);
 
     }
 

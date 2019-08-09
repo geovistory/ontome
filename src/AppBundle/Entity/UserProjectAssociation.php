@@ -196,6 +196,14 @@ class UserProjectAssociation
     }
 
     /**
+     * @return mixed
+     */
+    public function getEntityUserProjectAssociations()
+    {
+        return $this->entityUserProjectAssociations;
+    }
+
+    /**
      * @param User $user
      */
     public function setUser($user)
@@ -273,6 +281,14 @@ class UserProjectAssociation
     public function setModificationTime($modificationTime)
     {
         $this->modificationTime = $modificationTime;
+    }
+
+    /**
+     * @param mixed $entityUserProjectAssociations
+     */
+    public function setEntityUserProjectAssociations($entityUserProjectAssociations)
+    {
+        $this->entityUserProjectAssociations = $entityUserProjectAssociations;
     }
 
 
