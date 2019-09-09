@@ -52,6 +52,14 @@
                        role="button">
                         <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
                     </a>
+                {% elseif textProperty.namespace is not null %}
+                    <a href="{{ path('namespace_edit', {
+                        id: textProperty.namespace.id
+                    }) }}"
+                       class="pull-right btn btn-link"
+                       role="button">
+                        <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
+                    </a>
                 {% elseif textProperty.entityAssociation is not null and app.request.attributes.get('_route') == 'text_property_inverse_new' %}
                     <a href="{{ path('entity_association_inverse_edit', {
                         id: textProperty.entityAssociation.id
@@ -119,6 +127,14 @@
                 {% elseif textProperty.profile is not null %}
                     <a href="{{ path('profile_edit', {
                         id: textProperty.profile.id
+                    }) }}#identification"
+                       class="btn btn-default"
+                       role="button">
+                        Back <i class="fas fa-arrow-left"></i>
+                    </a>
+                {% elseif textProperty.namespace is not null %}
+                    <a href="{{ path('namespace_edit', {
+                        id: textProperty.namespace.id
                     }) }}#identification"
                        class="btn btn-default"
                        role="button">

@@ -76,6 +76,11 @@ class TextPropertyController extends Controller
             $redirectToRoute = 'profile_edit';
             $redirectToRouteFragment = 'identification';
         }
+        else if(!is_null($textProperty->getNamespace())){
+            $object = $textProperty->getNamespace();
+            $redirectToRoute = 'namespace_edit';
+            $redirectToRouteFragment = 'identification';
+        }
         else throw $this->createNotFoundException('The related object for the text property  n° '.$textProperty->getId().' does not exist. Please contact an administrator.');
 
         if(!is_null($textProperty->getClassAssociation())){
@@ -188,6 +193,16 @@ class TextPropertyController extends Controller
             $redirectToRoute = 'profile_edit';
             $redirectToRouteFragment = 'identification';
         }
+        else if($object === 'namespace') {
+            $associatedEntity = $em->getRepository('AppBundle:OntoNamespace')->find($objectId);
+            if (!$associatedEntity) {
+                throw $this->createNotFoundException('The namespace n° '.$objectId.' does not exist');
+            }
+            $textProperty->setNamespace($associatedEntity);
+            $associatedObject = $associatedEntity;
+            $redirectToRoute = 'namespace_edit';
+            $redirectToRouteFragment = 'identification';
+        }
         else if($object === 'entity-association') {
             $associatedEntity = $em->getRepository('AppBundle:EntityAssociation')->find($objectId);
             if (!$associatedEntity) {
@@ -227,7 +242,7 @@ class TextPropertyController extends Controller
         $textProperty->setSystemType($systemType);
 
         //ongoingNamespace associated to the textProperty for any kind of object, except Project or Profile
-        if($object !== 'project' && $object !== 'profile') {
+        if($object !== 'project' && $object !== 'profile' && $object !== 'namespace') {
             $textProperty->addNamespace($associatedObject->getOngoingNamespace());
         }
 
@@ -246,7 +261,7 @@ class TextPropertyController extends Controller
             $textProperty->setSystemType($systemType);
 
             //ongoingNamespace associated to the textProperty for any kind of object, except Project or Profile
-            if($object !== 'project' && $object !== 'profile') {
+            if($object !== 'project' && $object !== 'profile' && $object !== 'namespace') {
                 $textProperty->addNamespace($associatedObject->getOngoingNamespace());
             }
 
