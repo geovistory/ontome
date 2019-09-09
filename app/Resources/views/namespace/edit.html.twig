@@ -50,6 +50,12 @@
                 </div>
             </div>
             <div id="definition" class="tab-pane fade">
+                <div class="pull-right add-div">
+                    <a href="{{ path('text_property_new', {'type': 'definition', 'object': 'namespace', 'objectId': namespace.id })}}"
+                       class="btn btn-primary pull-right">
+                        Add <span class="fa fa-plus-circle"></span>
+                    </a>
+                </div>
                 <h3>Description</h3>
                 <table class="table table-striped" id="descriptions-table">
                     <thead>
@@ -57,7 +63,8 @@
                         <th>Show</th>
                         <th>Description</th>
                         <th>Language</th>
-                        <th>Namespace</th>
+                        <th>Edit</th>
+                        <th>Comments</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -69,11 +76,31 @@
                                 <span>{{ textProperty.textProperty|striptags|raw }}</span>
                             </td>
                             <td>{{ textProperty.languageIsoCode}}</td>
-                            <td>WIP</td>
+                            <td>
+                                <a href="{{ path('text_property_edit', {
+                                    'id': textProperty.id
+                                }) }}"
+                                   class="btn btn-xs btn-success">
+                                    <span class="fa fa-edit"></span>
+                                </a>
+                            </td>
+                            <td>
+                                <a class="btn" href="{{ path('text_property_edit', {
+                                    'id': textProperty.id
+                                }) }}#comments">
+                                    <span class="badge {% if textProperty.comments|length > 0  %}progress-bar-danger {% endif %}">{{ textProperty.comments|length }}</span>
+                                </a>
+                            </td>
                         </tr>
                     {% endfor %}
                     </tbody>
                 </table>
+                <div class="pull-right add-div">
+                    <a href="{{ path('text_property_new', {'type': 'additional-note', 'object': 'namespace', 'objectId': namespace.id })}}"
+                       class="btn btn-primary pull-right">
+                        Add <span class="fa fa-plus-circle"></span>
+                    </a>
+                </div>
                 <h3>Additional notes</h3>
                 <table class="table table-striped" id="additional-notes-table">
                     <thead>
@@ -81,7 +108,8 @@
                         <th>Show</th>
                         <th>Notes</th>
                         <th>Language</th>
-                        <th>Namespace</th>
+                        <th>Edit</th>
+                        <th>Comment</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -93,7 +121,21 @@
                                 <span>{{ textProperty.textProperty|striptags|raw }}</span>
                             </td>
                             <td>{{ textProperty.languageIsoCode}}</td>
-                            <td>WIP</td>
+                            <td>
+                                <a href="{{ path('text_property_edit', {
+                                    'id': textProperty.id
+                                }) }}"
+                                   class="btn btn-xs btn-success">
+                                    <span class="fa fa-edit"></span>
+                                </a>
+                            </td>
+                            <td>
+                                <a class="btn" href="{{ path('text_property_edit', {
+                                    'id': textProperty.id
+                                }) }}#comments">
+                                    <span class="badge {% if textProperty.comments|length > 0  %}progress-bar-danger {% endif %}">{{ textProperty.comments|length }}</span>
+                                </a>
+                            </td>
                         </tr>
                     {% endfor %}
                     </tbody>
@@ -134,6 +176,12 @@
                         <p>End date: {{ namespace.endDate|date('Y-m-d') }}</p>
                     {% endif %}
                 {% endif %}
+                <div class="pull-right add-div">
+                    <a href="{{ path('label_new', {'object': 'namespace', 'objectId': namespace.id })}}"
+                       class="btn btn-primary pull-right">
+                        Add <span class="fa fa-plus-circle"></span>
+                    </a>
+                </div>
                 <h3>Labels</h3>
                 <table class="table table-striped" id="labels-table">
                     <thead>
@@ -141,6 +189,8 @@
                         <th>Label</th>
                         <th>Language</th>
                         <th>Last updated</th>
+                        <th>Edit</th>
+                        <th>Comments</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -155,6 +205,21 @@
                             </td>
                             <td>{{ label.languageIsoCode}}</td>
                             <td>{{ label.modificationTime|date('Y-m-d') }}</td>
+                            <td>
+                                <a href="{{ path('label_edit', {
+                                    'id': label.id
+                                }) }}"
+                                   class="btn btn-xs btn-success">
+                                    <span class="fa fa-edit"></span>
+                                </a>
+                            </td>
+                            <td>
+                                <a class="btn" href="{{ path('label_edit', {
+                                    'id': label.id
+                                }) }}#comments">
+                                    <span class="badge {% if label.comments|length > 0  %}progress-bar-danger {% endif %}">{{ label.comments|length }}</span>
+                                </a>
+                            </td>
                         </tr>
                     {% endfor %}
                     </tbody>

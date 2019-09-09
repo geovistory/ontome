@@ -52,6 +52,11 @@ class LabelController  extends Controller
             $redirectToRoute = 'profile_edit';
             $redirectToRouteFragment = 'identification';
         }
+        else if(!is_null($label->getNamespace())){
+            $object = $label->getNamespace();
+            $redirectToRoute = 'namespace_edit';
+            $redirectToRouteFragment = 'identification';
+        }
         else throw $this->createNotFoundException('The related object for the label n° '.$label->getId().' does not exist. Please contact an administrator.');
 
         $this->denyAccessUnlessGranted('edit', $object);
@@ -122,12 +127,22 @@ class LabelController  extends Controller
             $redirectToRoute = 'profile_edit';
             $redirectToRouteFragment = 'identification';
         }
+        else if($object === 'namespace') {
+            $associatedEntity = $em->getRepository('AppBundle:OntoNamespace')->find($objectId);
+            if (!$associatedEntity) {
+                throw $this->createNotFoundException('The namepsace n° '.$objectId.' does not exist');
+            }
+            $label->setNamespace($associatedEntity);
+            $associatedObject = $associatedEntity;
+            $redirectToRoute = 'namespace_edit';
+            $redirectToRouteFragment = 'identification';
+        }
         else throw $this->createNotFoundException('The requested object "'.$object.'" does not exist!');
 
         $this->denyAccessUnlessGranted('edit', $associatedObject);
 
         //ongoingNamespace associated to the label for any kind of object, except Project or Profile
-        if($object !== 'project' && $object !== 'profile') {
+        if($object !== 'project' && $object !== 'profile'  && $object !== 'namespace') {
             $label->addNamespace($associatedObject->getOngoingNamespace());
         }
 
@@ -145,7 +160,7 @@ class LabelController  extends Controller
             $label = $form->getData();
 
             //ongoingNamespace associated to the label for any kind of object, except Project or Profile
-            if($object !== 'project' && $object !== 'profile') {
+            if($object !== 'project' && $object !== 'profile' && $object !== 'namespace') {
                 $label->addNamespace($associatedObject->getOngoingNamespace());
             }
 

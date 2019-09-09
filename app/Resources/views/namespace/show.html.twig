@@ -7,7 +7,7 @@
     <div class="container">
         <h2 class="class-name">
             {{ namespace }}
-            {% if is_granted('edit_manager', namespace) %}
+            {% if is_granted('edit', namespace) %}
                 <a href="{{ path('namespace_edit', {
                     id: namespace.id
                 }) }}" class="pull-right btn btn-success btn-edit">
