@@ -334,7 +334,7 @@
                 initComplete: function(){
                     this.api().columns([6]).every(function(){
                         var column = this;
-                        var select = $('<select><option value=""></option></select>')
+                        var select = $('<select id="properties-status-select"><option value=""></option></select>')
                             .appendTo($(column.header()))
                             .on('change', function(){
                                 var val = $.fn.dataTable.util.escapeRegex(
@@ -356,6 +356,10 @@
                     });
                 }
             });
+            var existsSelectedInProfile = $("#properties-status-select option[value='Selected in profile']").length !== 0; //détermine si cette valeur est dans le select
+            if (existsSelectedInProfile) {
+                $("#properties-status-select").val('Selected in profile').change(); //default filter on this column
+            }
             $('#additional-notes-table').DataTable();
 
 
