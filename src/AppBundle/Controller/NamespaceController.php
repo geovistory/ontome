@@ -61,7 +61,7 @@ class NamespaceController  extends Controller
             throw $this->createNotFoundException('The namespace n° '.$namespace->getId().' does not exist. Please contact an administrator.');
         }
 
-        $this->denyAccessUnlessGranted('edit_manager', $namespace);
+        $this->denyAccessUnlessGranted('edit', $namespace);
 
         $namespace->setModifier($this->getUser());
 

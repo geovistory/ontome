@@ -134,6 +134,12 @@
                         <p>End date: {{ namespace.endDate|date('Y-m-d') }}</p>
                     {% endif %}
                 {% endif %}
+                <div class="pull-right add-div">
+                    <a href="{{ path('label_new', {'object': 'namespace', 'objectId': namespace.id })}}"
+                       class="btn btn-primary pull-right">
+                        Add <span class="fa fa-plus-circle"></span>
+                    </a>
+                </div>
                 <h3>Labels</h3>
                 <table class="table table-striped" id="labels-table">
                     <thead>
@@ -141,6 +147,7 @@
                         <th>Label</th>
                         <th>Language</th>
                         <th>Last updated</th>
+                        <th>Edit</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -155,6 +162,14 @@
                             </td>
                             <td>{{ label.languageIsoCode}}</td>
                             <td>{{ label.modificationTime|date('Y-m-d') }}</td>
+                            <td>
+                                <a href="{{ path('label_edit', {
+                                    'id': label.id
+                                }) }}"
+                                   class="btn btn-xs btn-success">
+                                    <span class="fa fa-edit"></span>
+                                </a>
+                            </td>
                         </tr>
                     {% endfor %}
                     </tbody>
