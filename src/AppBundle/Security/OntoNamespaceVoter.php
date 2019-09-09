@@ -66,7 +66,7 @@ class OntoNamespaceVoter extends Voter
             if(!$namespace->getisOngoing()) {
                 return false;
             }
-            else if($userProjectAssociation->getProject() === $namespace->getProjectForTopLevelNamespace() && $userProjectAssociation->getPermission() === 1){
+            else if($userProjectAssociation->getProject() === $namespace->getProjectForTopLevelNamespace() && $userProjectAssociation->getPermission() <= 2){
                 return true;
             }
         }
