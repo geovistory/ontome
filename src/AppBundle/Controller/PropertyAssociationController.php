@@ -72,7 +72,8 @@ class PropertyAssociationController extends Controller
             $em->flush();
 
             return $this->redirectToRoute('property_show', [
-                'id' => $propertyAssociation->getChildProperty()->getId()
+                'id' => $propertyAssociation->getChildProperty()->getId(),
+                '_fragment' => 'property-hierarchy'
             ]);
 
         }
