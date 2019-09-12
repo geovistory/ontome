@@ -72,7 +72,8 @@ class ClassAssociationController extends Controller
             $em->flush();
 
             return $this->redirectToRoute('class_show', [
-                'id' => $classAssociation->getChildClass()->getId()
+                'id' => $classAssociation->getChildClass()->getId(),
+                '_fragment' => 'class-hierarchy'
             ]);
 
         }
