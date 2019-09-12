@@ -126,16 +126,18 @@
                                 <p class="text-muted"><em>No additional namespace added, please pick one below.</em></p>
                             {% endif %}
                             {% for additionalNamespace in additionalNamespaces if additionalNamespace != defaultNamespace %}
-                                <a href="#"><span class="glyphicon glyphicon-remove text-danger" aria-hidden="true"></span></a>
-                                <a href="{{ path('namespace_show', {'id': additionalNamespace.id}) }}">{{ additionalNamespace.standardLabel }}</a>
-                                {% if additionalNamespace.referencedNamespaceAssociations|length > 0 %}
-                                    <div class="small"><strong><em>Referenced :</em></strong></div>
-                                {% endif %}
-                                <ul>
-                                    {% for referencedNamespaceAssociation in additionalNamespace.referencedNamespaceAssociations if referencedNamespaceAssociation.namespace is not null %}
-                                        <li class="list-unstyled"><em>{{ referencedNamespaceAssociation.namespace.standardLabel }}</em></li>
-                                    {% endfor %}
-                                </ul>
+                                <div class="row" style="margin-left:0px;">
+                                    <a href="#" class="remove-namespace" data-id="{{ additionalNamespace.id }}"><span class="glyphicon glyphicon-remove text-danger" aria-hidden="true"></span></a>
+                                    <a href="{{ path('namespace_show', {'id': additionalNamespace.id}) }}">{{ additionalNamespace.standardLabel }}</a>
+                                    {% if additionalNamespace.referencedNamespaceAssociations|length > 0 %}
+                                        <div class="small"><strong><em>Referenced :</em></strong></div>
+                                    {% endif %}
+                                    <ul>
+                                        {% for referencedNamespaceAssociation in additionalNamespace.referencedNamespaceAssociations if referencedNamespaceAssociation.namespace is not null %}
+                                            <li class="list-unstyled"><em>{{ referencedNamespaceAssociation.namespace.standardLabel }}</em></li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
                             {% endfor %}
                             </div>
                             <h4>Pick an additional namespace</h4>
@@ -241,7 +243,6 @@
                     dataType: 'json',
                     success:function(data){
                         $('#loading-icon').hide(0);
-
                         // handling the response data from the controller
                         if(data.status == 'Error'){
                             console.log("[API] ERROR: "+data.message);
@@ -265,7 +266,7 @@
 
             $(document).on("click", ".pickable-namespace", function() {
                 var selectedValue = $(this).attr("id");
-                var userCurrentActiveProjectAssociationID = {{ userCurrentActiveProjectAssociation.id }}
+                var userCurrentActiveProjectAssociationID = {{ userCurrentActiveProjectAssociation.id }};
                 var url = '{{ path("user_project_namespace_association", {'userProjectAssociation' : 'userProjectID','namespace': 'selectedValue'}) }}';
                 url = url.replace("userProjectID", userCurrentActiveProjectAssociationID);
                 url = url.replace("selectedValue", selectedValue);
@@ -274,22 +275,22 @@
                     type: 'POST',
                     dataType: 'json',
                     success:function(data){
-
+                        console.log("OK OK OK");
                         // handling the response data from the controller
                         if(data.status == 'Error'){
                             console.log("[API] ERROR: "+data.message);
                         }
                         if(data.status == 'Success'){
-                            selectableClassesTable.ajax.reload();
+
                         }
-                        console.log("OK OK OK 3");
                     }
                 });
+
                 var urlNamespace = '{{ path('namespace_show', {'id' : 'selectedValue'}) }}';
                 urlNamespace = urlNamespace.replace('selectedValue', selectedValue);
                 $("#empty-namespace-list-message").remove();
                 $("#select-root-namespace option:selected").remove();
-                $("#additional-namespaces-list").append($('<a href="#namespaces" class="remove-namespace" data-id="'+selectedValue+'"><span class="glyphicon glyphicon-remove text-danger" aria-hidden="true"></span></a><a href="'+urlNamespace+'">'+$(this).text()+'</a><span class="loading-icon2" data-id="'+selectedValue+'">&nbsp;<span class="fas fa-spinner fa-spin"></span></span>'));
+                $("#additional-namespaces-list").append($('<div class="row" style="margin-left:0px;"><a href="#" class="remove-namespace" data-id="'+selectedValue+'"><span class="glyphicon glyphicon-remove text-danger" aria-hidden="true"></span></a><a href="'+urlNamespace+'">'+$(this).text()+'</a><span class="loading-icon2" data-id="'+selectedValue+'">&nbsp;<span class="fas fa-spinner fa-spin"></span></span></div>'));
                 $(".loading-icon2[data-id='"+selectedValue+"']").hide(0);
                 $("#chosable-namespaces-list").empty();
             });
@@ -306,7 +307,6 @@
                     type: 'DELETE',
                     dataType: 'json',
                     success:function(data){
-                        selectableClassesTable.ajax.reload();
                     },
                     statusCode: {
                         204: function () {

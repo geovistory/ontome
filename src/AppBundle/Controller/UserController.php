@@ -9,6 +9,7 @@
 namespace AppBundle\Controller;
 
 
+use AppBundle\Entity\EntityUserProjectAssociation;
 use AppBundle\Entity\OntoNamespace;
 use AppBundle\Entity\Project;
 use AppBundle\Entity\User;
@@ -432,23 +433,76 @@ class UserController extends Controller
     {
         //$this->denyAccessUnlessGranted('edit', $userProjectAssociation);
 
+        // 1 Vérifier que le namespace n'est pas top level
+        // 2 Vérifier qu'une association namespace - userproject identique n'existe pas
+            // Si oui : remettre le system type à 25
+            // Si non : créer l'association
+
+        $em = $this->getDoctrine()->getManager();
+
+        $eupa = null;
         if($namespace->getIsTopLevelNamespace()) {
             $status = 'Error';
             $message = 'This namespace is not valid';
         }
-        else if ($userProjectAssociation->getNamespaces()->contains($namespace)) {
+        else {
+            foreach($userProjectAssociation->getEntityUserProjectAssociations() as $eupa) {
+                if($eupa->getNamespace() == $namespace) {
+                    // Il existe déjà une association mais est-ce Selected ?
+                    if($eupa->getSystemType()->getId() == 25) {
+                        // On ne fait rien : l'association existe déjà et est selected.
+                        $status = 'Error';
+                        $message = 'This namespace is already used';
+                        break;
+                    }
+                    elseif ($eupa->getSystemType()->getId() == 26) {
+                        // L'association existe déjà, et l'utilisateur veut remettre à selected.
+                        $systemTypeSelected = $em->getRepository('AppBundle:SystemType')->find(25); //systemType 25 = Selected namespace for user preference
+                        $eupa->setSystemType($systemTypeSelected);
+                        $status = 'Success';
+                        $message = 'Namespace successfully associated';
+                        $em->persist($eupa);
+                        $em->flush();
+                        break;
+                    }
+                }
+                $eupa = null;
+            }
+
+            if(is_null($eupa)) {
+                $eupa = new EntityUserProjectAssociation();
+                $systemTypeSelected = $em->getRepository('AppBundle:SystemType')->find(25); //systemType 25 = Selected namespace for user preference
+                $eupa->setNamespace($namespace);
+                $eupa->setUserProjectAssociation($userProjectAssociation);
+                $eupa->setSystemType($systemTypeSelected);
+                $eupa->setCreator($this->getUser());
+                $eupa->setModifier($this->getUser());
+                $eupa->setCreationTime(new \DateTime('now'));
+                $eupa->setModificationTime(new \DateTime('now'));
+                $em->persist($eupa);
+                $em->flush();
+                $status = 'Success';
+                $message = 'Namespace successfully associated';
+            }
+        }
+
+        /*
+        if($namespace->getIsTopLevelNamespace()) {
+            $status = 'Error';
+            $message = 'This namespace is not valid';
+        }
+        else if ($userProjectAssociation->getEntityUserProjectAssociations()) {
             $status = 'Error';
             $message = 'This namespace is already used';
         }
         else {
-            $userProjectAssociation->addNamespace($namespace);
+            $namespaceUserProjectAssociation->setNamespace($namespace);
             $em = $this->getDoctrine()->getManager();
             $em->persist($userProjectAssociation);
             $em->flush();
             $status = 'Success';
             $message = 'Namespace successfully associated';
-        }
-
+        }*/
 
         $response = array(
             'status' => $status,
@@ -456,7 +510,6 @@ class UserController extends Controller
         );
 
         return new JsonResponse($response);
-
     }
 
     /**
@@ -468,11 +521,36 @@ class UserController extends Controller
      */
     public function deleteUserProjectNamespaceAssociationAction(OntoNamespace $namespace, UserProjectAssociation $userProjectAssociation, Request $request)
     {
-        $this->denyAccessUnlessGranted('edit', $userProjectAssociation);
+        //$this->denyAccessUnlessGranted('edit', $userProjectAssociation);
 
-        $userProjectAssociation->removeNamespace($namespace);
         $em = $this->getDoctrine()->getManager();
-        $em->persist($userProjectAssociation);
+
+        $eupa = null;
+
+        foreach($userProjectAssociation->getEntityUserProjectAssociations() as $eupa) {
+            if($eupa->getNamespace() == $namespace) {
+                // Il existe déjà une association mais est-ce Selected ?
+                if($eupa->getSystemType()->getId() == 26) {
+                    // On ne fait rien : l'association existe et est déjà rejected.
+                    $status = 'Error';
+                    $message = 'This namespace is already rejected';
+                    break;
+                }
+                elseif ($eupa->getSystemType()->getId() == 25) {
+                    // L'association existe déjà, et l'utilisateur veut mettre à rejected
+                    $systemTypeSelected = $em->getRepository('AppBundle:SystemType')->find(26); //systemType 25 = Selected namespace for user preference
+                    $eupa->setSystemType($systemTypeSelected);
+                    $status = 'Success';
+                    $message = 'Namespace successfully associated';
+                    $em->persist($eupa);
+                    $em->flush();
+                    break;
+                }
+            }
+            $eupa = null;
+        }
+        if(!is_null($eupa))
+            $em->persist($eupa);
         $em->flush();
 
         return new JsonResponse(null, 204);

@@ -21,6 +21,7 @@ class EntityUserProjectAssociation
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(type="integer", name="pk_associates_entity_to_user_project")
+     * @ORM\SequenceGenerator(sequenceName="che.associates_eup_pk_associates_eup_seq", allocationSize=1, initialValue=1)
      */
     private $id;
 
