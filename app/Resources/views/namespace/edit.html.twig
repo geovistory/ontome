@@ -144,20 +144,25 @@
             <div id="identification" class="tab-pane fade">
                 <h3>Identification</h3>
                 <div class="object-identification-edit-form">
-                    {{ form_start(namespaceForm) }}
-                        {{ form_errors(namespaceForm) }}
-                        {{ form_row(namespaceForm.namespaceURI) }}
-                        {{ form_row(namespaceForm.originalNamespaceURI) }}
-                        <button type="submit" class="btn btn-primary" formnovalidate>Save <span class="far fa-save"></span></button>
-                        <a href="{{ path('namespace_show', {
-                            id: namespace.id,
-                            '_fragment': 'identification'
-                        }) }}"
-                           class="btn btn-default"
-                           role="button">
-                            Back <i class="fas fa-arrow-left"></i>
-                        </a>
-                    {{ form_end(namespaceForm) }}
+                    {% if is_granted('full_edit', namespace) %}
+                        {{ form_start(namespaceForm) }}
+                            {{ form_errors(namespaceForm) }}
+                            {{ form_row(namespaceForm.namespaceURI) }}
+                            {{ form_row(namespaceForm.originalNamespaceURI) }}
+                            <button type="submit" class="btn btn-primary" formnovalidate>Save <span class="far fa-save"></span></button>
+                            <a href="{{ path('namespace_show', {
+                                id: namespace.id,
+                                '_fragment': 'identification'
+                            }) }}"
+                               class="btn btn-default"
+                               role="button">
+                                Back <i class="fas fa-arrow-left"></i>
+                            </a>
+                        {{ form_end(namespaceForm) }}
+                    {% else %}
+                        <p>OntoME URI: {{ namespace.namespaceURI }}</p>
+                        <p>Original URI: {{ namespace.originalNamespaceUri|default('<i>No original URI yet.</i>')|raw }}</p>
+                    {% endif %}
                 </div>
                 {% if namespace.projectForTopLevelNamespace is not null %}
                 <p>
@@ -267,7 +272,7 @@
                 {% endif %}
             </div>
             <div id="classes" class="tab-pane fade">
-                {% if is_granted('edit', namespace) %}
+                {% if is_granted('full_edit', namespace) %}
                     <div class="pull-right add-div">
                         <a href="{{ path('class_new', {'namespace': namespace.id}) }}" class="btn btn-primary pull-right">Add <span class="fa fa-plus-circle"></span></a>
                     </div>

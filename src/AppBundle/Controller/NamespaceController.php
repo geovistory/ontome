@@ -56,8 +56,7 @@ class NamespaceController  extends Controller
      */
     public function editAction(OntoNamespace $namespace, Request $request)
     {
-        if(is_null($namespace))
-        {
+        if(is_null($namespace)) {
             throw $this->createNotFoundException('The namespace n° '.$namespace->getId().' does not exist. Please contact an administrator.');
         }
 
@@ -65,27 +64,35 @@ class NamespaceController  extends Controller
 
         $namespace->setModifier($this->getUser());
 
-        $form = $this->createForm(NamespaceForm::class, $namespace);
+        if($this->isGranted('full_edit', $namespace)) {
 
-        $em = $this->getDoctrine()->getManager();
+            $form = $this->createForm(NamespaceForm::class, $namespace);
 
-        $form->handleRequest($request);
-        if ($form->isValid()) {
-            $namespace->setModifier($this->getUser());
-            $em->persist($namespace);
-            $em->flush();
+            $em = $this->getDoctrine()->getManager();
 
-            $this->addFlash('success', 'Namespace Updated!');
+            $form->handleRequest($request);
+            if ($form->isValid()) {
+                $namespace->setModifier($this->getUser());
+                $em->persist($namespace);
+                $em->flush();
 
-            return $this->redirectToRoute('namespace_edit', [
-                'id' => $namespace->getId()
+                $this->addFlash('success', 'Namespace Updated!');
+
+                return $this->redirectToRoute('namespace_edit', [
+                    'id' => $namespace->getId()
+                ]);
+            }
+            return $this->render('namespace/edit.html.twig', [
+                'namespaceForm' => $form->createView(),
+                'namespace' => $namespace
             ]);
         }
-
-        return $this->render('namespace/edit.html.twig', [
-            'namespaceForm' => $form->createView(),
-            'namespace' => $namespace
-        ]);
+        else {
+            return $this->render('namespace/edit.html.twig', [
+                'namespaceForm' => null,
+                'namespace' => $namespace
+            ]);
+        }
     }
 
     /**

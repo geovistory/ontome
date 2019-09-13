@@ -302,7 +302,7 @@ class OntoNamespace
     /**
      * @return mixed
      */
-    public function getisOngoing()
+    public function getIsOngoing()
     {
         return $this->isOngoing;
     }
