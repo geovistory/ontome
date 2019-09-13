@@ -55,7 +55,7 @@
                 {% elseif textProperty.namespace is not null %}
                     <a href="{{ path('namespace_edit', {
                         id: textProperty.namespace.id
-                    }) }}"
+                    }) }}#definition"
                        class="pull-right btn btn-link"
                        role="button">
                         <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
@@ -135,7 +135,7 @@
                 {% elseif textProperty.namespace is not null %}
                     <a href="{{ path('namespace_edit', {
                         id: textProperty.namespace.id
-                    }) }}#identification"
+                    }) }}#definition"
                        class="btn btn-default"
                        role="button">
                         Back <i class="fas fa-arrow-left"></i>

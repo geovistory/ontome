@@ -16,12 +16,13 @@ use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 class OntoNamespaceVoter extends Voter
 {
     const EDIT = 'edit';
+    const FULLEDIT = 'full_edit';
     const EDITMANAGER = 'edit_manager';
 
     protected function supports($attribute, $subject)
     {
         // if the attribute isn't one we support, return false
-        if (!in_array($attribute, array(self::EDIT, self::EDITMANAGER))) {
+        if (!in_array($attribute, array(self::EDIT, self::FULLEDIT, self::EDITMANAGER))) {
             return false;
         }
 
@@ -48,6 +49,8 @@ class OntoNamespaceVoter extends Voter
         switch ($attribute) {
             case self::EDIT:
                 return $this->canEdit($namespace, $user);
+            case self::FULLEDIT:
+                return $this->canFullEdit($namespace, $user);
             case self::EDITMANAGER:
                 return $this->canEditManager($namespace, $user);
         }
@@ -60,13 +63,28 @@ class OntoNamespaceVoter extends Voter
      * @param User $user
      * @return bool TRUE if $user and $namespace have matching namespace (thanks to the $userProjectAssociation)
      */
-    private function canEdit(OntoNamespace $namespace, User $user)
+    private function canFullEdit(OntoNamespace $namespace, User $user)
     {
         foreach($user->getUserProjectAssociations()->getIterator() as $i => $userProjectAssociation) {
-            if(!$namespace->getisOngoing()) {
+            if(!$namespace->getIsOngoing()) {
                 return false;
             }
             else if($userProjectAssociation->getProject() === $namespace->getProjectForTopLevelNamespace() && $userProjectAssociation->getPermission() <= 2){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * @param OntoNamespace $namespace
+     * @param User $user
+     * @return bool TRUE if $user and $namespace have matching namespace (thanks to the $userProjectAssociation)
+     */
+    private function canEdit(OntoNamespace $namespace, User $user)
+    {
+        foreach($user->getUserProjectAssociations()->getIterator() as $i => $userProjectAssociation) {
+            if($userProjectAssociation->getProject() === $namespace->getProjectForTopLevelNamespace() && $userProjectAssociation->getPermission() <= 2){
                 return true;
             }
         }
@@ -81,7 +99,7 @@ class OntoNamespaceVoter extends Voter
     private function canEditManager(OntoNamespace $namespace, User $user)
     {
         foreach($user->getUserProjectAssociations()->getIterator() as $i => $userProjectAssociation) {
-            if(!$namespace->getisOngoing()) {
+            if(!$namespace->getIsOngoing()) {
                 return false;
             }
             else if($userProjectAssociation->getProject() === $namespace->getProjectForTopLevelNamespace() && $userProjectAssociation->getPermission() === 2){

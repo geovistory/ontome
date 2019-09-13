@@ -79,7 +79,7 @@ class TextPropertyController extends Controller
         else if(!is_null($textProperty->getNamespace())){
             $object = $textProperty->getNamespace();
             $redirectToRoute = 'namespace_edit';
-            $redirectToRouteFragment = 'identification';
+            $redirectToRouteFragment = 'definition';
         }
         else throw $this->createNotFoundException('The related object for the text property  n° '.$textProperty->getId().' does not exist. Please contact an administrator.');
 
@@ -201,7 +201,7 @@ class TextPropertyController extends Controller
             $textProperty->setNamespace($associatedEntity);
             $associatedObject = $associatedEntity;
             $redirectToRoute = 'namespace_edit';
-            $redirectToRouteFragment = 'identification';
+            $redirectToRouteFragment = 'definition';
         }
         else if($object === 'entity-association') {
             $associatedEntity = $em->getRepository('AppBundle:EntityAssociation')->find($objectId);
