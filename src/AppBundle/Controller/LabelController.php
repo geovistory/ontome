@@ -52,6 +52,11 @@ class LabelController  extends Controller
             $redirectToRoute = 'profile_edit';
             $redirectToRouteFragment = 'identification';
         }
+        else if(!is_null($label->getProject())){
+            $object = $label->getProject();
+            $redirectToRoute = 'project_edit';
+            $redirectToRouteFragment = 'identification';
+        }
         else if(!is_null($label->getNamespace())){
             $object = $label->getNamespace();
             $redirectToRoute = 'namespace_edit';
@@ -85,7 +90,6 @@ class LabelController  extends Controller
             'associatedObject' => $object,
             'label' => $label
         ]);
-
     }
 
     /**
@@ -125,6 +129,16 @@ class LabelController  extends Controller
             $label->setProfile($associatedEntity);
             $associatedObject = $associatedEntity;
             $redirectToRoute = 'profile_edit';
+            $redirectToRouteFragment = 'identification';
+        }
+        else if($object === 'project') {
+            $associatedEntity = $em->getRepository('AppBundle:Project')->find($objectId);
+            if (!$associatedEntity) {
+                throw $this->createNotFoundException('The project n° '.$objectId.' does not exist');
+            }
+            $label->setProject($associatedEntity);
+            $associatedObject = $associatedEntity;
+            $redirectToRoute = 'project_edit';
             $redirectToRouteFragment = 'identification';
         }
         else if($object === 'namespace') {
