@@ -134,6 +134,12 @@
                 {% if  project.endDate is not null %}
                     <p>End date: {{ project.endDate|date('Y-m-d') }}</p>
                 {% endif %}
+                <div class="pull-right add-div">
+                    <a href="{{ path('label_new', {'object': 'project', 'objectId': project.id })}}"
+                       class="btn btn-primary pull-right">
+                        Add <span class="fa fa-plus-circle"></span>
+                    </a>
+                </div>
                 <h3>Labels</h3>
                 <table class="table table-striped" id="labels-table">
                     <thead>
@@ -141,18 +147,35 @@
                         <th>Label</th>
                         <th>Language</th>
                         <th>Last updated</th>
+                        <th>Edit</th>
+                        <th>Comments</th>
                     </tr>
                     </thead>
                     <tbody>
                     {% for label in project.labels %}
                         <tr>
                             <td>
-                                <a href="#">
-                                    {{ label.label }}
-                                </a> {% if label.isStandardLabelForLanguage %}*{% endif %}
+                                <a href="{{ path('label_show', {
+                                    'id': label.id
+                                }) }}">{{ label.label }}</a> {% if label.isStandardLabelForLanguage %}*{% endif %}
                             </td>
                             <td>{{ label.languageIsoCode}}</td>
                             <td>{{ label.modificationTime|date('Y-m-d') }}</td>
+                            <td>
+                                <a href="{{ path('label_edit', {
+                                    'id': label.id
+                                }) }}"
+                                   class="btn btn-xs btn-success">
+                                    <span class="fa fa-edit"></span>
+                                </a>
+                            </td>
+                            <td>
+                                <a class="btn" href="{{ path('label_edit', {
+                                    'id': label.id
+                                }) }}#comments">
+                                    <span class="badge {% if label.comments|length > 0  %}progress-bar-danger {% endif %}">{{ label.comments|length }}</span>
+                                </a>
+                            </td>
                         </tr>
                     {% endfor %}
                     </tbody>
