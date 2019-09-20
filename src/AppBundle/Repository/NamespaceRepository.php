@@ -113,7 +113,10 @@ class NamespaceRepository extends EntityRepository
             ->getQuery()
             ->execute();
 
-        return $defaultNamespace[0];
+         if(isset($defaultNamespace[0]))
+            return $defaultNamespace[0];
+         else
+             return null;
     }
 
     /**

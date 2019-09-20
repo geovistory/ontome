@@ -26,11 +26,11 @@ class ProfileRepository extends EntityRepository
           LEFT JOIN che.associates_entity_to_user_project aseup ON aseup.fk_profile = prf.pk_profile 
           WHERE prf.pk_profile IN(
 		    SELECT fk_profile FROM che.associates_project
-		    WHERE fk_project = 6
+		    WHERE fk_project = :id_project
 	        )
           AND ((aseup.fk_system_type = 25 AND aseup.fk_associate_user_to_project IN(
             SELECT pk_associate_user_to_project FROM che.associate_user_to_project
-	        WHERE fk_user = 7 AND fk_project = 6)) 
+	        WHERE fk_user = :id_user AND fk_project = :id_project)) 
 	      OR aseup.fk_system_type IS NULL)
         ";
 

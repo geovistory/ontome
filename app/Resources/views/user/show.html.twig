@@ -123,7 +123,7 @@
                             <h4>Additional namespaces</h4>
                             <div id="additional-namespaces-list">
                             {% if additionalNamespaces|length == 0 %}
-                                <p class="text-muted"><em>No additional namespace added, please pick one below.</em></p>
+                                <p class="text-muted" id="empty-namespace-list-message"><em>No additional namespace added, please pick one below.</em></p>
                             {% endif %}
                             {% for additionalNamespace in additionalNamespaces if additionalNamespace != defaultNamespace %}
                                 <div class="row" style="margin-left:0px;">
@@ -164,10 +164,10 @@
                                         {% set isActiveProfile = true %}
                                     {% endif %}
                                     {% if isActiveProfile %}
-                                    <a href="#"><span class="glyphicon glyphicon-check" aria-hidden="true"></span></a>
+                                    <a href="#" class="uncheck-profile" data-id="{{ profile.id }}"><span class="glyphicon glyphicon-check" aria-hidden="true"></span></a>
                                     <strong>Profile : <a href="{{ path('profile_show', {'id': profile.id}) }}">{{ profile }}</a></strong>
                                     {% else %}
-                                    <a href="#"><span class="glyphicon glyphicon-unchecked text-muted" aria-hidden="true"></span></a>
+                                    <a href="#" class="check-profile" data-id="{{ profile.id }}"><span class="glyphicon glyphicon-unchecked text-muted" aria-hidden="true"></span></a>
                                     <strong class="text-muted">Profile : <a class="text-muted" href="{{ path('profile_show', {'id': profile.id}) }}">{{ profile }}</a></strong>
                                     {% endif %}
                                 </div>
@@ -182,12 +182,12 @@
                                     {% endif %}
                                     {% if isActive %}
                                         <li class="list-unstyled" style="margin-left: -30px;">
-                                            <a href="#"><span class="glyphicon glyphicon-check" aria-hidden="true"></span></a>
+                                            <a href="#" class="uncheck-namespace" data-id="{{ namespace.id }}"><span class="glyphicon glyphicon-check" aria-hidden="true"></span></a>
                                             <a href="{{ path('namespace_show', {'id': namespace.id}) }}">{{ namespace.standardLabel }}</a>
                                         </li>
                                     {% else %}
                                         <li class="list-unstyled" style="margin-left: -30px;">
-                                            <a href="#"><span class="glyphicon glyphicon-unchecked text-muted" aria-hidden="true"></span></a>
+                                            <a href="#" class="check-namespace" data-id="{{ namespace.id }}"><span class="glyphicon glyphicon-unchecked text-muted" aria-hidden="true"></span></a>
                                             <a class="text-muted" href="{{ path('namespace_show', {'id': namespace.id}) }}">{{ namespace.standardLabel }}</a>
                                         </li>
                                     {% endif %}
@@ -266,6 +266,7 @@
 
             $(document).on("click", ".pickable-namespace", function() {
                 var selectedValue = $(this).attr("id");
+                var labelNamespace = $(this).text();
                 var userCurrentActiveProjectAssociationID = {{ userCurrentActiveProjectAssociation.id }};
                 var url = '{{ path("user_project_namespace_association", {'userProjectAssociation' : 'userProjectID','namespace': 'selectedValue'}) }}';
                 url = url.replace("userProjectID", userCurrentActiveProjectAssociationID);
@@ -275,30 +276,28 @@
                     type: 'POST',
                     dataType: 'json',
                     success:function(data){
-                        console.log("OK OK OK");
                         // handling the response data from the controller
                         if(data.status == 'Error'){
                             console.log("[API] ERROR: "+data.message);
                         }
                         if(data.status == 'Success'){
-
+                            var urlNamespace = '{{ path('namespace_show', {'id' : 'selectedValue'}) }}';
+                            urlNamespace = urlNamespace.replace('selectedValue', selectedValue);
+                            $("#additional-namespaces-list").append($('<div class="row" style="margin-left:0px;"><a href="#" class="remove-namespace" data-id="'+selectedValue+'"><span class="glyphicon glyphicon-remove text-danger" aria-hidden="true"></span></a><a href="'+urlNamespace+'">'+labelNamespace+'</a><span class="loading-icon2" data-id="'+selectedValue+'">&nbsp;<span class="fas fa-spinner fa-spin"></span></span></div>'));
+                            $(".loading-icon2[data-id='"+selectedValue+"']").hide(0);
                         }
                     }
                 });
-
-                var urlNamespace = '{{ path('namespace_show', {'id' : 'selectedValue'}) }}';
-                urlNamespace = urlNamespace.replace('selectedValue', selectedValue);
                 $("#empty-namespace-list-message").remove();
                 $("#select-root-namespace option:selected").remove();
-                $("#additional-namespaces-list").append($('<div class="row" style="margin-left:0px;"><a href="#" class="remove-namespace" data-id="'+selectedValue+'"><span class="glyphicon glyphicon-remove text-danger" aria-hidden="true"></span></a><a href="'+urlNamespace+'">'+$(this).text()+'</a><span class="loading-icon2" data-id="'+selectedValue+'">&nbsp;<span class="fas fa-spinner fa-spin"></span></span></div>'));
                 $(".loading-icon2[data-id='"+selectedValue+"']").hide(0);
                 $("#chosable-namespaces-list").empty();
             });
 
             $(document).on("click", ".remove-namespace", function() {
                 var selectedValue = $(this).data("id");
-                var userCurrentActiveProjectAssociationID = {{ userCurrentActiveProjectAssociation.id }}
-                    $(".loading-icon2[data-id='"+selectedValue+"']").show(0);
+                var userCurrentActiveProjectAssociationID = {{ userCurrentActiveProjectAssociation.id }};
+                $(".loading-icon2[data-id='"+selectedValue+"']").show(0);
                 var url = '{{ path("user_project_namespace_disassociation", {'userProjectAssociation' : 'userProjectID','namespace': 'selectedValue'}) }}';
                 url = url.replace("userProjectID", userCurrentActiveProjectAssociationID);
                 url = url.replace("selectedValue", selectedValue);
@@ -315,6 +314,70 @@
                     }
                 });
 
+            });
+
+            $(document).on("click", ".check-profile", function() {
+                var selectedValue = $(this).data("id");
+                var userCurrentActiveProjectAssociationID = {{ userCurrentActiveProjectAssociation.id }};
+                $(this).removeClass("check-profile");
+                $(this).addClass("uncheck-profile");
+                $(this).children('span').removeClass("glyphicon-unchecked");
+                $(this).children('span').removeClass("text-muted");
+                $(this).children('span').addClass("glyphicon-check");
+                $(this).next('strong').removeClass("text-muted");
+                $(this).next('strong').children('a').removeClass("text-muted");
+                $(this).parent('div').next('ul').children('li').children('a').removeClass("text-muted");
+                $(this).parent('div').next('ul').children('li').children('a').children('span').removeClass("text-muted");
+                $(this).parent('div').next('ul').children('li').children('a').children('span').removeClass("glyphicon-unchecked");
+                $(this).parent('div').next('ul').children('li').children('a').children('span').addClass("glyphicon-check");
+                var url = '{{ path("user_project_profile_association", {'userProjectAssociation' : 'userProjectID', 'profile': 'selectedValue'}) }}';
+                url = url.replace("userProjectID", userCurrentActiveProjectAssociationID);
+                url = url.replace("selectedValue", selectedValue);
+                $.ajax({
+                    url: url,
+                    type: 'POST',
+                    dataType: 'json',
+                    success:function(data){
+                        // handling the response data from the controller
+                        if(data.status == 'Error'){
+                            console.log("[API] ERROR: "+data.message);
+                        }
+                        if(data.status == 'Success'){
+                        }
+                    }
+                });
+                //$("#additional-namespaces-list").append($('<div class="row" style="margin-left:0px;"><a href="#" class="remove-namespace" data-id="'+selectedValue+'"><span class="glyphicon glyphicon-remove text-danger" aria-hidden="true"></span></a><a href="'+urlNamespace+'">'+labelNamespace+'</a><span class="loading-icon2" data-id="'+selectedValue+'">&nbsp;<span class="fas fa-spinner fa-spin"></span></span></div>'));*/
+            });
+
+            $(document).on("click", ".uncheck-profile", function() {
+                var selectedValue = $(this).data("id");
+                var userCurrentActiveProjectAssociationID = {{ userCurrentActiveProjectAssociation.id }};
+                $(this).removeClass("uncheck-profile");
+                $(this).addClass("check-profile");
+                $(this).children('span').removeClass("glyphicon-check");
+                $(this).children('span').addClass("glyphicon-unchecked");
+                $(this).children('span').addClass("text-muted");
+                $(this).next('strong').addClass("text-muted");
+                $(this).next('strong').children('a').addClass("text-muted");
+                $(this).parent('div').next('ul').children('li').children('a').addClass("text-muted");
+                $(this).parent('div').next('ul').children('li').children('a').children('span').addClass("text-muted");
+                $(this).parent('div').next('ul').children('li').children('a').children('span').addClass("glyphicon-unchecked");
+                $(this).parent('div').next('ul').children('li').children('a').children('span').removeClass("glyphicon-check");
+                var url = '{{ path("user_project_profile_disassociation", {'userProjectAssociation' : 'userProjectID','profile': 'selectedValue'}) }}';
+                url = url.replace("userProjectID", userCurrentActiveProjectAssociationID);
+                url = url.replace("selectedValue", selectedValue);
+                $.ajax({
+                    url: url,
+                    type: 'DELETE',
+                    dataType: 'json',
+                    success:function(data){
+                    },
+                    statusCode: {
+                        204: function () {
+                        }
+                    }
+                });
+                //$("#additional-namespaces-list").append($('<div class="row" style="margin-left:0px;"><a href="#" class="remove-namespace" data-id="'+selectedValue+'"><span class="glyphicon glyphicon-remove text-danger" aria-hidden="true"></span></a><a href="'+urlNamespace+'">'+labelNamespace+'</a><span class="loading-icon2" data-id="'+selectedValue+'">&nbsp;<span class="fas fa-spinner fa-spin"></span></span></div>'));*/
             });
         } );
     </script>

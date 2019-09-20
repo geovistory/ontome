@@ -11,6 +11,7 @@ namespace AppBundle\Controller;
 
 use AppBundle\Entity\EntityUserProjectAssociation;
 use AppBundle\Entity\OntoNamespace;
+use AppBundle\Entity\Profile;
 use AppBundle\Entity\Project;
 use AppBundle\Entity\User;
 use AppBundle\Entity\UserProjectAssociation;
@@ -332,14 +333,21 @@ class UserController extends Controller
             $userCurrentActiveProjectAssociation = $userProjectPublicAssociation;
         }
 
-        $additionalNamespaces = $em->getRepository('AppBundle:OntoNamespace')
-            ->findAdditionalNamespacesForUserProject($userCurrentActiveProjectAssociation);
+        $activeNamespaces = new ArrayCollection($em->getRepository('AppBundle:OntoNamespace')
+            ->findAllActiveNamespacesForUserProject($userCurrentActiveProjectAssociation));
 
-        $activeNamespaces = $em->getRepository('AppBundle:OntoNamespace')
-            ->findAllActiveNamespacesForUserProject($userCurrentActiveProjectAssociation);
+        $additionalNamespaces = new ArrayCollection($em->getRepository('AppBundle:OntoNamespace')
+            ->findAdditionalNamespacesForUserProject($userCurrentActiveProjectAssociation));
 
-        $activeProfiles = $em->getRepository('AppBundle:Profile')
-            ->findAllActiveProfilesForUserProject($userCurrentActiveProjectAssociation);
+        // On retire les namespaces actives et selected from project profiles de Additional namespaces
+        foreach($activeNamespaces as $activeNamespace) {
+            if($additionalNamespaces->contains($activeNamespace)) {
+                $additionalNamespaces->removeElement($activeNamespace);
+            }
+        }
+
+        $activeProfiles = new ArrayCollection($em->getRepository('AppBundle:Profile')
+            ->findAllActiveProfilesForUserProject($userCurrentActiveProjectAssociation));
 
         $rootNamespaces = $em->getRepository('AppBundle:OntoNamespace')
             ->findBy(array(
@@ -486,24 +494,6 @@ class UserController extends Controller
             }
         }
 
-        /*
-        if($namespace->getIsTopLevelNamespace()) {
-            $status = 'Error';
-            $message = 'This namespace is not valid';
-        }
-        else if ($userProjectAssociation->getEntityUserProjectAssociations()) {
-            $status = 'Error';
-            $message = 'This namespace is already used';
-        }
-        else {
-            $namespaceUserProjectAssociation->setNamespace($namespace);
-            $em = $this->getDoctrine()->getManager();
-            $em->persist($userProjectAssociation);
-            $em->flush();
-            $status = 'Success';
-            $message = 'Namespace successfully associated';
-        }*/
-
         $response = array(
             'status' => $status,
             'message' => $message
@@ -538,10 +528,10 @@ class UserController extends Controller
                 }
                 elseif ($eupa->getSystemType()->getId() == 25) {
                     // L'association existe déjà, et l'utilisateur veut mettre à rejected
-                    $systemTypeSelected = $em->getRepository('AppBundle:SystemType')->find(26); //systemType 25 = Selected namespace for user preference
+                    $systemTypeSelected = $em->getRepository('AppBundle:SystemType')->find(26); //systemType 26 = Rejected namespace for user preference
                     $eupa->setSystemType($systemTypeSelected);
                     $status = 'Success';
-                    $message = 'Namespace successfully associated';
+                    $message = 'Namespace successfully rejected';
                     $em->persist($eupa);
                     $em->flush();
                     break;
@@ -551,6 +541,135 @@ class UserController extends Controller
         }
         if(!is_null($eupa))
             $em->persist($eupa);
+        $em->flush();
+
+        return new JsonResponse(null, 204);
+
+    }
+
+    /**
+     * @Route("/user/{userProjectAssociation}/profile/{profile}/add", name="user_project_profile_association")
+     * @Method({ "POST"})
+     * @param Profile $profile The profile to be associated with an userProjectAssociation
+     * @param UserProjectAssociation  $userProjectAssociation    The userProjectAssociation to be associated with a profile
+     * @throws \Exception in case of unsuccessful association
+     * @return JsonResponse a Json formatted profile list
+     */
+    public function newUserProjectProfileAssociationAction(Profile $profile, UserProjectAssociation $userProjectAssociation, Request $request)
+    {
+        //$this->denyAccessUnlessGranted('edit', $userProjectAssociation);
+
+        // 1 Vérifier que le namespace n'est pas top level
+        // 2 Vérifier qu'une association namespace - userproject identique n'existe pas
+        // Si oui : remettre le system type à 25
+        // Si non : créer l'association
+
+        $em = $this->getDoctrine()->getManager();
+
+        $eupa = null;
+
+        foreach($userProjectAssociation->getEntityUserProjectAssociations() as $eupa) {
+            if($eupa->getProfile() == $profile) {
+                // Il existe déjà une association mais est-ce Selected ?
+                if($eupa->getSystemType()->getId() == 25) {
+                    // On ne fait rien : l'association existe déjà et est selected.
+                    $status = 'Error';
+                    $message = 'This profile is already used';
+                    break;
+                }
+                elseif ($eupa->getSystemType()->getId() == 26) {
+                    // L'association existe déjà, et l'utilisateur veut remettre à selected.
+                    $systemTypeSelected = $em->getRepository('AppBundle:SystemType')->find(25); //systemType 25 = Selected namespace for user preference
+                    $eupa->setSystemType($systemTypeSelected);
+                    $status = 'Success';
+                    $message = 'Profile successfully associated';
+                    $em->persist($eupa);
+                    $em->flush();
+                    break;
+                }
+            }
+            $eupa = null;
+        }
+
+        if(is_null($eupa)) {
+            $eupa = new EntityUserProjectAssociation();
+            $systemTypeSelected = $em->getRepository('AppBundle:SystemType')->find(25); //systemType 25 = Selected namespace for user preference
+            $eupa->setProfile($profile);
+            $eupa->setUserProjectAssociation($userProjectAssociation);
+            $eupa->setSystemType($systemTypeSelected);
+            $eupa->setCreator($this->getUser());
+            $eupa->setModifier($this->getUser());
+            $eupa->setCreationTime(new \DateTime('now'));
+            $eupa->setModificationTime(new \DateTime('now'));
+            $em->persist($eupa);
+            $em->flush();
+            $status = 'Success';
+            $message = 'Profile successfully associated';
+        }
+
+        $response = array(
+            'status' => $status,
+            'message' => $message
+        );
+
+        return new JsonResponse($response);
+    }
+
+    /**
+     * @Route("/user/{userProjectAssociation}/profile/{profile}/delete", name="user_project_profile_disassociation")
+     * @Method({ "DELETE"})
+     * @param Profile  $profile    The profile to be disassociated from a userProjectAssociation
+     * @param UserProjectAssociation  $userProjectAssociation    The userProjectAssociation to be disassociated from a profile
+     * @return JsonResponse a Json 204 HTTP response
+     */
+    public function deleteUserProjectProfileAssociationAction(Profile $profile, UserProjectAssociation $userProjectAssociation, Request $request)
+    {
+        //$this->denyAccessUnlessGranted('edit', $userProjectAssociation);
+
+        $em = $this->getDoctrine()->getManager();
+
+        $eupa = null;
+
+        foreach($userProjectAssociation->getEntityUserProjectAssociations() as $eupa) {
+            if($eupa->getProfile() == $profile) {
+                // Il existe déjà une association mais est-ce Selected ?
+                if($eupa->getSystemType()->getId() == 26) {
+                    // On ne fait rien : l'association existe et est déjà rejected.
+                    $status = 'Error';
+                    $message = 'This profile is already rejected';
+                    break;
+                }
+                elseif ($eupa->getSystemType()->getId() == 25) {
+                    // L'association existe déjà, et l'utilisateur veut mettre à rejected
+                    $systemTypeSelected = $em->getRepository('AppBundle:SystemType')->find(26); //systemType 26 = Rejected profile for user preference
+                    $eupa->setSystemType($systemTypeSelected);
+                    $status = 'Success';
+                    $message = 'Profile successfully rejected';
+                    $em->persist($eupa);
+                    $em->flush();
+                    break;
+                }
+            }
+            $eupa = null;
+        }
+
+        if(is_null($eupa)) {
+            $eupa = new EntityUserProjectAssociation();
+            $systemTypeSelected = $em->getRepository('AppBundle:SystemType')->find(26);
+            $eupa->setProfile($profile);
+            $eupa->setUserProjectAssociation($userProjectAssociation);
+            $eupa->setSystemType($systemTypeSelected);
+            $eupa->setCreator($this->getUser());
+            $eupa->setModifier($this->getUser());
+            $eupa->setCreationTime(new \DateTime('now'));
+            $eupa->setModificationTime(new \DateTime('now'));
+            $em->persist($eupa);
+            $em->flush();
+            $status = 'Success';
+            $message = 'Profile successfully rejected';
+        }
+
+        $em->persist($eupa);
         $em->flush();
 
         return new JsonResponse(null, 204);
