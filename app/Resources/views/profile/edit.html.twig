@@ -14,7 +14,8 @@
     <h2 class="profile-name">{{ profile.standardLabel }}</h2>
     <ul class="nav nav-tabs" id="main-tabs">
         <li class="active"><a data-toggle="tab" href="#summary">Summary</a></li>
-        <li><a data-toggle="tab" href="#identification">Profile identification</a></li>
+        <li><a data-toggle="tab" href="#definition">Definition</a></li>
+        <li><a data-toggle="tab" href="#identification">Identification</a></li>
         <li><a data-toggle="tab" href="#namespaces">Namespaces</a></li>
         <li><a data-toggle="tab" href="#classes">Classes</a></li>
         <li><a data-toggle="tab" href="#properties">Properties</a></li>
@@ -53,6 +54,92 @@
                     </div>
                 </div>
             </div>
+        </div>
+        <div id="definition" class="tab-pane fade">
+            <h3>Description</h3>
+            <table class="table table-striped" id="descriptions-table">
+                <thead>
+                <tr>
+                    <th>Show</th>
+                    <th>Description</th>
+                    <th>Language</th>
+                    <th>Edit</th>
+                    <th>Comments</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for textProperty in profile.textProperties if textProperty.systemType.id == 16 %}
+                    <tr>
+                        <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
+                        <td class="truncated-text">
+                            <span>{{ textProperty.textProperty|striptags|raw }}</span>
+                            {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
+                        </td>
+                        <td>{{ textProperty.languageIsoCode}}</td>
+                        <td>
+                            <a href="{{ path('text_property_edit', {
+                                'id': textProperty.id
+                            }) }}"
+                               class="btn btn-xs btn-success">
+                                <span class="fa fa-edit"></span>
+                            </a>
+                        </td>
+                        <td>
+                            <a class="btn" href="{{ path('text_property_edit', {
+                                'id': textProperty.id
+                            }) }}#comments">
+                                <span class="badge {% if textProperty.comments|length > 0  %}progress-bar-danger {% endif %}">{{ textProperty.comments|length }}</span>
+                            </a>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            <div class="pull-right add-div">
+                <a href="{{ path('text_property_new', {'type': 'additional-note', 'object': 'profile', 'objectId': profile.id })}}"
+                   class="btn btn-primary pull-right">
+                    Add <span class="fa fa-plus-circle"></span>
+                </a>
+            </div>
+            <h3>Additional notes</h3>
+            <table class="table table-striped" id="additional-notes-table">
+                <thead>
+                <tr>
+                    <th>Show</th>
+                    <th>Notes</th>
+                    <th>Language</th>
+                    <th>Edit</th>
+                    <th>Comment</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for textProperty in profile.textProperties if textProperty.systemType.id == 12 %}
+                    <tr>
+                        <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
+                        <td class="truncated-text">
+                            <span>{{ textProperty.textProperty|striptags|raw }}</span>
+                            {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
+                        </td>
+                        <td>{{ textProperty.languageIsoCode}}</td>
+                        <td>
+                            <a href="{{ path('text_property_edit', {
+                                'id': textProperty.id
+                            }) }}"
+                               class="btn btn-xs btn-success">
+                                <span class="fa fa-edit"></span>
+                            </a>
+                        </td>
+                        <td>
+                            <a class="btn" href="{{ path('text_property_edit', {
+                                'id': textProperty.id
+                            }) }}#comments">
+                                <span class="badge {% if textProperty.comments|length > 0  %}progress-bar-danger {% endif %}">{{ textProperty.comments|length }}</span>
+                            </a>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
         </div>
         <div id="identification" class="tab-pane fade">
             <h3>Identification</h3>
@@ -121,90 +208,6 @@
                     Add <span class="fa fa-plus-circle"></span>
                 </a>
             </div>
-            <h3>Description</h3>
-            <table class="table table-striped" id="descriptions-table">
-                <thead>
-                <tr>
-                    <th>Show</th>
-                    <th>Description</th>
-                    <th>Language</th>
-                    <th>Edit</th>
-                    <th>Comments</th>
-                </tr>
-                </thead>
-                <tbody>
-                {% for textProperty in profile.textProperties if textProperty.systemType.id == 16 %}
-                <tr>
-                    <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
-                    <td class="truncated-text">
-                        <span>{{ textProperty.textProperty|striptags|raw }}</span>
-                        {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
-                    </td>
-                    <td>{{ textProperty.languageIsoCode}}</td>
-                    <td>
-                        <a href="{{ path('text_property_edit', {
-                            'id': textProperty.id
-                        }) }}"
-                           class="btn btn-xs btn-success">
-                            <span class="fa fa-edit"></span>
-                        </a>
-                    </td>
-                    <td>
-                        <a class="btn" href="{{ path('text_property_edit', {
-                            'id': textProperty.id
-                        }) }}#comments">
-                            <span class="badge {% if textProperty.comments|length > 0  %}progress-bar-danger {% endif %}">{{ textProperty.comments|length }}</span>
-                        </a>
-                    </td>
-                </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-            <div class="pull-right add-div">
-                <a href="{{ path('text_property_new', {'type': 'additional-note', 'object': 'profile', 'objectId': profile.id })}}"
-                   class="btn btn-primary pull-right">
-                    Add <span class="fa fa-plus-circle"></span>
-                </a>
-            </div>
-            <h3>Additional notes</h3>
-            <table class="table table-striped" id="additional-notes-table">
-                <thead>
-                <tr>
-                    <th>Show</th>
-                    <th>Notes</th>
-                    <th>Language</th>
-                    <th>Edit</th>
-                    <th>Comment</th>
-                </tr>
-                </thead>
-                <tbody>
-                {% for textProperty in profile.textProperties if textProperty.systemType.id == 12 %}
-                <tr>
-                    <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
-                    <td class="truncated-text">
-                        <span>{{ textProperty.textProperty|striptags|raw }}</span>
-                        {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
-                    </td>
-                    <td>{{ textProperty.languageIsoCode}}</td>
-                    <td>
-                        <a href="{{ path('text_property_edit', {
-                            'id': textProperty.id
-                        }) }}"
-                           class="btn btn-xs btn-success">
-                            <span class="fa fa-edit"></span>
-                        </a>
-                    </td>
-                    <td>
-                        <a class="btn" href="{{ path('text_property_edit', {
-                            'id': textProperty.id
-                        }) }}#comments">
-                            <span class="badge {% if textProperty.comments|length > 0  %}progress-bar-danger {% endif %}">{{ textProperty.comments|length }}</span>
-                        </a>
-                    </td>
-                </tr>
-                {% endfor %}
-                </tbody>
-            </table>
         </div>
         <div id="classes" class="tab-pane fade">
             <div class="row">

@@ -21,7 +21,8 @@
         </h2>
         <ul class="nav nav-tabs" id="main-tabs">
             <li class="active"><a data-toggle="tab" href="#summary">Summary</a></li>
-            <li><a data-toggle="tab" href="#identification">Profile identification</a></li>
+            <li><a data-toggle="tab" href="#definition">Definition</a></li>
+            <li><a data-toggle="tab" href="#identification">Identification</a></li>
             <li><a data-toggle="tab" href="#namespaces">Namespaces</a></li>
             <li><a data-toggle="tab" href="#classes">Classes</a></li>
             <li><a data-toggle="tab" href="#properties">Properties</a></li>
@@ -61,37 +62,7 @@
                     </div>
                 </div>
             </div>
-            <div id="identification" class="tab-pane fade">
-                <h3>Identification</h3>
-                <p>Project of belonging: <a href="{{ path('project_show', {'id': profile.projectOfBelonging.id}) }}">{{ profile.projectOfBelonging.standardLabel }}</a></p>
-                <p>Start date: {{ profile.startDate is empty ? '' : profile.startDate|date('Y-m-d') }}</p>
-                <p>End date: {{ profile.endDate is empty ? '' : profile.endDate|date('Y-m-d') }}</p>
-                <h3>Labels</h3>
-                <table class="table table-striped" id="labels-table">
-                    <thead>
-                    <tr>
-                        <th>Label</th>
-                        <th>Language</th>
-                        <th>Last updated</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% for label in profile.labels %}
-                        <tr>
-                            <td>
-                                <a href="{{ path('label_show', {
-                                    'id': label.id
-                                }) }}">
-                                    {{ label.label }}
-                                </a> {% if label.isStandardLabelForLanguage %}*{% endif %}
-                            </td>
-                            <td>{{ label.languageIsoCode}}</td>
-                            <td>{{ label.modificationTime|date('Y-m-d') }}</td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-                <p>* : Standard label for this language</p>
+            <div id="definition" class="tab-pane fade">
                 <h3>Description</h3>
                 <table class="table table-striped" id="descriptions-table">
                     <thead>
@@ -138,6 +109,38 @@
                     {% endfor %}
                     </tbody>
                 </table>
+            </div>
+            <div id="identification" class="tab-pane fade">
+                <h3>Identification</h3>
+                <p>Project of belonging: <a href="{{ path('project_show', {'id': profile.projectOfBelonging.id}) }}">{{ profile.projectOfBelonging.standardLabel }}</a></p>
+                <p>Start date: {{ profile.startDate is empty ? '' : profile.startDate|date('Y-m-d') }}</p>
+                <p>End date: {{ profile.endDate is empty ? '' : profile.endDate|date('Y-m-d') }}</p>
+                <h3>Labels</h3>
+                <table class="table table-striped" id="labels-table">
+                    <thead>
+                    <tr>
+                        <th>Label</th>
+                        <th>Language</th>
+                        <th>Last updated</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for label in profile.labels %}
+                        <tr>
+                            <td>
+                                <a href="{{ path('label_show', {
+                                    'id': label.id
+                                }) }}">
+                                    {{ label.label }}
+                                </a> {% if label.isStandardLabelForLanguage %}*{% endif %}
+                            </td>
+                            <td>{{ label.languageIsoCode}}</td>
+                            <td>{{ label.modificationTime|date('Y-m-d') }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                <p>* : Standard label for this language</p>
             </div>
             <div id="classes" class="tab-pane fade">
                 <h3>Associated classes</h3>
