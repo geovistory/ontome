@@ -42,6 +42,11 @@ class Profile
     private $endDate;
 
     /**
+     * @ORM\Column(type="datetime")
+     */
+    private $wasClosedAt;
+
+    /**
      * @ORM\Column(type="boolean")
      */
     private $isOngoing;
@@ -191,6 +196,14 @@ class Profile
     /**
      * @return mixed
      */
+    public function getWasClosedAt()
+    {
+        return $this->wasClosedAt;
+    }
+
+    /**
+     * @return mixed
+     */
     public function getIsOngoing()
     {
         return $this->isOngoing;
@@ -330,6 +343,14 @@ class Profile
     public function setEndDate($endDate)
     {
         $this->endDate = $endDate;
+    }
+
+    /**
+     * @param mixed $wasClosedAt
+     */
+    public function setWasClosedAt($wasClosedAt)
+    {
+        $this->wasClosedAt = $wasClosedAt;
     }
 
     /**
