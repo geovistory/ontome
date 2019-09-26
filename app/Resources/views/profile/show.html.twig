@@ -113,8 +113,15 @@
             <div id="identification" class="tab-pane fade">
                 <h3>Identification</h3>
                 <p>Project of belonging: <a href="{{ path('project_show', {'id': profile.projectOfBelonging.id}) }}">{{ profile.projectOfBelonging.standardLabel }}</a></p>
-                <p>Start date: {{ profile.startDate is empty ? '' : profile.startDate|date('Y-m-d') }}</p>
-                <p>End date: {{ profile.endDate is empty ? '' : profile.endDate|date('Y-m-d') }}</p>
+                {% if profile.isOngoing %}
+                    <div class="alert alert-info">
+                        <p><i class="fas fa-info-circle"></i>&nbsp;This profile is ongoing</p>
+                    </div>
+                {% elseif profile.wasClosedAt is null %}
+                    <p>Profile published and available since: {{ profile.startDate is empty ? '' : profile.startDate|date('Y-m-d') }}</p>
+                {% elseif profile.wasClosedAt is not null %}
+                    <p>This profile was published on {{ profile.startDate is empty ? '' : profile.startDate|date('Y-m-d') }} and is <strong>deprecated</strong> and to no longer use since: {{ profile.endDate is empty ? '' : profile.endDate|date('Y-m-d') }}</p>
+                {% endif %}
                 <h3>Labels</h3>
                 <table class="table table-striped" id="labels-table">
                     <thead>
