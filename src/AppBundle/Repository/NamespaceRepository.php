@@ -60,9 +60,9 @@ class NamespaceRepository extends EntityRepository
                        standard_label AS \"standardLabel\" 
                 FROM che.namespace
                 WHERE pk_namespace NOT IN (
-                    SELECT nsp.fk_top_level_namespace FROM che.associates_namespace ansp
-                    JOIN che.namespace nsp ON ansp.fk_namespace = nsp.pk_namespace
-                    WHERE ansp.fk_profile = :profile AND ansp.fk_namespace IS NOT NULL
+                    SELECT nsp.fk_top_level_namespace FROM che.associates_referenced_namespace ansp
+                    JOIN che.namespace nsp ON ansp.fk_referenced_namespace = nsp.pk_namespace
+                    WHERE ansp.fk_profile = :profile AND ansp.fk_referenced_namespace IS NOT NULL
                     )
                 AND is_top_level_namespace;";
 
