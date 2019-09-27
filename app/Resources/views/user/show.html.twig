@@ -105,10 +105,10 @@
                                     {% set isActive = true %}
                                 {% endif %}
                                 {% if isActive %}
-                                <a href="#"><span class="glyphicon glyphicon-check text-primary" aria-hidden="true"></span></a>
+                                <a href="#" class="uncheck-namespace" data-id="{{ defaultNamespace.id }}"><span class="glyphicon glyphicon-check" aria-hidden="true"></span></a>
                                 <a href="{{ path('namespace_show', {'id': defaultNamespace.id}) }}">{{ defaultNamespace.standardLabel }}</a>
                                 {% else %}
-                                <a href="#"><span class="glyphicon glyphicon-unchecked text-muted" aria-hidden="true"></span></a>
+                                <a href="#" class="check-namespace" data-id="{{ defaultNamespace.id }}"><span class="glyphicon glyphicon-unchecked text-muted" aria-hidden="true"></span></a>
                                 <a class="text-muted" href="{{ path('namespace_show', {'id': defaultNamespace.id}) }}">{{ defaultNamespace.standardLabel }}</a>
                                 {% endif %}
                             </div>
@@ -378,6 +378,58 @@
                     }
                 });
                 //$("#additional-namespaces-list").append($('<div class="row" style="margin-left:0px;"><a href="#" class="remove-namespace" data-id="'+selectedValue+'"><span class="glyphicon glyphicon-remove text-danger" aria-hidden="true"></span></a><a href="'+urlNamespace+'">'+labelNamespace+'</a><span class="loading-icon2" data-id="'+selectedValue+'">&nbsp;<span class="fas fa-spinner fa-spin"></span></span></div>'));*/
+            });
+
+            $(document).on("click", ".check-namespace", function() {
+                var selectedValue = $(this).data("id");
+                var userCurrentActiveProjectAssociationID = {{ userCurrentActiveProjectAssociation.id }};
+                $(this).removeClass("check-namespace");
+                $(this).addClass("uncheck-namespace");
+                $(this).removeClass("text-muted");
+                $(this).next('a').removeClass("text-muted");
+                $(this).children('span').removeClass("glyphicon-unchecked");
+                $(this).children('span').addClass("glyphicon-check");
+                $(this).children('span').removeClass("text-muted");
+                var url = '{{ path("user_project_namespace_association", {'userProjectAssociation' : 'userProjectID','namespace': 'selectedValue'}) }}';
+                url = url.replace("userProjectID", userCurrentActiveProjectAssociationID);
+                url = url.replace("selectedValue", selectedValue);
+                $.ajax({
+                    url: url,
+                    type: 'POST',
+                    dataType: 'json',
+                    success:function(data){
+                    },
+                    statusCode: {
+                        204: function () {
+                        }
+                    }
+                });
+            });
+
+            $(document).on("click", ".uncheck-namespace", function() {
+                var selectedValue = $(this).data("id");
+                var userCurrentActiveProjectAssociationID = {{ userCurrentActiveProjectAssociation.id }};
+                $(this).removeClass("uncheck-namespace");
+                $(this).addClass("check-namespace");
+                $(this).addClass("text-muted");
+                $(this).next('a').addClass("text-muted");
+                $(this).children('span').removeClass("glyphicon-check");
+                $(this).children('span').addClass("glyphicon-unchecked");
+                $(this).children('span').addClass("text-muted");
+                var url = '{{ path("user_project_namespace_disassociation", {'userProjectAssociation' : 'userProjectID','namespace': 'selectedValue'}) }}';
+                url = url.replace("userProjectID", userCurrentActiveProjectAssociationID);
+                url = url.replace("selectedValue", selectedValue);
+                $.ajax({
+                    url: url,
+                    type: 'DELETE',
+                    dataType: 'json',
+                    success:function(data){
+                    },
+                    statusCode: {
+                        204: function () {
+                        }
+                    }
+                });
             });
         } );
     </script>

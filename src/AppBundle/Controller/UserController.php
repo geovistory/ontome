@@ -539,6 +539,23 @@ class UserController extends Controller
             }
             $eupa = null;
         }
+
+        if(is_null($eupa)) {
+            $eupa = new EntityUserProjectAssociation();
+            $systemTypeSelected = $em->getRepository('AppBundle:SystemType')->find(26); //systemType 25 = Selected namespace for user preference
+            $eupa->setNamespace($namespace);
+            $eupa->setUserProjectAssociation($userProjectAssociation);
+            $eupa->setSystemType($systemTypeSelected);
+            $eupa->setCreator($this->getUser());
+            $eupa->setModifier($this->getUser());
+            $eupa->setCreationTime(new \DateTime('now'));
+            $eupa->setModificationTime(new \DateTime('now'));
+            $em->persist($eupa);
+            $em->flush();
+            $status = 'Success';
+            $message = 'Namespace successfully rejected';
+        }
+
         if(!is_null($eupa))
             $em->persist($eupa);
         $em->flush();
