@@ -2,8 +2,11 @@
 
 namespace AppBundle\Form;
 
+use AppBundle\Entity\Project;
 use AppBundle\Form\DataTransformer\UserToNumberTransformer;
+use AppBundle\Repository\ProjectRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -40,8 +43,19 @@ class ProfileEditForm extends AbstractType
         }
 
         $builder
-            ->add('projectOfBelonging')
-            ->add('isOngoing', CheckboxType::class, ['label' => 'Is ongoing'])
+            ->add('projectOfBelonging', EntityType::class,
+                array(
+                    'class'=>Project::class,
+                    "label" => "Project of belonging",
+                    "query_builder" => function(ProjectRepository $repo) use ($user) {
+                        return $repo->findAvailableProjectByAdminId($user);
+                    }
+                )
+            )
+            ->add('isForcedPublication', CheckboxType::class, [
+                'label' => 'Allow API connection'
+            ])
+            /*->add('isOngoing', CheckboxType::class, ['label' => 'Is ongoing'])
             ->add('startDate', DateType::class, [
                 'label' => 'Start date',
                 'widget' => 'single_text',
@@ -55,7 +69,7 @@ class ProfileEditForm extends AbstractType
                 'attr' => ['class' => 'js-datepicker'],
                 'format' => 'yyyy-MM-dd',
                 'html5' => false
-            ])
+            ])*/
             ->add('creator', HiddenType::class)
             ->add('modifier', HiddenType::class);
         $builder->get('creator')

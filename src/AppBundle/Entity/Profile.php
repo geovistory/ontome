@@ -52,6 +52,11 @@ class Profile
     private $isOngoing;
 
     /**
+     * @ORM\Column(type="boolean")
+     */
+    private $isForcedPublication;
+
+    /**
      * @ORM\ManyToOne(targetEntity="Profile",  inversedBy="childProfiles")
      * @ORM\JoinColumn(name="fk_is_subprofile_of", referencedColumnName="pk_profile", nullable=true)
      */
@@ -212,6 +217,14 @@ class Profile
     /**
      * @return mixed
      */
+    public function getIsForcedPublication()
+    {
+        return $this->isForcedPublication;
+    }
+
+    /**
+     * @return mixed
+     */
     public function getParentProfile()
     {
         return $this->parentProfile;
@@ -359,6 +372,14 @@ class Profile
     public function setIsOngoing($isOngoing)
     {
         $this->isOngoing = $isOngoing;
+    }
+
+    /**
+     * @param mixed $isForcedPublication
+     */
+    public function setIsForcedPublication($isForcedPublication)
+    {
+        $this->isForcedPublication = $isForcedPublication;
     }
 
     /**
