@@ -25,6 +25,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 class ProfileController  extends Controller
 {
@@ -158,8 +159,7 @@ class ProfileController  extends Controller
     public function editAction(Profile $profile, Request $request)
     {
 
-        if(is_null($profile))
-        {
+        if(is_null($profile)) {
             throw $this->createNotFoundException('The profile n° '.$profile->getId().' does not exist. Please contact an administrator.');
         }
 
@@ -211,6 +211,76 @@ class ProfileController  extends Controller
             'properties' => $properties,
             'profileAssociations' => $profileAssociations
         ));
+    }
+
+    /**
+     * @Route("/profile/{id}/publish", name="profile_publish")
+     * @param Profile $profile
+     * @param Request $request
+     * @return Response the rendered template
+     */
+    public function publishAction(Profile $profile, Request $request)
+    {
+        if(is_null($profile)) {
+            throw $this->createNotFoundException('The profile n° '.$profile->getId().' does not exist. Please contact an administrator.');
+        }
+
+        //only the project of belonging administrator car publish a profile
+        $this->denyAccessUnlessGranted('full_edit', $profile->getProjectOfBelonging());
+
+        $em = $this->getDoctrine()->getManager();
+
+        $profile->setIsOngoing(false);
+        $profile->setStartDate(new \DateTime('now'));
+        $profile->setWasClosedAt(new \DateTime('now'));
+
+        $em->persist($profile);
+        $em->flush();
+
+        //we delete the word "ongoing" from all the profile labels
+        foreach ($profile->getLabels() as $label) {
+            $txt = $label->getLabel();
+            $label->setLabel(str_replace('ongoing', '', $txt));
+            $em->persist($label);
+            $em->flush();
+        }
+
+        $this->addFlash('success', 'Profile Published!');
+
+        return $this->redirectToRoute('profile_edit', [
+            'id' => $profile->getId(),
+            '_fragment' => 'identification'
+        ]);
+    }
+
+    /**
+     * @Route("/profile/{id}/deprecate", name="profile_deprecate")
+     * @param Profile $profile
+     * @param Request $request
+     * @return Response the rendered template
+     */
+    public function deprecateAction(Profile $profile, Request $request)
+    {
+        if(is_null($profile)) {
+            throw $this->createNotFoundException('The profile n° '.$profile->getId().' does not exist. Please contact an administrator.');
+        }
+
+        //only the project of belonging administrator car deprecate a profile
+        $this->denyAccessUnlessGranted('full_edit', $profile->getProjectOfBelonging());
+
+        $em = $this->getDoctrine()->getManager();
+
+        $profile->setEndDate(new \DateTime('now'));
+
+        $em->persist($profile);
+        $em->flush();
+
+        $this->addFlash('success', 'Profile deprecated!');
+
+        return $this->redirectToRoute('profile_edit', [
+            'id' => $profile->getId(),
+            '_fragment' => 'identification'
+        ]);
     }
 
     /**

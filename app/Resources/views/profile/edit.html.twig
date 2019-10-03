@@ -145,15 +145,52 @@
             <h3>Identification</h3>
 
             <div class="object-identification-edit-form">
+                {% if profile.isOngoing and is_granted('full_edit', profile.projectOfBelonging) %}
+                    {{ form_start(profileIdentificationForm) }}
+                    {{ form_errors(profileIdentificationForm) }}
+                    {{ form_row(profileIdentificationForm.projectOfBelonging) }}
+                    {{ form_row(profileIdentificationForm.isForcedPublication) }}
+                    <p><button type="submit" class="btn btn-primary" formnovalidate>Save <span class="far fa-save"></span></button>
+                    <button type="button" class="btn btn-default" onclick="window.location.reload();">Cancel&nbsp;<i class="fas fa-undo-alt"></i></button></p>
+                    {{ form_end(profileIdentificationForm) }}
+                {% endif %}
+                {% if not is_granted('full_edit', profile.projectOfBelonging) %}
+                    <p>Project of belonging: <a href="{{ path('project_show', {'id': profile.projectOfBelonging.id}) }}">{{ profile.projectOfBelonging.standardLabel }}</a></p>
+                {% endif %}
+                {% if profile.isOngoing %}
+                <div class="alert alert-info">
+                    <p><i class="fas fa-info-circle"></i>&nbsp;This profile is ongoing</p>
+                </div>
+                    {% if is_granted('full_edit', profile.projectOfBelonging) %}
+                    <p>
+                        <a class="btn btn-success" role="button" id="publish-btn">
+                            Publish <i class="fas fa-check"></i>
+                        </a>
+                    </p>
+                    {% endif %}
+                {% elseif profile.wasClosedAt is not null and profile.endDate is null %}
+                    <p>Profile published and available since: {{ profile.startDate is empty ? '' : profile.startDate|date('Y-m-d') }}</p>
+                    {% if is_granted('full_edit', profile.projectOfBelonging) %}
+                        <p>
+                            <a class="btn btn-danger" role="button" id="deprecate-btn">
+                                Deprecate <i class="fas fa-ban"></i>
+                            </a>
+                        </p>
+                    {% endif %}
+                {% elseif profile.endDate is not null %}
+                    <p>This profile was published on {{ profile.startDate is empty ? '' : profile.startDate|date('Y-m-d') }} and is <strong>deprecated</strong> and to no longer use since: {{ profile.endDate is empty ? '' : profile.endDate|date('Y-m-d') }}</p>
+                {% endif %}
+
+                {# note: disabled template because we may no longer use this (to be confirmed at next sprint meeting)
                 {{ form_start(profileIdentificationForm) }}
                 {{ form_errors(profileIdentificationForm) }}
                 {{ form_row(profileIdentificationForm.projectOfBelonging) }}
-                {{ form_row(profileIdentificationForm.isOngoing) }}
                 {{ form_row(profileIdentificationForm.startDate) }}
                 {{ form_row(profileIdentificationForm.endDate) }}
                 <button type="submit" class="btn btn-primary" formnovalidate>Save <span class="far fa-save"></span></button>
                 <button type="button" class="btn btn-default" onclick="window.location.reload();">Cancel&nbsp;<i class="fas fa-undo-alt"></i></button>
                 {{ form_end(profileIdentificationForm) }}
+                #}
             </div>
             <div class="pull-right add-div">
                 <a href="{{ path('label_new', {'object': 'profile', 'objectId': profile.id })}}"
@@ -419,6 +456,81 @@
     $(document).ready(function() {
         $('.js-datepicker').datepicker({
             format: 'yyyy-mm-dd'
+        });
+
+        //confirmation box for publish action
+        $('#publish-btn').on('click', function() {
+            bootbox.confirm({
+                message: "Once a profile is published, it's not possible to make it ongoing again. Are you sure you want to publish this profile?",
+                buttons: {
+                    confirm: {
+                        label: 'Yes',
+                        className: 'btn-success'
+                    },
+                    cancel: {
+                        label: 'No',
+                        className: 'btn-danger'
+                    }
+                },
+                callback: function (result) {
+                    if(result){
+                        var profileID = '{{ profile.id }}';
+                        var urlProfilePublish = '{{ path("profile_publish", {'id' : 'profileID'}) }}';
+                        urlProfilePublish = urlProfilePublish.replace("profileID", profileID);
+                        window.location = urlProfilePublish;
+                    }
+                }
+            });
+        });
+
+        //confirmation box for deprecate action
+        $('#deprecate-btn').on('click', function() {
+            bootbox.confirm({
+                message: "Once a profile is deprecated, it's not possible to publish it again. Are you sure you want to make this profile deprecated?",
+                buttons: {
+                    confirm: {
+                        label: 'Yes',
+                        className: 'btn-success'
+                    },
+                    cancel: {
+                        label: 'No',
+                        className: 'btn-danger'
+                    }
+                },
+                callback: function (result) {
+                    if(result){
+                        var profileID = '{{ profile.id }}';
+                        var urlProfileDeprecate = '{{ path("profile_deprecate", {'id' : 'profileID'}) }}';
+                        urlProfileDeprecate = urlProfileDeprecate.replace("profileID", profileID);
+                        window.location = urlProfileDeprecate;
+                    }
+                }
+            });
+        });
+
+        //confirmation box for forced publication status
+        $('#profile_edit_form_isForcedPublication').on('change', function() {
+            if(this.checked){
+                bootbox.confirm({
+                    message: "It's not advisable to publish an ongoing profile. Are you sure you want to allow an API connection on this profile?",
+                    buttons: {
+                        confirm: {
+                            label: 'Yes',
+                            className: 'btn-success'
+                        },
+                        cancel: {
+                            label: 'No',
+                            className: 'btn-danger'
+                        }
+                    },
+                    callback: function (result) {
+                        if(!result){
+                            $('#profile_edit_form_isForcedPublication').prop('checked', false);
+                        }
+                    }
+                });
+            }
+
         });
 
         var profileID = {{ profile.id }};

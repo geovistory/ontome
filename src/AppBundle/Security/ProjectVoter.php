@@ -16,11 +16,13 @@ use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 class ProjectVoter extends Voter
 {
     const EDIT = 'edit';
+    const FULLEDIT = 'full_edit';
+    const EDITMANAGER = 'edit_manager';
 
     protected function supports($attribute, $subject)
     {
         // if the attribute isn't one we support, return false
-        if (!in_array($attribute, array(self::EDIT))) {
+        if (!in_array($attribute, array(self::EDIT, self::FULLEDIT, self::EDITMANAGER))) {
             return false;
         }
 
@@ -47,6 +49,10 @@ class ProjectVoter extends Voter
         switch ($attribute) {
             case self::EDIT:
                 return $this->canEdit($project, $user);
+            case self::FULLEDIT:
+                return $this->canFullEdit($project, $user);
+            case self::EDITMANAGER:
+                return $this->canEditManager($project, $user);
         }
 
         throw new \LogicException('This code should not be reached!');
@@ -55,7 +61,7 @@ class ProjectVoter extends Voter
     /**
      * @param Project $project
      * @param User $user
-     * @return bool TRUE if $user is the creator of $project
+     * @return bool TRUE if $user is the administrator or a manager of $project
      */
     private function canEdit(Project $project, User $user)
     {
@@ -64,11 +70,36 @@ class ProjectVoter extends Voter
                 return true;
             }
         }
+        return false;
+    }
 
-        /*if($user->getId() == $project->getCreator()->getId()) //TODO: à enlever après tests
-        {
-            return true;
-        }*/
+    /**
+     * @param Project $project
+     * @param User $user
+     * @return bool TRUE if $user is the administrator or a manager of $project
+     */
+    private function canEditManager(Project $project, User $user)
+    {
+        foreach ($user->getUserProjectAssociations()->getIterator() as $i => $userProjectAssociation) {
+            if ($userProjectAssociation->getProject() == $project && $userProjectAssociation->getPermission() <= 2 ) { //permission <= means that the user is a project admin or manager
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * @param Project $project
+     * @param User $user
+     * @return bool TRUE if $user is the administrator of $project
+     */
+    private function canFullEdit(Project $project, User $user)
+    {
+        foreach ($user->getUserProjectAssociations()->getIterator() as $i => $userProjectAssociation) {
+            if ($userProjectAssociation->getProject() == $project && $userProjectAssociation->getPermission() === 1 ) { //permission <= means that the user is a project admin
+                return true;
+            }
+        }
         return false;
     }
 }
