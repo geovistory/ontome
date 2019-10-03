@@ -253,7 +253,35 @@ class ProfileController  extends Controller
         ]);
     }
 
+    /**
+     * @Route("/profile/{id}/deprecate", name="profile_deprecate")
+     * @param Profile $profile
+     * @param Request $request
+     * @return Response the rendered template
+     */
+    public function deprecateAction(Profile $profile, Request $request)
+    {
+        if(is_null($profile)) {
+            throw $this->createNotFoundException('The profile n° '.$profile->getId().' does not exist. Please contact an administrator.');
+        }
 
+        //only the project of belonging administrator car deprecate a profile
+        $this->denyAccessUnlessGranted('full_edit', $profile->getProjectOfBelonging());
+
+        $em = $this->getDoctrine()->getManager();
+
+        $profile->setEndDate(new \DateTime('now'));
+
+        $em->persist($profile);
+        $em->flush();
+
+        $this->addFlash('success', 'Profile deprecated!');
+
+        return $this->redirectToRoute('profile_edit', [
+            'id' => $profile->getId(),
+            '_fragment' => 'identification'
+        ]);
+    }
 
     /**
      * @Route("/profile/{profile}/namespace/{namespace}/add", name="profile_namespace_association")

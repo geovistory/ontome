@@ -117,7 +117,7 @@
                     <div class="alert alert-info">
                         <p><i class="fas fa-info-circle"></i>&nbsp;This profile is ongoing</p>
                     </div>
-                {% elseif profile.wasClosedAt is not null %}
+                {% elseif profile.wasClosedAt is not null and profile.endDate is null %}
                     <p>Profile published and available since: {{ profile.startDate is empty ? '' : profile.startDate|date('Y-m-d') }}</p>
                 {% elseif profile.endDate is not null %}
                     <p>This profile was published on {{ profile.startDate is empty ? '' : profile.startDate|date('Y-m-d') }} and is <strong>deprecated</strong> and to no longer use since: {{ profile.endDate is empty ? '' : profile.endDate|date('Y-m-d') }}</p>

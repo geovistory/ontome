@@ -153,16 +153,16 @@
                     {% if is_granted('full_edit', profile.projectOfBelonging) %}
                     <p>
                         <a class="btn btn-primary" role="button" id="publish-btn">
-                            Publish <i class="fas fa-project-diagram"></i>
+                            Publish <i class="fas fa-check"></i>
                         </a>
                     </p>
                     {% endif %}
-                {% elseif profile.wasClosedAt is not null %}
+                {% elseif profile.wasClosedAt is not null and profile.endDate is null %}
                     <p>Profile published and available since: {{ profile.startDate is empty ? '' : profile.startDate|date('Y-m-d') }}</p>
                     {% if is_granted('full_edit', profile.projectOfBelonging) %}
                         <p>
                             <a class="btn btn-danger" role="button" id="deprecate-btn">
-                                Publish <i class="fas fa-ban"></i>
+                                Deprecate <i class="fas fa-ban"></i>
                             </a>
                         </p>
                     {% endif %}
@@ -466,6 +466,30 @@
                         var urlProfilePublish = '{{ path("profile_publish", {'id' : 'profileID'}) }}';
                         urlProfilePublish = urlProfilePublish.replace("profileID", profileID);
                         window.location = urlProfilePublish;
+                    }
+                }
+            });
+        });
+
+        $('#deprecate-btn').on('click', function() {
+            bootbox.confirm({
+                message: "Once a profile is deprecated, it's not possible to publish it again. Are you sure you want to make this profile deprecated?",
+                buttons: {
+                    confirm: {
+                        label: 'Yes',
+                        className: 'btn-success'
+                    },
+                    cancel: {
+                        label: 'No',
+                        className: 'btn-danger'
+                    }
+                },
+                callback: function (result) {
+                    if(result){
+                        var profileID = '{{ profile.id }}';
+                        var urlProfileDeprecate = '{{ path("profile_deprecate", {'id' : 'profileID'}) }}';
+                        urlProfileDeprecate = urlProfileDeprecate.replace("profileID", profileID);
+                        window.location = urlProfileDeprecate;
                     }
                 }
             });
