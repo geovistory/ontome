@@ -148,34 +148,12 @@ class NamespaceRepository extends EntityRepository
         $sql = "
           SELECT ns.* FROM che.namespace ns
           LEFT JOIN che.associates_entity_to_user_project aseup ON aseup.fk_namespace = ns.pk_namespace 
-          WHERE ns.pk_namespace IN(
-	        -- Retourne l'espace de nom géré par le projet
-	        (SELECT pk_namespace FROM che.namespace
-	        WHERE fk_project_for_top_level_namespace = :id_project
-	        ORDER BY is_ongoing DESC, creation_time DESC
-	        LIMIT 1 OFFSET 0)
-	        UNION
-	        -- Retourne les espaces de nom utilisés par les profils actifs du projet
-	        (SELECT DISTINCT fk_referenced_namespace FROM che.associates_referenced_namespace asrefns
-	        LEFT JOIN che.associates_entity_to_user_project aseup2 ON aseup2.fk_profile = asrefns.fk_profile 
-	        WHERE asrefns.fk_profile IN(
-	          SELECT fk_profile FROM che.associates_project
-		      WHERE fk_project = :id_project)
-	          AND ((aseup2.fk_system_type = 25 AND aseup2.fk_associate_user_to_project IN(
-	            SELECT pk_associate_user_to_project FROM che.associate_user_to_project
-		        WHERE fk_user = :id_user AND fk_project = :id_project)) 
-	          OR aseup2.fk_system_type IS NULL)
-	        )
-          )
-          AND ((aseup.fk_system_type = 25 AND aseup.fk_associate_user_to_project IN(
-            SELECT pk_associate_user_to_project FROM che.associate_user_to_project
-	        WHERE fk_user = :id_user AND fk_project = :id_project)) 
-	      OR aseup.fk_system_type IS NULL)
+          WHERE aseup.fk_system_type = 25
+          AND aseup.fk_associate_user_to_project = :id_asup
         ";
 
         $query = $this->getEntityManager()->createNativeQuery($sql, $rsm);
-        $query->setParameter('id_project', $userProjectAssociation->getProject()->getId());
-        $query->setParameter('id_user', $userProjectAssociation->getUser()->getId());
+        $query->setParameter('id_asup', $userProjectAssociation->getId());
         return $query->getResult();
     }
 

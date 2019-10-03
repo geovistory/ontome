@@ -343,6 +343,13 @@
                             console.log("[API] ERROR: "+data.message);
                         }
                         if(data.status == 'Success'){
+                            data.namespacesSelected.forEach((idNamespace) => {
+                                $('a[data-id='+idNamespace+']').removeClass("text-muted");
+                                $('a[data-id='+idNamespace+']').children('span').removeClass("text-muted");
+                                $('a[data-id='+idNamespace+']').children('span').removeClass("glyphicon-unchecked");
+                                $('a[data-id='+idNamespace+']').children('span').addClass("glyphicon-check");
+                                $('a[data-id='+idNamespace+']').next('a').removeClass("text-muted");
+                            })
                         }
                     }
                 });
@@ -371,9 +378,18 @@
                     type: 'DELETE',
                     dataType: 'json',
                     success:function(data){
-                    },
-                    statusCode: {
-                        204: function () {
+                        // handling the response data from the controller
+                        if(data.status == 'Error'){
+                            console.log("[API] ERROR: "+data.message);
+                        }
+                        if(data.status == 'Success'){
+                            data.namespacesRejected.forEach((idNamespace) => {
+                                $('a[data-id='+idNamespace+']').addClass("text-muted");
+                                $('a[data-id='+idNamespace+']').children('span').addClass("text-muted");
+                                $('a[data-id='+idNamespace+']').children('span').addClass("glyphicon-unchecked");
+                                $('a[data-id='+idNamespace+']').children('span').removeClass("glyphicon-check");
+                                $('a[data-id='+idNamespace+']').next('a').addClass("text-muted");
+                            })
                         }
                     }
                 });
@@ -398,6 +414,11 @@
                     type: 'POST',
                     dataType: 'json',
                     success:function(data){
+                        $('a[data-id='+selectedValue+']').removeClass("text-muted");
+                        $('a[data-id='+selectedValue+']').children('span').removeClass("text-muted");
+                        $('a[data-id='+selectedValue+']').children('span').removeClass("glyphicon-unchecked");
+                        $('a[data-id='+selectedValue+']').children('span').addClass("glyphicon-check");
+                        $('a[data-id='+selectedValue+']').next('a').removeClass("text-muted");
                     },
                     statusCode: {
                         204: function () {
@@ -424,6 +445,11 @@
                     type: 'DELETE',
                     dataType: 'json',
                     success:function(data){
+                        $('a[data-id='+selectedValue+']').addClass("text-muted");
+                        $('a[data-id='+selectedValue+']').children('span').addClass("text-muted");
+                        $('a[data-id='+selectedValue+']').children('span').addClass("glyphicon-unchecked");
+                        $('a[data-id='+selectedValue+']').children('span').removeClass("glyphicon-check");
+                        $('a[data-id='+selectedValue+']').next('a').addClass("text-muted");
                     },
                     statusCode: {
                         204: function () {

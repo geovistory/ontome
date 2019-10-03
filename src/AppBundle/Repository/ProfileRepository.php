@@ -39,6 +39,28 @@ class ProfileRepository extends EntityRepository
         $query->setParameter('id_user', $userProjectAssociation->getUser()->getId());
         return $query->getResult();
     }
+    public function findAllProfilesForUserProject(UserProjectAssociation $userProjectAssociation)
+    {
+        $rsm = new ResultSetMappingBuilder($this->getEntityManager());
+        $rsm->addRootEntityFromClassMetadata('AppBundle\Entity\Profile', 'prf');
+
+        $sql = "
+          SELECT prf.* FROM che.profile prf
+          LEFT JOIN che.associates_entity_to_user_project aseup ON aseup.fk_profile = prf.pk_profile 
+          WHERE prf.pk_profile IN(
+		    SELECT fk_profile FROM che.associates_project
+		    WHERE fk_project = :id_project
+	        )
+          AND (aseup.fk_associate_user_to_project IN(
+            SELECT pk_associate_user_to_project FROM che.associate_user_to_project
+	        WHERE fk_user = :id_user AND fk_project = :id_project))
+        ";
+
+        $query = $this->getEntityManager()->createNativeQuery($sql, $rsm);
+        $query->setParameter('id_project', $userProjectAssociation->getProject()->getId());
+        $query->setParameter('id_user', $userProjectAssociation->getUser()->getId());
+        return $query->getResult();
+    }
 
     /**
      * @return array
