@@ -145,15 +145,41 @@
             <h3>Identification</h3>
 
             <div class="object-identification-edit-form">
+                <p>Project of belonging: <a href="{{ path('project_show', {'id': profile.projectOfBelonging.id}) }}">{{ profile.projectOfBelonging.standardLabel }}</a></p>
+                {% if profile.isOngoing %}
+                <div class="alert alert-info">
+                    <p><i class="fas fa-info-circle"></i>&nbsp;This profile is ongoing</p>
+                </div>
+                    {% if is_granted('full_edit', profile.projectOfBelonging) %}
+                    <p>
+                        <a class="btn btn-primary" role="button" id="publish-btn">
+                            Publish <i class="fas fa-project-diagram"></i>
+                        </a>
+                    </p>
+                    {% endif %}
+                {% elseif profile.wasClosedAt is not null %}
+                    <p>Profile published and available since: {{ profile.startDate is empty ? '' : profile.startDate|date('Y-m-d') }}</p>
+                    {% if is_granted('full_edit', profile.projectOfBelonging) %}
+                        <p>
+                            <a class="btn btn-danger" role="button" id="deprecate-btn">
+                                Publish <i class="fas fa-ban"></i>
+                            </a>
+                        </p>
+                    {% endif %}
+                {% elseif profile.endDate is not null %}
+                    <p>This profile was published on {{ profile.startDate is empty ? '' : profile.startDate|date('Y-m-d') }} and is <strong>deprecated</strong> and to no longer use since: {{ profile.endDate is empty ? '' : profile.endDate|date('Y-m-d') }}</p>
+                {% endif %}
+
+                {# note: disabled template because we may no longer use this (to be confirmed at next sprint meeting)
                 {{ form_start(profileIdentificationForm) }}
                 {{ form_errors(profileIdentificationForm) }}
                 {{ form_row(profileIdentificationForm.projectOfBelonging) }}
-                {{ form_row(profileIdentificationForm.isOngoing) }}
                 {{ form_row(profileIdentificationForm.startDate) }}
                 {{ form_row(profileIdentificationForm.endDate) }}
                 <button type="submit" class="btn btn-primary" formnovalidate>Save <span class="far fa-save"></span></button>
                 <button type="button" class="btn btn-default" onclick="window.location.reload();">Cancel&nbsp;<i class="fas fa-undo-alt"></i></button>
                 {{ form_end(profileIdentificationForm) }}
+                #}
             </div>
             <div class="pull-right add-div">
                 <a href="{{ path('label_new', {'object': 'profile', 'objectId': profile.id })}}"
@@ -419,6 +445,30 @@
     $(document).ready(function() {
         $('.js-datepicker').datepicker({
             format: 'yyyy-mm-dd'
+        });
+
+        $('#publish-btn').on('click', function() {
+            bootbox.confirm({
+                message: "Once a profile is published, it's not possible to make it ongoing again. Are you sure you want to publish this profile?",
+                buttons: {
+                    confirm: {
+                        label: 'Yes',
+                        className: 'btn-success'
+                    },
+                    cancel: {
+                        label: 'No',
+                        className: 'btn-danger'
+                    }
+                },
+                callback: function (result) {
+                    if(result){
+                        var profileID = '{{ profile.id }}';
+                        var urlProfilePublish = '{{ path("profile_publish", {'id' : 'profileID'}) }}';
+                        urlProfilePublish = urlProfilePublish.replace("profileID", profileID);
+                        window.location = urlProfilePublish;
+                    }
+                }
+            });
         });
 
         var profileID = {{ profile.id }};
