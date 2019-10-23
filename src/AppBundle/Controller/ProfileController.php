@@ -821,7 +821,7 @@ class ProfileController  extends Controller
     }
 
     /**
-     * @Route("/profile/{id}/json", name="profile_json")
+     * @Route("/profile/{id}/json", name="profile_json", schemes={"http"})
      * @Method("GET")
      * @param Profile $profile
      * @return JsonResponse a Json formatted graph representation of Profile
