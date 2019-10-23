@@ -95,8 +95,12 @@
                     </div>
                 </div>
                 <div id="my-current-namespaces" class="tab-pane fade">
-                    <h3>Namespaces whose classes and properties are displayed</h3>
+                    <h3>Namespaces whose classes and properties are displayed
+                    </h3>
                     <div class="row">
+                        <div class="col-lg-12">
+                            <a href="{{ path('user_reinitialization', {id: user.id}) }}" class="btn btn-success">Réinitialiser</a>
+                        </div>
                         <div class="col-lg-6">
                             <h4>Managed by the project</h4>
                             <div>

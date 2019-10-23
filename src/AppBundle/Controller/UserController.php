@@ -862,6 +862,43 @@ class UserController extends Controller
         return new JsonResponse($response);
 
     }
+    /**
+     * @Route("/user/{id}/reinitialization", name="user_reinitialization", requirements={"id"="\d+"})
+     * @param $user User
+     * @return Response
+     */
+    public function reinitialization(Request $request, User $user){
+        // récupérer l'id du projet actif
+        $currentProject = $user->getCurrentActiveProject();
+        $em = $this->getDoctrine()->getManager();
+        $upa = $em->getRepository('AppBundle:UserProjectAssociation')->findOneBy(array(
+            "user" => $user,
+            "project" => $currentProject
+        ));
+
+
+        // mettre tout à 26 (désactivation)
+        $eupas = $em->getRepository('AppBundle:EntityUserProjectAssociation')->findBy(array(
+            "userProjectAssociation" => $upa
+        ));
+
+        foreach ($eupas as $eupa) {
+            $systemTypeSelected = $em->getRepository('AppBundle:SystemType')->find(26);
+            $eupa->setSystemType($systemTypeSelected);
+            $eupa->setModifier($this->getUser());
+            $eupa->setModificationTime(new \DateTime('now'));
+            $em->persist($eupa);
+            $em->flush();
+        }
+
+        // remettre à 25 les namespaces rattachés au projet par défaut
+
+        // rediriger sur la page showAction
+        return $this->redirectToRoute('user_show', [
+            'id' => $user->getId(),
+            '_fragment' => 'my-current-namespaces'
+        ]);
+    }
 
     function captchaVerify($recaptcha){
         $url = "https://www.google.com/recaptcha/api/siteverify";
