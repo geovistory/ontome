@@ -14,6 +14,7 @@
             <li><a data-toggle="tab" href="#project-hierarchy">Hierarchy</a></li>
             <li><a data-toggle="tab" href="#managed-namespaces">Namespaces</a></li>
             <li><a data-toggle="tab" href="#profiles">Profiles</a></li>
+            <li><a data-toggle="tab" href="#members">Members</a></li>
         </ul>
         <div class="tab-content">
             <div id="summary" class="tab-pane fade in active">
@@ -313,6 +314,58 @@
                     </tbody>
                 </table>
             </div>
+            <div id="members" class="tab-pane fade">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h3>Members of the project</h3>
+                        <table class="table table-striped" id="members-of-the-project-table">
+                            <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Institution</th>
+                                <th>Role</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for userProjectAssociation in project.userProjectAssociations if userProjectAssociation.project == project.id %}
+                                <tr>
+                                    <td>{{ userProjectAssociation.user }}</td>
+                                    <td>{{ userProjectAssociation.user.institution }}</td>
+                                    <td>
+                                        {% if userProjectAssociation.permission == 1 %}
+                                           <span class="label label-danger">Administrator</span>
+                                        {% elseif userProjectAssociation.permission == 2 %}
+                                            <span class="label label-warning">Manager</span>
+                                        {% elseif userProjectAssociation.permission == 3 %}
+                                        {{ userProjectAssociation.permission }}
+                                            <span class="label label-success">Member</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <h3>OntoME users</h3>
+                        <table class="table table-striped" id="ontome-users-table">
+                            <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Institution</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for user in users %}
+                                <tr>
+                                    <td>{{ user.fullname }}</td>
+                                    <td>{{ user.institution }}</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+            </div>
         </div>
     </div>
 
@@ -332,6 +385,8 @@
             $('#managed-namespaces-table').DataTable();
             $('#owned-profiles-table').DataTable();
             $('#associated-profiles-table').DataTable();
+            $('#members-of-the-project-table').DataTable();
+            $('#ontome-users-table').DataTable();
 
         } );
     </script>

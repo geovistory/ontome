@@ -214,8 +214,12 @@ class ProjectController  extends Controller
 
         $em = $this->getDoctrine()->getManager();
 
+        $users = $em->getRepository('AppBundle:User')
+            ->findAllNotInProject($project);
+
         return $this->render('project/edit.html.twig', array(
-            'project' => $project
+            'project' => $project,
+            'users' => $users
         ));
     }
 }
