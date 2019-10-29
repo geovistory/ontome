@@ -397,7 +397,7 @@ class UserController extends Controller
                 }
             }
         }*/
-        
+
         $activeProfiles = new ArrayCollection($em->getRepository('AppBundle:Profile')
             ->findAllActiveProfilesForUserProject($userActiveProjectAssociation));
 
