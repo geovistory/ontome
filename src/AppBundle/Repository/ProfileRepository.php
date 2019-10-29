@@ -39,6 +39,7 @@ class ProfileRepository extends EntityRepository
         $query->setParameter('id_user', $userProjectAssociation->getUser()->getId());
         return $query->getResult();
     }
+
     public function findAllProfilesForUserProject(UserProjectAssociation $userProjectAssociation)
     {
         $rsm = new ResultSetMappingBuilder($this->getEntityManager());
