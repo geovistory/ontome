@@ -891,7 +891,65 @@ class UserController extends Controller
             $em->flush();
         }
 
-        // remettre à 25 les namespaces rattachés au projet par défaut
+        // userProjectAssociation with current active project
+        $userCurrentActiveProjectAssociation =$em->getRepository('AppBundle:UserProjectAssociation')
+            ->findOneBy(array(
+                    'user' => $user->getId(),
+                    'project' => $user->getCurrentActiveProject()->getId())
+            );
+
+        // remettre à 25 les profiles/namespaces rattachés au projet par défaut
+        $defaultNamespace = $em->getRepository('AppBundle:OntoNamespace')
+            ->findDefaultNamespaceForProject($user->getCurrentActiveProject());
+
+        $eupa = $em->getRepository('AppBundle:EntityUserProjectAssociation')
+            ->findOneBy(array(
+                    'namespace' => $defaultNamespace->getId(),
+                    'userProjectAssociation' => $userCurrentActiveProjectAssociation->getId()
+                )
+            );
+
+        $systemTypeSelected = $em->getRepository('AppBundle:SystemType')->find(25);
+        $eupa->setSystemType($systemTypeSelected);
+        $eupa->setModificationTime(new \DateTime('now'));
+        $eupa->setModifier($this->getUser());
+        $em->persist($eupa);
+        $em->flush();
+
+        $profilesUserProject = new ArrayCollection($em->getRepository('AppBundle:Profile')
+            ->findAllProfilesForUserProject($userCurrentActiveProjectAssociation));
+
+
+        foreach ($profilesUserProject as $profile){
+            $eupa = $em->getRepository('AppBundle:EntityUserProjectAssociation')
+                ->findOneBy(array(
+                        'profile' => $profile->getId(),
+                        'userProjectAssociation' => $userCurrentActiveProjectAssociation->getId()
+                    )
+                );
+
+            $systemTypeSelected = $em->getRepository('AppBundle:SystemType')->find(25);
+            $eupa->setSystemType($systemTypeSelected);
+            $eupa->setModificationTime(new \DateTime('now'));
+            $eupa->setModifier($this->getUser());
+            $em->persist($eupa);
+            $em->flush();
+
+            foreach($profile->getNamespaces() as $namespace){
+                $eupa = $em->getRepository('AppBundle:EntityUserProjectAssociation')
+                    ->findOneBy(array(
+                            'namespace' => $namespace->getId(),
+                            'userProjectAssociation' => $userCurrentActiveProjectAssociation->getId()
+                        )
+                    );
+                $systemTypeSelected = $em->getRepository('AppBundle:SystemType')->find(25);
+                $eupa->setSystemType($systemTypeSelected);
+                $eupa->setModificationTime(new \DateTime('now'));
+                $eupa->setModifier($this->getUser());
+                $em->persist($eupa);
+                $em->flush();
+            }
+        }
 
         // rediriger sur la page showAction
         return $this->redirectToRoute('user_show', [
