@@ -118,13 +118,19 @@
                                 {% endif %}
                             </div>
                             {% if defaultNamespace.referencedNamespaceAssociations|length > 0 %}
-                                <div class="small text-muted"><strong><em>Referenced :</em></strong></div>
-                            {% endif %}
-                            <ul>
-                                {% for referencedNamespaceAssociation in defaultNamespace.referencedNamespaceAssociations %}
+                                {% set break = false %}
+                                {% for referencedNamespaceAssociation in defaultNamespace.referencedNamespaceAssociations if referencedNamespaceAssociation.namespace is not null and not break %}
+                                    {% set break = true %}
+                                    <div class="small text-muted"><strong><em>Referenced :</em></strong></div>
+                                {% endfor %}
+                                {% if break %}
+                                <ul>
+                                {% for referencedNamespaceAssociation in defaultNamespace.referencedNamespaceAssociations if referencedNamespaceAssociation.namespace is not null %}
                                     <li class="list-unstyled"><em class="text-muted">{{ referencedNamespaceAssociation.namespace.standardLabel }}</em></li>
                                 {% endfor %}
-                            </ul>
+                                </ul>
+                                {% endif %}
+                            {% endif %}
                             {% endif %}
                             <h4>Additional namespaces</h4>
                             <div id="additional-namespaces-list">
@@ -136,13 +142,19 @@
                                     <a href="#" class="remove-namespace" data-id="{{ additionalNamespace.id }}"><span class="glyphicon glyphicon-remove text-danger" aria-hidden="true"></span></a>
                                     <a href="{{ path('namespace_show', {'id': additionalNamespace.id}) }}">{{ additionalNamespace.standardLabel }}</a>
                                     {% if additionalNamespace.referencedNamespaceAssociations|length > 0 %}
-                                        <div class="small"><strong><em>Referenced :</em></strong></div>
-                                    {% endif %}
-                                    <ul>
-                                        {% for referencedNamespaceAssociation in additionalNamespace.referencedNamespaceAssociations if referencedNamespaceAssociation.namespace is not null %}
-                                            <li class="list-unstyled"><em>{{ referencedNamespaceAssociation.namespace.standardLabel }}</em></li>
+                                        {% set break = false %}
+                                        {% for referencedNamespaceAssociation in additionalNamespace.referencedNamespaceAssociations if referencedNamespaceAssociation.namespace is not null and not break %}
+                                            {% set break = true %}
+                                            <div class="small text-muted"><strong><em>Referenced :</em></strong></div>
                                         {% endfor %}
-                                    </ul>
+                                        {% if break %}
+                                        <ul>
+                                        {% for referencedNamespaceAssociation in additionalNamespace.referencedNamespaceAssociations if referencedNamespaceAssociation.namespace is not null %}
+                                            <li class="list-unstyled"><em class="text-muted">{{ referencedNamespaceAssociation.namespace.standardLabel }}</em></li>
+                                        {% endfor %}
+                                        </ul>
+                                        {% endif %}
+                                    {% endif %}
                                 </div>
                             {% endfor %}
                             </div>
@@ -162,7 +174,7 @@
                         <div class="col-lg-6">
                             <h4>Selected from project profiles</h4>
                             {% if userActiveProjectAssociation.project.profiles|length == 0 %}
-                                <p class="text-muted"><em>No one profile uses this project.</em></p>
+                                <p class="text-muted"><em>This project does not manage any profile.</em></p>
                             {% endif %}
                             {% for profile in userActiveProjectAssociation.project.profiles %}
                                 <div>
