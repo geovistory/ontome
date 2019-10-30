@@ -28,9 +28,9 @@
             </div>
             <div class="col-xs-4">
                 {% if is_granted('ROLE_USER') %}
-                    <p class="text-right"><a class="btn btn-default" href="{{ path('security_logout') }}">Logout</a></p>
+                    <p class="text-right"><a class="btn btn-default" href="{{ path('security_logout') }}">LOGOUT</a></p>
                 {% else %}
-                    <p class="text-right"><a class="btn btn-default" href="{{ path('security_login') }}">Login</a></p>
+                    <p class="text-right"><a class="btn btn-default" href="{{ path('security_login') }}">LOGIN</a></p>
                 {% endif %}
             </div>
         </div>
