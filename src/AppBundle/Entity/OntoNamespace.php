@@ -240,7 +240,7 @@ class OntoNamespace
     private $childVersions;
 
     /**
-     * @ORM\OneToMany(targetEntity="ReferencedNamespaceAssociation", mappedBy="referencedNamespace")
+     * @ORM\OneToMany(targetEntity="ReferencedNamespaceAssociation", mappedBy="namespace")
      * @ORM\OrderBy({"id" = "ASC"})
      */
     private $referencedNamespaceAssociations;

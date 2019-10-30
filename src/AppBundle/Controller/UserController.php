@@ -297,6 +297,15 @@ class UserController extends Controller
 
         $em = $this->getDoctrine()->getManager();
 
+        // Public project = 21
+        $publicProject = $em->getRepository('AppBundle:Project')->find(21);
+
+        if(is_null($user->getCurrentActiveProject())){
+            $user->setCurrentActiveProject($publicProject);
+            $em->persist($user);
+            $em->flush();
+        }
+
         // Pour l'onglet My Project
         // On récupère tous les userProjectAssociations de l'utilisateur dans un ArrayCollection
         $userProjectAssociations = new ArrayCollection($em->getRepository('AppBundle:UserProjectAssociation')
@@ -311,8 +320,6 @@ class UserController extends Controller
                 break;
             }
         }
-        // Public project = 21
-        $publicProject = $em->getRepository('AppBundle:Project')->find(21);
 
         // Non il ne l'a pas : on le crée et on rajoute dans l'ArrayCollection
         if(!$hasUserPublicProjectAssociation)
@@ -574,7 +581,7 @@ class UserController extends Controller
             }
 
         }
-        $this->addFlash('success', 'Current active project updated!');
+        //$this->addFlash('success', 'Current active project updated!');
 
         return $this->redirectToRoute('user_show', [
             'id' => $user->getId(),

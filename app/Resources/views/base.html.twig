@@ -73,14 +73,7 @@
                     </li>
                 </ul>
             </li>
-            <li class="{{ 'property' in route and 'text_property' not in route or textProperty is defined and textProperty.property is not null ? 'active' }}"><a href="#" class="dropdown-toggle" data-toggle="dropdown">Properties <span class="caret"></span></a>
-                <ul class="dropdown-menu">
-                    <li><a href="{{ url('app_property_list') }}">Properties list</a>
-                    </li>
-                    <li><a href="{{ url('app_property_gettree') }}">Properties tree</a>
-                    </li>
-                </ul>
-            </li>
+            <li class="{{ 'property' in route and 'text_property' not in route or textProperty is defined and textProperty.property is not null ? 'active' }}"><a href="{{ url('app_property_list') }}">Properties</a></li>
             <li class="{{ 'namespace' in route ? 'active' }}"><a href="{{ url('app_namespace_list') }}">Namespaces</a></li>
             <li class="{{ 'project' in route or textProperty is defined and textProperty.project is not null ? 'active' }}"><a href="{{ url('app_project_list') }}">Projects</a></li>
             <li class="{{ 'profile' in route ? 'active' }}"><a href="{{ url('app_profile_list') }}">Profiles</a></li>
@@ -92,8 +85,15 @@
             <li><a href="http://phn-wiki.ish-lyon.cnrs.fr/doku.php?id=ontome:index" target="_blank"><i class="fas fa-question-circle"></i> User guide</a></li>
         </ul>
         {% if app.user is not null and app.user.currentActiveProject is not null %}
-        <p class="navbar-text navbar-right">
-            <strong>Active project :</strong> <a href="{{ path('project_show', {'id': app.user.currentActiveProject.id}) }}">{{ app.user.currentActiveProject }}</a> <a href="{{ path('user_show', {'id': app.user.id, '_fragment': 'my-projects'}) }}"><i class="fas fa-edit"></i></a>
+        <p class="navbar-text navbar-right" style="margin-right: 12px;">
+            <strong>Active project :</strong>
+            <a href="{{ path('project_show', {'id': app.user.currentActiveProject.id}) }}">{{ app.user.currentActiveProject }}</a> <a href="{{ path('user_show', {'id': app.user.id, '_fragment': 'my-projects'}) }}"><i class="fas fa-edit"></i></a>
+        </p>
+        {% else %}
+        <p class="navbar-text navbar-right" style="margin-right: 12px;">
+            <strong>Active project :</strong>
+            <a href="{{ path('project_show', {'id': '21'}) }}">Public project</a>
+            {% if app.user is not null %}<a href="{{ path('user_show', {'id': app.user.id, '_fragment': 'my-projects'}) }}"><i class="fas fa-edit"></i></a>{% endif %}
         </p>
         {% endif %}
     </div>
@@ -191,6 +191,7 @@
             // Change hash for page-reload
             $('a[data-toggle="tab"]').on('show.bs.tab', function (e) {
                 window.location.hash = e.target.hash;
+                $().alert('close');
             });
 
             $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
