@@ -119,14 +119,14 @@
                             </div>
                             {% if defaultNamespace.referencedNamespaceAssociations|length > 0 %}
                                 {% set break = false %}
-                                {% for referencedNamespaceAssociation in defaultNamespace.referencedNamespaceAssociations if referencedNamespaceAssociation.namespace is not null and not break %}
+                                {% for referencedNamespaceAssociation in defaultNamespace.referencedNamespaceAssociations if referencedNamespaceAssociation.referencedNamespace is not null and not break %}
                                     {% set break = true %}
                                     <div class="small text-muted"><strong><em>Referenced :</em></strong></div>
                                 {% endfor %}
                                 {% if break %}
                                 <ul>
-                                {% for referencedNamespaceAssociation in defaultNamespace.referencedNamespaceAssociations if referencedNamespaceAssociation.namespace is not null %}
-                                    <li class="list-unstyled"><em class="text-muted">{{ referencedNamespaceAssociation.namespace.standardLabel }}</em></li>
+                                {% for referencedNamespaceAssociation in defaultNamespace.referencedNamespaceAssociations if referencedNamespaceAssociation.referencedNamespace is not null %}
+                                    <li class="list-unstyled"><em class="text-muted">{{ referencedNamespaceAssociation.referencedNamespace.standardLabel }}</em></li>
                                 {% endfor %}
                                 </ul>
                                 {% endif %}
@@ -143,14 +143,14 @@
                                     <a href="{{ path('namespace_show', {'id': additionalNamespace.id}) }}">{{ additionalNamespace.standardLabel }}</a>
                                     {% if additionalNamespace.referencedNamespaceAssociations|length > 0 %}
                                         {% set break = false %}
-                                        {% for referencedNamespaceAssociation in additionalNamespace.referencedNamespaceAssociations if referencedNamespaceAssociation.namespace is not null and not break %}
+                                        {% for referencedNamespaceAssociation in additionalNamespace.referencedNamespaceAssociations if referencedNamespaceAssociation.referencedNamespace is not null and not break %}
                                             {% set break = true %}
                                             <div class="small text-muted"><strong><em>Referenced :</em></strong></div>
                                         {% endfor %}
                                         {% if break %}
                                         <ul>
-                                        {% for referencedNamespaceAssociation in additionalNamespace.referencedNamespaceAssociations if referencedNamespaceAssociation.namespace is not null %}
-                                            <li class="list-unstyled"><em class="text-muted">{{ referencedNamespaceAssociation.namespace.standardLabel }}</em></li>
+                                        {% for referencedNamespaceAssociation in additionalNamespace.referencedNamespaceAssociations if referencedNamespaceAssociation.referencedNamespace is not null %}
+                                            <li class="list-unstyled"><em class="text-muted">{{ referencedNamespaceAssociation.referencedNamespace.standardLabel }}</em></li>
                                         {% endfor %}
                                         </ul>
                                         {% endif %}
