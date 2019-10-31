@@ -318,53 +318,31 @@
                 <div class="row">
                     <div class="col-md-6">
                         <h3>Members of the project</h3>
-                        <table class="table table-striped" id="members-of-the-project-table">
+                        <table class="table table-striped" id="members-of-the-project-table" style="width:100%">
                             <thead>
                             <tr>
+                                <th></th>
+                                <th></th>
                                 <th>Name</th>
                                 <th>Institution</th>
                                 <th>Role</th>
                             </tr>
                             </thead>
-                            <tbody>
-                            {% for userProjectAssociation in project.userProjectAssociations if userProjectAssociation.project == project.id %}
-                                <tr>
-                                    <td>{{ userProjectAssociation.user }}</td>
-                                    <td>{{ userProjectAssociation.user.institution }}</td>
-                                    <td>
-                                        {% if userProjectAssociation.permission == 1 %}
-                                           <span class="label label-danger">Administrator</span>
-                                        {% elseif userProjectAssociation.permission == 2 %}
-                                            <span class="label label-warning">Manager</span>
-                                        {% elseif userProjectAssociation.permission == 3 %}
-                                        {{ userProjectAssociation.permission }}
-                                            <span class="label label-success">Member</span>
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                            </tbody>
                         </table>
                     </div>
                     <div class="col-md-6">
                         <h3>OntoME users</h3>
-                        <table class="table table-striped" id="ontome-users-table">
+                        <table class="table table-striped" id="ontome-users-table" style="width:100%">
                             <thead>
                             <tr>
+                                <th>ID</th>
                                 <th>Name</th>
                                 <th>Institution</th>
                             </tr>
                             </thead>
-                            <tbody>
-                            {% for user in users %}
-                                <tr>
-                                    <td>{{ user.fullname }}</td>
-                                    <td>{{ user.institution }}</td>
-                                </tr>
-                            {% endfor %}
-                            </tbody>
                         </table>
                     </div>
+                </div>
             </div>
         </div>
     </div>
@@ -377,6 +355,16 @@
 
     <script>
         $(document).ready(function() {
+            var projectID = {{ project.id }};
+            var urlSelectableMembers = '{{ path("selectable_members_project_json", {'project' : 'projectID'}) }}';
+            urlSelectableMembers = urlSelectableMembers.replace("projectID", projectID);
+
+            var urlAssociatedMembers = '{{ path("associated_members_project_json", {'project' : 'projectID'}) }}';
+            urlAssociatedMembers = urlAssociatedMembers.replace("projectID", projectID);
+
+            var isAdmin = {{ is_granted('full_edit', project) }};
+            var isManager = {{ is_granted('edit_manager', project) }}; //an admin IS a manager too
+
             $('#labels-table').DataTable();
             $('#description-table').DataTable();
             $('#additional-notes-table').DataTable();
@@ -385,8 +373,113 @@
             $('#managed-namespaces-table').DataTable();
             $('#owned-profiles-table').DataTable();
             $('#associated-profiles-table').DataTable();
-            $('#members-of-the-project-table').DataTable();
-            $('#ontome-users-table').DataTable();
+            var associatedMembersTable = $('#members-of-the-project-table').DataTable({
+                order: [[ 4, "asc" ]],
+                ajax: urlAssociatedMembers,
+                dataSrc: 'data',
+                columns: [
+                    { data: 'associationId' },
+                    { data: 'id' },
+                    { data: 'fullname' },
+                    { data: 'institution' },
+                    { data: 'permission' }
+                ],
+                columnDefs: [
+                    {
+                        targets: 0,
+                        render: function ( data, type, row, meta ) {
+
+                            var urlRemoveMember = '{{ path("profile_member_disassociation", {'id' : 'associationId'}) }}';
+                            urlRemoveMember = urlRemoveMember.replace("associationId", data);
+                            if(isAdmin) {
+                                return '<a data-id="' + data + '" data-url="' + urlRemoveMember + '" class="remove-member"><span class="glyphicon glyphicon-remove text-danger" aria-hidden="true"></span></a><span class="remove-member-loading-icon" data-id="' + row.data + '" style="display: none"><span class="fas fa-spinner fa-spin"></span></span>';
+                            }
+                            else return '';
+                        }
+                    },
+                    {
+                        targets: 4,
+                        render: function ( data, type, row, meta ) {
+                            var permissionBadge = '';
+                            if(data == 1){
+                                permissionBadge = '<span class="label label-danger">Administrator</span>';
+                            }
+                            else if(data == 2){
+                                permissionBadge = '<span class="label label-warning">Manager</span>';
+                            }
+                            else if(data == 3){
+                                permissionBadge = '<span class="label label-success">Member</span>';
+                            }
+
+                            return permissionBadge;
+
+                        }
+                    },
+                    {
+                        visible: false,
+                        targets: [1]
+                    }
+                ]
+            });
+
+            var selectableMembersTable = $('#ontome-users-table').DataTable({
+                ajax: urlSelectableMembers,
+                dataSrc: 'data',
+                columns: [
+                    { data: 'id' },
+                    { data: 'fullname' },
+                    { data: 'institution' },
+                ],
+                columnDefs: [
+                    {
+                        targets: 1,
+                        render: function ( data, type, row, meta ) {
+                            var urlSelectMember = '{{ path("project_user_association", {'project' : 'projectID', 'user' : 'id'}) }}';
+                            urlSelectMember = urlSelectMember.replace("projectID", projectID);
+                            urlSelectMember = urlSelectMember.replace("id", row.id);
+                            return '<a data-id="'+row.id+'" data-url="'+urlSelectMember+'" class="select-member"><span class="plus-icon" data-id="'+row.id+'"><span class="fas fa-plus"></span></span><span class="select-member-loading-icon" data-id="'+row.id+'" style="display: none"><span class="fas fa-spinner fa-spin"></span></span></a>&nbsp;' + data;
+                        }
+                    },
+                    {
+                        visible: false,
+                        targets: [0]
+                    }
+                ]
+            });
+
+            $(document).on("click", ".select-member", function() {
+                var selectedValue = $(this).data("id");
+                $(".plus-icon[data-id='"+selectedValue+"']").hide(0);
+                $(".select-member-loading-icon[data-id='"+selectedValue+"']").css('display','inline');
+                var url =  $(this).data("url");
+                console.log(url);
+                $.ajax({
+                    url: url ,
+                    type: 'POST',
+                    dataType: 'json',
+                    success:function(data){
+                        selectableMembersTable.ajax.reload();
+                        associatedMembersTable.ajax.reload();
+                    }
+                });
+            });
+
+            $(document).on("click", ".remove-member", function() {
+                var selectedValue = $(this).data("id");
+                $(".remove-member[data-id='"+selectedValue+"']").hide(0);
+                $(".remove-member-loading-icon[data-id='"+selectedValue+"']").css('display','inline');
+                var url =  $(this).data("url");
+                console.log(url);
+                $.ajax({
+                    url: url ,
+                    type: 'POST',
+                    dataType: 'json',
+                    success:function(data){
+                        associatedMembersTable.ajax.reload();
+                        selectableMembersTable.ajax.reload();
+                    }
+                });
+            });
 
         } );
     </script>
