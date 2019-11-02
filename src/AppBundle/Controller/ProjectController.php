@@ -296,7 +296,7 @@ class ProjectController  extends Controller
 
         if (!is_null($userProjectAssociation)) {
             $status = 'Error';
-            $message = 'This user is already member of this profile.';
+            $message = 'This user is already member of this project.';
         }
         else {
             $em = $this->getDoctrine()->getManager();
@@ -326,7 +326,42 @@ class ProjectController  extends Controller
     }
 
     /**
-     * @Route("/user-project-association/{id}/delete", name="profile_member_disassociation")
+     * @Route("/user-project-association/{id}/permission/{permission}/edit", name="project_member_permission_edit")
+     * @Method({ "POST"})
+     * @param UserProjectAssociation  $userProjectAssociation   The user to project association to be edited
+     * @param int  $permission    The permission to
+     * @throws \Exception in case of unsuccessful association
+     * @return JsonResponse $response
+     */
+    public function editProjectUserAssociationPermissionAction(UserProjectAssociation $userProjectAssociation, $permission, Request $request)
+    {
+        $this->denyAccessUnlessGranted('edit_manager', $userProjectAssociation->getProject());
+
+        try{
+            $em = $this->getDoctrine()->getManager();
+
+            $userProjectAssociation->setPermission($permission);
+            $userProjectAssociation->setModifier($this->getUser());
+            $em->persist($userProjectAssociation);
+            $em->flush();
+            $status = 'Success';
+            $message = 'Permission successfully edited.';
+        }
+        catch (\Exception $e) {
+            return new JsonResponse(null, 400, 'content-type:application/problem+json');
+        }
+
+
+        $response = array(
+            'status' => $status,
+            'message' => $message
+        );
+
+        return new JsonResponse($response);
+    }
+
+    /**
+     * @Route("/user-project-association/{id}/delete", name="project_member_disassociation")
      * @Method({ "POST"})
      * @param UserProjectAssociation  $userProjectAssociation   The user to project association to be deleted
      * @return JsonResponse a Json 204 HTTP response
@@ -334,10 +369,14 @@ class ProjectController  extends Controller
     public function deleteProfileClassAssociationAction(UserProjectAssociation $userProjectAssociation, Request $request)
     {
         $this->denyAccessUnlessGranted('edit_manager', $userProjectAssociation->getProject());
-        $em = $this->getDoctrine()->getManager();
-        $em->remove($userProjectAssociation);
-        $em->flush();
-
+        try {
+            $em = $this->getDoctrine()->getManager();
+            $em->remove($userProjectAssociation);
+            $em->flush();
+        }
+        catch (\Exception $e) {
+            return new JsonResponse(null, 400, 'content-type:application/problem+json');
+        }
         return new JsonResponse(null, 204);
 
     }

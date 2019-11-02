@@ -364,6 +364,7 @@
 
             var isAdmin = {{ is_granted('full_edit', project) }};
             var isManager = {{ is_granted('edit_manager', project) }}; //an admin IS a manager too
+            var currentUserId = {{ app.user.id }};
 
             $('#labels-table').DataTable();
             $('#description-table').DataTable();
@@ -389,30 +390,88 @@
                         targets: 0,
                         render: function ( data, type, row, meta ) {
 
-                            var urlRemoveMember = '{{ path("profile_member_disassociation", {'id' : 'associationId'}) }}';
+                            var urlRemoveMember = '{{ path("project_member_disassociation", {'id' : 'associationId'}) }}';
                             urlRemoveMember = urlRemoveMember.replace("associationId", data);
-                            if(isAdmin) {
-                                return '<a data-id="' + data + '" data-url="' + urlRemoveMember + '" class="remove-member"><span class="glyphicon glyphicon-remove text-danger" aria-hidden="true"></span></a><span class="remove-member-loading-icon" data-id="' + row.data + '" style="display: none"><span class="fas fa-spinner fa-spin"></span></span>';
+
+                            var renderedRemoveIcon = '';
+
+                            if(isAdmin && currentUserId != row.id) {
+                                renderedRemoveIcon = '<a data-id="' + data + '" data-url="' + urlRemoveMember + '" class="remove-member"><span class="glyphicon glyphicon-remove text-danger" aria-hidden="true"></span></a><span class="remove-member-loading-icon" data-id="' + row.data + '" style="display: none"><span class="fas fa-spinner fa-spin"></span></span>';
                             }
-                            else return '';
+                            else if(isManager && !isAdmin && row.permission == 3)
+                            {
+                                renderedRemoveIcon = '<a data-id="' + data + '" data-url="' + urlRemoveMember + '" class="remove-member"><span class="glyphicon glyphicon-remove text-danger" aria-hidden="true"></span></a><span class="remove-member-loading-icon" data-id="' + row.data + '" style="display: none"><span class="fas fa-spinner fa-spin"></span></span>';
+                            }
+                            else renderedRemoveIcon = '';
+
+                            return renderedRemoveIcon;
                         }
                     },
                     {
                         targets: 4,
                         render: function ( data, type, row, meta ) {
-                            var permissionBadge = '';
-                            if(data == 1){
-                                permissionBadge = '<span class="label label-danger">Administrator</span>';
-                            }
-                            else if(data == 2){
-                                permissionBadge = '<span class="label label-warning">Manager</span>';
-                            }
-                            else if(data == 3){
-                                permissionBadge = '<span class="label label-success">Member</span>';
-                            }
+                            var urlEditAssociationPermission = '{{ path("project_member_permission_edit", {'id' : 'associationId', 'permission' : 'permissionToken'}) }}';
+                            urlEditAssociationPermission = urlEditAssociationPermission.replace("associationId", row.associationId);
+                            var urlEditAssociationPermissionAdmin = urlEditAssociationPermission.replace("permissionToken", 1);
+                            var urlEditAssociationPermissionManager = urlEditAssociationPermission.replace("permissionToken", 2);
+                            var urlEditAssociationPermissionMember = urlEditAssociationPermission.replace("permissionToken", 3);
 
-                            return permissionBadge;
 
+                            var renderedPermissionsBlock;
+                            if(!isAdmin || currentUserId == row.id){
+                                //l'utilisateur courrant n'a pas le droit de modifier son propre rôle pour éviter qu'un admin s'enlève lui même les droits et que le projet se retrouve sans aucun admin
+                                var permissionBadge = '';
+                                if(data == 1){
+                                    permissionBadge = '<span class="label label-danger">Administrator</span>';
+                                }
+                                else if(data == 2){
+                                    permissionBadge = '<span class="label label-warning">Manager</span>';
+                                }
+                                else if(data == 3){
+                                    permissionBadge = '<span class="label label-success">Member</span>';
+                                }
+
+                                renderedPermissionsBlock = permissionBadge;
+                            }
+                            else {
+                                var permissionButtonGroup = '';
+                                if(data == 1){
+                                    permissionButtonGroup = '<div class="btn-group">\n' +
+                                    '  <button type="button" class="btn btn-xs btn-danger dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">\n' +
+                                    '    Administrator <span class="caret"></span>\n' +
+                                    '  </button>\n' +
+                                    '  <ul class="dropdown-menu">\n' +
+                                    '    <li><a data-url="' + urlEditAssociationPermissionManager + '" class="edit-association-permission">Manager</a></li>\n' +
+                                    '    <li><a data-url="' + urlEditAssociationPermissionMember + '" class="edit-association-permission">Member</a></li>\n' +
+                                    '  </ul>\n' +
+                                    '</div>';
+                                }
+                                else if(data == 2){
+                                    permissionButtonGroup = '<div class="btn-group">\n' +
+                                        '  <button type="button" class="btn btn-xs btn-warning dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">\n' +
+                                        '    Manager <span class="caret"></span>\n' +
+                                        '  </button>\n' +
+                                        '  <ul class="dropdown-menu">\n' +
+                                        '    <li><a data-url="' + urlEditAssociationPermissionAdmin + '" class="edit-association-permission">Administrator</a></li>\n' +
+                                        '    <li><a data-url="' + urlEditAssociationPermissionMember + '" class="edit-association-permission">Member</a></li>\n' +
+                                        '  </ul>\n' +
+                                        '</div>';
+                                }
+                                else if(data == 3){
+                                    permissionButtonGroup = '<div class="btn-group">\n' +
+                                        '  <button type="button" class="btn btn-xs btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">\n' +
+                                        '    Member <span class="caret"></span>\n' +
+                                        '  </button>\n' +
+                                        '  <ul class="dropdown-menu">\n' +
+                                        '    <li><a data-url="' + urlEditAssociationPermissionAdmin + '" class="edit-association-permission">Administrator</a></li>\n' +
+                                        '    <li><a data-url="' + urlEditAssociationPermissionManager + '" class="edit-association-permission">Manager</a></li>\n' +
+                                        '  </ul>\n' +
+                                        '</div>';
+                                }
+
+                                renderedPermissionsBlock = permissionButtonGroup;
+                            }
+                            return renderedPermissionsBlock;
                         }
                     },
                     {
@@ -452,7 +511,6 @@
                 $(".plus-icon[data-id='"+selectedValue+"']").hide(0);
                 $(".select-member-loading-icon[data-id='"+selectedValue+"']").css('display','inline');
                 var url =  $(this).data("url");
-                console.log(url);
                 $.ajax({
                     url: url ,
                     type: 'POST',
@@ -464,12 +522,23 @@
                 });
             });
 
+            $(document).on("click", ".edit-association-permission", function() {
+                var url =  $(this).data("url");
+                $.ajax({
+                    url: url ,
+                    type: 'POST',
+                    dataType: 'json',
+                    success:function(data){
+                        associatedMembersTable.ajax.reload();
+                    }
+                });
+            });
+
             $(document).on("click", ".remove-member", function() {
                 var selectedValue = $(this).data("id");
                 $(".remove-member[data-id='"+selectedValue+"']").hide(0);
                 $(".remove-member-loading-icon[data-id='"+selectedValue+"']").css('display','inline');
                 var url =  $(this).data("url");
-                console.log(url);
                 $.ajax({
                     url: url ,
                     type: 'POST',
