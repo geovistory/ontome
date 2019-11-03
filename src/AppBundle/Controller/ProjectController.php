@@ -12,14 +12,17 @@ use AppBundle\Entity\Label;
 use AppBundle\Entity\OntoNamespace;
 use AppBundle\Entity\Project;
 use AppBundle\Entity\TextProperty;
-use AppBundle\Entity\PropertyAssociation;
 use AppBundle\Entity\User;
 use AppBundle\Entity\UserProjectAssociation;
 use AppBundle\Form\ProjectQuickAddForm;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Finder\Exception\AccessDeniedException;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 
 class ProjectController  extends Controller
 {
@@ -214,8 +217,174 @@ class ProjectController  extends Controller
 
         $em = $this->getDoctrine()->getManager();
 
+        $users = $em->getRepository('AppBundle:User')
+            ->findAllNotInProject($project);
+
         return $this->render('project/edit.html.twig', array(
-            'project' => $project
+            'project' => $project,
+            'users' => $users
         ));
     }
+
+    /**
+     * @Route("/selectable-members/project/{project}/json", name="selectable_members_project_json")
+     * @Method("GET")
+     * @param Project $project
+     * @return JsonResponse a Json formatted list representation of Users selectable by Project
+     */
+    public function getSelectableMembersByProject(Project $project)
+    {
+        try{
+            $em = $this->getDoctrine()->getManager();
+            $users = $em->getRepository('AppBundle:User')
+                ->findAllNotInProject($project);
+            $data['data'] = $users;
+            $data = json_encode($data);
+        }
+        catch (NotFoundHttpException $e) {
+            return new JsonResponse(null,404, 'content-type:application/problem+json');
+        }
+
+        if(empty($users)) {
+            return new JsonResponse(null,204, array());
+        }
+
+        return new JsonResponse($data,200, array(), true);
+    }
+
+    /**
+     * @Route("/associated-members/project/{project}/json", name="associated_members_project_json")
+     * @Method("GET")
+     * @param Project $project
+     * @return JsonResponse a Json formatted list representation of Users selected by Project
+     */
+    public function getAssociatedMembersByProject(Project $project)
+    {
+        try{
+            $em = $this->getDoctrine()->getManager();
+            $classes = $em->getRepository('AppBundle:User')
+                ->findUsersInProject($project);
+            $data['data'] = $classes;
+            $data = json_encode($data);
+        }
+        catch (NotFoundHttpException $e) {
+            return new JsonResponse(null,404, 'content-type:application/problem+json');
+        }
+
+        if(empty($classes)) {
+            return new JsonResponse(null,204, array());
+        }
+
+        return new JsonResponse($data,200, array(), true);
+    }
+
+    /**
+     * @Route("/project/{project}/user/{user}/add", name="project_user_association")
+     * @Method({ "POST"})
+     * @param User  $user    The user to be associated with a project
+     * @param Project  $project    The project to be associated with a user
+     * @throws \Exception in case of unsuccessful association
+     * @return JsonResponse $response
+     */
+    public function newProjectUserAssociationAction(Project $project, User $user, Request $request)
+    {
+        $this->denyAccessUnlessGranted('edit_manager', $project);
+
+        $em = $this->getDoctrine()->getManager();
+        $userProjectAssociation = $em->getRepository('AppBundle:UserProjectAssociation')
+            ->findOneBy(array('project' => $project->getId(), 'user' => $user->getId()));
+
+        if (!is_null($userProjectAssociation)) {
+            $status = 'Error';
+            $message = 'This user is already member of this project.';
+        }
+        else {
+            $em = $this->getDoctrine()->getManager();
+
+            $userProjectAssociation = new UserProjectAssociation();
+            $userProjectAssociation->setProject($project);
+            $userProjectAssociation->setUser($user);
+            $userProjectAssociation->setPermission(3); //status 3 = member
+            $userProjectAssociation->setCreator($this->getUser());
+            $userProjectAssociation->setModifier($this->getUser());
+            $userProjectAssociation->setCreationTime(new \DateTime('now'));
+            $userProjectAssociation->setModificationTime(new \DateTime('now'));
+            $em->persist($userProjectAssociation);
+
+            $em->flush();
+            $status = 'Success';
+            $message = 'Member successfully associated.';
+        }
+
+
+        $response = array(
+            'status' => $status,
+            'message' => $message
+        );
+
+        return new JsonResponse($response);
+    }
+
+    /**
+     * @Route("/user-project-association/{id}/permission/{permission}/edit", name="project_member_permission_edit")
+     * @Method({ "POST"})
+     * @param UserProjectAssociation  $userProjectAssociation   The user to project association to be edited
+     * @param int  $permission    The permission to
+     * @throws \Exception in case of unsuccessful association
+     * @return JsonResponse $response
+     */
+    public function editProjectUserAssociationPermissionAction(UserProjectAssociation $userProjectAssociation, $permission, Request $request)
+    {
+        $this->denyAccessUnlessGranted('full_edit', $userProjectAssociation->getProject());
+
+        if($userProjectAssociation->getUser() == $this->getUser()) {
+            //l'utilisateur connecté ne peut pas changer ses propres permissions
+            $status = 'Error';
+            $message = 'The current user cannot change his own permission.';
+        }
+        else {
+            try{
+                $em = $this->getDoctrine()->getManager();
+
+                $userProjectAssociation->setPermission($permission);
+                $userProjectAssociation->setModifier($this->getUser());
+                $em->persist($userProjectAssociation);
+                $em->flush();
+                $status = 'Success';
+                $message = 'Permission successfully edited.';
+            }
+            catch (\Exception $e) {
+                return new JsonResponse(null, 400, 'content-type:application/problem+json');
+            }
+        }
+
+        $response = array(
+            'status' => $status,
+            'message' => $message
+        );
+
+        return new JsonResponse($response);
+    }
+
+    /**
+     * @Route("/user-project-association/{id}/delete", name="project_member_disassociation")
+     * @Method({ "POST"})
+     * @param UserProjectAssociation  $userProjectAssociation   The user to project association to be deleted
+     * @return JsonResponse a Json 204 HTTP response
+     */
+    public function deleteProjectUserAssociationAction(UserProjectAssociation $userProjectAssociation, Request $request)
+    {
+        $this->denyAccessUnlessGranted('edit_manager', $userProjectAssociation->getProject());
+        try {
+            $em = $this->getDoctrine()->getManager();
+            $em->remove($userProjectAssociation);
+            $em->flush();
+        }
+        catch (\Exception $e) {
+            return new JsonResponse(null, 400, 'content-type:application/problem+json');
+        }
+        return new JsonResponse(null, 204);
+
+    }
+
 }

@@ -17,7 +17,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 
 /**
- * @ORM\Entity
+ * @ORM\Entity(repositoryClass="AppBundle\Repository\UserRepository")
  * @ORM\Table(schema="che", name="admin_user")
  * @UniqueEntity(fields={"email"}, message="This e-mail is already in use.")
  * @UniqueEntity(fields={"login"}, message="This login is already in use.")

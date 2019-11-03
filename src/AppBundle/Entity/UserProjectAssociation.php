@@ -10,6 +10,7 @@ namespace AppBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Class UserProjectAssociation
@@ -43,6 +44,7 @@ class UserProjectAssociation
 
     /**
      * @ORM\Column(type="integer", name="has_permissions_in_project")
+     * @Assert\Choice({1, 2, 3})
      */
     private $permission;
 
