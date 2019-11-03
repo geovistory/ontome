@@ -335,22 +335,28 @@ class ProjectController  extends Controller
      */
     public function editProjectUserAssociationPermissionAction(UserProjectAssociation $userProjectAssociation, $permission, Request $request)
     {
-        $this->denyAccessUnlessGranted('edit_manager', $userProjectAssociation->getProject());
+        $this->denyAccessUnlessGranted('full_edit', $userProjectAssociation->getProject());
 
-        try{
-            $em = $this->getDoctrine()->getManager();
-
-            $userProjectAssociation->setPermission($permission);
-            $userProjectAssociation->setModifier($this->getUser());
-            $em->persist($userProjectAssociation);
-            $em->flush();
-            $status = 'Success';
-            $message = 'Permission successfully edited.';
+        if($userProjectAssociation->getUser() == $this->getUser()) {
+            //l'utilisateur connecté ne peut pas changer ses propres permissions
+            $status = 'Error';
+            $message = 'The current user cannot change his own permission.';
         }
-        catch (\Exception $e) {
-            return new JsonResponse(null, 400, 'content-type:application/problem+json');
-        }
+        else {
+            try{
+                $em = $this->getDoctrine()->getManager();
 
+                $userProjectAssociation->setPermission($permission);
+                $userProjectAssociation->setModifier($this->getUser());
+                $em->persist($userProjectAssociation);
+                $em->flush();
+                $status = 'Success';
+                $message = 'Permission successfully edited.';
+            }
+            catch (\Exception $e) {
+                return new JsonResponse(null, 400, 'content-type:application/problem+json');
+            }
+        }
 
         $response = array(
             'status' => $status,
@@ -366,7 +372,7 @@ class ProjectController  extends Controller
      * @param UserProjectAssociation  $userProjectAssociation   The user to project association to be deleted
      * @return JsonResponse a Json 204 HTTP response
      */
-    public function deleteProfileClassAssociationAction(UserProjectAssociation $userProjectAssociation, Request $request)
+    public function deleteProjectUserAssociationAction(UserProjectAssociation $userProjectAssociation, Request $request)
     {
         $this->denyAccessUnlessGranted('edit_manager', $userProjectAssociation->getProject());
         try {

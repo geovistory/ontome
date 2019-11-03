@@ -484,6 +484,7 @@
             var selectableMembersTable = $('#ontome-users-table').DataTable({
                 ajax: urlSelectableMembers,
                 dataSrc: 'data',
+                order: [[ 1, "asc" ]],
                 columns: [
                     { data: 'id' },
                     { data: 'fullname' },
