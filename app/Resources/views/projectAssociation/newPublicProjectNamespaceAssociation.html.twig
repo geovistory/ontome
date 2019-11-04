@@ -1,0 +1,63 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Add a namespace to the Public project{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.4/css/select2.min.css" rel="stylesheet" />
+{%  endblock %}
+
+{% block body %}
+    <div class="container">
+        <div class="row">
+            <div class="col-xs-12">
+                <h2>Add a namespace to the Public project
+                    <a href="{{ path('project_edit', {
+                        id: 21
+                    }) }}#managed-namespaces"
+                       class="pull-right btn btn-link"
+                       role="button">
+                        <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
+                    </a>
+                </h2>
+
+                {{ form_start(publicProjectNamespaceAssociationForm) }}
+                {{ form_row(publicProjectNamespaceAssociationForm.namespace) }}
+
+                <button type="submit" class="btn btn-primary" formnovalidate>Save <span class="far fa-save"></span></button>
+                    <a href="{{ path('project_edit', {
+                        id: 21
+                    }) }}#managed-namespaces"
+                       class="btn btn-default"
+                       role="button">
+                        Back <i class="fas fa-arrow-left"></i>
+                    </a>
+                {{ form_end(publicProjectNamespaceAssociationForm) }}
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block javascripts %}
+    {{ parent() }}
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.4/js/select2.min.js"></script>
+<script>
+
+    $(document).ready(function() {
+        $('#public_project_namespace_association_add_form_namespace').select2({
+            sorter: function(data) {
+                /* Sort data using lowercase comparison */
+                return data.sort(function (a, b) {
+                    a = a.text.toLowerCase();
+                    b = b.text.toLowerCase();
+                    if (a > b) {
+                        return 1;
+                    } else if (a < b) {
+                        return -1;
+                    }
+                    return 0;
+                });
+            }
+        });
+    } );
+</script>
+{% endblock %}

@@ -131,6 +131,11 @@ class Project
      */
     private $userProjectAssociations;
 
+    /**
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\ProjectAssociation", mappedBy="project")
+     */
+    private $projectAssociations;
+
     public function __construct()
     {
         $this->ownedProfiles = new ArrayCollection();
@@ -141,6 +146,7 @@ class Project
         $this->labels = new ArrayCollection();
         $this->childProjects = new ArrayCollection();
         $this->userProjectAssociations = new ArrayCollection();
+        $this->projectAssociations = new ArrayCollection();
     }
 
 
@@ -302,6 +308,14 @@ class Project
     public function getUserProjectAssociations()
     {
         return $this->userProjectAssociations;
+    }
+
+    /**
+     * @return ArrayCollection|ProjectAssociation
+     */
+    public function getProjectAssociations()
+    {
+        return $this->projectAssociations;
     }
 
     /**

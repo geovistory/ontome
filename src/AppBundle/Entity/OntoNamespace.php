@@ -207,6 +207,10 @@ class OntoNamespace
      */
     private $projects;
 
+    /**
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\ProjectAssociation", mappedBy="namespace")
+     */
+    private $projectAssociations;
 
     /**
      * @ORM\OneToMany(targetEntity="OntoNamespace", mappedBy="referencedVersion")
@@ -225,6 +229,7 @@ class OntoNamespace
         $this->profiles = new ArrayCollection();
         $this->projects = new ArrayCollection();
         $this->comments = new ArrayCollection();
+        $this->projectAssociations = new ArrayCollection();
     }
 
     /**
@@ -461,6 +466,14 @@ class OntoNamespace
 
     public function getIdentifierInNamespace(){
         return $this->namespaceURI;
+    }
+
+    /**
+     * @return ArrayCollection|ProjectAssociation
+     */
+    public function getProjectAssociations()
+    {
+        return $this->projectAssociations;
     }
 
     /**
