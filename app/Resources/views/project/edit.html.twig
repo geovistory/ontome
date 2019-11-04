@@ -255,6 +255,40 @@
                     {% endfor %}
                     </tbody>
                 </table>
+                {% if is_granted('full_edit', project) %}
+                    <div class="pull-right add-div">
+                        <a href="{{ path('public_project_namespace_association_new') }}" class="btn btn-primary pull-right">Add <span class="fa fa-plus-circle"></span></a>
+                    </div>
+                    <h3>Namespaces for the Public project</h3>
+                    <table class="table table-striped" id="public-project-namespaces-table">
+                        <thead>
+                        <tr>
+                            <th>Namespace</th>
+                            <th>Delete</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for namespace in namespacesPublicProject %}
+                            <tr>
+                                <td>
+                                    <a href="{{ path('namespace_show', {
+                                        'id': namespace.id
+                                    }) }}">
+                                        {{ namespace.standardLabel }}
+                                    </a>
+                                </td>
+                                <td>
+                                    <a href="{{ path('project_association_delete', {
+                                        'id' : namespace.associationId
+                                    }) }}">
+                                        <span class="glyphicon glyphicon-remove text-danger" aria-hidden="true"></span>
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                {% endif %}
             </div>
             <div id="profiles" class="tab-pane fade">
                 {% if is_granted('edit', project) %}
@@ -372,6 +406,7 @@
             $('#parent-projects-table').DataTable();
             $('#child-projects-table').DataTable();
             $('#managed-namespaces-table').DataTable();
+            $('#public-project-namespaces-table').DataTable();
             $('#owned-profiles-table').DataTable();
             $('#associated-profiles-table').DataTable();
             var associatedMembersTable = $('#members-of-the-project-table').DataTable({

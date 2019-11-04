@@ -220,8 +220,12 @@ class ProjectController  extends Controller
         $users = $em->getRepository('AppBundle:User')
             ->findAllNotInProject($project);
 
+        $namespacesPublicProject = $em->getRepository('AppBundle:OntoNamespace')
+            ->findNamespacesInPublicProject();
+
         return $this->render('project/edit.html.twig', array(
             'project' => $project,
+            'namespacesPublicProject' => $namespacesPublicProject,
             'users' => $users
         ));
     }

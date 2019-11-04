@@ -11,12 +11,13 @@ namespace AppBundle\Repository;
 use AppBundle\Entity\Project;
 use AppBundle\Entity\User;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\QueryBuilder;
 
 class ProjectRepository extends EntityRepository
 {
     /**
      * @param User $user
-     * @return Project[] the list of project whom user is an admin
+     * @return QueryBuilder to create the query for the list of project whom user is an admin
      */
     public function findAvailableProjectByAdminId(User $user)
     {
