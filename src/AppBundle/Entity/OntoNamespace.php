@@ -649,22 +649,6 @@ class OntoNamespace
         $this->referencedNamespaceAssociations = $referencedNamespaceAssociations;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getEntityAssociations()
-    {
-        return $this->entityAssociations;
-    }
-
-    /**
-     * @param mixed $entityAssociations
-     */
-    public function setEntityAssociations($entityAssociations)
-    {
-        $this->entityAssociations = $entityAssociations;
-    }
-
     public function addClassAssociation(ClassAssociation $classAssociation)
     {
         if ($this->classAssociations->contains($classAssociation)) {
