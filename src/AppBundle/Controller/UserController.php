@@ -695,10 +695,16 @@ class UserController extends Controller
             }
         }
 
+        $referencedNamespacesStandardLabels = array();
+
+        foreach ($eupa->getNamespace()->getReferencedNamespaceAssociations() as $referencedNamespacesAssociations) {
+            $referencedNamespacesStandardLabels[] = $referencedNamespacesAssociations->getReferencedNamespace()->getStandardLabel();
+        }
+
         $response = array(
             'status' => $status,
             'message' => $message,
-            'namespace' => $eupa->getNamespace()
+            'referencedNamespaceLabels' => $referencedNamespacesStandardLabels
         );
 
         return new JsonResponse($response);
