@@ -697,7 +697,8 @@ class UserController extends Controller
 
         $response = array(
             'status' => $status,
-            'message' => $message
+            'message' => $message,
+            'namespace' => $eupa->getNamespace()
         );
 
         return new JsonResponse($response);

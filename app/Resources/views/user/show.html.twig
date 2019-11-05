@@ -305,6 +305,11 @@
                             urlNamespace = urlNamespace.replace('selectedValue', selectedValue);
                             $("#additional-namespaces-list").append($('<div class="row" style="margin-left:0px;"><a href="#" class="remove-namespace" data-id="'+selectedValue+'"><span class="glyphicon glyphicon-remove text-danger" aria-hidden="true"></span></a><a href="'+urlNamespace+'">'+labelNamespace+'</a><span class="loading-icon2" data-id="'+selectedValue+'">&nbsp;<span class="fas fa-spinner fa-spin"></span></span></div>'));
                             $(".loading-icon2[data-id='"+selectedValue+"']").hide(0);
+                            if(data.namespace != null){
+                                for(prop in data.namespace){
+                                    console.log(prop);
+                                }
+                            }
                         }
                     }
                 });
