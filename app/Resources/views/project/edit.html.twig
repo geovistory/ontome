@@ -255,7 +255,7 @@
                     {% endfor %}
                     </tbody>
                 </table>
-                {% if is_granted('full_edit', project) %}
+                {% if is_granted('full_edit', project) and project.id == 21 %}
                     <div class="pull-right add-div">
                         <a href="{{ path('public_project_namespace_association_new') }}" class="btn btn-primary pull-right">Add <span class="fa fa-plus-circle"></span></a>
                     </div>
