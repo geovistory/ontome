@@ -95,8 +95,8 @@
                     </div>
                 </div>
                 <div id="my-current-namespaces" class="tab-pane fade">
-                    <h3>Namespaces whose classes and properties are displayed
-                    </h3>
+                    <h3>Namespaces whose classes and properties are displayed</h3>
+                    {% if userActiveProjectAssociation.project.id != 21 %}
                     <div class="row">
                         <div class="col-lg-12">
                             <a href="{{ path('user_reinitialization', {id: user.id}) }}" class="btn btn-success">Reset</a>
@@ -171,7 +171,6 @@
                             <ul class="list-group" id="chosable-namespaces-list" style="margin-top: 10px;">
                             </ul>
                         </div>
-                        {% if userActiveProjectAssociation.project.id != 21 %}
                         <div class="col-lg-6">
                             <h4>Selected from project profiles</h4>
                             {% if userActiveProjectAssociation.project.profiles|length == 0 %}
@@ -215,8 +214,28 @@
                                 </ul>
                             {% endfor %}
                         </div>
-                        {% endif %}
                     </div>
+                    {% else %}{# Projet public #}
+                        {% for displayedNamespace in displayedNamespaces %}
+                            <div class="row" style="margin-left:0px;">
+                                <a href="{{ path('namespace_show', {'id': displayedNamespace.id}) }}">{{ displayedNamespace.standardLabel }}</a>
+                                {% if displayedNamespace.referencedNamespaceAssociations|length > 0 %}
+                                    {% set break = false %}
+                                    {% for referencedNamespaceAssociation in displayedNamespace.referencedNamespaceAssociations if referencedNamespaceAssociation.referencedNamespace is not null and not break %}
+                                        {% set break = true %}
+                                        <div class="small text-muted"><strong><em>Referenced :</em></strong></div>
+                                    {% endfor %}
+                                    {% if break %}
+                                        <ul>
+                                            {% for referencedNamespaceAssociation in displayedNamespace.referencedNamespaceAssociations if referencedNamespaceAssociation.referencedNamespace is not null %}
+                                                <li class="list-unstyled"><em class="text-muted">{{ referencedNamespaceAssociation.referencedNamespace.standardLabel }}</em></li>
+                                            {% endfor %}
+                                        </ul>
+                                    {% endif %}
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
                 </div>
             </div>
         </div>
