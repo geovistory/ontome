@@ -395,6 +395,11 @@ class UserController extends Controller
         $additionalNamespaces = new ArrayCollection($em->getRepository('AppBundle:OntoNamespace')
             ->findAdditionalNamespacesForUserProject($userActiveProjectAssociation));
 
+        // On retire le namespace géré par le projet des additionals.
+        if($additionalNamespaces->contains($defaultNamespace)) {
+            $additionalNamespaces->removeElement($defaultNamespace);
+        }
+
         // On retire les namespaces actives et selected from project profiles de Additional namespaces
         // On ne doit pas retirer les namespaces actives si le projet est public
         if($userActiveProjectAssociation->getProject()->getId() != 21){

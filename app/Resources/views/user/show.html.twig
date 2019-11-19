@@ -137,7 +137,7 @@
                             {% if additionalNamespaces|length == 0 %}
                                 <p class="text-muted" id="empty-namespace-list-message"><em>No additional namespace added, please pick one below.</em></p>
                             {% endif %}
-                            {% for additionalNamespace in additionalNamespaces if additionalNamespace != defaultNamespace %}
+                            {% for additionalNamespace in additionalNamespaces %}
                                 <div class="row" style="margin-left:0px;">
                                     <a href="#" class="remove-namespace" data-id="{{ additionalNamespace.id }}"><span class="glyphicon glyphicon-remove text-danger" aria-hidden="true"></span></a>
                                     <a href="{{ path('namespace_show', {'id': additionalNamespace.id}) }}">{{ additionalNamespace.standardLabel }}</a>
