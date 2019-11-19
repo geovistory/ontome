@@ -89,12 +89,6 @@
             <strong>Active project :</strong>
             <a href="{{ path('project_show', {'id': app.user.currentActiveProject.id}) }}">{{ app.user.currentActiveProject }}</a> <a href="{{ path('user_show', {'id': app.user.id, '_fragment': 'my-projects'}) }}"><i class="fas fa-edit"></i></a>
         </p>
-        {% else %}
-        <p class="navbar-text navbar-right" style="margin-right: 12px;">
-            <strong>Active project :</strong>
-            <a href="{{ path('project_show', {'id': '21'}) }}">Public project</a>
-            {% if app.user is not null %}<a href="{{ path('user_show', {'id': app.user.id, '_fragment': 'my-projects'}) }}"><i class="fas fa-edit"></i></a>{% endif %}
-        </p>
         {% endif %}
     </div>
 </nav>
