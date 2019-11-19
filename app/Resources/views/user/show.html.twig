@@ -99,7 +99,7 @@
                     </h3>
                     <div class="row">
                         <div class="col-lg-12">
-                            <a href="{{ path('user_reinitialization', {id: user.id}) }}" class="btn btn-success">Réinitialiser</a>
+                            <a href="{{ path('user_reinitialization', {id: user.id}) }}" class="btn btn-success">Reset</a>
                         </div>
                         <div class="col-lg-6">
                             {% if defaultNamespace is not null %}
@@ -160,6 +160,7 @@
                             </div>
                             <h4>Pick an additional namespace</h4>
                             <select id="select-root-namespace">
+                                <option id="placeholder"></option>
                             {% for rootNamespace in rootNamespaces %}
                                 <option value="{{ rootNamespace.id }}">{{ rootNamespace.standardLabel }}</option>
                             {% endfor %}
@@ -236,6 +237,7 @@
             $('#loading-icon').hide(0);
             $('#select-root-namespace').select2({
                 width: '100%',
+                placeholder: 'Select a root namespace',
                 sorter: function(data) {
                     /* Sort data using lowercase comparison */
                     return data.sort(function (a, b) {
@@ -318,9 +320,9 @@
                     }
                 });
                 $("#empty-namespace-list-message").remove();
-                //$("#select-root-namespace option:selected").remove();
+                $("#select-root-namespace option:selected").remove();
                 //$('#select-root-namespace option:first').prop('selected',true);
-                $("option:selected").prop("selected", false);
+                //$("option:selected").prop("selected", false);
                 $(".loading-icon2[data-id='"+selectedValue+"']").hide(0);
                 $("#chosable-namespaces-list").empty();
             });
