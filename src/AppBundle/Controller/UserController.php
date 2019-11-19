@@ -397,13 +397,19 @@ class UserController extends Controller
 
         // On retire les namespaces actives et selected from project profiles de Additional namespaces
         // On ne doit pas retirer les namespaces actives si le projet est public
-        /*if($userActiveProjectAssociation->getProject()->getId() != 21){
-            foreach($activeNamespaces as $activeNamespace) {
-                if($additionalNamespaces->contains($activeNamespace)) {
-                    $additionalNamespaces->removeElement($activeNamespace);
+        if($userActiveProjectAssociation->getProject()->getId() != 21){
+            foreach($profilesUserProject as $profile) {
+                foreach($profile->getNamespaces() as $profilNamespace){
+                    foreach($activeNamespaces as $activeNamespace) {
+                        if($additionalNamespaces->contains($activeNamespace) && $activeNamespace == $profilNamespace) {
+                            $additionalNamespaces->removeElement($activeNamespace);
+                        }
+                    }
                 }
+
             }
-        }*/
+
+        }
 
         $activeProfiles = new ArrayCollection($em->getRepository('AppBundle:Profile')
             ->findAllActiveProfilesForUserProject($userActiveProjectAssociation));
