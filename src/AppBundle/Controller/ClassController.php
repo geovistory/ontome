@@ -34,8 +34,14 @@ class ClassController extends Controller
         $em = $this->getDoctrine()->getManager();
 
         if (!is_null($this->getUser())) {
-            $classes = $em->getRepository('AppBundle:OntoClass')
-                ->findAllOrderedById();
+            if($this->getUser()->getCurrentActiveProject()->getId() == 21){
+                $classes = $em->getRepository('AppBundle:OntoClass')
+                    ->findFilteredByPublicProjectOrderedById();
+            }
+            else{
+                $classes = $em->getRepository('AppBundle:OntoClass')
+                    ->findFilteredByActiveProjectOrderedById($this->getUser());
+            }
         }
         else{
             $classes = $em->getRepository('AppBundle:OntoClass')
