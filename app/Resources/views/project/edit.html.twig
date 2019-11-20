@@ -396,8 +396,20 @@
             var urlAssociatedMembers = '{{ path("associated_members_project_json", {'project' : 'projectID'}) }}';
             urlAssociatedMembers = urlAssociatedMembers.replace("projectID", projectID);
 
-            var isAdmin = {{ is_granted('full_edit', project) }};
-            var isManager = {{ is_granted('edit_manager', project) }}; //an admin IS a manager too
+            var isAdmin = "{{ is_granted('full_edit', project) }}";
+            if(isAdmin == '') {
+                isAdmin = false;
+            }
+            else if (isAdmin == '1') {
+                isAdmin = true;
+            }
+            var isManager = "{{ is_granted('edit_manager', project) }}"; //an admin IS a manager too
+            if(isManager == '') {
+                isManager = false;
+            }
+            else if (isManager == '1') {
+                isManager = true;
+            }
             var currentUserId = {{ app.user.id }};
 
             $('#labels-table').DataTable();
