@@ -12,6 +12,7 @@ use AppBundle\Entity\OntoClass;
 use AppBundle\Entity\Profile;
 use AppBundle\Entity\Project;
 use AppBundle\Entity\Property;
+use AppBundle\Entity\User;
 use Doctrine\ORM\EntityRepository;
 
 class PropertyRepository extends EntityRepository
@@ -44,6 +45,28 @@ class PropertyRepository extends EntityRepository
             ->leftJoin('nspc.referencedVersion', 'referencedVersion')
             ->addSelect('referencedVersion')
             ->orderBy('property.id', 'DESC')
+            ->getQuery()
+            ->execute();
+    }
+
+    /**
+     * @return Property[]
+     */
+    public function findFilteredByActiveProjectOrderedById(User $user)
+    {
+        return $this->createQueryBuilder('property')
+            ->join('property.namespaces','nspc')
+            ->join('nspc.namespaceUserProjectAssociation', 'nupa')
+            ->join('nupa.userProjectAssociation', 'upa')
+            ->join('nupa.systemType', 'st')
+            ->join('upa.user', 'user')
+            ->join('upa.project', 'proj')
+            ->andWhere('user.id = :pk_user')
+            ->andWhere('proj.id = :pk_active_project')
+            ->andWhere('st.id = 25')
+            ->setParameter('pk_user', $user->getId())
+            ->setParameter('pk_active_project', $user->getCurrentActiveProject()->getId())
+            ->orderBy('property.id','DESC')
             ->getQuery()
             ->execute();
     }

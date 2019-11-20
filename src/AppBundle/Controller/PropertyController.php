@@ -37,8 +37,14 @@ class PropertyController extends Controller
         $em = $this->getDoctrine()->getManager();
 
         if (!is_null($this->getUser())) {
-            $properties = $em->getRepository('AppBundle:Property')
-                ->findAllOrderedById();
+            if($this->getUser()->getCurrentActiveProject()->getId() == 21){
+                $properties = $em->getRepository('AppBundle:Property')
+                    ->findFilteredByPublicProjectOrderedById();
+            }
+            else{
+                $properties = $em->getRepository('AppBundle:Property')
+                    ->findFilteredByActiveProjectOrderedById($this->getUser());
+            }
         }
         else{
             $properties = $em->getRepository('AppBundle:Property')
