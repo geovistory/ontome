@@ -78,6 +78,7 @@ class PropertyController extends Controller
 
         $label = new Label();
         $label->setProperty($property);
+        $label->addNamespace($class->getOngoingNamespace());
         $label->setIsStandardLabelForLanguage(true);
         $label->setCreator($this->getUser());
         $label->setModifier($this->getUser());

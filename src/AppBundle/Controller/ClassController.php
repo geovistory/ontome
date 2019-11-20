@@ -74,6 +74,7 @@ class ClassController extends Controller
 
         $label = new Label();
         $label->setClass($class);
+        $label->addNamespace($namespace);
         $label->setIsStandardLabelForLanguage(true);
         $label->setCreator($this->getUser());
         $label->setModifier($this->getUser());
