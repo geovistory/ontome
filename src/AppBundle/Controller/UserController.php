@@ -950,20 +950,17 @@ class UserController extends Controller
         $currentProject = $user->getCurrentActiveProject();
         if($currentProject->getId() != 21) {
             $em = $this->getDoctrine()->getManager();
-            $upa = $em->getRepository('AppBundle:UserProjectAssociation')->findOneBy(array(
-                "user" => $user,
-                "project" => $currentProject
-            ));
+            $upa = $em->getRepository('AppBundle:UserProjectAssociation')
+                ->findOneBy(array("user" => $user, "project" => $currentProject));
 
 
             // mettre tout à 29 (désactivation)
-            $eupas = $em->getRepository('AppBundle:EntityUserProjectAssociation')->findBy(array(
-                "userProjectAssociation" => $upa
-            ));
+            $eupas = $em->getRepository('AppBundle:EntityUserProjectAssociation')
+                ->findBy(array("userProjectAssociation" => $upa));
 
             foreach ($eupas as $eupa) {
-                $systemTypeSelected = $em->getRepository('AppBundle:SystemType')->find(29);
-                $eupa->setSystemType($systemTypeSelected);
+                $systemTypeUnselected = $em->getRepository('AppBundle:SystemType')->find(29);
+                $eupa->setSystemType($systemTypeUnselected);
                 $eupa->setModifier($this->getUser());
                 $eupa->setModificationTime(new \DateTime('now'));
                 $em->persist($eupa);

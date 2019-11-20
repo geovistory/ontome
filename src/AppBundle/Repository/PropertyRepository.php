@@ -104,6 +104,43 @@ class PropertyRepository extends EntityRepository
      * @param OntoClass $class
      * @return array
      */
+    public function findFilteredOutgoingPropertiesById(OntoClass $class, User $user)
+    {
+        $conn = $this->getEntityManager()
+            ->getConnection();
+
+        $sql = "SELECT identifier_property AS property,
+                       identifier_range AS range,
+                       pk_property AS \"propertyId\",
+                       pk_range AS \"rangeId\",
+                       identifier_domain AS domain,
+                       che.get_root_namespace(nsp.pk_namespace) AS \"rootNamespaceId\",
+                      (SELECT label FROM che.get_namespace_labels(nsp.pk_namespace) WHERE language_iso_code = 'en') AS namespace
+                FROM  che.v_properties_with_domain_range,
+                      che.associates_namespace asnsp,
+                      che.namespace nsp
+                WHERE asnsp.fk_property = pk_property
+                  AND nsp.pk_namespace = asnsp.fk_namespace 
+                  AND nsp.pk_namespace IN (
+                    SELECT fk_namespace 
+                    FROM che.associates_entity_to_user_project 
+                    WHERE fk_associate_user_to_project = (
+                        SELECT pk_associate_user_to_project 
+                        FROM che.associate_user_to_project
+                        WHERE fk_user = :user AND fk_project = :project)
+                    AND fk_system_type = 25)
+                  AND pk_domain = :class;";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->execute(array('class' => $class->getId(), 'user' => $user->getId(), 'project' => $user->getCurrentActiveProject()->getId()));
+
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * @param OntoClass $class
+     * @return array
+     */
     public function findOutgoingInheritedPropertiesById(OntoClass $class)
     {
         $conn = $this->getEntityManager()
@@ -126,6 +163,44 @@ class PropertyRepository extends EntityRepository
 
         $stmt = $conn->prepare($sql);
         $stmt->execute(array('class' => $class->getId()));
+
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * @param OntoClass $class
+     * @return array
+     */
+    public function findFilteredOutgoingInheritedPropertiesById(OntoClass $class, User $user)
+    {
+        $conn = $this->getEntityManager()
+            ->getConnection();
+
+        $sql = "SELECT 	identifier_in_namespace AS domain,
+                        pk_parent AS \"parentClassId\",
+                        parent_identifier AS \"parentClass\",
+                        pk_property AS \"propertyId\",
+                        identifier_property AS property,
+                        pk_range AS \"rangeId\",
+                        identifier_range AS range,
+                        replace(ancestors, '|', '→') AS ancestors,
+                        (SELECT label FROM che.get_namespace_labels(nsp.pk_namespace) WHERE language_iso_code = 'en') AS namespace
+                FROM 	che.class_outgoing_inherited_properties(:class),
+                        che.associates_namespace asnsp,
+                        che.namespace nsp
+                WHERE 	asnsp.fk_property = pk_property
+                  AND 	nsp.pk_namespace = asnsp.fk_namespace
+                  AND nsp.pk_namespace IN (
+                    SELECT fk_namespace 
+                    FROM che.associates_entity_to_user_project 
+                    WHERE fk_associate_user_to_project = (
+                        SELECT pk_associate_user_to_project 
+                        FROM che.associate_user_to_project
+                        WHERE fk_user = :user AND fk_project = :project)
+                    AND fk_system_type = 25);";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->execute(array('class' => $class->getId(), 'user' => $user->getId(), 'project' => $user->getCurrentActiveProject()->getId()));
 
         return $stmt->fetchAll();
     }
@@ -164,6 +239,44 @@ class PropertyRepository extends EntityRepository
      * @param OntoClass $class
      * @return array
      */
+    public function findFilteredIngoingPropertiesById(OntoClass $class, User $user)
+    {
+        $conn = $this->getEntityManager()
+            ->getConnection();
+
+        $sql = "SELECT  pk_domain AS \"domainId\",
+                        identifier_domain AS domain,
+                        identifier_property AS property,
+                        pk_property AS \"propertyId\",
+                        pk_range AS \"rangeId\",
+                        identifier_range AS range,
+                        che.get_root_namespace(nsp.pk_namespace) AS \"rootNamespaceId\",
+                        (SELECT label FROM che.get_namespace_labels(nsp.pk_namespace) WHERE language_iso_code = 'en') AS namespace
+                FROM  che.v_properties_with_domain_range,
+                      che.associates_namespace asnsp,
+                      che.namespace nsp 
+                WHERE pk_range = :class
+                  AND asnsp.fk_property = pk_property
+                  AND nsp.pk_namespace = asnsp.fk_namespace
+                  AND nsp.pk_namespace IN (
+                    SELECT fk_namespace 
+                    FROM che.associates_entity_to_user_project 
+                    WHERE fk_associate_user_to_project = (
+                        SELECT pk_associate_user_to_project 
+                        FROM che.associate_user_to_project
+                        WHERE fk_user = :user AND fk_project = :project)
+                    AND fk_system_type = 25);";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->execute(array('class' => $class->getId(), 'user' => $user->getId(), 'project' => $user->getCurrentActiveProject()->getId()));
+
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * @param OntoClass $class
+     * @return array
+     */
     public function findIngoingInheritedPropertiesById(OntoClass $class)
     {
         $conn = $this->getEntityManager()
@@ -185,6 +298,43 @@ class PropertyRepository extends EntityRepository
 
         $stmt = $conn->prepare($sql);
         $stmt->execute(array('class' => $class->getId()));
+
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * @param OntoClass $class
+     * @return array
+     */
+    public function findFilteredIngoingInheritedPropertiesById(OntoClass $class, User $user)
+    {
+        $conn = $this->getEntityManager()
+            ->getConnection();
+
+        $sql = "SELECT  pk_domain AS \"domainId\",
+                        identifier_domain AS domain,
+                        identifier_property AS property,
+                        pk_property AS \"propertyId\",
+                        pk_parent AS \"rangeId\",
+                        parent_identifier AS range,
+                        replace(ancestors, '|', '→') AS ancestors,
+                        (SELECT label FROM che.get_namespace_labels(nsp.pk_namespace) WHERE language_iso_code = 'en') AS namespace
+                FROM  che.class_ingoing_inherited_properties(:class),
+                      che.associates_namespace asnsp,
+                      che.namespace nsp 
+                WHERE asnsp.fk_property = pk_property
+                  AND nsp.pk_namespace = asnsp.fk_namespace
+                  AND nsp.pk_namespace IN (
+                    SELECT fk_namespace 
+                    FROM che.associates_entity_to_user_project 
+                    WHERE fk_associate_user_to_project = (
+                        SELECT pk_associate_user_to_project 
+                        FROM che.associate_user_to_project
+                        WHERE fk_user = :user AND fk_project = :project)
+                    AND fk_system_type = 25);";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->execute(array('class' => $class->getId(), 'user' => $user->getId(), 'project' => $user->getCurrentActiveProject()->getId()));
 
         return $stmt->fetchAll();
     }
@@ -260,6 +410,81 @@ class PropertyRepository extends EntityRepository
      * @param Property $property
      * @return array
      */
+    public function findFilteredAncestorsById(Property $property, User $user)
+    {
+        $conn = $this->getEntityManager()
+            ->getConnection();
+
+        $sql = "WITH tw1 AS
+                (
+                  SELECT pk_parent,
+                     parent_identifier,
+                     DEPTH,
+                     ARRAY_TO_STRING(_path,'|') ancestors
+                  FROM che.ascendant_property_hierarchy(:property)
+                )
+                SELECT tw1.pk_parent  AS id,
+                       tw1.parent_identifier AS identifier,
+                       p.has_domain,
+                       domain.identifier_in_namespace AS \"domainIdentifier\",
+                       domain.standard_label AS \"domainStandardLabel\",
+                       p.domain_instances_min_quantifier,
+                       p.domain_instances_max_quantifier,
+                       p.has_range,
+                       range.identifier_in_namespace AS \"rangeIdentifier\",
+                       range.standard_label AS \"rangeStandardLabel\",
+                       p.range_instances_min_quantifier,
+                       p.range_instances_max_quantifier,
+                       tw1.DEPTH,
+                       replace(tw1.ancestors, '|', '→') AS ancestors,
+                       che.get_root_namespace(nsp.pk_namespace) AS \"rootNamespaceId\",
+                       (SELECT label FROM che.get_namespace_labels(che.get_root_namespace(nsp.pk_namespace)) WHERE language_iso_code = 'en') AS \"rootNamespaceLabel\"
+                FROM tw1,
+                     che.associates_namespace asnsp,
+                     che.namespace nsp,
+                     che.property p,
+                     che.class domain,
+                     che.class range
+                WHERE asnsp.fk_property = tw1.pk_parent
+                AND   nsp.pk_namespace = asnsp.fk_namespace
+                AND depth > 1 
+                AND p.pk_property = tw1.pk_parent
+                AND p.has_domain = domain.pk_class
+                AND p.has_range = range.pk_class
+                AND nsp.pk_namespace IN (
+                    SELECT fk_namespace 
+                    FROM che.associates_entity_to_user_project 
+                    WHERE fk_associate_user_to_project = (
+                        SELECT pk_associate_user_to_project 
+                        FROM che.associate_user_to_project
+                        WHERE fk_user = :user AND fk_project = :project)
+                    AND fk_system_type = 25)
+                GROUP BY tw1.pk_parent,
+                     tw1.parent_identifier,
+                     p.has_domain,
+                       domain.identifier_in_namespace,
+                       domain.standard_label,
+                       p.domain_instances_min_quantifier,
+                       p.domain_instances_max_quantifier,
+                       p.has_range,
+                       range.identifier_in_namespace,
+                       range.standard_label,
+                       p.range_instances_min_quantifier,
+                       p.range_instances_max_quantifier,
+                     tw1.depth,
+                     tw1.ancestors,
+                     nsp.pk_namespace";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->execute(array('property' => $property->getId(), 'user' => $user->getId(), 'project' => $user->getCurrentActiveProject()->getId()));
+
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * @param Property $property
+     * @return array
+     */
     public function findDescendantsById(Property $property)
     {
         $conn = $this->getEntityManager()
@@ -296,6 +521,58 @@ class PropertyRepository extends EntityRepository
 
         $stmt = $conn->prepare($sql);
         $stmt->execute(array('property' => $property->getId()));
+
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * @param Property $property
+     * @return array
+     */
+    public function findFilteredDescendantsById(Property $property, User $user)
+    {
+        $conn = $this->getEntityManager()
+            ->getConnection();
+
+        $sql = "SELECT  pk_child AS id,
+                        child_identifier as identifier,
+                       p.has_domain,
+                       domain.identifier_in_namespace AS \"domainIdentifier\",
+                       domain.standard_label AS \"domainStandardLabel\",
+                       p.domain_instances_min_quantifier,
+                       p.domain_instances_max_quantifier,
+                       p.has_range,
+                       range.identifier_in_namespace AS \"rangeIdentifier\",
+                       range.standard_label AS \"rangeStandardLabel\",
+                       p.range_instances_min_quantifier,
+                       p.range_instances_max_quantifier,
+                        depth,
+                        replace(descendants, '|', '→') AS descendants,
+                        che.get_root_namespace(nsp.pk_namespace) AS \"rootNamespaceId\",
+                       (SELECT label FROM che.get_namespace_labels(che.get_root_namespace(nsp.pk_namespace)) WHERE language_iso_code = 'en') AS \"rootNamespaceLabel\"                        
+                    FROM che.descendant_property_hierarchy((:property)),
+                         che.associates_namespace asnsp,
+                         che.namespace nsp,
+                         che.property p,
+                         che.class domain,
+                         che.class range
+                    WHERE asnsp.fk_property = pk_child
+                    AND   nsp.pk_namespace = asnsp.fk_namespace
+                    AND nsp.pk_namespace IN (
+                    SELECT fk_namespace 
+                    FROM che.associates_entity_to_user_project 
+                    WHERE fk_associate_user_to_project = (
+                        SELECT pk_associate_user_to_project 
+                        FROM che.associate_user_to_project
+                        WHERE fk_user = :user AND fk_project = :project)
+                    AND fk_system_type = 25)    
+                    AND p.pk_property = pk_child
+                    AND p.has_domain = domain.pk_class
+                    AND p.has_range = range.pk_class
+                         ";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->execute(array('property' => $property->getId(), 'user' => $user->getId(), 'project' => $user->getCurrentActiveProject()->getId()));
 
         return $stmt->fetchAll();
     }
@@ -614,6 +891,89 @@ class PropertyRepository extends EntityRepository
 
         $stmt = $conn->prepare($sql);
         $stmt->execute(array('property' => $property->getId()));
+
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * @param Property $property
+     * @return array
+     */
+    public function findFilteredRelationsById(Property $property, User $user)
+    {
+        $conn = $this->getEntityManager()
+            ->getConnection();
+
+        $sql = "SELECT
+                ea.pk_entity_association,
+                ea.fk_target_property AS fk_related_property,
+                p.identifier_in_namespace,
+                p.standard_label,
+                st.standard_label AS relation,
+                txtp.pk_text_property,
+                ns.pk_namespace AS \"rootNamespaceId\",
+                ns.standard_label AS \"standardLabelNamespace\"
+                FROM
+                che.entity_association AS ea
+                LEFT JOIN che.system_type AS st
+                ON st.pk_system_type = ea.fk_system_type
+                LEFT JOIN che.property AS p
+                ON ea.fk_target_property = p.pk_property
+                LEFT JOIN (SELECT * FROM che.text_property WHERE fk_text_property_type = 15) AS txtp
+                ON txtp.fk_entity_association = ea.pk_entity_association
+                LEFT JOIN che.associates_namespace AS ans
+                ON ans.fk_entity_association = ea.pk_entity_association
+                LEFT JOIN che.namespace AS ns
+                ON ns.pk_namespace= che.get_root_namespace(ans.fk_namespace)
+                WHERE
+                ea.fk_system_type IN (18, 20)
+                AND p.pk_property IS NOT NULL
+                AND ea.fk_source_property = :property
+                AND ns.pk_namespace IN (
+                    SELECT fk_namespace 
+                    FROM che.associates_entity_to_user_project 
+                    WHERE fk_associate_user_to_project = (
+                        SELECT pk_associate_user_to_project 
+                        FROM che.associate_user_to_project
+                        WHERE fk_user = :user AND fk_project = :project)
+                    AND fk_system_type = 25)
+                UNION
+                SELECT
+                ea.pk_entity_association,
+                ea.fk_source_property AS fk_related_property,
+                p.identifier_in_namespace,
+                p.standard_label,
+                st.standard_label AS relation,
+                txtp.pk_text_property,
+                ns.pk_namespace AS \"rootNamespaceId\",
+                ns.standard_label AS \"standardLabelNamespace\"
+                FROM
+                che.entity_association AS ea
+                LEFT JOIN che.system_type AS st
+                ON st.pk_system_type = ea.fk_system_type
+                LEFT JOIN che.property AS p
+                ON ea.fk_source_property = p.pk_property
+                LEFT JOIN (SELECT * FROM che.text_property WHERE fk_text_property_type = 15) AS txtp
+                ON txtp.fk_entity_association = ea.pk_entity_association
+                LEFT JOIN che.associates_namespace AS ans
+                ON ans.fk_entity_association = ea.pk_entity_association
+                LEFT JOIN che.namespace AS ns
+                ON ns.pk_namespace= che.get_root_namespace(ans.fk_namespace)
+                WHERE
+                ea.fk_system_type IN (18, 20)
+                AND p.pk_property IS NOT NULL
+                AND ea.fk_target_property = :property
+                AND ns.pk_namespace IN (
+                    SELECT fk_namespace 
+                    FROM che.associates_entity_to_user_project 
+                    WHERE fk_associate_user_to_project = (
+                        SELECT pk_associate_user_to_project 
+                        FROM che.associate_user_to_project
+                        WHERE fk_user = :user AND fk_project = :project)
+                    AND fk_system_type = 25)";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->execute(array('property' => $property->getId(), 'user' => $user->getId(), 'project' => $user->getCurrentActiveProject()->getId()));
 
         return $stmt->fetchAll();
     }

@@ -113,6 +113,52 @@ class ClassRepository extends EntityRepository
      * @param OntoClass $class
      * @return array
      */
+    public function findFilteredAncestorsById(OntoClass $class, User $user){
+        $conn = $this->getEntityManager()
+            ->getConnection();
+
+        $sql = "WITH tw1 AS
+                (
+                  SELECT pk_parent,
+                     parent_identifier,
+                     DEPTH,
+                     ARRAY_TO_STRING(_path,'|') ancestors,
+                     pk_is_subclass_of
+                  FROM che.ascendant_class_hierarchy(:class)
+                )
+                SELECT tw1.pk_parent AS id,
+                       tw1.parent_identifier AS identifier,
+                       tw1.DEPTH,
+                       che.get_root_namespace(nsp.pk_namespace) AS \"rootNamespaceId\",
+                       (SELECT label FROM che.get_namespace_labels(che.get_root_namespace(nsp.pk_namespace)) WHERE language_iso_code = 'en') AS \"rootNamespaceLabel\"
+                FROM tw1
+                JOIN che.associates_namespace asnsp ON (asnsp.fk_class = tw1.pk_parent)
+                JOIN che.namespace nsp ON (nsp.pk_namespace = asnsp.fk_namespace)
+                WHERE depth > 1 
+                AND nsp.pk_namespace IN (
+                    SELECT fk_namespace 
+                    FROM che.associates_entity_to_user_project 
+                    WHERE fk_associate_user_to_project = (
+                        SELECT pk_associate_user_to_project 
+                        FROM che.associate_user_to_project
+                        WHERE fk_user = :user AND fk_project = :project)
+                    AND fk_system_type = 25)
+                GROUP BY tw1.pk_parent,
+                     tw1.parent_identifier,
+                     tw1.depth,
+                     nsp.pk_namespace
+                ORDER BY depth DESC;";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->execute(array('class' => $class->getId(), 'user' => $user->getId(), 'project' => $user->getCurrentActiveProject()->getId()));
+
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * @param OntoClass $class
+     * @return array
+     */
     public function findDescendantsById(OntoClass $class){
         $conn = $this->getEntityManager()
             ->getConnection();
@@ -140,6 +186,41 @@ class ClassRepository extends EntityRepository
      * @param OntoClass $class
      * @return array
      */
+    public function findFilteredDescendantsById(OntoClass $class, User $user){
+        $conn = $this->getEntityManager()
+            ->getConnection();
+
+        $sql = "SELECT 	pk_child AS id,
+                        child_identifier AS identifier,
+                        depth,
+                        che.get_root_namespace(nsp.pk_namespace) AS \"rootNamespaceId\",
+                        (SELECT label FROM che.get_namespace_labels(che.get_root_namespace(nsp.pk_namespace)) WHERE language_iso_code = 'en') AS \"rootNamespaceLabel\"
+                FROM 	che.descendant_class_hierarchy(:class) cls, 
+                    che.associates_namespace asnsp,
+                        che.namespace nsp
+                WHERE 	asnsp.fk_class = cls.pk_child
+                AND   	nsp.pk_namespace = asnsp.fk_namespace
+                AND nsp.pk_namespace IN (
+                    SELECT fk_namespace 
+                    FROM che.associates_entity_to_user_project 
+                    WHERE fk_associate_user_to_project = (
+                        SELECT pk_associate_user_to_project 
+                        FROM che.associate_user_to_project
+                        WHERE fk_user = :user AND fk_project = :project)
+                    AND fk_system_type = 25)
+                GROUP BY pk_child, child_identifier, depth, nsp.pk_namespace, che.get_root_namespace(nsp.pk_namespace)
+                ORDER BY depth ASC;";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->execute(array('class' => $class->getId(), 'user' => $user->getId(), 'project' => $user->getCurrentActiveProject()->getId()));
+
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * @param OntoClass $class
+     * @return array
+     */
     public function findEquivalencesById(OntoClass $class){
         $conn = $this->getEntityManager()
             ->getConnection();
@@ -156,6 +237,38 @@ class ClassRepository extends EntityRepository
 
         $stmt = $conn->prepare($sql);
         $stmt->execute(array('class' => $class->getId()));
+
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * @param OntoClass $class
+     * @return array
+     */
+    public function findFilteredEquivalencesById(OntoClass $class, User $user){
+        $conn = $this->getEntityManager()
+            ->getConnection();
+
+        $sql = "SELECT 	fk_associated_class AS id,
+                        identifier_in_namespace AS identifier,
+                        che.get_root_namespace(nsp.pk_namespace) AS \"rootNamespaceId\",
+                        (SELECT label FROM che.get_namespace_labels(che.get_root_namespace(nsp.pk_namespace)) WHERE language_iso_code = 'en') AS \"rootNamespaceLabel\"
+                FROM  che.get_equivalent_classes(:class) cls,
+                      che.associates_namespace asnsp,
+                      che.namespace nsp
+                WHERE 	asnsp.fk_class = cls.fk_associated_class
+                 AND   	nsp.pk_namespace = asnsp.fk_namespace
+                 AND nsp.pk_namespace IN (
+                    SELECT fk_namespace 
+                    FROM che.associates_entity_to_user_project 
+                    WHERE fk_associate_user_to_project = (
+                        SELECT pk_associate_user_to_project 
+                        FROM che.associate_user_to_project
+                        WHERE fk_user = :user AND fk_project = :project)
+                    AND fk_system_type = 25);";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->execute(array('class' => $class->getId(), 'user' => $user->getId(), 'project' => $user->getCurrentActiveProject()->getId()));
 
         return $stmt->fetchAll();
     }
@@ -227,9 +340,106 @@ class ClassRepository extends EntityRepository
     }
 
     /**
+     * @param OntoClass $class
+     * @return array
+     */
+    public function findFilteredRelationsById(OntoClass $class, User $user){
+        $conn = $this->getEntityManager()
+            ->getConnection();
+
+        $sql = "SELECT
+                ea.pk_entity_association,
+                ea.fk_target_class AS fk_related_class,
+                c.identifier_in_namespace,
+                c.standard_label,
+                st.standard_label AS relation,
+                txtp.pk_text_property,
+                ns.pk_namespace AS \"rootNamespaceId\",
+                ns.standard_label AS \"standardLabelNamespace\"
+                FROM
+                che.entity_association AS ea
+                LEFT JOIN che.system_type AS st
+                ON st.pk_system_type = ea.fk_system_type
+                LEFT JOIN che.class AS c
+                ON ea.fk_target_class = c.pk_class
+                LEFT JOIN (SELECT * FROM che.text_property WHERE fk_text_property_type = 15) AS txtp
+                ON txtp.fk_entity_association = ea.pk_entity_association
+                LEFT JOIN che.associates_namespace AS ans
+                ON ans.fk_entity_association = ea.pk_entity_association
+                LEFT JOIN che.namespace AS ns
+                ON ns.pk_namespace= che.get_root_namespace(ans.fk_namespace)
+                WHERE
+                ea.fk_system_type IN (4, 19)
+                AND ea.fk_source_class = :class
+                AND c.pk_class IS NOT NULL
+                AND ns.pk_namespace IN (
+                    SELECT fk_namespace 
+                    FROM che.associates_entity_to_user_project 
+                    WHERE fk_associate_user_to_project = (
+                        SELECT pk_associate_user_to_project 
+                        FROM che.associate_user_to_project
+                        WHERE fk_user = :user AND fk_project = :project)
+                    AND fk_system_type = 25)
+                UNION
+                SELECT
+                ea.pk_entity_association,
+                ea.fk_source_class AS fk_related_class,
+                c.identifier_in_namespace,
+                c.standard_label,
+                st.standard_label AS relation,
+                txtp.pk_text_property,
+                ns.pk_namespace AS \"rootNamespaceId\",
+                ns.standard_label AS \"standardLabelNamespace\"
+                FROM
+                che.entity_association AS ea
+                LEFT JOIN che.system_type AS st
+                ON st.pk_system_type = ea.fk_system_type
+                LEFT JOIN che.class AS c
+                ON ea.fk_source_class = c.pk_class
+                LEFT JOIN (SELECT * FROM che.text_property WHERE fk_text_property_type = 15) AS txtp
+                ON txtp.fk_entity_association = ea.pk_entity_association
+                LEFT JOIN che.associates_namespace AS ans
+                ON ans.fk_entity_association = ea.pk_entity_association
+                LEFT JOIN che.namespace AS ns
+                ON ns.pk_namespace= che.get_root_namespace(ans.fk_namespace)
+                WHERE
+                ea.fk_system_type IN (4, 19)
+                AND ea.fk_target_class = :class
+                AND c.pk_class IS NOT NULL
+                AND ns.pk_namespace IN (
+                    SELECT fk_namespace 
+                    FROM che.associates_entity_to_user_project 
+                    WHERE fk_associate_user_to_project = (
+                        SELECT pk_associate_user_to_project 
+                        FROM che.associate_user_to_project
+                        WHERE fk_user = :user AND fk_project = :project)
+                    AND fk_system_type = 25)";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->execute(array('class' => $class->getId(), 'user' => $user->getId(), 'project' => $user->getCurrentActiveProject()->getId()));
+
+        return $stmt->fetchAll();
+    }
+
+    /**
      * @return array
      */
     public function findClassesTree(){
+        $conn = $this->getEntityManager()
+            ->getConnection();
+
+        $sql = "SELECT array_to_json(array_agg(tree)) AS json FROM che.tree_classes_with_css_color(214) tree";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->execute();
+
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * @return array
+     */
+    public function findFilteredClassesTree(){
         $conn = $this->getEntityManager()
             ->getConnection();
 

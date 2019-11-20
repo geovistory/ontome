@@ -143,29 +143,59 @@ class ClassController extends Controller
     {
         $em = $this->getDoctrine()->getManager();
 
-        $ancestors = $em->getRepository('AppBundle:OntoClass')
-            ->findAncestorsById($class);
+        if (!is_null($this->getUser()) && $this->getUser()->getCurrentActiveProject()->getId() != 21) {
+            // L'utilisateur est connecté et le projet actif n'est pas le projet public
+            $user = $this->getUser();
 
-        $descendants = $em->getRepository('AppBundle:OntoClass')
-            ->findDescendantsById($class);
+            $ancestors = $em->getRepository('AppBundle:OntoClass')
+                ->findFilteredAncestorsById($class, $user);
 
-        $equivalences = $em->getRepository('AppBundle:OntoClass')
-            ->findEquivalencesById($class);
+            $descendants = $em->getRepository('AppBundle:OntoClass')
+                ->findFilteredDescendantsById($class, $user);
 
-        $relations = $em->getRepository('AppBundle:OntoClass')
-            ->findRelationsById($class);
+            $equivalences = $em->getRepository('AppBundle:OntoClass')
+                ->findFilteredEquivalencesById($class, $user);
 
-        $outgoingProperties = $em->getRepository('AppBundle:Property')
-            ->findOutgoingPropertiesById($class);
+            $relations = $em->getRepository('AppBundle:OntoClass')
+                ->findFilteredRelationsById($class, $user);
 
-        $outgoingInheritedProperties = $em->getRepository('AppBundle:Property')
-            ->findOutgoingInheritedPropertiesById($class);
+            $outgoingProperties = $em->getRepository('AppBundle:Property')
+                ->findFilteredOutgoingPropertiesById($class, $user);
 
-        $ingoingProperties = $em->getRepository('AppBundle:Property')
-            ->findIngoingPropertiesById($class);
+            $outgoingInheritedProperties = $em->getRepository('AppBundle:Property')
+                ->findFilteredOutgoingInheritedPropertiesById($class, $user);
 
-        $ingoingInheritedProperties = $em->getRepository('AppBundle:Property')
-            ->findIngoingInheritedPropertiesById($class);
+            $ingoingProperties = $em->getRepository('AppBundle:Property')
+                ->findFilteredIngoingPropertiesById($class, $user);
+
+            $ingoingInheritedProperties = $em->getRepository('AppBundle:Property')
+                ->findFilteredIngoingInheritedPropertiesById($class, $user);
+        }
+        else{ // L'utilisateur n'est pas connecté
+            $ancestors = $em->getRepository('AppBundle:OntoClass')
+                ->findAncestorsById($class);
+
+            $descendants = $em->getRepository('AppBundle:OntoClass')
+                ->findDescendantsById($class);
+
+            $equivalences = $em->getRepository('AppBundle:OntoClass')
+                ->findEquivalencesById($class);
+
+            $relations = $em->getRepository('AppBundle:OntoClass')
+                ->findRelationsById($class);
+
+            $outgoingProperties = $em->getRepository('AppBundle:Property')
+                ->findOutgoingPropertiesById($class);
+
+            $outgoingInheritedProperties = $em->getRepository('AppBundle:Property')
+                ->findOutgoingInheritedPropertiesById($class);
+
+            $ingoingProperties = $em->getRepository('AppBundle:Property')
+                ->findIngoingPropertiesById($class);
+
+            $ingoingInheritedProperties = $em->getRepository('AppBundle:Property')
+                ->findIngoingInheritedPropertiesById($class);
+        }
 
         $this->get('logger')
             ->info('Showing class: '.$class->getIdentifierInNamespace());
@@ -219,29 +249,59 @@ class ClassController extends Controller
 
         $em = $this->getDoctrine()->getManager();
 
-        $ancestors = $em->getRepository('AppBundle:OntoClass')
-            ->findAncestorsById($class);
+        if (!is_null($this->getUser()) && $this->getUser()->getCurrentActiveProject()->getId() != 21) {
+            // L'utilisateur est connecté et le projet actif n'est pas le projet public
+            $user = $this->getUser();
 
-        $descendants = $em->getRepository('AppBundle:OntoClass')
-            ->findDescendantsById($class);
+            $ancestors = $em->getRepository('AppBundle:OntoClass')
+                ->findFilteredAncestorsById($class, $user);
 
-        $equivalences = $em->getRepository('AppBundle:OntoClass')
-            ->findEquivalencesById($class);
+            $descendants = $em->getRepository('AppBundle:OntoClass')
+                ->findFilteredDescendantsById($class, $user);
 
-        $relations = $em->getRepository('AppBundle:OntoClass')
-            ->findRelationsById($class);
+            $equivalences = $em->getRepository('AppBundle:OntoClass')
+                ->findFilteredEquivalencesById($class, $user);
 
-        $outgoingProperties = $em->getRepository('AppBundle:Property')
-            ->findOutgoingPropertiesById($class);
+            $relations = $em->getRepository('AppBundle:OntoClass')
+                ->findFilteredRelationsById($class, $user);
 
-        $outgoingInheritedProperties = $em->getRepository('AppBundle:Property')
-            ->findOutgoingInheritedPropertiesById($class);
+            $outgoingProperties = $em->getRepository('AppBundle:Property')
+                ->findFilteredOutgoingPropertiesById($class, $user);
 
-        $ingoingProperties = $em->getRepository('AppBundle:Property')
-            ->findIngoingPropertiesById($class);
+            $outgoingInheritedProperties = $em->getRepository('AppBundle:Property')
+                ->findFilteredOutgoingInheritedPropertiesById($class, $user);
 
-        $ingoingInheritedProperties = $em->getRepository('AppBundle:Property')
-            ->findIngoingInheritedPropertiesById($class);
+            $ingoingProperties = $em->getRepository('AppBundle:Property')
+                ->findFilteredIngoingPropertiesById($class, $user);
+
+            $ingoingInheritedProperties = $em->getRepository('AppBundle:Property')
+                ->findFilteredIngoingInheritedPropertiesById($class, $user);
+        }
+        else{ // L'utilisateur n'est pas connecté
+            $ancestors = $em->getRepository('AppBundle:OntoClass')
+                ->findAncestorsById($class);
+
+            $descendants = $em->getRepository('AppBundle:OntoClass')
+                ->findDescendantsById($class);
+
+            $equivalences = $em->getRepository('AppBundle:OntoClass')
+                ->findEquivalencesById($class);
+
+            $relations = $em->getRepository('AppBundle:OntoClass')
+                ->findRelationsById($class);
+
+            $outgoingProperties = $em->getRepository('AppBundle:Property')
+                ->findOutgoingPropertiesById($class);
+
+            $outgoingInheritedProperties = $em->getRepository('AppBundle:Property')
+                ->findOutgoingInheritedPropertiesById($class);
+
+            $ingoingProperties = $em->getRepository('AppBundle:Property')
+                ->findIngoingPropertiesById($class);
+
+            $ingoingInheritedProperties = $em->getRepository('AppBundle:Property')
+                ->findIngoingInheritedPropertiesById($class);
+        }
 
         $this->get('logger')
             ->info('Showing class: '.$class->getIdentifierInNamespace());
@@ -277,8 +337,15 @@ class ClassController extends Controller
     public function getTreeJson()
     {
         $em = $this->getDoctrine()->getManager();
-        $classes = $em->getRepository('AppBundle:OntoClass')
-            ->findClassesTree();
+
+        if (!is_null($this->getUser()) && $this->getUser()->getCurrentActiveProject()->getId() != 21) {
+            $classes = $em->getRepository('AppBundle:OntoClass')
+                ->findFilteredClassesTree();
+        }
+        else{
+            $classes = $em->getRepository('AppBundle:OntoClass')
+                ->findClassesTree();
+        }
 
         return new JsonResponse($classes[0]['json'],200, array(), true);
     }
