@@ -443,7 +443,7 @@ class ClassRepository extends EntityRepository
         $conn = $this->getEntityManager()
             ->getConnection();
 
-        $sql = "SELECT array_to_json(array_agg(tree)) AS json FROM che.tree_filtered_classes_with_css_color(214,7,28) tree";
+        $sql = "SELECT array_to_json(array_agg(tree)) AS json FROM che.tree_classes_with_css_color(214) tree";
 
         $stmt = $conn->prepare($sql);
         $stmt->execute();
