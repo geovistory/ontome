@@ -821,6 +821,70 @@ class ProfileController  extends Controller
     }
 
     /**
+     * @Route("/selectable-descendent-domain/profile/{profile}/domain/{domain}/range/{range}/property/{property}/json", name="selectable_descendent_domain_profile_json")
+     * @Method("GET")
+     * @param Profile $profile
+     * @param OntoClass $domain
+     * @param OntoClass $range
+     * @param Property $property
+     * @param Request $request
+     * @return JsonResponse a Json formatted list representation of selectable descendent classes for properties by Class, Property and Profile
+     */
+    public function getSelectableDescendentDomain(OntoClass $domain, OntoClass $range, Profile $profile, Property $property, Request $request)
+    {
+        try {
+            $searchTerm = $request->get('term'); //récupération du paramètre "term" envoyé par select2 pour la requête AJAX
+
+            $em = $this->getDoctrine()->getManager();
+            $classes = $em->getRepository('AppBundle:OntoClass')
+                ->findDescendantsDomainByProfileAndDomainAndRangeId($profile, $domain, $range, $property, $searchTerm);
+            $data['results'] = $classes;
+            $data = json_encode($data);
+        }
+        catch (NotFoundHttpException $e) {
+            return new JsonResponse(null,404, 'content-type:application/problem+json');
+        }
+
+        if(empty($classes)) {
+            return new JsonResponse(null,204, array());
+        }
+
+        return new JsonResponse($data,200, array(), true);
+    }
+
+    /**
+     * @Route("/selectable-descendent-range/profile/{profile}/domain/{domain}/range/{range}/property/{property}/json", name="selectable_descendent_range_profile_json")
+     * @Method("GET")
+     * @param Profile $profile
+     * @param OntoClass $domain
+     * @param OntoClass $range
+     * @param Property $property
+     * @param Request $request
+     * @return JsonResponse a Json formatted list representation of selectable descendent classes for properties by Class, Property and Profile
+     */
+    public function getSelectableDescendentRange(OntoClass $domain, OntoClass $range, Profile $profile, Property $property, Request $request)
+    {
+        try {
+            $searchTerm = $request->get('term'); //récupération du paramètre "term" envoyé par select2 pour la requête AJAX
+
+            $em = $this->getDoctrine()->getManager();
+            $classes = $em->getRepository('AppBundle:OntoClass')
+                ->findDescendantsRangeByProfileAndDomainAndRangeId($profile, $domain, $range, $property, $searchTerm);
+            $data['results'] = $classes;
+            $data = json_encode($data);
+        }
+        catch (NotFoundHttpException $e) {
+            return new JsonResponse(null,404, 'content-type:application/problem+json');
+        }
+
+        if(empty($classes)) {
+            return new JsonResponse(null,204, array());
+        }
+
+        return new JsonResponse($data,200, array(), true);
+    }
+
+    /**
      * @Route("/profile/{id}/json", name="profile_json", schemes={"http"})
      * @Method("GET")
      * @param Profile $profile
