@@ -126,9 +126,10 @@
                     targets: 2,
                     render: function ( data, type, row, meta ) {
                         if(row.fk_system_type != '5') {
-                            var urlGetDescendentClasses = '{{ path("selectable_descendent_class_profile_json", {'profile' : 'profileID', 'class' : 'classID', 'property' : 'propertyID'}) }}';
+                            var urlGetDescendentClasses = '{{ path("selectable_descendent_range_profile_json", {'profile' : 'profileID', 'domain' : 'domainID', 'range' : 'rangeID', 'property' : 'propertyID'}) }}';
                             urlGetDescendentClasses = urlGetDescendentClasses.replace("profileID", profileID);
-                            urlGetDescendentClasses = urlGetDescendentClasses.replace("classID", row.rangeId);
+                            urlGetDescendentClasses = urlGetDescendentClasses.replace("domainID", classID);
+                            urlGetDescendentClasses = urlGetDescendentClasses.replace("rangeID", row.rangeId);
                             urlGetDescendentClasses = urlGetDescendentClasses.replace("propertyID", row.propertyId);
                             return '<span class = "outgoing-property-range-switch" data-id="' + row.propertyId + '">' + data + '</span><span id="outgoing-property-range-select-' + row.propertyId + '" data-id="' + row.propertyId + '"></span>&nbsp;<a data-id="' + row.propertyId + '" data-url="' + urlGetDescendentClasses + '" class="select-subclass-range" data-toggle="tooltip" title="Select a child class"><i class="far fa-caret-square-down"></i></a>';
                         }
@@ -189,9 +190,10 @@
                     targets: 2,
                     render: function ( data, type, row, meta ) {
                         if(row.fk_system_type != '5') {
-                            var urlGetDescendentClasses = '{{ path("selectable_descendent_class_profile_json", {'profile' : 'profileID', 'class' : 'classID', 'property' : 'propertyID'}) }}';
+                            var urlGetDescendentClasses = '{{ path("selectable_descendent_range_profile_json", {'profile' : 'profileID', 'domain' : 'domainID', 'range' : 'rangeID', 'property' : 'propertyID'}) }}';
                             urlGetDescendentClasses = urlGetDescendentClasses.replace("profileID", profileID);
-                            urlGetDescendentClasses = urlGetDescendentClasses.replace("classID", row.rangeId);
+                            urlGetDescendentClasses = urlGetDescendentClasses.replace("domainID", classID);
+                            urlGetDescendentClasses = urlGetDescendentClasses.replace("rangeID", row.rangeId);
                             urlGetDescendentClasses = urlGetDescendentClasses.replace("propertyID", row.propertyId);
                             return '<span class = "outgoing-inherited-property-range-switch" data-id="'+row.propertyId+'-'+row.rangeId+'">'+data+'</span><span id="outgoing-inherited-property-range-select-'+row.propertyId+'-'+row.rangeId+'" data-id="'+row.propertyId+'-'+row.rangeId+'"></span>&nbsp;<a data-id="'+row.propertyId+'-'+row.rangeId+'" data-url="'+urlGetDescendentClasses+'" class="select-subclass-range-inherited" data-toggle="tooltip" title="Select a child class"><i class="far fa-caret-square-down"></i></a>';
                         }
@@ -219,9 +221,10 @@
                     targets: 0,
                     render: function ( data, type, row, meta ) {
                         if(row.fk_system_type != '5') {
-                            var urlGetDescendentClasses = '{{ path("selectable_descendent_class_profile_json", {'profile' : 'profileID', 'class' : 'classID', 'property' : 'propertyID'}) }}';
+                            var urlGetDescendentClasses = '{{ path("selectable_descendent_domain_profile_json", {'profile' : 'profileID', 'domain' : 'domainID', 'range' : 'rangeID', 'property' : 'propertyID'}) }}';
                             urlGetDescendentClasses = urlGetDescendentClasses.replace("profileID", profileID);
-                            urlGetDescendentClasses = urlGetDescendentClasses.replace("classID", row.domainId);
+                            urlGetDescendentClasses = urlGetDescendentClasses.replace("domainID", row.domainId);
+                            urlGetDescendentClasses = urlGetDescendentClasses.replace("rangeID", classID);
                             urlGetDescendentClasses = urlGetDescendentClasses.replace("propertyID", row.propertyId);
                             return '<span class = "incoming-property-domain-switch" data-id="' + row.propertyId + '">' + data + '</span><span id="incoming-property-domain-select-' + row.propertyId + '" data-id="' + row.propertyId + '"></span>&nbsp;<a data-id="' + row.propertyId + '" data-url="' + urlGetDescendentClasses + '" class="select-subclass-domain" data-toggle="tooltip" title="Select a child class"><i class="far fa-caret-square-down"></i></a>';
                         }
@@ -278,9 +281,10 @@
                     targets: 0,
                     render: function ( data, type, row, meta ) {
                         if(row.fk_system_type != '5') {
-                            var urlGetDescendentClasses = '{{ path("selectable_descendent_class_profile_json", {'profile' : 'profileID', 'class' : 'classID', 'property' : 'propertyID'}) }}';
+                            var urlGetDescendentClasses = '{{ path("selectable_descendent_domain_profile_json", {'profile' : 'profileID', 'domain' : 'domainID', 'range' : 'rangeID', 'property' : 'propertyID'}) }}';
                             urlGetDescendentClasses = urlGetDescendentClasses.replace("profileID", profileID);
-                            urlGetDescendentClasses = urlGetDescendentClasses.replace("classID", row.domainId);
+                            urlGetDescendentClasses = urlGetDescendentClasses.replace("domainID", row.domainId);
+                            urlGetDescendentClasses = urlGetDescendentClasses.replace("rangeID", classID);
                             urlGetDescendentClasses = urlGetDescendentClasses.replace("propertyID", row.propertyId);
                             return '<span class = "incoming-inherited-property-domain-switch" data-id="'+row.propertyId+'-'+row.domainId+'">'+data+'</span><span id="incoming-inherited-property-domain-select-'+row.propertyId+'-'+row.domainId+'" data-id="'+row.propertyId+'-'+row.domainId+'"></span>&nbsp;<a data-id="'+row.propertyId+'-'+row.domainId+'" data-url="'+urlGetDescendentClasses+'" class="select-subclass-domain-inherited" data-toggle="tooltip" title="Select a child class"><i class="far fa-caret-square-down"></i></a>';
                         }
