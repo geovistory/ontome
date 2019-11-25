@@ -170,6 +170,12 @@ class ClassController extends Controller
 
             $ingoingInheritedProperties = $em->getRepository('AppBundle:Property')
                 ->findFilteredIngoingInheritedPropertiesById($class, $user);
+
+            $userProjectAssociation = $em->getRepository('AppBundle:UserProjectAssociation')
+                ->findOneBy(array('user' => $user, 'project' => $user->getCurrentActiveProject()));
+
+            $activeNamespaces = $em->getRepository('AppBundle:OntoNamespace')
+                ->findAllActiveNamespacesForUserProject($userProjectAssociation);
         }
         else{ // L'utilisateur n'est pas connecté
             $ancestors = $em->getRepository('AppBundle:OntoClass')
@@ -195,6 +201,8 @@ class ClassController extends Controller
 
             $ingoingInheritedProperties = $em->getRepository('AppBundle:Property')
                 ->findIngoingInheritedPropertiesById($class);
+
+            $activeNamespaces = null;
         }
 
         $this->get('logger')
@@ -210,7 +218,8 @@ class ClassController extends Controller
             'outgoingProperties' => $outgoingProperties,
             'outgoingInheritedProperties' => $outgoingInheritedProperties,
             'ingoingProperties' => $ingoingProperties,
-            'ingoingInheritedProperties' => $ingoingInheritedProperties
+            'ingoingInheritedProperties' => $ingoingInheritedProperties,
+            'activeNamespaces' => $activeNamespaces
         ));
     }
 
