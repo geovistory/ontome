@@ -560,7 +560,7 @@ class UserController extends Controller
      */
     public function newUserProjectNamespaceAssociationAction(OntoNamespace $namespace, UserProjectAssociation $userProjectAssociation, Request $request)
     {
-        //$this->denyAccessUnlessGranted('edit', $userProjectAssociation);
+        $this->denyAccessUnlessGranted('edit', $userProjectAssociation->getUser());
 
         // 1 Vérifier que le namespace n'est pas top level
         // 2 Vérifier qu'une association namespace - userproject identique n'existe pas
@@ -639,7 +639,7 @@ class UserController extends Controller
      */
     public function deleteUserProjectNamespaceAssociationAction(OntoNamespace $namespace, UserProjectAssociation $userProjectAssociation, Request $request)
     {
-        //$this->denyAccessUnlessGranted('edit', $userProjectAssociation);
+        $this->denyAccessUnlessGranted('edit', $userProjectAssociation->getUser());
 
         $em = $this->getDoctrine()->getManager();
 
@@ -702,7 +702,7 @@ class UserController extends Controller
      */
     public function newUserProjectProfileAssociationAction(Profile $profile, UserProjectAssociation $userProjectAssociation, Request $request)
     {
-        //$this->denyAccessUnlessGranted('edit', $userProjectAssociation);
+        $this->denyAccessUnlessGranted('edit', $userProjectAssociation->getUser());
 
         // 1 Vérifier que le namespace n'est pas top level
         // 2 Vérifier qu'une association namespace - userproject identique n'existe pas
@@ -826,7 +826,7 @@ class UserController extends Controller
      */
     public function deleteUserProjectProfileAssociationAction(Profile $profile, UserProjectAssociation $userProjectAssociation, Request $request)
     {
-        //$this->denyAccessUnlessGranted('edit', $userProjectAssociation);
+        $this->denyAccessUnlessGranted('edit', $userProjectAssociation->getUser());
 
         $em = $this->getDoctrine()->getManager();
 
@@ -936,6 +936,9 @@ class UserController extends Controller
      * @return Response
      */
     public function reinitialization(Request $request, User $user){
+
+        $this->denyAccessUnlessGranted('edit', $user);
+
         // récupérer l'id du projet actif
         $currentProject = $user->getCurrentActiveProject();
         if($currentProject->getId() != 21) {
