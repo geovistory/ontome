@@ -3,8 +3,10 @@
 namespace AppBundle\Form;
 
 use AppBundle\Entity\OntoClass;
+use AppBundle\Entity\Property;
 use AppBundle\Form\DataTransformer\SystemTypeToNumberTransformer;
 use AppBundle\Repository\ClassRepository;
+use AppBundle\Repository\PropertyRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
@@ -60,7 +62,7 @@ class EntityAssociationForm extends AbstractType
                 ->add('targetClass', EntityType::class,
                     array(
                         'class' => OntoClass::class,
-                        'label' => "range",
+                        'label' => "Target class",
                         'query_builder' => function(ClassRepository $repo) use ($user){
                             return $repo->findFilteredClassByActiveProjectOrderedById($user);
                         }
@@ -75,7 +77,14 @@ class EntityAssociationForm extends AbstractType
                         'owl:inverseOf' => 20
                     ),
                     'label' => 'Type relation'))
-                ->add('targetProperty');
+                ->add('targetProperty', EntityType::class,
+                    array(
+                        'class' => Property::class,
+                        'label' => "Target property",
+                        'query_builder' => function(PropertyRepository $repo) use ($user){
+                            return $repo->findFilteredPropertiesByActiveProjectOrderedById($user);
+                        }
+                    ));
         }
 
         $builder->get('systemType')

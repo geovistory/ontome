@@ -44,7 +44,7 @@ class ParentClassAssociationForm extends AbstractType
             ->add('parentClass', EntityType::class,
                 array(
                     'class' => OntoClass::class,
-                    'label' => "range",
+                    'label' => "Parent class",
                     'query_builder' => function(ClassRepository $repo) use ($user){
                         return $repo->findFilteredClassByActiveProjectOrderedById($user);
                     }

@@ -59,7 +59,7 @@ class OutgoingPropertyQuickAddForm extends AbstractType
             ->add('range', EntityType::class,
                 array(
                     'class' => OntoClass::class,
-                    'label' => "range",
+                    'label' => "Range",
                     'query_builder' => function(ClassRepository $repo) use ($user){
                         return $repo->findFilteredClassByActiveProjectOrderedById($user);
                     }

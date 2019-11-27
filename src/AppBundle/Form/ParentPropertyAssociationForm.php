@@ -3,6 +3,7 @@
 namespace AppBundle\Form;
 
 use AppBundle\Entity\OntoClass;
+use AppBundle\Entity\Property;
 use AppBundle\Form\DataTransformer\PropertyToNumberTransformer;
 use AppBundle\Repository\PropertyRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -16,7 +17,6 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
 
 class ParentPropertyAssociationForm extends AbstractType
 {
-
     private $transformer;
     private $tokenStorage;
     private $em;
@@ -35,17 +35,17 @@ class ParentPropertyAssociationForm extends AbstractType
 
         if (!$user) {
             throw new \LogicException(
-                'The ParentClassAssociationForm cannot be used without an authenticated user!'
+                'The ParentPropertyAssociationForm cannot be used without an authenticated user!'
             );
         }
 
         $builder
             ->add('parentProperty', EntityType::class,
                 array(
-                    'class' => OntoClass::class,
-                    'label' => "range",
+                    'class' => Property::class,
+                    'label' => "Parent property",
                     'query_builder' => function(PropertyRepository $repo) use ($user){
-                        return $repo->findFilteredPropertyByActiveProjectOrderedById($user);
+                        return $repo->findFilteredPropertiesByActiveProjectOrderedById($user);
                     }
                 ))
             ->add('childProperty', HiddenType::class)

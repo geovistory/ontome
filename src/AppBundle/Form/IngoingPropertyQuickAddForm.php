@@ -54,7 +54,7 @@ class IngoingPropertyQuickAddForm extends AbstractType
             ->add('domain', EntityType::class,
                 array(
                     'class' => OntoClass::class,
-                    'label' => "domain",
+                    'label' => "Domain",
                     'query_builder' => function(ClassRepository $repo) use ($user){
                         return $repo->findFilteredClassByActiveProjectOrderedById($user);
                     }
