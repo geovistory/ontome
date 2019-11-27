@@ -9,6 +9,7 @@
 namespace AppBundle\Repository;
 
 use AppBundle\Entity\Profile;
+use AppBundle\Entity\Project;
 use Doctrine\ORM\EntityRepository;
 
 class ProfileRepository extends EntityRepository
@@ -28,4 +29,28 @@ class ProfileRepository extends EntityRepository
 
         return $stmt->fetchAll();
     }
+
+    /**
+     * @param $lang string the language iso code
+     * @param $selectingProjectId
+     * @param $owningProjectId
+     * @return array
+     */
+    public function findProfilesApi($lang, $selectingProjectId, $owningProjectId)
+    {
+        $conn = $this->getEntityManager()
+            ->getConnection();
+
+        $sql = "SELECT array_to_json(array_agg(result)) AS json FROM (SELECT * FROM api.get_profiles_list(:lang, :selectingProject, :owningProject) ) result;";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->execute(array(
+            'lang' => $lang,
+            'selectingProject' => $selectingProjectId,
+            'owningProject' => $owningProjectId
+        ));
+
+        return $stmt->fetchAll();
+    }
+
 }
