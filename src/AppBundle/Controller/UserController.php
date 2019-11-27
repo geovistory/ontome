@@ -415,9 +415,10 @@ class UserController extends Controller
      */
     public function editCurrentActiveProjectAction(Project $project)
     {
-        $em = $this->getDoctrine()->getManager();
-
         $user = $this->getUser();
+        $this->denyAccessUnlessGranted('edit', $user);
+
+        $em = $this->getDoctrine()->getManager();
 
         // Public project = 21
         $publicProject = $em->getRepository('AppBundle:Project')->find(21);
