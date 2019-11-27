@@ -13,6 +13,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class ApiController extends Controller
@@ -68,6 +69,40 @@ class ApiController extends Controller
         }
 
         return new JsonResponse($properties[0]['json'],200, array(), true);
+    }
+
+    /**
+     * @Route("/api/profiles.json", name="api_profiles_json")
+     * @Method("GET")
+     * @param Request $request
+     * @return JsonResponse a Json formatted list representation of profiles
+     */
+    public function getProfiles(Request $request)
+    {
+        try {
+            $lang = $request->get('lang', 'en');
+            $selectingProject = intval($request->get('selected-by-project', 0));
+            $owningProject = intval($request->get('owned-by-project', 0));
+
+            $em = $this->getDoctrine()->getManager();
+            $profiles = $em->getRepository('AppBundle:Profile')
+                ->findProfilesApi($lang, $selectingProject, $owningProject);
+
+        } catch (\Exception $e) {
+            $message = $e->getMessage();
+            $status = 'Error';
+            $response = array(
+                'status' => $status,
+                'message' => $message
+            );
+            return new JsonResponse($response,500, 'content-type:application/problem+json');
+        }
+
+        if(empty($profiles[0]['json'])) {
+            return new JsonResponse(null,204, array());
+        }
+
+        return new JsonResponse($profiles[0]['json'],200, array(), true);
     }
 
 
