@@ -379,6 +379,8 @@
                 $(this).next('strong').removeClass("text-muted");
                 $(this).next('strong').children('a').removeClass("text-muted");
                 $(this).parent('div').next('ul').children('li').children('a').removeClass("text-muted");
+                $(this).parent('div').next('ul').children('li').children('a').addClass("uncheck-namespace");
+                $(this).parent('div').next('ul').children('li').children('a').removeClass("check-namespace");
                 $(this).parent('div').next('ul').children('li').children('a').children('span').removeClass("text-muted");
                 $(this).parent('div').next('ul').children('li').children('a').children('span').removeClass("glyphicon-unchecked");
                 $(this).parent('div').next('ul').children('li').children('a').children('span').addClass("glyphicon-check");
@@ -396,11 +398,13 @@
                         }
                         if(data.status == 'Success'){
                             data.namespacesSelected.forEach((idNamespace) => {
-                                $('a[data-id='+idNamespace+']').removeClass("text-muted");
-                                $('a[data-id='+idNamespace+']').children('span').removeClass("text-muted");
-                                $('a[data-id='+idNamespace+']').children('span').removeClass("glyphicon-unchecked");
-                                $('a[data-id='+idNamespace+']').children('span').addClass("glyphicon-check");
-                                $('a[data-id='+idNamespace+']').next('a').removeClass("text-muted");
+                                //$('a[data-id='+idNamespace+'][class*="check-namespace"]').removeClass("text-muted");
+                                //$('a[data-id='+idNamespace+'][class*="check-namespace"]').addClass("uncheck-namespace");
+                                //$('a[data-id='+idNamespace+'][class*="check-namespace"]').removeClass("check-namespace");
+                                //$('a[data-id='+idNamespace+'][class*="check-namespace"]').children('span').removeClass("text-muted");
+                                //$('a[data-id='+idNamespace+'][class*="check-namespace"]').children('span').removeClass("glyphicon-unchecked");
+                                //$('a[data-id='+idNamespace+'][class*="check-namespace"]').children('span').addClass("glyphicon-check");
+                                //$('a[data-id='+idNamespace+'][class*="check-namespace"]').next('a').removeClass("text-muted");
                             })
                         }
                     }
@@ -419,6 +423,8 @@
                 $(this).next('strong').addClass("text-muted");
                 $(this).next('strong').children('a').addClass("text-muted");
                 $(this).parent('div').next('ul').children('li').children('a').addClass("text-muted");
+                $(this).parent('div').next('ul').children('li').children('a').addClass("check-namespace");
+                $(this).parent('div').next('ul').children('li').children('a').removeClass("uncheck-namespace");
                 $(this).parent('div').next('ul').children('li').children('a').children('span').addClass("text-muted");
                 $(this).parent('div').next('ul').children('li').children('a').children('span').addClass("glyphicon-unchecked");
                 $(this).parent('div').next('ul').children('li').children('a').children('span').removeClass("glyphicon-check");
@@ -436,11 +442,13 @@
                         }
                         if(data.status == 'Success'){
                             data.namespacesRejected.forEach((idNamespace) => {
-                                $('a[data-id='+idNamespace+']').addClass("text-muted");
-                                $('a[data-id='+idNamespace+']').children('span').addClass("text-muted");
-                                $('a[data-id='+idNamespace+']').children('span').addClass("glyphicon-unchecked");
-                                $('a[data-id='+idNamespace+']').children('span').removeClass("glyphicon-check");
-                                $('a[data-id='+idNamespace+']').next('a').addClass("text-muted");
+                                //$('a[data-id='+idNamespace+'][class*="check-namespace"]').addClass("text-muted");
+                                //$('a[data-id='+idNamespace+'][class*="check-namespace"]').addClass("check-namespace");
+                                //$('a[data-id='+idNamespace+'][class*="check-namespace"]').removeClass("uncheck-namespace");
+                                //$('a[data-id='+idNamespace+'][class*="check-namespace"]').children('span').addClass("text-muted");
+                                //$('a[data-id='+idNamespace+'][class*="check-namespace"]').children('span').addClass("glyphicon-unchecked");
+                                //$('a[data-id='+idNamespace+'][class*="check-namespace"]').children('span').removeClass("glyphicon-check");
+                                //$('a[data-id='+idNamespace+'][class*="check-namespace"]').next('a').addClass("text-muted");
                             })
                         }
                     }
@@ -466,11 +474,13 @@
                     type: 'POST',
                     dataType: 'json',
                     success:function(data){
-                        $('a[data-id='+selectedValue+']').removeClass("text-muted");
-                        $('a[data-id='+selectedValue+']').children('span').removeClass("text-muted");
-                        $('a[data-id='+selectedValue+']').children('span').removeClass("glyphicon-unchecked");
-                        $('a[data-id='+selectedValue+']').children('span').addClass("glyphicon-check");
-                        $('a[data-id='+selectedValue+']').next('a').removeClass("text-muted");
+                        $('a[data-id='+selectedValue+'][class*="check-namespace"]').removeClass("text-muted");
+                        $('a[data-id='+selectedValue+'][class*="check-namespace"]').addClass("uncheck-namespace");
+                        $('a[data-id='+selectedValue+'][class*="check-namespace"]').removeClass("check-namespace");
+                        $('a[data-id='+selectedValue+'][class*="check-namespace"]').children('span').removeClass("text-muted");
+                        $('a[data-id='+selectedValue+'][class*="check-namespace"]').children('span').removeClass("glyphicon-unchecked");
+                        $('a[data-id='+selectedValue+'][class*="check-namespace"]').children('span').addClass("glyphicon-check");
+                        $('a[data-id='+selectedValue+'][class*="check-namespace"]').next('a').removeClass("text-muted");
                     },
                     statusCode: {
                         204: function () {
@@ -497,11 +507,13 @@
                     type: 'DELETE',
                     dataType: 'json',
                     success:function(data){
-                        $('a[data-id='+selectedValue+']').addClass("text-muted");
-                        $('a[data-id='+selectedValue+']').children('span').addClass("text-muted");
-                        $('a[data-id='+selectedValue+']').children('span').addClass("glyphicon-unchecked");
-                        $('a[data-id='+selectedValue+']').children('span').removeClass("glyphicon-check");
-                        $('a[data-id='+selectedValue+']').next('a').addClass("text-muted");
+                        $('a[data-id='+selectedValue+'][class*="check-namespace"]').addClass("text-muted");
+                        $('a[data-id='+selectedValue+'][class*="check-namespace"]').addClass("check-namespace");
+                        $('a[data-id='+selectedValue+'][class*="check-namespace"]').removeClass("uncheck-namespace");
+                        $('a[data-id='+selectedValue+'][class*="check-namespace"]').children('span').addClass("text-muted");
+                        $('a[data-id='+selectedValue+'][class*="check-namespace"]').children('span').addClass("glyphicon-unchecked");
+                        $('a[data-id='+selectedValue+'][class*="check-namespace"]').children('span').removeClass("glyphicon-check");
+                        $('a[data-id='+selectedValue+'][class*="check-namespace"]').next('a').addClass("text-muted");
                     },
                     statusCode: {
                         204: function () {
