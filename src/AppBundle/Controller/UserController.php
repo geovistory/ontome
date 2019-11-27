@@ -423,6 +423,13 @@ class UserController extends Controller
         // Public project = 21
         $publicProject = $em->getRepository('AppBundle:Project')->find(21);
 
+        // Vérifier si le projet peut lui être attribué, autre que 21.
+        $userProjectAssociation = $em->getRepository('AppBundle:UserProjectAssociation')
+            ->findOneBy(array('user' => $user, 'project' => $project));
+        if(is_null($userProjectAssociation) && $project->getId() != 21) // Si null : il en a pas les droits, sauf pour le projet public
+        {
+            throw $this->createAccessDeniedException();
+        }
         $user->setCurrentActiveProject($project);
         $em->persist($user);
         $em->flush();
@@ -502,7 +509,6 @@ class UserController extends Controller
                 }
             }
         }
-        //$this->addFlash('success', 'Current active project updated!');
 
         return $this->redirectToRoute('user_show', [
             'id' => $user->getId(),
