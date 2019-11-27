@@ -72,6 +72,27 @@ class ClassRepository extends EntityRepository
     }
 
     /**
+     * @return OntoClass[]
+     * Identique au dessus mais retourne le QueryBuilder (pour les form)
+     */
+    public function findFilteredClassByActiveProjectOrderedById(User $user)
+    {
+        return $this->createQueryBuilder('class')
+            ->join('class.namespaces','nspc')
+            ->join('nspc.namespaceUserProjectAssociation', 'nupa')
+            ->join('nupa.userProjectAssociation', 'upa')
+            ->join('nupa.systemType', 'st')
+            ->join('upa.user', 'user')
+            ->join('upa.project', 'proj')
+            ->andWhere('user.id = :pk_user')
+            ->andWhere('proj.id = :pk_active_project')
+            ->andWhere('st.id = 25')
+            ->setParameter('pk_user', $user->getId())
+            ->setParameter('pk_active_project', $user->getCurrentActiveProject()->getId())
+            ->orderBy('class.id','DESC');
+    }
+
+    /**
      * @param OntoClass $class
      * @return array
      */
