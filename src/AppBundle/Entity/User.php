@@ -123,6 +123,12 @@ class User implements UserInterface
     private $userProjectAssociations;
 
     /**
+     * @ORM\ManyToOne(targetEntity="Project", inversedBy="UserProjectAssociation")
+     * @ORM\JoinColumn(name="fk_current_active_project", referencedColumnName="pk_project", nullable=false)
+     */
+    private $currentActiveProject;
+
+    /**
      * User constructor.
      */
     public function __construct()
@@ -367,6 +373,22 @@ class User implements UserInterface
     public function setTokenDate($tokenDate)
     {
         $this->tokenDate = $tokenDate;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getCurrentActiveProject()
+    {
+        return $this->currentActiveProject;
+    }
+
+    /**
+     * @param mixed $currentActiveProject
+     */
+    public function setCurrentActiveProject($currentActiveProject)
+    {
+        $this->currentActiveProject = $currentActiveProject;
     }
 
     public function __toString()

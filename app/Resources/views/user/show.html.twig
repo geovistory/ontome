@@ -1,5 +1,10 @@
 {% extends 'base.html.twig' %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.4/css/select2.min.css" rel="stylesheet" />
+{% endblock %}
+
 {% block body %}
     <div class="container">
         <div class="row">
@@ -20,7 +25,7 @@
             <ul class="nav nav-tabs" id="main-tabs">
                 <li class="active"><a data-toggle="tab" href="#user-info">My account</a></li>
                 <li><a data-toggle="tab" href="#my-projects">My projects</a></li>
-                <li><a data-toggle="tab" href="#my-namespaces">My namespaces</a></li>
+                <li><a data-toggle="tab" href="#my-current-namespaces">My current namespaces</a></li>
             </ul>
             <div class="tab-content">
                 <div id="user-info" class="tab-pane fade in active">
@@ -43,7 +48,7 @@
                     </table>
                 </div>
                 <div id="my-projects" class="tab-pane fade">
-                    {% if namespaces|length < 1 %}
+                    {% if userProjectAssociations|length < 1 or userProjectAssociations|length == 1 %}
                         <div class="pull-right add-div">
                             <a href="{{ path('project_new_user')}}"
                                class="btn btn-primary pull-right">
@@ -55,8 +60,9 @@
                     <table class="table table-striped" id="projects-table">
                         <thead>
                         <tr>
-                            <th>Project identifier</th>
+                            <th>Project name</th>
                             <th>Last updated</th>
+                            <th>Action</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -68,8 +74,18 @@
                                     }) }}">
                                         {{ userProjectAssociation.project.standardLabel }}
                                     </a>
+                                    {% if userProjectAssociation.project.standardLabel == userActiveProjectAssociation.project.standardLabel %}
+                                        <span class="label label-success" style="margin-left: 10px;"><i class="fas fa-dot-circle"></i> Active</span>
+                                    {% endif %}
                                 </td>
                                 <td>{{ userProjectAssociation.project.modificationTime|date('Y-m-d') }}</td>
+                                <td>
+                                    {% if userProjectAssociation.project.standardLabel != userActiveProjectAssociation.project.standardLabel %}
+                                    <a href="{{ path('user_edit_current_active_project', {'project': userProjectAssociation.project.id}) }}" class="btn btn-xs btn-primary">
+                                        <i class="far fa-dot-circle"></i> Activate
+                                    </a>
+                                    {% endif %}
+                                </td>
                             </tr>
                         {% endfor %}
                         </tbody>
@@ -78,32 +94,148 @@
                         <p><i class="fas fa-info-circle"></i>&nbsp;If you are interested in joining an <a href="{{ path('app_project_list') }}" target="_blank">existing project</a>, please write to <a href="mailto:ontome@dataforhistory.org">ontome@dataforhistory.org</a> indicating the name of the <a href="{{ path('app_project_list') }}" target="_blank">project</a> and the reason of your request. </p>
                     </div>
                 </div>
-                <div id="my-namespaces" class="tab-pane fade">
-                    <h3>My namespaces</h3>
-                    <table class="table table-striped" id="namespaces-table">
-                        <thead>
-                        <tr>
-                            <th>Namespaces URI</th>
-                            <th>Namespaces identifier</th>
-                            <th>Last updated</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {% for namespace in namespaces %}
-                            <tr>
-                                <td>{{ namespace.namespaceUri }}</td>
-                                <td>
-                                    <a href="{{ path('namespace_show', {
-                                        'id': namespace.id
-                                    }) }}">
-                                        {{ namespace }}
-                                    </a>
-                                </td>
-                                <td>{{ namespace.modificationTime|date('Y-m-d') }}</td>
-                            </tr>
+                <div id="my-current-namespaces" class="tab-pane fade">
+                    <h3>Namespaces whose classes and properties are displayed</h3>
+                    {% if userActiveProjectAssociation.project.id != 21 %}
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <a href="{{ path('user_reinitialization', {id: user.id}) }}" class="btn btn-success">Reset</a>
+                        </div>
+                        <div class="col-lg-6">
+                            {% if defaultNamespace is not null %}
+                            <h4>Managed by the project</h4>
+                            <div>
+                                {% set isActive = false %}
+                                {% if defaultNamespace in activeNamespaces %}
+                                    {% set isActive = true %}
+                                {% endif %}
+                                {% if isActive %}
+                                <a href="#" class="uncheck-namespace" data-id="{{ defaultNamespace.id }}"><span class="glyphicon glyphicon-check" aria-hidden="true"></span></a>
+                                <a href="{{ path('namespace_show', {'id': defaultNamespace.id}) }}">{{ defaultNamespace.standardLabel }}</a>
+                                {% else %}
+                                <a href="#" class="check-namespace" data-id="{{ defaultNamespace.id }}"><span class="glyphicon glyphicon-unchecked text-muted" aria-hidden="true"></span></a>
+                                <a class="text-muted" href="{{ path('namespace_show', {'id': defaultNamespace.id}) }}">{{ defaultNamespace.standardLabel }}</a>
+                                {% endif %}
+                            </div>
+                            {% if defaultNamespace.referencedNamespaceAssociations|length > 0 %}
+                                {% set break = false %}
+                                {% for referencedNamespaceAssociation in defaultNamespace.referencedNamespaceAssociations if referencedNamespaceAssociation.referencedNamespace is not null and not break %}
+                                    {% set break = true %}
+                                    <div class="small text-muted"><strong><em>Referenced :</em></strong></div>
+                                {% endfor %}
+                                {% if break %}
+                                <ul>
+                                {% for referencedNamespaceAssociation in defaultNamespace.referencedNamespaceAssociations if referencedNamespaceAssociation.referencedNamespace is not null %}
+                                    <li class="list-unstyled"><em class="text-muted">{{ referencedNamespaceAssociation.referencedNamespace.standardLabel }}</em></li>
+                                {% endfor %}
+                                </ul>
+                                {% endif %}
+                            {% endif %}
+                            {% endif %}
+                            <h4>Additional namespaces</h4>
+                            <div id="additional-namespaces-list">
+                            {% if additionalNamespaces|length == 0 %}
+                                <p class="text-muted" id="empty-namespace-list-message"><em>No additional namespace added, please pick one below.</em></p>
+                            {% endif %}
+                            {% for additionalNamespace in additionalNamespaces %}
+                                <div class="row" style="margin-left:0px;">
+                                    <a href="#" class="remove-namespace" data-id="{{ additionalNamespace.id }}"><span class="glyphicon glyphicon-remove text-danger" aria-hidden="true"></span></a>
+                                    <a href="{{ path('namespace_show', {'id': additionalNamespace.id}) }}">{{ additionalNamespace.standardLabel }}</a>
+                                    {% if additionalNamespace.referencedNamespaceAssociations|length > 0 %}
+                                        {% set break = false %}
+                                        {% for referencedNamespaceAssociation in additionalNamespace.referencedNamespaceAssociations if referencedNamespaceAssociation.referencedNamespace is not null and not break %}
+                                            {% set break = true %}
+                                            <div class="small text-muted"><strong><em>Referenced :</em></strong></div>
+                                        {% endfor %}
+                                        {% if break %}
+                                        <ul>
+                                        {% for referencedNamespaceAssociation in additionalNamespace.referencedNamespaceAssociations if referencedNamespaceAssociation.referencedNamespace is not null %}
+                                            <li class="list-unstyled"><em class="text-muted">{{ referencedNamespaceAssociation.referencedNamespace.standardLabel }}</em></li>
+                                        {% endfor %}
+                                        </ul>
+                                        {% endif %}
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                            </div>
+                            <h4>Pick an additional namespace</h4>
+                            <select id="select-root-namespace">
+                                <option id="placeholder"></option>
+                            {% for rootNamespace in rootNamespaces %}
+                                <option value="{{ rootNamespace.id }}">{{ rootNamespace.standardLabel }}</option>
+                            {% endfor %}
+                            </select>
+                            <div id="loading-icon">
+                                <span class="fas fa-spinner fa-spin"></span>
+                            </div>
+                            <ul class="list-group" id="chosable-namespaces-list" style="margin-top: 10px;">
+                            </ul>
+                        </div>
+                        <div class="col-lg-6">
+                            <h4>Selected from project profiles</h4>
+                            {% if userActiveProjectAssociation.project.profiles|length == 0 %}
+                                <p class="text-muted"><em>This project does not manage any profile.</em></p>
+                            {% endif %}
+                            {% for profile in userActiveProjectAssociation.project.profiles %}
+                                <div>
+                                    {% set isActiveProfile = false %}
+                                    {% if profile in activeProfiles %}
+                                        {% set isActiveProfile = true %}
+                                    {% endif %}
+                                    {% if isActiveProfile %}
+                                    <a href="#" class="uncheck-profile" data-id="{{ profile.id }}"><span class="glyphicon glyphicon-check" aria-hidden="true"></span></a>
+                                    <strong>Profile : <a href="{{ path('profile_show', {'id': profile.id}) }}">{{ profile }}</a></strong>
+                                    {% else %}
+                                    <a href="#" class="check-profile" data-id="{{ profile.id }}"><span class="glyphicon glyphicon-unchecked text-muted" aria-hidden="true"></span></a>
+                                    <strong class="text-muted">Profile : <a class="text-muted" href="{{ path('profile_show', {'id': profile.id}) }}">{{ profile }}</a></strong>
+                                    {% endif %}
+                                </div>
+                                {% if profile.namespaces|length == 0 %}
+                                    <p class="text-muted"><em>No namespace is associated with this profile.</em></p>
+                                {% endif %}
+                                <ul style="margin-bottom: 20px;">
+                                {% for namespace in profile.namespaces %}
+                                    {% set isActive = false %}
+                                    {% if namespace in activeNamespaces %}
+                                        {% set isActive = true %}
+                                    {% endif %}
+                                    {% if isActive %}
+                                        <li class="list-unstyled" style="margin-left: -30px;">
+                                            <a href="#" class="uncheck-namespace" data-id="{{ namespace.id }}"><span class="glyphicon glyphicon-check" aria-hidden="true"></span></a>
+                                            <a href="{{ path('namespace_show', {'id': namespace.id}) }}">{{ namespace.standardLabel }}</a>
+                                        </li>
+                                    {% else %}
+                                        <li class="list-unstyled" style="margin-left: -30px;">
+                                            <a href="#" class="check-namespace" data-id="{{ namespace.id }}"><span class="glyphicon glyphicon-unchecked text-muted" aria-hidden="true"></span></a>
+                                            <a class="text-muted" href="{{ path('namespace_show', {'id': namespace.id}) }}">{{ namespace.standardLabel }}</a>
+                                        </li>
+                                    {% endif %}
+                                {% endfor %}
+                                </ul>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% else %}{# Projet public #}
+                        {% for displayedNamespace in displayedNamespaces %}
+                            <div class="row" style="margin-left:0px;">
+                                <a href="{{ path('namespace_show', {'id': displayedNamespace.id}) }}">{{ displayedNamespace.standardLabel }}</a>
+                                {% if displayedNamespace.referencedNamespaceAssociations|length > 0 %}
+                                    {% set break = false %}
+                                    {% for referencedNamespaceAssociation in displayedNamespace.referencedNamespaceAssociations if referencedNamespaceAssociation.referencedNamespace is not null and not break %}
+                                        {% set break = true %}
+                                        <div class="small text-muted"><strong><em>Referenced :</em></strong></div>
+                                    {% endfor %}
+                                    {% if break %}
+                                        <ul>
+                                            {% for referencedNamespaceAssociation in displayedNamespace.referencedNamespaceAssociations if referencedNamespaceAssociation.referencedNamespace is not null %}
+                                                <li class="list-unstyled"><em class="text-muted">{{ referencedNamespaceAssociation.referencedNamespace.standardLabel }}</em></li>
+                                            {% endfor %}
+                                        </ul>
+                                    {% endif %}
+                                {% endif %}
+                            </div>
                         {% endfor %}
-                        </tbody>
-                    </table>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -112,11 +244,283 @@
 
 {% block javascripts %}
     {{ parent() }}
-
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.4/js/select2.min.js"></script>
     <script>
         $(document).ready(function() {
-            $('#namespaces-table').DataTable();
-            $('#projects-table').DataTable();
+            // Onglet My Projects
+            $('#projects-table').DataTable({
+                "order": [[2, 'asc']]
+            });
+
+            // Onglet My current namespaces
+            $('#loading-icon').hide(0);
+            $('#select-root-namespace').select2({
+                width: '100%',
+                placeholder: 'Select a root namespace',
+                sorter: function(data) {
+                    /* Sort data using lowercase comparison */
+                    return data.sort(function (a, b) {
+                        a = a.text.toLowerCase();
+                        b = b.text.toLowerCase();
+                        if (a > b) {
+                            return 1;
+                        } else if (a < b) {
+                            return -1;
+                        }
+                        return 0;
+                    });
+                }
+            });
+
+            $('#select-root-namespace').on('select2:select', function (e) {
+                $('#loading-icon').show(0);
+                $('#chosable-namespaces-list').empty();
+                var selectedValue = e.params.data.id;
+                var url = '{{ path("namespaces_by_root_id_list_json", {'id': 'selectedValue'}) }}';
+                url = url.replace("selectedValue", selectedValue);
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    dataType: 'json',
+                    success:function(data){
+                        $('#loading-icon').hide(0);
+                        // handling the response data from the controller
+                        if(data.status == 'Error'){
+                            console.log("[API] ERROR: "+data.message);
+                        }
+                        if(data.status == 'Success'){
+                            $.each(data.namespaces, function(key, val){
+                                $("#chosable-namespaces-list").append($("<a class=\"list-group-item pickable-namespace\" id="+val.id+">"+val.standardLabel+"</a>"));
+                            });
+                        }
+                    }
+                });
+            });
+
+            $(document).on("mouseenter", ".pickable-namespace", function() {
+                $(this).prepend($("<span><i class=\"fas fa-plus\"></i>&nbsp;</span>"));
+            });
+
+            $(document).on("mouseleave", ".pickable-namespace", function() {
+                $(this).find(":first-child").remove();
+            });
+
+            $(document).on("click", ".pickable-namespace", function() {
+                var selectedValue = $(this).attr("id");
+                var labelNamespace = $(this).text();
+                var userActiveProjectAssociationID = {{ userActiveProjectAssociation.id }};
+                var url = '{{ path("user_project_namespace_association", {'userProjectAssociation' : 'userProjectID','namespace': 'selectedValue'}) }}';
+                url = url.replace("userProjectID", userActiveProjectAssociationID);
+                url = url.replace("selectedValue", selectedValue);
+                $.ajax({
+                    url: url,
+                    type: 'POST',
+                    dataType: 'json',
+                    success:function(data){
+                        // handling the response data from the controller
+                        if(data.status == 'Error'){
+                            console.log("[API] ERROR: "+data.message);
+                        }
+                        if(data.status == 'Success'){
+                            var urlNamespace = '{{ path('namespace_show', {'id' : 'selectedValue'}) }}';
+                            urlNamespace = urlNamespace.replace('selectedValue', selectedValue);
+                            $("#additional-namespaces-list").append($('<div class="row" style="margin-left:0px;"><a href="#" class="remove-namespace" data-id="'+selectedValue+'"><span class="glyphicon glyphicon-remove text-danger" aria-hidden="true"></span></a><a href="'+urlNamespace+'">'+labelNamespace+'</a><span class="loading-icon2" data-id="'+selectedValue+'">&nbsp;<span class="fas fa-spinner fa-spin"></span></span></div>'));
+                            $(".loading-icon2[data-id='"+selectedValue+"']").hide(0);
+                            if(data.referencedNamespaceLabels.length != 0){
+                                // Rajouter Referenceds ;
+                                $("a[href='"+urlNamespace+"']").parent().append('<div class="small text-muted"><strong><em>Referenced :</em></strong></div>');
+                                $("a[href='"+urlNamespace+"']").parent().append('<ul data-id="'+selectedValue+'">');
+                                $("a[href='"+urlNamespace+"']").parent().append('</ul>');
+                                for(const value of data.referencedNamespaceLabels) {
+                                    $("ul[data-id='"+selectedValue+"']").append('<li class="list-unstyled"><em class="text-muted">'+value+'</em></li>');
+                                }
+                            }
+                        }
+                    }
+                });
+                $("#empty-namespace-list-message").remove();
+                $("#select-root-namespace option:selected").remove();
+                //$('#select-root-namespace option:first').prop('selected',true);
+                //$("option:selected").prop("selected", false);
+                $(".loading-icon2[data-id='"+selectedValue+"']").hide(0);
+                $("#chosable-namespaces-list").empty();
+            });
+
+            $(document).on("click", ".remove-namespace", function() {
+                var selectedValue = $(this).data("id");
+                var userActiveProjectAssociationID = {{ userActiveProjectAssociation.id }};
+                $(".loading-icon2[data-id='"+selectedValue+"']").show(0);
+                var url = '{{ path("user_project_namespace_disassociation", {'userProjectAssociation' : 'userProjectID','namespace': 'selectedValue'}) }}';
+                url = url.replace("userProjectID", userActiveProjectAssociationID);
+                url = url.replace("selectedValue", selectedValue);
+                $.ajax({
+                    url: url,
+                    type: 'DELETE',
+                    dataType: 'json',
+                    success:function(data){
+                    },
+                    statusCode: {
+                        204: function () {
+                            $(".remove-namespace[data-id='"+selectedValue+"']").parent().remove();
+                        }
+                    }
+                });
+
+            });
+
+            $(document).on("click", ".check-profile", function() {
+                var selectedValue = $(this).data("id");
+                var userActiveProjectAssociationID = {{ userActiveProjectAssociation.id }};
+                $(this).removeClass("check-profile");
+                $(this).addClass("uncheck-profile");
+                $(this).children('span').removeClass("glyphicon-unchecked");
+                $(this).children('span').removeClass("text-muted");
+                $(this).children('span').addClass("glyphicon-check");
+                $(this).next('strong').removeClass("text-muted");
+                $(this).next('strong').children('a').removeClass("text-muted");
+                $(this).parent('div').next('ul').children('li').children('a').removeClass("text-muted");
+                $(this).parent('div').next('ul').children('li').children('a').addClass("uncheck-namespace");
+                $(this).parent('div').next('ul').children('li').children('a').removeClass("check-namespace");
+                $(this).parent('div').next('ul').children('li').children('a').children('span').removeClass("text-muted");
+                $(this).parent('div').next('ul').children('li').children('a').children('span').removeClass("glyphicon-unchecked");
+                $(this).parent('div').next('ul').children('li').children('a').children('span').addClass("glyphicon-check");
+                var url = '{{ path("user_project_profile_association", {'userProjectAssociation' : 'userProjectID', 'profile': 'selectedValue'}) }}';
+                url = url.replace("userProjectID", userActiveProjectAssociationID);
+                url = url.replace("selectedValue", selectedValue);
+                $.ajax({
+                    url: url,
+                    type: 'POST',
+                    dataType: 'json',
+                    success:function(data){
+                        // handling the response data from the controller
+                        if(data.status == 'Error'){
+                            console.log("[API] ERROR: "+data.message);
+                        }
+                        if(data.status == 'Success'){
+                            data.namespacesSelected.forEach((idNamespace) => {
+                                //$('a[data-id='+idNamespace+'][class*="check-namespace"]').removeClass("text-muted");
+                                //$('a[data-id='+idNamespace+'][class*="check-namespace"]').addClass("uncheck-namespace");
+                                //$('a[data-id='+idNamespace+'][class*="check-namespace"]').removeClass("check-namespace");
+                                //$('a[data-id='+idNamespace+'][class*="check-namespace"]').children('span').removeClass("text-muted");
+                                //$('a[data-id='+idNamespace+'][class*="check-namespace"]').children('span').removeClass("glyphicon-unchecked");
+                                //$('a[data-id='+idNamespace+'][class*="check-namespace"]').children('span').addClass("glyphicon-check");
+                                //$('a[data-id='+idNamespace+'][class*="check-namespace"]').next('a').removeClass("text-muted");
+                            })
+                        }
+                    }
+                });
+                //$("#additional-namespaces-list").append($('<div class="row" style="margin-left:0px;"><a href="#" class="remove-namespace" data-id="'+selectedValue+'"><span class="glyphicon glyphicon-remove text-danger" aria-hidden="true"></span></a><a href="'+urlNamespace+'">'+labelNamespace+'</a><span class="loading-icon2" data-id="'+selectedValue+'">&nbsp;<span class="fas fa-spinner fa-spin"></span></span></div>'));*/
+            });
+
+            $(document).on("click", ".uncheck-profile", function() {
+                var selectedValue = $(this).data("id");
+                var userActiveProjectAssociationID = {{ userActiveProjectAssociation.id }};
+                $(this).removeClass("uncheck-profile");
+                $(this).addClass("check-profile");
+                $(this).children('span').removeClass("glyphicon-check");
+                $(this).children('span').addClass("glyphicon-unchecked");
+                $(this).children('span').addClass("text-muted");
+                $(this).next('strong').addClass("text-muted");
+                $(this).next('strong').children('a').addClass("text-muted");
+                $(this).parent('div').next('ul').children('li').children('a').addClass("text-muted");
+                $(this).parent('div').next('ul').children('li').children('a').addClass("check-namespace");
+                $(this).parent('div').next('ul').children('li').children('a').removeClass("uncheck-namespace");
+                $(this).parent('div').next('ul').children('li').children('a').children('span').addClass("text-muted");
+                $(this).parent('div').next('ul').children('li').children('a').children('span').addClass("glyphicon-unchecked");
+                $(this).parent('div').next('ul').children('li').children('a').children('span').removeClass("glyphicon-check");
+                var url = '{{ path("user_project_profile_disassociation", {'userProjectAssociation' : 'userProjectID','profile': 'selectedValue'}) }}';
+                url = url.replace("userProjectID", userActiveProjectAssociationID);
+                url = url.replace("selectedValue", selectedValue);
+                $.ajax({
+                    url: url,
+                    type: 'DELETE',
+                    dataType: 'json',
+                    success:function(data){
+                        // handling the response data from the controller
+                        if(data.status == 'Error'){
+                            console.log("[API] ERROR: "+data.message);
+                        }
+                        if(data.status == 'Success'){
+                            data.namespacesRejected.forEach((idNamespace) => {
+                                //$('a[data-id='+idNamespace+'][class*="check-namespace"]').addClass("text-muted");
+                                //$('a[data-id='+idNamespace+'][class*="check-namespace"]').addClass("check-namespace");
+                                //$('a[data-id='+idNamespace+'][class*="check-namespace"]').removeClass("uncheck-namespace");
+                                //$('a[data-id='+idNamespace+'][class*="check-namespace"]').children('span').addClass("text-muted");
+                                //$('a[data-id='+idNamespace+'][class*="check-namespace"]').children('span').addClass("glyphicon-unchecked");
+                                //$('a[data-id='+idNamespace+'][class*="check-namespace"]').children('span').removeClass("glyphicon-check");
+                                //$('a[data-id='+idNamespace+'][class*="check-namespace"]').next('a').addClass("text-muted");
+                            })
+                        }
+                    }
+                });
+                //$("#additional-namespaces-list").append($('<div class="row" style="margin-left:0px;"><a href="#" class="remove-namespace" data-id="'+selectedValue+'"><span class="glyphicon glyphicon-remove text-danger" aria-hidden="true"></span></a><a href="'+urlNamespace+'">'+labelNamespace+'</a><span class="loading-icon2" data-id="'+selectedValue+'">&nbsp;<span class="fas fa-spinner fa-spin"></span></span></div>'));*/
+            });
+
+            $(document).on("click", ".check-namespace", function() {
+                var selectedValue = $(this).data("id");
+                var userActiveProjectAssociationID = {{ userActiveProjectAssociation.id }};
+                $(this).removeClass("check-namespace");
+                $(this).addClass("uncheck-namespace");
+                $(this).removeClass("text-muted");
+                $(this).next('a').removeClass("text-muted");
+                $(this).children('span').removeClass("glyphicon-unchecked");
+                $(this).children('span').addClass("glyphicon-check");
+                $(this).children('span').removeClass("text-muted");
+                var url = '{{ path("user_project_namespace_association", {'userProjectAssociation' : 'userProjectID','namespace': 'selectedValue'}) }}';
+                url = url.replace("userProjectID", userActiveProjectAssociationID);
+                url = url.replace("selectedValue", selectedValue);
+                $.ajax({
+                    url: url,
+                    type: 'POST',
+                    dataType: 'json',
+                    success:function(data){
+                        $('a[data-id='+selectedValue+'][class*="check-namespace"]').removeClass("text-muted");
+                        $('a[data-id='+selectedValue+'][class*="check-namespace"]').addClass("uncheck-namespace");
+                        $('a[data-id='+selectedValue+'][class*="check-namespace"]').removeClass("check-namespace");
+                        $('a[data-id='+selectedValue+'][class*="check-namespace"]').children('span').removeClass("text-muted");
+                        $('a[data-id='+selectedValue+'][class*="check-namespace"]').children('span').removeClass("glyphicon-unchecked");
+                        $('a[data-id='+selectedValue+'][class*="check-namespace"]').children('span').addClass("glyphicon-check");
+                        $('a[data-id='+selectedValue+'][class*="check-namespace"]').next('a').removeClass("text-muted");
+                    },
+                    statusCode: {
+                        204: function () {
+                        }
+                    }
+                });
+            });
+
+            $(document).on("click", ".uncheck-namespace", function() {
+                var selectedValue = $(this).data("id");
+                var userActiveProjectAssociationID = {{ userActiveProjectAssociation.id }};
+                $(this).removeClass("uncheck-namespace");
+                $(this).addClass("check-namespace");
+                $(this).addClass("text-muted");
+                $(this).next('a').addClass("text-muted");
+                $(this).children('span').removeClass("glyphicon-check");
+                $(this).children('span').addClass("glyphicon-unchecked");
+                $(this).children('span').addClass("text-muted");
+                var url = '{{ path("user_project_namespace_disassociation", {'userProjectAssociation' : 'userProjectID','namespace': 'selectedValue'}) }}';
+                url = url.replace("userProjectID", userActiveProjectAssociationID);
+                url = url.replace("selectedValue", selectedValue);
+                $.ajax({
+                    url: url,
+                    type: 'DELETE',
+                    dataType: 'json',
+                    success:function(data){
+                        $('a[data-id='+selectedValue+'][class*="check-namespace"]').addClass("text-muted");
+                        $('a[data-id='+selectedValue+'][class*="check-namespace"]').addClass("check-namespace");
+                        $('a[data-id='+selectedValue+'][class*="check-namespace"]').removeClass("uncheck-namespace");
+                        $('a[data-id='+selectedValue+'][class*="check-namespace"]').children('span').addClass("text-muted");
+                        $('a[data-id='+selectedValue+'][class*="check-namespace"]').children('span').addClass("glyphicon-unchecked");
+                        $('a[data-id='+selectedValue+'][class*="check-namespace"]').children('span').removeClass("glyphicon-check");
+                        $('a[data-id='+selectedValue+'][class*="check-namespace"]').next('a').addClass("text-muted");
+                    },
+                    statusCode: {
+                        204: function () {
+                        }
+                    }
+                });
+            });
         } );
     </script>
 {% endblock %}

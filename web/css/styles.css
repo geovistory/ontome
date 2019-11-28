@@ -2,7 +2,7 @@
 Flexbox Layout
 *******************************/
 
-.header, .navi, .object-details, .notes-container, .footer {
+.navi, .object-details, .notes-container, .footer {
     display: -webkit-flex;
     display: flex;
 }

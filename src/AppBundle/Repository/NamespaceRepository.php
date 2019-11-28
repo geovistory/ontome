@@ -9,9 +9,14 @@
 namespace AppBundle\Repository;
 
 
+use AppBundle\Entity\OntoClass;
 use AppBundle\Entity\OntoNamespace;
 use AppBundle\Entity\Profile;
+use AppBundle\Entity\Project;
+use AppBundle\Entity\UserProjectAssociation;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Query\ResultSetMapping;
+use Doctrine\ORM\Query\ResultSetMappingBuilder;
 use Doctrine\ORM\QueryBuilder;
 
 class NamespaceRepository extends EntityRepository
@@ -88,7 +93,68 @@ class NamespaceRepository extends EntityRepository
             ->orderBy('nsp.id','DESC');
             //->getQuery()
             //->execute();
+    }
 
+    // Pour le choix par défaut dans My current namepaces
+    // // 1/ En 1er choix : le namespace ongoing du projet
+    // // 2/ S'il n'existe pas, en 2nd choix : le namespace publié le plus récent
+    // // 3/ S'il ne peut être déterminé : le premier namespace trouvé
+    /**
+     * @return OntoNamespace
+     */
+    public function findDefaultNamespaceForProject(Project $project)
+    {
+         $defaultNamespace = $this->createQueryBuilder('nsp')
+            ->join('nsp.projectForTopLevelNamespace','proj')
+            ->andWhere('proj.id = :pk_project')
+            ->orderBy('nsp.isOngoing', 'DESC')
+            ->addOrderBy('nsp.creationTime', 'DESC')
+            ->setParameter('pk_project', $project->getId())
+            ->getQuery()
+            ->execute();
+
+         if(isset($defaultNamespace[0]))
+            return $defaultNamespace[0];
+         else
+             return null;
+    }
+
+    /**
+     * @return OntoNamespace[]
+     */
+    public function findAdditionalNamespacesForUserProject(UserProjectAssociation $userProjectAssociation)
+    {
+        $additionalNamespaces = $this->createQueryBuilder('nsp')
+            ->join('nsp.namespaceUserProjectAssociation', 'nupa')
+            ->join('nupa.userProjectAssociation', 'upa')
+            ->join('nupa.systemType', 'st')
+            ->andWhere('upa.id = :pk_user_project_association')
+            ->andWhere('st.id = 25')
+            ->setParameter('pk_user_project_association', $userProjectAssociation->getId())
+            ->getQuery()
+            ->execute();
+
+        return $additionalNamespaces;
+    }
+
+    /**
+     * @return OntoNamespace[]
+     */
+    public function findAllActiveNamespacesForUserProject(UserProjectAssociation $userProjectAssociation)
+    {
+        $rsm = new ResultSetMappingBuilder($this->getEntityManager());
+        $rsm->addRootEntityFromClassMetadata('AppBundle\Entity\OntoNamespace', 'ns');
+
+        $sql = "
+          SELECT ns.* FROM che.namespace ns
+          LEFT JOIN che.associates_entity_to_user_project aseup ON aseup.fk_namespace = ns.pk_namespace 
+          WHERE aseup.fk_system_type = 25
+          AND aseup.fk_associate_user_to_project = :id_asup
+        ";
+
+        $query = $this->getEntityManager()->createNativeQuery($sql, $rsm);
+        $query->setParameter('id_asup', $userProjectAssociation->getId());
+        return $query->getResult();
     }
 
     /**
