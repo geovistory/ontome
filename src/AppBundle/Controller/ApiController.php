@@ -99,7 +99,7 @@ class ApiController extends Controller
         }
 
         if(empty($profiles[0]['json'])) {
-            return new JsonResponse(null,204, array());
+            return new JsonResponse('[]',200, array(), true);//envoi d'un tableau JSON vide si pas de résultat
         }
 
         return new JsonResponse($profiles[0]['json'],200, array(), true);
