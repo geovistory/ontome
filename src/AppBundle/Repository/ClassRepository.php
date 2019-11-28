@@ -15,6 +15,7 @@ use AppBundle\Entity\Project;
 use AppBundle\Entity\Property;
 use AppBundle\Entity\User;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Query\ResultSetMappingBuilder;
 
 class ClassRepository extends EntityRepository
 {
@@ -54,21 +55,39 @@ class ClassRepository extends EntityRepository
      */
     public function findFilteredByActiveProjectOrderedById(User $user)
     {
-        return $this->createQueryBuilder('class')
-            ->join('class.namespaces','nspc')
-            ->join('nspc.namespaceUserProjectAssociation', 'nupa')
-            ->join('nupa.userProjectAssociation', 'upa')
-            ->join('nupa.systemType', 'st')
-            ->join('upa.user', 'user')
-            ->join('upa.project', 'proj')
-            ->andWhere('user.id = :pk_user')
-            ->andWhere('proj.id = :pk_active_project')
-            ->andWhere('st.id = 25')
-            ->setParameter('pk_user', $user->getId())
-            ->setParameter('pk_active_project', $user->getCurrentActiveProject()->getId())
-            ->orderBy('class.id','DESC')
-            ->getQuery()
-            ->execute();
+        $rsm = new ResultSetMappingBuilder($this->getEntityManager());
+        $rsm->addRootEntityFromClassMetadata('AppBundle\Entity\OntoClass', 'cl');
+
+        $sql = "SELECT cl.* 
+                FROM che.class cl
+                WHERE pk_class IN(
+                    SELECT fk_class 
+                    FROM che.associates_namespace 
+                    WHERE fk_namespace 
+                    IN(	SELECT fk_namespace 
+                        FROM che.associates_entity_to_user_project 
+                        WHERE fk_system_type = 25 
+                        AND fk_associate_user_to_project = (
+                            SELECT pk_associate_user_to_project 
+                            FROM che.associate_user_to_project 
+                            WHERE fk_user = :id_user AND fk_project = :id_project)
+                        UNION
+                        SELECT fk_referenced_namespace
+                        FROM che.associates_referenced_namespace
+                        WHERE fk_namespace IN (	SELECT fk_namespace 
+                                    FROM che.associates_entity_to_user_project 
+                                    WHERE fk_system_type = 25 
+                                    AND fk_associate_user_to_project = (
+                                        SELECT pk_associate_user_to_project 
+                                        FROM che.associate_user_to_project 
+                                        WHERE fk_user = :id_user AND fk_project = :id_project))) 
+                    AND fk_class IS NOT NULL)
+        ";
+
+        $query = $this->getEntityManager()->createNativeQuery($sql, $rsm);
+        $query->setParameter('id_user', $user->getId());
+        $query->setParameter('id_project', $user->getCurrentActiveProject()->getId());
+        return $query->getResult();
     }
 
     /**
@@ -460,14 +479,14 @@ class ClassRepository extends EntityRepository
     /**
      * @return array
      */
-    public function findFilteredClassesTree(){
+    public function findFilteredClassesTree(User $user){
         $conn = $this->getEntityManager()
             ->getConnection();
 
-        $sql = "SELECT array_to_json(array_agg(tree)) AS json FROM che.tree_filtered_classes_with_css_color(214,7,28) tree";
+        $sql = "SELECT array_to_json(array_agg(tree)) AS json FROM che.tree_filtered_classes_with_css_color(214,:fk_user,:fk_project) tree";
 
         $stmt = $conn->prepare($sql);
-        $stmt->execute();
+        $stmt->execute(array('fk_user'=>$user->getId(),'fk_project'=>$user->getCurrentActiveProject()->getId()));
 
         return $stmt->fetchAll();
     }

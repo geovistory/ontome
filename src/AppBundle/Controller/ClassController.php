@@ -349,7 +349,7 @@ class ClassController extends Controller
 
         if (!is_null($this->getUser()) && $this->getUser()->getCurrentActiveProject()->getId() != 21) {
             $classes = $em->getRepository('AppBundle:OntoClass')
-                ->findFilteredClassesTree();
+                ->findFilteredClassesTree($this->getUser());
         }
         else{
             $classes = $em->getRepository('AppBundle:OntoClass')
