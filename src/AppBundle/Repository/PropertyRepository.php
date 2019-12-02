@@ -14,6 +14,7 @@ use AppBundle\Entity\Project;
 use AppBundle\Entity\Property;
 use AppBundle\Entity\User;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\QueryBuilder;
 
 class PropertyRepository extends EntityRepository
 {
@@ -50,11 +51,50 @@ class PropertyRepository extends EntityRepository
     }
 
     /**
-     * @return Property[]
+     * @return QueryBuilder
      */
-    public function findFilteredByActiveProjectOrderedById(User $user)
+    public function findFilteredPropertiesByActiveProjectOrderedById(User $user)
     {
-        return $this->createQueryBuilder('property')
+        //D'abord trouver les fk_namespace sélectionnés
+        $conn = $this->getEntityManager()->getConnection();
+
+        $sql = "SELECT fk_namespace 
+                FROM che.associates_entity_to_user_project 
+                WHERE fk_system_type = 25 
+                AND fk_associate_user_to_project = (  SELECT pk_associate_user_to_project 
+                                                      FROM che.associate_user_to_project 
+                                                      WHERE fk_user = :fk_user AND fk_project = :fk_project)";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->execute(array(
+            'fk_user' => $user->getId(),
+            'fk_project' => $user->getCurrentActiveProject()->getId()
+        ));
+
+        $arrayActivesNamespaces = $stmt->fetchAll();
+        $idsActivesNamespaces = array();
+        foreach($arrayActivesNamespaces as $activeNamespace)
+            $idsActivesNamespaces[]  = $activeNamespace['fk_namespace'];
+
+        $qMarks = str_repeat('?,', count($idsActivesNamespaces) - 1) . '?';
+        $sql = "SELECT fk_referenced_namespace 
+                FROM che.associates_referenced_namespace
+                WHERE fk_namespace IN (".$qMarks.")";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->execute($idsActivesNamespaces);
+
+        $arrayReferencedActivesNamespaces = $stmt->fetchAll();
+
+        $namespacesActives = array_merge($arrayActivesNamespaces, $arrayReferencedActivesNamespaces);
+
+        $qb = $this->createQueryBuilder('property')
+            ->join('property.namespaces','nspc')
+            ->where('nspc.id IN (:id_namespaces)')
+            ->setParameter('id_namespaces', $namespacesActives);
+
+        return $qb;
+        /**return $this->createQueryBuilder('property')
             ->join('property.namespaces','nspc')
             ->join('nspc.namespaceUserProjectAssociation', 'nupa')
             ->join('nupa.userProjectAssociation', 'upa')
@@ -66,29 +106,15 @@ class PropertyRepository extends EntityRepository
             ->andWhere('st.id = 25')
             ->setParameter('pk_user', $user->getId())
             ->setParameter('pk_active_project', $user->getCurrentActiveProject()->getId())
-            ->orderBy('property.id','DESC')
-            ->getQuery()
-            ->execute();
+            ->orderBy('property.id','DESC');**/
     }
 
     /**
      * @return Property[]
      */
-    public function findFilteredPropertiesByActiveProjectOrderedById(User $user)
+    public function findFilteredByActiveProjectOrderedById(User $user)
     {
-        return $this->createQueryBuilder('property')
-            ->join('property.namespaces','nspc')
-            ->join('nspc.namespaceUserProjectAssociation', 'nupa')
-            ->join('nupa.userProjectAssociation', 'upa')
-            ->join('nupa.systemType', 'st')
-            ->join('upa.user', 'user')
-            ->join('upa.project', 'proj')
-            ->andWhere('user.id = :pk_user')
-            ->andWhere('proj.id = :pk_active_project')
-            ->andWhere('st.id = 25')
-            ->setParameter('pk_user', $user->getId())
-            ->setParameter('pk_active_project', $user->getCurrentActiveProject()->getId())
-            ->orderBy('property.id','DESC');
+        return $this->findFilteredPropertiesByActiveProjectOrderedById($user)->getQuery()->execute();
     }
 
     /**

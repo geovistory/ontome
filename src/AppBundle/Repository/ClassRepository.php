@@ -16,6 +16,7 @@ use AppBundle\Entity\Property;
 use AppBundle\Entity\User;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Query\ResultSetMappingBuilder;
+use Doctrine\ORM\QueryBuilder;
 
 class ClassRepository extends EntityRepository
 {
@@ -51,64 +52,58 @@ class ClassRepository extends EntityRepository
     }
 
     /**
-     * @return OntoClass[]
+     * @return QueryBuilder
+     * Identique en dessous mais retourne le QueryBuilder (pour les form)
      */
-    public function findFilteredByActiveProjectOrderedById(User $user)
+    public function findFilteredClassByActiveProjectOrderedById(User $user)
     {
-        $rsm = new ResultSetMappingBuilder($this->getEntityManager());
-        $rsm->addRootEntityFromClassMetadata('AppBundle\Entity\OntoClass', 'cl');
+        //D'abord trouver les fk_namespace sélectionnés
+        $conn = $this->getEntityManager()->getConnection();
 
-        $sql = "SELECT cl.* 
-                FROM che.class cl
-                WHERE pk_class IN(
-                    SELECT fk_class 
-                    FROM che.associates_namespace 
-                    WHERE fk_namespace 
-                    IN(	SELECT fk_namespace 
-                        FROM che.associates_entity_to_user_project 
-                        WHERE fk_system_type = 25 
-                        AND fk_associate_user_to_project = (
-                            SELECT pk_associate_user_to_project 
-                            FROM che.associate_user_to_project 
-                            WHERE fk_user = :id_user AND fk_project = :id_project)
-                        UNION
-                        SELECT fk_referenced_namespace
-                        FROM che.associates_referenced_namespace
-                        WHERE fk_namespace IN (	SELECT fk_namespace 
-                                    FROM che.associates_entity_to_user_project 
-                                    WHERE fk_system_type = 25 
-                                    AND fk_associate_user_to_project = (
-                                        SELECT pk_associate_user_to_project 
-                                        FROM che.associate_user_to_project 
-                                        WHERE fk_user = :id_user AND fk_project = :id_project))) 
-                    AND fk_class IS NOT NULL)
-        ";
+        $sql = "SELECT fk_namespace 
+                FROM che.associates_entity_to_user_project 
+                WHERE fk_system_type = 25 
+                AND fk_associate_user_to_project = (  SELECT pk_associate_user_to_project 
+                                                      FROM che.associate_user_to_project 
+                                                      WHERE fk_user = :fk_user AND fk_project = :fk_project)";
 
-        $query = $this->getEntityManager()->createNativeQuery($sql, $rsm);
-        $query->setParameter('id_user', $user->getId());
-        $query->setParameter('id_project', $user->getCurrentActiveProject()->getId());
-        return $query->getResult();
+        $stmt = $conn->prepare($sql);
+        $stmt->execute(array(
+            'fk_user' => $user->getId(),
+            'fk_project' => $user->getCurrentActiveProject()->getId()
+        ));
+
+        $arrayActivesNamespaces = $stmt->fetchAll();
+        $idsActivesNamespaces = array();
+        foreach($arrayActivesNamespaces as $activeNamespace)
+            $idsActivesNamespaces[]  = $activeNamespace['fk_namespace'];
+
+        $qMarks = str_repeat('?,', count($idsActivesNamespaces) - 1) . '?';
+        $sql = "SELECT fk_referenced_namespace 
+                FROM che.associates_referenced_namespace
+                WHERE fk_namespace IN (".$qMarks.")";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->execute($idsActivesNamespaces);
+
+        $arrayReferencedActivesNamespaces = $stmt->fetchAll();
+
+        $namespacesActives = array_merge($arrayActivesNamespaces, $arrayReferencedActivesNamespaces);
+
+        $qb = $this->createQueryBuilder('class')
+            ->join('class.namespaces','nspc')
+            ->where('nspc.id IN (:id_namespaces)')
+            ->setParameter('id_namespaces', $namespacesActives);
+
+        return $qb;
     }
 
     /**
      * @return OntoClass[]
-     * Identique au dessus mais retourne le QueryBuilder (pour les form)
      */
-    public function findFilteredClassByActiveProjectOrderedById(User $user)
+    public function findFilteredByActiveProjectOrderedById(User $user)
     {
-        return $this->createQueryBuilder('class')
-            ->join('class.namespaces','nspc')
-            ->join('nspc.namespaceUserProjectAssociation', 'nupa')
-            ->join('nupa.userProjectAssociation', 'upa')
-            ->join('nupa.systemType', 'st')
-            ->join('upa.user', 'user')
-            ->join('upa.project', 'proj')
-            ->andWhere('user.id = :pk_user')
-            ->andWhere('proj.id = :pk_active_project')
-            ->andWhere('st.id = 25')
-            ->setParameter('pk_user', $user->getId())
-            ->setParameter('pk_active_project', $user->getCurrentActiveProject()->getId())
-            ->orderBy('class.id','DESC');
+        return $this->findFilteredClassByActiveProjectOrderedById($user)->getQuery()->execute();
     }
 
     /**
