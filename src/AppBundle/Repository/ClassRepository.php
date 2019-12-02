@@ -65,7 +65,20 @@ class ClassRepository extends EntityRepository
                 WHERE fk_system_type = 25 
                 AND fk_associate_user_to_project = (  SELECT pk_associate_user_to_project 
                                                       FROM che.associate_user_to_project 
-                                                      WHERE fk_user = :fk_user AND fk_project = :fk_project)";
+                                                      WHERE fk_user = :fk_user AND fk_project = :fk_project)
+                AND fk_namespace IS NOT NULL
+                UNION
+                SELECT fk_referenced_namespace AS fk_namespace
+                FROM che.associates_referenced_namespace
+                WHERE fk_namespace IN (
+                  SELECT fk_namespace 
+                  FROM che.associates_entity_to_user_project 
+                  WHERE fk_system_type = 25 
+                  AND fk_associate_user_to_project = (  SELECT pk_associate_user_to_project 
+                                                        FROM che.associate_user_to_project 
+                                                        WHERE fk_user = :fk_user AND fk_project = :fk_project)
+                  AND fk_namespace IS NOT NULL
+                )";
 
         $stmt = $conn->prepare($sql);
         $stmt->execute(array(
@@ -74,26 +87,11 @@ class ClassRepository extends EntityRepository
         ));
 
         $arrayActivesNamespaces = $stmt->fetchAll();
-        $idsActivesNamespaces = array();
-        foreach($arrayActivesNamespaces as $activeNamespace)
-            $idsActivesNamespaces[]  = $activeNamespace['fk_namespace'];
-
-        $qMarks = str_repeat('?,', count($idsActivesNamespaces) - 1) . '?';
-        $sql = "SELECT fk_referenced_namespace 
-                FROM che.associates_referenced_namespace
-                WHERE fk_namespace IN (".$qMarks.")";
-
-        $stmt = $conn->prepare($sql);
-        $stmt->execute($idsActivesNamespaces);
-
-        $arrayReferencedActivesNamespaces = $stmt->fetchAll();
-
-        $namespacesActives = array_merge($arrayActivesNamespaces, $arrayReferencedActivesNamespaces);
 
         $qb = $this->createQueryBuilder('class')
             ->join('class.namespaces','nspc')
             ->where('nspc.id IN (:id_namespaces)')
-            ->setParameter('id_namespaces', $namespacesActives);
+            ->setParameter('id_namespaces', $arrayActivesNamespaces);
 
         return $qb;
     }
