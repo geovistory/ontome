@@ -594,4 +594,28 @@ class PropertyRepository extends EntityRepository
 
         return $stmt->fetchAll();
     }
+
+    /**
+     * @param $lang string the language iso code
+     * @param $availableInProfile
+     * @param $selectedByProject
+     * @return array
+     */
+    public function findPropertiesWithProfileApi($lang, $availableInProfile, $selectedByProject)
+    {
+        $conn = $this->getEntityManager()
+            ->getConnection();
+
+        $sql = "SELECT array_to_json(array_agg(result)) AS json FROM (SELECT * FROM api.get_properties_list(:lang, :availableInProfile, :selectedByProject) ) result;";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->execute(array(
+            'lang' => $lang,
+            'availableInProfile' => $availableInProfile,
+            'selectedByProject' => $selectedByProject
+        ));
+
+        return $stmt->fetchAll();
+    }
+
 }
