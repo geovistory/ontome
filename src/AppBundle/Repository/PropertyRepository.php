@@ -94,19 +94,6 @@ class PropertyRepository extends EntityRepository
             ->setParameter('id_namespaces', $namespacesActives);
 
         return $qb;
-        /**return $this->createQueryBuilder('property')
-            ->join('property.namespaces','nspc')
-            ->join('nspc.namespaceUserProjectAssociation', 'nupa')
-            ->join('nupa.userProjectAssociation', 'upa')
-            ->join('nupa.systemType', 'st')
-            ->join('upa.user', 'user')
-            ->join('upa.project', 'proj')
-            ->andWhere('user.id = :pk_user')
-            ->andWhere('proj.id = :pk_active_project')
-            ->andWhere('st.id = 25')
-            ->setParameter('pk_user', $user->getId())
-            ->setParameter('pk_active_project', $user->getCurrentActiveProject()->getId())
-            ->orderBy('property.id','DESC');**/
     }
 
     /**
@@ -155,26 +142,40 @@ class PropertyRepository extends EntityRepository
         $conn = $this->getEntityManager()
             ->getConnection();
 
-        $sql = "SELECT identifier_property AS property,
-                       identifier_range AS range,
-                       pk_property AS \"propertyId\",
-                       pk_range AS \"rangeId\",
-                       identifier_domain AS domain,
-                       che.get_root_namespace(nsp.pk_namespace) AS \"rootNamespaceId\",
-                      (SELECT label FROM che.get_namespace_labels(nsp.pk_namespace) WHERE language_iso_code = 'en') AS namespace
-                FROM  che.v_properties_with_domain_range,
-                      che.associates_namespace asnsp,
-                      che.namespace nsp
-                WHERE asnsp.fk_property = pk_property
-                  AND nsp.pk_namespace = asnsp.fk_namespace 
-                  AND nsp.pk_namespace IN (
-                    SELECT fk_namespace 
-                    FROM che.associates_entity_to_user_project 
-                    WHERE fk_associate_user_to_project = (
-                        SELECT pk_associate_user_to_project 
-                        FROM che.associate_user_to_project
-                        WHERE fk_user = :user AND fk_project = :project)
-                    AND fk_system_type = 25)
+        $sql = "    WITH filtered_namespaces AS
+                    (
+                        SELECT fk_namespace 
+                        FROM che.associates_entity_to_user_project 
+                        WHERE fk_associate_user_to_project = (
+                            SELECT pk_associate_user_to_project 
+                            FROM che.associate_user_to_project
+                            WHERE fk_user = :user AND fk_project = :project)
+                        AND fk_system_type = 25
+                        UNION
+                        SELECT fk_referenced_namespace AS fk_namespace
+                        FROM che.associates_referenced_namespace
+                        WHERE fk_namespace IN (
+                            SELECT fk_namespace 
+                            FROM che.associates_entity_to_user_project 
+                            WHERE fk_associate_user_to_project = (
+                                SELECT pk_associate_user_to_project 
+                                FROM che.associate_user_to_project
+                                WHERE fk_user = :user AND fk_project = :project)
+                            AND fk_system_type = 25)
+                    )
+                    SELECT identifier_property AS property,
+                        identifier_range AS range,
+                        pk_property AS \"propertyId\",
+                        pk_range AS \"rangeId\",
+                        identifier_domain AS domain,
+                        che.get_root_namespace(nsp.pk_namespace) AS \"rootNamespaceId\",
+                        (SELECT label FROM che.get_namespace_labels(nsp.pk_namespace) WHERE language_iso_code = 'en') AS namespace
+                    FROM che.v_properties_with_domain_range,
+                        che.associates_namespace asnsp,
+                        che.namespace nsp
+                    WHERE asnsp.fk_property = pk_property
+                    AND nsp.pk_namespace = asnsp.fk_namespace 
+                    AND nsp.pk_namespace IN (SELECT fk_namespace FROM filtered_namespaces)
                   AND pk_domain = :class;";
 
         $stmt = $conn->prepare($sql);
@@ -222,7 +223,28 @@ class PropertyRepository extends EntityRepository
         $conn = $this->getEntityManager()
             ->getConnection();
 
-        $sql = "SELECT 	identifier_in_namespace AS domain,
+        $sql = "    WITH filtered_namespaces AS
+                    (
+                        SELECT fk_namespace 
+                        FROM che.associates_entity_to_user_project 
+                        WHERE fk_associate_user_to_project = (
+                            SELECT pk_associate_user_to_project 
+                            FROM che.associate_user_to_project
+                            WHERE fk_user = :user AND fk_project = :project)
+                        AND fk_system_type = 25
+                        UNION
+                        SELECT fk_referenced_namespace AS fk_namespace
+                        FROM che.associates_referenced_namespace
+                        WHERE fk_namespace IN (
+                            SELECT fk_namespace 
+                            FROM che.associates_entity_to_user_project 
+                            WHERE fk_associate_user_to_project = (
+                                SELECT pk_associate_user_to_project 
+                                FROM che.associate_user_to_project
+                                WHERE fk_user = :user AND fk_project = :project)
+                            AND fk_system_type = 25)
+                    )
+                    SELECT 	identifier_in_namespace AS domain,
                         pk_parent AS \"parentClassId\",
                         parent_identifier AS \"parentClass\",
                         pk_property AS \"propertyId\",
@@ -236,14 +258,7 @@ class PropertyRepository extends EntityRepository
                         che.namespace nsp
                 WHERE 	asnsp.fk_property = pk_property
                   AND 	nsp.pk_namespace = asnsp.fk_namespace
-                  AND nsp.pk_namespace IN (
-                    SELECT fk_namespace 
-                    FROM che.associates_entity_to_user_project 
-                    WHERE fk_associate_user_to_project = (
-                        SELECT pk_associate_user_to_project 
-                        FROM che.associate_user_to_project
-                        WHERE fk_user = :user AND fk_project = :project)
-                    AND fk_system_type = 25);";
+                  AND   nsp.pk_namespace IN (SELECT fk_namespace FROM filtered_namespaces)";
 
         $stmt = $conn->prepare($sql);
         $stmt->execute(array('class' => $class->getId(), 'user' => $user->getId(), 'project' => $user->getCurrentActiveProject()->getId()));
@@ -290,7 +305,28 @@ class PropertyRepository extends EntityRepository
         $conn = $this->getEntityManager()
             ->getConnection();
 
-        $sql = "SELECT  pk_domain AS \"domainId\",
+        $sql = "WITH filtered_namespaces AS
+                    (
+                        SELECT fk_namespace 
+                        FROM che.associates_entity_to_user_project 
+                        WHERE fk_associate_user_to_project = (
+                            SELECT pk_associate_user_to_project 
+                            FROM che.associate_user_to_project
+                            WHERE fk_user = :user AND fk_project = :project)
+                        AND fk_system_type = 25
+                        UNION
+                        SELECT fk_referenced_namespace AS fk_namespace
+                        FROM che.associates_referenced_namespace
+                        WHERE fk_namespace IN (
+                            SELECT fk_namespace 
+                            FROM che.associates_entity_to_user_project 
+                            WHERE fk_associate_user_to_project = (
+                                SELECT pk_associate_user_to_project 
+                                FROM che.associate_user_to_project
+                                WHERE fk_user = :user AND fk_project = :project)
+                            AND fk_system_type = 25)
+                    )
+                    SELECT  pk_domain AS \"domainId\",
                         identifier_domain AS domain,
                         identifier_property AS property,
                         pk_property AS \"propertyId\",
@@ -304,14 +340,7 @@ class PropertyRepository extends EntityRepository
                 WHERE pk_range = :class
                   AND asnsp.fk_property = pk_property
                   AND nsp.pk_namespace = asnsp.fk_namespace
-                  AND nsp.pk_namespace IN (
-                    SELECT fk_namespace 
-                    FROM che.associates_entity_to_user_project 
-                    WHERE fk_associate_user_to_project = (
-                        SELECT pk_associate_user_to_project 
-                        FROM che.associate_user_to_project
-                        WHERE fk_user = :user AND fk_project = :project)
-                    AND fk_system_type = 25);";
+                  AND nsp.pk_namespace IN (SELECT fk_namespace FROM filtered_namespaces)";
 
         $stmt = $conn->prepare($sql);
         $stmt->execute(array('class' => $class->getId(), 'user' => $user->getId(), 'project' => $user->getCurrentActiveProject()->getId()));
@@ -357,7 +386,28 @@ class PropertyRepository extends EntityRepository
         $conn = $this->getEntityManager()
             ->getConnection();
 
-        $sql = "SELECT  pk_domain AS \"domainId\",
+        $sql = "WITH filtered_namespaces AS
+                    (
+                        SELECT fk_namespace 
+                        FROM che.associates_entity_to_user_project 
+                        WHERE fk_associate_user_to_project = (
+                            SELECT pk_associate_user_to_project 
+                            FROM che.associate_user_to_project
+                            WHERE fk_user = :user AND fk_project = :project)
+                        AND fk_system_type = 25
+                        UNION
+                        SELECT fk_referenced_namespace AS fk_namespace
+                        FROM che.associates_referenced_namespace
+                        WHERE fk_namespace IN (
+                            SELECT fk_namespace 
+                            FROM che.associates_entity_to_user_project 
+                            WHERE fk_associate_user_to_project = (
+                                SELECT pk_associate_user_to_project 
+                                FROM che.associate_user_to_project
+                                WHERE fk_user = :user AND fk_project = :project)
+                            AND fk_system_type = 25)
+                    )
+                    SELECT  pk_domain AS \"domainId\",
                         identifier_domain AS domain,
                         identifier_property AS property,
                         pk_property AS \"propertyId\",
@@ -370,14 +420,7 @@ class PropertyRepository extends EntityRepository
                       che.namespace nsp 
                 WHERE asnsp.fk_property = pk_property
                   AND nsp.pk_namespace = asnsp.fk_namespace
-                  AND nsp.pk_namespace IN (
-                    SELECT fk_namespace 
-                    FROM che.associates_entity_to_user_project 
-                    WHERE fk_associate_user_to_project = (
-                        SELECT pk_associate_user_to_project 
-                        FROM che.associate_user_to_project
-                        WHERE fk_user = :user AND fk_project = :project)
-                    AND fk_system_type = 25);";
+                  AND nsp.pk_namespace IN (SELECT fk_namespace FROM filtered_namespaces)";
 
         $stmt = $conn->prepare($sql);
         $stmt->execute(array('class' => $class->getId(), 'user' => $user->getId(), 'project' => $user->getCurrentActiveProject()->getId()));
@@ -468,7 +511,28 @@ class PropertyRepository extends EntityRepository
                      DEPTH,
                      ARRAY_TO_STRING(_path,'|') ancestors
                   FROM che.ascendant_property_hierarchy(:property)
-                )
+                ),
+                filtered_namespaces AS
+                    (
+                        SELECT fk_namespace 
+                        FROM che.associates_entity_to_user_project 
+                        WHERE fk_associate_user_to_project = (
+                            SELECT pk_associate_user_to_project 
+                            FROM che.associate_user_to_project
+                            WHERE fk_user = :user AND fk_project = :project)
+                        AND fk_system_type = 25
+                        UNION
+                        SELECT fk_referenced_namespace AS fk_namespace
+                        FROM che.associates_referenced_namespace
+                        WHERE fk_namespace IN (
+                            SELECT fk_namespace 
+                            FROM che.associates_entity_to_user_project 
+                            WHERE fk_associate_user_to_project = (
+                                SELECT pk_associate_user_to_project 
+                                FROM che.associate_user_to_project
+                                WHERE fk_user = :user AND fk_project = :project)
+                            AND fk_system_type = 25)
+                    )
                 SELECT tw1.pk_parent  AS id,
                        tw1.parent_identifier AS identifier,
                        p.has_domain,
@@ -497,14 +561,7 @@ class PropertyRepository extends EntityRepository
                 AND p.pk_property = tw1.pk_parent
                 AND p.has_domain = domain.pk_class
                 AND p.has_range = range.pk_class
-                AND nsp.pk_namespace IN (
-                    SELECT fk_namespace 
-                    FROM che.associates_entity_to_user_project 
-                    WHERE fk_associate_user_to_project = (
-                        SELECT pk_associate_user_to_project 
-                        FROM che.associate_user_to_project
-                        WHERE fk_user = :user AND fk_project = :project)
-                    AND fk_system_type = 25)
+                AND nsp.pk_namespace IN (SELECT fk_namespace FROM filtered_namespaces)
                 GROUP BY tw1.pk_parent,
                      tw1.parent_identifier,
                      p.has_domain,
@@ -580,7 +637,28 @@ class PropertyRepository extends EntityRepository
         $conn = $this->getEntityManager()
             ->getConnection();
 
-        $sql = "SELECT  pk_child AS id,
+        $sql = "WITH filtered_namespaces AS
+                    (
+                        SELECT fk_namespace 
+                        FROM che.associates_entity_to_user_project 
+                        WHERE fk_associate_user_to_project = (
+                            SELECT pk_associate_user_to_project 
+                            FROM che.associate_user_to_project
+                            WHERE fk_user = :user AND fk_project = :project)
+                        AND fk_system_type = 25
+                        UNION
+                        SELECT fk_referenced_namespace AS fk_namespace
+                        FROM che.associates_referenced_namespace
+                        WHERE fk_namespace IN (
+                            SELECT fk_namespace 
+                            FROM che.associates_entity_to_user_project 
+                            WHERE fk_associate_user_to_project = (
+                                SELECT pk_associate_user_to_project 
+                                FROM che.associate_user_to_project
+                                WHERE fk_user = :user AND fk_project = :project)
+                            AND fk_system_type = 25)
+                    )
+                    SELECT  pk_child AS id,
                         child_identifier as identifier,
                        p.has_domain,
                        domain.identifier_in_namespace AS \"domainIdentifier\",
@@ -604,14 +682,7 @@ class PropertyRepository extends EntityRepository
                          che.class range
                     WHERE asnsp.fk_property = pk_child
                     AND   nsp.pk_namespace = asnsp.fk_namespace
-                    AND nsp.pk_namespace IN (
-                    SELECT fk_namespace 
-                    FROM che.associates_entity_to_user_project 
-                    WHERE fk_associate_user_to_project = (
-                        SELECT pk_associate_user_to_project 
-                        FROM che.associate_user_to_project
-                        WHERE fk_user = :user AND fk_project = :project)
-                    AND fk_system_type = 25)    
+                    AND nsp.pk_namespace IN (SELECT fk_namespace FROM filtered_namespaces)    
                     AND p.pk_property = pk_child
                     AND p.has_domain = domain.pk_class
                     AND p.has_range = range.pk_class
@@ -950,7 +1021,28 @@ class PropertyRepository extends EntityRepository
         $conn = $this->getEntityManager()
             ->getConnection();
 
-        $sql = "SELECT
+        $sql = "WITH filtered_namespaces AS
+                    (
+                        SELECT fk_namespace 
+                        FROM che.associates_entity_to_user_project 
+                        WHERE fk_associate_user_to_project = (
+                            SELECT pk_associate_user_to_project 
+                            FROM che.associate_user_to_project
+                            WHERE fk_user = :user AND fk_project = :project)
+                        AND fk_system_type = 25
+                        UNION
+                        SELECT fk_referenced_namespace AS fk_namespace
+                        FROM che.associates_referenced_namespace
+                        WHERE fk_namespace IN (
+                            SELECT fk_namespace 
+                            FROM che.associates_entity_to_user_project 
+                            WHERE fk_associate_user_to_project = (
+                                SELECT pk_associate_user_to_project 
+                                FROM che.associate_user_to_project
+                                WHERE fk_user = :user AND fk_project = :project)
+                            AND fk_system_type = 25)
+                    )
+                    SELECT
                 ea.pk_entity_association,
                 ea.fk_target_property AS fk_related_property,
                 p.identifier_in_namespace,
@@ -975,14 +1067,7 @@ class PropertyRepository extends EntityRepository
                 ea.fk_system_type IN (18, 20)
                 AND p.pk_property IS NOT NULL
                 AND ea.fk_source_property = :property
-                AND ns.pk_namespace IN (
-                    SELECT fk_namespace 
-                    FROM che.associates_entity_to_user_project 
-                    WHERE fk_associate_user_to_project = (
-                        SELECT pk_associate_user_to_project 
-                        FROM che.associate_user_to_project
-                        WHERE fk_user = :user AND fk_project = :project)
-                    AND fk_system_type = 25)
+                AND ns.pk_namespace IN (SELECT fk_namespace FROM filtered_namespaces)
                 UNION
                 SELECT
                 ea.pk_entity_association,
