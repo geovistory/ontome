@@ -37,8 +37,14 @@ class PropertyController extends Controller
         $em = $this->getDoctrine()->getManager();
 
         if (!is_null($this->getUser())) {
-            $properties = $em->getRepository('AppBundle:Property')
-                ->findAllOrderedById();
+            if($this->getUser()->getCurrentActiveProject()->getId() == 21){
+                $properties = $em->getRepository('AppBundle:Property')
+                    ->findFilteredByPublicProjectOrderedById();
+            }
+            else{
+                $properties = $em->getRepository('AppBundle:Property')
+                    ->findFilteredByActiveProjectOrderedById($this->getUser());
+            }
         }
         else{
             $properties = $em->getRepository('AppBundle:Property')
@@ -167,21 +173,38 @@ class PropertyController extends Controller
     {
         $em = $this->getDoctrine()->getManager();
 
-        $ancestors = $em->getRepository('AppBundle:Property')
-            ->findAncestorsById($property);
+        if (!is_null($this->getUser()) && $this->getUser()->getCurrentActiveProject()->getId() != 21) {
+            // L'utilisateur est connecté et le projet actif n'est pas le projet public
+            $user = $this->getUser();
 
-        $descendants = $em->getRepository('AppBundle:Property')
-            ->findDescendantsById($property);
+            $ancestors = $em->getRepository('AppBundle:Property')
+                ->findFilteredAncestorsById($property, $user);
 
-        $domainRange = $em->getRepository('AppBundle:Property')
-            ->findDomainRangeById($property);
+            $descendants = $em->getRepository('AppBundle:Property')
+                ->findFilteredDescendantsById($property, $user);
 
-        $relations = $em->getRepository('AppBundle:Property')
-            ->findRelationsById($property);
+            $domainRange = $em->getRepository('AppBundle:Property')
+                ->findDomainRangeById($property);
+
+            $relations = $em->getRepository('AppBundle:Property')
+                ->findFilteredRelationsById($property, $user);
+        }
+        else{
+            $ancestors = $em->getRepository('AppBundle:Property')
+                ->findAncestorsById($property);
+
+            $descendants = $em->getRepository('AppBundle:Property')
+                ->findDescendantsById($property);
+
+            $domainRange = $em->getRepository('AppBundle:Property')
+                ->findDomainRangeById($property);
+
+            $relations = $em->getRepository('AppBundle:Property')
+                ->findRelationsById($property);
+        }
 
         $this->get('logger')
-            ->info('Showing property: '.$property->getIdentifierInNamespace());
-
+            ->info('Showing property: ' . $property->getIdentifierInNamespace());
 
         return $this->render('property/show.html.twig', array(
             'property' => $property,
@@ -243,17 +266,35 @@ class PropertyController extends Controller
 
         $em = $this->getDoctrine()->getManager();
 
-        $ancestors = $em->getRepository('AppBundle:Property')
-            ->findAncestorsById($property);
+        if (!is_null($this->getUser()) && $this->getUser()->getCurrentActiveProject()->getId() != 21) {
+            // L'utilisateur est connecté et le projet actif n'est pas le projet public
+            $user = $this->getUser();
 
-        $descendants = $em->getRepository('AppBundle:Property')
-            ->findDescendantsById($property);
+            $ancestors = $em->getRepository('AppBundle:Property')
+                ->findFilteredAncestorsById($property, $user);
 
-        $domainRange = $em->getRepository('AppBundle:Property')
-            ->findDomainRangeById($property);
+            $descendants = $em->getRepository('AppBundle:Property')
+                ->findFilteredDescendantsById($property, $user);
 
-        $relations = $em->getRepository('AppBundle:Property')
-            ->findRelationsById($property);
+            $domainRange = $em->getRepository('AppBundle:Property')
+                ->findDomainRangeById($property);
+
+            $relations = $em->getRepository('AppBundle:Property')
+                ->findFilteredRelationsById($property, $user);
+        }
+        else{
+            $ancestors = $em->getRepository('AppBundle:Property')
+                ->findAncestorsById($property);
+
+            $descendants = $em->getRepository('AppBundle:Property')
+                ->findDescendantsById($property);
+
+            $domainRange = $em->getRepository('AppBundle:Property')
+                ->findDomainRangeById($property);
+
+            $relations = $em->getRepository('AppBundle:Property')
+                ->findRelationsById($property);
+        }
 
 
         $this->get('logger')

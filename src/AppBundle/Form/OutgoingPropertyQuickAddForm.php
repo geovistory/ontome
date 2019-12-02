@@ -2,10 +2,12 @@
 
 namespace AppBundle\Form;
 
+use AppBundle\Entity\OntoClass;
 use AppBundle\Entity\OntoNamespace;
 use AppBundle\Entity\User;
 use AppBundle\Form\DataTransformer\OntoClassToNumberTransformer;
 use AppBundle\Form\DataTransformer\UserToNumberTransformer;
+use AppBundle\Repository\ClassRepository;
 use AppBundle\Repository\NamespaceRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -34,7 +36,14 @@ class OutgoingPropertyQuickAddForm extends AbstractType
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
+        $userID = $this->tokenStorage->getToken()->getUser()->getId();
+        $user = $this->em->getRepository('AppBundle:User')->find($userID);
 
+        if (!$user) {
+            throw new \LogicException(
+                'The OutgoingPropertyQuickAddForm cannot be used without an authenticated user!'
+            );
+        }
 
         $builder
             ->add('identifierInNamespace', TextType::class, array(
@@ -47,7 +56,14 @@ class OutgoingPropertyQuickAddForm extends AbstractType
                 'allow_add' => true,
                 'by_reference' => false,
             ))
-            ->add('range')
+            ->add('range', EntityType::class,
+                array(
+                    'class' => OntoClass::class,
+                    'label' => "Range",
+                    'query_builder' => function(ClassRepository $repo) use ($user){
+                        return $repo->findFilteredClassByActiveProjectOrderedById($user);
+                    }
+                ))
             ->add('domainMinQuantifier',ChoiceType::class, array(
                 'choices'  => array(
                     'Min' => null,

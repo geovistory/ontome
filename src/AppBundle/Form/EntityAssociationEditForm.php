@@ -2,23 +2,43 @@
 
 namespace AppBundle\Form;
 
+use AppBundle\Entity\Property;
 use AppBundle\Form\DataTransformer\SystemTypeToNumberTransformer;
+use AppBundle\Repository\PropertyRepository;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 class EntityAssociationEditForm extends AbstractType
 {
 
-    public function __construct(SystemTypeToNumberTransformer $transformer)
+    private $transformer;
+    private $tokenStorage;
+    private $em;
+
+    public function __construct(SystemTypeToNumberTransformer $transformer, TokenStorageInterface $tokenStorage, EntityManagerInterface $em)
     {
         $this->transformer = $transformer;
+        $this->tokenStorage = $tokenStorage;
+        $this->em = $em;
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
+        $userID = $this->tokenStorage->getToken()->getUser()->getId();
+        $user = $this->em->getRepository('AppBundle:User')->find($userID);
+
+        if (!$user) {
+            throw new \LogicException(
+                'The EntityAssociationEditForm cannot be used without an authenticated user!'
+            );
+        }
+
         if($options['object'] == 'class')
         {
             $builder
@@ -40,8 +60,22 @@ class EntityAssociationEditForm extends AbstractType
                         'owl:inverseOf' => 20
                     ),
                     'label' => 'Type relation'))
-                ->add('targetProperty')
-                ->add('sourceProperty');
+                ->add('targetProperty', EntityType::class,
+                    array(
+                        'class' => Property::class,
+                        'label' => "Target property",
+                        'query_builder' => function(PropertyRepository $repo) use ($user){
+                            return $repo->findFilteredPropertiesByActiveProjectOrderedById($user);
+                        }
+                    ))
+                ->add('sourceProperty', EntityType::class,
+                    array(
+                        'class' => Property::class,
+                        'label' => "Source property",
+                        'query_builder' => function(PropertyRepository $repo) use ($user){
+                            return $repo->findFilteredPropertiesByActiveProjectOrderedById($user);
+                        }
+                    ));
         }
 
         $builder->get('systemType')
