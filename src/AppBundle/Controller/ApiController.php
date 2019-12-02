@@ -105,5 +105,73 @@ class ApiController extends Controller
         return new JsonResponse($profiles[0]['json'],200, array(), true);
     }
 
+    /**
+     * @Route("/api/classes-profile.json", name="api_classes_profile_json")
+     * @Method("GET")
+     * @param Request $request
+     * @return JsonResponse a Json formatted list representation of classes with profile
+     */
+    public function getClassesWithProfile(Request $request)
+    {
+        try {
+            $lang = $request->get('lang', 'en');
+            $availableInProfile = intval($request->get('available-in-profile', 0));
+            $selectedByProject = intval($request->get('selected-by-project', 0));
+
+            $em = $this->getDoctrine()->getManager();
+            $classes = $em->getRepository('AppBundle:OntoClass')
+                ->findClassesWithProfileApi($lang, $availableInProfile, $selectedByProject);
+
+        } catch (\Exception $e) {
+            $message = $e->getMessage();
+            $status = 'Error';
+            $response = array(
+                'status' => $status,
+                'message' => $message
+            );
+            return new JsonResponse($response,500, 'content-type:application/problem+json');
+        }
+
+        if(empty($classes[0]['json'])) {
+            return new JsonResponse('[]',200, array(), true);//envoi d'un tableau JSON vide si pas de résultat
+        }
+
+        return new JsonResponse($classes[0]['json'],200, array(), true);
+    }
+
+    /**
+     * @Route("/api/properties-profile.json", name="api_properties_profile_json")
+     * @Method("GET")
+     * @param Request $request
+     * @return JsonResponse a Json formatted list representation of properties with profile
+     */
+    public function getPropertiesWithProfile(Request $request)
+    {
+        try {
+            $lang = $request->get('lang', 'en');
+            $availableInProfile = intval($request->get('available-in-profile', 0));
+            $selectedByProject = intval($request->get('selected-by-project', 0));
+
+            $em = $this->getDoctrine()->getManager();
+            $properties = $em->getRepository('AppBundle:Property')
+                ->findPropertiesWithProfileApi($lang, $availableInProfile, $selectedByProject);
+
+        } catch (\Exception $e) {
+            $message = $e->getMessage();
+            $status = 'Error';
+            $response = array(
+                'status' => $status,
+                'message' => $message
+            );
+            return new JsonResponse($response,500, 'content-type:application/problem+json');
+        }
+
+        if(empty($properties[0]['json'])) {
+            return new JsonResponse('[]',200, array(), true);//envoi d'un tableau JSON vide si pas de résultat
+        }
+
+        return new JsonResponse($properties[0]['json'],200, array(), true);
+    }
+
 
 }

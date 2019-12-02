@@ -447,5 +447,28 @@ class ClassRepository extends EntityRepository
         return $stmt->fetchAll();
     }
 
+    /**
+     * @param $lang string the language iso code
+     * @param $availableInProfile
+     * @param $selectedByProject
+     * @return array
+     */
+    public function findClassesWithProfileApi($lang, $availableInProfile, $selectedByProject)
+    {
+        $conn = $this->getEntityManager()
+            ->getConnection();
+
+        $sql = "SELECT array_to_json(array_agg(result)) AS json FROM (SELECT * FROM api.get_classes_list(:lang, :availableInProfile, :selectedByProject) ) result;";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->execute(array(
+            'lang' => $lang,
+            'availableInProfile' => $availableInProfile,
+            'selectedByProject' => $selectedByProject
+        ));
+
+        return $stmt->fetchAll();
+    }
+
 
 }
