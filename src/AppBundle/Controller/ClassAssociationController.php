@@ -130,8 +130,9 @@ class ClassAssociationController extends Controller
             $em->persist($classAssociation);
             $em->flush();
 
-            return $this->redirectToRoute('class_association_edit', [
-                'id' => $classAssociation->getId()
+            return $this->redirectToRoute('class_edit', [
+                'id' => $classAssociation->getChildClass()->getId(),
+                '_fragment' => 'class-hierarchy'
             ]);
 
         }
