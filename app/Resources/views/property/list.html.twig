@@ -22,29 +22,29 @@
         <tbody>
         {% for property in properties %}
             <tr>
-                <td class="text-nowrap text-right small">
+                <td class="text-right small">
                     {% if property.domain is not null %}
                         <a href="{{ path('class_show', {'id': property.domain.id }) }}">
                             {{ property.domain }}
                         </a>
                     {% endif %}
                 </td>
-                <td class="text-nowrap small" style="padding-left: 30px;">
+                <td class="small" style="padding-left: 30px;">
                     {% if property.domainMinQuantifier is not null and property.domainMaxQuantifier is not null %}
                         ({% if  property.domainMinQuantifier != -1 %}{{ property.domainMinQuantifier }}{% else %}n{% endif %},{% if  property.domainMaxQuantifier != -1 %}{{ property.domainMaxQuantifier }}{% else %}n{% endif %})
                     {% endif %}
                 </td>
-                <td class="text-nowrap text-center">
+                <td class="text-center">
                     <a href="{{ path('property_show', {'id': property.id}) }}">
                         {{ property }}
                     </a>
                 </td>
-                <td class="text-nowrap small" style="padding-right: 30px;">
+                <td class="small" style="padding-right: 30px;">
                     {% if property.rangeMinQuantifier is not null and property.rangeMaxQuantifier is not null %}
                         ({% if  property.rangeMinQuantifier != -1 %}{{ property.rangeMinQuantifier }}{% else %}n{% endif %},{% if  property.rangeMaxQuantifier != -1 %}{{ property.rangeMaxQuantifier }}{% else %}n{% endif %})
                     {% endif %}
                 </td>
-                <td class="text-nowrap small">
+                <td class="small">
                     {% if property.range is not null %}
                         <a href="{{ path('class_show', {'id': property.range.id }) }}">
                             {{ property.range }}
@@ -69,16 +69,11 @@
         $(document).ready(function() {
             $('#property-table').DataTable({
                 "order": [[2, 'asc']],
+                "pageLength":50,
                 "columnDefs": [
-                    { "width": "1%", "targets": 0 },
                     { "width": "1%", "orderable": false, "targets": 1 },
-                    { "width": "1%", "targets": 2 },
-                    { "width": "1%", "orderable": false, "targets": 3 },
-                    { "width": "1%", "targets": 4 },
-                    { "width": "1%", "targets": 6 }],
-                "autoWidth": false,
-                "pageLength": 50
+                    { "width": "1%", "orderable": false, "targets": 3 }
             });
-        } );
+        });
     </script>
 {% endblock %}

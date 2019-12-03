@@ -531,19 +531,19 @@
                     <tbody>
                     {% for association in property.childPropertyAssociations %}
                         <tr>
-                            <td class="text-nowrap text-right small">
+                            <td class="text-right small">
                                 {% if association.parentProperty.domain is not null %}
                                     <a href="{{ path('class_show', {'id': association.parentProperty.domain.id }) }}">
                                         {{ association.parentProperty.domain }}
                                     </a>
                                 {% endif %}
                             </td>
-                            <td class="text-nowrap small" style="padding-left: 30px;">
+                            <td class="small" style="padding-left: 30px;">
                                 {% if association.parentProperty.domainMinQuantifier is not null and association.parentProperty.domainMaxQuantifier is not null %}
                                     ({% if  association.parentProperty.domainMinQuantifier != -1 %}{{ association.parentProperty.domainMinQuantifier }}{% else %}n{% endif %},{% if  association.parentProperty.domainMaxQuantifier != -1 %}{{ association.parentProperty.domainMaxQuantifier }}{% else %}n{% endif %})
                                 {% endif %}
                             </td>
-                            <td class="text-nowrap text-center">
+                            <td class="text-center">
                                 <a href="{{ path('property_show', {
                                     'id': association.parentProperty.id,
                                     '_fragment': 'property-hierarchy'
@@ -551,12 +551,12 @@
                                     {{ association.parentProperty.invertedLabel }}
                                 </a>
                             </td>
-                            <td class="text-nowrap small" style="padding-right: 30px;">
+                            <td class="small" style="padding-right: 30px;">
                                 {% if association.parentProperty.rangeMinQuantifier is not null and association.parentProperty.rangeMaxQuantifier is not null %}
                                     ({% if  association.parentProperty.rangeMinQuantifier != -1 %}{{ association.parentProperty.rangeMinQuantifier }}{% else %}n{% endif %},{% if  association.parentProperty.rangeMaxQuantifier != -1 %}{{ association.parentProperty.rangeMaxQuantifier }}{% else %}n{% endif %})
                                 {% endif %}
                             </td>
-                            <td class="text-nowrap small">
+                            <td class="small">
                                 {% if association.parentProperty.range is not null %}
                                     <a href="{{ path('class_show', {'id': association.parentProperty.range.id }) }}">
                                         {{ association.parentProperty.range }}
@@ -620,7 +620,7 @@
                     <tbody>
                     {% for ancestor in ancestors|sort %}
                         <tr>
-                            <td class="text-nowrap text-right small">
+                            <td class="text-right small">
                                 {% if ancestor.domainIdentifier is not null %}
                                     <a href="{{ path('class_show', {'id': ancestor.has_domain }) }}">
                                         {% if ancestor.domainStandardLabel == ancestor.domainIdentifier %}
@@ -631,12 +631,12 @@
                                     </a>
                                 {% endif %}
                             </td>
-                            <td class="text-nowrap small" style="padding-left: 30px;">
+                            <td class="small" style="padding-left: 30px;">
                                 {% if ancestor.domain_instances_min_quantifier is not null and ancestor.domain_instances_max_quantifier is not null %}
                                     ({% if  ancestor.domain_instances_min_quantifier != -1 %}{{ ancestor.domain_instances_min_quantifier }}{% else %}n{% endif %},{% if  ancestor.domain_instances_max_quantifier != -1 %}{{ ancestor.domain_instances_max_quantifier }}{% else %}n{% endif %})
                                 {% endif %}
                             </td>
-                            <td class="text-nowrap text-center">
+                            <td class="text-center">
                                 <a href="{{ path('property_show', {
                                     'id': ancestor.id,
                                     '_fragment': 'property-hierarchy'
@@ -644,12 +644,12 @@
                                     {{ ancestor.identifier }}
                                 </a>
                             </td>
-                            <td class="text-nowrap small" style="padding-right: 30px;">
+                            <td class="small" style="padding-right: 30px;">
                                 {% if ancestor.range_instances_min_quantifier is not null and ancestor.range_instances_max_quantifier is not null %}
                                     ({% if  ancestor.range_instances_min_quantifier != -1 %}{{ ancestor.range_instances_min_quantifier }}{% else %}n{% endif %},{% if  ancestor.range_instances_max_quantifier != -1 %}{{ ancestor.range_instances_max_quantifier }}{% else %}n{% endif %})
                                 {% endif %}
                             </td>
-                            <td class="text-nowrap small">
+                            <td class="small">
                                 {% if ancestor.rangeIdentifier is not null %}
                                     <a href="{{ path('class_show', {'id': ancestor.has_range }) }}">
                                         {% if ancestor.rangeStandardLabel == ancestor.rangeIdentifier %}
@@ -682,7 +682,7 @@
                     <tbody>
                     {% for descendant in descendants|sort %}
                         <tr>
-                            <td class="text-nowrap text-right small">
+                            <td class="text-right small">
                                 {% if descendant.domainIdentifier is not null %}
                                     <a href="{{ path('class_show', {'id': descendant.has_domain }) }}">
                                         {% if descendant.domainStandardLabel == descendant.domainIdentifier %}
@@ -693,12 +693,12 @@
                                     </a>
                                 {% endif %}
                             </td>
-                            <td class="text-nowrap small" style="padding-left: 30px;">
+                            <td class="small" style="padding-left: 30px;">
                                 {% if descendant.domain_instances_min_quantifier is not null and descendant.domain_instances_max_quantifier is not null %}
                                     ({% if  descendant.domain_instances_min_quantifier != -1 %}{{ descendant.domain_instances_min_quantifier }}{% else %}n{% endif %},{% if  descendant.domain_instances_max_quantifier != -1 %}{{ descendant.domain_instances_max_quantifier }}{% else %}n{% endif %})
                                 {% endif %}
                             </td>
-                            <td class="text-nowrap text-center">
+                            <td class="text-center">
                                 <a href="{{ path('property_show', {
                                     'id': descendant.id,
                                     '_fragment': 'property-hierarchy'
@@ -706,12 +706,12 @@
                                     {{ descendant.identifier }}
                                 </a>
                             </td>
-                            <td class="text-nowrap small" style="padding-right: 30px;">
+                            <td class="small" style="padding-right: 30px;">
                                 {% if descendant.range_instances_min_quantifier is not null and descendant.range_instances_max_quantifier is not null %}
                                     ({% if  descendant.range_instances_min_quantifier != -1 %}{{ descendant.range_instances_min_quantifier }}{% else %}n{% endif %},{% if  descendant.range_instances_max_quantifier != -1 %}{{ descendant.range_instances_max_quantifier }}{% else %}n{% endif %})
                                 {% endif %}
                             </td>
-                            <td class="text-nowrap small">
+                            <td class="small">
                                 {% if descendant.rangeIdentifier is not null %}
                                     <a href="{{ path('class_show', {'id': descendant.has_range }) }}">
                                         {% if descendant.rangeStandardLabel == descendant.rangeIdentifier %}
