@@ -47,7 +47,7 @@ class EntityAssociationEditForm extends AbstractType
                         'owl:equivalentClass' => 4,
                         'owl:disjointWith' => 19
                     ),
-                    'label' => 'Type relation'))
+                    'label' => 'Relation'))
                 ->add('targetClass')
                 ->add('sourceClass');
         }
@@ -59,7 +59,7 @@ class EntityAssociationEditForm extends AbstractType
                         'owl:equivalentProperty' => 18,
                         'owl:inverseOf' => 20
                     ),
-                    'label' => 'Type relation'))
+                    'label' => 'Relation'))
                 ->add('targetProperty', EntityType::class,
                     array(
                         'class' => Property::class,

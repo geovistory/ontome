@@ -58,11 +58,11 @@ class EntityAssociationForm extends AbstractType
                         'owl:equivalentClass' => 4,
                         'owl:disjointWith' => 19
                     ),
-                    'label' => 'Type relation'))
+                    'label' => 'Relation'))
                 ->add('targetClass', EntityType::class,
                     array(
                         'class' => OntoClass::class,
-                        'label' => "Target class",
+                        'label' => "Related class",
                         'query_builder' => function(ClassRepository $repo) use ($user){
                             return $repo->findFilteredClassByActiveProjectOrderedById($user);
                         }
@@ -76,11 +76,11 @@ class EntityAssociationForm extends AbstractType
                         'owl:equivalentProperty' => 18,
                         'owl:inverseOf' => 20
                     ),
-                    'label' => 'Type relation'))
+                    'label' => 'Relation'))
                 ->add('targetProperty', EntityType::class,
                     array(
                         'class' => Property::class,
-                        'label' => "Target property",
+                        'label' => "Related property",
                         'query_builder' => function(PropertyRepository $repo) use ($user){
                             return $repo->findFilteredPropertiesByActiveProjectOrderedById($user);
                         }
