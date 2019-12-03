@@ -125,15 +125,22 @@ class ClassRepository extends EntityRepository
                        tw1.parent_identifier AS identifier,
                        tw1.DEPTH,
                        che.get_root_namespace(nsp.pk_namespace) AS \"rootNamespaceId\",
-                       (SELECT label FROM che.get_namespace_labels(che.get_root_namespace(nsp.pk_namespace)) WHERE language_iso_code = 'en') AS \"rootNamespaceLabel\"
+                       (SELECT label FROM che.get_namespace_labels(che.get_root_namespace(nsp.pk_namespace)) WHERE language_iso_code = 'en') AS \"rootNamespaceLabel\",
+                       nsp2.pk_namespace AS \"definedInNamespaceId\",
+                       nsp2.standard_label AS \"definedInNamespaceLabel\"
                 FROM tw1
                 JOIN che.associates_namespace asnsp ON (asnsp.fk_class = tw1.pk_parent)
                 JOIN che.namespace nsp ON (nsp.pk_namespace = asnsp.fk_namespace)
+                
+                JOIN che.associates_namespace asnsp2 ON (asnsp2.fk_is_subclass_of = (SELECT pk_is_subclass_of FROM che.is_subclass_of WHERE is_parent_class = tw1.pk_parent AND is_child_class = :class))
+                JOIN che.namespace nsp2 ON (nsp2.pk_namespace = asnsp2.fk_namespace)
+                
                 WHERE depth > 1 
                 GROUP BY tw1.pk_parent,
                      tw1.parent_identifier,
                      tw1.depth,
-                     nsp.pk_namespace
+                     nsp.pk_namespace,
+                     nsp2.pk_namespace
                 ORDER BY depth DESC;";
 
         $stmt = $conn->prepare($sql);
@@ -163,10 +170,16 @@ class ClassRepository extends EntityRepository
                        tw1.parent_identifier AS identifier,
                        tw1.DEPTH,
                        che.get_root_namespace(nsp.pk_namespace) AS \"rootNamespaceId\",
-                       (SELECT label FROM che.get_namespace_labels(che.get_root_namespace(nsp.pk_namespace)) WHERE language_iso_code = 'en') AS \"rootNamespaceLabel\"
+                       (SELECT label FROM che.get_namespace_labels(che.get_root_namespace(nsp.pk_namespace)) WHERE language_iso_code = 'en') AS \"rootNamespaceLabel\",
+                       nsp2.pk_namespace AS \"definedInNamespaceId\",
+                       nsp2.standard_label AS \"definedInNamespaceLabel\"
                 FROM tw1
                 JOIN che.associates_namespace asnsp ON (asnsp.fk_class = tw1.pk_parent)
                 JOIN che.namespace nsp ON (nsp.pk_namespace = asnsp.fk_namespace)
+                
+                JOIN che.associates_namespace asnsp2 ON (asnsp2.fk_is_subclass_of = (SELECT pk_is_subclass_of FROM che.is_subclass_of WHERE is_parent_class = tw1.pk_parent AND is_child_class = :class))
+                JOIN che.namespace nsp2 ON (nsp2.pk_namespace = asnsp2.fk_namespace)
+                
                 WHERE depth > 1 
                 AND nsp.pk_namespace IN (
                     SELECT fk_namespace 
@@ -179,7 +192,8 @@ class ClassRepository extends EntityRepository
                 GROUP BY tw1.pk_parent,
                      tw1.parent_identifier,
                      tw1.depth,
-                     nsp.pk_namespace
+                     nsp.pk_namespace,
+                     nsp2.pk_namespace
                 ORDER BY depth DESC;";
 
         $stmt = $conn->prepare($sql);
@@ -200,13 +214,21 @@ class ClassRepository extends EntityRepository
                         child_identifier AS identifier,
                         depth,
                         che.get_root_namespace(nsp.pk_namespace) AS \"rootNamespaceId\",
-                        (SELECT label FROM che.get_namespace_labels(che.get_root_namespace(nsp.pk_namespace)) WHERE language_iso_code = 'en') AS \"rootNamespaceLabel\"
+                        (SELECT label FROM che.get_namespace_labels(che.get_root_namespace(nsp.pk_namespace)) WHERE language_iso_code = 'en') AS \"rootNamespaceLabel\",
+                        nsp2.pk_namespace AS \"definedInNamespaceId\",
+                        nsp2.standard_label AS \"definedInNamespaceLabel\"
                 FROM 	che.descendant_class_hierarchy(:class) cls, 
-                    che.associates_namespace asnsp,
-                        che.namespace nsp
+                        che.associates_namespace asnsp,
+                        che.namespace nsp,
+                        che.associates_namespace asnsp2,
+                        che.namespace nsp2
+                
                 WHERE 	asnsp.fk_class = cls.pk_child
                 AND   	nsp.pk_namespace = asnsp.fk_namespace
-                GROUP BY pk_child, child_identifier, depth, nsp.pk_namespace, che.get_root_namespace(nsp.pk_namespace)
+                AND     asnsp2.fk_is_subclass_of = (SELECT pk_is_subclass_of FROM che.is_subclass_of WHERE is_child_class = pk_child AND is_parent_class = :class)
+                AND     nsp2.pk_namespace = asnsp2.fk_namespace
+                
+                GROUP BY pk_child, child_identifier, depth, nsp.pk_namespace, che.get_root_namespace(nsp.pk_namespace), nsp2.pk_namespace
                 ORDER BY depth ASC;";
 
         $stmt = $conn->prepare($sql);
@@ -227,12 +249,20 @@ class ClassRepository extends EntityRepository
                         child_identifier AS identifier,
                         depth,
                         che.get_root_namespace(nsp.pk_namespace) AS \"rootNamespaceId\",
-                        (SELECT label FROM che.get_namespace_labels(che.get_root_namespace(nsp.pk_namespace)) WHERE language_iso_code = 'en') AS \"rootNamespaceLabel\"
+                        (SELECT label FROM che.get_namespace_labels(che.get_root_namespace(nsp.pk_namespace)) WHERE language_iso_code = 'en') AS \"rootNamespaceLabel\",
+                        nsp2.pk_namespace AS \"definedInNamespaceId\",
+                        nsp2.standard_label AS \"definedInNamespaceLabel\"
                 FROM 	che.descendant_class_hierarchy(:class) cls, 
-                    che.associates_namespace asnsp,
-                        che.namespace nsp
+                        che.associates_namespace asnsp,
+                        che.namespace nsp,
+                        che.associates_namespace asnsp2,
+                        che.namespace nsp2
+                
                 WHERE 	asnsp.fk_class = cls.pk_child
                 AND   	nsp.pk_namespace = asnsp.fk_namespace
+                AND     asnsp2.fk_is_subclass_of = (SELECT pk_is_subclass_of FROM che.is_subclass_of WHERE is_child_class = pk_child AND is_parent_class = :class)
+                AND     nsp2.pk_namespace = asnsp2.fk_namespace
+                
                 AND nsp.pk_namespace IN (
                     SELECT fk_namespace 
                     FROM che.associates_entity_to_user_project 
@@ -241,7 +271,7 @@ class ClassRepository extends EntityRepository
                         FROM che.associate_user_to_project
                         WHERE fk_user = :user AND fk_project = :project)
                     AND fk_system_type = 25)
-                GROUP BY pk_child, child_identifier, depth, nsp.pk_namespace, che.get_root_namespace(nsp.pk_namespace)
+                GROUP BY pk_child, child_identifier, depth, nsp.pk_namespace, che.get_root_namespace(nsp.pk_namespace), nsp2.pk_namespace
                 ORDER BY depth ASC;";
 
         $stmt = $conn->prepare($sql);

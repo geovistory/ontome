@@ -466,19 +466,25 @@ class PropertyRepository extends EntityRepository
                        tw1.DEPTH,
                        replace(tw1.ancestors, '|', '→') AS ancestors,
                        che.get_root_namespace(nsp.pk_namespace) AS \"rootNamespaceId\",
-                       (SELECT label FROM che.get_namespace_labels(che.get_root_namespace(nsp.pk_namespace)) WHERE language_iso_code = 'en') AS \"rootNamespaceLabel\"
+                       (SELECT label FROM che.get_namespace_labels(che.get_root_namespace(nsp.pk_namespace)) WHERE language_iso_code = 'en') AS \"rootNamespaceLabel\",
+                       nsp2.pk_namespace AS \"definedInNamespaceId\",
+                       nsp2.standard_label AS \"definedInNamespaceLabel\"
                 FROM tw1,
                      che.associates_namespace asnsp,
                      che.namespace nsp,
                      che.property p,
                      che.class domain,
-                     che.class range
+                     che.class range,
+                     che.associates_namespace asnsp2,
+                     che.namespace nsp2
                 WHERE asnsp.fk_property = tw1.pk_parent
                 AND   nsp.pk_namespace = asnsp.fk_namespace
                 AND depth > 1 
                 AND p.pk_property = tw1.pk_parent
                 AND p.has_domain = domain.pk_class
                 AND p.has_range = range.pk_class
+                AND asnsp2.fk_is_subproperty_of = (SELECT pk_is_subproperty_of FROM che.is_subproperty_of WHERE is_parent_property = tw1.pk_parent AND is_child_property = :property)
+                AND nsp2.pk_namespace = asnsp2.fk_namespace
                 GROUP BY tw1.pk_parent,
                      tw1.parent_identifier,
                      p.has_domain,
@@ -493,7 +499,8 @@ class PropertyRepository extends EntityRepository
                        p.range_instances_max_quantifier,
                      tw1.depth,
                      tw1.ancestors,
-                     nsp.pk_namespace";
+                     nsp.pk_namespace,
+                     nsp2.pk_namespace";
 
         $stmt = $conn->prepare($sql);
         $stmt->execute(array('property' => $property->getId()));
@@ -556,19 +563,25 @@ class PropertyRepository extends EntityRepository
                        tw1.DEPTH,
                        replace(tw1.ancestors, '|', '→') AS ancestors,
                        che.get_root_namespace(nsp.pk_namespace) AS \"rootNamespaceId\",
-                       (SELECT label FROM che.get_namespace_labels(che.get_root_namespace(nsp.pk_namespace)) WHERE language_iso_code = 'en') AS \"rootNamespaceLabel\"
+                       (SELECT label FROM che.get_namespace_labels(che.get_root_namespace(nsp.pk_namespace)) WHERE language_iso_code = 'en') AS \"rootNamespaceLabel\",
+                       nsp2.pk_namespace AS \"definedInNamespaceId\",
+                       nsp2.standard_label AS \"definedInNamespaceLabel\"
                 FROM tw1,
                      che.associates_namespace asnsp,
                      che.namespace nsp,
                      che.property p,
                      che.class domain,
-                     che.class range
+                     che.class range,
+                     che.associates_namespace asnsp2,
+                     che.namespace nsp2
                 WHERE asnsp.fk_property = tw1.pk_parent
                 AND   nsp.pk_namespace = asnsp.fk_namespace
                 AND depth > 1 
                 AND p.pk_property = tw1.pk_parent
                 AND p.has_domain = domain.pk_class
                 AND p.has_range = range.pk_class
+                AND asnsp2.fk_is_subproperty_of = (SELECT pk_is_subproperty_of FROM che.is_subproperty_of WHERE is_parent_property = tw1.pk_parent AND is_child_property = :property)
+                AND nsp2.pk_namespace = asnsp2.fk_namespace
                 AND nsp.pk_namespace IN (SELECT fk_namespace FROM filtered_namespaces)
                 GROUP BY tw1.pk_parent,
                      tw1.parent_identifier,
@@ -584,7 +597,8 @@ class PropertyRepository extends EntityRepository
                        p.range_instances_max_quantifier,
                      tw1.depth,
                      tw1.ancestors,
-                     nsp.pk_namespace";
+                     nsp.pk_namespace,
+                     nsp2.pk_namespace";
 
         $stmt = $conn->prepare($sql);
         $stmt->execute(array('property' => $property->getId(), 'user' => $user->getId(), 'project' => $user->getCurrentActiveProject()->getId()));
@@ -616,18 +630,24 @@ class PropertyRepository extends EntityRepository
                         depth,
                         replace(descendants, '|', '→') AS descendants,
                         che.get_root_namespace(nsp.pk_namespace) AS \"rootNamespaceId\",
-                       (SELECT label FROM che.get_namespace_labels(che.get_root_namespace(nsp.pk_namespace)) WHERE language_iso_code = 'en') AS \"rootNamespaceLabel\"                        
+                       (SELECT label FROM che.get_namespace_labels(che.get_root_namespace(nsp.pk_namespace)) WHERE language_iso_code = 'en') AS \"rootNamespaceLabel\",
+                       nsp2.pk_namespace AS \"definedInNamespaceId\",
+                       nsp2.standard_label AS \"definedInNamespaceLabel\"                        
                     FROM che.descendant_property_hierarchy((:property)),
                          che.associates_namespace asnsp,
                          che.namespace nsp,
                          che.property p,
                          che.class domain,
-                         che.class range
+                         che.class range,
+                         che.associates_namespace asnsp2,
+                         che.namespace nsp2
                     WHERE asnsp.fk_property = pk_child
                     AND   nsp.pk_namespace = asnsp.fk_namespace    
                     AND p.pk_property = pk_child
                     AND p.has_domain = domain.pk_class
                     AND p.has_range = range.pk_class
+                    AND asnsp2.fk_is_subproperty_of = (SELECT pk_is_subproperty_of FROM che.is_subproperty_of WHERE is_parent_property = :property AND is_child_property = pk_child)
+                    AND nsp2.pk_namespace = asnsp2.fk_namespace
                          ";
 
         $stmt = $conn->prepare($sql);
@@ -683,19 +703,25 @@ class PropertyRepository extends EntityRepository
                         depth,
                         replace(descendants, '|', '→') AS descendants,
                         che.get_root_namespace(nsp.pk_namespace) AS \"rootNamespaceId\",
-                       (SELECT label FROM che.get_namespace_labels(che.get_root_namespace(nsp.pk_namespace)) WHERE language_iso_code = 'en') AS \"rootNamespaceLabel\"                        
+                       (SELECT label FROM che.get_namespace_labels(che.get_root_namespace(nsp.pk_namespace)) WHERE language_iso_code = 'en') AS \"rootNamespaceLabel\",
+                       nsp2.pk_namespace AS \"definedInNamespaceId\",
+                       nsp2.standard_label AS \"definedInNamespaceLabel\"                   
                     FROM che.descendant_property_hierarchy((:property)),
                          che.associates_namespace asnsp,
                          che.namespace nsp,
                          che.property p,
                          che.class domain,
-                         che.class range
+                         che.class range,
+                         che.associates_namespace asnsp2,
+                         che.namespace nsp2
                     WHERE asnsp.fk_property = pk_child
                     AND   nsp.pk_namespace = asnsp.fk_namespace
                     AND nsp.pk_namespace IN (SELECT fk_namespace FROM filtered_namespaces)    
                     AND p.pk_property = pk_child
                     AND p.has_domain = domain.pk_class
                     AND p.has_range = range.pk_class
+                    AND asnsp2.fk_is_subproperty_of = (SELECT pk_is_subproperty_of FROM che.is_subproperty_of WHERE is_parent_property = :property AND is_child_property = pk_child)
+                    AND nsp2.pk_namespace = asnsp2.fk_namespace
                          ";
 
         $stmt = $conn->prepare($sql);

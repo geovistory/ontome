@@ -435,7 +435,7 @@
                     <tr>
                         <th>Class</th>
                         <th>Justification</th>
-                        <th>Root namespace</th>
+                        <th>Defined in namespace</th>
                         <th>
                             {% if is_granted('edit', class) %}
                                 Edit association
@@ -467,10 +467,10 @@
                                 {% endif %}
                             </td>
                             <td>
-                                {% if association.parentClass.namespaces is not null %}
-                                    {% if association.parentClass.namespaces|first.topLevelNamespace is not null %}
-                                        {{ association.parentClass.namespaces|first.topLevelNamespace }}
-                                    {% endif %}
+                                {% if association.namespaces is not null %}
+                                    {% for ns in association.namespaces %}
+                                        {{ ns.standardLabel }}
+                                    {% endfor %}
                                 {% else %}
                                     WIP
                                 {% endif %}
@@ -502,7 +502,7 @@
                     <tr>
                         <th>Class</th>
                         <th>Depth</th>
-                        <th>Root namespace</th>
+                        <th>Defined in namespace</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -517,7 +517,7 @@
                                 </a>
                             </td>
                             <td>{{ ancestor.depth }}</td>
-                            <td>{{ ancestor.rootNamespaceLabel }}</td>
+                            <td>{{ ancestor.definedInNamespaceLabel }}</td>
                         </tr>
                     {% endfor %}
                     </tbody>
@@ -528,7 +528,7 @@
                     <tr>
                         <th>Class identifier</th>
                         <th>Depth</th>
-                        <th>Root namespace</th>
+                        <th>Defined in namespace</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -543,7 +543,7 @@
                                 </a>
                             </td>
                             <td>{{ descendant.depth }}</td>
-                            <td>{{ descendant.rootNamespaceLabel }}</td>
+                            <td>{{ descendant.definedInNamespaceLabel }}</td>
                         </tr>
                     {% endfor %}
                     </tbody>
