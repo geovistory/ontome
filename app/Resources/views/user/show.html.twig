@@ -26,6 +26,7 @@
                 <li class="active"><a data-toggle="tab" href="#user-info">My account</a></li>
                 <li><a data-toggle="tab" href="#my-projects">My projects</a></li>
                 <li><a data-toggle="tab" href="#my-current-namespaces">My current namespaces</a></li>
+                <li><a data-toggle="tab" href="#my-profiles">My profiles</a></li>
             </ul>
             <div class="tab-content">
                 <div id="user-info" class="tab-pane fade in active">
@@ -237,6 +238,41 @@
                         {% endfor %}
                     {% endif %}
                 </div>
+                <div id="my-profiles" class="tab-pane fade">
+                    <h3>My profiles</h3>
+                    <table class="table table-striped" id="my-profiles-table">
+                        <thead>
+                        <tr>
+                            <th>Profile name</th>
+                            <th>Project of belonging</th>
+                            <th>Last updated</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                            {% for upa in user.userProjectAssociations %}
+                                {% for profile in upa.project.ownedProfiles %}
+                                    <tr>
+                                        <td>
+                                            <a href="{{ path('profile_show', {
+                                                'id': profile.id
+                                            }) }}">
+                                                {{ profile.standardLabel }}
+                                            </a>
+                                        </td>
+                                        <td>
+                                            <a href="{{ path('project_show', {
+                                                'id': profile.projectOfBelonging.id
+                                            }) }}">
+                                                {{ profile.projectOfBelonging.standardLabel }}
+                                            </a>
+                                        </td>
+                                        <td>{{ profile.modificationTime|date('Y-m-d') }}</td>
+                                    </tr>
+                                {% endfor %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
@@ -247,6 +283,8 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.4/js/select2.min.js"></script>
     <script>
         $(document).ready(function() {
+            $('#my-profiles-table').DataTable({"pageLength":50});
+
             // Onglet My Projects
             $('#projects-table').DataTable({
                 "order": [[2, 'asc']]
@@ -272,6 +310,7 @@
                 }
             });
 
+            {% if userActiveProjectAssociation.project.id != 21 %}
             $('#select-root-namespace').on('select2:select', function (e) {
                 $('#loading-icon').show(0);
                 $('#chosable-namespaces-list').empty();
@@ -521,6 +560,7 @@
                     }
                 });
             });
+        {% endif %}
         } );
     </script>
 {% endblock %}
