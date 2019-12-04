@@ -41,6 +41,8 @@ class LabelType extends AbstractType
         $builder
             ->add('label', TextType::class, array(
             ))
+            ->add('inverseLabel', TextType::class, array(
+            ))
             ->add('languageIsoCode', ChoiceType::class, array(
                 'choices'  => array(
                     'English' => 'en',
