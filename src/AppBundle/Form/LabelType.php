@@ -72,6 +72,7 @@ class LabelType extends AbstractType
     {
         $resolver->setDefaults(array(
             'data_class' => Label::class,
+            'canInverseLabel' => false
         ));
     }
 
