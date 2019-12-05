@@ -37,6 +37,8 @@ class LabelController  extends Controller
      */
     public function editAction(Label $label, Request $request)
     {
+        $canInverseLabel = false;
+
         if(!is_null($label->getClass())){
             $object = $label->getClass();
             $redirectToRoute = 'class_edit';
@@ -46,6 +48,7 @@ class LabelController  extends Controller
             $object = $label->getProperty();
             $redirectToRoute = 'property_edit';
             $redirectToRouteFragment = 'identification';
+            $canInverseLabel = true;
         }
         else if(!is_null($label->getProfile())){
             $object = $label->getProfile();
@@ -68,7 +71,7 @@ class LabelController  extends Controller
 
         $label->setModifier($this->getUser());
 
-        $form = $this->createForm(LabelForm::class, $label);
+        $form = $this->createForm(LabelForm::class, $label, ['canInverseLabel' => $canInverseLabel]);
 
         $form->handleRequest($request);
         if ($form->isValid()) {
@@ -88,7 +91,8 @@ class LabelController  extends Controller
         return $this->render('label/edit.html.twig', [
             'labelForm' => $form->createView(),
             'associatedObject' => $object,
-            'label' => $label
+            'label' => $label,
+            'canInverseLabel' => $canInverseLabel
         ]);
     }
 
@@ -100,6 +104,7 @@ class LabelController  extends Controller
         $em = $this->getDoctrine()->getManager();
 
         $label = new Label();
+        $canInverseLabel = false;
 
         if($object === 'class') {
             $associatedEntity = $em->getRepository('AppBundle:OntoClass')->find($objectId);
@@ -120,6 +125,7 @@ class LabelController  extends Controller
             $associatedObject = $associatedEntity;
             $redirectToRoute = 'property_edit';
             $redirectToRouteFragment = 'identification';
+            $canInverseLabel = true;
         }
         else if($object === 'profile') {
             $associatedEntity = $em->getRepository('AppBundle:Profile')->find($objectId);
@@ -166,7 +172,7 @@ class LabelController  extends Controller
         $label->setModificationTime(new \DateTime('now'));
 
 
-        $form = $this->createForm(LabelForm::class, $label);
+        $form = $this->createForm(LabelForm::class, $label, ['canInverseLabel' => $canInverseLabel]);
 
         // only handles data on POST
         $form->handleRequest($request);
@@ -198,7 +204,8 @@ class LabelController  extends Controller
 
         return $this->render('label/new.html.twig', [
             'label' => $label,
-            'labelForm' => $form->createView()
+            'labelForm' => $form->createView(),
+            'canInverseLabel' => $canInverseLabel
         ]);
 
     }
