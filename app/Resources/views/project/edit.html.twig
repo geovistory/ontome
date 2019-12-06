@@ -198,7 +198,7 @@
                             <td>
                                 <a href="{{ path('project_show', {
                                     'id': project.parentProject.id
-                                }) }}">
+                                }) }}#project-hierarchy">
                                     {{ project.parentProject.standardLabel }}
                                 </a>
                             </td>
@@ -221,7 +221,7 @@
                             <td>
                                 <a href="{{ path('project_show', {
                                     'id': childProject.id
-                                }) }}">
+                                }) }}#project-hierarchy">
                                     {{ childProject.standardLabel }}
                                 </a>
                             </td>
