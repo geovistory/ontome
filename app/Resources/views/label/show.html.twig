@@ -23,7 +23,7 @@
                 <div class="tab-content">
                     <div id="label" class="tab-pane fade in active">
                         <div class="container">
-                            <h3>{{ label.label}}</h3>
+                            <h3>{{ label.label}} {% if label.inverseLabel != ""%}({{ label.inverseLabel }}){% endif %}</h3>
                             <dl class="object-details-list">
                                 <dt>Language</dt>
                                 <dd>{{ label.languageIsoCode}}</dd>

@@ -56,6 +56,11 @@ class LabelType extends AbstractType
             ))
             ->add('creator', HiddenType::class)
             ->add('modifier', HiddenType::class);
+        if($options['canInverseLabel']){
+            $builder
+                ->add('inverseLabel', TextType::class, array(
+                ));
+        }
         $builder->get('creator')
             ->addModelTransformer($this->transformer);
         $builder->get('modifier')
@@ -67,6 +72,7 @@ class LabelType extends AbstractType
     {
         $resolver->setDefaults(array(
             'data_class' => Label::class,
+            'canInverseLabel' => false
         ));
     }
 

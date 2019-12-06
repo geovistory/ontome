@@ -360,7 +360,7 @@
                             <td>
                                 <a href="{{ path('label_show', {
                                     'id': label.id
-                                }) }}">{{ label.label }}</a> {% if label.isStandardLabelForLanguage %}*{% endif %}
+                                }) }}">{{ label.label }} {% if label.inverseLabel != ""%}({{ label.inverseLabel }}){% endif %}</a> {% if label.isStandardLabelForLanguage %}*{% endif %}
                             </td>
                             <td>{{ label.languageIsoCode}}</td>
                             <td>{{ label.modificationTime|date('Y-m-d') }}</td>

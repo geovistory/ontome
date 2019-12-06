@@ -33,6 +33,11 @@ class Label
     private $label;
 
     /**
+     * @ORM\Column(type="text", nullable=false)
+     */
+    private $inverseLabel;
+
+    /**
      * @Assert\NotBlank()
      * @ORM\Column(type="text", nullable=false)
      */
@@ -142,6 +147,14 @@ class Label
     public function getLabel()
     {
         return $this->label;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getInverseLabel()
+    {
+        return $this->inverseLabel;
     }
 
     /**
@@ -293,6 +306,14 @@ class Label
     public function setLabel($label)
     {
         $this->label = $label;
+    }
+
+    /**
+     * @param mixed $label
+     */
+    public function setInverseLabel($inverseLabel)
+    {
+        $this->inverseLabel = $inverseLabel;
     }
 
     /**

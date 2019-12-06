@@ -62,6 +62,9 @@
                             <h3>Label</h3>
                             {{ form_start(labelForm) }}
                                 {{ form_row(labelForm.label) }}
+                                {% if canInverseLabel %}
+                                    {{ form_row(labelForm.inverseLabel) }}
+                                {% endif %}
                                 {{ form_row(labelForm.languageIsoCode) }}
                                 {{ form_row(labelForm.isStandardLabelForLanguage) }}
 
