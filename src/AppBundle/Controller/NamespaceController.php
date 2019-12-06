@@ -8,12 +8,17 @@
 
 namespace AppBundle\Controller;
 
+use AppBundle\Entity\Label;
 use AppBundle\Entity\OntoNamespace;
 use AppBundle\Entity\Profile;
+use AppBundle\Entity\Project;
+use AppBundle\Entity\TextProperty;
 use AppBundle\Form\NamespaceForm;
+use AppBundle\Form\NamespaceQuickAddForm;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\Finder\Exception\AccessDeniedException;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -28,10 +33,138 @@ class NamespaceController  extends Controller
         $em = $this->getDoctrine()->getManager();
 
         $namespaces = $em->getRepository('AppBundle:OntoNamespace')
-            ->findAllOrderedById();
+            ->findAll();
+        //->findAllOrderedById();
 
         return $this->render('namespace/list.html.twig', [
             'namespaces' => $namespaces
+        ]);
+    }
+
+    /**
+     * @Route("/namespace/new/{project}", name="namespace_new")
+     */
+    public function newNamespaceAction(Project $project, Request $request)
+    {
+
+        $tokenInterface = $this->get('security.token_storage')->getToken();
+        $isAuthenticated = $tokenInterface->isAuthenticated();
+        if(!$isAuthenticated) throw new AccessDeniedException('You must be an authenticated user to access this page.');
+
+        $this->denyAccessUnlessGranted('edit_manager', $project);
+
+        if (!$project->getManagedNamespaces()->isEmpty()) {
+            throw new AccessDeniedException('You cannot add a new namespace to this project because it already has a managed namespace.');
+        }
+
+        $namespace = new OntoNamespace();
+
+        $em = $this->getDoctrine()->getManager();
+        $systemTypeDescription = $em->getRepository('AppBundle:SystemType')->find(16); //systemType 16 = Description
+
+        $description = new TextProperty();
+        $description->setNamespace($namespace);
+        $description->setSystemType($systemTypeDescription);
+        $description->setCreator($this->getUser());
+        $description->setModifier($this->getUser());
+        $description->setCreationTime(new \DateTime('now'));
+        $description->setModificationTime(new \DateTime('now'));
+
+        $ongoingDescription = new TextProperty();
+        $ongoingDescription->setNamespace($namespace);
+        $ongoingDescription->setSystemType($systemTypeDescription);
+        $ongoingDescription->setCreator($this->getUser());
+        $ongoingDescription->setModifier($this->getUser());
+        $ongoingDescription->setCreationTime(new \DateTime('now'));
+        $ongoingDescription->setModificationTime(new \DateTime('now'));
+
+        $namespace->addTextProperty($description);
+
+        $ongoingNamespace = new OntoNamespace();
+        $namespaceLabel = new Label();
+        $ongoingNamespaceLabel = new Label();
+
+        $now = new \DateTime();
+
+        $namespace->setCreator($this->getUser());
+        $namespace->setModifier($this->getUser());
+
+        $namespaceLabel->setIsStandardLabelForLanguage(true);
+        $namespaceLabel->setCreator($this->getUser());
+        $namespaceLabel->setModifier($this->getUser());
+        $namespaceLabel->setCreationTime(new \DateTime('now'));
+        $namespaceLabel->setModificationTime(new \DateTime('now'));
+
+        $namespace->addLabel($namespaceLabel);
+
+        $form = $this->createForm(NamespaceQuickAddForm::class, $namespace);
+        // only handles data on POST
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $namespace = $form->getData();
+            $namespace->setProjectForTopLevelNamespace($project);
+            $namespace->setCreator($this->getUser());
+            $namespace->setModifier($this->getUser());
+            $namespace->setCreationTime(new \DateTime('now'));
+            $namespace->setModificationTime(new \DateTime('now'));
+
+            $labelForURI = strtolower(preg_replace("/[^A-Za-z0-9\-]/", '-', $namespaceLabel->getLabel()));
+            //$labelForURI = strtolower(str_replace(' ', '-', $namespaceLabel->getLabel()));
+
+            $namespace->setNamespaceURI($labelForURI);
+            $namespace->setIsTopLevelNamespace(true);
+            $namespace->setIsOngoing(false);
+
+            $ongoingNamespace->setNamespaceURI($labelForURI.'-ongoing');
+            $ongoingNamespace->setIsTopLevelNamespace(false);
+            $ongoingNamespace->setIsOngoing(true);
+            $ongoingNamespace->setTopLevelNamespace($namespace);
+            $ongoingNamespace->setProjectForTopLevelNamespace($project);
+            $ongoingNamespace->setReferencedVersion($namespace);
+            $ongoingNamespace->setCreator($this->getUser());
+            $ongoingNamespace->setModifier($this->getUser());
+            $ongoingNamespace->setCreationTime(new \DateTime('now'));
+            $ongoingNamespace->setModificationTime(new \DateTime('now'));
+
+            $ongoingNamespaceLabel->setIsStandardLabelForLanguage(true);
+            $ongoingNamespaceLabel->setLabel($namespaceLabel->getLabel().' ongoing');
+            $ongoingNamespaceLabel->setLanguageIsoCode($namespaceLabel->getLanguageIsoCode());
+            $ongoingNamespaceLabel->setCreator($this->getUser());
+            $ongoingNamespaceLabel->setModifier($this->getUser());
+            $ongoingNamespaceLabel->setCreationTime(new \DateTime('now'));
+            $ongoingNamespaceLabel->setModificationTime(new \DateTime('now'));
+            $ongoingNamespace->addLabel($ongoingNamespaceLabel);
+
+            if($namespace->getTextProperties()->containsKey(1)){
+                $namespace->getTextProperties()[1]->setCreationTime(new \DateTime('now'));
+                $namespace->getTextProperties()[1]->setModificationTime(new \DateTime('now'));
+                $namespace->getTextProperties()[1]->setSystemType($systemTypeDescription);
+                $namespace->getTextProperties()[1]->setClass($ongoingNamespace);
+            }
+            else {
+                $ongoingDescription = $description;
+                $ongoingNamespace->addTextProperty($ongoingDescription);
+            }
+
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($namespace);
+            $em->persist($ongoingNamespace);
+            $em->flush();
+
+
+            return $this->redirectToRoute('namespace_edit', [
+                'id' =>$ongoingNamespace->getId()
+            ]);
+
+        }
+
+        $em = $this->getDoctrine()->getManager();
+
+
+        return $this->render('namespace/new.html.twig', [
+            'namespace' => $namespace,
+            'namespaceForm' => $form->createView()
         ]);
     }
 

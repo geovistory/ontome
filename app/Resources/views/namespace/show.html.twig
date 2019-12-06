@@ -110,11 +110,11 @@
             </div>
             <div id="identification" class="tab-pane fade">
                 <h3>Identification</h3>
-                <p>OntoME URI: {{ namespace.namespaceURI }}</p>
+                <p>OntoME URI: https://dataforhistory.org/{% if namespace.originalNamespaceURI is not null %}external-ontology/{% endif %}{{ namespace.namespaceURI }}</p>
                 <p>Original URI: {{ namespace.originalNamespaceUri|default('<i>No original URI yet.</i>')|raw }}</p>
                 {% if namespace.projectForTopLevelNamespace is not null %}
                 <p>
-                    Project: <a href="{{ path('project_show', {
+                    Project of belonging: <a href="{{ path('project_show', {
                                 'id': namespace.projectForTopLevelNamespace.id
                             }) }}"
                                 target="_blank">{{ namespace.projectForTopLevelNamespace }}
@@ -122,12 +122,14 @@
                 </p>
                 {% endif %}
                 {% if namespace.isTopLevelNamespace == false %}
-                    {% if  namespace.startDate is not null %}
-                        <p>Start date: {{ namespace.startDate|date('Y-m-d') }}</p>
+                    {% if namespace.isOngoing %}
+                        <p>This namespace is ongoing and can be modified at any time. It is not advisable to use its classes and properties.</p>
                     {% endif %}
-                    {% if  namespace.endDate is not null %}
-                        <p>End date: {{ namespace.endDate|date('Y-m-d') }}</p>
+                    {% if namespace.startDate is not null %}
+                        <p>Namespace published and available since: {{ namespace.startDate|date('Y-m-d') }}</p>
                     {% endif %}
+                {% else %}
+                    <p>This namespace is a root namespace. Find all its versions in the <a href="#namespace-hierarchy" onclick="window.location = '{{ path('namespace_show', {'id': namespace.id}) }}#namespace-hierarchy';window.location.reload()">Hierarchy tab</a>.</p>
                 {% endif %}
                 <h3>Labels</h3>
                 <table class="table table-striped" id="labels-table">
