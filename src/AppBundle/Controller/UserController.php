@@ -979,22 +979,25 @@ class UserController extends Controller
 
             if ($currentProject->getId() != 21) {
                 // remettre à 25 les profiles/namespaces rattachés au projet par défaut
+
                 $defaultNamespace = $em->getRepository('AppBundle:OntoNamespace')
                     ->findDefaultNamespaceForProject($user->getCurrentActiveProject());
 
-                $eupa = $em->getRepository('AppBundle:EntityUserProjectAssociation')
-                    ->findOneBy(array(
-                            'namespace' => $defaultNamespace->getId(),
-                            'userProjectAssociation' => $userCurrentActiveProjectAssociation->getId()
-                        )
-                    );
+                if(!is_null($defaultNamespace)) {
+                    $eupa = $em->getRepository('AppBundle:EntityUserProjectAssociation')
+                        ->findOneBy(array(
+                                'namespace' => $defaultNamespace->getId(),
+                                'userProjectAssociation' => $userCurrentActiveProjectAssociation->getId()
+                            )
+                        );
 
-                $systemTypeSelected = $em->getRepository('AppBundle:SystemType')->find(25);
-                $eupa->setSystemType($systemTypeSelected);
-                $eupa->setModificationTime(new \DateTime('now'));
-                $eupa->setModifier($this->getUser());
-                $em->persist($eupa);
-                $em->flush();
+                    $systemTypeSelected = $em->getRepository('AppBundle:SystemType')->find(25);
+                    $eupa->setSystemType($systemTypeSelected);
+                    $eupa->setModificationTime(new \DateTime('now'));
+                    $eupa->setModifier($this->getUser());
+                    $em->persist($eupa);
+                    $em->flush();
+                }
             } else {
                 // Cas projet public
                 // On vérifie s'il existe déjà un userProjectAssociation lié avec le projet public
