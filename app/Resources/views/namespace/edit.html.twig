@@ -147,7 +147,20 @@
                     {% if is_granted('full_edit', namespace) %}
                         {{ form_start(namespaceForm) }}
                             {{ form_errors(namespaceForm) }}
-                            {{ form_row(namespaceForm.namespaceURI) }}
+                            <div class="
+                                        form-group cool-class
+                                        {% if form_errors(namespaceForm.namespaceURI)  %}
+                                        has-feedback has-error
+                                        {% endif %}
+                                        "
+                            >
+                                {{ form_label(namespaceForm.namespaceURI) }}
+                                <div class="input-group">
+                                    <span class="input-group-addon">https://dataforhistory.org/{% if namespace.originalNamespaceURI is not null %}external-ontology/{% endif %}</span>
+                                    {{ form_widget(namespaceForm.namespaceURI, { 'attr': {'placeholder': 'my-namespace-1-5'} }) }}
+                                </div>
+                                {{ form_errors(namespaceForm.namespaceURI) }}
+                            </div>
                             {{ form_row(namespaceForm.originalNamespaceURI) }}
                             <button type="submit" class="btn btn-primary" formnovalidate>Save <span class="far fa-save"></span></button>
                             <a href="{{ path('namespace_show', {
@@ -166,7 +179,7 @@
                 </div>
                 {% if namespace.projectForTopLevelNamespace is not null %}
                 <p>
-                    Project: <a href="{{ path('project_show', {
+                    Project of belonging: <a href="{{ path('project_show', {
                                 'id': namespace.projectForTopLevelNamespace.id
                             }) }}"
                                 target="_blank">{{ namespace.projectForTopLevelNamespace }}
@@ -174,12 +187,14 @@
                 </p>
                 {% endif %}
                 {% if namespace.isTopLevelNamespace == false %}
-                    {% if  namespace.startDate is not null %}
-                        <p>Start date: {{ namespace.startDate|date('Y-m-d') }}</p>
+                    {% if namespace.isOngoing %}
+                        <p>This namespace is ongoing and can be modified at any time. It is not advisable to use its classes and properties.</p>
                     {% endif %}
-                    {% if  namespace.endDate is not null %}
-                        <p>End date: {{ namespace.endDate|date('Y-m-d') }}</p>
+                    {% if namespace.startDate is not null %}
+                        <p>Namespace published and available since: {{ namespace.startDate|date('Y-m-d') }}</p>
                     {% endif %}
+                {% else %}
+                    <p>This namespace is a root namespace. Find all its versions in the <a href="#namespace-hierarchy" onclick="window.location = '{{ path('namespace_edit', {'id': namespace.id}) }}#namespace-hierarchy';window.location.reload()">Hierarchy tab</a>.</p>
                 {% endif %}
                 <div class="pull-right add-div">
                     <a href="{{ path('label_new', {'object': 'namespace', 'objectId': namespace.id })}}"

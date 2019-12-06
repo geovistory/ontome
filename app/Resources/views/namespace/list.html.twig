@@ -10,8 +10,7 @@
     <table class="table table-striped" id="project-table">
         <thead>
         <tr>
-            <th>Namespaces identifier</th>
-            <th>Namespaces URI</th>
+            <th>Namespace</th>
             <th>Last updated</th>
         </tr>
         </thead>
@@ -22,10 +21,9 @@
                     <a href="{{ path('namespace_show', {
                         'id': namespace.id
                     }) }}">
-                        {{ namespace.labels }}
+                        {{ namespace }}
                     </a>
                 </td>
-                <td>{{ namespace.namespaceUri }}</td>
                 <td>{{ namespace.modificationTime|date('Y-m-d') }}</td>
             </tr>
         {% endfor %}

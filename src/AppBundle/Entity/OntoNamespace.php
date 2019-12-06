@@ -30,7 +30,10 @@ class OntoNamespace
 
     /**
      * @Assert\NotBlank()
-     * @Assert\Url()
+     * @Assert\Regex(
+     *     pattern="/^[a-z0-9\-]+$/",
+     *     message="The characters string for this namspace's OntoME URI must contain only lower case non accent letters and dash"
+     * )
      * @ORM\Column(type="text", nullable=false, unique=true)
      */
     private $namespaceURI;
@@ -90,14 +93,14 @@ class OntoNamespace
     private $standardLabel;
 
     /**
-     * @ORM\Column(type="date")
+     * @ORM\Column(type="datetime")
      */
-    private $startDate;
+    private $publishedAt;
 
     /**
-     * @ORM\Column(type="date")
+     * @ORM\Column(type="datetime")
      */
-    private $endDate;
+    private $deprecatedAt;
 
     /**
      * @ORM\OneToMany(targetEntity="AppBundle\Entity\Comment", mappedBy="namespace")
@@ -144,7 +147,7 @@ class OntoNamespace
 
     /**
      * @Assert\NotBlank()
-     * @ORM\OneToMany(targetEntity="AppBundle\Entity\TextProperty", mappedBy="namespace")
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\TextProperty", mappedBy="namespace", cascade={"persist"})
      * @ORM\OrderBy({"languageIsoCode" = "ASC"})
      */
     private $textProperties;
@@ -360,17 +363,17 @@ class OntoNamespace
     /**
      * @return mixed
      */
-    public function getStartDate()
+    public function getPublishedAt()
     {
-        return $this->startDate;
+        return $this->publishedAt;
     }
 
     /**
      * @return mixed
      */
-    public function getEndDate()
+    public function getDeprecatedAt()
     {
-        return $this->endDate;
+        return $this->deprecatedAt;
     }
 
     /**
@@ -586,19 +589,19 @@ class OntoNamespace
     }
 
     /**
-     * @param mixed $startDate
+     * @param mixed $publishedAt
      */
-    public function setStartDate($startDate)
+    public function setPublishedAt($publishedAt)
     {
-        $this->startDate = $startDate;
+        $this->publishedAt = $publishedAt;
     }
 
     /**
-     * @param mixed $endDate
+     * @param mixed $deprecatedAt
      */
-    public function setEndDate($endDate)
+    public function setDeprecatedAt($deprecatedAt)
     {
-        $this->endDate = $endDate;
+        $this->deprecatedAt = $deprecatedAt;
     }
 
     /**
@@ -649,6 +652,23 @@ class OntoNamespace
         $this->referencedNamespaceAssociations = $referencedNamespaceAssociations;
     }
 
+    /**
+     * @param ArrayCollection $labels
+     */
+    public function setLabels($labels)
+    {
+        $this->labels = $labels;
+    }
+
+    /**
+     * @param ArrayCollection $textProperties
+     */
+    public function setTextProperties($textProperties)
+    {
+        $this->textProperties = $textProperties;
+    }
+
+
     public function addClassAssociation(ClassAssociation $classAssociation)
     {
         if ($this->classAssociations->contains($classAssociation)) {
@@ -679,10 +699,20 @@ class OntoNamespace
         $label->setNamespace($this);
     }
 
+    public function addTextProperty(TextProperty $textProperty)
+    {
+        if ($this->textProperties->contains($textProperty)) {
+            return;
+        }
+        $this->textProperties[] = $textProperty;
+        // needed to update the owning side of the relationship!
+        $textProperty->setNamespace($this);
+    }
+
     public function __toString()
     {
         $s = $this->getStandardLabel();
-        if(empty($s)) $s = $this->namespaceURI;
+        if(empty($s)) $s = 'https://dataforhistory.org/'.$this->namespaceURI;
         return (string) $s;
     }
 
