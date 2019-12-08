@@ -223,4 +223,25 @@ class NamespaceRepository extends EntityRepository
 
     }
 
+    /**
+     * @param $lang string the language iso code
+     * @param $namespace int the ID of the namespace
+     * @return array
+     */
+    public function findClassesAndPropertiesByNamespaceIdApi($lang, $namespace)
+    {
+        $conn = $this->getEntityManager()
+            ->getConnection();
+
+        $sql = "SELECT result FROM api.get_classes_and_properties_for_namespace(:lang, :namespace) as result;";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->execute(array(
+            'lang' => $lang,
+            'namespace' => $namespace
+        ));
+
+        return $stmt->fetchAll();
+    }
+
 }
