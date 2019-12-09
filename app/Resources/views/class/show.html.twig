@@ -64,6 +64,14 @@
                         <div class="col-lg-10">
                             <ul class="list-unstyled">
                             {% for association in class.childClassAssociations %}
+                                {# Savoir si cet entité se trouve bien dans l'un des espaces de nom actifs (filtrage) #}
+                                {% set isInActiveNamespaces = false %}
+                                {% for activeNamespace in activeNamespaces %}
+                                    {% if activeNamespace in association.namespaces %}
+                                        {% set isInActiveNamespaces = true %}
+                                    {% endif %}
+                                {% endfor %}
+                                {% if isInActiveNamespaces %}
                                 <li>
                                     <a href="{{ path('class_show', {'id': association.parentClass.id }) }}">
                                         {% if association.parentClass.identifierInNamespace != association.parentClass.standardLabel %}
@@ -73,6 +81,7 @@
                                         {% endif %}
                                     </a>
                                 </li>
+                                {% endif %}
                             {% endfor %}
                             </ul>
                         </div>
@@ -86,6 +95,14 @@
                         <div class="col-lg-10">
                             <ul class="list-unstyled">
                             {% for association in class.parentClassAssociations %}
+                                {# Savoir si cet entité se trouve bien dans l'un des espaces de nom actifs (filtrage) #}
+                                {% set isInActiveNamespaces = false %}
+                                {% for activeNamespace in activeNamespaces %}
+                                    {% if activeNamespace in association.namespaces %}
+                                        {% set isInActiveNamespaces = true %}
+                                    {% endif %}
+                                {% endfor %}
+                                {% if isInActiveNamespaces %}
                                 <li>
                                     <a href="{{ path('class_show', {'id': association.childClass.id}) }}">
                                         {% if association.childClass.identifierInNamespace != association.childClass.standardLabel %}
@@ -95,6 +112,7 @@
                                         {% endif %}
                                     </a>
                                 </li>
+                                {% endif %}
                             {% endfor %}
                             </ul>
                         </div>
@@ -108,6 +126,14 @@
                         <div class="col-lg-10">
                             <ul class="list-unstyled">
                             {% for relation in class.entityAssociations if relation.systemType.id == 4 or relation.systemType.id == 19 %}
+                                {# Savoir si cet entité se trouve bien dans l'un des espaces de nom actifs (filtrage) #}
+                                {% set isInActiveNamespaces = false %}
+                                {% for activeNamespace in activeNamespaces %}
+                                    {% if activeNamespace in relation.namespaces and activeNamespace in relation.namespaces %}
+                                        {% set isInActiveNamespaces = true %}
+                                    {% endif %}
+                                {% endfor %}
+                                {% if isInActiveNamespaces %}
                                 <li>{{ relation.systemType.standardLabel }}
                                     {% if relation.sourceClass.id == class.id %}
                                     <a href="{{ path("class_show", {'id': relation.targetClass.id }) }}">
@@ -119,6 +145,7 @@
                                     </a>
                                     {% endif %}
                                 </li>
+                                {% endif %}
                             {% endfor %}
                             </ul>
                         </div>
@@ -131,13 +158,22 @@
                         <div class="col-lg-10">
                             {% set scopeNote, break = '<i>No scope note yet.</i>', false %}
                             {% for textProperty in class.textProperties if textProperty.systemType.id == 1 %}
-                                {% if not break %}
-                                    {% if textProperty.languageIsoCode == 'en' %}
-                                        {% set break = true %}
-                                        {% set scopeNote = textProperty.textProperty %}
-                                    {% else %}
-                                        {% if scopeNote == '<i>No scope note yet.</i>' %}
+                                {# Savoir si cet entité se trouve bien dans l'un des espaces de nom actifs (filtrage) #}
+                                {% set isInActiveNamespaces = false %}
+                                {% for activeNamespace in activeNamespaces %}
+                                    {% if activeNamespace in textProperty.namespaces %}
+                                        {% set isInActiveNamespaces = true %}
+                                    {% endif %}
+                                {% endfor %}
+                                {% if isInActiveNamespaces %}
+                                    {% if not break %}
+                                        {% if textProperty.languageIsoCode == 'en' %}
+                                            {% set break = true %}
                                             {% set scopeNote = textProperty.textProperty %}
+                                        {% else %}
+                                            {% if scopeNote == '<i>No scope note yet.</i>' %}
+                                                {% set scopeNote = textProperty.textProperty %}
+                                            {% endif %}
                                         {% endif %}
                                     {% endif %}
                                 {% endif %}
@@ -152,8 +188,17 @@
                         <div class="col-lg-10">
                             {% set isExamplesEmpty = true %}
                             {% for textProperty in class.textProperties if textProperty.systemType.id == 7 %}
-                                {% set isExamplesEmpty = false %}
-                                {{ textProperty.textProperty|raw }}
+                                {# Savoir si cet entité se trouve bien dans l'un des espaces de nom actifs (filtrage) #}
+                                {% set isInActiveNamespaces = false %}
+                                {% for activeNamespace in activeNamespaces %}
+                                    {% if activeNamespace in textProperty.namespaces %}
+                                        {% set isInActiveNamespaces = true %}
+                                    {% endif %}
+                                {% endfor %}
+                                {% if isInActiveNamespaces %}
+                                    {% set isExamplesEmpty = false %}
+                                    {{ textProperty.textProperty|raw }}
+                                {% endif %}
                             {% endfor %}
                             {% if isExamplesEmpty %}
                                 <p><i>No example yet.</i></p>
@@ -167,7 +212,16 @@
                         <div class="col-lg-10">
                             <ul class="list-unstyled">
                             {% for association in class.childClassAssociations %}
-                                <li>{{ class.identifierInNamespace }}(x) ⊃ {{ association.parentClass.identifierInNamespace }}(x)</li>
+                                {# Savoir si cet entité se trouve bien dans l'un des espaces de nom actifs (filtrage) #}
+                                {% set isInActiveNamespaces = false %}
+                                {% for activeNamespace in activeNamespaces %}
+                                    {% if activeNamespace in association.namespaces %}
+                                        {% set isInActiveNamespaces = true %}
+                                    {% endif %}
+                                {% endfor %}
+                                {% if isInActiveNamespaces %}
+                                    <li>{{ class.identifierInNamespace }}(x) ⊃ {{ association.parentClass.identifierInNamespace }}(x)</li>
+                                {% endif %}
                             {% endfor %}
                             </ul>
                         </div>
@@ -222,6 +276,7 @@
                     </thead>
                     <tbody>
                     {% for textProperty in class.textProperties if textProperty.systemType.id == 1 %}
+                        {# Savoir si le scope note se trouve bien dans l'un des espaces de nom actifs (filtrage) #}
                         {% set isInActiveNamespaces = false %}
                         {% for activeNamespace in activeNamespaces %}
                             {% if activeNamespace in textProperty.namespaces %}

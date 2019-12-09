@@ -79,17 +79,26 @@
                             <div class="col-lg-10">
                                 <ul class="list-unstyled">
                                     {% for association in property.childPropertyAssociations %}
-                                        <li>
-                                            <a href="{{ path('class_show', {'id': association.parentProperty.domain.id}) }}">
-                                                {{ association.parentProperty.domain.identifierInNamespace }} {{ association.parentProperty.domain.standardLabel }}
-                                            </a> →
-                                            <a href="{{ path('property_show', {'id': association.parentProperty.id}) }}">
-                                                {{ association.parentProperty.identifierInNamespace }} {{ association.parentProperty.standardLabel }}
-                                            </a> →
-                                            <a href="{{ path('class_show', {'id': association.parentProperty.range.id}) }}">
-                                                {{ association.parentProperty.range.identifierInNamespace }} {{ association.parentProperty.range.standardLabel }}
-                                            </a>
-                                        </li>
+                                        {# Savoir si cet entité se trouve bien dans l'un des espaces de nom actifs (filtrage) #}
+                                        {% set isInActiveNamespaces = false %}
+                                        {% for activeNamespace in activeNamespaces %}
+                                            {% if activeNamespace in association.namespaces %}
+                                                {% set isInActiveNamespaces = true %}
+                                            {% endif %}
+                                        {% endfor %}
+                                        {% if isInActiveNamespaces %}
+                                            <li>
+                                                <a href="{{ path('class_show', {'id': association.parentProperty.domain.id}) }}">
+                                                    {{ association.parentProperty.domain.identifierInNamespace }} {{ association.parentProperty.domain.standardLabel }}
+                                                </a> →
+                                                <a href="{{ path('property_show', {'id': association.parentProperty.id}) }}">
+                                                    {{ association.parentProperty.identifierInNamespace }} {{ association.parentProperty.standardLabel }}
+                                                </a> →
+                                                <a href="{{ path('class_show', {'id': association.parentProperty.range.id}) }}">
+                                                    {{ association.parentProperty.range.identifierInNamespace }} {{ association.parentProperty.range.standardLabel }}
+                                                </a>
+                                            </li>
+                                        {% endif %}
                                     {% endfor %}
                                 </ul>
                             </div>
@@ -103,17 +112,26 @@
                             <div class="col-lg-10">
                                 <ul class="list-unstyled">
                                     {% for association in property.parentPropertyAssociations %}
-                                        <li>
-                                            <a href="{{ path('class_show', {'id': association.childProperty.domain.id}) }}">
-                                                {{ association.childProperty.domain.identifierInNamespace }} {{ association.childProperty.domain.standardLabel }}
-                                            </a> →
-                                            <a href="{{ path('property_show', {'id': association.childProperty.id}) }}">
-                                                {{ association.childProperty.identifierInNamespace }} {{ association.childProperty.standardLabel }}
-                                            </a> →
-                                            <a href="{{ path('class_show', {'id': association.childProperty.range.id}) }}">
-                                                {{ association.childProperty.range.identifierInNamespace }} {{ association.childProperty.range.standardLabel }}
-                                            </a>
-                                        </li>
+                                        {# Savoir si cet entité se trouve bien dans l'un des espaces de nom actifs (filtrage) #}
+                                        {% set isInActiveNamespaces = false %}
+                                        {% for activeNamespace in activeNamespaces %}
+                                            {% if activeNamespace in association.namespaces %}
+                                                {% set isInActiveNamespaces = true %}
+                                            {% endif %}
+                                        {% endfor %}
+                                        {% if isInActiveNamespaces %}
+                                            <li>
+                                                <a href="{{ path('class_show', {'id': association.childProperty.domain.id}) }}">
+                                                    {{ association.childProperty.domain.identifierInNamespace }} {{ association.childProperty.domain.standardLabel }}
+                                                </a> →
+                                                <a href="{{ path('property_show', {'id': association.childProperty.id}) }}">
+                                                    {{ association.childProperty.identifierInNamespace }} {{ association.childProperty.standardLabel }}
+                                                </a> →
+                                                <a href="{{ path('class_show', {'id': association.childProperty.range.id}) }}">
+                                                    {{ association.childProperty.range.identifierInNamespace }} {{ association.childProperty.range.standardLabel }}
+                                                </a>
+                                            </li>
+                                        {% endif %}
                                     {% endfor %}
                                 </ul>
                             </div>
@@ -139,6 +157,14 @@
                         <div class="col-lg-10">
                             <ul class="list-unstyled">
                                 {% for relation in property.entityAssociations if relation.systemType.id == 18 or relation.systemType.id == 20 %}
+                                    {# Savoir si cet entité se trouve bien dans l'un des espaces de nom actifs (filtrage) #}
+                                    {% set isInActiveNamespaces = false %}
+                                    {% for activeNamespace in activeNamespaces %}
+                                        {% if activeNamespace in relation.namespaces %}
+                                            {% set isInActiveNamespaces = true %}
+                                        {% endif %}
+                                    {% endfor %}
+                                    {% if isInActiveNamespaces %}
                                     <li>{{ relation.systemType.standardLabel }}
                                         {% if relation.sourceProperty.id == property.id %}
                                             <a href="{{ path("property_show", {'id': relation.targetProperty.id }) }}">
@@ -150,6 +176,7 @@
                                             </a>
                                         {% endif %}
                                     </li>
+                                    {% endif %}
                                 {% endfor %}
                             </ul>
                         </div>
@@ -162,13 +189,22 @@
                         <div class="col-lg-10">
                             {% set scopeNote, break = '<i>No scope note yet.</i>', false %}
                             {% for textProperty in property.textProperties if textProperty.systemType.id == 1 %}
-                                {% if not break %}
-                                    {% if textProperty.languageIsoCode == 'en' %}
-                                        {% set break = true %}
-                                        {% set scopeNote = textProperty.textProperty %}
-                                    {% else %}
-                                        {% if scopeNote == '<i>No scope note yet.</i>' %}
+                                {# Savoir si cet entité se trouve bien dans l'un des espaces de nom actifs (filtrage) #}
+                                {% set isInActiveNamespaces = false %}
+                                {% for activeNamespace in activeNamespaces %}
+                                    {% if activeNamespace in textProperty.namespaces %}
+                                        {% set isInActiveNamespaces = true %}
+                                    {% endif %}
+                                {% endfor %}
+                                {% if isInActiveNamespaces %}
+                                    {% if not break %}
+                                        {% if textProperty.languageIsoCode == 'en' %}
+                                            {% set break = true %}
                                             {% set scopeNote = textProperty.textProperty %}
+                                        {% else %}
+                                            {% if scopeNote == '<i>No scope note yet.</i>' %}
+                                                {% set scopeNote = textProperty.textProperty %}
+                                            {% endif %}
                                         {% endif %}
                                     {% endif %}
                                 {% endif %}
@@ -182,9 +218,16 @@
                         </div>
                         <div class="col-lg-10">
                             {% set empty = true %}
-                            {% for textProperty in property.textProperties if textProperty.systemType.id == 7 %}
-                                {% set empty = false %}
-                                {{ textProperty.textProperty|raw }}
+                            {% for textProperty in property.textProperties if textProperty.systemType.id == 7 %}{% set isInActiveNamespaces = false %}
+                                {% for activeNamespace in activeNamespaces %}
+                                    {% if activeNamespace in textProperty.namespaces %}
+                                        {% set isInActiveNamespaces = true %}
+                                    {% endif %}
+                                {% endfor %}
+                                {% if isInActiveNamespaces %}
+                                    {% set empty = false %}
+                                    {{ textProperty.textProperty|raw }}
+                                {% endif %}
                             {% endfor %}
                             {% if empty %}
                                 <p><i>No example yet.</i></p>
@@ -200,7 +243,16 @@
                                 <li>{{ property.identifierInNamespace }}(x,y) ⊃ {{ property.domain.identifierInNamespace }}(x)</li>
                                 <li>{{ property.identifierInNamespace }}(x,y) ⊃ {{ property.range.identifierInNamespace }}(y)</li>
                                 {% for association in property.childPropertyAssociations %}
-                                    <li>{{ property.identifierInNamespace }}(x,y) ⊃ {{ association.parentProperty.identifierInNamespace }}(x,y)</li>
+                                    {# Savoir si cet entité se trouve bien dans l'un des espaces de nom actifs (filtrage) #}
+                                    {% set isInActiveNamespaces = false %}
+                                    {% for activeNamespace in activeNamespaces %}
+                                        {% if activeNamespace in textProperty.namespaces %}
+                                            {% set isInActiveNamespaces = true %}
+                                        {% endif %}
+                                    {% endfor %}
+                                    {% if isInActiveNamespaces %}
+                                        <li>{{ property.identifierInNamespace }}(x,y) ⊃ {{ association.parentProperty.identifierInNamespace }}(x,y)</li>
+                                    {% endif %}
                                 {% endfor %}
                             </ul>
                         </div>

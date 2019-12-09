@@ -143,8 +143,8 @@ class ClassController extends Controller
     {
         $em = $this->getDoctrine()->getManager();
 
-        if (!is_null($this->getUser()) && $this->getUser()->getCurrentActiveProject()->getId() != 21) {
-            // L'utilisateur est connecté et le projet actif n'est pas le projet public
+        if (!is_null($this->getUser())) {
+            // L'utilisateur est connecté
             $user = $this->getUser();
 
             $ancestors = $em->getRepository('AppBundle:OntoClass')
@@ -175,7 +175,7 @@ class ClassController extends Controller
                 ->findOneBy(array('user' => $user, 'project' => $user->getCurrentActiveProject()));
 
             $activeNamespaces = $em->getRepository('AppBundle:OntoNamespace')
-                ->findAllActiveNamespacesForUserProject($userProjectAssociation);
+                ->findAllActiveNamespacesForUser($user);
         }
         else{ // L'utilisateur n'est pas connecté
             $ancestors = $em->getRepository('AppBundle:OntoClass')
@@ -202,7 +202,8 @@ class ClassController extends Controller
             $ingoingInheritedProperties = $em->getRepository('AppBundle:Property')
                 ->findIngoingInheritedPropertiesById($class);
 
-            $activeNamespaces = null;
+            $activeNamespaces = $em->getRepository('AppBundle:OntoNamespace')
+                ->findActiveNamespacesInPublicProject();
         }
 
         $this->get('logger')
