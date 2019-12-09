@@ -82,7 +82,7 @@
                                         {# Savoir si cet entité se trouve bien dans l'un des espaces de nom actifs (filtrage) #}
                                         {% set isInActiveNamespaces = false %}
                                         {% for activeNamespace in activeNamespaces %}
-                                            {% if activeNamespace in association.parentProperty.namespaces %}
+                                            {% if activeNamespace in association.namespaces %}
                                                 {% set isInActiveNamespaces = true %}
                                             {% endif %}
                                         {% endfor %}
@@ -115,7 +115,7 @@
                                         {# Savoir si cet entité se trouve bien dans l'un des espaces de nom actifs (filtrage) #}
                                         {% set isInActiveNamespaces = false %}
                                         {% for activeNamespace in activeNamespaces %}
-                                            {% if activeNamespace in association.childProperty.namespaces %}
+                                            {% if activeNamespace in association.namespaces %}
                                                 {% set isInActiveNamespaces = true %}
                                             {% endif %}
                                         {% endfor %}
@@ -160,7 +160,7 @@
                                     {# Savoir si cet entité se trouve bien dans l'un des espaces de nom actifs (filtrage) #}
                                     {% set isInActiveNamespaces = false %}
                                     {% for activeNamespace in activeNamespaces %}
-                                        {% if activeNamespace in relation.sourceProperty.namespaces and activeNamespace in relation.targetProperty.namespaces %}
+                                        {% if activeNamespace in relation.namespaces %}
                                             {% set isInActiveNamespaces = true %}
                                         {% endif %}
                                     {% endfor %}

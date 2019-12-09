@@ -67,7 +67,7 @@
                                 {# Savoir si cet entité se trouve bien dans l'un des espaces de nom actifs (filtrage) #}
                                 {% set isInActiveNamespaces = false %}
                                 {% for activeNamespace in activeNamespaces %}
-                                    {% if activeNamespace in association.parentClass.namespaces %}
+                                    {% if activeNamespace in association.namespaces %}
                                         {% set isInActiveNamespaces = true %}
                                     {% endif %}
                                 {% endfor %}
@@ -98,7 +98,7 @@
                                 {# Savoir si cet entité se trouve bien dans l'un des espaces de nom actifs (filtrage) #}
                                 {% set isInActiveNamespaces = false %}
                                 {% for activeNamespace in activeNamespaces %}
-                                    {% if activeNamespace in association.childClass.namespaces %}
+                                    {% if activeNamespace in association.namespaces %}
                                         {% set isInActiveNamespaces = true %}
                                     {% endif %}
                                 {% endfor %}
@@ -129,7 +129,7 @@
                                 {# Savoir si cet entité se trouve bien dans l'un des espaces de nom actifs (filtrage) #}
                                 {% set isInActiveNamespaces = false %}
                                 {% for activeNamespace in activeNamespaces %}
-                                    {% if activeNamespace in association.sourceClass.namespaces and activeNamespace in association.targetClass.namespaces %}
+                                    {% if activeNamespace in relation.namespaces and activeNamespace in relation.namespaces %}
                                         {% set isInActiveNamespaces = true %}
                                     {% endif %}
                                 {% endfor %}
@@ -215,7 +215,7 @@
                                 {# Savoir si cet entité se trouve bien dans l'un des espaces de nom actifs (filtrage) #}
                                 {% set isInActiveNamespaces = false %}
                                 {% for activeNamespace in activeNamespaces %}
-                                    {% if activeNamespace in association.parentClass.namespaces %}
+                                    {% if activeNamespace in association.namespaces %}
                                         {% set isInActiveNamespaces = true %}
                                     {% endif %}
                                 {% endfor %}
