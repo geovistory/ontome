@@ -202,7 +202,8 @@ class ClassController extends Controller
             $ingoingInheritedProperties = $em->getRepository('AppBundle:Property')
                 ->findIngoingInheritedPropertiesById($class);
 
-            $activeNamespaces = null;
+            $activeNamespaces = $em->getRepository('AppBundle:OntoNamespace')
+                ->findActiveNamespacesInPublicProject();
         }
 
         $this->get('logger')

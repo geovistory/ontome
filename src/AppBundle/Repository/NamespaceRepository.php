@@ -213,6 +213,21 @@ class NamespaceRepository extends EntityRepository
     }
 
     /**
+     * @return array
+     */
+    public function findActiveNamespacesInPublicProject(){
+        $publicProjectNamespaces = $this->createQueryBuilder('nsp')
+            ->join('nsp.projectAssociations', 'npa')
+            ->join('npa.project', 'p')
+            ->andWhere('p.id = 21')
+            ->andWhere('npa.systemType = 17')
+            ->getQuery()
+            ->execute();
+
+        return $publicProjectNamespaces;
+    }
+
+    /**
      * @return QueryBuilder to create the query for the list of namespaces available for association with public project
      */
     public function findAvailableNamespacesForPublicProjectAssociation()
