@@ -5,7 +5,20 @@
 {% block body %}
 
     <div class="container">
-        <h2 class="class-name">{{ namespace }}</h2>
+        <h2 class="class-name">
+            {{ namespace }}
+            {% if not namespace.isTopLevelNamespace %}
+                <span class="pull-right">
+                    <a  href="{{ path('api_classes_and_properties_by_namespace_xml', {
+                        namespace: namespace.id
+                    }) }}"
+                        class="btn btn-primary"
+                        download="namespace-{{ namespace.standardLabel }}.rdf">
+                        <i class="fas fa-code"></i> RDF
+                    </a>
+                </span>
+            {% endif %}
+        </h2>
         <ul class="nav nav-tabs">
             <li class="active"><a data-toggle="tab" href="#summary">Summary</a></li>
             <li><a data-toggle="tab" href="#definition">Definition</a></li>
@@ -19,7 +32,9 @@
 
         <div class="tab-content">
             <div id="summary" class="tab-pane fade in active">
-                <h3>{{ namespace }}</h3>
+                <h3>
+                    {{ namespace }}
+                </h3>
                 <div class="container">
                     <div class="row">
                         <div class="col-lg-2">
@@ -156,7 +171,7 @@
                             >
                                 {{ form_label(namespaceForm.namespaceURI) }}
                                 <div class="input-group">
-                                    <span class="input-group-addon">https://dataforhistory.org/{% if namespace.originalNamespaceURI is not null %}external-ontology/{% endif %}</span>
+                                    <span class="input-group-addon">https://dataforhistory.org/{% if namespace.originalNamespaceURI is not null %}external-{% endif %}ontology/</span>
                                     {{ form_widget(namespaceForm.namespaceURI, { 'attr': {'placeholder': 'my-namespace-1-5'} }) }}
                                 </div>
                                 {{ form_errors(namespaceForm.namespaceURI) }}
