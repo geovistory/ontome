@@ -173,7 +173,7 @@ class PropertyController extends Controller
     {
         $em = $this->getDoctrine()->getManager();
 
-        if (!is_null($this->getUser()) && $this->getUser()->getCurrentActiveProject()->getId() != 21) {
+        if (!is_null($this->getUser())) {
             // L'utilisateur est connecté et le projet actif n'est pas le projet public
             $user = $this->getUser();
 
@@ -188,6 +188,9 @@ class PropertyController extends Controller
 
             $relations = $em->getRepository('AppBundle:Property')
                 ->findFilteredRelationsById($property, $user);
+
+            $activeNamespaces = $em->getRepository('AppBundle:OntoNamespace')
+                ->findAllActiveNamespacesForUser($user);
         }
         else{
             $ancestors = $em->getRepository('AppBundle:Property')
@@ -201,6 +204,9 @@ class PropertyController extends Controller
 
             $relations = $em->getRepository('AppBundle:Property')
                 ->findRelationsById($property);
+
+            $activeNamespaces = $em->getRepository('AppBundle:OntoNamespace')
+                ->findActiveNamespacesInPublicProject();
         }
 
         $this->get('logger')
@@ -211,7 +217,8 @@ class PropertyController extends Controller
             'ancestors' => $ancestors,
             'descendants' => $descendants,
             'domainRange' => $domainRange,
-            'relations' => $relations
+            'relations' => $relations,
+            'activeNamespaces' => $activeNamespaces
         ));
     }
 
