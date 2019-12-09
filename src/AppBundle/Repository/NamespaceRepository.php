@@ -233,7 +233,7 @@ class NamespaceRepository extends EntityRepository
         $conn = $this->getEntityManager()
             ->getConnection();
 
-        $sql = "SELECT result FROM api.get_classes_and_properties_for_namespace(:lang, :namespace) as result;";
+        $sql = "SELECT result::text FROM api.get_classes_and_properties_for_namespace(:lang, :namespace) as result;";
 
         $stmt = $conn->prepare($sql);
         $stmt->execute(array(
