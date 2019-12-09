@@ -178,8 +178,8 @@ class NamespaceRepository extends EntityRepository
                                                                 WHERE fk_user = :id_user AND fk_project = :id_project)
                       UNION
                       SELECT ns2.* FROM che.namespace ns2
-                      WHERE ns2.pk_namespace IN (SELECT fk_referenced_namespace FROM che.associate_namespace WHERE fk_namespace IN(
-                        SELECT ns3.* FROM che.namespace ns3
+                      WHERE ns2.pk_namespace IN (SELECT fk_referenced_namespace FROM che.associates_referenced_namespace WHERE fk_namespace IN(
+                        SELECT ns3.pk_namespace FROM che.namespace ns3
                         LEFT JOIN che.associates_entity_to_user_project aseup2 ON aseup2.fk_namespace = ns3.pk_namespace 
                         WHERE aseup2.fk_system_type = 25
                         AND aseup2.fk_associate_user_to_project = (SELECT pk_associate_user_to_project 
