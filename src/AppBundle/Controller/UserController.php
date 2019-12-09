@@ -1018,7 +1018,7 @@ class UserController extends Controller
             }
 
             $profilesUserProject = new ArrayCollection($em->getRepository('AppBundle:Profile')
-                ->findAllProfilesForUserProject($userCurrentActiveProjectAssociation));
+                ->findAllProfilesForUser($user));
 
 
             foreach ($profilesUserProject as $profile) {
