@@ -444,23 +444,26 @@ class UserController extends Controller
             $defaultNamespace = $em->getRepository('AppBundle:OntoNamespace')
                 ->findDefaultNamespaceForProject($project);
 
-            // Est-ce que la vue sur defaultNamespace a déjà été initialisée ?
-            $eupa = $em->getRepository('AppBundle:EntityUserProjectAssociation')
-                ->findOneBy(array('namespace' => $defaultNamespace->getId(), 'userProjectAssociation' => $userProjectAssociation->getId()));
+            if(!is_null($defaultNamespace))
+            {
+                // Est-ce que la vue sur defaultNamespace a déjà été initialisée ?
+                $eupa = $em->getRepository('AppBundle:EntityUserProjectAssociation')
+                    ->findOneBy(array('namespace' => $defaultNamespace->getId(), 'userProjectAssociation' => $userProjectAssociation->getId()));
 
-            // Il n'existe aucune vue sur defaultNamespace. En créer 1
-            if (is_null($eupa)) {
-                $eupa = new EntityUserProjectAssociation();
-                $systemTypeSelected = $em->getRepository('AppBundle:SystemType')->find(25); //systemType 25 = Selected namespace for user preference
-                $eupa->setNamespace($defaultNamespace);
-                $eupa->setUserProjectAssociation($userProjectAssociation);
-                $eupa->setSystemType($systemTypeSelected);
-                $eupa->setCreator($this->getUser());
-                $eupa->setModifier($this->getUser());
-                $eupa->setCreationTime(new \DateTime('now'));
-                $eupa->setModificationTime(new \DateTime('now'));
-                $em->persist($eupa);
-                $em->flush();
+                // Il n'existe aucune vue sur defaultNamespace. En créer 1
+                if (is_null($eupa)) {
+                    $eupa = new EntityUserProjectAssociation();
+                    $systemTypeSelected = $em->getRepository('AppBundle:SystemType')->find(25); //systemType 25 = Selected namespace for user preference
+                    $eupa->setNamespace($defaultNamespace);
+                    $eupa->setUserProjectAssociation($userProjectAssociation);
+                    $eupa->setSystemType($systemTypeSelected);
+                    $eupa->setCreator($this->getUser());
+                    $eupa->setModifier($this->getUser());
+                    $eupa->setCreationTime(new \DateTime('now'));
+                    $eupa->setModificationTime(new \DateTime('now'));
+                    $em->persist($eupa);
+                    $em->flush();
+                }
             }
 
             // 2. Les profils (et leurs namespaces associés) associés au projet
@@ -976,22 +979,25 @@ class UserController extends Controller
 
             if ($currentProject->getId() != 21) {
                 // remettre à 25 les profiles/namespaces rattachés au projet par défaut
+
                 $defaultNamespace = $em->getRepository('AppBundle:OntoNamespace')
                     ->findDefaultNamespaceForProject($user->getCurrentActiveProject());
 
-                $eupa = $em->getRepository('AppBundle:EntityUserProjectAssociation')
-                    ->findOneBy(array(
-                            'namespace' => $defaultNamespace->getId(),
-                            'userProjectAssociation' => $userCurrentActiveProjectAssociation->getId()
-                        )
-                    );
+                if(!is_null($defaultNamespace)) {
+                    $eupa = $em->getRepository('AppBundle:EntityUserProjectAssociation')
+                        ->findOneBy(array(
+                                'namespace' => $defaultNamespace->getId(),
+                                'userProjectAssociation' => $userCurrentActiveProjectAssociation->getId()
+                            )
+                        );
 
-                $systemTypeSelected = $em->getRepository('AppBundle:SystemType')->find(25);
-                $eupa->setSystemType($systemTypeSelected);
-                $eupa->setModificationTime(new \DateTime('now'));
-                $eupa->setModifier($this->getUser());
-                $em->persist($eupa);
-                $em->flush();
+                    $systemTypeSelected = $em->getRepository('AppBundle:SystemType')->find(25);
+                    $eupa->setSystemType($systemTypeSelected);
+                    $eupa->setModificationTime(new \DateTime('now'));
+                    $eupa->setModifier($this->getUser());
+                    $em->persist($eupa);
+                    $em->flush();
+                }
             } else {
                 // Cas projet public
                 // On vérifie s'il existe déjà un userProjectAssociation lié avec le projet public
