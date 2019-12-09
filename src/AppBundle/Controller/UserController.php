@@ -15,7 +15,6 @@ use AppBundle\Entity\Profile;
 use AppBundle\Entity\Project;
 use AppBundle\Entity\User;
 use AppBundle\Entity\UserProjectAssociation;
-use AppBundle\Form\MyEnvironmentForm;
 use AppBundle\Form\UserEditForm;
 use AppBundle\Form\UserRegistrationForm;
 use AppBundle\Form\UserRequestPasswordForm;
@@ -342,19 +341,19 @@ class UserController extends Controller
 
             // Les profils utilisés par le projet
             $profilesUserProject = new ArrayCollection($em->getRepository('AppBundle:Profile')
-                ->findAllProfilesForUserProject($userActiveProjectAssociation));
+                ->findAllProfilesForUser($user));
 
             // Les profils actifs
             $activeProfiles = new ArrayCollection($em->getRepository('AppBundle:Profile')
-                ->findAllActiveProfilesForUserProject($userActiveProjectAssociation));
+                ->findAllActiveProfilesForUser($user));
 
             // Les espaces de noms actifs
             $activeNamespaces = new ArrayCollection($em->getRepository('AppBundle:OntoNamespace')
-                ->findAllActiveNamespacesForUserProject($userActiveProjectAssociation));
+                ->findAllActiveNamespacesForUser($user));
 
             // Et enfin, tous les namespaces, y compris le defaut et ceux des profils, qu'il faut donc retirer ci-dessous
             $additionalNamespaces = new ArrayCollection($em->getRepository('AppBundle:OntoNamespace')
-                ->findAdditionalNamespacesForUserProject($userActiveProjectAssociation));
+                ->findAdditionalNamespacesForUser($user));
 
             // On retire le namespace géré par le projet des additionals.
             if($additionalNamespaces->contains($defaultNamespace)) {
@@ -468,7 +467,7 @@ class UserController extends Controller
 
             // 2. Les profils (et leurs namespaces associés) associés au projet
             $profilesUserProject = new ArrayCollection($em->getRepository('AppBundle:Profile')
-                ->findAllProfilesForUserProject($userProjectAssociation));
+                ->findAllProfilesForUser($user));
 
             if(count($profilesUserProject) == 0) {
                 foreach ($project->getProfiles() as $profile) {

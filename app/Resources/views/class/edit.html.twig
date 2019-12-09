@@ -219,38 +219,47 @@
                     </thead>
                     <tbody>
                     {% for textProperty in class.textProperties if textProperty.systemType.id == 1 %}
-                    {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
-                        <tr>
-                            <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
-                            <td class="truncated-text">
-                                <span>{{ textProperty.textProperty|striptags|raw }}</span>
-                            </td>
-                            <td>{{ textProperty.languageIsoCode}}</td>
-                            <td>
-                                <!-- {% if textProperty.namespace is not null %}
-                                    {% for label in textProperty.namespace.topLevelNamespace.labels %}
-                                        {% if label.isStandardLabelForLanguage == true and label.languageIsoCode == 'en' %}
-                                            {{ label.label }}
-                                        {% endif %}
-                                    {% endfor %}
-                                {% endif %} -->
-                            </td>
-                            <td>
-                                <a href="{{ path('text_property_edit', {
-                                    'id': textProperty.id
-                                }) }}"
-                                   class="btn btn-xs btn-success">
-                                    <span class="fa fa-edit"></span>
-                                </a>
-                            </td>
-                            <td>
-                                <a class="btn" href="{{ path('text_property_edit', {
-                                    'id': textProperty.id
-                                }) }}#comments">
-                                    <span class="badge {% if textProperty.comments|length > 0  %}progress-bar-danger {% endif %}">{{ textProperty.comments|length }}</span>
-                                </a>
-                            </td>
-                        </tr>
+                        {# Savoir si le scope note se retrouve bien dans l'un des espaces de nom actifs (filtrage) #}
+                        {% set isInActiveNamespaces = false %}
+                        {% for activeNamespace in activeNamespaces %}
+                            {% if activeNamespace in textProperty.namespaces %}
+                                {% set isInActiveNamespaces = true %}
+                            {% endif %}
+                        {% endfor %}
+                        {% if isInActiveNamespaces %}
+                        {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
+                            <tr>
+                                <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
+                                <td class="truncated-text">
+                                    <span>{{ textProperty.textProperty|striptags|raw }}</span>
+                                </td>
+                                <td>{{ textProperty.languageIsoCode}}</td>
+                                <td>
+                                    <!-- {% if textProperty.namespace is not null %}
+                                        {% for label in textProperty.namespace.topLevelNamespace.labels %}
+                                            {% if label.isStandardLabelForLanguage == true and label.languageIsoCode == 'en' %}
+                                                {{ label.label }}
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% endif %} -->
+                                </td>
+                                <td>
+                                    <a href="{{ path('text_property_edit', {
+                                        'id': textProperty.id
+                                    }) }}"
+                                       class="btn btn-xs btn-success">
+                                        <span class="fa fa-edit"></span>
+                                    </a>
+                                </td>
+                                <td>
+                                    <a class="btn" href="{{ path('text_property_edit', {
+                                        'id': textProperty.id
+                                    }) }}#comments">
+                                        <span class="badge {% if textProperty.comments|length > 0  %}progress-bar-danger {% endif %}">{{ textProperty.comments|length }}</span>
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endif %}
                     {% endfor %}
                     </tbody>
                 </table>

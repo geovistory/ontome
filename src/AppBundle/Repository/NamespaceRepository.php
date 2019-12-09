@@ -13,6 +13,7 @@ use AppBundle\Entity\OntoClass;
 use AppBundle\Entity\OntoNamespace;
 use AppBundle\Entity\Profile;
 use AppBundle\Entity\Project;
+use AppBundle\Entity\User;
 use AppBundle\Entity\UserProjectAssociation;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Query\ResultSetMapping;
@@ -120,17 +121,20 @@ class NamespaceRepository extends EntityRepository
     }
 
     /**
+     * @param User $user
      * @return OntoNamespace[]
      */
-    public function findAdditionalNamespacesForUserProject(UserProjectAssociation $userProjectAssociation)
+    public function findAdditionalNamespacesForUser(User $user)
     {
         $additionalNamespaces = $this->createQueryBuilder('nsp')
             ->join('nsp.namespaceUserProjectAssociation', 'nupa')
             ->join('nupa.userProjectAssociation', 'upa')
             ->join('nupa.systemType', 'st')
-            ->andWhere('upa.id = :pk_user_project_association')
+            ->andWhere('upa.user = :user')
+            ->andWhere('upa.project = :project')
             ->andWhere('st.id = 25')
-            ->setParameter('pk_user_project_association', $userProjectAssociation->getId())
+            ->setParameter('user', $user)
+            ->setParameter('project', $user->getCurrentActiveProject())
             ->getQuery()
             ->execute();
 
@@ -138,23 +142,39 @@ class NamespaceRepository extends EntityRepository
     }
 
     /**
+     * @param User $user
      * @return OntoNamespace[]
      */
-    public function findAllActiveNamespacesForUserProject(UserProjectAssociation $userProjectAssociation)
+    public function findAllActiveNamespacesForUser(User $user)
     {
-        $rsm = new ResultSetMappingBuilder($this->getEntityManager());
-        $rsm->addRootEntityFromClassMetadata('AppBundle\Entity\OntoNamespace', 'ns');
+        // Cas Projet public
+        if($user->getCurrentActiveProject()->getId() == 21){
+            $publicProjectNamespaces = $this->createQueryBuilder('nsp')
+                ->join('nsp.projectAssociations', 'npa')
+                ->andWhere('npa.project = :project')
+                ->andWhere('npa.systemType = 17')
+                ->setParameter('project', $user->getCurrentActiveProject())
+                ->getQuery()
+                ->execute();
 
-        $sql = "
-          SELECT ns.* FROM che.namespace ns
-          LEFT JOIN che.associates_entity_to_user_project aseup ON aseup.fk_namespace = ns.pk_namespace 
-          WHERE aseup.fk_system_type = 25
-          AND aseup.fk_associate_user_to_project = :id_asup
-        ";
+            return $publicProjectNamespaces;
+        }
+        else{ // Autre cas
+            $rsm = new ResultSetMappingBuilder($this->getEntityManager());
+            $rsm->addRootEntityFromClassMetadata('AppBundle\Entity\OntoNamespace', 'ns');
 
-        $query = $this->getEntityManager()->createNativeQuery($sql, $rsm);
-        $query->setParameter('id_asup', $userProjectAssociation->getId());
-        return $query->getResult();
+            $sql = "  SELECT ns.* FROM che.namespace ns
+                      LEFT JOIN che.associates_entity_to_user_project aseup ON aseup.fk_namespace = ns.pk_namespace 
+                      WHERE aseup.fk_system_type = 25
+                      AND aseup.fk_associate_user_to_project = (SELECT pk_associate_user_to_project 
+                                                                FROM che.associate_user_to_project 
+                                                                WHERE fk_user = :id_user AND fk_project = :id_project)";
+
+            $query = $this->getEntityManager()->createNativeQuery($sql, $rsm);
+            $query->setParameter('id_user', $user->getId());
+            $query->setParameter('id_project', $user->getCurrentActiveProject()->getId());
+            return $query->getResult();
+        }
     }
 
     /**

@@ -9,14 +9,13 @@
 namespace AppBundle\Repository;
 
 use AppBundle\Entity\Profile;
-use AppBundle\Entity\UserProjectAssociation;
-use AppBundle\Entity\Project;
+use AppBundle\Entity\User;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Query\ResultSetMappingBuilder;
 
 class ProfileRepository extends EntityRepository
 {
-    public function findAllActiveProfilesForUserProject(UserProjectAssociation $userProjectAssociation)
+    public function findAllActiveProfilesForUser(User $user)
     {
         $rsm = new ResultSetMappingBuilder($this->getEntityManager());
         $rsm->addRootEntityFromClassMetadata('AppBundle\Entity\Profile', 'prf');
@@ -35,12 +34,12 @@ class ProfileRepository extends EntityRepository
         ";
 
         $query = $this->getEntityManager()->createNativeQuery($sql, $rsm);
-        $query->setParameter('id_project', $userProjectAssociation->getProject()->getId());
-        $query->setParameter('id_user', $userProjectAssociation->getUser()->getId());
+        $query->setParameter('id_project', $user->getCurrentActiveProject()->getId());
+        $query->setParameter('id_user', $user->getId());
         return $query->getResult();
     }
 
-    public function findAllProfilesForUserProject(UserProjectAssociation $userProjectAssociation)
+    public function findAllProfilesForUser(User $user)
     {
         $rsm = new ResultSetMappingBuilder($this->getEntityManager());
         $rsm->addRootEntityFromClassMetadata('AppBundle\Entity\Profile', 'prf');
@@ -58,8 +57,8 @@ class ProfileRepository extends EntityRepository
         ";
 
         $query = $this->getEntityManager()->createNativeQuery($sql, $rsm);
-        $query->setParameter('id_project', $userProjectAssociation->getProject()->getId());
-        $query->setParameter('id_user', $userProjectAssociation->getUser()->getId());
+        $query->setParameter('id_project', $user->getCurrentActiveProject()->getId());
+        $query->setParameter('id_user', $user->getId());
         return $query->getResult();
     }
 

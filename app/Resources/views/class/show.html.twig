@@ -222,6 +222,7 @@
                     </thead>
                     <tbody>
                     {% for textProperty in class.textProperties if textProperty.systemType.id == 1 %}
+                        {# Savoir si le scope note se trouve bien dans l'un des espaces de nom actifs (filtrage) #}
                         {% set isInActiveNamespaces = false %}
                         {% for activeNamespace in activeNamespaces %}
                             {% if activeNamespace in textProperty.namespaces %}
