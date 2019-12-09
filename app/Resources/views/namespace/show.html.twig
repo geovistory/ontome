@@ -7,13 +7,25 @@
     <div class="container">
         <h2 class="class-name">
             {{ namespace }}
-            {% if is_granted('edit', namespace) %}
-                <a href="{{ path('namespace_edit', {
-                    id: namespace.id
-                }) }}" class="pull-right btn btn-success btn-edit">
-                    <i class="fa fa-edit"></i>
+            <span class="pull-right">
+                {% if is_granted('edit', namespace) %}
+                    <a href="{{ path('namespace_edit', {
+                                id: namespace.id
+                            }) }}"
+                       class="btn btn-success btn-edit">
+                        <i class="fa fa-edit"></i>
+                    </a>
+                {% endif %}
+                {% if not namespace.isTopLevelNamespace %}
+                <a  href="{{ path('api_classes_and_properties_by_namespace_xml', {
+                            namespace: namespace.id
+                        }) }}"
+                    class="btn btn-primary"
+                    download="namespace-{{ namespace.standardLabel }}.rdf">
+                    <i class="fas fa-code"></i> RDF
                 </a>
-            {% endif %}
+                {% endif %}
+            </span>
         </h2>
         <ul class="nav nav-tabs">
             <li class="active"><a data-toggle="tab" href="#summary">Summary</a></li>
@@ -110,7 +122,7 @@
             </div>
             <div id="identification" class="tab-pane fade">
                 <h3>Identification</h3>
-                <p>OntoME URI: https://dataforhistory.org/{% if namespace.originalNamespaceURI is not null %}external-ontology/{% endif %}{{ namespace.namespaceURI }}</p>
+                <p>OntoME URI: https://dataforhistory.org/{% if namespace.originalNamespaceURI is not null %}external-{% endif %}ontology/{{ namespace.namespaceURI }}</p>
                 <p>Original URI: {{ namespace.originalNamespaceUri|default('<i>No original URI yet.</i>')|raw }}</p>
                 {% if namespace.projectForTopLevelNamespace is not null %}
                 <p>

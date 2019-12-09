@@ -175,7 +175,7 @@ class ApiController extends Controller
     }
 
     /**
-     * @Route("/api/namespaces-rdf-owl.xml", name="api_classes_and_properties_by_namespace_xml")
+     * @Route("/api/namespaces-rdf-owl.rdf", name="api_classes_and_properties_by_namespace_xml")
      * @Method("GET")
      * @param Request $request
      * @return Response
@@ -192,12 +192,12 @@ class ApiController extends Controller
             $xml = '<?xml version="1.0" encoding="UTF8" ?>';
             $xml .= '<error code="500" message="Error: '.$e->getMessage().'"/>';
             $response = new Response($xml);
-            $response->headers->set('Content-Type', 'xml');
+            $response->headers->set('Content-Type', 'application/rdf+xml');
             return $response;
         }
 
         $response = new Response($xml[0]['result']);
-        $response->headers->set('Content-Type', 'xml');
+        $response->headers->set('Content-Type', 'application/rdf+xml');
         return $response;
     }
 
