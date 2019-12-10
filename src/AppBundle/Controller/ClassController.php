@@ -367,9 +367,16 @@ class ClassController extends Controller
      */
     public function getTreeLegendJson()
     {
+        if (!is_null($this->getUser()) && $this->getUser()->getCurrentActiveProject()->getId() != 21) {
+            $context = 'public_namespace_classes_tree';
+        }
+        else{
+            $context = 'public_namespace_classes_tree';
+        }
+
         $em = $this->getDoctrine()->getManager();
         $legend = $em->getRepository('AppBundle:OntoClass')
-            ->findClassesTreeLegend();
+            ->findClassesTreeLegend($context);
 
 
         return new JsonResponse($legend[0]['json']);

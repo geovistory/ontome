@@ -515,16 +515,18 @@ class ClassRepository extends EntityRepository
     }
 
     /**
+     * @param $context
      * @return array
+     * @throws \Doctrine\DBAL\DBALException
      */
-    public function findClassesTreeLegend(){
+    public function findClassesTreeLegend($context){
         $conn = $this->getEntityManager()
             ->getConnection();
 
-        $sql = "SELECT array_to_json(array_agg(legend)) AS json FROM (SELECT pk_css_color, css_color, label FROM che.css_color WHERE context = 'ontologies_classes_tree' ORDER BY pk_css_color) legend;";
+        $sql = "SELECT array_to_json(array_agg(legend)) AS json FROM (SELECT pk_css_color, css_color, label FROM che.css_color WHERE context = :context ORDER BY notes) legend;";
 
         $stmt = $conn->prepare($sql);
-        $stmt->execute();
+        $stmt->execute(array('context' => $context));
 
         return $stmt->fetchAll();
     }
