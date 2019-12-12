@@ -225,7 +225,7 @@
                                 {# Savoir si cet entité se trouve bien dans l'un des espaces de nom actifs (filtrage) #}
                                 {% set isInActiveNamespaces = false %}
                                 {% for activeNamespace in activeNamespaces %}
-                                    {% if activeNamespace in association.namespaces %}
+                                    {% if activeNamespace in textProperty.namespaces %}
                                         {% set isInActiveNamespaces = true %}
                                     {% endif %}
                                 {% endfor %}
