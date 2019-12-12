@@ -259,8 +259,8 @@ class ClassController extends Controller
 
         $em = $this->getDoctrine()->getManager();
 
-        if (!is_null($this->getUser()) && $this->getUser()->getCurrentActiveProject()->getId() != 21) {
-            // L'utilisateur est connecté et le projet actif n'est pas le projet public
+        if (!is_null($this->getUser())) {
+            // L'utilisateur est connecté
             $user = $this->getUser();
 
             $ancestors = $em->getRepository('AppBundle:OntoClass')
@@ -286,6 +286,9 @@ class ClassController extends Controller
 
             $ingoingInheritedProperties = $em->getRepository('AppBundle:Property')
                 ->findFilteredIngoingInheritedPropertiesById($class, $user);
+
+            $activeNamespaces = $em->getRepository('AppBundle:OntoNamespace')
+                ->findAllActiveNamespacesForUser($user);
         }
         else{ // L'utilisateur n'est pas connecté
             $ancestors = $em->getRepository('AppBundle:OntoClass')
@@ -311,6 +314,9 @@ class ClassController extends Controller
 
             $ingoingInheritedProperties = $em->getRepository('AppBundle:Property')
                 ->findIngoingInheritedPropertiesById($class);
+
+            $activeNamespaces = $em->getRepository('AppBundle:OntoNamespace')
+                ->findActiveNamespacesInPublicProject();
         }
 
         $this->get('logger')
@@ -327,6 +333,7 @@ class ClassController extends Controller
             'outgoingInheritedProperties' => $outgoingInheritedProperties,
             'ingoingProperties' => $ingoingProperties,
             'ingoingInheritedProperties' => $ingoingInheritedProperties,
+            'activeNamespaces' => $activeNamespaces,
             'classIdentifierForm' => $formIdentifier->createView()
         ));
     }

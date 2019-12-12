@@ -205,8 +205,8 @@
                     {% if namespace.isOngoing %}
                         <p>This namespace is ongoing and can be modified at any time. It is not advisable to use its classes and properties.</p>
                     {% endif %}
-                    {% if namespace.startDate is not null %}
-                        <p>Namespace published and available since: {{ namespace.startDate|date('Y-m-d') }}</p>
+                    {% if namespace.publishedAt is not null %}
+                        <p>Namespace published and available since: {{ namespace.publishedAt|date('Y-m-d') }}</p>
                     {% endif %}
                 {% else %}
                     <p>This namespace is a root namespace. Find all its versions in the <a href="#namespace-hierarchy" onclick="window.location = '{{ path('namespace_edit', {'id': namespace.id}) }}#namespace-hierarchy';window.location.reload()">Hierarchy tab</a>.</p>
@@ -337,7 +337,11 @@
                 <table class="table table-striped" id="properties-table">
                     <thead>
                     <tr>
-                        <th>Property identifier</th>
+                        <th class="text-right">Domain</th>
+                        <th></th>
+                        <th class="text-center">Property</th>
+                        <th></th>
+                        <th>Range</th>
                         <th>Last updated</th>
                     </tr>
                     </thead>
