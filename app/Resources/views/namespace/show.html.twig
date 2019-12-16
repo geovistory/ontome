@@ -16,13 +16,13 @@
                         <i class="fa fa-edit"></i>
                     </a>
                 {% endif %}
-                {% if not namespace.isTopLevelNamespace %}
+                {% if is_granted('ROLE_USER') and not namespace.isTopLevelNamespace %}
                 <a  href="{{ path('api_classes_and_properties_by_namespace_xml', {
                             namespace: namespace.id
                         }) }}"
                     class="btn btn-primary"
                     download="namespace-{{ namespace.standardLabel }}.rdf">
-                    <i class="fas fa-code"></i> RDF
+                    <i class="fas fa-code"></i> OWL-RDF
                 </a>
                 {% endif %}
             </span>

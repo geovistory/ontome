@@ -231,6 +231,7 @@ class ProfileController  extends Controller
         $em = $this->getDoctrine()->getManager();
 
         $profile->setIsOngoing(false);
+        $profile->setIsForcedPublication(false);
         $profile->setStartDate(new \DateTime('now'));
         $profile->setWasClosedAt(new \DateTime('now'));
 
