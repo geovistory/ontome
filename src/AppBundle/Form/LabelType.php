@@ -40,7 +40,13 @@ class LabelType extends AbstractType
 
         $builder
             ->add('label', TextType::class, array(
-            ))
+            ));
+        if($options['canInverseLabel']){
+            $builder
+                ->add('inverseLabel', TextType::class, array(
+                ));
+        }
+        $builder
             ->add('languageIsoCode', ChoiceType::class, array(
                 'choices'  => array(
                     'English' => 'en',
@@ -56,11 +62,6 @@ class LabelType extends AbstractType
             ))
             ->add('creator', HiddenType::class)
             ->add('modifier', HiddenType::class);
-        if($options['canInverseLabel']){
-            $builder
-                ->add('inverseLabel', TextType::class, array(
-                ));
-        }
         $builder->get('creator')
             ->addModelTransformer($this->transformer);
         $builder->get('modifier')

@@ -288,6 +288,9 @@ class PropertyController extends Controller
 
             $relations = $em->getRepository('AppBundle:Property')
                 ->findFilteredRelationsById($property, $user);
+
+            $activeNamespaces = $em->getRepository('AppBundle:OntoNamespace')
+                ->findAllActiveNamespacesForUser($user);
         }
         else{
             $ancestors = $em->getRepository('AppBundle:Property')
@@ -301,6 +304,9 @@ class PropertyController extends Controller
 
             $relations = $em->getRepository('AppBundle:Property')
                 ->findRelationsById($property);
+
+            $activeNamespaces = $em->getRepository('AppBundle:OntoNamespace')
+                ->findActiveNamespacesInPublicProject();
         }
 
 
@@ -315,7 +321,8 @@ class PropertyController extends Controller
             'domainRange' => $domainRange,
             'relations' => $relations,
             'propertyForm' => $form->createView(),
-            'propertyIdentifierForm' => $formIdentifier->createView()
+            'propertyIdentifierForm' => $formIdentifier->createView(),
+            'activeNamespaces' => $activeNamespaces
         ));
     }
 

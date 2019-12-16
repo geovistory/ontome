@@ -51,7 +51,7 @@ class OutgoingPropertyQuickAddForm extends AbstractType
             ->add('labels', CollectionType::class, array(
                 'label' => 'Enter a label and select a language',
                 'entry_type' => LabelType::class,
-                'entry_options' => array('label' => false),
+                'entry_options' => array('label' => false, 'canInverseLabel' => true),
                 'error_bubbling' => false,
                 'allow_add' => true,
                 'by_reference' => false,
