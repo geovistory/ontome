@@ -78,7 +78,7 @@ class ClassRepository extends EntityRepository
                                                         FROM che.associate_user_to_project 
                                                         WHERE fk_user = :fk_user AND fk_project = :fk_project)
                   AND fk_namespace IS NOT NULL
-                )";
+                );";
 
         $stmt = $conn->prepare($sql);
         $stmt->execute(array(
@@ -126,21 +126,16 @@ class ClassRepository extends EntityRepository
                        tw1.DEPTH,
                        che.get_root_namespace(nsp.pk_namespace) AS \"rootNamespaceId\",
                        (SELECT label FROM che.get_namespace_labels(che.get_root_namespace(nsp.pk_namespace)) WHERE language_iso_code = 'en') AS \"rootNamespaceLabel\",
-                       nsp2.pk_namespace AS \"definedInNamespaceId\",
-                       nsp2.standard_label AS \"definedInNamespaceLabel\"
+                       nsp.pk_namespace AS \"classNamespaceId\",
+                       nsp.standard_label AS \"classNamespaceLabel\"
                 FROM tw1
                 JOIN che.associates_namespace asnsp ON (asnsp.fk_class = tw1.pk_parent)
                 JOIN che.namespace nsp ON (nsp.pk_namespace = asnsp.fk_namespace)
-                
-                JOIN che.associates_namespace asnsp2 ON (asnsp2.fk_is_subclass_of = (SELECT pk_is_subclass_of FROM che.is_subclass_of WHERE is_parent_class = tw1.pk_parent AND is_child_class = :class))
-                JOIN che.namespace nsp2 ON (nsp2.pk_namespace = asnsp2.fk_namespace)
-                
                 WHERE depth > 1 
                 GROUP BY tw1.pk_parent,
                      tw1.parent_identifier,
                      tw1.depth,
-                     nsp.pk_namespace,
-                     nsp2.pk_namespace
+                     nsp.pk_namespace
                 ORDER BY depth DESC;";
 
         $stmt = $conn->prepare($sql);
@@ -157,6 +152,24 @@ class ClassRepository extends EntityRepository
         $conn = $this->getEntityManager()
             ->getConnection();
 
+        // Trouver d'abord les espaces de noms filtrés - juste les clés pour le IN de la requête ci-dessous
+        $em = $this->getEntityManager();
+        $filteredNamespaces = $em->getRepository('AppBundle:OntoNamespace')
+            ->findAllActiveNamespacesForUser($user);
+
+        $idsFilteredNamespaces = array();
+        $qFilteredNamespaces = array();
+        foreach ($filteredNamespaces as $namespace)
+        {
+            $idsFilteredNamespaces[] = $namespace->getId();
+        }
+
+        // Construire la variable qui permet d'avoir ?,?,?... pour la requête ci-dessous
+        for($i=0;$i<count($idsFilteredNamespaces);$i++){
+            $qFilteredNamespaces[] = "?";
+        }
+        $strQFilteredNamespaces = join(',',$qFilteredNamespaces);
+
         $sql = "WITH tw1 AS
                 (
                   SELECT pk_parent,
@@ -164,40 +177,29 @@ class ClassRepository extends EntityRepository
                      DEPTH,
                      ARRAY_TO_STRING(_path,'|') ancestors,
                      pk_is_subclass_of
-                  FROM che.ascendant_class_hierarchy(:class)
+                  FROM che.ascendant_class_hierarchy(?)
                 )
                 SELECT tw1.pk_parent AS id,
                        tw1.parent_identifier AS identifier,
                        tw1.DEPTH,
                        che.get_root_namespace(nsp.pk_namespace) AS \"rootNamespaceId\",
                        (SELECT label FROM che.get_namespace_labels(che.get_root_namespace(nsp.pk_namespace)) WHERE language_iso_code = 'en') AS \"rootNamespaceLabel\",
-                       nsp2.pk_namespace AS \"definedInNamespaceId\",
-                       nsp2.standard_label AS \"definedInNamespaceLabel\"
+                       nsp.pk_namespace AS \"classNamespaceId\",
+                       nsp.standard_label AS \"classNamespaceLabel\"
                 FROM tw1
                 JOIN che.associates_namespace asnsp ON (asnsp.fk_class = tw1.pk_parent)
                 JOIN che.namespace nsp ON (nsp.pk_namespace = asnsp.fk_namespace)
                 
-                JOIN che.associates_namespace asnsp2 ON (asnsp2.fk_is_subclass_of = (SELECT pk_is_subclass_of FROM che.is_subclass_of WHERE is_parent_class = tw1.pk_parent AND is_child_class = :class))
-                JOIN che.namespace nsp2 ON (nsp2.pk_namespace = asnsp2.fk_namespace)
-                
                 WHERE depth > 1 
-                AND nsp.pk_namespace IN (
-                    SELECT fk_namespace 
-                    FROM che.associates_entity_to_user_project 
-                    WHERE fk_associate_user_to_project = (
-                        SELECT pk_associate_user_to_project 
-                        FROM che.associate_user_to_project
-                        WHERE fk_user = :user AND fk_project = :project)
-                    AND fk_system_type = 25)
+                AND nsp.pk_namespace IN (".$strQFilteredNamespaces.")
                 GROUP BY tw1.pk_parent,
                      tw1.parent_identifier,
                      tw1.depth,
-                     nsp.pk_namespace,
-                     nsp2.pk_namespace
+                     nsp.pk_namespace
                 ORDER BY depth DESC;";
 
         $stmt = $conn->prepare($sql);
-        $stmt->execute(array('class' => $class->getId(), 'user' => $user->getId(), 'project' => $user->getCurrentActiveProject()->getId()));
+        $stmt->execute(array_merge(array($class->getId()), $idsFilteredNamespaces));
 
         return $stmt->fetchAll();
     }
@@ -215,20 +217,16 @@ class ClassRepository extends EntityRepository
                         depth,
                         che.get_root_namespace(nsp.pk_namespace) AS \"rootNamespaceId\",
                         (SELECT label FROM che.get_namespace_labels(che.get_root_namespace(nsp.pk_namespace)) WHERE language_iso_code = 'en') AS \"rootNamespaceLabel\",
-                        nsp2.pk_namespace AS \"definedInNamespaceId\",
-                        nsp2.standard_label AS \"definedInNamespaceLabel\"
+                        nsp.pk_namespace AS \"classNamespaceId\",
+                        nsp.standard_label AS \"classNamespaceLabel\"
                 FROM 	che.descendant_class_hierarchy(:class) cls, 
                         che.associates_namespace asnsp,
-                        che.namespace nsp,
-                        che.associates_namespace asnsp2,
-                        che.namespace nsp2
+                        che.namespace nsp
                 
                 WHERE 	asnsp.fk_class = cls.pk_child
                 AND   	nsp.pk_namespace = asnsp.fk_namespace
-                AND     asnsp2.fk_is_subclass_of = (SELECT pk_is_subclass_of FROM che.is_subclass_of WHERE is_child_class = pk_child AND is_parent_class = :class)
-                AND     nsp2.pk_namespace = asnsp2.fk_namespace
                 
-                GROUP BY pk_child, child_identifier, depth, nsp.pk_namespace, che.get_root_namespace(nsp.pk_namespace), nsp2.pk_namespace
+                GROUP BY pk_child, child_identifier, depth, nsp.pk_namespace, che.get_root_namespace(nsp.pk_namespace)
                 ORDER BY depth ASC;";
 
         $stmt = $conn->prepare($sql);
@@ -245,37 +243,44 @@ class ClassRepository extends EntityRepository
         $conn = $this->getEntityManager()
             ->getConnection();
 
+        // Trouver d'abord les espaces de noms filtrés - juste les clés pour le IN de la requête ci-dessous
+        $em = $this->getEntityManager();
+        $filteredNamespaces = $em->getRepository('AppBundle:OntoNamespace')
+            ->findAllActiveNamespacesForUser($user);
+
+        $idsFilteredNamespaces = array();
+        $qFilteredNamespaces = array();
+        foreach ($filteredNamespaces as $namespace)
+        {
+            $idsFilteredNamespaces[] = $namespace->getId();
+        }
+
+        // Construire la variable qui permet d'avoir ?,?,?... pour la requête ci-dessous
+        for($i=0;$i<count($idsFilteredNamespaces);$i++){
+            $qFilteredNamespaces[] = "?";
+        }
+        $strQFilteredNamespaces = join(',',$qFilteredNamespaces);
+
         $sql = "SELECT 	pk_child AS id,
                         child_identifier AS identifier,
                         depth,
                         che.get_root_namespace(nsp.pk_namespace) AS \"rootNamespaceId\",
                         (SELECT label FROM che.get_namespace_labels(che.get_root_namespace(nsp.pk_namespace)) WHERE language_iso_code = 'en') AS \"rootNamespaceLabel\",
-                        nsp2.pk_namespace AS \"definedInNamespaceId\",
-                        nsp2.standard_label AS \"definedInNamespaceLabel\"
-                FROM 	che.descendant_class_hierarchy(:class) cls, 
+                        nsp.pk_namespace AS \"classNamespaceId\",
+                        nsp.standard_label AS \"classNamespaceLabel\"
+                FROM 	che.descendant_class_hierarchy(?) cls, 
                         che.associates_namespace asnsp,
-                        che.namespace nsp,
-                        che.associates_namespace asnsp2,
-                        che.namespace nsp2
+                        che.namespace nsp
                 
                 WHERE 	asnsp.fk_class = cls.pk_child
                 AND   	nsp.pk_namespace = asnsp.fk_namespace
-                AND     asnsp2.fk_is_subclass_of = (SELECT pk_is_subclass_of FROM che.is_subclass_of WHERE is_child_class = pk_child AND is_parent_class = :class)
-                AND     nsp2.pk_namespace = asnsp2.fk_namespace
                 
-                AND nsp.pk_namespace IN (
-                    SELECT fk_namespace 
-                    FROM che.associates_entity_to_user_project 
-                    WHERE fk_associate_user_to_project = (
-                        SELECT pk_associate_user_to_project 
-                        FROM che.associate_user_to_project
-                        WHERE fk_user = :user AND fk_project = :project)
-                    AND fk_system_type = 25)
-                GROUP BY pk_child, child_identifier, depth, nsp.pk_namespace, che.get_root_namespace(nsp.pk_namespace), nsp2.pk_namespace
+                AND nsp.pk_namespace IN (".$strQFilteredNamespaces.")
+                GROUP BY pk_child, child_identifier, depth, nsp.pk_namespace, che.get_root_namespace(nsp.pk_namespace)
                 ORDER BY depth ASC;";
 
         $stmt = $conn->prepare($sql);
-        $stmt->execute(array('class' => $class->getId(), 'user' => $user->getId(), 'project' => $user->getCurrentActiveProject()->getId()));
+        $stmt->execute(array_merge(array($class->getId()), $idsFilteredNamespaces));
 
         return $stmt->fetchAll();
     }
@@ -394,7 +399,7 @@ class ClassRepository extends EntityRepository
                 WHERE
                 ea.fk_system_type IN (4, 19)
                 AND ea.fk_target_class = :class
-                AND c.pk_class IS NOT NULL";
+                AND c.pk_class IS NOT NULL;";
 
         $stmt = $conn->prepare($sql);
         $stmt->execute(array('class' => $class->getId()));
@@ -409,6 +414,24 @@ class ClassRepository extends EntityRepository
     public function findFilteredRelationsById(OntoClass $class, User $user){
         $conn = $this->getEntityManager()
             ->getConnection();
+
+        // Trouver d'abord les espaces de noms filtrés - juste les clés pour le IN de la requête ci-dessous
+        $em = $this->getEntityManager();
+        $filteredNamespaces = $em->getRepository('AppBundle:OntoNamespace')
+            ->findAllActiveNamespacesForUser($user);
+
+        $idsFilteredNamespaces = array();
+        $qFilteredNamespaces = array();
+        foreach ($filteredNamespaces as $namespace)
+        {
+            $idsFilteredNamespaces[] = $namespace->getId();
+        }
+
+        // Construire la variable qui permet d'avoir ?,?,?... pour la requête ci-dessous
+        for($i=0;$i<count($idsFilteredNamespaces);$i++){
+            $qFilteredNamespaces[] = "?";
+        }
+        $strQFilteredNamespaces = join(',',$qFilteredNamespaces);
 
         $sql = "SELECT
                 ea.pk_entity_association,
@@ -433,16 +456,9 @@ class ClassRepository extends EntityRepository
                 ON ns.pk_namespace= che.get_root_namespace(ans.fk_namespace)
                 WHERE
                 ea.fk_system_type IN (4, 19)
-                AND ea.fk_source_class = :class
+                AND ea.fk_source_class = ?
                 AND c.pk_class IS NOT NULL
-                AND ns.pk_namespace IN (
-                    SELECT fk_namespace 
-                    FROM che.associates_entity_to_user_project 
-                    WHERE fk_associate_user_to_project = (
-                        SELECT pk_associate_user_to_project 
-                        FROM che.associate_user_to_project
-                        WHERE fk_user = :user AND fk_project = :project)
-                    AND fk_system_type = 25)
+                AND ns.pk_namespace IN (".$strQFilteredNamespaces.")
                 UNION
                 SELECT
                 ea.pk_entity_association,
@@ -467,19 +483,12 @@ class ClassRepository extends EntityRepository
                 ON ns.pk_namespace= che.get_root_namespace(ans.fk_namespace)
                 WHERE
                 ea.fk_system_type IN (4, 19)
-                AND ea.fk_target_class = :class
+                AND ea.fk_target_class = ?
                 AND c.pk_class IS NOT NULL
-                AND ns.pk_namespace IN (
-                    SELECT fk_namespace 
-                    FROM che.associates_entity_to_user_project 
-                    WHERE fk_associate_user_to_project = (
-                        SELECT pk_associate_user_to_project 
-                        FROM che.associate_user_to_project
-                        WHERE fk_user = :user AND fk_project = :project)
-                    AND fk_system_type = 25)";
+                AND ns.pk_namespace IN (".$strQFilteredNamespaces.");";
 
         $stmt = $conn->prepare($sql);
-        $stmt->execute(array('class' => $class->getId(), 'user' => $user->getId(), 'project' => $user->getCurrentActiveProject()->getId()));
+        $stmt->execute(array_merge(array($class->getId()), $idsFilteredNamespaces, array($class->getId()), $idsFilteredNamespaces));
 
         return $stmt->fetchAll();
     }
