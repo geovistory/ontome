@@ -719,11 +719,11 @@
             });
         });
 
-        $(document).on("mouseenter", ".pickable-namespace", function() {
+        $(document).on("mouseenter touchstart", ".pickable-namespace", function() {
             $(this).prepend($("<span><i class=\"fas fa-plus\"></i>&nbsp;</span>"));
         });
 
-        $(document).on("mouseleave", ".pickable-namespace", function() {
+        $(document).on("mouseleave touchend", ".pickable-namespace", function() {
             $(this).find(":first-child").remove();
         });
 
