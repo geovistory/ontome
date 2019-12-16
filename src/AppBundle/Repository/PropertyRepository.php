@@ -252,7 +252,7 @@ class PropertyRepository extends EntityRepository
                         che.namespace nsp
                 WHERE 	asnsp.fk_property = pk_property
                   AND 	nsp.pk_namespace = asnsp.fk_namespace
-                  AND   nsp.pk_namespace IN (".$strQFilteredNamespaces.")";
+                  AND   nsp.pk_namespace IN (".$strQFilteredNamespaces.");";
 
         $stmt = $conn->prepare($sql);
         $stmt->execute(array_merge(array($class->getId()), $idsFilteredNamespaces));
@@ -331,7 +331,7 @@ class PropertyRepository extends EntityRepository
                 WHERE pk_range = ?
                   AND asnsp.fk_property = pk_property
                   AND nsp.pk_namespace = asnsp.fk_namespace
-                  AND nsp.pk_namespace IN (".$strQFilteredNamespaces.")";
+                  AND nsp.pk_namespace IN (".$strQFilteredNamespaces.");";
 
         $stmt = $conn->prepare($sql);
         $stmt->execute(array_merge(array($class->getId()), $idsFilteredNamespaces));
@@ -408,7 +408,7 @@ class PropertyRepository extends EntityRepository
                       che.namespace nsp 
                 WHERE asnsp.fk_property = pk_property
                   AND nsp.pk_namespace = asnsp.fk_namespace
-                  AND nsp.pk_namespace IN (".$strQFilteredNamespaces.")";
+                  AND nsp.pk_namespace IN (".$strQFilteredNamespaces.");";
 
         $stmt = $conn->prepare($sql);
         $stmt->execute(array_merge(array($class->getId()), $idsFilteredNamespaces));
@@ -449,24 +449,20 @@ class PropertyRepository extends EntityRepository
                        replace(tw1.ancestors, '|', '→') AS ancestors,
                        che.get_root_namespace(nsp.pk_namespace) AS \"rootNamespaceId\",
                        (SELECT label FROM che.get_namespace_labels(che.get_root_namespace(nsp.pk_namespace)) WHERE language_iso_code = 'en') AS \"rootNamespaceLabel\",
-                       nsp2.pk_namespace AS \"definedInNamespaceId\",
-                       nsp2.standard_label AS \"definedInNamespaceLabel\"
+                       nsp.pk_namespace AS \"propertyNamespaceId\",
+                       nsp.standard_label AS \"propertyNamespaceLabel\"
                 FROM tw1,
                      che.associates_namespace asnsp,
                      che.namespace nsp,
                      che.property p,
                      che.class domain,
-                     che.class range,
-                     che.associates_namespace asnsp2,
-                     che.namespace nsp2
+                     che.class range
                 WHERE asnsp.fk_property = tw1.pk_parent
                 AND   nsp.pk_namespace = asnsp.fk_namespace
                 AND depth > 1 
                 AND p.pk_property = tw1.pk_parent
                 AND p.has_domain = domain.pk_class
                 AND p.has_range = range.pk_class
-                AND asnsp2.fk_is_subproperty_of = (SELECT pk_is_subproperty_of FROM che.is_subproperty_of WHERE is_parent_property = tw1.pk_parent AND is_child_property = :property)
-                AND nsp2.pk_namespace = asnsp2.fk_namespace
                 GROUP BY tw1.pk_parent,
                      tw1.parent_identifier,
                      p.has_domain,
@@ -481,8 +477,7 @@ class PropertyRepository extends EntityRepository
                        p.range_instances_max_quantifier,
                      tw1.depth,
                      tw1.ancestors,
-                     nsp.pk_namespace,
-                     nsp2.pk_namespace";
+                     nsp.pk_namespace";
 
         $stmt = $conn->prepare($sql);
         $stmt->execute(array('property' => $property->getId()));
@@ -499,37 +494,32 @@ class PropertyRepository extends EntityRepository
         $conn = $this->getEntityManager()
             ->getConnection();
 
+        // Trouver d'abord les espaces de noms filtrés - juste les clés pour le IN de la requête ci-dessous
+        $em = $this->getEntityManager();
+        $filteredNamespaces = $em->getRepository('AppBundle:OntoNamespace')
+            ->findAllActiveNamespacesForUser($user);
+
+        $idsFilteredNamespaces = array();
+        $qFilteredNamespaces = array();
+        foreach ($filteredNamespaces as $namespace)
+        {
+            $idsFilteredNamespaces[] = $namespace->getId();
+        }
+
+        // Construire la variable qui permet d'avoir ?,?,?... pour la requête ci-dessous
+        for($i=0;$i<count($idsFilteredNamespaces);$i++){
+            $qFilteredNamespaces[] = "?";
+        }
+        $strQFilteredNamespaces = join(',',$qFilteredNamespaces);
+
         $sql = "WITH tw1 AS
                 (
                   SELECT pk_parent,
                      parent_identifier,
                      DEPTH,
                      ARRAY_TO_STRING(_path,'|') ancestors
-                  FROM che.ascendant_property_hierarchy(:property)
-                ),
-                filtered_namespaces AS
-                    (
-                        SELECT fk_namespace 
-                        FROM che.associates_entity_to_user_project 
-                        WHERE fk_associate_user_to_project = (
-                            SELECT pk_associate_user_to_project 
-                            FROM che.associate_user_to_project
-                            WHERE fk_user = :user AND fk_project = :project)
-                        AND fk_system_type = 25
-                        AND fk_namespace IS NOT NULL
-                        UNION
-                        SELECT fk_referenced_namespace AS fk_namespace
-                        FROM che.associates_referenced_namespace
-                        WHERE fk_namespace IN (
-                            SELECT fk_namespace 
-                            FROM che.associates_entity_to_user_project 
-                            WHERE fk_associate_user_to_project = (
-                                SELECT pk_associate_user_to_project 
-                                FROM che.associate_user_to_project
-                                WHERE fk_user = :user AND fk_project = :project)
-                            AND fk_system_type = 25
-                            AND fk_namespace IS NOT NULL)
-                    )
+                  FROM che.ascendant_property_hierarchy(?)
+                )
                 SELECT tw1.pk_parent  AS id,
                        tw1.parent_identifier AS identifier,
                        p.has_domain,
@@ -546,25 +536,21 @@ class PropertyRepository extends EntityRepository
                        replace(tw1.ancestors, '|', '→') AS ancestors,
                        che.get_root_namespace(nsp.pk_namespace) AS \"rootNamespaceId\",
                        (SELECT label FROM che.get_namespace_labels(che.get_root_namespace(nsp.pk_namespace)) WHERE language_iso_code = 'en') AS \"rootNamespaceLabel\",
-                       nsp2.pk_namespace AS \"definedInNamespaceId\",
-                       nsp2.standard_label AS \"definedInNamespaceLabel\"
+                       nsp.pk_namespace AS \"propertyNamespaceId\",
+                       nsp.standard_label AS \"propertyNamespaceLabel\"
                 FROM tw1,
                      che.associates_namespace asnsp,
                      che.namespace nsp,
                      che.property p,
                      che.class domain,
-                     che.class range,
-                     che.associates_namespace asnsp2,
-                     che.namespace nsp2
+                     che.class range
                 WHERE asnsp.fk_property = tw1.pk_parent
                 AND   nsp.pk_namespace = asnsp.fk_namespace
                 AND depth > 1 
                 AND p.pk_property = tw1.pk_parent
                 AND p.has_domain = domain.pk_class
                 AND p.has_range = range.pk_class
-                AND asnsp2.fk_is_subproperty_of = (SELECT pk_is_subproperty_of FROM che.is_subproperty_of WHERE is_parent_property = tw1.pk_parent AND is_child_property = :property)
-                AND nsp2.pk_namespace = asnsp2.fk_namespace
-                AND nsp.pk_namespace IN (SELECT fk_namespace FROM filtered_namespaces)
+                AND nsp.pk_namespace IN (".$strQFilteredNamespaces.")
                 GROUP BY tw1.pk_parent,
                      tw1.parent_identifier,
                      p.has_domain,
@@ -579,11 +565,10 @@ class PropertyRepository extends EntityRepository
                        p.range_instances_max_quantifier,
                      tw1.depth,
                      tw1.ancestors,
-                     nsp.pk_namespace,
-                     nsp2.pk_namespace";
+                     nsp.pk_namespace";
 
         $stmt = $conn->prepare($sql);
-        $stmt->execute(array('property' => $property->getId(), 'user' => $user->getId(), 'project' => $user->getCurrentActiveProject()->getId()));
+        $stmt->execute(array_merge(array($property->getId()), $idsFilteredNamespaces));
 
         return $stmt->fetchAll();
     }
@@ -613,23 +598,19 @@ class PropertyRepository extends EntityRepository
                         replace(descendants, '|', '→') AS descendants,
                         che.get_root_namespace(nsp.pk_namespace) AS \"rootNamespaceId\",
                        (SELECT label FROM che.get_namespace_labels(che.get_root_namespace(nsp.pk_namespace)) WHERE language_iso_code = 'en') AS \"rootNamespaceLabel\",
-                       nsp2.pk_namespace AS \"definedInNamespaceId\",
-                       nsp2.standard_label AS \"definedInNamespaceLabel\"                        
+                       nsp.pk_namespace AS \"propertyNamespaceId\",
+                       nsp.standard_label AS \"propertyNamespaceLabel\"                   
                     FROM che.descendant_property_hierarchy((:property)),
                          che.associates_namespace asnsp,
                          che.namespace nsp,
                          che.property p,
                          che.class domain,
-                         che.class range,
-                         che.associates_namespace asnsp2,
-                         che.namespace nsp2
+                         che.class range
                     WHERE asnsp.fk_property = pk_child
                     AND   nsp.pk_namespace = asnsp.fk_namespace    
                     AND p.pk_property = pk_child
                     AND p.has_domain = domain.pk_class
-                    AND p.has_range = range.pk_class
-                    AND asnsp2.fk_is_subproperty_of = (SELECT pk_is_subproperty_of FROM che.is_subproperty_of WHERE is_parent_property = :property AND is_child_property = pk_child)
-                    AND nsp2.pk_namespace = asnsp2.fk_namespace
+                    AND p.has_range = range.pk_class;
                          ";
 
         $stmt = $conn->prepare($sql);
@@ -647,30 +628,25 @@ class PropertyRepository extends EntityRepository
         $conn = $this->getEntityManager()
             ->getConnection();
 
-        $sql = "WITH filtered_namespaces AS
-                    (
-                        SELECT fk_namespace 
-                        FROM che.associates_entity_to_user_project 
-                        WHERE fk_associate_user_to_project = (
-                            SELECT pk_associate_user_to_project 
-                            FROM che.associate_user_to_project
-                            WHERE fk_user = :user AND fk_project = :project)
-                        AND fk_system_type = 25
-                        AND fk_namespace IS NOT NULL
-                        UNION
-                        SELECT fk_referenced_namespace AS fk_namespace
-                        FROM che.associates_referenced_namespace
-                        WHERE fk_namespace IN (
-                            SELECT fk_namespace 
-                            FROM che.associates_entity_to_user_project 
-                            WHERE fk_associate_user_to_project = (
-                                SELECT pk_associate_user_to_project 
-                                FROM che.associate_user_to_project
-                                WHERE fk_user = :user AND fk_project = :project)
-                            AND fk_system_type = 25
-                            AND fk_namespace IS NOT NULL)
-                    )
-                    SELECT  pk_child AS id,
+        // Trouver d'abord les espaces de noms filtrés - juste les clés pour le IN de la requête ci-dessous
+        $em = $this->getEntityManager();
+        $filteredNamespaces = $em->getRepository('AppBundle:OntoNamespace')
+            ->findAllActiveNamespacesForUser($user);
+
+        $idsFilteredNamespaces = array();
+        $qFilteredNamespaces = array();
+        foreach ($filteredNamespaces as $namespace)
+        {
+            $idsFilteredNamespaces[] = $namespace->getId();
+        }
+
+        // Construire la variable qui permet d'avoir ?,?,?... pour la requête ci-dessous
+        for($i=0;$i<count($idsFilteredNamespaces);$i++){
+            $qFilteredNamespaces[] = "?";
+        }
+        $strQFilteredNamespaces = join(',',$qFilteredNamespaces);
+
+        $sql = "SELECT  pk_child AS id,
                         child_identifier as identifier,
                        p.has_domain,
                        domain.identifier_in_namespace AS \"domainIdentifier\",
@@ -686,28 +662,23 @@ class PropertyRepository extends EntityRepository
                         replace(descendants, '|', '→') AS descendants,
                         che.get_root_namespace(nsp.pk_namespace) AS \"rootNamespaceId\",
                        (SELECT label FROM che.get_namespace_labels(che.get_root_namespace(nsp.pk_namespace)) WHERE language_iso_code = 'en') AS \"rootNamespaceLabel\",
-                       nsp2.pk_namespace AS \"definedInNamespaceId\",
-                       nsp2.standard_label AS \"definedInNamespaceLabel\"                   
-                    FROM che.descendant_property_hierarchy((:property)),
+                       nsp.pk_namespace AS \"propertyNamespaceId\",
+                       nsp.standard_label AS \"propertyNamespaceLabel\"                   
+                    FROM che.descendant_property_hierarchy(?),
                          che.associates_namespace asnsp,
                          che.namespace nsp,
                          che.property p,
                          che.class domain,
-                         che.class range,
-                         che.associates_namespace asnsp2,
-                         che.namespace nsp2
+                         che.class range
                     WHERE asnsp.fk_property = pk_child
                     AND   nsp.pk_namespace = asnsp.fk_namespace
-                    AND nsp.pk_namespace IN (SELECT fk_namespace FROM filtered_namespaces)    
+                    AND nsp.pk_namespace IN (".$strQFilteredNamespaces.")    
                     AND p.pk_property = pk_child
                     AND p.has_domain = domain.pk_class
-                    AND p.has_range = range.pk_class
-                    AND asnsp2.fk_is_subproperty_of = (SELECT pk_is_subproperty_of FROM che.is_subproperty_of WHERE is_parent_property = :property AND is_child_property = pk_child)
-                    AND nsp2.pk_namespace = asnsp2.fk_namespace
-                         ";
+                    AND p.has_range = range.pk_class;";
 
         $stmt = $conn->prepare($sql);
-        $stmt->execute(array('property' => $property->getId(), 'user' => $user->getId(), 'project' => $user->getCurrentActiveProject()->getId()));
+        $stmt->execute(array_merge(array($property->getId()),$idsFilteredNamespaces));
 
         return $stmt->fetchAll();
     }
@@ -1039,30 +1010,25 @@ class PropertyRepository extends EntityRepository
         $conn = $this->getEntityManager()
             ->getConnection();
 
-        $sql = "WITH filtered_namespaces AS
-                    (
-                        SELECT fk_namespace 
-                        FROM che.associates_entity_to_user_project 
-                        WHERE fk_associate_user_to_project = (
-                            SELECT pk_associate_user_to_project 
-                            FROM che.associate_user_to_project
-                            WHERE fk_user = :user AND fk_project = :project)
-                        AND fk_system_type = 25
-                        AND fk_namespace IS NOT NULL
-                        UNION
-                        SELECT fk_referenced_namespace AS fk_namespace
-                        FROM che.associates_referenced_namespace
-                        WHERE fk_namespace IN (
-                            SELECT fk_namespace 
-                            FROM che.associates_entity_to_user_project 
-                            WHERE fk_associate_user_to_project = (
-                                SELECT pk_associate_user_to_project 
-                                FROM che.associate_user_to_project
-                                WHERE fk_user = :user AND fk_project = :project)
-                            AND fk_system_type = 25
-                            AND fk_namespace IS NOT NULL)
-                    )
-                    SELECT
+        // Trouver d'abord les espaces de noms filtrés - juste les clés pour le IN de la requête ci-dessous
+        $em = $this->getEntityManager();
+        $filteredNamespaces = $em->getRepository('AppBundle:OntoNamespace')
+            ->findAllActiveNamespacesForUser($user);
+
+        $idsFilteredNamespaces = array();
+        $qFilteredNamespaces = array();
+        foreach ($filteredNamespaces as $namespace)
+        {
+            $idsFilteredNamespaces[] = $namespace->getId();
+        }
+
+        // Construire la variable qui permet d'avoir ?,?,?... pour la requête ci-dessous
+        for($i=0;$i<count($idsFilteredNamespaces);$i++){
+            $qFilteredNamespaces[] = "?";
+        }
+        $strQFilteredNamespaces = join(',',$qFilteredNamespaces);
+
+        $sql = "SELECT
                 ea.pk_entity_association,
                 ea.fk_target_property AS fk_related_property,
                 p.identifier_in_namespace,
@@ -1086,8 +1052,8 @@ class PropertyRepository extends EntityRepository
                 WHERE
                 ea.fk_system_type IN (18, 20)
                 AND p.pk_property IS NOT NULL
-                AND ea.fk_source_property = :property
-                AND ns.pk_namespace IN (SELECT fk_namespace FROM filtered_namespaces)
+                AND ea.fk_source_property = ?
+                AND ns.pk_namespace IN (".$strQFilteredNamespaces.")
                 UNION
                 SELECT
                 ea.pk_entity_association,
@@ -1113,18 +1079,11 @@ class PropertyRepository extends EntityRepository
                 WHERE
                 ea.fk_system_type IN (18, 20)
                 AND p.pk_property IS NOT NULL
-                AND ea.fk_target_property = :property
-                AND ns.pk_namespace IN (
-                    SELECT fk_namespace 
-                    FROM che.associates_entity_to_user_project 
-                    WHERE fk_associate_user_to_project = (
-                        SELECT pk_associate_user_to_project 
-                        FROM che.associate_user_to_project
-                        WHERE fk_user = :user AND fk_project = :project)
-                    AND fk_system_type = 25)";
+                AND ea.fk_target_property = ?
+                AND ns.pk_namespace IN (".$strQFilteredNamespaces.");";
 
         $stmt = $conn->prepare($sql);
-        $stmt->execute(array('property' => $property->getId(), 'user' => $user->getId(), 'project' => $user->getCurrentActiveProject()->getId()));
+        $stmt->execute(array_merge(array($property->getId()) , $idsFilteredNamespaces, array($property->getId()), $idsFilteredNamespaces));
 
         return $stmt->fetchAll();
     }

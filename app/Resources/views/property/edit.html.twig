@@ -572,7 +572,7 @@
                         <th></th>
                         <th>Range</th>
                         <th>Justification</th>
-                        <th>Defined in namespace</th>
+                        <th>Relation namespace</th>
                         <th>
                             {% if is_granted('edit', property) %}
                                 Edit association
@@ -668,7 +668,7 @@
                         <th></th>
                         <th>Range</th>
                         <th>Depth</th>
-                        <th>Defined in namespace</th>
+                        <th>Property namespace</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -715,7 +715,7 @@
                                 {% endif %}
                             </td>
                             <td>{{ ancestor.depth }}</td>
-                            <td>{{ ancestor.definedInNamespaceLabel }}</td>
+                            <td>{{ ancestor.propertyNamespaceLabel }}</td>
                         </tr>
                     {% endfor %}
                     </tbody>
@@ -730,7 +730,7 @@
                         <th></th>
                         <th>Range</th>
                         <th>Depth</th>
-                        <th>Defined in namespace</th>
+                        <th>Property namespace</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -777,7 +777,7 @@
                                 {% endif %}
                             </td>
                             <td>{{ descendant.depth }}</td>
-                            <td>{{ descendant.definedInNamespaceLabel }}</td>
+                            <td>{{ descendant.propertyNamespaceLabel }}</td>
                         </tr>
                     {% endfor %}
                     </tbody>
@@ -798,7 +798,7 @@
                         <th>Relation</th>
                         <th>Property</th>
                         <th>Justification</th>
-                        <th>Defined in namespace</th>
+                        <th>Relation namespace</th>
                         <th>Edit relations</th>
                     </tr>
                     </thead>

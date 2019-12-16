@@ -490,7 +490,7 @@
                     <tr>
                         <th>Class</th>
                         <th>Justification</th>
-                        <th>Defined in namespace</th>
+                        <th>Relation namespace</th>
                         <th>
                             {% if is_granted('edit', class) %}
                                 Edit association
@@ -557,7 +557,7 @@
                     <tr>
                         <th>Class</th>
                         <th>Depth</th>
-                        <th>Defined in namespace</th>
+                        <th>Class namespace</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -572,7 +572,7 @@
                                 </a>
                             </td>
                             <td>{{ ancestor.depth }}</td>
-                            <td>{{ ancestor.definedInNamespaceLabel }}</td>
+                            <td>{{ ancestor.classNamespaceLabel }}</td>
                         </tr>
                     {% endfor %}
                     </tbody>
@@ -581,9 +581,9 @@
                 <table class="table table-striped" id="descendants-table">
                     <thead>
                     <tr>
-                        <th>Class identifier</th>
+                        <th>Class</th>
                         <th>Depth</th>
-                        <th>Defined in namespace</th>
+                        <th>Class namespace</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -598,7 +598,7 @@
                                 </a>
                             </td>
                             <td>{{ descendant.depth }}</td>
-                            <td>{{ descendant.definedInNamespaceLabel }}</td>
+                            <td>{{ descendant.classNamespaceLabel }}</td>
                         </tr>
                     {% endfor %}
                     </tbody>
@@ -612,7 +612,7 @@
                             <th>Relation</th>
                             <th>Class</th>
                             <th>Justification</th>
-                            <th>Defined in namespace</th>
+                            <th>Relation namespace</th>
                             <th>View details</th>
                         </tr>
                     </thead>
