@@ -108,6 +108,7 @@ class NamespaceRepository extends EntityRepository
          $defaultNamespace = $this->createQueryBuilder('nsp')
             ->join('nsp.projectForTopLevelNamespace','proj')
             ->andWhere('proj.id = :pk_project')
+            ->andWhere('nsp.isTopLevelNamespace = false')
             ->orderBy('nsp.isOngoing', 'DESC')
             ->addOrderBy('nsp.creationTime', 'DESC')
             ->setParameter('pk_project', $project->getId())
