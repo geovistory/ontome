@@ -470,7 +470,7 @@ class UserController extends Controller
                 ->findAllProfilesForUser($user));
 
             if(count($profilesUserProject) == 0) {
-                foreach ($project->getProfiles() as $profile) {
+                foreach ($project->getOwnedProfiles() as $profile) {
                     // Vérifier si on a déjà pas un eupa sur ce profile
                     $eupa = $em->getRepository('AppBundle:EntityUserProjectAssociation')
                         ->findOneBy(array('profile' => $profile->getId(), 'userProjectAssociation' => $userProjectAssociation->getId()));
