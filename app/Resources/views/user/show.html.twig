@@ -177,7 +177,7 @@
                             {% if userActiveProjectAssociation.project.profiles|length == 0 %}
                                 <p class="text-muted"><em>This project does not manage any profile.</em></p>
                             {% endif %}
-                            {% for profile in userActiveProjectAssociation.project.profiles %}
+                            {% for profile in userActiveProjectAssociation.project.ownedProfiles %}
                                 <div>
                                     {% set isActiveProfile = false %}
                                     {% if profile in activeProfiles %}
@@ -185,10 +185,10 @@
                                     {% endif %}
                                     {% if isActiveProfile %}
                                     <a href="#" class="uncheck-profile" data-id="{{ profile.id }}"><span class="glyphicon glyphicon-check" aria-hidden="true"></span></a>
-                                    <strong>Profile : <a href="{{ path('profile_show', {'id': profile.id}) }}">{{ profile }}</a></strong>
+                                    <strong>Profile : <a href="{{ path('profile_show', {'id': profile.id}) }}">{{ profile.standardLabel }}</a></strong>
                                     {% else %}
                                     <a href="#" class="check-profile" data-id="{{ profile.id }}"><span class="glyphicon glyphicon-unchecked text-muted" aria-hidden="true"></span></a>
-                                    <strong class="text-muted">Profile : <a class="text-muted" href="{{ path('profile_show', {'id': profile.id}) }}">{{ profile }}</a></strong>
+                                    <strong class="text-muted">Profile : <a class="text-muted" href="{{ path('profile_show', {'id': profile.id}) }}">{{ profile.standardLabel }}</a></strong>
                                     {% endif %}
                                 </div>
                                 {% if profile.namespaces|length == 0 %}

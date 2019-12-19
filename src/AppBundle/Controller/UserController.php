@@ -469,16 +469,34 @@ class UserController extends Controller
             $profilesUserProject = new ArrayCollection($em->getRepository('AppBundle:Profile')
                 ->findAllProfilesForUser($user));
 
-            if(count($profilesUserProject) == 0) {
-                foreach ($project->getProfiles() as $profile) {
-                    // Vérifier si on a déjà pas un eupa sur ce profile
-                    $eupa = $em->getRepository('AppBundle:EntityUserProjectAssociation')
-                        ->findOneBy(array('profile' => $profile->getId(), 'userProjectAssociation' => $userProjectAssociation->getId()));
+            foreach ($project->getOwnedProfiles() as $profile) {
+                // Vérifier si on a déjà pas un eupa sur ce profile
+                $eupa = $em->getRepository('AppBundle:EntityUserProjectAssociation')
+                    ->findOneBy(array('profile' => $profile->getId(), 'userProjectAssociation' => $userProjectAssociation->getId()));
 
-                    if(is_null($eupa)){
+                if(is_null($eupa)){
+                    $eupa = new EntityUserProjectAssociation();
+                    $systemTypeSelected = $em->getRepository('AppBundle:SystemType')->find(25); //systemType 25 = Selected namespace for user preference
+                    $eupa->setProfile($profile);
+                    $eupa->setUserProjectAssociation($userProjectAssociation);
+                    $eupa->setSystemType($systemTypeSelected);
+                    $eupa->setCreator($this->getUser());
+                    $eupa->setModifier($this->getUser());
+                    $eupa->setCreationTime(new \DateTime('now'));
+                    $eupa->setModificationTime(new \DateTime('now'));
+                    $em->persist($eupa);
+                    $em->flush();
+                }
+
+                foreach($profile->getNamespaces() as $namespace){
+                    // Vérifier si un eupa identique n'a pas déjà etre crée avec un autre profil plus tot:
+                    $eupa = $em->getRepository('AppBundle:EntityUserProjectAssociation')
+                        ->findOneBy(array('namespace' => $namespace->getId(), 'userProjectAssociation' => $userProjectAssociation->getId()));
+
+                    if (is_null($eupa)) {
                         $eupa = new EntityUserProjectAssociation();
                         $systemTypeSelected = $em->getRepository('AppBundle:SystemType')->find(25); //systemType 25 = Selected namespace for user preference
-                        $eupa->setProfile($profile);
+                        $eupa->setNamespace($namespace);
                         $eupa->setUserProjectAssociation($userProjectAssociation);
                         $eupa->setSystemType($systemTypeSelected);
                         $eupa->setCreator($this->getUser());
@@ -487,26 +505,6 @@ class UserController extends Controller
                         $eupa->setModificationTime(new \DateTime('now'));
                         $em->persist($eupa);
                         $em->flush();
-                    }
-
-                    foreach($profile->getNamespaces() as $namespace){
-                        // Vérifier si un eupa identique n'a pas déjà etre crée avec un autre profil plus tot:
-                        $eupa = $em->getRepository('AppBundle:EntityUserProjectAssociation')
-                            ->findOneBy(array('namespace' => $namespace->getId(), 'userProjectAssociation' => $userProjectAssociation->getId()));
-
-                        if (is_null($eupa)) {
-                            $eupa = new EntityUserProjectAssociation();
-                            $systemTypeSelected = $em->getRepository('AppBundle:SystemType')->find(25); //systemType 25 = Selected namespace for user preference
-                            $eupa->setNamespace($namespace);
-                            $eupa->setUserProjectAssociation($userProjectAssociation);
-                            $eupa->setSystemType($systemTypeSelected);
-                            $eupa->setCreator($this->getUser());
-                            $eupa->setModifier($this->getUser());
-                            $eupa->setCreationTime(new \DateTime('now'));
-                            $eupa->setModificationTime(new \DateTime('now'));
-                            $em->persist($eupa);
-                            $em->flush();
-                        }
                     }
                 }
             }

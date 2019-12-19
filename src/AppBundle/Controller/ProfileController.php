@@ -8,6 +8,7 @@
 
 namespace AppBundle\Controller;
 
+use AppBundle\Entity\EntityUserProjectAssociation;
 use AppBundle\Entity\Label;
 use AppBundle\Entity\OntoClass;
 use AppBundle\Entity\OntoNamespace;
@@ -130,6 +131,20 @@ class ProfileController  extends Controller
                 $profile->getTextProperties()[1]->setClass($profile);
             }
 
+            // Créer les entity_to_user_project pour les activer par défaut
+            $userProjectAssociations = $em->getRepository('AppBundle:UserProjectAssociation')->findByProject($project);
+            foreach ($userProjectAssociations as $userProjectAssociation) {
+                $eupa = new EntityUserProjectAssociation();
+                $systemTypeSelected = $em->getRepository('AppBundle:SystemType')->find(25); //systemType 25 = Selected namespace for user preference
+                $eupa->setProfile($profile);
+                $eupa->setUserProjectAssociation($userProjectAssociation);
+                $eupa->setSystemType($systemTypeSelected);
+                $eupa->setCreator($this->getUser());
+                $eupa->setModifier($this->getUser());
+                $eupa->setCreationTime(new \DateTime('now'));
+                $eupa->setModificationTime(new \DateTime('now'));
+                $em->persist($eupa);
+            }
 
             $em = $this->getDoctrine()->getManager();
             $em->persist($profile);
@@ -308,6 +323,22 @@ class ProfileController  extends Controller
             $profile->addNamespace($namespace);
             $em = $this->getDoctrine()->getManager();
             $em->persist($profile);
+
+            // Créer les entity_to_user_project pour les activer par défaut
+            $userProjectAssociations = $em->getRepository('AppBundle:UserProjectAssociation')->findByProject($profile->getProjectOfBelonging());
+            foreach ($userProjectAssociations as $userProjectAssociation) {
+                $eupa = new EntityUserProjectAssociation();
+                $systemTypeSelected = $em->getRepository('AppBundle:SystemType')->find(25); //systemType 25 = Selected namespace for user preference
+                $eupa->setNamespace($namespace);
+                $eupa->setUserProjectAssociation($userProjectAssociation);
+                $eupa->setSystemType($systemTypeSelected);
+                $eupa->setCreator($this->getUser());
+                $eupa->setModifier($this->getUser());
+                $eupa->setCreationTime(new \DateTime('now'));
+                $eupa->setModificationTime(new \DateTime('now'));
+                $em->persist($eupa);
+            }
+
             $em->flush();
             $status = 'Success';
             $message = 'Namespace successfully associated';

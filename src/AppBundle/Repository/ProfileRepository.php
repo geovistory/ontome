@@ -23,14 +23,11 @@ class ProfileRepository extends EntityRepository
         $sql = "
           SELECT prf.* FROM che.profile prf
           LEFT JOIN che.associates_entity_to_user_project aseup ON aseup.fk_profile = prf.pk_profile 
-          WHERE prf.pk_profile IN(
-		    SELECT fk_profile FROM che.associates_project
-		    WHERE fk_project = :id_project
-	        )
+          WHERE prf.fk_project_of_belonging = :id_project
           AND ((aseup.fk_system_type = 25 AND aseup.fk_associate_user_to_project IN(
             SELECT pk_associate_user_to_project FROM che.associate_user_to_project
 	        WHERE fk_user = :id_user AND fk_project = :id_project)) 
-	      OR aseup.fk_system_type IS NULL)
+	      OR aseup.fk_system_type IS NULL);
         ";
 
         $query = $this->getEntityManager()->createNativeQuery($sql, $rsm);
@@ -47,13 +44,10 @@ class ProfileRepository extends EntityRepository
         $sql = "
           SELECT prf.* FROM che.profile prf
           LEFT JOIN che.associates_entity_to_user_project aseup ON aseup.fk_profile = prf.pk_profile 
-          WHERE prf.pk_profile IN(
-		    SELECT fk_profile FROM che.associates_project
-		    WHERE fk_project = :id_project
-	        )
+          WHERE prf.fk_project_of_belonging = :id_project
           AND (aseup.fk_associate_user_to_project IN(
             SELECT pk_associate_user_to_project FROM che.associate_user_to_project
-	        WHERE fk_user = :id_user AND fk_project = :id_project))
+	        WHERE fk_user = :id_user AND fk_project = :id_project));
         ";
 
         $query = $this->getEntityManager()->createNativeQuery($sql, $rsm);
