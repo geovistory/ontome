@@ -287,7 +287,10 @@
 
             // Onglet My Projects
             $('#projects-table').DataTable({
-                "order": [[2, 'asc']]
+                columnDefs: [ {
+                    targets: [ 0 ],
+                    orderData: [ 2, 0 ]
+                }]
             });
 
             // Onglet My current namespaces
