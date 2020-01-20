@@ -237,29 +237,34 @@
                     <a href="{{ path('namespace_new', {'project': project.id}) }}" class="btn btn-primary pull-right">Add <span class="fa fa-plus-circle"></span></a>
                 </div>
                 {% endif %}
-                <h3>Namespaces managed by this project</h3>
-                <table class="table table-striped" id="managed-namespaces-table">
-                    <thead>
-                    <tr>
-                        <th>Namespace</th>
-                        <th>Last updated</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% for namespace in project.managedNamespaces if namespace.isTopLevelNamespace %}
+                {% if project.managedNamespaces is not empty %}
+                    <h3>This project manages the <a href="{{ path('namespace_show', {'id':project.managedNamespaces|first.referencedVersion.id}) }}">{{ project.managedNamespaces|first.referencedVersion }}</a> namespace</h3>
+                    <h3>Versions of this namespace:</h3>
+                    <table class="table table-striped" id="managed-namespaces-table">
+                        <thead>
                         <tr>
-                            <td>
-                                <a href="{{ path('namespace_show', {
-                                    'id': namespace.id
-                                }) }}">
-                                    {{ namespace }}
-                                </a>
-                            </td>
-                            <td>{{ namespace.modificationTime|date('Y-m-d') }}</td>
+                            <th>Namespace</th>
+                            <th>Last updated</th>
                         </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                        {% for namespace in project.managedNamespaces|first.referencedVersion.childVersions %}
+                            <tr>
+                                <td>
+                                    <a href="{{ path('namespace_show', {
+                                        'id': namespace.id
+                                    }) }}">
+                                        {{ namespace }}
+                                    </a>
+                                </td>
+                                <td>{{ namespace.modificationTime|date('Y-m-d') }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <h3><em>There is currently no namespace managed by this project.</em></h3>
+                {% endif %}
                 {% if is_granted('full_edit', project) and project.id == 21 %}
                     <div class="pull-right add-div">
                         <a href="{{ path('public_project_namespace_association_new') }}" class="btn btn-primary pull-right">Add <span class="fa fa-plus-circle"></span></a>

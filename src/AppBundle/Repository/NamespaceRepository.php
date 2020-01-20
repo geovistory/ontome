@@ -78,6 +78,30 @@ class NamespaceRepository extends EntityRepository
         return $stmt->fetchAll();
     }
 
+    /**
+     * @param OntoNamespace $namespace the namespace to be checked for referenced namespace association
+     * @return array
+     */
+    public function findAllNonAssociatedToNamespaceByNamespaceId(OntoNamespace $namespace){
+        $conn = $this->getEntityManager()
+            ->getConnection();
+
+        $sql = "SELECT pk_namespace AS id, 
+                       standard_label AS \"standardLabel\" 
+                FROM che.namespace
+                WHERE pk_namespace NOT IN (
+                    SELECT nsp.fk_top_level_namespace FROM che.associates_referenced_namespace ansp
+                    JOIN che.namespace nsp ON ansp.fk_referenced_namespace = nsp.pk_namespace
+                    WHERE ansp.fk_namespace = :namespace AND ansp.fk_referenced_namespace IS NOT NULL
+                    )
+                AND is_top_level_namespace;";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->execute(array('namespace' => $namespace->getId()));
+
+        return $stmt->fetchAll();
+    }
+
     public function findAllowedOngoingNamespaceByUser($user)
     {
         return $this->createQueryBuilder('nsp')
