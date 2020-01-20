@@ -637,7 +637,7 @@ class OntoNamespace
     }
 
     /**
-     * @return mixed
+     * @@return ArrayCollection|ReferencedNamespaceAssociation[]
      */
     public function getReferencedNamespaceAssociations()
     {

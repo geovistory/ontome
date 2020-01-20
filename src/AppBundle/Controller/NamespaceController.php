@@ -12,6 +12,7 @@ use AppBundle\Entity\Label;
 use AppBundle\Entity\OntoNamespace;
 use AppBundle\Entity\Profile;
 use AppBundle\Entity\Project;
+use AppBundle\Entity\ReferencedNamespaceAssociation;
 use AppBundle\Entity\TextProperty;
 use AppBundle\Form\NamespaceForm;
 use AppBundle\Form\NamespaceQuickAddForm;
@@ -197,11 +198,14 @@ class NamespaceController  extends Controller
 
         $namespace->setModifier($this->getUser());
 
+        $em = $this->getDoctrine()->getManager();
+
+        $rootNamespaces = $em->getRepository('AppBundle:OntoNamespace')
+            ->findAllNonAssociatedToNamespaceByNamespaceId($namespace);
+
         if($this->isGranted('full_edit', $namespace)) {
 
             $form = $this->createForm(NamespaceForm::class, $namespace);
-
-            $em = $this->getDoctrine()->getManager();
 
             $form->handleRequest($request);
             if ($form->isValid()) {
@@ -217,13 +221,15 @@ class NamespaceController  extends Controller
             }
             return $this->render('namespace/edit.html.twig', [
                 'namespaceForm' => $form->createView(),
-                'namespace' => $namespace
+                'namespace' => $namespace,
+                'rootNamespaces' => $rootNamespaces,
             ]);
         }
         else {
             return $this->render('namespace/edit.html.twig', [
                 'namespaceForm' => null,
-                'namespace' => $namespace
+                'namespace' => $namespace,
+                'rootNamespaces' => $rootNamespaces,
             ]);
         }
     }
@@ -311,5 +317,81 @@ class NamespaceController  extends Controller
 
         return new JsonResponse($namespaces[0]['json'],200, array(), true);
     }
+
+    /**
+     * @Route("/namespace/{namespace}/referenced-namespace/{referencedNamespace}/add", name="namespace_referenced_namespace_association")
+     * @Method({ "POST"})
+     * @param OntoNamespace  $namespace    The namespace to be associated with a referenced namespace
+     * @param OntoNamespace  $referencedNamespace    The referenced namespace to be associated with a namespace
+     * @throws \Exception in case of unsuccessful association
+     * @return JsonResponse a Json formatted namespaces list
+     */
+    public function newReferencedNamespaceAssociationAction(OntoNamespace $namespace, OntoNamespace $referencedNamespace, Request $request)
+    {
+        $this->denyAccessUnlessGranted('edit', $namespace);
+
+        $em = $this->getDoctrine()->getManager();
+
+        $referencedNamespaceAssociation = $em->getRepository('AppBundle:ReferencedNamespaceAssociation')
+            ->findOneBy(array('namespace' => $namespace, 'referencedNamespace' => $referencedNamespace));
+
+        if($namespace->getIsTopLevelNamespace()) {
+            $status = 'Error';
+            $message = 'This namespace is not valid';
+        }
+        else if (!is_null($referencedNamespaceAssociation)) {
+            $status = 'Error';
+            $message = 'This namespace is already associated with a referenced namespace';
+        }
+        else {
+            $referencedNamespaceAssociation = new ReferencedNamespaceAssociation();
+            $referencedNamespaceAssociation->setNamespace($namespace);
+            $referencedNamespaceAssociation->setReferencedNamespace($referencedNamespace);
+            $referencedNamespaceAssociation->setCreator($this->getUser());
+            $referencedNamespaceAssociation->setModifier($this->getUser());
+            $referencedNamespaceAssociation->setCreationTime(new \DateTime('now'));
+            $referencedNamespaceAssociation->setModificationTime(new \DateTime('now'));
+
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($referencedNamespaceAssociation);
+
+            $em->flush();
+            $status = 'Success';
+            $message = 'Namespace successfully associated';
+        }
+
+
+        $response = array(
+            'status' => $status,
+            'message' => $message
+        );
+
+        return new JsonResponse($response);
+
+    }
+
+    /**
+     * @Route("/namespace/{namespace}/referenced-namespace/{referencedNamespace}/delete", name="namespace_referenced_namespace_disassociation")
+     * @Method({ "DELETE"})
+     * @param OntoNamespace  $namespace    The namespace to be disassociated from a referenced namespace
+     * @param OntoNamespace  $referencedNamespace    The referenced namespace to be disassociated from a namespace
+     * @return JsonResponse a Json 204 HTTP response
+     */
+    public function deleteProfileNamespaceAssociationAction(OntoNamespace $namespace, OntoNamespace $referencedNamespace, Request $request)
+    {
+        $this->denyAccessUnlessGranted('edit', $namespace);
+
+        $em = $this->getDoctrine()->getManager();
+
+        $referencedNamespaceAssociation = $em->getRepository('AppBundle:ReferencedNamespaceAssociation')
+            ->findOneBy(array('namespace' => $namespace, 'referencedNamespace' => $referencedNamespace));
+
+        $em->remove($referencedNamespaceAssociation);
+        $em->flush();
+
+        return new JsonResponse(null, 204);
+
+    }
+
 
 }
