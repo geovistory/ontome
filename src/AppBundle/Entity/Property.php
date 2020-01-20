@@ -669,13 +669,13 @@ class Property
 
     public function __toString()
     {
-        if($this->getIdentifierInNamespace() === $this->getStandardLabel()){
-            $s = $this->getIdentifierInNamespace();
+        if($this->getIdentifierInNamespace() === explode(' (',$this->getStandardLabel())[0]){
+            $s = $this->getStandardLabel();
         }
         else if(!is_null($this->getStandardLabel())) {
             $s = $this->getStandardLabel().' – '.$this->getIdentifierInNamespace();
         }
-        else $s = $this->getIdentifierInNamespace();
+        else $s = $this->getStandardLabel();
         return (string) $s;
     }
 
