@@ -87,7 +87,9 @@
         {% if app.user is not null and app.user.currentActiveProject is not null %}
         <p class="navbar-text navbar-right" style="margin-right: 12px;">
             <strong>Active project :</strong>
-            <a href="{{ path('project_show', {'id': app.user.currentActiveProject.id}) }}">{{ app.user.currentActiveProject }}</a> <a href="{{ path('user_show', {'id': app.user.id, '_fragment': 'my-projects'}) }}"><i class="fas fa-edit"></i></a>
+            <a href="{{ path('project_show', {'id': app.user.currentActiveProject.id}) }}">
+                {{ app.user.currentActiveProject }}</a>
+            <a href="{{ path('user_show', {'id': app.user.id, '_fragment': 'my-projects'}) }}" id="iconTabShowMyProjects"><i class="fas fa-edit"></i></a>
         </p>
         {% endif %}
     </div>
@@ -203,13 +205,16 @@
             $.extend( true, $.fn.dataTable.defaults, {
                 "pageLength": 25
             } );
+
+            $('#iconTabShowMyProjects').click(function(){
+                $('.nav-tabs a[href="#my-projects"]').tab('show');
+            })
         });
 
         //add tooltip to all elements with the data-toggle="tooltip" attr
         $("body").tooltip({
             selector: '[data-toggle="tooltip"]'
         });
-
     </script>
 {% endblock %}
 </body>
