@@ -247,36 +247,70 @@
             </div>
         </div>
         <div id="classes" class="tab-pane fade">
-            <div class="row">
-                <div class="col-md-6">
-                    <h3>Associated classes</h3>
-                    <table class="table table-striped" id="classes-table" style="width:100%">
-                        <thead>
-                        <tr>
-                            <th></th>
-                            <th>ID</th>
-                            <th>Identifier in namespace</th>
-                            <th>Class</th>
-                            <th>Association type</th>
-                            <th>Namespace</th>
-                            <th>Pick properties</th>
-                        </tr>
-                        </thead>
-                    </table>
+            {% if profile.isOngoing %}
+                <div class="row">
+                    <div class="col-md-6">
+                        <h3>Associated classes</h3>
+                        <table class="table table-striped" id="classes-table" style="width:100%">
+                            <thead>
+                            <tr>
+                                <th></th>
+                                <th>ID</th>
+                                <th>Identifier in namespace</th>
+                                <th>Class</th>
+                                <th>Association type</th>
+                                <th>Namespace</th>
+                                <th>Pick properties</th>
+                            </tr>
+                            </thead>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <h3>Selectable classes</h3>
+                        <table class="table table-striped" id="selectable-classes-table" style="width:100%">
+                            <thead>
+                            <tr>
+                                <th>Select</th>
+                                <th>Class</th>
+                                <th>Namespace</th>
+                            </tr>
+                            </thead>
+                        </table>
+                    </div>
                 </div>
-                <div class="col-md-6">
-                    <h3>Selectable classes</h3>
-                    <table class="table table-striped" id="selectable-classes-table" style="width:100%">
-                        <thead>
+            {% else %}
+                <h3>Associated classes</h3>
+                <table class="table table-striped" id="classes-table">
+                    <thead>
+                    <tr>
+                        <th>Class</th>
+                        <th>Association type</th>
+                        <th>Namespace</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for class in classes %}
                         <tr>
-                            <th>Select</th>
-                            <th>Class</th>
-                            <th>Namespace</th>
+                            <td>
+                                <a href="{{ path('class_show', {
+                                    'id': class.id
+                                }) }}">
+                                    {% if class.identifierInNamespace != class.standardLabel and class.standardLabel is not null %}
+                                        {{ class.standardLabel }} – {{ class.identifierInNamespace }}
+                                    {% else %}
+                                        {{ class.identifierInNamespace }}
+                                    {% endif %}
+                                </a>
+                            </td>
+                            <td>{{ class.associationType }}</td>
+                            <td>
+                                {{ class.namespace }}
+                            </td>
                         </tr>
-                        </thead>
-                    </table>
-                </div>
-            </div>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            {% endif %}
         </div>
         <div id="properties" class="tab-pane fade">
             <h3>Associated properties</h3>
@@ -396,6 +430,7 @@
             </table>
         </div>
         <div id="namespaces" class="tab-pane fade">
+        {% if profile.isOngoing %}
             <h4>Namespaces used by this profile</h4>
             {% if profile.namespaces|length == 0 %}
                 <em id="empty-namespace-list-message">There is currently no namespace used by this profile.</em>
@@ -429,6 +464,23 @@
                     </ul>
                 </div>
             </div>
+        {% else %}
+            <h4>Namespaces used by this profile</h4>
+            {% if profile.namespaces|length == 0 %}
+                <em id="empty-namespace-list-message">There is currently no namespace used by this profile.</em>
+            {% endif %}
+            <ul id="used-namespaces-list">
+                {% for namespace in profile.namespaces %}
+                    <li>
+                        <a href="{{ path('namespace_show', {
+                            'id': namespace.id
+                        }) }}">
+                            {{ namespace }}
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
         </div>
         <div id="graph" class="tab-pane fade">
             <h3>Graph</h3>
@@ -533,6 +585,8 @@
 
         });
 
+        {% if profile.isOngoing %}
+
         var profileID = {{ profile.id }};
         var urlSelectableClasses = '{{ path("selectable_classes_profile_json", {'profile' : 'profileID'}) }}';
         urlSelectableClasses = urlSelectableClasses.replace("profileID", profileID);
@@ -540,8 +594,6 @@
         var urlAssociatedClasses = '{{ path("associated_classes_profile_json", {'profile' : 'profileID'}) }}';
         urlAssociatedClasses = urlAssociatedClasses.replace("profileID", profileID);
 
-        $('#labels-table').DataTable();
-        $('#descriptions-table').DataTable();
         var associatedClassesTable = $('#classes-table').DataTable({
             order: [[ 6, "desc" ]],
             ajax: urlAssociatedClasses,
@@ -623,37 +675,6 @@
                 }
             ]
         });
-        $('#properties-table').DataTable({
-            initComplete: function(){
-                this.api().columns([6]).every(function(){
-                    var column = this;
-                    var select = $('<select id="properties-status-select"><option value=""></option></select>')
-                        .appendTo($(column.header()))
-                        .on('change', function(){
-                            var val = $.fn.dataTable.util.escapeRegex(
-                                $(this).val()
-                            );
-
-                            column
-                                .search(val ? '^'+val+'$' : '', true, false)
-                                .draw();
-                        });
-
-                    $(select).click(function(e){
-                        e.stopPropagation();
-                    });
-
-                    column.data().unique().sort().each(function(d, j){
-                        select.append('<option value="'+d+'">'+d+'</option>')
-                    });
-                });
-            }
-        });
-        var existsSelectedInProfile = $("#properties-status-select option[value='Selected in profile']").length !== 0; //détermine si cette valeur est dans le select
-        if (existsSelectedInProfile) {
-            $("#properties-status-select").val('Selected in profile').change(); //default filter on this column
-        }
-        $('#additional-notes-table').DataTable();
         $('#namespaces-table').DataTable();
 
         $('#loading-icon').hide(0);
@@ -813,6 +834,45 @@
                 }
             });
         });
+
+        {% else %}
+        $('#classes-table').DataTable();
+        {% endif %}
+
+        $('#labels-table').DataTable();
+        $('#descriptions-table').DataTable();
+        $('#properties-table').DataTable({
+            initComplete: function(){
+                this.api().columns([6]).every(function(){
+                    var column = this;
+                    var select = $('<select id="properties-status-select"><option value=""></option></select>')
+                        .appendTo($(column.header()))
+                        .on('change', function(){
+                            var val = $.fn.dataTable.util.escapeRegex(
+                                $(this).val()
+                            );
+
+                            column
+                                .search(val ? '^'+val+'$' : '', true, false)
+                                .draw();
+                        });
+
+                    $(select).click(function(e){
+                        e.stopPropagation();
+                    });
+
+                    column.data().unique().sort().each(function(d, j){
+                        select.append('<option value="'+d+'">'+d+'</option>')
+                    });
+                });
+            }
+        });
+        var existsSelectedInProfile = $("#properties-status-select option[value='Selected in profile']").length !== 0; //détermine si cette valeur est dans le select
+        if (existsSelectedInProfile) {
+            $("#properties-status-select").val('Selected in profile').change(); //default filter on this column
+        }
+        $('#additional-notes-table').DataTable();
+        $('#projects-table').DataTable();
 
         $("a[href='#graph']").click(
             function(){
