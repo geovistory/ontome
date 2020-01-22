@@ -27,6 +27,7 @@
                 <li><a data-toggle="tab" href="#my-projects">My projects</a></li>
                 <li><a data-toggle="tab" href="#my-current-namespaces">My current namespaces</a></li>
                 <li><a data-toggle="tab" href="#my-profiles">My profiles</a></li>
+                <li><a data-toggle="tab" href="#my-comments">My comments</a></li>
             </ul>
             <div class="tab-content">
                 <div id="user-info" class="tab-pane fade in active">
@@ -273,6 +274,27 @@
                         </tbody>
                     </table>
                 </div>
+                <div id="my-comments" class="tab-pane fade">
+                    <h3>My comments</h3>
+                    <table class="table table-striped" id="my-comments-table">
+                        <thead>
+                        <tr>
+                            <th>Entity</th>
+                            <th>Level</th>
+                            <th>Comment</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for comment in user.comments %}
+                        <tr>
+                            <td>#{{ comment.id }}</td>
+                            <td></td>
+                            <td>{{ comment.comment }}</td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
@@ -284,6 +306,8 @@
     <script>
         $(document).ready(function() {
             $('#my-profiles-table').DataTable({"pageLength":50});
+
+            $('#my-comments-table').DataTable();
 
             // Onglet My Projects
             $('#projects-table').DataTable({
