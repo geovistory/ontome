@@ -129,6 +129,11 @@ class User implements UserInterface
     private $currentActiveProject;
 
     /**
+     * @ORM\OneToMany(targetEntity="Comment", mappedBy="creator")
+     */
+    private $comments;
+
+    /**
      * User constructor.
      */
     public function __construct()
@@ -400,6 +405,14 @@ class User implements UserInterface
     public function setCurrentActiveProject($currentActiveProject)
     {
         $this->currentActiveProject = $currentActiveProject;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getComments()
+    {
+        return $this->comments;
     }
 
     public function __toString()
