@@ -157,6 +157,12 @@ class CommentController extends Controller
 
         //$this->denyAccessUnlessGranted('edit', $associatedObject);
 
+        if(!in_array($this->getUser()->getId(), $comment->getViewedBy())){
+            $viewedBy = $comment->getViewedBy();
+            $viewedBy[] = $this->getUser()->getId();
+            $comment->setViewedBy($viewedBy);
+        }
+
         $comment->setCreator($this->getUser());
         $comment->setModifier($this->getUser());
         $comment->setCreationTime(new \DateTime('now'));

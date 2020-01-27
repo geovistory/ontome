@@ -33,6 +33,22 @@ class Comment
     private $comment;
 
     /**
+     * @ORM\OneToMany(targetEntity="Comment", mappedBy="commentedComment")
+     */
+    private $answers;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Comment", inversedBy="commentedComment")
+     * @ORM\JoinColumn(name="fk_commented_comment", referencedColumnName="pk_comment")
+     */
+    private $commentedComment;
+
+    /**
+     * @ORM\Column(type="json_array", nullable=true)
+     */
+    private $viewedBy = [];
+
+    /**
      * @ORM\ManyToOne(targetEntity="OntoClass", inversedBy="comments")
      * @ORM\JoinColumn(name="fk_class", referencedColumnName="pk_class")
      */
@@ -112,6 +128,27 @@ class Comment
     public function getComment()
     {
         return $this->comment;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getAnswers()
+    {
+        return $this->answers;
+    }
+
+    public function getViewedBy()
+    {
+        return $this->viewedBy;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getCommentedComment()
+    {
+        return $this->commentedComment;
     }
 
     /**
@@ -296,6 +333,14 @@ class Comment
     public function setModificationTime($modificationTime)
     {
         $this->modificationTime = $modificationTime;
+    }
+
+    /**
+     * @param mixed $roles
+     */
+    public function setViewedBy(array $viewedBy)
+    {
+        $this->viewedBy = $viewedBy;
     }
 
 
