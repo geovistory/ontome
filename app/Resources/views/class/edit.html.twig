@@ -22,7 +22,7 @@
             <li><a data-toggle="tab" href="#relations">Relations</a></li>
             <li><a data-toggle="tab" href="#profiles">Profiles</a></li>
             <li><a data-toggle="tab" href="#graph">Graph</a></li>
-            <li><a data-toggle="tab" href="#comments">Comments <span class="badge {% if class.comments|length > 0  %}progress-bar-danger {% endif %}">{{ class.comments|length }}</span></a></li>
+            <li><a data-toggle="tab" href="#comments" class="updateViewComment" data-id="{{ class.id }}" data-object="class">Comments <span class="badge {% if class.comments|length > 0  %}progress-bar-danger {% endif %}">{{ class.comments|length }}</span></a></li>
         </ul>
 
         <div class="tab-content">
@@ -306,9 +306,9 @@
                                     </a>
                                 </td>
                                 <td>
-                                    <a class="btn" href="{{ path('text_property_edit', {
+                                    <a class="btn updateViewComment" href="{{ path('text_property_edit', {
                                         'id': textProperty.id
-                                    }) }}#comments">
+                                    }) }}#comments" data-id="{{ textProperty.id }}" data-object="text-property">
                                         <span class="badge {% if textProperty.comments|length > 0  %}progress-bar-danger {% endif %}">{{ textProperty.comments|length }}</span>
                                     </a>
                                 </td>
@@ -363,9 +363,9 @@
                                 </a>
                             </td>
                             <td>
-                                <a class="btn" href="{{ path('text_property_edit', {
+                                <a class="btn updateViewComment" href="{{ path('text_property_edit', {
                                     'id': textProperty.id
-                                }) }}#comments">
+                                }) }}#comments" data-id="{{ textProperty.id }}" data-object="text-property">
                                     <span class="badge {% if textProperty.comments|length > 0  %}progress-bar-danger {% endif %}">{{ textProperty.comments|length }}</span>
                                 </a>
                             </td>
@@ -420,9 +420,9 @@
                                 </a>
                             </td>
                             <td>
-                                <a class="btn" href="{{ path('text_property_edit', {
+                                <a class="btn updateViewComment" href="{{ path('text_property_edit', {
                                     'id': textProperty.id
-                                }) }}#comments">
+                                }) }}#comments" data-id="{{ textProperty.id }}" data-object="text-property">
                                     <span class="badge {% if textProperty.comments|length > 0  %}progress-bar-danger {% endif %}">{{ textProperty.comments|length }}</span>
                                 </a>
                             </td>
@@ -501,9 +501,9 @@
                                 </a>
                             </td>
                             <td>
-                                <a class="btn" href="{{ path('label_edit', {
+                                <a class="btn updateViewComment" href="{{ path('label_edit', {
                                     'id': label.id
-                                }) }}#comments">
+                                }) }}#comments" data-id="{{ label.id }}" data-object="label">
                                     <span class="badge {% if label.comments|length > 0  %}progress-bar-danger {% endif %}">{{ label.comments|length }}</span>
                                 </a>
                             </td>
@@ -1099,6 +1099,22 @@
             $('#identifier-edit-btn-close').click(function(){
                 $('#identifier-details-block').show(200);
                 $('#identifier-form-block').hide(200);
+            });
+
+            $('a.updateViewComment').on('click', function () {
+                var selectedObject = $(this).data("object");
+                var selectedValue = $(this).data("id");
+                var url = '{{ path("viewed_by_json", {'object': 'selectedObject', 'objectId': 'selectedValue'}) }}';
+                url = url.replace("selectedValue", selectedValue);
+                url = url.replace("selectedObject", selectedObject);
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    dataType: 'json',
+                    statusCode: {
+                        204: function () {}
+                    }
+                });
             });
         } );
     </script>

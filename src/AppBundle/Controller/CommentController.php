@@ -229,4 +229,89 @@ class CommentController extends Controller
             'commentForm' => $form->createView()
         ]);
     }
+
+    /**
+     * @Route("/comment/{object}/{objectId}/viewedby/json", name="viewed_by_json")
+     * @Method("GET")
+     * @return JsonResponse
+     */
+    public function viewedByJson($object, $objectId, Request $request)
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        if($object === 'class') {
+            $associatedEntity = $em->getRepository('AppBundle:OntoClass')->find($objectId);
+            if (!$associatedEntity) {
+                throw $this->createNotFoundException('The class n° '.$objectId.' does not exist');
+            }
+
+            $comments = $em->getRepository('AppBundle:Comment')->findBy(array("class" => $associatedEntity));
+        }
+        else if($object === 'property') {
+            $associatedEntity = $em->getRepository('AppBundle:Property')->find($objectId);
+            if (!$associatedEntity) {
+                throw $this->createNotFoundException('The property n° '.$objectId.' does not exist');
+            }
+
+            $comments = $em->getRepository('AppBundle:Comment')->findBy(array("property" => $associatedEntity));
+        }
+        else if($object === 'class-association') {
+            $associatedEntity = $em->getRepository('AppBundle:ClassAssociation')->find($objectId);
+            if (!$associatedEntity) {
+                throw $this->createNotFoundException('The class association n° '.$objectId.' does not exist');
+            }
+
+            $comments = $em->getRepository('AppBundle:Comment')->findBy(array("classAssociation" => $associatedEntity));
+        }
+        else if($object === 'property-association') {
+            $associatedEntity = $em->getRepository('AppBundle:PropertyAssociation')->find($objectId);
+            if (!$associatedEntity) {
+                throw $this->createNotFoundException('The property association n° '.$objectId.' does not exist');
+            }
+
+            $comments = $em->getRepository('AppBundle:Comment')->findBy(array("propertyAssociation" => $associatedEntity));
+        }
+        else if($object === 'text-property') {
+            $associatedEntity = $em->getRepository('AppBundle:TextProperty')->find($objectId);
+            if (!$associatedEntity) {
+                throw $this->createNotFoundException('The text property n° '.$objectId.' does not exist');
+            }
+
+            $comments = $em->getRepository('AppBundle:Comment')->findBy(array("textProperty" => $associatedEntity));
+        }
+        else if($object === 'label') {
+            $associatedEntity = $em->getRepository('AppBundle:Label')->find($objectId);
+            if (!$associatedEntity) {
+                throw $this->createNotFoundException('The label n° '.$objectId.' does not exist');
+            }
+
+            $comments = $em->getRepository('AppBundle:Comment')->findBy(array("label" => $associatedEntity));
+        }
+        else if($object === 'namespace') {
+            $associatedEntity = $em->getRepository('AppBundle:OntoNamespace')->find($objectId);
+            if (!$associatedEntity) {
+                throw $this->createNotFoundException('The namespace n° '.$objectId.' does not exist');
+            }
+
+            $comments = $em->getRepository('AppBundle:Comment')->findBy(array("namespace" => $associatedEntity));
+        }
+        else throw $this->createNotFoundException('The requested object "'.$object.'" does not exist!');
+
+        foreach ($comments as $comment){
+            if(!in_array($this->getUser()->getId(), $comment->getViewedBy())){
+                $viewedBy = $comment->getViewedBy();
+                $viewedBy[] = $this->getUser()->getId();
+                $comment->setViewedBy($viewedBy);
+                $em->persist($comment);
+                $em->flush();
+            }
+        }
+
+        $response = array(
+            'status' => 200,
+            'message' => "OK"
+        );
+
+        return new JsonResponse($response);
+    }
 }
