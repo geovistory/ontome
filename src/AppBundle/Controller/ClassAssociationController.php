@@ -37,7 +37,7 @@ class ClassAssociationController extends Controller
         $justification = new TextProperty();
         $justification->setClassAssociation($classAssociation);
         $justification->setSystemType($systemTypeJustification);
-        $justification->addNamespace($childClass->getOngoingNamespace());
+        $justification->addNamespace($this->getUser()->getCurrentOngoingNamespace());
         $justification->setCreator($this->getUser());
         $justification->setModifier($this->getUser());
         $justification->setCreationTime(new \DateTime('now'));
@@ -52,7 +52,7 @@ class ClassAssociationController extends Controller
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $classAssociation = $form->getData();
-            $classAssociation->addNamespace($childClass->getOngoingNamespace());
+            $classAssociation->addNamespace($this->getUser()->getCurrentOngoingNamespace());
             $classAssociation->setCreator($this->getUser());
             $classAssociation->setModifier($this->getUser());
             $classAssociation->setCreationTime(new \DateTime('now'));
@@ -62,7 +62,7 @@ class ClassAssociationController extends Controller
                 $classAssociation->getTextProperties()[1]->setCreationTime(new \DateTime('now'));
                 $classAssociation->getTextProperties()[1]->setModificationTime(new \DateTime('now'));
                 $classAssociation->getTextProperties()[1]->setSystemType($systemTypeExample);
-                $classAssociation->getTextProperties()[1]->addNamespace($childClass->getOngoingNamespace());
+                $classAssociation->getTextProperties()[1]->addNamespace($this->getUser()->getCurrentOngoingNamespace());
                 $classAssociation->getTextProperties()[1]->setClassAssociation($classAssociation);
             }
 

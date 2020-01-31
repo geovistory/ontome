@@ -163,7 +163,7 @@ class LabelController  extends Controller
 
         //ongoingNamespace associated to the label for any kind of object, except Project or Profile
         if($object !== 'project' && $object !== 'profile'  && $object !== 'namespace') {
-            $label->addNamespace($associatedObject->getOngoingNamespace());
+            $label->addNamespace($this->getUser()->getCurrentOngoingNamespace());
         }
 
         $label->setCreator($this->getUser());
@@ -181,7 +181,7 @@ class LabelController  extends Controller
 
             //ongoingNamespace associated to the label for any kind of object, except Project or Profile
             if($object !== 'project' && $object !== 'profile' && $object !== 'namespace') {
-                $label->addNamespace($associatedObject->getOngoingNamespace());
+                $label->addNamespace($this->getUser()->getCurrentOngoingNamespace());
             }
 
             $label->setCreator($this->getUser());

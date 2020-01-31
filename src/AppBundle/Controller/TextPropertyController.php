@@ -243,7 +243,7 @@ class TextPropertyController extends Controller
 
         //ongoingNamespace associated to the textProperty for any kind of object, except Project or Profile
         if($object !== 'project' && $object !== 'profile' && $object !== 'namespace') {
-            $textProperty->addNamespace($associatedObject->getOngoingNamespace());
+            $textProperty->addNamespace($this->getUser()->getCurrentOngoingNamespace());
         }
 
         $textProperty->setCreator($this->getUser());
@@ -262,7 +262,7 @@ class TextPropertyController extends Controller
 
             //ongoingNamespace associated to the textProperty for any kind of object, except Project or Profile
             if($object !== 'project' && $object !== 'profile' && $object !== 'namespace') {
-                $textProperty->addNamespace($associatedObject->getOngoingNamespace());
+                $textProperty->addNamespace($this->getUser()->getCurrentOngoingNamespace());
             }
 
             $textProperty->setCreator($this->getUser());

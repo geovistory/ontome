@@ -337,7 +337,7 @@ class OntoNamespace
     }
 
     /**
-     * @return mixed
+     * @return bool
      */
     public function getIsOngoing()
     {
