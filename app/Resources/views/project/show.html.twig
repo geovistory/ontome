@@ -192,7 +192,8 @@
             </div>
             <div id="managed-namespaces" class="tab-pane fade">
                 {% if project.managedNamespaces is not empty %}
-                    <h3>This project manages the <a href="{{ path('namespace_show', {'id':project.managedNamespaces|first.referencedVersion.id}) }}">{{ project.managedNamespaces|first.referencedVersion }}</a> namespace</h3>
+                    <h3>Root namespace</h3>
+                    <p>This project manages the <strong><a href="{{ path('namespace_show', {'id':project.managedNamespaces|first.topLevelNamespace.id}) }}">{{ project.managedNamespaces|first.topLevelNamespace }}</a></strong> namespace.</p>
                     <h3>Versions of this namespace:</h3>
                     <table class="table table-striped" id="managed-namespaces-table">
                         <thead>
@@ -202,7 +203,7 @@
                         </tr>
                         </thead>
                         <tbody>
-                        {% for namespace in project.managedNamespaces|first.referencedVersion.childVersions %}
+                        {% for namespace in project.managedNamespaces|first.topLevelNamespace.childVersions %}
                             <tr>
                                 <td>
                                     <a href="{{ path('namespace_show', {

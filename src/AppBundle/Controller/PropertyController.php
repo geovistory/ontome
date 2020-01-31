@@ -74,7 +74,7 @@ class PropertyController extends Controller
         $scopeNote = new TextProperty();
         $scopeNote->setProperty($property);
         $scopeNote->setSystemType($systemTypeScopeNote);
-        $scopeNote->addNamespace($class->getOngoingNamespace());
+        $scopeNote->addNamespace($this->getUser()->getCurrentOngoingNamespace());
         $scopeNote->setCreator($this->getUser());
         $scopeNote->setModifier($this->getUser());
         $scopeNote->setCreationTime(new \DateTime('now'));
@@ -84,7 +84,7 @@ class PropertyController extends Controller
 
         $label = new Label();
         $label->setProperty($property);
-        $label->addNamespace($class->getOngoingNamespace());
+        $label->addNamespace($this->getUser()->getCurrentOngoingNamespace());
         $label->setIsStandardLabelForLanguage(true);
         $label->setCreator($this->getUser());
         $label->setModifier($this->getUser());
@@ -100,7 +100,7 @@ class PropertyController extends Controller
         }
 
         $property->setIsManualIdentifier(is_null($class->getOngoingNamespace()->getTopLevelNamespace()->getPropertyPrefix()));
-        $property->addNamespace($class->getOngoingNamespace());
+        $property->addNamespace($this->getUser()->getCurrentOngoingNamespace());
         $property->setCreator($this->getUser());
         $property->setModifier($this->getUser());
 
@@ -133,7 +133,7 @@ class PropertyController extends Controller
                 $property->getTextProperties()[1]->setCreationTime(new \DateTime('now'));
                 $property->getTextProperties()[1]->setModificationTime(new \DateTime('now'));
                 $property->getTextProperties()[1]->setSystemType($systemTypeExample);
-                $property->getTextProperties()[1]->addNamespace($class->getOngoingNamespace());
+                $property->getTextProperties()[1]->addNamespace($this->getUser()->getCurrentOngoingNamespace());
                 $property->getTextProperties()[1]->setProperty($property);
             }
 

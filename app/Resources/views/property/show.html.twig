@@ -783,7 +783,9 @@
                     {% for profile in property.profiles %}
                         <tr>
                             <td>
-                                <a href="#">
+                                <a href="{{ path('profile_show', {
+                                    'id': profile.id
+                                }) }}">
                                     {{ profile.standardLabel }}
                                 </a>
                             </td>

@@ -360,6 +360,25 @@ class User implements UserInterface
     }
 
     /**
+     * @return Project
+     */
+    public function getCurrentActiveProject()
+    {
+        return $this->currentActiveProject;
+    }
+
+    /**
+     * @return OntoNamespace the ongoing namespace managed by the current active project
+     */
+    public function getCurrentOngoingNamespace()
+    {
+        $namespaces = $this->getCurrentActiveProject()->getManagedNamespaces()->filter(function(OntoNamespace $namespace){
+            return $namespace->getIsOngoing();
+        });
+        return $namespaces->first();
+    }
+
+    /**
      * @param mixed $token
      */
     public function setToken($token)
@@ -373,14 +392,6 @@ class User implements UserInterface
     public function setTokenDate($tokenDate)
     {
         $this->tokenDate = $tokenDate;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getCurrentActiveProject()
-    {
-        return $this->currentActiveProject;
     }
 
     /**

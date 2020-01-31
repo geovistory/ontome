@@ -54,7 +54,7 @@ class EntityAssociationController extends Controller
         $justification = new TextProperty();
         $justification->setEntityAssociation($entityAssociation);
         $justification->setSystemType($systemTypeJustification);
-        $justification->addNamespace($source->getOngoingNamespace());
+        $justification->addNamespace($source->$this->getUser()->getCurrentOngoingNamespace());
         $justification->setCreator($this->getUser());
         $justification->setModifier($this->getUser());
         $justification->setCreationTime(new \DateTime('now'));
@@ -67,7 +67,7 @@ class EntityAssociationController extends Controller
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $entityAssociation = $form->getData();
-            $entityAssociation->addNamespace($source->getOngoingNamespace());
+            $entityAssociation->addNamespace($this->getUser()->getCurrentOngoingNamespace());
             $entityAssociation->setCreator($this->getUser());
             $entityAssociation->setModifier($this->getUser());
             $entityAssociation->setCreationTime(new \DateTime('now'));
@@ -78,7 +78,7 @@ class EntityAssociationController extends Controller
                 $entityAssociation->getTextProperties()[1]->setCreationTime(new \DateTime('now'));
                 $entityAssociation->getTextProperties()[1]->setModificationTime(new \DateTime('now'));
                 $entityAssociation->getTextProperties()[1]->setSystemType($systemTypeExample);
-                $entityAssociation->getTextProperties()[1]->addNamespace($source->getOngoingNamespace());
+                $entityAssociation->getTextProperties()[1]->addNamespace($this->getUser()->getCurrentOngoingNamespace());
                 $entityAssociation->getTextProperties()[1]->setEntityAssociation($entityAssociation);
             }
 
@@ -191,7 +191,6 @@ class EntityAssociationController extends Controller
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $entityAssociation = $form->getData();
-            //$classAssociation->addNamespace($classAssociation->getChildClass()->getOngoingNamespace());
             $entityAssociation->setModifier($this->getUser());
             $entityAssociation->setModificationTime(new \DateTime('now'));
 
