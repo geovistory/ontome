@@ -122,8 +122,11 @@
             </div>
             <div id="identification" class="tab-pane fade">
                 <h3>Identification</h3>
-                <p>OntoME URI: https://dataforhistory.org/{% if namespace.originalNamespaceURI is not null %}external-{% endif %}ontology/{{ namespace.namespaceURI }}</p>
+                {% if namespace.originalNamespaceURI is null %}
+                <p>OntoME URI: https://dataforhistory.org/ontology/{{ namespace.namespaceURI }}</p>
+                {% else %}
                 <p>Original URI: {{ namespace.originalNamespaceUri|default('<i>No original URI yet.</i>')|raw }}</p>
+                {% endif %}
                 {% if namespace.projectForTopLevelNamespace is not null %}
                 <p>
                     Project of belonging: <a href="{{ path('project_show', {
@@ -202,7 +205,13 @@
                     <tbody>
                     {% for childNamespace in namespace.childVersions  %}
                         <tr>
-                            <td>{{ childNamespace.namespaceUri }}</td>
+                            <td>
+                            {% if childNamespace.originalNamespaceURI is null %}
+                                {{ childNamespace.namespaceUri }}
+                            {% else %}
+                                {{ childNamespace.originalNamespaceURI }}
+                            {% endif %}
+                            </td>
                             <td>
                                 <a href="{{ path('namespace_show', {
                                     'id': childNamespace.id,
