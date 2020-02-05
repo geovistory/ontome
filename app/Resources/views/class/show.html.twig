@@ -334,7 +334,15 @@
                     </thead>
                     <tbody>
                     {% for textProperty in class.textProperties if textProperty.systemType.id == 7 %}
-                    {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
+                        {# Savoir si l'entité se trouve bien dans l'un des espaces de nom actifs (filtrage) #}
+                        {% set isInActiveNamespaces = false %}
+                        {% for activeNamespace in activeNamespaces %}
+                            {% if activeNamespace in textProperty.namespaces %}
+                                {% set isInActiveNamespaces = true %}
+                            {% endif %}
+                        {% endfor %}
+                        {% if isInActiveNamespaces %}
+                        {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
                         <tr>
                             <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
                             <td class="truncated-text">
@@ -357,6 +365,7 @@
                                 </a>
                             </td>
                         </tr>
+                    {% endif %}
                     {% endfor %}
                     </tbody>
                 </table>
@@ -374,7 +383,15 @@
                     </thead>
                     <tbody>
                     {% for textProperty in class.textProperties if textProperty.systemType.id == 12 %}
-                    {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
+                        {# Savoir si l'additional note se trouve bien dans l'un des espaces de nom actifs (filtrage) #}
+                        {% set isInActiveNamespaces = false %}
+                        {% for activeNamespace in activeNamespaces %}
+                            {% if activeNamespace in textProperty.namespaces %}
+                                {% set isInActiveNamespaces = true %}
+                            {% endif %}
+                        {% endfor %}
+                        {% if isInActiveNamespaces %}
+                        {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
                         <tr>
                             <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
                             <td class="truncated-text">
@@ -397,6 +414,7 @@
                                 </a>
                             </td>
                         </tr>
+                        {% endif %}
                     {% endfor %}
                     </tbody>
                 </table>
@@ -416,6 +434,14 @@
                     </thead>
                     <tbody>
                     {% for label in class.labels %}
+                        {# Savoir si l'entité se trouve bien dans l'un des espaces de nom actifs (filtrage) #}
+                        {% set isInActiveNamespaces = false %}
+                        {% for activeNamespace in activeNamespaces %}
+                            {% if activeNamespace in label.namespaces %}
+                                {% set isInActiveNamespaces = true %}
+                            {% endif %}
+                        {% endfor %}
+                        {% if isInActiveNamespaces %}
                         <tr>
                             <td>
                                 <a href="{{ path('label_show', {
@@ -439,6 +465,7 @@
                                 </a>
                             </td>
                         </tr>
+                        {% endif %}
                     {% endfor %}
                     </tbody>
                 </table>
@@ -502,6 +529,14 @@
                     </thead>
                     <tbody>
                     {% for association in class.childClassAssociations %}
+                        {# Savoir si l'entité se trouve bien dans l'un des espaces de nom actifs (filtrage) #}
+                        {% set isInActiveNamespaces = false %}
+                        {% for activeNamespace in activeNamespaces %}
+                            {% if activeNamespace in association.namespaces %}
+                                {% set isInActiveNamespaces = true %}
+                            {% endif %}
+                        {% endfor %}
+                        {% if isInActiveNamespaces %}
                         <tr>
                             <td>
                                 <a href="{{ path('class_show', {
@@ -548,6 +583,7 @@
 
                             </td>
                         </tr>
+                        {% endif %}
                     {% endfor %}
                     </tbody>
                 </table>
@@ -562,6 +598,14 @@
                     </thead>
                     <tbody>
                     {% for ancestor in ancestors|sort %}
+                        {# Savoir si l'entité se trouve bien dans l'un des espaces de nom actifs (filtrage) #}
+                        {% set isInActiveNamespaces = false %}
+                        {% for activeNamespace in activeNamespaces %}
+                            {% if activeNamespace.standardLabel == ancestor.classNamespaceLabel %}
+                                {% set isInActiveNamespaces = true %}
+                            {% endif %}
+                        {% endfor %}
+                        {% if isInActiveNamespaces %}
                         <tr>
                             <td>
                                 <a href="{{ path('class_show', {
@@ -574,6 +618,7 @@
                             <td>{{ ancestor.depth }}</td>
                             <td>{{ ancestor.classNamespaceLabel }}</td>
                         </tr>
+                        {% endif %}
                     {% endfor %}
                     </tbody>
                 </table>
@@ -588,6 +633,14 @@
                     </thead>
                     <tbody>
                     {% for descendant in descendants|sort %}
+                        {# Savoir si l'entité se trouve bien dans l'un des espaces de nom actifs (filtrage) #}
+                        {% set isInActiveNamespaces = false %}
+                        {% for activeNamespace in activeNamespaces %}
+                            {% if activeNamespace.standardLabel == descendant.classNamespaceLabel %}
+                                {% set isInActiveNamespaces = true %}
+                            {% endif %}
+                        {% endfor %}
+                        {% if isInActiveNamespaces %}
                         <tr>
                             <td>
                                 <a href="{{ path('class_show', {
@@ -600,6 +653,7 @@
                             <td>{{ descendant.depth }}</td>
                             <td>{{ descendant.classNamespaceLabel }}</td>
                         </tr>
+                        {% endif %}
                     {% endfor %}
                     </tbody>
                 </table>
@@ -618,6 +672,14 @@
                     </thead>
                     <tbody>
                     {% for relation in class.entityAssociations if relation.systemType.id == 4 or relation.systemType.id == 19 %}
+                        {# Savoir si l'entité se trouve bien dans l'un des espaces de nom actifs (filtrage) #}
+                        {% set isInActiveNamespaces = false %}
+                        {% for activeNamespace in activeNamespaces %}
+                            {% if activeNamespace in relation.namespaces %}
+                                {% set isInActiveNamespaces = true %}
+                            {% endif %}
+                        {% endfor %}
+                        {% if isInActiveNamespaces %}
                         <tr>
                             <td>{{ relation.systemType }}</td>
                             {% if class.id == relation.sourceClass.id %}
@@ -668,6 +730,7 @@
                                 {% endif %}
                             </td>
                         </tr>
+                        {% endif %}
                     {% endfor %}
                     </tbody>
                 </table>
@@ -685,6 +748,14 @@
                     </thead>
                     <tbody>
                     {% for outgoingProperty in outgoingProperties|sort %}
+                        {# Savoir si l'entité se trouve bien dans l'un des espaces de nom actifs (filtrage) #}
+                        {% set isInActiveNamespaces = false %}
+                        {% for activeNamespace in activeNamespaces %}
+                            {% if activeNamespace.standardLabel == outgoingProperty.namespace %}
+                                {% set isInActiveNamespaces = true %}
+                            {% endif %}
+                        {% endfor %}
+                        {% if isInActiveNamespaces %}
                         <tr>
                             <td>
                                 {{ outgoingProperty.domain }}
@@ -705,6 +776,7 @@
                             </td>
                             <td>{{ outgoingProperty.namespace }}</td>
                         </tr>
+                        {% endif %}
                     {% endfor %}
                     </tbody>
                 </table>
@@ -720,6 +792,14 @@
                     </thead>
                     <tbody>
                     {% for outgoingInheritedProperty in outgoingInheritedProperties|sort %}
+                        {# Savoir si l'entité se trouve bien dans l'un des espaces de nom actifs (filtrage) #}
+                        {% set isInActiveNamespaces = false %}
+                        {% for activeNamespace in activeNamespaces %}
+                            {% if activeNamespace.standardLabel == outgoingInheritedProperty.namespace %}
+                                {% set isInActiveNamespaces = true %}
+                            {% endif %}
+                        {% endfor %}
+                        {% if isInActiveNamespaces %}
                         <tr>
                             <td>
                                 {{ outgoingInheritedProperty.domain }} (is a
@@ -746,6 +826,7 @@
                             </td>
                             <td>{{ outgoingInheritedProperty.namespace }}</td>
                         </tr>
+                        {% endif %}
                     {% endfor %}
                     </tbody>
                 </table>
@@ -761,6 +842,14 @@
                     </thead>
                     <tbody>
                     {% for ingoingProperty in ingoingProperties|sort %}
+                        {# Savoir si l'entité se trouve bien dans l'un des espaces de nom actifs (filtrage) #}
+                        {% set isInActiveNamespaces = false %}
+                        {% for activeNamespace in activeNamespaces %}
+                            {% if activeNamespace.standardLabel == ingoingProperty.namespace %}
+                                {% set isInActiveNamespaces = true %}
+                            {% endif %}
+                        {% endfor %}
+                        {% if isInActiveNamespaces %}
                         <tr>
                             <td>
                                 <a href="{{ path('class_show', {
@@ -781,6 +870,7 @@
                             </td>
                             <td>{{ ingoingProperty.namespace }}</td>
                         </tr>
+                        {% endif %}
                     {% endfor %}
                     </tbody>
                 </table>
@@ -796,6 +886,14 @@
                     </thead>
                     <tbody>
                     {% for ingoingInheritedProperty in ingoingInheritedProperties|sort %}
+                        {# Savoir si l'entité se trouve bien dans l'un des espaces de nom actifs (filtrage) #}
+                        {% set isInActiveNamespaces = false %}
+                        {% for activeNamespace in activeNamespaces %}
+                            {% if activeNamespace.standardLabel == ingoingInheritedProperty.namespace %}
+                                {% set isInActiveNamespaces = true %}
+                            {% endif %}
+                        {% endfor %}
+                        {% if isInActiveNamespaces %}
                         <tr>
                             <td>
                                 <a href="{{ path('class_show', {
@@ -822,6 +920,7 @@
                             </td>
                             <td>{{ ingoingInheritedProperty.namespace }}</td>
                         </tr>
+                        {% endif %}
                     {% endfor %}
                     </tbody>
                 </table>

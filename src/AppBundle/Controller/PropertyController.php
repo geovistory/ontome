@@ -191,6 +191,23 @@ class PropertyController extends Controller
 
             $activeNamespaces = $em->getRepository('AppBundle:OntoNamespace')
                 ->findAllActiveNamespacesForUser($user);
+
+            $propertyVersionNamespace = null;
+            foreach ($property->getNamespaces() as $namespace){
+                if(is_null($propertyVersionNamespace)){
+                    $propertyVersionNamespace = $namespace;
+                }
+
+                if($namespace->getCreationTime() > $propertyVersionNamespace->getCreationTime()){
+                    $propertyVersionNamespace = $namespace;
+                }
+
+                if($namespace->getIsOngoing()){
+                    $propertyVersionNamespace = $namespace;
+                    break;
+                }
+            }
+            $activeNamespaces[] = $propertyVersionNamespace;
         }
         else{
             $ancestors = $em->getRepository('AppBundle:Property')
@@ -207,6 +224,23 @@ class PropertyController extends Controller
 
             $activeNamespaces = $em->getRepository('AppBundle:OntoNamespace')
                 ->findActiveNamespacesInPublicProject();
+
+            $propertyVersionNamespace = null;
+            foreach ($property->getNamespaces() as $namespace){
+                if(is_null($propertyVersionNamespace)){
+                    $propertyVersionNamespace = $namespace;
+                }
+
+                if($namespace->getCreationTime() > $propertyVersionNamespace->getCreationTime()){
+                    $propertyVersionNamespace = $namespace;
+                }
+
+                if($namespace->getIsOngoing()){
+                    $propertyVersionNamespace = $namespace;
+                    break;
+                }
+            }
+            $activeNamespaces[] = $propertyVersionNamespace;
         }
 
         $this->get('logger')
@@ -291,6 +325,23 @@ class PropertyController extends Controller
 
             $activeNamespaces = $em->getRepository('AppBundle:OntoNamespace')
                 ->findAllActiveNamespacesForUser($user);
+
+            $propertyVersionNamespace = null;
+            foreach ($property->getNamespaces() as $namespace){
+                if(is_null($propertyVersionNamespace)){
+                    $propertyVersionNamespace = $namespace;
+                }
+
+                if($namespace->getCreationTime() > $propertyVersionNamespace->getCreationTime()){
+                    $propertyVersionNamespace = $namespace;
+                }
+
+                if($namespace->getIsOngoing()){
+                    $propertyVersionNamespace = $namespace;
+                    break;
+                }
+            }
+            $activeNamespaces[] = $propertyVersionNamespace;
         }
         else{
             $ancestors = $em->getRepository('AppBundle:Property')
@@ -307,6 +358,23 @@ class PropertyController extends Controller
 
             $activeNamespaces = $em->getRepository('AppBundle:OntoNamespace')
                 ->findActiveNamespacesInPublicProject();
+
+            $propertyVersionNamespace = null;
+            foreach ($property->getNamespaces() as $namespace){
+                if(is_null($propertyVersionNamespace)){
+                    $propertyVersionNamespace = $namespace;
+                }
+
+                if($namespace->getCreationTime() > $propertyVersionNamespace->getCreationTime()){
+                    $propertyVersionNamespace = $namespace;
+                }
+
+                if($namespace->getIsOngoing()){
+                    $propertyVersionNamespace = $namespace;
+                    break;
+                }
+            }
+            $activeNamespaces[] = $propertyVersionNamespace;
         }
 
 

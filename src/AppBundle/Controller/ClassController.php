@@ -176,6 +176,23 @@ class ClassController extends Controller
 
             $activeNamespaces = $em->getRepository('AppBundle:OntoNamespace')
                 ->findAllActiveNamespacesForUser($user);
+
+            $classVersionNamespace = null;
+            foreach ($class->getNamespaces() as $namespace){
+                if(is_null($classVersionNamespace)){
+                    $classVersionNamespace = $namespace;
+                }
+
+                if($namespace->getCreationTime() > $classVersionNamespace->getCreationTime()){
+                    $classVersionNamespace = $namespace;
+                }
+
+                if($namespace->getIsOngoing()){
+                    $classVersionNamespace = $namespace;
+                    break;
+                }
+            }
+            $activeNamespaces[] = $classVersionNamespace;
         }
         else{ // L'utilisateur n'est pas connecté
             $ancestors = $em->getRepository('AppBundle:OntoClass')
@@ -204,6 +221,23 @@ class ClassController extends Controller
 
             $activeNamespaces = $em->getRepository('AppBundle:OntoNamespace')
                 ->findActiveNamespacesInPublicProject();
+
+            $classVersionNamespace = null;
+            foreach ($class->getNamespaces() as $namespace){
+                if(is_null($classVersionNamespace)){
+                    $classVersionNamespace = $namespace;
+                }
+
+                if($namespace->getCreationTime() > $classVersionNamespace->getCreationTime()){
+                    $classVersionNamespace = $namespace;
+                }
+
+                if($namespace->getIsOngoing()){
+                    $classVersionNamespace = $namespace;
+                    break;
+                }
+            }
+            $activeNamespaces[] = $classVersionNamespace;
         }
 
         $this->get('logger')
@@ -289,6 +323,23 @@ class ClassController extends Controller
 
             $activeNamespaces = $em->getRepository('AppBundle:OntoNamespace')
                 ->findAllActiveNamespacesForUser($user);
+
+            $classVersionNamespace = null;
+            foreach ($class->getNamespaces() as $namespace){
+                if(is_null($classVersionNamespace)){
+                    $classVersionNamespace = $namespace;
+                }
+
+                if($namespace->getCreationTime() > $classVersionNamespace->getCreationTime()){
+                    $classVersionNamespace = $namespace;
+                }
+
+                if($namespace->getIsOngoing()){
+                    $classVersionNamespace = $namespace;
+                    break;
+                }
+            }
+            $activeNamespaces[] = $classVersionNamespace;
         }
         else{ // L'utilisateur n'est pas connecté
             $ancestors = $em->getRepository('AppBundle:OntoClass')
@@ -317,6 +368,23 @@ class ClassController extends Controller
 
             $activeNamespaces = $em->getRepository('AppBundle:OntoNamespace')
                 ->findActiveNamespacesInPublicProject();
+
+            $classVersionNamespace = null;
+            foreach ($class->getNamespaces() as $namespace){
+                if(is_null($classVersionNamespace)){
+                    $classVersionNamespace = $namespace;
+                }
+
+                if($namespace->getCreationTime() > $classVersionNamespace->getCreationTime()){
+                    $classVersionNamespace = $namespace;
+                }
+
+                if($namespace->getIsOngoing()){
+                    $classVersionNamespace = $namespace;
+                    break;
+                }
+            }
+            $activeNamespaces[] = $classVersionNamespace;
         }
 
         $this->get('logger')
