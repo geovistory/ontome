@@ -279,7 +279,15 @@
                     </thead>
                     <tbody>
                     {% for textProperty in property.textProperties if textProperty.systemType.id == 1 %}
-                    {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
+                        {# Savoir si le scope note se trouve bien dans l'un des espaces de nom actifs (filtrage) #}
+                        {% set isInActiveNamespaces = false %}
+                        {% for activeNamespace in activeNamespaces %}
+                            {% if activeNamespace in textProperty.namespaces %}
+                                {% set isInActiveNamespaces = true %}
+                            {% endif %}
+                        {% endfor %}
+                        {% if isInActiveNamespaces %}
+                        {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
                         <tr>
                             <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
                             <td class="truncated-text">
@@ -302,6 +310,7 @@
                                 </a>
                             </td>
                         </tr>
+                        {% endif %}
                     {% endfor %}
                     </tbody>
                 </table>
@@ -319,6 +328,14 @@
                     </thead>
                     <tbody>
                     {% for textProperty in property.textProperties if textProperty.systemType.id == 7 %}
+                        {# Savoir si le scope note se trouve bien dans l'un des espaces de nom actifs (filtrage) #}
+                        {% set isInActiveNamespaces = false %}
+                        {% for activeNamespace in activeNamespaces %}
+                            {% if activeNamespace in textProperty.namespaces %}
+                                {% set isInActiveNamespaces = true %}
+                            {% endif %}
+                        {% endfor %}
+                        {% if isInActiveNamespaces %}
                         <tr>
                             <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
                             <td class="truncated-text">
@@ -342,6 +359,7 @@
                                 </a>
                             </td>
                         </tr>
+                        {% endif %}
                     {% endfor %}
                     </tbody>
                 </table>
@@ -359,6 +377,14 @@
                     </thead>
                     <tbody>
                     {% for textProperty in property.textProperties if textProperty.systemType.id == 12 %}
+                        {# Savoir si le scope note se trouve bien dans l'un des espaces de nom actifs (filtrage) #}
+                        {% set isInActiveNamespaces = false %}
+                        {% for activeNamespace in activeNamespaces %}
+                            {% if activeNamespace in textProperty.namespaces %}
+                                {% set isInActiveNamespaces = true %}
+                            {% endif %}
+                        {% endfor %}
+                        {% if isInActiveNamespaces %}
                         <tr>
                             <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
                             <td class="truncated-text">
@@ -382,6 +408,7 @@
                                 </a>
                             </td>
                         </tr>
+                        {% endif %}
                     {% endfor %}
                     </tbody>
                 </table>
@@ -410,6 +437,14 @@
                     </thead>
                     <tbody>
                     {% for label in property.labels %}
+                        {# Savoir si l'entité se trouve bien dans l'un des espaces de nom actifs (filtrage) #}
+                        {% set isInActiveNamespaces = false %}
+                        {% for activeNamespace in activeNamespaces %}
+                            {% if activeNamespace in label.namespaces %}
+                                {% set isInActiveNamespaces = true %}
+                            {% endif %}
+                        {% endfor %}
+                        {% if isInActiveNamespaces %}
                         <tr>
                             <td>
                                 <a href="{{ path('label_show', {
@@ -433,6 +468,7 @@
                                 </a>
                             </td>
                         </tr>
+                        {% endif %}
                     {% endfor %}
                     </tbody>
                 </table>
@@ -502,6 +538,14 @@
                     </thead>
                     <tbody>
                     {% for association in property.childPropertyAssociations %}
+                        {# Savoir si l'entité se trouve bien dans l'un des espaces de nom actifs (filtrage) #}
+                        {% set isInActiveNamespaces = false %}
+                        {% for activeNamespace in activeNamespaces %}
+                            {% if activeNamespace in association.namespaces %}
+                                {% set isInActiveNamespaces = true %}
+                            {% endif %}
+                        {% endfor %}
+                        {% if isInActiveNamespaces %}
                         <tr>
                             <td class="text-right small">
                                 {% if association.parentProperty.domain is not null %}
@@ -572,6 +616,7 @@
 
                             </td>
                         </tr>
+                        {% endif %}
                     {% endfor %}
                     </tbody>
                 </table>
@@ -590,6 +635,14 @@
                     </thead>
                     <tbody>
                     {% for ancestor in ancestors|sort %}
+                        {# Savoir si l'entité se trouve bien dans l'un des espaces de nom actifs (filtrage) #}
+                        {% set isInActiveNamespaces = false %}
+                        {% for activeNamespace in activeNamespaces %}
+                            {% if activeNamespace.standardLabel == ancestor.propertyNamespaceLabel %}
+                                {% set isInActiveNamespaces = true %}
+                            {% endif %}
+                        {% endfor %}
+                        {% if isInActiveNamespaces %}
                         <tr>
                             <td class="text-right small">
                                 {% if ancestor.domainIdentifier is not null %}
@@ -634,6 +687,7 @@
                             <td>{{ ancestor.depth }}</td>
                             <td>{{ ancestor.propertyNamespaceLabel }}</td>
                         </tr>
+                        {% endif %}
                     {% endfor %}
                     </tbody>
                 </table>
@@ -652,6 +706,14 @@
                     </thead>
                     <tbody>
                     {% for descendant in descendants|sort %}
+                        {# Savoir si l'entité se trouve bien dans l'un des espaces de nom actifs (filtrage) #}
+                        {% set isInActiveNamespaces = false %}
+                        {% for activeNamespace in activeNamespaces %}
+                            {% if activeNamespace.standardLabel == descendant.propertyNamespaceLabel %}
+                                {% set isInActiveNamespaces = true %}
+                            {% endif %}
+                        {% endfor %}
+                        {% if isInActiveNamespaces %}
                         <tr>
                             <td class="text-right small">
                                 {% if descendant.domainIdentifier is not null %}
@@ -696,6 +758,7 @@
                             <td>{{ descendant.depth }}</td>
                             <td>{{ descendant.propertyNamespaceLabel }}</td>
                         </tr>
+                        {% endif %}
                     {% endfor %}
                     </tbody>
                 </table>
@@ -714,6 +777,14 @@
                     </thead>
                     <tbody>
                     {% for relation in property.entityAssociations if relation.systemType.id == 18 or relation.systemType.id == 20 %}
+                        {# Savoir si l'entité se trouve bien dans l'un des espaces de nom actifs (filtrage) #}
+                        {% set isInActiveNamespaces = false %}
+                        {% for activeNamespace in activeNamespaces %}
+                            {% if activeNamespace in relation.namespaces %}
+                                {% set isInActiveNamespaces = true %}
+                            {% endif %}
+                        {% endfor %}
+                        {% if isInActiveNamespaces %}
                         <tr>
                             <td>{{ relation.systemType }}</td>
                             {% if property.id == relation.sourceProperty.id %}
@@ -764,6 +835,7 @@
                                 {% endif %}
                             </td>
                         </tr>
+                        {% endif %}
                     {% endfor %}
                     </tbody>
                 </table>
