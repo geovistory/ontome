@@ -63,6 +63,7 @@
                         <thead>
                         <tr>
                             <th>Project name</th>
+                            <th>Master project</th>
                             <th>Last updated</th>
                             <th>Action</th>
                         </tr>
@@ -78,6 +79,15 @@
                                     </a>
                                     {% if userProjectAssociation.project.standardLabel == userActiveProjectAssociation.project.standardLabel %}
                                         <span class="label label-success" style="margin-left: 10px;"><i class="fas fa-dot-circle"></i> Active</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if userProjectAssociation.project.parentProject is not null %}
+                                        <a href="{{ path('project_show', {'id': userProjectAssociation.project.parentProject.id}) }}">
+                                        {{ userProjectAssociation.project.parentProject.standardLabel }}
+                                        </a>
+                                    {% else %}
+                                        <span class="text-muted">(Master)</span>
                                     {% endif %}
                                 </td>
                                 <td>{{ userProjectAssociation.project.modificationTime|date('Y-m-d') }}</td>
@@ -152,7 +162,7 @@
                                         {% if break %}
                                         <ul>
                                         {% for referencedNamespaceAssociation in additionalNamespace.referencedNamespaceAssociations if referencedNamespaceAssociation.referencedNamespace is not null %}
-                                            <li class="list-unstyled"><em><a href="{{ path('namespace_show', {'id': referencedNamespaceAssociation.referencedNamespace.id}) }}">{{ referencedNamespaceAssociation.referencedNamespace.standardLabel }}</a></em></li>
+                                            <li class="list-unstyled"><em class="text-muted">{{ referencedNamespaceAssociation.referencedNamespace.standardLabel }}</em></li>
                                         {% endfor %}
                                         </ul>
                                         {% endif %}
@@ -209,7 +219,7 @@
                                     {% else %}
                                         <li class="list-unstyled" style="margin-left: -30px;">
                                             <a href="#" class="check-namespace" data-id="{{ namespace.id }}"><span class="glyphicon glyphicon-unchecked text-muted" aria-hidden="true"></span></a>
-                                            <a href="{{ path('namespace_show', {'id': namespace.id}) }}">{{ namespace.standardLabel }}</a>
+                                            <a class="text-muted" href="{{ path('namespace_show', {'id': namespace.id}) }}">{{ namespace.standardLabel }}</a>
                                         </li>
                                     {% endif %}
                                 {% endfor %}
@@ -230,7 +240,7 @@
                                     {% if break %}
                                         <ul>
                                             {% for referencedNamespaceAssociation in displayedNamespace.referencedNamespaceAssociations if referencedNamespaceAssociation.referencedNamespace is not null %}
-                                                <li class="list-unstyled"><em><a href="{{ path('namespace_show', {'id': referencedNamespaceAssociation.referencedNamespace.id}) }}">{{ referencedNamespaceAssociation.referencedNamespace.standardLabel }}</a></em></li>
+                                                <li class="list-unstyled"><em class="text-muted">{{ referencedNamespaceAssociation.referencedNamespace.standardLabel }}</em></li>
                                             {% endfor %}
                                         </ul>
                                     {% endif %}
@@ -466,7 +476,7 @@
             $('#projects-table').DataTable({
                 columnDefs: [ {
                     targets: [ 0 ],
-                    orderData: [ 2, 0 ]
+                    orderData: [ 3, 0 ]
                 }]
             });
 
