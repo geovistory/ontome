@@ -558,13 +558,14 @@
                     <thead>
                     <tr>
                         <th>Class</th>
+                        <th>Class namespace</th>
+                        <th>Relation defined in</th>
                         <th>Justification</th>
-                        <th>Relation namespace</th>
                         <th>
                             {% if is_granted('edit', class) %}
-                                Edit association
+                                Edit relation
                             {% else %}
-                                View association
+                                View relation
                             {% endif %}
                         </th>
                     </tr>
@@ -588,14 +589,7 @@
                                     {{ association.parentClass.invertedLabel }}
                                 </a>
                             </td>
-                            <td>
-                                {% if association.textProperties is not null %}
-                                    {% for textProperty in association.textProperties if textProperty.systemType.id == 15 and textProperty.languageIsoCode == 'en' %}
-                                        <a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="fas fa-info-circle" aria-hidden="true"></span></a>
-                                        {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
-                                    {% endfor %}
-                                {% endif %}
-                            </td>
+                            <td>{{ association.parentClass.ongoingNamespace }}</td>
                             <td>
                                 {% if association.namespaces is not null %}
                                     {% for ns in association.namespaces %}
@@ -603,6 +597,16 @@
                                     {% endfor %}
                                 {% else %}
                                     WIP
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if association.textProperties is not null %}
+                                    {% for textProperty in association.textProperties if textProperty.systemType.id == 15 %}
+                                        {% if loop.index == 1 %}
+                                            <a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="fas fa-info-circle" aria-hidden="true"></span></a>
+                                            {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
+                                        {% endif %}
+                                    {% endfor %}
                                 {% endif %}
                             </td>
                             <td>
@@ -713,8 +717,8 @@
                         <th>Relation</th>
                         <th>Class</th>
                         <th>Justification</th>
-                        <th>Relation namespace</th>
-                        <th>Edit relations</th>
+                        <th>Relation defined in</th>
+                        <th>Edit relation</th>
                     </tr>
                     </thead>
                     <tbody>

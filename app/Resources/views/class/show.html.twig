@@ -516,13 +516,14 @@
                     <thead>
                     <tr>
                         <th>Class</th>
+                        <th>Class namespace</th>
+                        <th>Relation defined in</th>
                         <th>Justification</th>
-                        <th>Relation namespace</th>
                         <th>
                             {% if is_granted('edit', class) %}
-                                Edit association
+                                Edit relation
                             {% else %}
-                                View association
+                                View relation
                             {% endif %}
                         </th>
                     </tr>
@@ -546,6 +547,16 @@
                                     {{ association.parentClass.invertedLabel }}
                                 </a>
                             </td>
+                            <td>{{ association.parentClass.ongoingNamespace }}</td>
+                            <td>
+                                {% if association.namespaces is not null %}
+                                    {% for ns in association.namespaces %}
+                                        {{ ns.standardLabel }}
+                                    {% endfor %}
+                                {% else %}
+                                    WIP
+                                {% endif %}
+                            </td>
                             <td>
                                 {% if association.textProperties is not null %}
                                     {% for textProperty in association.textProperties if textProperty.systemType.id == 15 %}
@@ -554,15 +565,6 @@
                                             {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
                                         {% endif %}
                                     {% endfor %}
-                                {% endif %}
-                            </td>
-                            <td>
-                                {% if association.namespaces is not null %}
-                                    {% for ns in association.namespaces %}
-                                        {{ ns.standardLabel }}
-                                    {% endfor %}
-                                {% else %}
-                                    WIP
                                 {% endif %}
                             </td>
                             <td>
@@ -666,8 +668,8 @@
                             <th>Relation</th>
                             <th>Class</th>
                             <th>Justification</th>
-                            <th>Relation namespace</th>
-                            <th>View details</th>
+                            <th>Relation defined in</th>
+                            <th>View relation</th>
                         </tr>
                     </thead>
                     <tbody>
