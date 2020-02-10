@@ -187,32 +187,34 @@
             <div id="project-hierarchy" class="tab-pane fade">
                 <h3>Hierarchy</h3>
                 {% if project.parentProject is null  %}
-                    <p>{{ project.standardLabel }} is a <b>root project</b>.</p>
-                    <h3>Subprojects</h3>
-                    <table class="table table-striped" id="child-projects-table">
-                        <thead>
-                        <tr>
-                            <th>Project name</th>
-                            <th>Last updated</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {% for childProject in project.childProjects  %}
+                    <p>{{ project.standardLabel }} is a <b>master project</b>{% if project.childProjects|length == 0 %} and has no subproject{% endif %}.</p>
+                    {% if project.childProjects|length != 0 %}
+                        <h3>Subprojects</h3>
+                        <table class="table table-striped" id="child-projects-table">
+                            <thead>
                             <tr>
-                                <td>
-                                    <a href="{{ path('project_show', {
-                                        'id': childProject.id
-                                    }) }}#project-hierarchy">
-                                        {{ childProject.standardLabel }}
-                                    </a>
-                                </td>
-                                <td>{{ childProject.modificationTime|date('Y-m-d') }}</td>
+                                <th>Project name</th>
+                                <th>Last updated</th>
                             </tr>
-                        {% endfor %}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                            {% for childProject in project.childProjects  %}
+                                <tr>
+                                    <td>
+                                        <a href="{{ path('project_show', {
+                                            'id': childProject.id
+                                        }) }}#project-hierarchy">
+                                            {{ childProject.standardLabel }}
+                                        </a>
+                                    </td>
+                                    <td>{{ childProject.modificationTime|date('Y-m-d') }}</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    {% endif %}
                 {% else %}
-                    <p>Root project: <a href="{{ path('project_show', {
+                    <p>Master project: <a href="{{ path('project_show', {
                             'id': project.parentProject.id,
                             '_fragment':'project-hierarchy'
                         }) }}">
