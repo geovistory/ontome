@@ -418,17 +418,19 @@
                     {% set namespaces = [] %}
 
                     {# toutes les versions de l'espace de noms de haut niveau géré par le projet #}
-                    {% set managedNamespace = project.managedNamespaces|first.topLevelNamespace %}
-                    {% set namespaces = namespaces|merge(managedNamespace.childVersions) %}
+                    {% if project.managedNamespaces is not empty %}
+                        {% set managedNamespace = project.managedNamespaces|first.topLevelNamespace %}
+                        {% set namespaces = namespaces|merge(managedNamespace.childVersions) %}
 
-                    {# la ou les versions des espaces de noms de référence #}
-                    {% for nsversion in managedNamespace.childVersions %}
-                        {% for refnsassoc in nsversion.referencedNamespaceAssociations %}
-                            {% if refnsassoc.referencedNamespace not in namespaces %}
-                                {% set namespaces = namespaces|merge([refnsassoc.referencedNamespace]) %}
-                            {% endif %}
+                        {# la ou les versions des espaces de noms de référence #}
+                        {% for nsversion in managedNamespace.childVersions %}
+                            {% for refnsassoc in nsversion.referencedNamespaceAssociations %}
+                                {% if refnsassoc.referencedNamespace not in namespaces %}
+                                    {% set namespaces = namespaces|merge([refnsassoc.referencedNamespace]) %}
+                                {% endif %}
+                            {% endfor %}
                         {% endfor %}
-                    {% endfor %}
+                    {% endif %}
 
                     {# la ou les versions des espaces de noms sélectionnés par le ou les profils du projet #}
                     {% for profil in project.ownedProfiles %}
