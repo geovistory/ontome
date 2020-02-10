@@ -35,7 +35,7 @@
             <li><a data-toggle="tab" href="#classes">Classes</a></li>
             <li><a data-toggle="tab" href="#properties">Properties</a></li>
             <li><a data-toggle="tab" href="#graph">Graph</a></li>
-            <li><a data-toggle="tab" href="#comments">Comments</a></li>
+            <li><a data-toggle="tab" href="#comments" class="updateViewComment" data-id="{{ namespace.id }}" data-object="namespace">Comments</a></li>
         </ul>
 
         <div class="tab-content">
@@ -365,6 +365,22 @@
             $('#properties-table').DataTable();
             $('#classes-table').DataTable();
             $('#child-namespaces-table').DataTable();
+
+            $('a.updateViewComment').on('click', function () {
+                var selectedObject = $(this).data("object");
+                var selectedValue = $(this).data("id");
+                var url = '{{ path("viewed_by_json", {'object': 'selectedObject', 'objectId': 'selectedValue'}) }}';
+                url = url.replace("selectedValue", selectedValue);
+                url = url.replace("selectedObject", selectedObject);
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    dataType: 'json',
+                    statusCode: {
+                        204: function () {}
+                    }
+                });
+            });
         } );
     </script>
     {% include 'comment/js-bock.html.twig'  with {'objectType': 'namespace', 'objectId' : namespace.id  } %}

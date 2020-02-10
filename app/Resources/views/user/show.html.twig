@@ -27,6 +27,7 @@
                 <li><a data-toggle="tab" href="#my-projects">My projects</a></li>
                 <li><a data-toggle="tab" href="#my-current-namespaces">My current namespaces</a></li>
                 <li><a data-toggle="tab" href="#my-profiles">My profiles</a></li>
+                <li><a data-toggle="tab" href="#my-comments">My comments</a></li>
             </ul>
             <div class="tab-content">
                 <div id="user-info" class="tab-pane fade in active">
@@ -273,6 +274,161 @@
                         </tbody>
                     </table>
                 </div>
+                <div id="my-comments" class="tab-pane fade">
+                    <h3>My comments</h3>
+                    <table class="table table-striped" id="my-comments-table">
+                        <thead>
+                        <tr>
+                            <th>Entity</th>
+                            <th>Commented section</th>
+                            <th class="text-nowrap">Creation date</th>
+                            <th>Last comment</th>
+                            <th>Unread replies</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% set entitiesList = [] %}
+                        {% for comment in user.comments|sort|reverse %}
+                            {% if comment.class is not null %}
+                                {% set entity = "class" %}
+                                {% set id = comment.class.id %}
+                            {% elseif comment.property is not null %}
+                                {% set entity = "property" %}
+                                {% set id = comment.property.id %}
+                            {% elseif comment.label is not null %}
+                                {% set entity = "label" %}
+                                {% set id = comment.label.id %}
+                            {% elseif comment.namespace is not null %}
+                                {% set entity = "namespace" %}
+                                {% set id = comment.namespace.id %}
+                            {% elseif comment.classAssociation is not null %}
+                                {% set entity = "classAssociation" %}
+                                {% set id = comment.classAssociation.id %}
+                            {% elseif comment.propertyAssociation is not null %}
+                                {% set entity = "propertyAssociation" %}
+                                {% set id = comment.propertyAssociation.id %}
+                            {% elseif comment.textProperty is not null %}
+                                {% set entity = "textProperty" %}
+                                {% set id = comment.textProperty.id %}
+                            {% endif %}
+
+                            {% if [entity,id] not in entitiesList %}
+                                {# Pour ne pas à avoir à répeter une même entité #}
+                                {% set entitiesList = entitiesList|merge([[entity,id]]) %}
+                                <tr>
+                                    <td class="text-nowrap">
+                                        {% if comment.class is not null %}
+                                            {{ comment.class.invertedLabel }}
+                                        {% elseif comment.property is not null %}
+                                            {{ comment.property.invertedLabel }}
+                                        {% elseif comment.label is not null %}
+                                            {{ comment.label }}
+                                        {% elseif comment.namespace is not null %}
+                                            {{ comment.namespace }}
+                                        {% elseif comment.classAssociation is not null %}
+                                            {{ comment.classAssociation }}
+                                        {% elseif comment.propertyAssociation is not null %}
+                                            {{ comment.propertyAssociation }}
+                                        {% elseif comment.textProperty is not null %}
+                                            {% if comment.textProperty.class is not null %}
+                                                {{ comment.textProperty.class.invertedLabel }}
+                                            {% elseif comment.textProperty.property is not null %}
+                                                {{ comment.textProperty.property.invertedLabel }}
+                                            {% elseif comment.textProperty.namespace is not null %}
+                                                {{ comment.textProperty.namespace }}
+                                            {% elseif comment.textProperty.project is not null %}
+                                                {{ comment.textProperty.project }}
+                                            {% elseif comment.textProperty.profile is not null %}
+                                                {{ comment.textProperty.profile }}
+                                            {% elseif comment.textProperty.classAssociation is not null %}
+                                                {{ comment.textProperty.classAssociation }}
+                                            {% elseif comment.textProperty.entityAssociation is not null %}
+                                                {{ comment.textProperty.entityAssociation }}
+                                            {% elseif comment.textProperty.propertyAssociation is not null %}
+                                                {{ comment.textProperty.propertyAssociation }}
+                                            {% elseif comment.textProperty.propertyAssociation is not null %}
+                                                {{ comment.textProperty.propertyAssociation }}
+                                            {% endif %}
+                                        {% else %}
+                                            General
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-nowrap">
+                                        {% if comment.class is not null %}
+                                            Class
+                                        {% elseif comment.property is not null %}
+                                            Property
+                                        {% elseif comment.label is not null %}
+                                            Label
+                                        {% elseif comment.namespace is not null %}
+                                            Namespace
+                                        {% elseif comment.classAssociation is not null %}
+                                            Class association
+                                        {% elseif comment.propertyAssociation is not null %}
+                                            Property association
+                                        {% elseif comment.textProperty is not null %}
+                                            {% if comment.textProperty.systemType is not null %}
+                                                {{ comment.textProperty.systemType.standardLabel|capitalize }}
+                                            {% endif %}
+                                        {% else %}
+                                            General
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-nowrap">{{ comment.creationTime|date('Y-m-d') }}</td>
+                                    <td class="truncated-text" width="100%">
+                                        <span>
+                                        {% if comment.class is not null %}
+                                        <a href="{{ path('class_show', {'id': comment.class.id, '_fragment': 'comments'}) }}" class="updateViewComment" data-id="{{ comment.class.id }}" data-object="class">
+                                        {% elseif comment.property is not null %}
+                                            <a href="{{ path('property_show', {'id': comment.property.id, '_fragment': 'comments'}) }}" class="updateViewComment" data-id="{{ comment.property.id }}" data-object="property">
+                                        {% elseif comment.label is not null %}
+                                            <a href="{{ path('label_show', {'id': comment.label.id, '_fragment': 'comments'}) }}" class="updateViewComment" data-id="{{ comment.label.id }}" data-object="label">
+                                        {% elseif comment.namespace is not null %}
+                                            <a href="{{ path('namespace_show', {'id': comment.namespace.id, '_fragment': 'comments'}) }}" class="updateViewComment" data-id="{{ comment.namespace.id }}" data-object="namespace">
+                                        {% elseif comment.classAssociation is not null %}
+                                            <a href="{{ path('class_association_show', {'id': comment.classAssociation.id, '_fragment': 'comments'}) }}" class="updateViewComment" data-id="{{ comment.classAssociation.id }}" data-object="classAssociation">
+                                        {% elseif comment.propertyAssociation is not null %}
+                                            <a href="{{ path('property_association_show', {'id': comment.propertyAssociation.id, '_fragment': 'comments'}) }}" class="updateViewComment" data-id="{{ comment.propertyAssociation.id }}" data-object="propertyAssociation">
+                                        {% elseif comment.textProperty is not null %}
+                                            <a href="{{ path('text_property_show', {'id': comment.textProperty.id, '_fragment': 'comments'}) }}" class="updateViewComment" data-id="{{ comment.textProperty.id }}" data-object="textProperty">
+                                        {% else %}
+                                            General
+                                        {% endif %}
+                                                {{ comment.comment|striptags|raw }}</a>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% set nb_unseen_comment = 0 %}
+                                        {% if comment.class is not null %}
+                                            {% set coms = comment.class.comments %}
+                                        {% elseif comment.property is not null %}
+                                            {% set coms = comment.property.comments %}
+                                        {% elseif comment.label is not null %}
+                                            {% set coms = comment.label.comments %}
+                                        {% elseif comment.namespace is not null %}
+                                            {% set coms = comment.namespace.comments %}
+                                        {% elseif comment.classAssociation is not null %}
+                                            {% set coms = comment.classAssociation.comments %}
+                                        {% elseif comment.propertyAssociation is not null %}
+                                            {% set coms = comment.propertyAssociation.comments %}
+                                        {% elseif comment.textProperty is not null %}
+                                            {% set coms = comment.textProperty.comments %}
+                                        {% else %}
+                                            {% set coms = [] %}
+                                        {% endif %}
+                                        {% for com in coms %}
+                                            {% if user.id not in com.viewedBy %}
+                                                {% set nb_unseen_comment = nb_unseen_comment + 1 %}
+                                            {% endif %}
+                                        {% endfor %}
+                                        <span class="badge {% if nb_unseen_comment > 0 %}progress-bar-danger{% endif %}">{{ nb_unseen_comment }}</span>
+                                    </td>
+                                </tr>
+                                {% endif %}
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
@@ -283,7 +439,28 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.4/js/select2.min.js"></script>
     <script>
         $(document).ready(function() {
+
+            $('a.updateViewComment').on('click', function () {
+                var selectedObject = $(this).data("object");
+                var selectedValue = $(this).data("id");
+                var url = '{{ path("viewed_by_json", {'object': 'selectedObject', 'objectId': 'selectedValue'}) }}';
+                url = url.replace("selectedValue", selectedValue);
+                url = url.replace("selectedObject", selectedObject);
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    dataType: 'json',
+                    statusCode: {
+                        204: function () {}
+                    }
+                });
+            });
+
             $('#my-profiles-table').DataTable({"pageLength":50});
+
+            $('#my-comments-table').DataTable({
+                "order": [[ 4, 'desc' ], [ 2, 'desc' ], [ 0, 'asc' ], [ 1, 'asc' ]]
+            });
 
             // Onglet My Projects
             $('#projects-table').DataTable({
