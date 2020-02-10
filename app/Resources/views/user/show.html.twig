@@ -276,7 +276,6 @@
                 </div>
                 <div id="my-comments" class="tab-pane fade">
                     <h3>My comments</h3>
-                    <p>Total of my comments : {{ user.comments|length }} comments</p>
                     <table class="table table-striped" id="my-comments-table">
                         <thead>
                         <tr>
@@ -459,7 +458,9 @@
 
             $('#my-profiles-table').DataTable({"pageLength":50});
 
-            $('#my-comments-table').DataTable();
+            $('#my-comments-table').DataTable({
+                "order": [[ 4, 'desc' ], [ 2, 'desc' ], [ 0, 'asc' ], [ 1, 'asc' ]]
+            });
 
             // Onglet My Projects
             $('#projects-table').DataTable({
