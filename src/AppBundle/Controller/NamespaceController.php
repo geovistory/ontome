@@ -105,6 +105,7 @@ class NamespaceController  extends Controller
         if ($form->isSubmitted() && $form->isValid()) {
             $namespace = $form->getData();
             $namespace->setProjectForTopLevelNamespace($project);
+            $namespace->setTopLevelNamespace($namespace);
             $namespace->setCreator($this->getUser());
             $namespace->setModifier($this->getUser());
             $namespace->setCreationTime(new \DateTime('now'));
@@ -116,6 +117,7 @@ class NamespaceController  extends Controller
             $namespace->setNamespaceURI($labelForURI);
             $namespace->setIsTopLevelNamespace(true);
             $namespace->setIsOngoing(false);
+
 
             $ongoingNamespace->setNamespaceURI($labelForURI.'-ongoing');
             $ongoingNamespace->setIsTopLevelNamespace(false);
