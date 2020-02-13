@@ -10,7 +10,9 @@ namespace AppBundle\Controller;
 
 use AppBundle\Entity\Label;
 use AppBundle\Entity\OntoNamespace;
+use AppBundle\Entity\Profile;
 use AppBundle\Entity\Project;
+use AppBundle\Entity\ProjectAssociation;
 use AppBundle\Entity\TextProperty;
 use AppBundle\Entity\User;
 use AppBundle\Entity\UserProjectAssociation;
@@ -326,4 +328,137 @@ class ProjectController  extends Controller
 
     }
 
+    /**
+     * @Route("/selectable-profiles/project/{project}/json", name="selectable_profiles_project_json")
+     * @Method("GET")
+     * @param Project $project
+     * @return JsonResponse a Json formatted list representation of Profiles selectable by Project
+     */
+    public function getSelectableProfilesByProject(Project $project)
+    {
+        try{
+            $em = $this->getDoctrine()->getManager();
+            $profiles = $em->getRepository('AppBundle:Profile')
+                ->findProfilesForAssociationWithProjectByProjectId($project);
+            $data['data'] = $profiles;
+            $data = json_encode($data);
+        }
+        catch (NotFoundHttpException $e) {
+            return new JsonResponse(null,404, 'content-type:application/problem+json');
+        }
+
+        if(empty($profiles)) {
+            return new JsonResponse(null,204, array());
+        }
+
+        return new JsonResponse($data,200, array(), true);
+    }
+
+    /**
+     * @Route("/associated-profiles/project/{project}/json", name="associated_profiles_project_json")
+     * @Method("GET")
+     * @param Project $project
+     * @return JsonResponse a Json formatted list representation of Profiles associated with Project
+     */
+    public function getAssociatedProfilesByProject(Project $project)
+    {
+        try{
+            $em = $this->getDoctrine()->getManager();
+            $profiles = $em->getRepository('AppBundle:Profile')
+                ->findProfilesByProjectId($project);
+            $data['data'] = $profiles;
+            $data = json_encode($data);
+        }
+        catch (NotFoundHttpException $e) {
+            return new JsonResponse(null,404, 'content-type:application/problem+json');
+        }
+
+        if(empty($profiles)) {
+            return new JsonResponse(null,204, array());
+        }
+
+        return new JsonResponse($data,200, array(), true);
+    }
+
+    /**
+     * @Route("/project/{project}/profile/{profile}/add", name="project_profile_association")
+     * @Method({ "POST"})
+     * @param Profile  $profile The profile to be associated with a project
+     * @param Project  $project   The project to be associated with a profile
+     * @throws \Exception in case of unsuccessful association
+     * @return JsonResponse a Json formatted namespaces list
+     */
+    public function newProjectProfileAssociationAction(Profile $profile, Project $project, Request $request)
+    {
+        $this->denyAccessUnlessGranted('edit', $project);
+
+        $em = $this->getDoctrine()->getManager();
+        $projectAssociation = $em->getRepository('AppBundle:ProjectAssociation')
+            ->findOneBy(array('project' => $project->getId(), 'profile' => $profile->getId()));
+
+        if (!is_null($projectAssociation)) {
+            if($projectAssociation->getSystemType()->getId() == 11) {
+                $status = 'Error';
+                $message = 'This profile is already used by this project';
+            }
+            else {
+                $systemType = $em->getRepository('AppBundle:SystemType')->find(11); //systemType 11 = Used by project
+                $projectAssociation->setSystemType($systemType);
+
+                $em->persist($projectAssociation);
+                $em->flush();
+
+                $status = 'Success';
+                $message = 'Profile successfully re-associated';
+            }
+        }
+        else {
+            $em = $this->getDoctrine()->getManager();
+
+            $projectAssociation = new ProjectAssociation();
+            $projectAssociation->setProject($project);
+            $projectAssociation->setProfile($profile);
+            $systemType = $em->getRepository('AppBundle:SystemType')->find(11); //systemType 11 = Used by project
+            $projectAssociation->setSystemType($systemType);
+            $projectAssociation->setCreator($this->getUser());
+            $projectAssociation->setModifier($this->getUser());
+            $projectAssociation->setCreationTime(new \DateTime('now'));
+            $projectAssociation->setModificationTime(new \DateTime('now'));
+            $em->persist($projectAssociation);
+
+            $em->flush();
+            $status = 'Success';
+            $message = 'Profile successfully associated';
+        }
+
+
+        $response = array(
+            'status' => $status,
+            'message' => $message
+        );
+
+        return new JsonResponse($response);
+    }
+
+    /**
+    * @Route("/project/{project}/profile/{profile}/delete", name="project_profile_disassociation")
+    * @Method({ "POST"})
+    * @param Profile  $profile    The profile to be disassociated from a project
+    * @param Project  $project    The project to be disassociated from a profile
+    * @return JsonResponse a Json 204 HTTP response
+    */
+    public function deleteProjectProfileAssociationAction(Profile $profile, Project $project, Request $request)
+    {
+        $this->denyAccessUnlessGranted('edit', $project);
+        $em = $this->getDoctrine()->getManager();
+
+        $projectAssociation = $em->getRepository('AppBundle:ProjectAssociation')
+            ->findOneBy(array('project' => $project->getId(), 'profile' => $profile->getId()));
+
+        $em->remove($projectAssociation);
+        $em->flush();
+
+        return new JsonResponse(null, 204);
+
+    }
 }
