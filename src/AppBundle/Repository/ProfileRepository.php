@@ -104,7 +104,11 @@ class ProfileRepository extends EntityRepository
             ->getConnection();
 
         $sql = "SELECT DISTINCT pk_profile AS id, 
-                standard_label AS \"standardLabel\"
+                standard_label AS \"standardLabel\",
+                was_closed_at AS \"wasClosedAt\",
+                end_date AS \"endDate\",
+                is_forced_publication AS \"isForcedPublication\",
+                is_ongoing AS \"isOngoing\"
                 FROM che.profile
                 WHERE pk_profile IN(
                   SELECT fk_profile 
