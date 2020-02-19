@@ -209,13 +209,6 @@
                         <tr {% if is_granted('edit', childNamespace) and childNamespace.isOngoing %}class="success"{% endif %}>
                             <td>{{ childNamespace.publishedAt|date('Y-m-d H-i:s') }}</td>
                             <td>
-                                {% if childNamespace.originalNamespaceURI is null %}
-                                    {{ childNamespace.namespaceUri }}
-                                {% else %}
-                                    {{ childNamespace.originalNamespaceURI }}
-                                {% endif %}
-                            </td>
-                            <td>
                                 <a href="{{ path('namespace_show', {
                                     'id': childNamespace.id,
                                     '_fragment': 'namespace-hierarchy'
@@ -223,7 +216,7 @@
                                     {{ childNamespace.standardLabel }}
                                 </a>
                             </td>
-                            <td>{{ childNamespace.namespaceUri }}</td>
+                            <td>{{ childNamespace.displayURI }}</td>
                             <td>{{ childNamespace.modificationTime|date('Y-m-d') }}</td>
                             <td>
                                 {% set isEnabled = false %}
