@@ -622,16 +622,16 @@ class UserController extends Controller
             }
         }
 
-        $referencedNamespacesStandardLabels = array();
+        $referencedNamespaces = array();
 
         foreach ($eupa->getNamespace()->getReferencedNamespaceAssociations() as $referencedNamespacesAssociations) {
-            $referencedNamespacesStandardLabels[] = $referencedNamespacesAssociations->getReferencedNamespace()->getStandardLabel();
+            $referencedNamespaces[] = array('id'=>$referencedNamespacesAssociations->getReferencedNamespace()->getId(),'standardLabel'=>$referencedNamespacesAssociations->getReferencedNamespace()->getStandardLabel());
         }
 
         $response = array(
             'status' => $status,
             'message' => $message,
-            'referencedNamespaceLabels' => $referencedNamespacesStandardLabels
+            'referencedNamespaces' => $referencedNamespaces
         );
 
         return new JsonResponse($response);
