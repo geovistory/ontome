@@ -230,6 +230,12 @@
                                     {% for eupa in upa.entityUserProjectAssociations if eupa.systemType.id == 25 %}
                                         {% if eupa.namespace == childNamespace %}
                                             <a href="{{ path('user_show', {'id': app.user.id, '_fragment': 'my-current-namespaces'}) }}"><span class="glyphicon glyphicon-check" aria-hidden="true"></span></a>
+                                        {% elseif eupa.namespace.referencedNamespaceAssociations is not empty %}
+                                            {% for referencedNamespaceAssociation in eupa.namespace.referencedNamespaceAssociations %}
+                                                {% if referencedNamespaceAssociation.referencedNamespace == childNamespace %}
+                                                    <a href="{{ path('user_show', {'id': app.user.id, '_fragment': 'my-current-namespaces'}) }}"><span class="glyphicon glyphicon-check" aria-hidden="true"></span></a>
+                                                {% endif %}
+                                            {% endfor %}
                                         {% endif %}
                                     {% endfor %}
                                 {% endfor %}
