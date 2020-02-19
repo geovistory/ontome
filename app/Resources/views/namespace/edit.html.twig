@@ -308,17 +308,16 @@
                     <thead>
                     <tr>
                         <th>PublishedAt</th>
-                        <th>Namespaces URI</th>
-                        <th>Namespaces identifier</th>
+                        <th>Namespace</th>
+                        <th>URI</th>
                         <th>Last updated</th>
-                        <th>Enabled namespace</th>
+                        <th>Current namespace</th>
                     </tr>
                     </thead>
                     <tbody>
                     {% for childNamespace in namespace.childVersions %}
                         <tr {% if is_granted('edit', childNamespace) and childNamespace.isOngoing %}class="success"{% endif %}>
                             <td>{{ childNamespace.publishedAt|date('Y-m-d H-i:s') }}</td>
-                            <td>{{ childNamespace.namespaceUri }}</td>
                             <td>
                                 <a href="{{ path('namespace_show', {
                                     'id': childNamespace.id,
@@ -327,22 +326,24 @@
                                     {{ childNamespace.standardLabel }}
                                 </a>
                             </td>
+                            <td>{{ childNamespace.namespaceUri }}</td>
                             <td>{{ childNamespace.modificationTime|date('Y-m-d') }}</td>
                             <td>
                                 {% set isEnabled = false %}
                                 {% for upa in app.user.userProjectAssociations if upa.project == app.user.currentActiveProject %}
                                     {% for eupa in upa.entityUserProjectAssociations if eupa.systemType.id == 25 %}
                                         {% if eupa.namespace == childNamespace %}
-                                            <a href="{{ path('user_show', {'id': app.user.id, '_fragment': 'my-current-namespaces'}) }}"><span class="glyphicon glyphicon-check" aria-hidden="true"></span></a>
+                                            {% set isEnabled = true %}
                                         {% elseif eupa.namespace.referencedNamespaceAssociations is not empty %}
                                             {% for referencedNamespaceAssociation in eupa.namespace.referencedNamespaceAssociations %}
                                                 {% if referencedNamespaceAssociation.referencedNamespace == childNamespace %}
-                                                    <a href="{{ path('user_show', {'id': app.user.id, '_fragment': 'my-current-namespaces'}) }}"><span class="glyphicon glyphicon-check" aria-hidden="true"></span></a>
+                                                    {% set isEnabled = true %}
                                                 {% endif %}
                                             {% endfor %}
                                         {% endif %}
                                     {% endfor %}
                                 {% endfor %}
+                                <a href="{{ path('user_show', {'id': app.user.id, '_fragment': 'my-current-namespaces'}) }}">{% if isEnabled %}Yes{% else %}No{% endif %}</a>
                             </td>
                         </tr>
                     {% endfor %}
