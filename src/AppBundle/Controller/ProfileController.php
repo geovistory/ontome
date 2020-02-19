@@ -931,4 +931,68 @@ class ProfileController  extends Controller
         return new JsonResponse($profile[0]['json'],200, array(), true);
     }
 
+    /**
+     * @Route("/profile/{profile}/recreate", name="profile_recreate")
+     * @Method({ "GET"})
+     * @param Profile  $profile    The published profile to be recreate
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse
+     */
+    public function recreateProfileFromPublishedProfileAction(Profile $profile, Request $request)
+    {
+        $this->denyAccessUnlessGranted('edit', $profile->getProjectOfBelonging());
+        $em = $this->getDoctrine()->getManager();
+
+        try {
+            if(!$profile->getIsOngoing() and !is_null($profile->getWasClosedAt()) and is_null($profile->getEndDate())) {
+                $newProfile = new Profile();
+
+                $newProfile->setStandardLabel($profile->getStandardLabel().' ongoing');
+                $newProfile->setIsOngoing(true);
+                $newProfile->setIsForcedPublication(false);
+
+                $newProfile->setProjectOfBelonging($profile->getProjectOfBelonging());
+
+                $newProfile->setCreator($this->getUser());
+                $newProfile->setModifier($this->getUser());
+                $newProfile->setCreationTime(new \DateTime('now'));
+                $newProfile->setModificationTime(new \DateTime('now'));
+
+                foreach ($profile->getTextProperties() as $textProperty){
+                    $newTextProperty = clone $textProperty;
+                    $newProfile->addTextProperty($newTextProperty);
+                }
+
+                foreach ($profile->getLabels() as $label){
+                    $newLabel = clone $label;
+                    $newLabel->setLabel($profile->getStandardLabel().' ongoing');
+                    $newProfile->addLabel($newLabel);
+                }
+
+                foreach ($profile->getProfileAssociations() as $profileAssociation){
+                    $newProfileAssociation = clone $profileAssociation;
+                    $newProfile->addProfileAssociation($newProfileAssociation);
+                }
+
+                foreach ($profile->getNamespaces() as $namespace){
+                    $newProfile->addNamespace($namespace);
+                }
+
+                $em->persist($newProfile);
+                $em->flush();
+            }
+            else{
+                throw $this->createNotFoundException('The profile n° '.$profile->getId().' is ongoing or depreceated, and can\'t be recreate.');
+            }
+
+        }
+        catch (\Exception $e) {
+            throw $this->createNotFoundException('The profile can\'t be recreate. Please contact an administrator.');
+        }
+
+        return $this->redirectToRoute('project_show', [
+            'id' => $profile->getProjectOfBelonging()->getId(),
+            '_fragment' => 'profiles'
+        ]);
+
+    }
 }
