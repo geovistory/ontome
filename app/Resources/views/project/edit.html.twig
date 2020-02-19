@@ -338,11 +338,11 @@
                                         class="btn btn-primary">
                                         <i class="fas fa-microchip"></i> JSON Properties
                                     </a>
-                                    {% if (not profile.isOngoing and profile.wasClosedAt is not null and profile.endDate is null and is_granted('edit', project)) %}
-                                        <a class="recreate-btn btn btn-primary" data-id="{{ profile.id }}" role="button"><i class="fas fa-microchip"></i> Copy in a new ongoing profile</a>
-                                    {% endif %}
                                 {% else %}
                                     Not published in API
+                                {% endif %}
+                                {% if (not profile.isOngoing and profile.wasClosedAt is not null and profile.endDate is null and is_granted('edit', project)) %}
+                                    <a class="recreate-btn btn btn-primary" data-id="{{ profile.id }}" role="button"><i class="fas fa-microchip"></i> Copy in a new ongoing profile</a>
                                 {% endif %}
                             </td>
                         </tr>
