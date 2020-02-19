@@ -112,6 +112,14 @@ class ProjectAssociation
     }
 
     /**
+     * @return mixed
+     */
+    public function getProfile()
+    {
+        return $this->profile;
+    }
+
+    /**
      * @return SystemType
      */
     public function getSystemType()
@@ -167,6 +175,14 @@ class ProjectAssociation
     public function setProject($project)
     {
         $this->project = $project;
+    }
+
+    /**
+     * @param mixed $profile
+     */
+    public function setProfile($profile)
+    {
+        $this->profile = $profile;
     }
 
     /**

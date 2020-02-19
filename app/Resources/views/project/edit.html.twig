@@ -15,7 +15,7 @@
             <li><a data-toggle="tab" href="#managed-namespaces">Namespaces</a></li>
             <li><a data-toggle="tab" href="#profiles">Profiles</a></li>
             <li><a data-toggle="tab" href="#members">Members</a></li>
-            <li><a data-toggle="tab" href="#comments-list">Comments list</a></li>
+            <!--<li><a data-toggle="tab" href="#comments-list">Comments list</a></li>-->
         </ul>
         <div class="tab-content">
             <div id="summary" class="tab-pane fade in active">
@@ -68,7 +68,7 @@
                     </thead>
                     <tbody>
                     {% for textProperty in project.textProperties if textProperty.systemType.id == 16 %}
-                    {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
+                        {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
                         <tr>
                             <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
                             <td class="truncated-text">
@@ -107,7 +107,7 @@
                     </thead>
                     <tbody>
                     {% for textProperty in project.textProperties if textProperty.systemType.id == 12 %}
-                    {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
+                        {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
                         <tr>
                             <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
                             <td class="truncated-text">
@@ -131,7 +131,7 @@
             <div id="identification" class="tab-pane fade">
                 <h3>Identification</h3>
                 {% if  project.startDate is not null %}
-                <p>Start date: {{ project.startDate|date('Y-m-d') }}</p>
+                    <p>Start date: {{ project.startDate|date('Y-m-d') }}</p>
                 {% endif %}
                 {% if  project.endDate is not null %}
                     <p>End date: {{ project.endDate|date('Y-m-d') }}</p>
@@ -225,9 +225,9 @@
             </div>
             <div id="managed-namespaces" class="tab-pane fade">
                 {% if is_granted('full_edit', project) and project.managedNamespaces is empty %}
-                <div class="pull-right add-div">
-                    <a href="{{ path('namespace_new', {'project': project.id}) }}" class="btn btn-primary pull-right">Add <span class="fa fa-plus-circle"></span></a>
-                </div>
+                    <div class="pull-right add-div">
+                        <a href="{{ path('namespace_new', {'project': project.id}) }}" class="btn btn-primary pull-right">Add <span class="fa fa-plus-circle"></span></a>
+                    </div>
                 {% endif %}
                 {% if project.managedNamespaces is not empty %}
                     <h3>Root namespace</h3>
@@ -322,56 +322,36 @@
                     {% endfor %}
                     </tbody>
                 </table>
-                <h3>
-                    Profiles used by this project
-                    <a data-toggle="tooltip" data-placement="right" title="These profiles are available in the API">
-                        <span class="fas fa-info-circle"></span>
-                    </a>
-                </h3>
-                <table class="table table-striped" id="associated-profiles-table">
-                    <thead>
-                    <tr>
-                        <th>Profile</th>
-                        <th>Creation date</th>
-                        <th>API</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% for profile in project.profiles %}
-                        <tr>
-                            <td>
-                                <a href="{{ path('profile_show', {
-                                    'id': profile.id
-                                }) }}">
-                                    {{ profile.standardLabel }}
-                                </a>
-                            </td>
-                            <td>{{ profile.creationTime|date('Y-m-d') }}</td>
-                            <td>
-                                {% if (not profile.isOngoing and profile.wasClosedAt is not null and profile.endDate is null) or (profile.isForcedPublication and profile.isOngoing ) %}
-                                    <a  href="{{ path('api_classes_profile_json', {
-                                        'lang': 'en',
-                                        'available-in-profile': profile.id
-                                    }) }}"
-                                        class="btn btn-primary">
-                                        <i class="fas fa-microchip"></i> JSON Classes
-                                    </a>
-                                    &nbsp;
-                                    <a  href="{{ path('api_properties_profile_json', {
-                                        'lang': 'en',
-                                        'available-in-profile': profile.id
-                                    }) }}"
-                                        class="btn btn-primary">
-                                        <i class="fas fa-microchip"></i> JSON Properties
-                                    </a>
-                                {% else %}
-                                    API not available
-                                {% endif %}
-                            </td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
+                <div class="row">
+                    <div class="col-lg-8">
+                        <h3>
+                            Profiles used by this project
+                            <a data-toggle="tooltip" data-placement="right" title="These profiles are published in the API of the project">
+                                <span class="fas fa-info-circle"></span>
+                            </a>
+                        </h3>
+                        <table class="table table-striped" id="associated-profiles-table">
+                            <thead>
+                            <tr>
+                                <th></th>
+                                <th>Profile</th>
+                                <th>API</th>
+                            </tr>
+                            </thead>
+                        </table>
+                    </div>
+                    <div class="col-lg-4">
+                        <h3>Selectable profiles</h3>
+                        <table class="table table-striped" id="selectable-profiles-table">
+                            <thead>
+                            <tr>
+                                <th></th>
+                                <th>Profile</th>
+                            </tr>
+                            </thead>
+                        </table>
+                    </div>
+                </div>
             </div>
             <div id="members" class="tab-pane fade">
                 <div class="row">
@@ -403,153 +383,7 @@
                     </div>
                 </div>
             </div>
-            <div id="comments-list" class="tab-pane fade">
-                <h3>Project-related comments</h3>
-                <table class="table table-striped" id="comments-list-table" style="width:100%">
-                    <thead>
-                    <tr>
-                        <th>Entity</th>
-                        <th>Commented section</th>
-                        <th class="text-nowrap">Creation date</th>
-                        <th>Comment</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% set namespaces = [] %}
-
-                    {# toutes les versions de l'espace de noms de haut niveau géré par le projet #}
-                    {% if project.managedNamespaces is not empty %}
-                        {% set managedNamespace = project.managedNamespaces|first.topLevelNamespace %}
-                        {% set namespaces = namespaces|merge(managedNamespace.childVersions) %}
-
-                        {# la ou les versions des espaces de noms de référence #}
-                        {% for nsversion in managedNamespace.childVersions %}
-                            {% for refnsassoc in nsversion.referencedNamespaceAssociations %}
-                                {% if refnsassoc.referencedNamespace not in namespaces %}
-                                    {% set namespaces = namespaces|merge([refnsassoc.referencedNamespace]) %}
-                                {% endif %}
-                            {% endfor %}
-                        {% endfor %}
-                    {% endif %}
-
-                    {# la ou les versions des espaces de noms sélectionnés par le ou les profils du projet #}
-                    {% for profil in project.ownedProfiles %}
-                        {% for ns in profil.namespaces %}
-                            {% if ns not in namespaces %}
-                                {% set namespaces = namespaces|merge([ns]) %}
-                            {% endif %}
-                        {% endfor %}
-                    {% endfor %}
-
-                    {% set comments = [] %}
-                    {% for ns in namespaces %}
-                        {% for class in ns.classes %}
-                            {% set comments = comments|merge(class.comments) %}
-                            {% for label in class.labels %}
-                                {% set comments = comments|merge(label.comments) %}
-                            {% endfor %}
-                            {% for textProperty in class.textProperties %}
-                                {% set comments = comments|merge(textProperty.comments) %}
-                            {% endfor %}
-                        {% endfor %}
-                        {% for property in ns.properties %}
-                            {% set comments = comments|merge(property.comments) %}
-                            {% for label in property.labels %}
-                                {% set comments = comments|merge(label.comments) %}
-                            {% endfor %}
-                            {% for textProperty in property.textProperties %}
-                                {% set comments = comments|merge(textProperty.comments) %}
-                            {% endfor %}
-                        {% endfor %}
-                    {% endfor %}
-                    {% for comment in comments %}
-                        <tr>
-                            <td class="text-nowrap">
-                                {% if comment.class is not null %}
-                                    {{ comment.class.invertedLabel }}
-                                {% elseif comment.property is not null %}
-                                    {{ comment.property.invertedLabel }}
-                                {% elseif comment.label is not null %}
-                                    {{ comment.label }}
-                                {% elseif comment.namespace is not null %}
-                                    {{ comment.namespace }}
-                                {% elseif comment.classAssociation is not null %}
-                                    {{ comment.classAssociation }}
-                                {% elseif comment.propertyAssociation is not null %}
-                                    {{ comment.propertyAssociation }}
-                                {% elseif comment.textProperty is not null %}
-                                    {% if comment.textProperty.class is not null %}
-                                        {{ comment.textProperty.class.invertedLabel }}
-                                    {% elseif comment.textProperty.property is not null %}
-                                        {{ comment.textProperty.property.invertedLabel }}
-                                    {% elseif comment.textProperty.namespace is not null %}
-                                        {{ comment.textProperty.namespace }}
-                                    {% elseif comment.textProperty.project is not null %}
-                                        {{ comment.textProperty.project }}
-                                    {% elseif comment.textProperty.profile is not null %}
-                                        {{ comment.textProperty.profile }}
-                                    {% elseif comment.textProperty.classAssociation is not null %}
-                                        {{ comment.textProperty.classAssociation }}
-                                    {% elseif comment.textProperty.entityAssociation is not null %}
-                                        {{ comment.textProperty.entityAssociation }}
-                                    {% elseif comment.textProperty.propertyAssociation is not null %}
-                                        {{ comment.textProperty.propertyAssociation }}
-                                    {% elseif comment.textProperty.propertyAssociation is not null %}
-                                        {{ comment.textProperty.propertyAssociation }}
-                                    {% endif %}
-                                {% else %}
-                                    General
-                                {% endif %}
-                            </td>
-                            <td class="text-nowrap">
-                                {% if comment.class is not null %}
-                                    Class
-                                {% elseif comment.property is not null %}
-                                    Property
-                                {% elseif comment.label is not null %}
-                                    Label
-                                {% elseif comment.namespace is not null %}
-                                    Namespace
-                                {% elseif comment.classAssociation is not null %}
-                                    Class association
-                                {% elseif comment.propertyAssociation is not null %}
-                                    Property association
-                                {% elseif comment.textProperty is not null %}
-                                    {% if comment.textProperty.systemType is not null %}
-                                        {{ comment.textProperty.systemType.standardLabel|capitalize }}
-                                    {% endif %}
-                                {% else %}
-                                    General
-                                {% endif %}
-                            </td>
-                            <td class="text-nowrap">{{ comment.creationTime|date('Y-m-d') }}</td>
-                            <td class="truncated-text" width="100%">
-                                    <span>
-                                    {% if comment.class is not null %}
-                                    <a href="{{ path('class_show', {'id': comment.class.id, '_fragment': 'comments'}) }}" class="updateViewComment" data-id="{{ comment.class.id }}" data-object="class">
-                                    {% elseif comment.property is not null %}
-                                        <a href="{{ path('property_show', {'id': comment.property.id, '_fragment': 'comments'}) }}" class="updateViewComment" data-id="{{ comment.property.id }}" data-object="property">
-                                    {% elseif comment.label is not null %}
-                                        <a href="{{ path('label_show', {'id': comment.label.id, '_fragment': 'comments'}) }}" class="updateViewComment" data-id="{{ comment.label.id }}" data-object="label">
-                                    {% elseif comment.namespace is not null %}
-                                        <a href="{{ path('namespace_show', {'id': comment.namespace.id, '_fragment': 'comments'}) }}" class="updateViewComment" data-id="{{ comment.namespace.id }}" data-object="namespace">
-                                    {% elseif comment.classAssociation is not null %}
-                                        <a href="{{ path('class_association_show', {'id': comment.classAssociation.id, '_fragment': 'comments'}) }}" class="updateViewComment" data-id="{{ comment.classAssociation.id }}" data-object="classAssociation">
-                                    {% elseif comment.propertyAssociation is not null %}
-                                        <a href="{{ path('property_association_show', {'id': comment.propertyAssociation.id, '_fragment': 'comments'}) }}" class="updateViewComment" data-id="{{ comment.propertyAssociation.id }}" data-object="propertyAssociation">
-                                    {% elseif comment.textProperty is not null %}
-                                        <a href="{{ path('text_property_show', {'id': comment.textProperty.id, '_fragment': 'comments'}) }}" class="updateViewComment" data-id="{{ comment.textProperty.id }}" data-object="textProperty">
-                                    {% else %}
-                                        General
-                                            {% endif %}
-                                            {{ comment.comment|striptags|raw }}</a>
-                                    </span>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+            <!-- Onglet Comment List - Retiré par AP - Sauvegardé sous Desktop/commentList.txt -->
         </div>
     </div>
 
@@ -558,7 +392,7 @@
 
 {% block javascripts %}
     {{ parent() }}
-
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.4/js/select2.min.js"></script>
     <script>
         $(document).ready(function() {
             var projectID = {{ project.id }};
@@ -593,7 +427,6 @@
             $('#public-project-namespaces-table').DataTable();
             $('#comments-list-table').DataTable();
             $('#owned-profiles-table').DataTable();
-            $('#associated-profiles-table').DataTable();
             var associatedMembersTable = $('#members-of-the-project-table').DataTable({
                 order: [[ 4, "asc" ]],
                 ajax: urlAssociatedMembers,
@@ -657,14 +490,14 @@
                                 var permissionButtonGroup = '';
                                 if(data == 1){
                                     permissionButtonGroup = '<div class="btn-group">\n' +
-                                    '  <button type="button" class="btn btn-xs btn-danger dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">\n' +
-                                    '    Administrator <span class="caret"></span>\n' +
-                                    '  </button>\n' +
-                                    '  <ul class="dropdown-menu">\n' +
-                                    '    <li><a data-url="' + urlEditAssociationPermissionManager + '" class="edit-association-permission">Manager</a></li>\n' +
-                                    '    <li><a data-url="' + urlEditAssociationPermissionMember + '" class="edit-association-permission">Member</a></li>\n' +
-                                    '  </ul>\n' +
-                                    '</div>';
+                                        '  <button type="button" class="btn btn-xs btn-danger dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">\n' +
+                                        '    Administrator <span class="caret"></span>\n' +
+                                        '  </button>\n' +
+                                        '  <ul class="dropdown-menu">\n' +
+                                        '    <li><a data-url="' + urlEditAssociationPermissionManager + '" class="edit-association-permission">Manager</a></li>\n' +
+                                        '    <li><a data-url="' + urlEditAssociationPermissionMember + '" class="edit-association-permission">Member</a></li>\n' +
+                                        '  </ul>\n' +
+                                        '</div>';
                                 }
                                 else if(data == 2){
                                     permissionButtonGroup = '<div class="btn-group">\n' +
@@ -771,6 +604,126 @@
                 });
             });
 
+            // -----
+            // Onglet Profiles
+            // -----
+            var projectID = {{ project.id }};
+            var urlSelectableProfiles = '{{ path("selectable_profiles_project_json", {'project' : 'projectID'}) }}';
+            urlSelectableProfiles = urlSelectableProfiles.replace("projectID", projectID);
+
+            var urlAssociatedProfiles = '{{ path("associated_profiles_project_json", {'project' : 'projectID'}) }}';
+            urlAssociatedProfiles = urlAssociatedProfiles.replace("projectID", projectID);
+
+            var associatedProfilesTable = $('#associated-profiles-table').DataTable({
+                order: [[ 1, "desc" ]],
+                ajax: urlAssociatedProfiles,
+                dataSrc: 'data',
+                columns: [
+                    { data: 'id' },
+                    { data: 'standardLabel' },
+                    { data: null }
+                ],
+                columnDefs: [
+                    {
+                        targets: 0,
+                        render: function ( data, type, row, meta ) {
+
+                            var urlRemoveProfile = '{{ path("project_profile_disassociation", {'project' : 'projectID', 'profile' : 'profileID'}) }}';
+                            urlRemoveProfile = urlRemoveProfile.replace("projectID", projectID);
+                            urlRemoveProfile = urlRemoveProfile.replace("profileID", row.id);
+                            return '<a href="#profiles" data-id="' + row.id + '" data-url="' + urlRemoveProfile + '" class="remove-profile"><span class="glyphicon glyphicon-remove text-danger" aria-hidden="true"></span></a><span class="remove-profile-loading-icon" data-id="' + row.id + '" style="display: none"><span class="fas fa-spinner fa-spin"></span></span>';
+                        }
+                    },
+                    {
+                        targets: 1,
+                        render: function ( data, type, row, meta ) {
+                            var urlProfile = '{{ path("profile_show", {'id' : 'profileID'}) }}';
+                            urlProfile = urlProfile.replace("profileID", row.id);
+
+                            return '<a href="' + urlProfile + '">' + data + '</a>';
+
+                        }
+                    },
+                    {
+                        targets: 2,
+                        render: function ( data, type, row, meta ) {
+                            if((!row.isOngoing && row.wasClosedAt != null && row.endDate == null) || (row.isForcedPublication && row.isOngoing)){
+                            var urlApiClassesProfileJson = '{{ path("api_classes_profile_json", {'lang': 'en', 'available-in-profile' : 'profileID'}) }}';
+                            var urlApiPropertiesProfileJson = '{{ path("api_classes_profile_json", {'lang': 'en', 'available-in-profile' : 'profileID'}) }}';
+                            urlApiClassesProfileJson = urlApiClassesProfileJson.replace("profileID", row.id);
+                            urlApiPropertiesProfileJson = urlApiPropertiesProfileJson.replace("profileID", row.id);
+
+                            return '<a href="' + urlApiClassesProfileJson + '" class="btn btn-primary"><i class="fas fa-microchip"></i> JSON Classes</a>' +
+                                ' <a href="' + urlApiPropertiesProfileJson + '" class="btn btn-primary"><i class="fas fa-microchip"></i> JSON Properties</a>';
+                            }
+                            else{
+                                return 'API not available';
+                            }
+                        }
+                    }
+                ]
+            });
+            var selectableProfilesTable = $('#selectable-profiles-table').DataTable({
+                ajax: urlSelectableProfiles,
+                dataSrc: 'data',
+                columns: [
+                    { data: 'profileId' },
+                    { data: 'standardLabel' }
+                ],
+                columnDefs: [
+                    {
+                        targets: 0,
+                        render: function ( data, type, row, meta ) {
+                            var urlSelectProfil = '{{ path("project_profile_association", {'project' : 'projectID', 'profile' : 'profileID'}) }}';
+                            urlSelectProfil = urlSelectProfil.replace("projectID", projectID);
+                            urlSelectProfil = urlSelectProfil.replace("profileID", row.profileId);
+                            return '<a href="#profiles" data-id="'+row.profileId+'" data-url="'+urlSelectProfil+'" class="select-profile"><span class="plus-icon" data-id="'+row.profileId+'"><span class="fas fa-plus"></span></span><span class="select-profile-loading-icon" data-id="'+row.profileId+'" style="display: none"><span class="fas fa-spinner fa-spin"></span></span></a>';
+                        }
+                    },
+                    {
+                        targets: 1,
+                        render: function ( data, type, row, meta ) {
+                            var urlProfil = '{{ path("profile_show", {'id' : 'profileID'}) }}';
+                            urlProfil = urlProfil.replace("profileID", row.profileId);
+                            return '<a href="'+urlProfil+'">'+data+'</a>';
+                        }
+                    },
+                ]
+            });
+
+            $(document).on("click", ".select-profile", function() {
+                var selectedValue = $(this).data("id");
+                $(".plus-icon[data-id='"+selectedValue+"']").hide(0);
+                $(".select-profile-loading-icon[data-id='"+selectedValue+"']").css('display','inline');
+                var url =  $(this).data("url");
+                console.log(url);
+                $.ajax({
+                    url: url ,
+                    type: 'POST',
+                    dataType: 'json',
+                    success:function(data){
+                        selectableProfilesTable.ajax.reload();
+                        associatedProfilesTable.ajax.reload();
+                    }
+                });
+            });
+
+            $(document).on("click", ".remove-profile", function() {
+                var selectedValue = $(this).data("id");
+                $(".remove-profile[data-id='"+selectedValue+"']").hide(0);
+                $(".remove-profile-loading-icon[data-id='"+selectedValue+"']").css('display','inline');
+                var url =  $(this).data("url");
+                console.log(url);
+                $.ajax({
+                    url: url ,
+                    type: 'POST',
+                    dataType: 'json',
+                    success:function(data){
+                        associatedProfilesTable.ajax.reload();
+                        selectableProfilesTable.ajax.reload();
+                    }
+                });
+            });
         } );
     </script>
 

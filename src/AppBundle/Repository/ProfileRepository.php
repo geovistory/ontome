@@ -9,6 +9,7 @@
 namespace AppBundle\Repository;
 
 use AppBundle\Entity\Profile;
+use AppBundle\Entity\Project;
 use AppBundle\Entity\User;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Query\ResultSetMappingBuilder;
@@ -90,6 +91,58 @@ class ProfileRepository extends EntityRepository
             'selectingProject' => $selectingProjectId,
             'owningProject' => $owningProjectId
         ));
+
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * @param Project $project
+     * @return array
+     */
+    public function findProfilesByProjectId(Project $project){
+        $conn = $this->getEntityManager()
+            ->getConnection();
+
+        $sql = "SELECT DISTINCT pk_profile AS id, 
+                standard_label AS \"standardLabel\",
+                was_closed_at AS \"wasClosedAt\",
+                end_date AS \"endDate\",
+                is_forced_publication AS \"isForcedPublication\",
+                is_ongoing AS \"isOngoing\"
+                FROM che.profile
+                WHERE pk_profile IN(
+                  SELECT fk_profile 
+                  FROM che.associates_project 
+                  WHERE fk_project = :project
+                  );";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute(array('project' => $project->getId()));
+
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * @param Project $project
+     * @return array
+     */
+    public function findProfilesForAssociationWithProjectByProjectId(Project $project){
+        $conn = $this->getEntityManager()
+            ->getConnection();
+
+        $sql = "SELECT DISTINCT pk_profile AS \"profileId\", standard_label AS \"standardLabel\"
+                FROM che.profile
+                WHERE was_closed_at IS NOT NULL OR is_forced_publication
+                EXCEPT 
+                SELECT DISTINCT pk_profile AS id, 
+                standard_label AS \"standardLabel\"
+                FROM che.profile
+                WHERE pk_profile IN(
+                  SELECT fk_profile 
+                  FROM che.associates_project 
+                  WHERE fk_project = :project
+                  );";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute(array('project' => $project->getId()));
 
         return $stmt->fetchAll();
     }
