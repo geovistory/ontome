@@ -716,4 +716,17 @@ class OntoNamespace
         return (string) $s;
     }
 
+    /**
+     * @return string the URI to be displayed
+     */
+    public function getDisplayURI()
+    {
+        $s ='';
+        if(!empty($this->originalNamespaceURI)){
+            $s = $this->originalNamespaceURI;
+        }
+        else $s = 'https://ontome.dataforhistory.org/'.$this->namespaceURI;
+        return $s;
+    }
+
 }
