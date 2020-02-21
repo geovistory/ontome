@@ -131,7 +131,7 @@ class ProfileRepository extends EntityRepository
 
         $sql = "SELECT DISTINCT pk_profile AS \"profileId\", standard_label AS \"standardLabel\"
                 FROM che.profile
-                WHERE was_closed_at IS NOT NULL OR is_forced_publication
+                WHERE (was_closed_at IS NOT NULL OR is_forced_publication) AND end_date IS NULL
                 EXCEPT 
                 SELECT DISTINCT pk_profile AS id, 
                 standard_label AS \"standardLabel\"
