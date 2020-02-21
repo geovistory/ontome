@@ -675,7 +675,7 @@ class Property
         else if(!is_null($this->getStandardLabel())) {
             $s = $this->getStandardLabel().' – '.$this->getIdentifierInNamespace();
         }
-        else $s = $this->getStandardLabel();
+        else $s = $this->getIdentifierInNamespace();
         return (string) $s;
     }
 
