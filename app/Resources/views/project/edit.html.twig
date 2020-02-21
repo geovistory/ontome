@@ -305,6 +305,7 @@
                     <tr>
                         <th>Profile</th>
                         <th>Creation date</th>
+                        <th>API</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -318,6 +319,27 @@
                                 </a>
                             </td>
                             <td>{{ profile.creationTime|date('Y-m-d') }}</td>
+                            <td>
+                                {% if (not profile.isOngoing and profile.wasClosedAt is not null and profile.endDate is null) or (profile.isForcedPublication and profile.isOngoing ) %}
+                                    <a  href="{{ path('api_classes_profile_json', {
+                                        'lang': 'en',
+                                        'available-in-profile': profile.id
+                                    }) }}"
+                                        class="btn btn-primary">
+                                        <i class="fas fa-microchip"></i> JSON Classes
+                                    </a>
+                                    &nbsp;
+                                    <a  href="{{ path('api_properties_profile_json', {
+                                        'lang': 'en',
+                                        'available-in-profile': profile.id
+                                    }) }}"
+                                        class="btn btn-primary">
+                                        <i class="fas fa-microchip"></i> JSON Properties
+                                    </a>
+                                {% else %}
+                                    Not published in API
+                                {% endif %}
+                            </td>
                         </tr>
                     {% endfor %}
                     </tbody>
@@ -657,7 +679,7 @@
                                 ' <a href="' + urlApiPropertiesProfileJson + '" class="btn btn-primary"><i class="fas fa-microchip"></i> JSON Properties</a>';
                             }
                             else{
-                                return 'API not available';
+                                return 'Not published in API';
                             }
                         }
                     }
