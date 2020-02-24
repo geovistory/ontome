@@ -54,7 +54,7 @@ class EntityAssociationController extends Controller
         $justification = new TextProperty();
         $justification->setEntityAssociation($entityAssociation);
         $justification->setSystemType($systemTypeJustification);
-        $justification->addNamespace($source->$this->getUser()->getCurrentOngoingNamespace());
+        $justification->addNamespace($this->getUser()->getCurrentOngoingNamespace());
         $justification->setCreator($this->getUser());
         $justification->setModifier($this->getUser());
         $justification->setCreationTime(new \DateTime('now'));
