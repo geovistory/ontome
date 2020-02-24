@@ -248,7 +248,7 @@
                                     {# Savoir si cet entité se trouve bien dans l'un des espaces de nom actifs (filtrage) #}
                                     {% set isInActiveNamespaces = false %}
                                     {% for activeNamespace in activeNamespaces %}
-                                        {% if activeNamespace in textProperty.namespaces %}
+                                        {% if activeNamespace in association.namespaces %}
                                             {% set isInActiveNamespaces = true %}
                                         {% endif %}
                                     {% endfor %}
@@ -347,8 +347,7 @@
                         {% endfor %}
                         {% if isInActiveNamespaces %}
                         <tr>
-                        {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
-                        <tr>
+                            {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
                             <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
                             <td class="truncated-text">
                                 <span>{{ textProperty.textProperty|striptags|raw }}</span>
