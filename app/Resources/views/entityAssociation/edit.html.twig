@@ -31,6 +31,7 @@
 
         <ul class="nav nav-tabs" id="main-tabs">
             <li class="active"><a data-toggle="tab" href="#justifications">Relation and justifications</a></li>
+            <li><a data-toggle="tab" href="#comments" class="updateViewComment" data-id="{{ entityAssociation.id }}" data-object="entity-association">Comments <span class="badge {% if entityAssociation.comments|length > 0  %}progress-bar-danger {% endif %}">{{ entityAssociation.comments|length }}</span></a></li>
         </ul>
 
         <div class="tab-content">
@@ -187,12 +188,40 @@
                     </tbody>
                 </table>
             </div>
+            <div id="comments" class="tab-pane fade">
+                <h3>Comments</h3>
+                <div class="comment-box js-user-info" data-fullname="{{ app.user }}">
+                    <div class="action-box">
+                        {% if entityAssociation.comments is empty %}
+                            <p id="comment-not-found"><em>No comment found.</em></p>
+                        {% endif %}
+                        <ul id="comments-list" class="comments-list">
+                            {% for comment in entityAssociation.comments %}
+                                <li>
+                                    <div class="comment-text">
+                                        <p><strong><a href="#">{{ comment.creator.fullName }}</a></strong></p>
+                                        <p>{{ comment.comment }}</p>
+                                        <span class="date sub-comment-text">on {{ comment.creationTime|date() }}</span>
+                                    </div>
+                                </li>
+                            {% endfor %}
+                        </ul>
+
+                        {% if app.user %}
+                            <div class="new-comment-form" id="new-comment-form">
+                                {{ render(controller('AppBundle:Comment:new', {'object' : 'entity-association', 'objectId' : entityAssociation.id})) }}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 {% endblock %}
 
 {% block javascripts %}
     {{ parent() }}
+    {% include 'comment/js-bock.html.twig'  with {'objectType': 'entity-association', 'objectId' : entityAssociation.id  } %}
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.4/js/select2.min.js"></script>
 
     <script>

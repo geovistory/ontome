@@ -503,11 +503,6 @@
                 </table>
             </div>
             <div id="property-hierarchy" class="tab-pane fade">
-                {% if is_granted('edit', property) %}
-                    <div class="pull-right add-div">
-                        <a href="{{ path('new_parent_property_form', {'childProperty': property.id}) }}" class="btn btn-primary pull-right">Add <span class="fa fa-plus-circle"></span></a>
-                    </div>
-                {% endif %}
                 <h3>Parent properties
                     {% set tooltipProperty = "rdfs:subpropertyOf the property below" %}
                     {% if property.childPropertyAssociations|length > 1  %}
@@ -527,13 +522,8 @@
                         <th>Range</th>
                         <th>Justification</th>
                         <th>Relation namespace</th>
-                        <th>
-                            {% if is_granted('edit', property) %}
-                                Edit association
-                            {% else %}
-                                View association
-                            {% endif %}
-                        </th>
+                        <th>View association</th>
+                        <th>Comments</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -599,21 +589,14 @@
                                 {% endif %}
                             </td>
                             <td>
-                                {% if is_granted('edit', property) %}
-                                    <a href="{{ path('property_association_edit', {
-                                        'id': association.id
-                                    }) }}"
-                                       class="btn btn-xs btn-success">
-                                        <span class="fa fa-edit"></span>
-                                    </a>
-                                {% else %}
-                                    <a href="{{ path('property_association_show', {
-                                        'id': association.id
-                                    }) }}">
-                                        <span class="fa fa-eye"></span>
-                                    </a>
-                                {% endif %}
-
+                                <a href="{{ path('property_association_show', {'id': association.id}) }}"><span class="fa fa-eye"></span></a>
+                            </td>
+                            <td>
+                                <a class="btn updateViewComment" href="{{ path('property_association_show', {
+                                    'id': association.id
+                                }) }}#comments" data-id="{{ association.id }}" data-object="property-association">
+                                    <span class="badge {% if association.comments|length > 0  %}progress-bar-danger {% endif %}">{{ association.comments|length }}</span>
+                                </a>
                             </td>
                         </tr>
                         {% endif %}
@@ -773,6 +756,7 @@
                         <th>Justification</th>
                         <th>Relation namespace</th>
                         <th>View details</th>
+                        <th>Comments</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -831,6 +815,21 @@
                                         'id': relation.id
                                     }) }}">
                                         <span class="fa fa-eye"></span>
+                                    </a>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if property.id == relation.sourceProperty.id %}
+                                    <a class="btn updateViewComment" href="{{ path('entity_association_show', {
+                                        'id': relation.id
+                                    }) }}#comments" data-id="{{ relation.id }}" data-object="entity-association">
+                                        <span class="badge {% if relation.comments|length > 0  %}progress-bar-danger {% endif %}">{{ relation.comments|length }}</span>
+                                    </a>
+                                {% else %}
+                                    <a class="btn updateViewComment" href="{{ path('entity_association_inverse_show', {
+                                        'id': relation.id
+                                    }) }}#comments" data-id="{{ relation.id }}" data-object="entity-association">
+                                        <span class="badge {% if relation.comments|length > 0  %}progress-bar-danger {% endif %}">{{ relation.comments|length }}</span>
                                     </a>
                                 {% endif %}
                             </td>

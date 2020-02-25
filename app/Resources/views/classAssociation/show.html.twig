@@ -21,6 +21,7 @@
 
         <ul class="nav nav-tabs" id="main-tabs">
             <li class="active"><a data-toggle="tab" href="#justifications">Parent class and justifications</a></li>
+            <li><a data-toggle="tab" href="#comments" class="updateViewComment" data-id="{{ classAssociation.id }}" data-object="class-association">Comments <span class="badge {% if classAssociation.comments|length > 0  %}progress-bar-danger {% endif %}">{{ classAssociation.comments|length }}</span></a></li>
         </ul>
 
         <div class="tab-content">
@@ -132,6 +133,33 @@
                     </tbody>
                 </table>
             </div>
+            <div id="comments" class="tab-pane fade">
+                <h3>Comments</h3>
+                <div class="comment-box js-user-info" data-fullname="{{ app.user }}">
+                    <div class="action-box">
+                        {% if classAssociation.comments is empty %}
+                            <p id="comment-not-found"><em>No comment found.</em></p>
+                        {% endif %}
+                        <ul id="comments-list" class="comments-list">
+                            {% for comment in classAssociation.comments %}
+                                <li>
+                                    <div class="comment-text">
+                                        <p><strong><a href="#">{{ comment.creator.fullName }}</a></strong></p>
+                                        <p>{{ comment.comment }}</p>
+                                        <span class="date sub-comment-text">on {{ comment.creationTime|date() }}</span>
+                                    </div>
+                                </li>
+                            {% endfor %}
+                        </ul>
+
+                        {% if app.user %}
+                            <div class="new-comment-form" id="new-comment-form">
+                                {{ render(controller('AppBundle:Comment:new', {'object' : 'class-association', 'objectId' : classAssociation.id})) }}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -139,6 +167,7 @@
 
 {% block javascripts %}
     {{ parent() }}
+    {% include 'comment/js-bock.html.twig'  with {'objectType': 'class-association', 'objectId' : classAssociation.id  } %}
 
     <script>
         $(document).ready(function() {

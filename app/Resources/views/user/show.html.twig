@@ -317,6 +317,9 @@
                             {% elseif comment.propertyAssociation is not null %}
                                 {% set entity = "propertyAssociation" %}
                                 {% set id = comment.propertyAssociation.id %}
+                            {% elseif comment.entityAssociation is not null %}
+                                {% set entity = "entityAssociation" %}
+                                {% set id = comment.entityAssociation.id %}
                             {% elseif comment.textProperty is not null %}
                                 {% set entity = "textProperty" %}
                                 {% set id = comment.textProperty.id %}
@@ -339,6 +342,8 @@
                                             {{ comment.classAssociation }}
                                         {% elseif comment.propertyAssociation is not null %}
                                             {{ comment.propertyAssociation }}
+                                        {% elseif comment.entityAssociation is not null %}
+                                            {{ comment.entityAssociation }}
                                         {% elseif comment.textProperty is not null %}
                                             {% if comment.textProperty.class is not null %}
                                                 {{ comment.textProperty.class.invertedLabel }}
@@ -376,6 +381,8 @@
                                             Class association
                                         {% elseif comment.propertyAssociation is not null %}
                                             Property association
+                                        {% elseif comment.entityAssociation is not null %}
+                                            Entity association
                                         {% elseif comment.textProperty is not null %}
                                             {% if comment.textProperty.systemType is not null %}
                                                 {{ comment.textProperty.systemType.standardLabel|capitalize }}
@@ -396,9 +403,11 @@
                                         {% elseif comment.namespace is not null %}
                                             <a href="{{ path('namespace_show', {'id': comment.namespace.id, '_fragment': 'comments'}) }}" class="updateViewComment" data-id="{{ comment.namespace.id }}" data-object="namespace">
                                         {% elseif comment.classAssociation is not null %}
-                                            <a href="{{ path('class_association_show', {'id': comment.classAssociation.id, '_fragment': 'comments'}) }}" class="updateViewComment" data-id="{{ comment.classAssociation.id }}" data-object="classAssociation">
+                                            <a href="{{ path('class_association_show', {'id': comment.classAssociation.id, '_fragment': 'comments'}) }}" class="updateViewComment" data-id="{{ comment.classAssociation.id }}" data-object="class-association">
                                         {% elseif comment.propertyAssociation is not null %}
-                                            <a href="{{ path('property_association_show', {'id': comment.propertyAssociation.id, '_fragment': 'comments'}) }}" class="updateViewComment" data-id="{{ comment.propertyAssociation.id }}" data-object="propertyAssociation">
+                                            <a href="{{ path('property_association_show', {'id': comment.propertyAssociation.id, '_fragment': 'comments'}) }}" class="updateViewComment" data-id="{{ comment.propertyAssociation.id }}" data-object="property-association">
+                                        {% elseif comment.entityAssociation is not null %}
+                                            <a href="{{ path('entity_association_show', {'id': comment.entityAssociation.id, '_fragment': 'comments'}) }}" class="updateViewComment" data-id="{{ comment.entityAssociation.id }}" data-object="entity-association">
                                         {% elseif comment.textProperty is not null %}
                                             <a href="{{ path('text_property_show', {'id': comment.textProperty.id, '_fragment': 'comments'}) }}" class="updateViewComment" data-id="{{ comment.textProperty.id }}" data-object="textProperty">
                                         {% else %}

@@ -56,6 +56,12 @@ class CommentController extends Controller
                 throw $this->createNotFoundException('The property association n° '.$objectId.' does not exist');
             }
         }
+        else if($objectType === 'entity-association') {
+            $associatedEntity = $em->getRepository('AppBundle:EntityAssociation')->find($objectId);
+            if (!$associatedEntity) {
+                throw $this->createNotFoundException('The entity association n° '.$objectId.' does not exist');
+            }
+        }
         else if($objectType === 'text-property') {
             $associatedEntity = $em->getRepository('AppBundle:TextProperty')->find($objectId);
             if (!$associatedEntity) {
@@ -130,6 +136,13 @@ class CommentController extends Controller
                 throw $this->createNotFoundException('The property association n° '.$objectId.' does not exist');
             }
             $comment->setPropertyAssociation($associatedEntity);
+        }
+        else if($object === 'entity-association') {
+            $associatedEntity = $em->getRepository('AppBundle:EntityAssociation')->find($objectId);
+            if (!$associatedEntity) {
+                throw $this->createNotFoundException('The entity association n° '.$objectId.' does not exist');
+            }
+            $comment->setEntityAssociation($associatedEntity);
         }
         else if($object === 'text-property') {
             $associatedEntity = $em->getRepository('AppBundle:TextProperty')->find($objectId);
@@ -270,6 +283,14 @@ class CommentController extends Controller
             }
 
             $comments = $em->getRepository('AppBundle:Comment')->findBy(array("propertyAssociation" => $associatedEntity));
+        }
+        else if($object === 'entity-association') {
+            $associatedEntity = $em->getRepository('AppBundle:EntityAssociation')->find($objectId);
+            if (!$associatedEntity) {
+                throw $this->createNotFoundException('The entity association n° '.$objectId.' does not exist');
+            }
+
+            $comments = $em->getRepository('AppBundle:Comment')->findBy(array("entityAssociation" => $associatedEntity));
         }
         else if($object === 'text-property') {
             $associatedEntity = $em->getRepository('AppBundle:TextProperty')->find($objectId);
