@@ -559,7 +559,7 @@
                         <th>Class namespace</th>
                         <th>Relation defined in</th>
                         <th>Justification</th>
-                        <th>Edit relation</th>
+                        <th>Edit</th>
                         <th>Comments</th>
                     </tr>
                     </thead>
@@ -596,7 +596,7 @@
                                 {% if association.textProperties is not null %}
                                     {% for textProperty in association.textProperties if textProperty.systemType.id == 15 %}
                                         {% if loop.index == 1 %}
-                                            <a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="fas fa-info-circle" aria-hidden="true"></span></a>
+                                            <a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="fas fa-eye" aria-hidden="true"></span></a>
                                             {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
                                         {% endif %}
                                     {% endfor %}
@@ -704,7 +704,7 @@
                         <th>Class</th>
                         <th>Justification</th>
                         <th>Relation defined in</th>
-                        <th>Edit relation</th>
+                        <th>Edit</th>
                         <th>Comments</th>
                     </tr>
                     </thead>
@@ -739,7 +739,7 @@
                                 {% if relation.textProperties is not null %}
                                     {% for textProperty in relation.textProperties if textProperty.systemType.id == 15 %}
                                         {% if loop.index == 1 %}
-                                            <a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="fas fa-info-circle" aria-hidden="true"></span></a>
+                                            <a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="fas fa-eye" aria-hidden="true"></span></a>
                                             {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
                                         {% endif %}
                                     {% endfor %}

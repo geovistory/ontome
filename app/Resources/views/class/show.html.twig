@@ -514,7 +514,7 @@
                         <th>Class namespace</th>
                         <th>Relation defined in</th>
                         <th>Justification</th>
-                        <th>View relation</th>
+                        <th>View details</th>
                         <th>Comments</th>
                     </tr>
                     </thead>
@@ -551,14 +551,14 @@
                                 {% if association.textProperties is not null %}
                                     {% for textProperty in association.textProperties if textProperty.systemType.id == 15 %}
                                         {% if loop.index == 1 %}
-                                            <a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="fas fa-info-circle" aria-hidden="true"></span></a>
+                                            <a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="fas fa-eye" aria-hidden="true"></span></a>
                                             {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
                                         {% endif %}
                                     {% endfor %}
                                 {% endif %}
                             </td>
                             <td>
-                                <a href="{{ path('class_association_show', {'id': association.id}) }}"><span class="fa fa-eye"></span></a>
+                                <a href="{{ path('class_association_show', {'id': association.id}) }}"><span class="fa fa-info-circle"></span></a>
                             </td>
                             <td>
                                 <a class="btn updateViewComment" href="{{ path('class_association_show', {
@@ -652,7 +652,7 @@
                             <th>Class</th>
                             <th>Justification</th>
                             <th>Relation defined in</th>
-                            <th>View relation</th>
+                            <th>View details</th>
                             <th>Comments</th>
                         </tr>
                     </thead>
@@ -687,7 +687,7 @@
                                 {% if relation.textProperties is not null %}
                                     {% for textProperty in relation.textProperties if textProperty.systemType.id == 15 %}
                                         {% if loop.index == 1 %}
-                                            <a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="fas fa-info-circle" aria-hidden="true"></span></a>
+                                            <a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="fas fa-eye" aria-hidden="true"></span></a>
                                             {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
                                         {% endif %}
                                     {% endfor %}
@@ -705,13 +705,13 @@
                                 <a href="{{ path('entity_association_show', {
                                     'id': relation.id
                                 }) }}">
-                                    <span class="fa fa-eye"></span>
+                                    <span class="fa fa-info-circle"></span>
                                 </a>
                                 {% else %}
                                     <a href="{{ path('entity_association_inverse_show', {
                                     'id': relation.id
                                 }) }}">
-                                    <span class="fa fa-eye"></span>
+                                    <span class="fa fa-info-circle"></span>
                                 </a>
                                 {% endif %}
                             </td>
