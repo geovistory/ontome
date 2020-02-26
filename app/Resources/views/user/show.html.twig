@@ -339,11 +339,15 @@
                                         {% elseif comment.namespace is not null %}
                                             {{ comment.namespace }}
                                         {% elseif comment.classAssociation is not null %}
-                                            {{ comment.classAssociation }}
+                                            {{ comment.classAssociation.childClass.invertedLabel }} rdfs:subclassOf {{ comment.classAssociation.parentClass.invertedLabel }}
                                         {% elseif comment.propertyAssociation is not null %}
-                                            {{ comment.propertyAssociation }}
+                                            {{ comment.propertyAssociation.childProperty.invertedLabel }} rdfs:subpropertyOf {{ comment.propertyAssociation.parentProperty.invertedLabel }}
                                         {% elseif comment.entityAssociation is not null %}
-                                            {{ comment.entityAssociation }}
+                                            {% if comment.entityAssociation.sourceClass is not null %}
+                                                {{ comment.entityAssociation.sourceClass.invertedLabel }} {{ comment.entityAssociation.systemType }} {{ comment.entityAssociation.targetClass.invertedLabel }}
+                                            {% elseif comment.entityAssociation.sourceProperty is not null %}
+                                                {{ comment.entityAssociation.sourceProperty.invertedLabel }} {{ comment.entityAssociation.systemType }} {{ comment.entityAssociation.targetProperty.invertedLabel }}
+                                            {% endif %}
                                         {% elseif comment.textProperty is not null %}
                                             {% if comment.textProperty.class is not null %}
                                                 {{ comment.textProperty.class.invertedLabel }}
@@ -378,11 +382,11 @@
                                         {% elseif comment.namespace is not null %}
                                             Namespace
                                         {% elseif comment.classAssociation is not null %}
-                                            Class association
+                                            Hierarchy
                                         {% elseif comment.propertyAssociation is not null %}
-                                            Property association
+                                            Hierarchy
                                         {% elseif comment.entityAssociation is not null %}
-                                            Entity association
+                                            Relation
                                         {% elseif comment.textProperty is not null %}
                                             {% if comment.textProperty.systemType is not null %}
                                                 {{ comment.textProperty.systemType.standardLabel|capitalize }}

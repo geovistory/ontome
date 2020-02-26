@@ -12,7 +12,7 @@
         <h2 class="class-name">
             {% if not inverse %}
                 {{ entityAssociation.source }}: {{ entityAssociation.systemType.standardLabel }}
-                <a href="{{ path(entityAssociation.sourceObjectType~'_show', {
+                <a href="{{ path(entityAssociation.sourceObjectType~'_edit', {
                     id: entityAssociation.source.id,
                     '_fragment': "relations"
                 }) }}" class="pull-right btn btn-link">
@@ -20,7 +20,7 @@
                 </a>
             {% else %}
                 {{ entityAssociation.target }}: {{ entityAssociation.systemType.standardLabel }}
-                <a href="{{ path(entityAssociation.targetObjectType~'_show', {
+                <a href="{{ path(entityAssociation.targetObjectType~'_edit', {
                     id: entityAssociation.target.id,
                     '_fragment': "relations"
                 }) }}" class="pull-right btn btn-link">

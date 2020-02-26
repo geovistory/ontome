@@ -12,7 +12,8 @@
         <h2 class="property-name">
             {{ propertyAssociation }}
             <a href="{{ path('property_show', {
-                id: propertyAssociation.childProperty.id
+                'id': propertyAssociation.childProperty.id,
+                '_fragment': 'property-hierarchy'
             }) }}" class="pull-right btn btn-link">
                 <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
             </a>
