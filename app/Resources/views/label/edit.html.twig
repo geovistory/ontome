@@ -6,9 +6,13 @@
             <div class="col-xs-12">
                 <h2>Edit
                     {% if label.object is not null %}
-                    {{ label.object }} label
+                        {% if label.object.identifierInNamespace is not null %}
+                            {{ label.object.standardLabel }} – {{ label.object.identifierInNamespace }}: Label
+                        {% else %}
+                            {{ label.object.objectIdentification }}: Label
+                        {% endif %}
                     {% else %}
-                        label
+                        Label
                     {% endif %}
                     {% if label.class is not null %}
                         <a href="{{ path('class_edit', {
@@ -54,7 +58,9 @@
                 </h2>
                 <ul class="nav nav-tabs" id="main-tabs">
                     <li class="active"><a data-toggle="tab" href="#label">Label</a></li>
+                    {% if label.object == 'class' or label.object == 'property' %}
                     <li><a data-toggle="tab" href="#comments">Comments</a></li>
+                    {% endif %}
                 </ul>
                 <div class="tab-content">
                     <div id="label" class="tab-pane fade in active">
@@ -113,6 +119,7 @@
                             {{ form_end(labelForm) }}
                         </div>
                     </div>
+                    {% if label.object == 'class' or label.object == 'property' %}
                     <div id="comments" class="tab-pane fade">
                         <h3>Comments</h3>
                         <div class="comment-box js-user-info" data-fullname="{{ app.user }}">
@@ -140,6 +147,7 @@
                             </div>
                         </div>
                     </div>
+                    {% endif %}
                 </div>
             </div>
         </div>

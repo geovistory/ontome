@@ -5,16 +5,46 @@
             <div class="col-xs-12">
                 <h2>
                     {% if textProperty.object is not null %}
-                        {{ textProperty.object.objectIdentification }} - {{ textProperty.systemType.standardLabel }}
+                        {% if textProperty.object.identifierInNamespace is not null %}
+                            {{ textProperty.object.standardLabel }} – {{ textProperty.object.identifierInNamespace }}: {{ textProperty.systemType.standardLabel }}
+                        {% else %}
+                            {{ textProperty.object.objectIdentification }}: {{ textProperty.systemType.standardLabel }}
+                        {% endif %}
                     {% else %}
                         {{ textProperty.systemType.standardLabel }}
                     {% endif %}
 
+                    {% if textProperty.class is not null %}
+                        {% set route = 'class_show' %}
+                    {% elseif textProperty.property is not null %}
+                        {% set route = 'property_show' %}
+                    {% elseif textProperty.namespace is not null %}
+                        {% set route = 'namespace_show' %}
+                    {% elseif textProperty.project is not null %}
+                        {% set route = 'project_show' %}
+                    {% elseif textProperty.profile is not null %}
+                        {% set route = 'profile_show' %}
+                    {% elseif textProperty.classAssociation is not null %}
+                        {% set route = 'class_association_show' %}
+                    {% elseif textProperty.propertyAssociation is not null %}
+                        {% set route = 'property_association_show' %}
+                    {% elseif textProperty.entityAssociation is not null %}
+                        {% set route = 'property_association_show' %}
+                    {% endif %}
+
+                    {% if route is not null %}
+                    <a href="{{ path(route, {'id':textProperty.object.id, '_fragment': 'definition'}) }}"
+                       class="pull-right btn btn-link"
+                       role="button">
+                        <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
+                    </a>
+                    {% else %}
                     <a href="{{ app.request.headers.get('referer') }}#definition"
                        class="pull-right btn btn-link"
                        role="button">
                         <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
                     </a>
+                    {% endif %}
                 </h2>
                 <ul class="nav nav-tabs" id="main-tabs">
                     <li class="active"><a data-toggle="tab" href="#text-property">{{ textProperty.systemType }}</a></li>

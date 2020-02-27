@@ -335,18 +335,22 @@
                                         {% elseif comment.property is not null %}
                                             {{ comment.property.invertedLabel }}
                                         {% elseif comment.label is not null %}
-                                            {{ comment.label }}
+                                            {% if comment.label.object.invertedLabel is not null %}
+                                                {{ comment.label.object.invertedLabel }}
+                                            {% else %}
+                                                {{ comment.label.object.standardLabel }}
+                                            {% endif %}
                                         {% elseif comment.namespace is not null %}
                                             {{ comment.namespace }}
                                         {% elseif comment.classAssociation is not null %}
                                             {{ comment.classAssociation.childClass.invertedLabel }} rdfs:subclassOf {{ comment.classAssociation.parentClass.invertedLabel }}
                                         {% elseif comment.propertyAssociation is not null %}
-                                            {{ comment.propertyAssociation.childProperty.invertedLabel }} rdfs:subpropertyOf {{ comment.propertyAssociation.parentProperty.invertedLabel }}
+                                            {{ comment.propertyAssociation.childProperty.invertedLabelWithoutInverseLabel }} rdfs:subpropertyOf {{ comment.propertyAssociation.parentProperty.invertedLabelWithoutInverseLabel }}
                                         {% elseif comment.entityAssociation is not null %}
                                             {% if comment.entityAssociation.sourceClass is not null %}
                                                 {{ comment.entityAssociation.sourceClass.invertedLabel }} {{ comment.entityAssociation.systemType }} {{ comment.entityAssociation.targetClass.invertedLabel }}
                                             {% elseif comment.entityAssociation.sourceProperty is not null %}
-                                                {{ comment.entityAssociation.sourceProperty.invertedLabel }} {{ comment.entityAssociation.systemType }} {{ comment.entityAssociation.targetProperty.invertedLabel }}
+                                                {{ comment.entityAssociation.sourceProperty.invertedLabelWithoutInverseLabel }} {{ comment.entityAssociation.systemType }} {{ comment.entityAssociation.targetProperty.invertedLabelWithoutInverseLabel }}
                                             {% endif %}
                                         {% elseif comment.textProperty is not null %}
                                             {% if comment.textProperty.class is not null %}
