@@ -308,6 +308,7 @@
                         <th>Profile</th>
                         <th>Creation date</th>
                         <th>API</th>
+                        <th></th>
                     </tr>
                     </thead>
                     <tbody>
@@ -341,8 +342,10 @@
                                 {% else %}
                                     Not published in API
                                 {% endif %}
+                            </td>
+                            <td>
                                 {% if (not profile.isOngoing and profile.wasClosedAt is not null and profile.endDate is null and is_granted('edit_manager', project)) %}
-                                    <a class="recreate-btn btn btn-primary" data-id="{{ profile.id }}" role="button"><i class="fas fa-microchip"></i> Copy in a new ongoing profile</a>
+                                    <a class="recreate-btn btn btn-primary" data-id="{{ profile.id }}" role="button"><i class="fas fa-copy"></i> Duplicate</a>
                                 {% endif %}
                             </td>
                         </tr>
@@ -653,6 +656,7 @@
                 columnDefs: [
                     {
                         targets: 0,
+                        width: 0,
                         render: function ( data, type, row, meta ) {
 
                             var urlRemoveProfile = '{{ path("project_profile_disassociation", {'project' : 'projectID', 'profile' : 'profileID'}) }}';
@@ -663,6 +667,8 @@
                     },
                     {
                         targets: 1,
+                        width: 0,
+                        className: 'text-nowrap',
                         render: function ( data, type, row, meta ) {
                             var urlProfile = '{{ path("profile_show", {'id' : 'profileID'}) }}';
                             urlProfile = urlProfile.replace("profileID", row.id);
@@ -673,6 +679,7 @@
                     },
                     {
                         targets: 2,
+                        width: '100%',
                         render: function ( data, type, row, meta ) {
                             if((!row.isOngoing && row.wasClosedAt != null && row.endDate == null) || (row.isForcedPublication && row.isOngoing)){
                             var urlApiClassesProfileJson = '{{ path("api_classes_profile_json", {'lang': 'en', 'available-in-profile' : 'profileID'}) }}';
@@ -756,7 +763,7 @@
             $('.recreate-btn').on('click', function() {
                 var profileID = $(this).data("id");
                 bootbox.confirm({
-                    message: "This will create a new ongoing version of this profile. Are you sure you want to do that?",
+                    message: "This will create a new ongoing version of this profile. Do you wish to proceed?",
                     buttons: {
                         confirm: {
                             label: 'Yes',
