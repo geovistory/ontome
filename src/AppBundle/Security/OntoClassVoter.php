@@ -63,7 +63,8 @@ class OntoClassVoter extends Voter
             if(is_null($class->getOngoingNamespace())) {
                 return false;
             }
-            if($userProjectAssociation->getProject() === $class->getOngoingNamespace()->getProjectForTopLevelNamespace() && $userProjectAssociation->getPermission() === 1){
+            if($userProjectAssociation->getProject() === $class->getOngoingNamespace()->getProjectForTopLevelNamespace()
+                && $userProjectAssociation->getPermission() <= 3){
                 return true;
             }
         }

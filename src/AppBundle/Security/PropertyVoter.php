@@ -63,7 +63,8 @@ class PropertyVoter extends Voter
             if(is_null($property->getOngoingNamespace())) {
                 return false;
             }
-            if($userProjectAssociation->getProject() === $property->getOngoingNamespace()->getProjectForTopLevelNamespace() && $userProjectAssociation->getPermission() === 1){
+            if($userProjectAssociation->getProject() === $property->getOngoingNamespace()->getProjectForTopLevelNamespace()
+                && $userProjectAssociation->getPermission() <= 3){
                 return true;
             }
         }
