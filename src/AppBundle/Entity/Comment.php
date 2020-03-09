@@ -73,6 +73,12 @@ class Comment
     private $propertyAssociation;
 
     /**
+     * @ORM\ManyToOne(targetEntity="EntityAssociation", inversedBy="comments")
+     * @ORM\JoinColumn(name="fk_entity_association", referencedColumnName="pk_entity_association")
+     */
+    private $entityAssociation;
+
+    /**
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\TextProperty", inversedBy="comments")
      * @ORM\JoinColumn(name="fk_text_property", referencedColumnName="pk_text_property")
      */
@@ -184,6 +190,14 @@ class Comment
     }
 
     /**
+     * @return PropertyAssociation
+     */
+    public function getEntityAssociation()
+    {
+        return $this->entityAssociation;
+    }
+
+    /**
      * @return TextProperty
      */
     public function getTextProperty()
@@ -277,6 +291,14 @@ class Comment
     public function setPropertyAssociation($propertyAssociation)
     {
         $this->propertyAssociation = $propertyAssociation;
+    }
+
+    /**
+     * @param mixed $entityAssociation
+     */
+    public function setEntityAssociation($entityAssociation)
+    {
+        $this->entityAssociation = $entityAssociation;
     }
 
     /**

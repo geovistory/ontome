@@ -317,6 +317,9 @@
                             {% elseif comment.propertyAssociation is not null %}
                                 {% set entity = "propertyAssociation" %}
                                 {% set id = comment.propertyAssociation.id %}
+                            {% elseif comment.entityAssociation is not null %}
+                                {% set entity = "entityAssociation" %}
+                                {% set id = comment.entityAssociation.id %}
                             {% elseif comment.textProperty is not null %}
                                 {% set entity = "textProperty" %}
                                 {% set id = comment.textProperty.id %}
@@ -332,13 +335,23 @@
                                         {% elseif comment.property is not null %}
                                             {{ comment.property.invertedLabel }}
                                         {% elseif comment.label is not null %}
-                                            {{ comment.label }}
+                                            {% if comment.label.object.invertedLabel is not null %}
+                                                {{ comment.label.object.invertedLabel }}
+                                            {% else %}
+                                                {{ comment.label.object.standardLabel }}
+                                            {% endif %}
                                         {% elseif comment.namespace is not null %}
                                             {{ comment.namespace }}
                                         {% elseif comment.classAssociation is not null %}
-                                            {{ comment.classAssociation }}
+                                            {{ comment.classAssociation.childClass.invertedLabel }} rdfs:subclassOf {{ comment.classAssociation.parentClass.invertedLabel }}
                                         {% elseif comment.propertyAssociation is not null %}
-                                            {{ comment.propertyAssociation }}
+                                            {{ comment.propertyAssociation.childProperty.invertedLabelWithoutInverseLabel }} rdfs:subpropertyOf {{ comment.propertyAssociation.parentProperty.invertedLabelWithoutInverseLabel }}
+                                        {% elseif comment.entityAssociation is not null %}
+                                            {% if comment.entityAssociation.sourceClass is not null %}
+                                                {{ comment.entityAssociation.sourceClass.invertedLabel }} {{ comment.entityAssociation.systemType }} {{ comment.entityAssociation.targetClass.invertedLabel }}
+                                            {% elseif comment.entityAssociation.sourceProperty is not null %}
+                                                {{ comment.entityAssociation.sourceProperty.invertedLabelWithoutInverseLabel }} {{ comment.entityAssociation.systemType }} {{ comment.entityAssociation.targetProperty.invertedLabelWithoutInverseLabel }}
+                                            {% endif %}
                                         {% elseif comment.textProperty is not null %}
                                             {% if comment.textProperty.class is not null %}
                                                 {{ comment.textProperty.class.invertedLabel }}
@@ -373,9 +386,11 @@
                                         {% elseif comment.namespace is not null %}
                                             Namespace
                                         {% elseif comment.classAssociation is not null %}
-                                            Class association
+                                            Hierarchy
                                         {% elseif comment.propertyAssociation is not null %}
-                                            Property association
+                                            Hierarchy
+                                        {% elseif comment.entityAssociation is not null %}
+                                            Relation
                                         {% elseif comment.textProperty is not null %}
                                             {% if comment.textProperty.systemType is not null %}
                                                 {{ comment.textProperty.systemType.standardLabel|capitalize }}
@@ -396,9 +411,11 @@
                                         {% elseif comment.namespace is not null %}
                                             <a href="{{ path('namespace_show', {'id': comment.namespace.id, '_fragment': 'comments'}) }}" class="updateViewComment" data-id="{{ comment.namespace.id }}" data-object="namespace">
                                         {% elseif comment.classAssociation is not null %}
-                                            <a href="{{ path('class_association_show', {'id': comment.classAssociation.id, '_fragment': 'comments'}) }}" class="updateViewComment" data-id="{{ comment.classAssociation.id }}" data-object="classAssociation">
+                                            <a href="{{ path('class_association_show', {'id': comment.classAssociation.id, '_fragment': 'comments'}) }}" class="updateViewComment" data-id="{{ comment.classAssociation.id }}" data-object="class-association">
                                         {% elseif comment.propertyAssociation is not null %}
-                                            <a href="{{ path('property_association_show', {'id': comment.propertyAssociation.id, '_fragment': 'comments'}) }}" class="updateViewComment" data-id="{{ comment.propertyAssociation.id }}" data-object="propertyAssociation">
+                                            <a href="{{ path('property_association_show', {'id': comment.propertyAssociation.id, '_fragment': 'comments'}) }}" class="updateViewComment" data-id="{{ comment.propertyAssociation.id }}" data-object="property-association">
+                                        {% elseif comment.entityAssociation is not null %}
+                                            <a href="{{ path('entity_association_show', {'id': comment.entityAssociation.id, '_fragment': 'comments'}) }}" class="updateViewComment" data-id="{{ comment.entityAssociation.id }}" data-object="entity-association">
                                         {% elseif comment.textProperty is not null %}
                                             <a href="{{ path('text_property_show', {'id': comment.textProperty.id, '_fragment': 'comments'}) }}" class="updateViewComment" data-id="{{ comment.textProperty.id }}" data-object="textProperty">
                                         {% else %}

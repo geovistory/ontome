@@ -498,11 +498,6 @@
                 </table>
             </div>
             <div id="class-hierarchy" class="tab-pane fade">
-                {% if is_granted('edit', class) %}
-                    <div class="pull-right add-div">
-                        <a href="{{ path('new_parent_class_form', {'childClass': class.id}) }}" class="btn btn-primary pull-right">Add <span class="fa fa-plus-circle"></span></a>
-                    </div>
-                {% endif %}
                 <h3>Parent classes
                     {% set tooltipClass = "rdfs:subclassOf the class below" %}
                     {% if class.childClassAssociations|length > 1  %}
@@ -519,13 +514,8 @@
                         <th>Class namespace</th>
                         <th>Relation defined in</th>
                         <th>Justification</th>
-                        <th>
-                            {% if is_granted('edit', class) %}
-                                Edit relation
-                            {% else %}
-                                View relation
-                            {% endif %}
-                        </th>
+                        <th>View details</th>
+                        <th>Comments</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -561,28 +551,21 @@
                                 {% if association.textProperties is not null %}
                                     {% for textProperty in association.textProperties if textProperty.systemType.id == 15 %}
                                         {% if loop.index == 1 %}
-                                            <a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="fas fa-info-circle" aria-hidden="true"></span></a>
+                                            <a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="fas fa-eye" aria-hidden="true"></span></a>
                                             {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
                                         {% endif %}
                                     {% endfor %}
                                 {% endif %}
                             </td>
                             <td>
-                                {% if is_granted('edit', class) %}
-                                    <a href="{{ path('class_association_edit', {
-                                        'id': association.id
-                                    }) }}"
-                                       class="btn btn-xs btn-success">
-                                        <span class="fa fa-edit"></span>
-                                    </a>
-                                {% else %}
-                                    <a href="{{ path('class_association_show', {
-                                        'id': association.id
-                                    }) }}">
-                                        <span class="fa fa-eye"></span>
-                                    </a>
-                                {% endif %}
-
+                                <a href="{{ path('class_association_show', {'id': association.id}) }}"><span class="fa fa-info-circle"></span></a>
+                            </td>
+                            <td>
+                                <a class="btn updateViewComment" href="{{ path('class_association_show', {
+                                    'id': association.id
+                                }) }}#comments" data-id="{{ association.id }}" data-object="class-association">
+                                    <span class="badge {% if association.comments|length > 0  %}progress-bar-danger {% endif %}">{{ association.comments|length }}</span>
+                                </a>
                             </td>
                         </tr>
                         {% endif %}
@@ -669,7 +652,8 @@
                             <th>Class</th>
                             <th>Justification</th>
                             <th>Relation defined in</th>
-                            <th>View relation</th>
+                            <th>View details</th>
+                            <th>Comments</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -703,7 +687,7 @@
                                 {% if relation.textProperties is not null %}
                                     {% for textProperty in relation.textProperties if textProperty.systemType.id == 15 %}
                                         {% if loop.index == 1 %}
-                                            <a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="fas fa-info-circle" aria-hidden="true"></span></a>
+                                            <a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="fas fa-eye" aria-hidden="true"></span></a>
                                             {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
                                         {% endif %}
                                     {% endfor %}
@@ -721,14 +705,29 @@
                                 <a href="{{ path('entity_association_show', {
                                     'id': relation.id
                                 }) }}">
-                                    <span class="fa fa-eye"></span>
+                                    <span class="fa fa-info-circle"></span>
                                 </a>
                                 {% else %}
                                     <a href="{{ path('entity_association_inverse_show', {
                                     'id': relation.id
                                 }) }}">
-                                    <span class="fa fa-eye"></span>
+                                    <span class="fa fa-info-circle"></span>
                                 </a>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if class.id == relation.sourceClass.id %}
+                                    <a class="btn updateViewComment" href="{{ path('entity_association_show', {
+                                        'id': relation.id
+                                    }) }}#comments" data-id="{{ relation.id }}" data-object="entity-association">
+                                        <span class="badge {% if relation.comments|length > 0  %}progress-bar-danger {% endif %}">{{ relation.comments|length }}</span>
+                                    </a>
+                                {% else %}
+                                    <a class="btn updateViewComment" href="{{ path('entity_association_inverse_show', {
+                                        'id': relation.id
+                                    }) }}#comments" data-id="{{ relation.id }}" data-object="entity-association">
+                                        <span class="badge {% if relation.comments|length > 0  %}progress-bar-danger {% endif %}">{{ relation.comments|length }}</span>
+                                    </a>
                                 {% endif %}
                             </td>
                         </tr>

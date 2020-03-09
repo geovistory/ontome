@@ -101,6 +101,12 @@ class EntityAssociation
     private $modificationTime;
 
     /**
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Comment", mappedBy="entityAssociation")
+     * @ORM\OrderBy({"creationTime" = "DESC"})
+     */
+    private $comments;
+
+    /**
      * EntityAssociation constructor.
      */
     public function __construct()
@@ -179,6 +185,14 @@ class EntityAssociation
     public function getNamespaces()
     {
         return $this->namespaces;
+    }
+
+    /**
+     * @return ArrayCollection|Comment[]
+     */
+    public function getComments()
+    {
+        return $this->comments;
     }
 
     /**

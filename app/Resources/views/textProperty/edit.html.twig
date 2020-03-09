@@ -5,7 +5,11 @@
         <div class="col-xs-12">
             <h2>Edit
                 {% if textProperty.object is not null %}
-                {{ textProperty.object.objectIdentification }} - {{ textProperty.systemType.standardLabel }}
+                    {% if textProperty.object.identifierInNamespace is not null %}
+                        {{ textProperty.object.standardLabel }} – {{ textProperty.object.identifierInNamespace }}: {{ textProperty.systemType.standardLabel }}
+                    {% else %}
+                        {{ textProperty.object.objectIdentification }}: {{ textProperty.systemType.standardLabel }}
+                    {% endif %}
                 {% else %}
                     {{ textProperty.systemType.standardLabel }}
                 {% endif %}

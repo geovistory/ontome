@@ -6,19 +6,52 @@
             <div class="col-xs-12">
                 <h2>
                     {% if label.object is not null %}
-                        {{ label.object }} label
+                        {% if label.object.identifierInNamespace is not null %}
+                            {{ label.object.standardLabel }} – {{ label.object.identifierInNamespace }}: Label
+                        {% else %}
+                            {{ label.object.objectIdentification }}: Label
+                        {% endif %}
                     {% else %}
-                        label
+                        Label
                     {% endif %}
+
+                    {% if label.class is not null %}
+                        {% set route = 'class_show' %}
+                    {% elseif label.property is not null %}
+                        {% set route = 'property_show' %}
+                    {% elseif label.namespace is not null %}
+                        {% set route = 'namespace_show' %}
+                    {% elseif label.project is not null %}
+                        {% set route = 'project_show' %}
+                    {% elseif label.profile is not null %}
+                        {% set route = 'profile_show' %}
+                    {% elseif label.classAssociation is not null %}
+                        {% set route = 'class_association_show' %}
+                    {% elseif label.propertyAssociation is not null %}
+                        {% set route = 'property_association_show' %}
+                    {% elseif label.entityAssociation is not null %}
+                        {% set route = 'property_association_show' %}
+                    {% endif %}
+
+                    {% if route is not null %}
+                    <a href="{{ path(route, {'id':label.object.id, '_fragment': 'identification'}) }}"
+                       class="pull-right btn btn-link"
+                       role="button">
+                        <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
+                    </a>
+                    {% else %}
                     <a href="{{ app.request.headers.get('referer') }}#identification"
                        class="pull-right btn btn-link"
                        role="button">
                         <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
                     </a>
+                    {% endif %}
                 </h2>
                 <ul class="nav nav-tabs" id="main-tabs">
                     <li class="active"><a data-toggle="tab" href="#label">Label</a></li>
+                    {% if label.object == 'class' or label.object == 'property' %}
                     <li><a data-toggle="tab" href="#comments">Comments</a></li>
+                    {% endif %}
                 </ul>
                 <div class="tab-content">
                     <div id="label" class="tab-pane fade in active">
@@ -38,6 +71,7 @@
                             </dl>
                         </div>
                     </div>
+                    {% if label.object == 'class' or label.object == 'property' %}
                     <div id="comments" class="tab-pane fade">
                         <h3>Comments</h3>
                         <div class="comment-box js-user-info" data-fullname="{{ app.user }}">
@@ -65,6 +99,7 @@
                             </div>
                         </div>
                     </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
