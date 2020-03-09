@@ -8,6 +8,7 @@
 
 namespace AppBundle\Controller;
 
+use AppBundle\Entity\EntityUserProjectAssociation;
 use AppBundle\Entity\Label;
 use AppBundle\Entity\OntoNamespace;
 use AppBundle\Entity\Profile;
@@ -143,11 +144,26 @@ class NamespaceController  extends Controller
                 $namespace->getTextProperties()[1]->setCreationTime(new \DateTime('now'));
                 $namespace->getTextProperties()[1]->setModificationTime(new \DateTime('now'));
                 $namespace->getTextProperties()[1]->setSystemType($systemTypeDescription);
-                $namespace->getTextProperties()[1]->setClass($ongoingNamespace);
+                $namespace->getTextProperties()[1]->setNamespace($ongoingNamespace);
             }
             else {
                 $ongoingDescription = $description;
                 $ongoingNamespace->addTextProperty($ongoingDescription);
+            }
+
+            // Créer les entity_to_user_project pour les activer par défaut
+            $userProjectAssociations = $em->getRepository('AppBundle:UserProjectAssociation')->findByProject($project);
+            foreach ($userProjectAssociations as $userProjectAssociation) {
+                $eupa = new EntityUserProjectAssociation();
+                $systemTypeSelected = $em->getRepository('AppBundle:SystemType')->find(25); //systemType 25 = Selected namespace for user preference
+                $eupa->setNamespace($ongoingNamespace);
+                $eupa->setUserProjectAssociation($userProjectAssociation);
+                $eupa->setSystemType($systemTypeSelected);
+                $eupa->setCreator($this->getUser());
+                $eupa->setModifier($this->getUser());
+                $eupa->setCreationTime(new \DateTime('now'));
+                $eupa->setModificationTime(new \DateTime('now'));
+                $em->persist($eupa);
             }
 
             $em = $this->getDoctrine()->getManager();

@@ -157,6 +157,11 @@ class ClassRepository extends EntityRepository
         $filteredNamespaces = $em->getRepository('AppBundle:OntoNamespace')
             ->findAllActiveNamespacesForUser($user);
 
+        $classNamespace = $class->getOngoingNamespace();
+        if(!in_array($classNamespace, $filteredNamespaces)){
+            $filteredNamespaces[] = $classNamespace;
+        }
+
         $idsFilteredNamespaces = array();
         $qFilteredNamespaces = array();
         foreach ($filteredNamespaces as $namespace)
@@ -200,7 +205,6 @@ class ClassRepository extends EntityRepository
 
         $stmt = $conn->prepare($sql);
         $stmt->execute(array_merge(array($class->getId()), $idsFilteredNamespaces));
-
         return $stmt->fetchAll();
     }
 
@@ -248,6 +252,11 @@ class ClassRepository extends EntityRepository
         $filteredNamespaces = $em->getRepository('AppBundle:OntoNamespace')
             ->findAllActiveNamespacesForUser($user);
 
+        $classNamespace = $class->getOngoingNamespace();
+        if(!in_array($classNamespace, $filteredNamespaces)){
+            $filteredNamespaces[] = $classNamespace;
+        }
+
         $idsFilteredNamespaces = array();
         $qFilteredNamespaces = array();
         foreach ($filteredNamespaces as $namespace)
@@ -262,22 +271,22 @@ class ClassRepository extends EntityRepository
         $strQFilteredNamespaces = join(',',$qFilteredNamespaces);
 
         $sql = "SELECT 	pk_child AS id,
-                        child_identifier AS identifier,
-                        depth,
-                        che.get_root_namespace(nsp.pk_namespace) AS \"rootNamespaceId\",
-                        (SELECT label FROM che.get_namespace_labels(che.get_root_namespace(nsp.pk_namespace)) WHERE language_iso_code = 'en') AS \"rootNamespaceLabel\",
-                        nsp.pk_namespace AS \"classNamespaceId\",
-                        nsp.standard_label AS \"classNamespaceLabel\"
-                FROM 	che.descendant_class_hierarchy(?) cls, 
-                        che.associates_namespace asnsp,
-                        che.namespace nsp
-                
-                WHERE 	asnsp.fk_class = cls.pk_child
-                AND   	nsp.pk_namespace = asnsp.fk_namespace
-                
-                AND nsp.pk_namespace IN (".$strQFilteredNamespaces.")
-                GROUP BY pk_child, child_identifier, depth, nsp.pk_namespace, che.get_root_namespace(nsp.pk_namespace)
-                ORDER BY depth ASC;";
+                    child_identifier AS identifier,
+                    depth,
+                    che.get_root_namespace(nsp.pk_namespace) AS \"rootNamespaceId\",
+                    (SELECT label FROM che.get_namespace_labels(che.get_root_namespace(nsp.pk_namespace)) WHERE language_iso_code = 'en') AS \"rootNamespaceLabel\",
+                    nsp.pk_namespace AS \"classNamespaceId\",
+                    nsp.standard_label AS \"classNamespaceLabel\"
+            FROM 	che.descendant_class_hierarchy(?) cls, 
+                    che.associates_namespace asnsp,
+                    che.namespace nsp
+            
+            WHERE 	asnsp.fk_class = cls.pk_child
+            AND   	nsp.pk_namespace = asnsp.fk_namespace
+            
+            AND nsp.pk_namespace IN (" . $strQFilteredNamespaces . ")
+            GROUP BY pk_child, child_identifier, depth, nsp.pk_namespace, che.get_root_namespace(nsp.pk_namespace)
+            ORDER BY depth ASC;";
 
         $stmt = $conn->prepare($sql);
         $stmt->execute(array_merge(array($class->getId()), $idsFilteredNamespaces));
@@ -419,6 +428,11 @@ class ClassRepository extends EntityRepository
         $em = $this->getEntityManager();
         $filteredNamespaces = $em->getRepository('AppBundle:OntoNamespace')
             ->findAllActiveNamespacesForUser($user);
+
+        $classNamespace = $class->getOngoingNamespace();
+        if(!in_array($classNamespace, $filteredNamespaces)){
+            $filteredNamespaces[] = $classNamespace;
+        }
 
         $idsFilteredNamespaces = array();
         $qFilteredNamespaces = array();

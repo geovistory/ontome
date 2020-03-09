@@ -144,7 +144,12 @@ class PropertyRepository extends EntityRepository
         $em = $this->getEntityManager();
         $filteredNamespaces = $em->getRepository('AppBundle:OntoNamespace')
             ->findAllActiveNamespacesForUser($user);
-
+        
+        $propertyNamespace = $class->getOngoingNamespace();
+        if(!in_array($propertyNamespace, $filteredNamespaces)){
+            $filteredNamespaces[] = $propertyNamespace;
+        }
+        
         $idsFilteredNamespaces = array();
         $qFilteredNamespaces = array();
         foreach ($filteredNamespaces as $namespace)
@@ -225,6 +230,11 @@ class PropertyRepository extends EntityRepository
         $filteredNamespaces = $em->getRepository('AppBundle:OntoNamespace')
             ->findAllActiveNamespacesForUser($user);
 
+        $propertyNamespace = $class->getOngoingNamespace();
+        if(!in_array($propertyNamespace, $filteredNamespaces)){
+            $filteredNamespaces[] = $propertyNamespace;
+        }
+
         $idsFilteredNamespaces = array();
         $qFilteredNamespaces = array();
         foreach ($filteredNamespaces as $namespace)
@@ -304,6 +314,11 @@ class PropertyRepository extends EntityRepository
         $filteredNamespaces = $em->getRepository('AppBundle:OntoNamespace')
             ->findAllActiveNamespacesForUser($user);
 
+        $propertyNamespace = $class->getOngoingNamespace();
+        if(!in_array($propertyNamespace, $filteredNamespaces)){
+            $filteredNamespaces[] = $propertyNamespace;
+        }
+
         $idsFilteredNamespaces = array();
         $qFilteredNamespaces = array();
         foreach ($filteredNamespaces as $namespace)
@@ -381,6 +396,11 @@ class PropertyRepository extends EntityRepository
         $em = $this->getEntityManager();
         $filteredNamespaces = $em->getRepository('AppBundle:OntoNamespace')
             ->findAllActiveNamespacesForUser($user);
+
+        $propertyNamespace = $class->getOngoingNamespace();
+        if(!in_array($propertyNamespace, $filteredNamespaces)){
+            $filteredNamespaces[] = $propertyNamespace;
+        }
 
         $idsFilteredNamespaces = array();
         $qFilteredNamespaces = array();
@@ -498,6 +518,11 @@ class PropertyRepository extends EntityRepository
         $em = $this->getEntityManager();
         $filteredNamespaces = $em->getRepository('AppBundle:OntoNamespace')
             ->findAllActiveNamespacesForUser($user);
+
+        $propertyNamespace = $property->getOngoingNamespace();
+        if(!in_array($propertyNamespace, $filteredNamespaces)){
+            $filteredNamespaces[] = $propertyNamespace;
+        }
 
         $idsFilteredNamespaces = array();
         $qFilteredNamespaces = array();
@@ -632,6 +657,11 @@ class PropertyRepository extends EntityRepository
         $em = $this->getEntityManager();
         $filteredNamespaces = $em->getRepository('AppBundle:OntoNamespace')
             ->findAllActiveNamespacesForUser($user);
+
+        $propertyNamespace = $property->getOngoingNamespace();
+        if(!in_array($propertyNamespace, $filteredNamespaces)){
+            $filteredNamespaces[] = $propertyNamespace;
+        }
 
         $idsFilteredNamespaces = array();
         $qFilteredNamespaces = array();
@@ -1014,6 +1044,11 @@ class PropertyRepository extends EntityRepository
         $em = $this->getEntityManager();
         $filteredNamespaces = $em->getRepository('AppBundle:OntoNamespace')
             ->findAllActiveNamespacesForUser($user);
+
+        $propertyNamespace = $property->getOngoingNamespace();
+        if(!in_array($propertyNamespace, $filteredNamespaces)){
+            $filteredNamespaces[] = $propertyNamespace;
+        }
 
         $idsFilteredNamespaces = array();
         $qFilteredNamespaces = array();
