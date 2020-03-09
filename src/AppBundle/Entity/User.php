@@ -380,7 +380,11 @@ class User implements UserInterface
         $namespaces = $this->getCurrentActiveProject()->getManagedNamespaces()->filter(function(OntoNamespace $namespace){
             return $namespace->getIsOngoing();
         });
-        return $namespaces->first();
+
+        if($namespaces->first())
+            return $namespaces->first();
+        else
+            return;
     }
 
     /**

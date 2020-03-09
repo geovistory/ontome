@@ -60,9 +60,12 @@ class OntoClassVoter extends Voter
     private function canEdit(OntoClass $class, User $user)
     {
         foreach($user->getUserProjectAssociations()->getIterator() as $i => $userProjectAssociation) {
-            if(is_null($class->getOngoingNamespace())) {
+            // Il faut absolument un espace de nom pour pouvoir associer les entités à un espace de nom.
+            // Or les projets n'ont pas forcément un espace de nom ongoing. Il faut donc à ce moment là empêcher le mode Edit.
+            if(is_null($class->getOngoingNamespace()) || is_null($user->getCurrentOngoingNamespace())) {
                 return false;
             }
+
             if($userProjectAssociation->getProject() === $class->getOngoingNamespace()->getProjectForTopLevelNamespace()
                 && $userProjectAssociation->getPermission() <= 3){
                 return true;
