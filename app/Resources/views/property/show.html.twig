@@ -91,15 +91,19 @@
                                         {% endfor %}
                                         {% if isInActiveNamespaces %}
                                             <li>
+                                                {% if association.parentProperty.domain is not null %}
                                                 <a href="{{ path('class_show', {'id': association.parentProperty.domain.id}) }}">
                                                     {{ association.parentProperty.domain.identifierInNamespace }} {{ association.parentProperty.domain.standardLabel }}
-                                                </a> →
+                                                </a>
+                                                {% endif %} →
                                                 <a href="{{ path('property_show', {'id': association.parentProperty.id}) }}">
                                                     {{ association.parentProperty.identifierInNamespace }} {{ association.parentProperty.standardLabel }}
                                                 </a> →
+                                                {% if association.parentProperty.range is not null %}
                                                 <a href="{{ path('class_show', {'id': association.parentProperty.range.id}) }}">
                                                     {{ association.parentProperty.range.identifierInNamespace }} {{ association.parentProperty.range.standardLabel }}
                                                 </a>
+                                                {% endif %}
                                             </li>
                                         {% endif %}
                                     {% endfor %}
