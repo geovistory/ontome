@@ -220,6 +220,7 @@
                         <th>Profile</th>
                         <th>Creation date</th>
                         <th>API</th>
+                        <th></th>
                     </tr>
                     </thead>
                     <tbody>
@@ -252,6 +253,11 @@
                                     </a>
                                 {% else %}
                                     Not published in API
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if (not profile.isOngoing and profile.wasClosedAt is not null and profile.endDate is null and is_granted('edit', project)) %}
+                                    <a class="recreate-btn btn btn-primary" data-id="{{ profile.id }}" role="button"><i class="fas fa-copy"></i> Duplicate</a>
                                 {% endif %}
                             </td>
                         </tr>
@@ -374,6 +380,31 @@
                     dataType: 'json',
                     statusCode: {
                         204: function () {}
+                    }
+                });
+            });
+
+            //confirmation box for profile recreate action
+            $('.recreate-btn').on('click', function() {
+                var profileID = $(this).data("id");
+                bootbox.confirm({
+                    message: "This will create a new ongoing version of this profile. Do you wish to proceed?",
+                    buttons: {
+                        confirm: {
+                            label: 'Yes',
+                            className: 'btn-success'
+                        },
+                        cancel: {
+                            label: 'No',
+                            className: 'btn-danger'
+                        }
+                    },
+                    callback: function (result) {
+                        if(result){
+                            var urlProfileRecreate = '{{ path("profile_recreate", {'profile' : 'profileID'}) }}';
+                            urlProfileRecreate = urlProfileRecreate.replace("profileID", profileID);
+                            window.location = urlProfileRecreate;
+                        }
                     }
                 });
             });

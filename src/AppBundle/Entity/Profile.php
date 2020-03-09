@@ -349,11 +349,16 @@ class Profile
     }
 
     /**
-     * @param mixed $profileAssociations
+     * @param mixed $profileAssociation
      */
-    public function setProfileAssociations($profileAssociations)
+    public function addProfileAssociation($profileAssociation)
     {
-        $this->profileAssociations = $profileAssociations;
+        if ($this->profileAssociations->contains($profileAssociation)) {
+            return;
+        }
+        $this->profileAssociations[] = $profileAssociation;
+        // needed to update the owning side of the relationship!
+        $profileAssociation->setProfile($this);
     }
 
     /**
@@ -378,6 +383,14 @@ class Profile
     public function getObjectIdentification()
     {
         return $this->standardLabel;
+    }
+
+    /**
+     * @param mixed $startDate
+     */
+    public function setStandardLabel($standardLabel)
+    {
+        $this->standardLabel = $standardLabel;
     }
 
     /**
@@ -520,12 +533,27 @@ class Profile
         $this->namespaces[] = $namespace;
     }
 
+    public function setNamespaces($namespaces)
+    {
+        $this->namespaces = $namespaces;
+    }
+
     public function addClass(OntoClass $class)
     {
         if ($this->classes->contains($class)) {
             return;
         }
         $this->classes[] = $class;
+    }
+
+    public function setClasses($classes)
+    {
+        $this->classes = $classes;
+    }
+
+    public function setProperties($properties)
+    {
+        $this->properties = $properties;
     }
 
     public function removeNamespace(OntoNamespace $namespace)
