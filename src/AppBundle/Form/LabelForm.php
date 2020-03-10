@@ -40,7 +40,7 @@ class LabelForm extends AbstractType
         }
 
         $builder
-            ->add('label', TextType::class, array(
+            ->add('label', TextType::class, array('label' => false
             ))
             ->add('languageIsoCode', ChoiceType::class, array(
                 'choices'  => array(
