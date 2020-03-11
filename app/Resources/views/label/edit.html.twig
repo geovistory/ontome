@@ -4,17 +4,9 @@
     <div class="container">
         <div class="row">
             <div class="col-xs-12">
-                <h2>Edit
-                    {% if label.object is not null %}
-                        {% if label.object.identifierInNamespace is not null %}
-                            {{ label.object.standardLabel }} – {{ label.object.identifierInNamespace }}: Label
-                        {% else %}
-                            {{ label.object.objectIdentification }}: Label
-                        {% endif %}
-                    {% else %}
-                        Label
-                    {% endif %}
+                <h2>Edit the label for the
                     {% if label.class is not null %}
+                        class {{ label.class }}
                         <a href="{{ path('class_edit', {
                                     id: label.class.id
                             }) }}#identification"
@@ -23,6 +15,7 @@
                             <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
                         </a>
                     {% elseif label.property is not null %}
+                        property {{ label.property }}
                         <a href="{{ path('property_edit', {
                             id: label.property.id
                         }) }}#identification"
@@ -31,6 +24,7 @@
                             <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
                         </a>
                     {% elseif label.profile is not null %}
+                        profile {{ label.profile }}
                         <a href="{{ path('profile_edit', {
                             id: label.profile.id
                         }) }}#identification"
@@ -39,6 +33,7 @@
                             <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
                         </a>
                     {% elseif label.project is not null %}
+                        project {{ label.project }}
                         <a href="{{ path('project_edit', {
                             id: label.project.id
                         }) }}#identification"
@@ -47,6 +42,7 @@
                             <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
                         </a>
                     {% elseif label.namespace is not null %}
+                        namespace {{ label.namespace }}
                         <a href="{{ path('namespace_edit', {
                             id: label.namespace.id
                         }) }}#identification"

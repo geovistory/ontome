@@ -4,16 +4,16 @@
     <div class="row">
         <div class="col-xs-12">
             <h2>Edit
-                {% if textProperty.object is not null %}
-                    {% if textProperty.object.identifierInNamespace is not null %}
-                        {{ textProperty.object.standardLabel }} – {{ textProperty.object.identifierInNamespace }}: {{ textProperty.systemType.standardLabel }}
-                    {% else %}
-                        {{ textProperty.object.objectIdentification }}: {{ textProperty.systemType.standardLabel }}
-                    {% endif %}
-                {% else %}
-                    {{ textProperty.systemType.standardLabel }}
-                {% endif %}
                 {% if textProperty.classAssociation is not null %}
+                    {% if textProperty.object is not null %}
+                        {% if textProperty.object.identifierInNamespace is not null %}
+                            {{ textProperty.object.standardLabel }} – {{ textProperty.object.identifierInNamespace }}: {{ textProperty.systemType.standardLabel }}
+                        {% else %}
+                            {{ textProperty.object.objectIdentification }}: {{ textProperty.systemType.standardLabel }}
+                        {% endif %}
+                    {% else %}
+                        {{ textProperty.systemType.standardLabel }}
+                    {% endif %}
                     <a href="{{ path('class_association_edit', {
                                 id: textProperty.classAssociation.id
                         }) }}"
@@ -22,6 +22,15 @@
                         <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
                     </a>
                 {% elseif textProperty.propertyAssociation is not null %}
+                    {% if textProperty.object is not null %}
+                        {% if textProperty.object.identifierInNamespace is not null %}
+                            {{ textProperty.object.standardLabel }} – {{ textProperty.object.identifierInNamespace }}: {{ textProperty.systemType.standardLabel }}
+                        {% else %}
+                            {{ textProperty.object.objectIdentification }}: {{ textProperty.systemType.standardLabel }}
+                        {% endif %}
+                    {% else %}
+                        {{ textProperty.systemType.standardLabel }}
+                    {% endif %}
                     <a href="{{ path('property_association_edit', {
                         id: textProperty.propertyAssociation.id
                     }) }}"
@@ -30,6 +39,7 @@
                         <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
                     </a>
                 {% elseif textProperty.class is not null %}
+                    the {{ textProperty.systemType.standardLabel|lower }} for the class {{ textProperty.class }}
                     <a href="{{ path('class_edit', {
                         id: textProperty.class.id
                     }) }}#definition"
@@ -38,6 +48,7 @@
                         <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
                     </a>
                 {% elseif textProperty.property is not null %}
+                    the {{ textProperty.systemType.standardLabel|lower }} for the property {{ textProperty.property }}
                     <a href="{{ path('property_edit', {
                         id: textProperty.property.id
                     }) }}#definition"
@@ -46,6 +57,7 @@
                         <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
                     </a>
                 {% elseif textProperty.project is not null %}
+                    the {{ textProperty.systemType.standardLabel|lower }} for the project {{ textProperty.project }}
                     <a href="{{ path('project_edit', {
                         id: textProperty.project.id
                     }) }}#definition"
@@ -54,6 +66,7 @@
                         <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
                     </a>
                 {% elseif textProperty.profile is not null %}
+                    the {{ textProperty.systemType.standardLabel|lower }} for the profile {{ textProperty.profile }}
                     <a href="{{ path('profile_edit', {
                         id: textProperty.profile.id
                     }) }}#definition"
@@ -62,6 +75,7 @@
                         <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
                     </a>
                 {% elseif textProperty.namespace is not null %}
+                    the {{ textProperty.systemType.standardLabel|lower }} for the namespace {{ textProperty.namespace }}
                     <a href="{{ path('namespace_edit', {
                         id: textProperty.namespace.id
                     }) }}#definition"
@@ -70,6 +84,15 @@
                         <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
                     </a>
                 {% elseif textProperty.entityAssociation is not null and app.request.attributes.get('_route') == 'text_property_inverse_new' %}
+                    {% if textProperty.object is not null %}
+                        {% if textProperty.object.identifierInNamespace is not null %}
+                            {{ textProperty.object.standardLabel }} – {{ textProperty.object.identifierInNamespace }}: {{ textProperty.systemType.standardLabel }}
+                        {% else %}
+                            {{ textProperty.object.objectIdentification }}: {{ textProperty.systemType.standardLabel }}
+                        {% endif %}
+                    {% else %}
+                        {{ textProperty.systemType.standardLabel }}
+                    {% endif %}
                     <a href="{{ path('entity_association_inverse_edit', {
                     id: textProperty.entityAssociation.id
                 }) }}#definition"
@@ -78,6 +101,15 @@
                     <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
                 </a>
                 {% elseif textProperty.entityAssociation is not null %}
+                    {% if textProperty.object is not null %}
+                        {% if textProperty.object.identifierInNamespace is not null %}
+                            {{ textProperty.object.standardLabel }} – {{ textProperty.object.identifierInNamespace }}: {{ textProperty.systemType.standardLabel }}
+                        {% else %}
+                            {{ textProperty.object.objectIdentification }}: {{ textProperty.systemType.standardLabel }}
+                        {% endif %}
+                    {% else %}
+                        {{ textProperty.systemType.standardLabel }}
+                    {% endif %}
                     <a href="{{ path('entity_association_edit', {
                         id: textProperty.entityAssociation.id
                     }) }}#definition"

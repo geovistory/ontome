@@ -191,7 +191,7 @@ class TextPropertyController extends Controller
             $textProperty->setProfile($associatedEntity);
             $associatedObject = $associatedEntity;
             $redirectToRoute = 'profile_edit';
-            $redirectToRouteFragment = 'identification';
+            $redirectToRouteFragment = 'definition';
         }
         else if($object === 'namespace') {
             $associatedEntity = $em->getRepository('AppBundle:OntoNamespace')->find($objectId);
