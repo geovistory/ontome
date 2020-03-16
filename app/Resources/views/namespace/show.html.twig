@@ -68,6 +68,52 @@
                             {% endif %}
                         </div>
                     </div>
+                    {% if namespace.referencedNamespaceAssociations is not empty %}
+                    <div class="row">
+                        <div class="col-lg-2">
+                            <p>Reference namespaces of which this namespace is an extension:</p>
+                        </div>
+                        <div class="col-lg-10">
+                                <ul>
+                                    {% for referencedNamespaceAssociation in namespace.referencedNamespaceAssociations %}
+                                        <li>
+                                            <a href="{{ path('namespace_show', {
+                                                'id': referencedNamespaceAssociation.referencedNamespace.id
+                                            }) }}">
+                                                {{ referencedNamespaceAssociation.referencedNamespace }}
+                                            </a>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                        </div>
+                    </div>
+                    {% endif %}
+                    <div class="row">
+                        <div class="col-lg-2">
+                            <p>Contributors:</p>
+                        </div>
+                        <div class="col-lg-10">
+                            {% set contributors, break = null, false %}
+                            {% for textProperty in namespace.textProperties if textProperty.systemType.id == 2 %}
+                                {% if not break %}
+                                    {% if textProperty.languageIsoCode == 'en' %}
+                                        {% set break = true %}
+                                        {% set contributors = textProperty.textProperty %}
+                                    {% else %}
+                                        {% if contributors == null %}
+                                            {% set contributors = textProperty.textProperty %}
+                                        {% endif %}
+                                    {% endif %}
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if contributors is not null %}
+                                {{ contributors|raw }}
+                            {% else %}
+                                <p><i>No contributors yet.</i></p>
+                            {% endif %}
+                        </div>
+                    </div>
                 </div>
             </div>
             <div id="definition" class="tab-pane fade">
