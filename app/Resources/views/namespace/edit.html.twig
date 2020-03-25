@@ -85,6 +85,7 @@
                             </div>
                         </div>
                     {% endif %}
+                    {% if not namespace.isTopLevelNamespace %}
                     <div class="row">
                         <div class="col-lg-2">
                             <p>Contributors:</p>
@@ -111,6 +112,7 @@
                             {% endif %}
                         </div>
                     </div>
+                    {% endif %}
                 </div>
             </div>
             <div id="definition" class="tab-pane fade">
@@ -159,6 +161,39 @@
                     {% endfor %}
                     </tbody>
                 </table>
+                {% if not namespace.isTopLevelNamespace %}
+                    {% set txtPcontributors, break = null, false %}
+                    {% for textProperty in namespace.textProperties if textProperty.systemType.id == 2 %}
+                        {% if not break %}
+                            {% if textProperty.languageIsoCode == 'en' %}
+                                {% set break = true %}
+                                {% set txtPcontributors = textProperty %}
+                            {% else %}
+                                {% if txtPcontributors == null %}
+                                    {% set txtPcontributors = textProperty %}
+                                {% endif %}
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+                    <h3>Contributors
+                        {% if txtPcontributors is not null %}
+                        <a href="{{ path('text_property_edit', {'id': txtPcontributors.id}) }}" class="btn btn-xs btn-success">
+                            <span class="fa fa-edit"></span>
+                        </a>
+                        {% else %}
+                        <a href="{{ path('text_property_new', {'type': 'dct:contributor', 'object': 'namespace', 'objectId': namespace.id })}}"
+                           class="btn btn-primary btn-xs">
+                            New <span class="fa fa-plus-circle"></span>
+                        </a>
+                        {% endif %}
+                    </h3>
+
+                    {% if txtPcontributors is not null %}
+                        {{ txtPcontributors.textProperty|raw }}
+                    {% else %}
+                        <p><i>No contributors yet.</i></p>
+                    {% endif %}
+                {% endif %}
                 <div class="pull-right add-div">
                     <a href="{{ path('text_property_new', {'type': 'additional-note', 'object': 'namespace', 'objectId': namespace.id })}}"
                        class="btn btn-primary pull-right">

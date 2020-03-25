@@ -88,6 +88,7 @@
                         </div>
                     </div>
                     {% endif %}
+                    {% if not namespace.isTopLevelNamespace %}
                     <div class="row">
                         <div class="col-lg-2">
                             <p>Contributors:</p>
@@ -114,6 +115,7 @@
                             {% endif %}
                         </div>
                     </div>
+                    {% endif %}
                 </div>
             </div>
             <div id="definition" class="tab-pane fade">
@@ -141,6 +143,28 @@
                     {% endfor %}
                     </tbody>
                 </table>
+                {% if not namespace.isTopLevelNamespace %}
+                    <h3>Contributors</h3>
+                    {% set contributors, break = null, false %}
+                    {% for textProperty in namespace.textProperties if textProperty.systemType.id == 2 %}
+                        {% if not break %}
+                            {% if textProperty.languageIsoCode == 'en' %}
+                                {% set break = true %}
+                                {% set contributors = textProperty.textProperty %}
+                            {% else %}
+                                {% if contributors == null %}
+                                    {% set contributors = textProperty.textProperty %}
+                                {% endif %}
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if contributors is not null %}
+                        {{ contributors|raw }}
+                    {% else %}
+                        <p><i>No contributors yet.</i></p>
+                    {% endif %}
+                {% endif %}
                 <h3>Additional notes</h3>
                 <table class="table table-striped" id="additional-notes-table">
                     <thead>
