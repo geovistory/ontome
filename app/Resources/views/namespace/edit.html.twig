@@ -26,12 +26,14 @@
         </h2>
         <ul class="nav nav-tabs">
             <li class="active"><a data-toggle="tab" href="#summary">Summary</a></li>
-            <li><a data-toggle="tab" href="#definition">Definition</a></li>
             <li><a data-toggle="tab" href="#identification">Identification</a></li>
+            <li><a data-toggle="tab" href="#definition">Definition</a></li>
             <li><a data-toggle="tab" href="#namespace-hierarchy">Hierarchy</a></li>
+            {% if not namespace.isTopLevelNamespace %}
             <li><a data-toggle="tab" href="#classes">Classes</a></li>
             <li><a data-toggle="tab" href="#properties">Properties</a></li>
             <li><a data-toggle="tab" href="#graph">Graph</a></li>
+            {% endif %}
             <li><a data-toggle="tab" href="#comments" class="updateViewComment" data-id="{{ namespace.id }}" data-object="namespace">Comments</a></li>
         </ul>
 
