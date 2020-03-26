@@ -297,6 +297,7 @@
                 {% else %}
                     <p>This namespace is a root namespace. Find all its versions in the <a href="#namespace-hierarchy" onclick="window.location = '{{ path('namespace_edit', {'id': namespace.id}) }}#namespace-hierarchy';window.location.reload()">Hierarchy tab</a>.</p>
                 {% endif %}
+                {% if not namespace.isTopLevelNamespace %}
                 <h3>Reference namespaces of which this namespace is an extension</h3>
                 {% if namespace.referencedNamespaceAssociations is empty %}
                     <em id="empty-namespace-list-message">No reference namespace has been specified.</em>
@@ -336,6 +337,7 @@
                         Add <span class="fa fa-plus-circle"></span>
                     </a>
                 </div>
+                {% endif %}
                 <h3>Labels</h3>
                 <table class="table table-striped" id="labels-table">
                     <thead>
