@@ -73,20 +73,17 @@
                     {% if namespace.referencedNamespaceAssociations is not empty %}
                     <div class="row">
                         <div class="col-lg-2">
-                            <p>Reference namespaces of which this namespace is an extension:</p>
+                            <p>Reference namespace{% if namespace.referencedNamespaceAssociations|length > 1 %}s{% endif %}:</p>
                         </div>
                         <div class="col-lg-10">
-                                <ul>
-                                    {% for referencedNamespaceAssociation in namespace.referencedNamespaceAssociations %}
-                                        <li>
-                                            <a href="{{ path('namespace_show', {
-                                                'id': referencedNamespaceAssociation.referencedNamespace.id
-                                            }) }}">
-                                                {{ referencedNamespaceAssociation.referencedNamespace }}
-                                            </a>
-                                        </li>
-                                    {% endfor %}
-                                </ul>
+                        {% for referencedNamespaceAssociation in namespace.referencedNamespaceAssociations %}
+                            <p><a href="{{ path('namespace_show', {
+                                    'id': referencedNamespaceAssociation.referencedNamespace.id
+                                }) }}">
+                                    {{ referencedNamespaceAssociation.referencedNamespace }}
+                                </a>
+                            </p>
+                        {% endfor %}
                         </div>
                     </div>
                     {% endif %}
@@ -219,19 +216,17 @@
                     <p>This namespace is a root namespace. Find all its versions in the <a href="#namespace-hierarchy" onclick="window.location = '{{ path('namespace_show', {'id': namespace.id}) }}#namespace-hierarchy';window.location.reload()">Hierarchy tab</a>.</p>
                 {% endif %}
                 {% if not namespace.isTopLevelNamespace %}
-                <h3>Reference namespaces of which this namespace is an extension</h3>
+                <h3>Reference namespace{% if namespace.referencedNamespaceAssociations|length > 1 %}s{% endif %} of which this namespace is an extension</h3>
                 {% if namespace.referencedNamespaceAssociations is not empty %}
-                    <ul>
-                        {% for referencedNamespaceAssociation in namespace.referencedNamespaceAssociations %}
-                            <li>
-                                <a href="{{ path('namespace_show', {
-                                    'id': referencedNamespaceAssociation.referencedNamespace.id
-                                }) }}">
-                                    {{ referencedNamespaceAssociation.referencedNamespace }}
-                                </a>
-                            </li>
-                        {% endfor %}
-                    </ul>
+                    {% for referencedNamespaceAssociation in namespace.referencedNamespaceAssociations %}
+                        <p>
+                            <a href="{{ path('namespace_show', {
+                                'id': referencedNamespaceAssociation.referencedNamespace.id
+                            }) }}">
+                                {{ referencedNamespaceAssociation.referencedNamespace }}
+                            </a>
+                        </p>
+                    {% endfor %}
                 {% else %}
                     <em>No reference namespace has been specified.</em>
                 {% endif %}
