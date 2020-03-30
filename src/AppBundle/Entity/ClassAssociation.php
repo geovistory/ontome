@@ -45,6 +45,12 @@ class ClassAssociation
     private $parentClass;
 
     /**
+     * @ORM\ManyToOne(targetEntity="OntoNamespace", inversedBy="classAssociationVersions")
+     * @ORM\JoinColumn(name="fk_namespace_for_version", referencedColumnName="pk_namespace", nullable=false)
+     */
+    private $namespaceForVersion;
+
+    /**
      * @ORM\Column(type="text")
      */
     private $notes;
@@ -110,6 +116,14 @@ class ClassAssociation
     public function getId()
     {
         return $this->id;
+    }
+
+    /**
+     * @return OntoNamespace
+     */
+    public function getNamespaceForVersion()
+    {
+        return $this->namespaceForVersion;
     }
 
     /**
@@ -199,6 +213,14 @@ class ClassAssociation
     public function getModificationTime()
     {
         return $this->modificationTime;
+    }
+
+    /**
+     * @param mixed $namespaceForVersion
+     */
+    public function setNamespaceForVersion($namespaceForVersion)
+    {
+        $this->namespaceForVersion = $namespaceForVersion;
     }
 
     /**

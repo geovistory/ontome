@@ -49,6 +49,12 @@ class Comment
     private $viewedBy = [];
 
     /**
+     * @ORM\ManyToOne(targetEntity="OntoNamespace", inversedBy="commentVersions")
+     * @ORM\JoinColumn(name="fk_namespace_for_version", referencedColumnName="pk_namespace", nullable=false)
+     */
+    private $namespaceForVersion;
+
+    /**
      * @ORM\ManyToOne(targetEntity="OntoClass", inversedBy="comments")
      * @ORM\JoinColumn(name="fk_class", referencedColumnName="pk_class")
      */
@@ -126,6 +132,14 @@ class Comment
     public function getId()
     {
         return $this->id;
+    }
+
+    /**
+     * @return OntoNamespace
+     */
+    public function getNamespaceForVersion()
+    {
+        return $this->namespaceForVersion;
     }
 
     /**
@@ -251,6 +265,14 @@ class Comment
     public function getModificationTime()
     {
         return $this->modificationTime;
+    }
+
+    /**
+     * @param mixed $namespaceForVersion
+     */
+    public function setNamespaceForVersion($namespaceForVersion)
+    {
+        $this->namespaceForVersion = $namespaceForVersion;
     }
 
     /**

@@ -62,6 +62,12 @@ class EntityAssociation
     private $directed;
 
     /**
+     * @ORM\ManyToOne(targetEntity="OntoNamespace", inversedBy="entityAssociationVersions")
+     * @ORM\JoinColumn(name="fk_namespace_for_version", referencedColumnName="pk_namespace", nullable=false)
+     */
+    private $namespaceForVersion;
+
+    /**
      * @Assert\NotNull()
      * @Assert\Valid()
      * @ORM\OneToMany(targetEntity="AppBundle\Entity\TextProperty", mappedBy="entityAssociation", cascade={"persist"})
@@ -121,6 +127,14 @@ class EntityAssociation
     public function getId()
     {
         return $this->id;
+    }
+
+    /**
+     * @return OntoNamespace
+     */
+    public function getNamespaceForVersion()
+    {
+        return $this->namespaceForVersion;
     }
 
     /**
@@ -283,6 +297,14 @@ class EntityAssociation
             $objectType = 'property';
         }
         return $objectType;
+    }
+
+    /**
+     * @param mixed $namespaceForVersion
+     */
+    public function setNamespaceForVersion($namespaceForVersion)
+    {
+        $this->namespaceForVersion = $namespaceForVersion;
     }
 
     /**

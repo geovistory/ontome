@@ -40,6 +40,11 @@ class OntoClass
     private $isManualIdentifier;
 
     /**
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\OntoClassVersion", mappedBy="class")
+     */
+    private $classVersions;
+
+    /**
      * @ORM\Column(type="text")
      */
     private $importerXmlField;
@@ -167,6 +172,7 @@ class OntoClass
     public function __construct()
     {
         $this->namespaces = new ArrayCollection();
+        $this->classVersions = new ArrayCollection();
         $this->labels = new ArrayCollection();
         $this->textProperties = new ArrayCollection();
         $this->profiles = new ArrayCollection();
@@ -229,6 +235,13 @@ class OntoClass
         return $this->isManualIdentifier;
     }
 
+    /**
+     * @return ArrayCollection|OntoClassVersion[]
+     */
+    public function getClassVersions()
+    {
+        return $this->classVersions;
+    }
 
     /**
      * @return mixed

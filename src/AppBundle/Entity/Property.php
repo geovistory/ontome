@@ -33,6 +33,11 @@ class Property
     private $identifierInNamespace;
 
     /**
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\PropertyVersion", mappedBy="property")
+     */
+    private $propertyVersions;
+
+    /**
      * @var boolean
      * A non-persisted field that's used to know if the $identifierInNamespace field is manually set by the user
      * or automatically set by a trigger in the database     *
@@ -198,6 +203,7 @@ class Property
     public function __construct()
     {
         $this->namespaces = new ArrayCollection();
+        $this->propertyVersions = new ArrayCollection();
         $this->labels = new ArrayCollection();
         $this->textProperties = new ArrayCollection();
         $this->profiles = new ArrayCollection();

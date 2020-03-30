@@ -44,6 +44,12 @@ class Label
     private $languageIsoCode;
 
     /**
+     * @ORM\ManyToOne(targetEntity="OntoNamespace", inversedBy="labelVersions")
+     * @ORM\JoinColumn(name="fk_namespace_for_version", referencedColumnName="pk_namespace", nullable=false)
+     */
+    private $namespaceForVersion;
+
+    /**
      * @ORM\Column(type="integer")
      */
     private $importerInteger;
@@ -139,6 +145,14 @@ class Label
     public function getId()
     {
         return $this->id;
+    }
+
+    /**
+     * @return OntoNamespace
+     */
+    public function getNamespaceForVersion()
+    {
+        return $this->namespaceForVersion;
     }
 
     /**
@@ -298,6 +312,14 @@ class Label
     public function getModificationTime()
     {
         return $this->modificationTime;
+    }
+
+    /**
+     * @param mixed $namespaceForVersion
+     */
+    public function setNamespaceForVersion($namespaceForVersion)
+    {
+        $this->namespaceForVersion = $namespaceForVersion;
     }
 
     /**

@@ -248,6 +248,54 @@ class OntoNamespace
      */
     private $referencedNamespaceAssociations;
 
+    /**
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Comment", mappedBy="namespaceForVersion")
+     * @ORM\OrderBy({"creationTime" = "DESC"})
+     */
+    private $commentVersions;
+
+    /**
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\ClassAssociation", mappedBy="namespaceForVersion")
+     * @ORM\OrderBy({"creationTime" = "DESC"})
+     */
+    private $classAssociationVersions;
+
+    /**
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\EntityAssociation", mappedBy="namespaceForVersion")
+     * @ORM\OrderBy({"creationTime" = "DESC"})
+     */
+    private $entityAssociationVersions;
+
+    /**
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Label", mappedBy="namespaceForVersion")
+     * @ORM\OrderBy({"creationTime" = "DESC"})
+     */
+    private $labelVersions;
+
+    /**
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\OntoClassVersion", mappedBy="namespaceForVersion")
+     * @ORM\OrderBy({"creationTime" = "DESC"})
+     */
+    private $classVersions;
+
+    /**
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\PropertyVersion", mappedBy="namespaceForVersion")
+     * @ORM\OrderBy({"creationTime" = "DESC"})
+     */
+    private $propetyVersions;
+
+    /**
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\PropertyAssociation", mappedBy="namespaceForVersion")
+     * @ORM\OrderBy({"creationTime" = "DESC"})
+     */
+    private $propertyAssociationVersions;
+
+    /**
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\TextProperty", mappedBy="namespaceForVersion")
+     * @ORM\OrderBy({"creationTime" = "DESC"})
+     */
+    private $textPropertyVersions;
+
     public function __construct()
     {
         $this->classes = new ArrayCollection();
@@ -262,6 +310,14 @@ class OntoNamespace
         $this->projects = new ArrayCollection();
         $this->comments = new ArrayCollection();
         $this->projectAssociations = new ArrayCollection();
+        $this->classAssociationVersions = new ArrayCollection();
+        $this->commentVersions = new ArrayCollection();
+        $this->entityAssociationVersions = new ArrayCollection();
+        $this->labelVersions = new ArrayCollection();
+        $this->classVersions = new ArrayCollection();
+        $this->propetyVersions = new ArrayCollection();
+        $this->propertyAssociationVersions = new ArrayCollection();
+        $this->textPropertyVersions = new ArrayCollection();
     }
 
     /**
@@ -509,6 +565,70 @@ class OntoNamespace
     }
 
     /**
+     * @return ArrayCollection
+     */
+    public function getCommentVersions()
+    {
+        return $this->commentVersions;
+    }
+
+    /**
+     * @return ArrayCollection
+     */
+    public function getClassAssociationVersions()
+    {
+        return $this->classAssociationVersions;
+    }
+
+    /**
+     * @return ArrayCollection
+     */
+    public function getEntityAssociationVersions()
+    {
+        return $this->entityAssociationVersions;
+    }
+
+    /**
+     * @return ArrayCollection
+     */
+    public function getLabelVersions()
+    {
+        return $this->labelVersions;
+    }
+
+    /**
+     * @return ArrayCollection
+     */
+    public function getClassVersions()
+    {
+        return $this->classVersions;
+    }
+
+    /**
+     * @return ArrayCollection
+     */
+    public function getPropetyVersions()
+    {
+        return $this->propetyVersions;
+    }
+
+    /**
+     * @return ArrayCollection
+     */
+    public function getPropertyAssociationVersions()
+    {
+        return $this->propertyAssociationVersions;
+    }
+
+    /**
+     * @return ArrayCollection
+     */
+    public function getTextPropertyVersions()
+    {
+        return $this->textPropertyVersions;
+    }
+
+    /**
      * @return string a human readable identification of the object
      */
     public function getObjectIdentification()
@@ -637,7 +757,7 @@ class OntoNamespace
     }
 
     /**
-     * @@return ArrayCollection|ReferencedNamespaceAssociation[]
+     * @return ArrayCollection|ReferencedNamespaceAssociation[]
      */
     public function getReferencedNamespaceAssociations()
     {
