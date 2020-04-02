@@ -157,9 +157,23 @@ class ClassRepository extends EntityRepository
         $filteredNamespaces = $em->getRepository('AppBundle:OntoNamespace')
             ->findAllActiveNamespacesForUser($user);
 
-        $classNamespace = $class->getOngoingNamespace();
-        if(!in_array($classNamespace, $filteredNamespaces)){
-            $filteredNamespaces[] = $classNamespace;
+        $classNamespaces = $class->getNamespaces();
+        $isClassNamespace = null;
+
+        foreach ($classNamespaces as $classNamespace){
+            if(!$classNamespace->getIsTopLevelNamespace()){
+                if($classNamespace->getIsOngoing()){
+                    $isClassNamespace = $classNamespace;
+                    break;
+                }
+                else{
+                    $isClassNamespace = $classNamespace;
+                }
+            }
+        }
+
+        if(!in_array($isClassNamespace, $filteredNamespaces)){
+            $filteredNamespaces[] = $isClassNamespace;
         }
 
         $idsFilteredNamespaces = array();
@@ -252,8 +266,22 @@ class ClassRepository extends EntityRepository
         $filteredNamespaces = $em->getRepository('AppBundle:OntoNamespace')
             ->findAllActiveNamespacesForUser($user);
 
-        $classNamespace = $class->getOngoingNamespace();
-        if(!in_array($classNamespace, $filteredNamespaces)){
+        $classNamespaces = $class->getNamespaces();
+        $isClassNamespace = null;
+
+        foreach ($classNamespaces as $classNamespace){
+            if(!$classNamespace->getIsTopLevelNamespace()){
+                if($classNamespace->getIsOngoing()){
+                    $isClassNamespace = $classNamespace;
+                    break;
+                }
+                else{
+                    $isClassNamespace = $classNamespace;
+                }
+            }
+        }
+
+        if(!in_array($isClassNamespace, $filteredNamespaces)){
             $filteredNamespaces[] = $classNamespace;
         }
 
@@ -429,8 +457,22 @@ class ClassRepository extends EntityRepository
         $filteredNamespaces = $em->getRepository('AppBundle:OntoNamespace')
             ->findAllActiveNamespacesForUser($user);
 
-        $classNamespace = $class->getOngoingNamespace();
-        if(!in_array($classNamespace, $filteredNamespaces)){
+        $classNamespaces = $class->getNamespaces();
+        $isClassNamespace = null;
+
+        foreach ($classNamespaces as $classNamespace){
+            if(!$classNamespace->getIsTopLevelNamespace()){
+                if($classNamespace->getIsOngoing()){
+                    $isClassNamespace = $classNamespace;
+                    break;
+                }
+                else{
+                    $isClassNamespace = $classNamespace;
+                }
+            }
+        }
+
+        if(!in_array($isClassNamespace, $filteredNamespaces)){
             $filteredNamespaces[] = $classNamespace;
         }
 

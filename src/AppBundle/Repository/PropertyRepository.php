@@ -144,10 +144,24 @@ class PropertyRepository extends EntityRepository
         $em = $this->getEntityManager();
         $filteredNamespaces = $em->getRepository('AppBundle:OntoNamespace')
             ->findAllActiveNamespacesForUser($user);
-        
-        $propertyNamespace = $class->getOngoingNamespace();
-        if(!in_array($propertyNamespace, $filteredNamespaces)){
-            $filteredNamespaces[] = $propertyNamespace;
+
+        $classNamespaces = $class->getNamespaces();
+        $isClassNamespace = null;
+
+        foreach ($classNamespaces as $classNamespace){
+            if(!$classNamespace->getIsTopLevelNamespace()){
+                if($classNamespace->getIsOngoing()){
+                    $isClassNamespace = $classNamespace;
+                    break;
+                }
+                else{
+                    $isClassNamespace = $classNamespace;
+                }
+            }
+        }
+
+        if(!in_array($isClassNamespace, $filteredNamespaces)){
+            $filteredNamespaces[] = $isClassNamespace;
         }
         
         $idsFilteredNamespaces = array();
@@ -230,9 +244,23 @@ class PropertyRepository extends EntityRepository
         $filteredNamespaces = $em->getRepository('AppBundle:OntoNamespace')
             ->findAllActiveNamespacesForUser($user);
 
-        $propertyNamespace = $class->getOngoingNamespace();
-        if(!in_array($propertyNamespace, $filteredNamespaces)){
-            $filteredNamespaces[] = $propertyNamespace;
+        $classNamespaces = $class->getNamespaces();
+        $isClassNamespace = null;
+
+        foreach ($classNamespaces as $classNamespace){
+            if(!$classNamespace->getIsTopLevelNamespace()){
+                if($classNamespace->getIsOngoing()){
+                    $isClassNamespace = $classNamespace;
+                    break;
+                }
+                else{
+                    $isClassNamespace = $classNamespace;
+                }
+            }
+        }
+
+        if(!in_array($isClassNamespace, $filteredNamespaces)){
+            $filteredNamespaces[] = $isClassNamespace;
         }
 
         $idsFilteredNamespaces = array();
@@ -314,9 +342,23 @@ class PropertyRepository extends EntityRepository
         $filteredNamespaces = $em->getRepository('AppBundle:OntoNamespace')
             ->findAllActiveNamespacesForUser($user);
 
-        $propertyNamespace = $class->getOngoingNamespace();
-        if(!in_array($propertyNamespace, $filteredNamespaces)){
-            $filteredNamespaces[] = $propertyNamespace;
+        $classNamespaces = $class->getNamespaces();
+        $isClassNamespace = null;
+
+        foreach ($classNamespaces as $classNamespace){
+            if(!$classNamespace->getIsTopLevelNamespace()){
+                if($classNamespace->getIsOngoing()){
+                    $isClassNamespace = $classNamespace;
+                    break;
+                }
+                else{
+                    $isClassNamespace = $classNamespace;
+                }
+            }
+        }
+
+        if(!in_array($isClassNamespace, $filteredNamespaces)){
+            $filteredNamespaces[] = $isClassNamespace;
         }
 
         $idsFilteredNamespaces = array();
@@ -397,9 +439,23 @@ class PropertyRepository extends EntityRepository
         $filteredNamespaces = $em->getRepository('AppBundle:OntoNamespace')
             ->findAllActiveNamespacesForUser($user);
 
-        $propertyNamespace = $class->getOngoingNamespace();
-        if(!in_array($propertyNamespace, $filteredNamespaces)){
-            $filteredNamespaces[] = $propertyNamespace;
+        $classNamespaces = $class->getNamespaces();
+        $isClassNamespace = null;
+
+        foreach ($classNamespaces as $classNamespace){
+            if(!$classNamespace->getIsTopLevelNamespace()){
+                if($classNamespace->getIsOngoing()){
+                    $isClassNamespace = $classNamespace;
+                    break;
+                }
+                else{
+                    $isClassNamespace = $classNamespace;
+                }
+            }
+        }
+
+        if(!in_array($isClassNamespace, $filteredNamespaces)){
+            $filteredNamespaces[] = $isClassNamespace;
         }
 
         $idsFilteredNamespaces = array();
