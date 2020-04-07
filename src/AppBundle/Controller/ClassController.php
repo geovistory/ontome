@@ -29,27 +29,23 @@ class ClassController extends Controller
     /**
      * @Route("/class")
      */
-    public function listAction()
-    {
+    public function listAction(){
         $em = $this->getDoctrine()->getManager();
 
-        if (!is_null($this->getUser())) {
-            if($this->getUser()->getCurrentActiveProject()->getId() == 21){
-                $classes = $em->getRepository('AppBundle:OntoClass')
-                    ->findFilteredByPublicProjectOrderedById();
-            }
-            else{
-                $classes = $em->getRepository('AppBundle:OntoClass')
-                    ->findFilteredByActiveProjectOrderedById($this->getUser());
-            }
+        // Récupérer les namespaces pour le filtrage
+        if (is_null($this->getUser()) || $this->getUser()->getCurrentActiveProject()->getId() == 21){ // Utilisateur non connecté OU connecté et utilisant le projet public
+            $namespacesId = $em->getRepository('AppBundle:OntoNamespace')->findPublicProjectNamespacesId();
         }
-        else{
-            $classes = $em->getRepository('AppBundle:OntoClass')
-                ->findFilteredByPublicProjectOrderedById();
+        else{ // Utilisateur connecté et utilisant un autre projet
+            $namespacesId = $em->getRepository('AppBundle:OntoNamespace')->findNamespacesIdFilteredByUser($this->getUser());
         }
 
+        // Récupérer les classes selon le filtrage obtenu
+        $classes = $em->getRepository('AppBundle:OntoClass')->findClassesFilteredByNamespacesId($namespacesId);
+
         return $this->render('class/list.html.twig', [
-            'classes' => $classes
+            'classes' => $classes,
+            'namespacesId' => $namespacesId
         ]);
     }
 

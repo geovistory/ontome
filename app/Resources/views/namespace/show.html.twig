@@ -296,12 +296,14 @@
                                     {% for eupa in upa.entityUserProjectAssociations if eupa.systemType.id == 25 %}
                                         {% if eupa.namespace == childNamespace %}
                                             {% set isEnabled = true %}
-                                        {% elseif eupa.namespace.referencedNamespaceAssociations is not empty %}
-                                            {% for referencedNamespaceAssociation in eupa.namespace.referencedNamespaceAssociations %}
-                                                {% if referencedNamespaceAssociation.referencedNamespace == childNamespace %}
-                                                    {% set isEnabled = true %}
-                                                {% endif %}
-                                            {% endfor %}
+                                        {% elseif eupa.namespace is not null %}
+                                            {% if eupa.namespace.referencedNamespaceAssociations is not empty %}
+                                                {% for referencedNamespaceAssociation in eupa.namespace.referencedNamespaceAssociations %}
+                                                    {% if referencedNamespaceAssociation.referencedNamespace == childNamespace %}
+                                                        {% set isEnabled = true %}
+                                                    {% endif %}
+                                                {% endfor %}
+                                            {% endif %}
                                         {% endif %}
                                     {% endfor %}
                                 {% endfor %}

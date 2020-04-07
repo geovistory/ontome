@@ -14,7 +14,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * Class OntoClassVersion
  * @ORM\Entity
- * @ORM\Table(schema="che", name="class")
+ * @ORM\Table(schema="che", name="class_version")
  */
 class OntoClassVersion
 {
@@ -198,5 +198,19 @@ class OntoClassVersion
     public function setModificationTime($modificationTime)
     {
         $this->modificationTime = $modificationTime;
+    }
+
+    public function __toString()
+    {
+        if($this->getClass()->getIdentifierInNamespace() === $this->getStandardLabel()){
+            $s = $this->getStandardLabel();
+        }
+        else if(!is_null($this->getStandardLabel())){
+            $s = $this->getStandardLabel().' – '.$this->getClass()->getIdentifierInNamespace();
+        }
+        else{
+            $s = $this->getClass()->getIdentifierInNamespace();
+        }
+        return (string) $s;
     }
 }

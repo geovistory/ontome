@@ -36,19 +36,25 @@ class ClassRepository extends EntityRepository
     }
 
     /**
+     * @param array $namespacesId - An array with namespace keys
+     * @return \Doctrine\ORM\Query
+     */
+    private function createQueryBuilderClassesFilteredByNamespacesId(array $namespacesId){
+        return $this->createQueryBuilder('class')
+            ->join('class.classVersions','cv')
+            ->join('cv.namespaceForVersion','nfv')
+            ->where('nfv.id IN (:namespacesId)')
+            ->setParameter('namespacesId', $namespacesId)
+            ->getQuery();
+    }
+
+    /**
+     * @param array $namespacesId
      * @return OntoClass[]
      */
-    public function findFilteredByPublicProjectOrderedById()
-    {
-        return $this->createQueryBuilder('class')
-            ->join('class.namespaces','nspc')
-            ->join('nspc.projects', 'prj')
-            ->addSelect('nspc')
-            ->leftJoin('nspc.referencedVersion', 'referencedVersion')
-            ->addSelect('referencedVersion')
-            ->orderBy('class.id','DESC')
-            ->getQuery()
-            ->execute();
+    public function findClassesFilteredByNamespacesId(array $namespacesId){
+        $classes = $this->createQueryBuilderClassesFilteredByNamespacesId($namespacesId)->execute();
+        return $classes;
     }
 
     /**

@@ -18,22 +18,32 @@
         </tr>
         </thead>
         <tbody>
+            {# Rappel : "classes" est déjà filtrée : toutes ces classes ont au moins une classVersion compatible avec le filtrage #}
+            {# Inutile donc de refiltrer sur classes #}
             {% for class in classes %}
+                {# Une version par root est activé pour filtrage, donc pas possible d'avoir 2 classes identiques affichées #}
+                {# Donc l'utilisation de la boucle est justifiée par la condition if, et qui ne retournera qu'une classe #}
+                {% for classVersion in class.classVersions if classVersion.namespaceForVersion.id in namespacesId %}
                 <tr>
                     <td>
                         <a href="{{ path('class_show', {
                             'id': class.id
                         }) }}">
-                            {{ class }}
+                                {{ classVersion }}
                         </a>
                     </td>
                     <td>
-                        {% if class.namespaces|first.referencedVersion is not null %}
-                            {{ class.namespaces|first.referencedVersion }}
+                        {{ classVersion.namespaceForVersion.referencedVersion }}
+                    </td>
+                    <td>
+                        {% if classVersion.modificationTime is not null %}
+                            {{ classVersion.modificationTime|date('Y-m-d') }}
+                        {% else %}
+                            {{ classVersion.creationTime|date('Y-m-d') }}
                         {% endif %}
                     </td>
-                    <td>{{ class.modificationTime|date('Y-m-d') }}</td>
                 </tr>
+                {% endfor %}
             {% endfor %}
         </tbody>
     </table>
