@@ -35,71 +35,25 @@ class PropertyRepository extends EntityRepository
     }
 
     /**
-     * @return Property[]
+     * @param array $namespacesId - An array with namespace keys
+     * @return \Doctrine\ORM\Query
      */
-    public function findFilteredByPublicProjectOrderedById()
-    {
+    private function createQueryBuilderPropertiesFilteredByNamespacesId(array $namespacesId){
         return $this->createQueryBuilder('property')
-            ->join('property.namespaces', 'nspc')
-            ->join('nspc.projects', 'prj')
-            ->addSelect('nspc')
-            ->leftJoin('nspc.referencedVersion', 'referencedVersion')
-            ->addSelect('referencedVersion')
-            ->orderBy('property.id', 'DESC')
-            ->getQuery()
-            ->execute();
+            ->join('property.propertyVersions','pv')
+            ->join('pv.namespaceForVersion','nfv')
+            ->where('nfv.id IN (:namespacesId)')
+            ->setParameter('namespacesId', $namespacesId)
+            ->getQuery();
     }
 
     /**
-     * @return QueryBuilder
+     * @param array $namespacesId
+     * @return OntoClass[]
      */
-    public function findFilteredPropertiesByActiveProjectOrderedById(User $user)
-    {
-        //D'abord trouver les fk_namespace sélectionnés
-        $conn = $this->getEntityManager()->getConnection();
-
-        $sql = "SELECT fk_namespace 
-                FROM che.associates_entity_to_user_project 
-                WHERE fk_system_type = 25 
-                AND fk_associate_user_to_project = (  SELECT pk_associate_user_to_project 
-                                                      FROM che.associate_user_to_project 
-                                                      WHERE fk_user = :fk_user AND fk_project = :fk_project)
-                AND fk_namespace IS NOT NULL
-                UNION
-                SELECT fk_referenced_namespace AS fk_namespace
-                FROM che.associates_referenced_namespace
-                WHERE fk_namespace IN (
-                  SELECT fk_namespace 
-                  FROM che.associates_entity_to_user_project 
-                  WHERE fk_system_type = 25 
-                  AND fk_associate_user_to_project = (  SELECT pk_associate_user_to_project 
-                                                        FROM che.associate_user_to_project 
-                                                        WHERE fk_user = :fk_user AND fk_project = :fk_project)
-                  AND fk_namespace IS NOT NULL
-                )";
-
-        $stmt = $conn->prepare($sql);
-        $stmt->execute(array(
-            'fk_user' => $user->getId(),
-            'fk_project' => $user->getCurrentActiveProject()->getId()
-        ));
-
-        $arrayActivesNamespaces = $stmt->fetchAll();
-
-        $qb = $this->createQueryBuilder('property')
-            ->join('property.namespaces','nspc')
-            ->where('nspc.id IN (:id_namespaces)')
-            ->setParameter('id_namespaces', $arrayActivesNamespaces);
-
-        return $qb;
-    }
-
-    /**
-     * @return Property[]
-     */
-    public function findFilteredByActiveProjectOrderedById(User $user)
-    {
-        return $this->findFilteredPropertiesByActiveProjectOrderedById($user)->getQuery()->execute();
+    public function findPropertiesFilteredByNamespacesId(array $namespacesId){
+        $properties = $this->createQueryBuilderPropertiesFilteredByNamespacesId($namespacesId)->execute();
+        return $properties;
     }
 
     /**

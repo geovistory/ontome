@@ -370,5 +370,124 @@ class PropertyVersion
         $this->namespaceForVersion = $namespaceForVersion;
     }
 
+    /**
+     * Exemple de retour attendu : altered (was altered by) – O18
+     * Autre exemple : added – P111
+     * @return string
+     */
+    public function __toString()
+    {
+        if($this->getProperty()->getIdentifierInNamespace() === explode(' (',$this->getStandardLabel())[0]){
+            $s = $this->getStandardLabel();
+        }
+        else if(!is_null($this->getStandardLabel())){
+            $s = $this->getStandardLabel().' – '.$this->getProperty()->getIdentifierInNamespace();
+        }
+        else{
+            $s = $this->getProperty()->getIdentifierInNamespace();
+        }
 
+        return (string) $s;
+    }
+
+    /**
+     * Exemple de retour attendu : O18 altered (was altered by)
+     * Autre exemple : P111 added
+     * @return string
+     */
+    public function getInvertedLabel()
+    {
+        if($this->getProperty()->getIdentifierInNamespace() === explode(' (',$this->getStandardLabel())[0]){
+            $s = $this->getProperty()->getIdentifierInNamespace();
+        }
+        else if(!is_null($this->getStandardLabel())) {
+            $s = $this->getProperty()->getIdentifierInNamespace().' '.$this->getStandardLabel();
+        }
+        else $s = $this->getProperty()->getIdentifierInNamespace();
+
+        return (string) $s;
+    }
+
+    /**
+     * Exemple de retour attendu : O18 altered
+     * Autre exemple : P111 added
+     * @return string
+     */
+    public function getInvertedLabelWithoutInverseLabel()
+    {
+        if($this->getProperty()->getIdentifierInNamespace() === $this->getStandardLabel()){
+            $s = $this->getProperty()->getIdentifierInNamespace();
+        }
+        else if(!is_null($this->getStandardLabel())){
+            $standardLabelWithoutInverseLabel = "";
+            foreach($this->getProperty()->getLabels() as $label){
+                if($label->getIsStandardLabelForLanguage() && $label->getLanguageIsoCode() == "en"){
+                    $standardLabelWithoutInverseLabel = $label->getLabel();
+                    break;
+                }
+            }
+            $s = $this->getProperty()->getIdentifierInNamespace().' '.$standardLabelWithoutInverseLabel;
+        }
+        else{
+            $s = $this->getProperty()->getIdentifierInNamespace();
+        }
+
+        return (string) $s;
+    }
+
+    /**
+     * Retour attendu : (0,1) ou (0,n) etc...
+     * @return string
+     */
+    public function getDomainQuantifiers()
+    {
+        $s = '-';
+        if(!is_null($this->getDomainMinQuantifier()) && !is_null($this->getDomainMaxQuantifier())){
+            if($this->getDomainMinQuantifier() == -1){
+                $min = 'n';
+            }
+            else{
+                $min = $this->getDomainMinQuantifier();
+            }
+
+            if($this->getDomainMaxQuantifier() == -1){
+                $max = 'n';
+            }
+            else{
+                $max = $this->getDomainMaxQuantifier();
+            }
+
+            $s = '('.$min.','.$max.')';
+        }
+
+        return (string) $s;
+    }
+
+    /**
+     * Retour attendu : (0,1) ou (0,n) etc...
+     * @return string
+     */
+    public function getRangeQuantifiers()
+    {
+        $s = '-';
+        if(!is_null($this->getRangeMinQuantifier()) && !is_null($this->getRangeMaxQuantifier())){
+            if($this->getRangeMinQuantifier() == -1){
+                $min = 'n';
+            }
+            else{
+                $min = $this->getRangeMinQuantifier();
+            }
+
+            if($this->getRangeMaxQuantifier() == -1){
+                $max = 'n';
+            }
+            else{
+                $max = $this->getRangeMaxQuantifier();
+            }
+
+            $s = '('.$min.','.$max.')';
+        }
+
+        return (string) $s;
+    }
 }

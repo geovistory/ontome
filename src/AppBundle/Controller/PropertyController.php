@@ -32,27 +32,23 @@ class PropertyController extends Controller
     /**
      * @Route("/property")
      */
-    public function listAction()
-    {
+    public function listAction(){
         $em = $this->getDoctrine()->getManager();
 
-        if (!is_null($this->getUser())) {
-            if($this->getUser()->getCurrentActiveProject()->getId() == 21){
-                $properties = $em->getRepository('AppBundle:Property')
-                    ->findFilteredByPublicProjectOrderedById();
-            }
-            else{
-                $properties = $em->getRepository('AppBundle:Property')
-                    ->findFilteredByActiveProjectOrderedById($this->getUser());
-            }
+        // Récupérer les namespaces pour le filtrage
+        if(is_null($this->getUser()) || $this->getUser()->getCurrentActiveProject()->getId() == 21){ // Utilisateur non connecté OU connecté et utilisant le projet public
+            $namespacesId = $em->getRepository('AppBundle:OntoNamespace')->findPublicProjectNamespacesId();
         }
-        else{
-            $properties = $em->getRepository('AppBundle:Property')
-                ->findFilteredByPublicProjectOrderedById();
+        else{ // Utilisateur connecté et utilisant un autre projet
+            $namespacesId = $em->getRepository('AppBundle:OntoNamespace')->findNamespacesIdFilteredByUser($this->getUser());
         }
 
+        // Récupérer les classes selon le filtrage obtenu
+        $properties = $em->getRepository('AppBundle:Property')->findPropertiesFilteredByNamespacesId($namespacesId);
+
         return $this->render('property/list.html.twig', [
-            'properties' => $properties
+            'properties' => $properties,
+            'namespacesId' => $namespacesId
         ]);
     }
 

@@ -200,17 +200,43 @@ class OntoClassVersion
         $this->modificationTime = $modificationTime;
     }
 
+    /**
+     * Exemple de retour attendu : Activity - E7
+     * Sauf si standardLabel est vide ou standardLabel égal Identifier
+     * @return string
+     */
     public function __toString()
     {
+        // Si l'identifier in namespace de la classe est identique au standard label de classVersion, n'afficher que le standard label
         if($this->getClass()->getIdentifierInNamespace() === $this->getStandardLabel()){
             $s = $this->getStandardLabel();
         }
+        // Sinon si le standard label n'est pas vide afficher les deux
         else if(!is_null($this->getStandardLabel())){
             $s = $this->getStandardLabel().' – '.$this->getClass()->getIdentifierInNamespace();
         }
+        // Si le standard label est vide, n'afficher que l'identifier in namespace
         else{
             $s = $this->getClass()->getIdentifierInNamespace();
         }
+
+        return (string) $s;
+    }
+
+    /**
+     * Exemple de retour attendu : E7 Activity
+     * Sauf si standardLabel est vide ou standardLabel égal Identifier
+     * @return string
+     */
+    public function getInvertedLabel()
+    {
+        if($this->getClass()->getIdentifierInNamespace() === $this->getStandardLabel()){
+            $s = $this->getClass()->getIdentifierInNamespace();
+        }
+        else if(!is_null($this->getStandardLabel())){
+            $s = $this->getClass()->getIdentifierInNamespace().' '.$this->getStandardLabel();
+        }
+        else $s = $this->getClass()->getIdentifierInNamespace();
         return (string) $s;
     }
 }

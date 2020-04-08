@@ -33,7 +33,7 @@ class ClassController extends Controller
         $em = $this->getDoctrine()->getManager();
 
         // Récupérer les namespaces pour le filtrage
-        if (is_null($this->getUser()) || $this->getUser()->getCurrentActiveProject()->getId() == 21){ // Utilisateur non connecté OU connecté et utilisant le projet public
+        if(is_null($this->getUser()) || $this->getUser()->getCurrentActiveProject()->getId() == 21){ // Utilisateur non connecté OU connecté et utilisant le projet public
             $namespacesId = $em->getRepository('AppBundle:OntoNamespace')->findPublicProjectNamespacesId();
         }
         else{ // Utilisateur connecté et utilisant un autre projet

@@ -271,6 +271,14 @@ class Property
     }
 
     /**
+     * @return mixed
+     */
+    public function getPropertyVersions()
+    {
+        return $this->propertyVersions;
+    }
+
+    /**
      * @return OntoClass
      */
     public function getDomain()
@@ -512,6 +520,14 @@ class Property
     }
 
     /**
+     * @param mixed $propertyVersions
+     */
+    public function setPropertyVersions($propertyVersions)
+    {
+        $this->propertyVersions = $propertyVersions;
+    }
+
+    /**
      * @param mixed $range
      */
     public function setRange($range)
@@ -661,6 +677,7 @@ class Property
         $profileAssociation->setProperty($this);
     }
 
+    // TODO Projet Delta A supprimer
     public function getInvertedLabel()
     {
         if($this->getIdentifierInNamespace() === $this->getStandardLabel()){
@@ -673,6 +690,7 @@ class Property
         return (string) $s;
     }
 
+    // TODO Projet Delta A supprimer
     public function getInvertedLabelWithoutInverseLabel()
     {
         if($this->getIdentifierInNamespace() === $this->getStandardLabel()){
@@ -692,6 +710,7 @@ class Property
         return (string) $s;
     }
 
+    // TODO Projet Delta A supprimer
     public function __toString()
     {
         if($this->getIdentifierInNamespace() === explode(' (',$this->getStandardLabel())[0]){

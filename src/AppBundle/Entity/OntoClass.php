@@ -531,6 +531,7 @@ class OntoClass
         $profileAssociation->setClass($this);
     }
 
+    // TODO Projet Delta A supprimer
     public function getInvertedLabel()
     {
         if($this->getIdentifierInNamespace() === $this->getStandardLabel()){
@@ -543,6 +544,7 @@ class OntoClass
         return (string) $s;
     }
 
+    // TODO Projet Delta A supprimer
     public function __toString()
     {
         if($this->getIdentifierInNamespace() === $this->getStandardLabel()){
