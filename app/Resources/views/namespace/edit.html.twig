@@ -70,7 +70,7 @@
                     {% if namespace.referencedNamespaceAssociations is not empty %}
                         <div class="row">
                             <div class="col-lg-2">
-                                <p>Reference namespace{% if namespace.referencedNamespaceAssociations|length > 1 %}s{% endif %} of which this namespace is an extension:</p>
+                                <p>Reference namespace{% if namespace.referencedNamespaceAssociations|length > 1 %}s{% endif %}:</p>
                             </div>
                             <div class="col-lg-10">
                             {% for referencedNamespaceAssociation in namespace.referencedNamespaceAssociations %}
