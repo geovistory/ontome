@@ -939,55 +939,44 @@ class ProfileController  extends Controller
      */
     public function recreateProfileFromPublishedProfileAction(Profile $profile, Request $request)
     {
-        $this->denyAccessUnlessGranted('edit', $profile->getProjectOfBelonging());
+        $this->denyAccessUnlessGranted('duplicate', $profile);
         $em = $this->getDoctrine()->getManager();
 
-        try {
-            if(!$profile->getIsOngoing() and !is_null($profile->getWasClosedAt()) and is_null($profile->getEndDate())) {
-                $newProfile = new Profile();
+        $newProfile = new Profile();
 
-                $newProfile->setStandardLabel($profile->getStandardLabel().' ongoing');
-                $newProfile->setIsOngoing(true);
-                $newProfile->setIsForcedPublication(false);
+        $newProfile->setStandardLabel($profile->getStandardLabel().' ongoing');
+        $newProfile->setIsOngoing(true);
+        $newProfile->setIsForcedPublication(false);
 
-                $newProfile->setProjectOfBelonging($profile->getProjectOfBelonging());
+        $newProfile->setProjectOfBelonging($profile->getProjectOfBelonging());
 
-                $newProfile->setCreator($this->getUser());
-                $newProfile->setModifier($this->getUser());
-                $newProfile->setCreationTime(new \DateTime('now'));
-                $newProfile->setModificationTime(new \DateTime('now'));
+        $newProfile->setCreator($this->getUser());
+        $newProfile->setModifier($this->getUser());
+        $newProfile->setCreationTime(new \DateTime('now'));
+        $newProfile->setModificationTime(new \DateTime('now'));
 
-                foreach ($profile->getTextProperties() as $textProperty){
-                    $newTextProperty = clone $textProperty;
-                    $newProfile->addTextProperty($newTextProperty);
-                }
-
-                foreach ($profile->getLabels() as $label){
-                    $newLabel = clone $label;
-                    $newLabel->setLabel($profile->getStandardLabel().' ongoing');
-                    $newProfile->addLabel($newLabel);
-                }
-
-                foreach ($profile->getProfileAssociations() as $profileAssociation){
-                    $newProfileAssociation = clone $profileAssociation;
-                    $newProfile->addProfileAssociation($newProfileAssociation);
-                }
-
-                foreach ($profile->getNamespaces() as $namespace){
-                    $newProfile->addNamespace($namespace);
-                }
-
-                $em->persist($newProfile);
-                $em->flush();
-            }
-            else{
-                throw $this->createNotFoundException('The profile n° '.$profile->getId().' is ongoing or depreceated, and can\'t be recreate.');
-            }
-
+        foreach ($profile->getTextProperties() as $textProperty){
+            $newTextProperty = clone $textProperty;
+            $newProfile->addTextProperty($newTextProperty);
         }
-        catch (\Exception $e) {
-            throw $this->createNotFoundException('The profile can\'t be recreate. Please contact an administrator.');
+
+        foreach ($profile->getLabels() as $label){
+            $newLabel = clone $label;
+            $newLabel->setLabel($profile->getStandardLabel().' ongoing');
+            $newProfile->addLabel($newLabel);
         }
+
+        foreach ($profile->getProfileAssociations() as $profileAssociation){
+            $newProfileAssociation = clone $profileAssociation;
+            $newProfile->addProfileAssociation($newProfileAssociation);
+        }
+
+        foreach ($profile->getNamespaces() as $namespace){
+            $newProfile->addNamespace($namespace);
+        }
+
+        $em->persist($newProfile);
+        $em->flush();
 
         return $this->redirectToRoute('project_show', [
             'id' => $profile->getProjectOfBelonging()->getId(),
