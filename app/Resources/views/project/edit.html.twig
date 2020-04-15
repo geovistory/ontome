@@ -241,8 +241,7 @@
                         </tr>
                         </thead>
                         <tbody>
-                        {% if project.managedNamespaces|first.referencedVersion is not null %}
-                        {% for namespace in project.managedNamespaces|first.referencedVersion.childVersions %}
+                        {% for namespace in project.managedNamespaces|first.topLevelNamespace.childVersions %}
                             <tr>
                                 <td>
                                     <a href="{{ path('namespace_show', {
@@ -254,7 +253,6 @@
                                 <td>{{ namespace.modificationTime|date('Y-m-d') }}</td>
                             </tr>
                         {% endfor %}
-                        {% endif %}
                         </tbody>
                     </table>
                 {% else %}
