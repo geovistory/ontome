@@ -4,32 +4,70 @@
         <div class="row">
             <div class="col-xs-12">
                 <h2>
-                    {% if textProperty.object is not null %}
-                        {% if textProperty.object.identifierInNamespace is not null %}
-                            {{ textProperty.object.standardLabel }} – {{ textProperty.object.identifierInNamespace }}: {{ textProperty.systemType.standardLabel }}
-                        {% else %}
-                            {{ textProperty.object.objectIdentification }}: {{ textProperty.systemType.standardLabel }}
-                        {% endif %}
-                    {% else %}
-                        {{ textProperty.systemType.standardLabel }}
-                    {% endif %}
 
                     {% if textProperty.class is not null %}
                         {% set route = 'class_show' %}
+                        {{ textProperty.systemType.standardLabel|capitalize }} for the class {{ textProperty.class }}
                     {% elseif textProperty.property is not null %}
                         {% set route = 'property_show' %}
+                        {{ textProperty.systemType.standardLabel|capitalize }} for the property {{ textProperty.property }}
                     {% elseif textProperty.namespace is not null %}
                         {% set route = 'namespace_show' %}
+                        {% if textProperty.object is not null %}
+                            {% if textProperty.object.identifierInNamespace is not null %}
+                                {{ textProperty.object.standardLabel }} – {{ textProperty.object.identifierInNamespace }}: {{ textProperty.systemType.standardLabel }}
+                            {% else %}
+                                {{ textProperty.object.objectIdentification }}: {{ textProperty.systemType.standardLabel }}
+                            {% endif %}
+                        {% else %}
+                            {{ textProperty.systemType.standardLabel }}
+                        {% endif %}
                     {% elseif textProperty.project is not null %}
                         {% set route = 'project_show' %}
+                        {% if textProperty.object is not null %}
+                            {% if textProperty.object.identifierInNamespace is not null %}
+                                {{ textProperty.object.standardLabel }} – {{ textProperty.object.identifierInNamespace }}: {{ textProperty.systemType.standardLabel }}
+                            {% else %}
+                                {{ textProperty.object.objectIdentification }}: {{ textProperty.systemType.standardLabel }}
+                            {% endif %}
+                        {% else %}
+                            {{ textProperty.systemType.standardLabel }}
+                        {% endif %}
                     {% elseif textProperty.profile is not null %}
                         {% set route = 'profile_show' %}
+                        {% if textProperty.object is not null %}
+                            {% if textProperty.object.identifierInNamespace is not null %}
+                                {{ textProperty.object.standardLabel }} – {{ textProperty.object.identifierInNamespace }}: {{ textProperty.systemType.standardLabel }}
+                            {% else %}
+                                {{ textProperty.object.objectIdentification }}: {{ textProperty.systemType.standardLabel }}
+                            {% endif %}
+                        {% else %}
+                            {{ textProperty.systemType.standardLabel }}
+                        {% endif %}
                     {% elseif textProperty.classAssociation is not null %}
                         {% set route = 'class_association_show' %}
+                        {% if textProperty.object is not null %}
+                            {% if textProperty.object.identifierInNamespace is not null %}
+                                {{ textProperty.object.standardLabel }} – {{ textProperty.object.identifierInNamespace }}: {{ textProperty.systemType.standardLabel }}
+                            {% else %}
+                                {{ textProperty.object.objectIdentification }}: {{ textProperty.systemType.standardLabel }}
+                            {% endif %}
+                        {% else %}
+                            {{ textProperty.systemType.standardLabel }}
+                        {% endif %}
                     {% elseif textProperty.propertyAssociation is not null %}
                         {% set route = 'property_association_show' %}
                     {% elseif textProperty.entityAssociation is not null %}
                         {% set route = 'property_association_show' %}
+                        {% if textProperty.object is not null %}
+                            {% if textProperty.object.identifierInNamespace is not null %}
+                                {{ textProperty.object.standardLabel }} – {{ textProperty.object.identifierInNamespace }}: {{ textProperty.systemType.standardLabel }}
+                            {% else %}
+                                {{ textProperty.object.objectIdentification }}: {{ textProperty.systemType.standardLabel }}
+                            {% endif %}
+                        {% else %}
+                            {{ textProperty.systemType.standardLabel }}
+                        {% endif %}
                     {% endif %}
 
                     {% if route is not null %}

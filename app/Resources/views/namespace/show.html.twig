@@ -29,12 +29,14 @@
         </h2>
         <ul class="nav nav-tabs">
             <li class="active"><a data-toggle="tab" href="#summary">Summary</a></li>
-            <li><a data-toggle="tab" href="#definition">Definition</a></li>
             <li><a data-toggle="tab" href="#identification">Identification</a></li>
+            <li><a data-toggle="tab" href="#definition">Definition</a></li>
             <li><a data-toggle="tab" href="#namespace-hierarchy">Hierarchy</a></li>
+            {% if not namespace.isTopLevelNamespace %}
             <li><a data-toggle="tab" href="#classes">Classes</a></li>
             <li><a data-toggle="tab" href="#properties">Properties</a></li>
             <li><a data-toggle="tab" href="#graph">Graph</a></li>
+            {% endif %}
             <li><a data-toggle="tab" href="#comments" class="updateViewComment" data-id="{{ namespace.id }}" data-object="namespace">Comments</a></li>
         </ul>
 
@@ -68,6 +70,51 @@
                             {% endif %}
                         </div>
                     </div>
+                    {% if namespace.referencedNamespaceAssociations is not empty %}
+                    <div class="row">
+                        <div class="col-lg-2">
+                            <p>Reference namespace{% if namespace.referencedNamespaceAssociations|length > 1 %}s{% endif %}:</p>
+                        </div>
+                        <div class="col-lg-10">
+                        {% for referencedNamespaceAssociation in namespace.referencedNamespaceAssociations %}
+                            <p><a href="{{ path('namespace_show', {
+                                    'id': referencedNamespaceAssociation.referencedNamespace.id
+                                }) }}">
+                                    {{ referencedNamespaceAssociation.referencedNamespace }}
+                                </a>
+                            </p>
+                        {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% if not namespace.isTopLevelNamespace %}
+                    <div class="row">
+                        <div class="col-lg-2">
+                            <p>Contributors:</p>
+                        </div>
+                        <div class="col-lg-10">
+                            {% set contributors, break = null, false %}
+                            {% for textProperty in namespace.textProperties if textProperty.systemType.id == 2 %}
+                                {% if not break %}
+                                    {% if textProperty.languageIsoCode == 'en' %}
+                                        {% set break = true %}
+                                        {% set contributors = textProperty.textProperty %}
+                                    {% else %}
+                                        {% if contributors == null %}
+                                            {% set contributors = textProperty.textProperty %}
+                                        {% endif %}
+                                    {% endif %}
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if contributors is not null %}
+                                {{ contributors|raw }}
+                            {% else %}
+                                <p><i>No contributors yet.</i></p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
             <div id="definition" class="tab-pane fade">
@@ -95,6 +142,28 @@
                     {% endfor %}
                     </tbody>
                 </table>
+                {% if not namespace.isTopLevelNamespace %}
+                    <h3>Contributors</h3>
+                    {% set contributors, break = null, false %}
+                    {% for textProperty in namespace.textProperties if textProperty.systemType.id == 2 %}
+                        {% if not break %}
+                            {% if textProperty.languageIsoCode == 'en' %}
+                                {% set break = true %}
+                                {% set contributors = textProperty.textProperty %}
+                            {% else %}
+                                {% if contributors == null %}
+                                    {% set contributors = textProperty.textProperty %}
+                                {% endif %}
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if contributors is not null %}
+                        {{ contributors|raw }}
+                    {% else %}
+                        <p><i>No contributors yet.</i></p>
+                    {% endif %}
+                {% endif %}
                 <h3>Additional notes</h3>
                 <table class="table table-striped" id="additional-notes-table">
                     <thead>
@@ -146,21 +215,21 @@
                 {% else %}
                     <p>This namespace is a root namespace. Find all its versions in the <a href="#namespace-hierarchy" onclick="window.location = '{{ path('namespace_show', {'id': namespace.id}) }}#namespace-hierarchy';window.location.reload()">Hierarchy tab</a>.</p>
                 {% endif %}
-                <h3>Reference namespaces of which this namespace is an extension</h3>
+                {% if not namespace.isTopLevelNamespace %}
+                <h3>Reference namespace{% if namespace.referencedNamespaceAssociations|length > 1 %}s{% endif %} of which this namespace is an extension</h3>
                 {% if namespace.referencedNamespaceAssociations is not empty %}
-                    <ul>
-                        {% for referencedNamespaceAssociation in namespace.referencedNamespaceAssociations %}
-                            <li>
-                                <a href="{{ path('namespace_show', {
-                                    'id': referencedNamespaceAssociation.referencedNamespace.id
-                                }) }}">
-                                    {{ referencedNamespaceAssociation.referencedNamespace }}
-                                </a>
-                            </li>
-                        {% endfor %}
-                    </ul>
+                    {% for referencedNamespaceAssociation in namespace.referencedNamespaceAssociations %}
+                        <p>
+                            <a href="{{ path('namespace_show', {
+                                'id': referencedNamespaceAssociation.referencedNamespace.id
+                            }) }}">
+                                {{ referencedNamespaceAssociation.referencedNamespace }}
+                            </a>
+                        </p>
+                    {% endfor %}
                 {% else %}
                     <em>No reference namespace has been specified.</em>
+                {% endif %}
                 {% endif %}
                 <h3>Labels</h3>
                 <table class="table table-striped" id="labels-table">

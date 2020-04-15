@@ -123,7 +123,7 @@ class ProjectController  extends Controller
 
 
         return $this->render('project/new.html.twig', [
-            'errors' => $errors,
+            'errors' => $form->getErrors(),
             'project' => $project,
             'projectForm' => $form->createView()
         ]);

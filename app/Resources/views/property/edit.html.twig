@@ -20,9 +20,9 @@
 
         <ul class="nav nav-tabs" id="main-tabs">
             <li class="active"><a data-toggle="tab" href="#summary">Summary</a></li>
-            <li><a data-toggle="tab" href="#definition">Definition</a></li>
             <li><a data-toggle="tab" href="#identification">Identification</a></li>
-            <li><a data-toggle="tab" href="#namespaces">Namespace</a></li>
+            <li><a data-toggle="tab" href="#definition">Definition</a></li>
+            <li><a data-toggle="tab" href="#namespaces">Namespaces</a></li>
             <li><a data-toggle="tab" href="#property-hierarchy">Hierarchy</a></li>
             <li><a data-toggle="tab" href="#relations">Relations</a></li>
             <li><a data-toggle="tab" href="#profiles">Profiles</a></li>
@@ -471,9 +471,9 @@
                             </div>
                             <div class="col-lg-2">
                                 <p class="text-center"><label>Domain quantifiers</label></p>
-                                <div>
-                                    {{ form_widget(propertyForm.domainMinQuantifier, {'attr' : {'style': 'background-color: white; width: 49%; float: left;'}}) }}
-                                    {{ form_widget(propertyForm.domainMaxQuantifier, {'attr' : {'style': 'background-color: white; width: 49%; float: right;'}}) }}
+                                <div class="row">
+                                    <div class="col-md-6" style="padding:0;">{{ form_widget(propertyForm.domainMinQuantifier) }}</div>
+                                    <div class="col-md-6" style="padding:0;">{{ form_widget(propertyForm.domainMaxQuantifier) }}</div>
                                 </div>
                             </div>
                             <div class="col-lg-4">
@@ -482,9 +482,9 @@
                             </div>
                             <div class="col-lg-2">
                                 <p class="text-center"><label>Range quantifiers</label></p>
-                                <div>
-                                    {{ form_widget(propertyForm.rangeMinQuantifier, {'attr' : {'style': 'background-color: white; width: 49%; float: left;'}}) }}
-                                    {{ form_widget(propertyForm.rangeMaxQuantifier, {'attr' : {'style': 'background-color: white; width: 49%; float: right;'}}) }}
+                                <div col="row">
+                                    <div class="col-md-6" style="padding:0;">{{ form_widget(propertyForm.rangeMinQuantifier) }}</div>
+                                    <div class="col-md-6" style="padding:0;">{{ form_widget(propertyForm.rangeMaxQuantifier) }}</div>
                                 </div>
                             </div>
                             <div class="col-lg-2">

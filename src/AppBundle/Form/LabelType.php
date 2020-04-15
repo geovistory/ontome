@@ -39,7 +39,7 @@ class LabelType extends AbstractType
         }
 
         $builder
-            ->add('label', TextType::class, array(
+            ->add('label', TextType::class, array('label' => false
             ));
         if($options['canInverseLabel']){
             $builder

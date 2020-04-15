@@ -37,9 +37,12 @@ class TextPropertyForm extends AbstractType
             );
         }
 
+        $labelTextProperty = $options['labelTextProperty'];
+
         $builder
             ->add('textProperty', TextareaType::class, array(
-                'attr' => array('class' => 'tinymce')
+                'attr' => array('class' => 'tinymce'),
+                'label' => $labelTextProperty
             ))
             ->add('languageIsoCode', ChoiceType::class, array(
                 'choices'  => array(
@@ -63,7 +66,8 @@ class TextPropertyForm extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults(array(
-            'data_class' => TextProperty::class
+            'data_class' => TextProperty::class,
+            'labelTextProperty' => false
         ));
     }
 

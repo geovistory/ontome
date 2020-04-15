@@ -191,7 +191,7 @@ class TextPropertyController extends Controller
             $textProperty->setProfile($associatedEntity);
             $associatedObject = $associatedEntity;
             $redirectToRoute = 'profile_edit';
-            $redirectToRouteFragment = 'identification';
+            $redirectToRouteFragment = 'definition';
         }
         else if($object === 'namespace') {
             $associatedEntity = $em->getRepository('AppBundle:OntoNamespace')->find($objectId);
@@ -234,6 +234,9 @@ class TextPropertyController extends Controller
         }
         else if($type === 'definition') {
             $systemType = $em->getRepository('AppBundle:SystemType')->find(16); //systemType 16 = description
+        }
+        else if($type === 'dct:contributor') {
+            $systemType = $em->getRepository('AppBundle:SystemType')->find(2); //systemType 16 = description
         }
         else throw $this->createNotFoundException('The requested text property type "'.$type.'" does not exist!');
 
