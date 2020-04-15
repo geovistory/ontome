@@ -809,7 +809,7 @@
                         {# Savoir si l'entité se trouve bien dans l'un des espaces de nom actifs (filtrage) #}
                         {% set isInActiveNamespaces = false %}
                         {% for activeNamespace in activeNamespaces %}
-                            {% if activeNamespace.standardLabel == outgoingProperty.namespace %}
+                            {% if activeNamespace.id == outgoingProperty.namespaceId %}
                                 {% set isInActiveNamespaces = true %}
                             {% endif %}
                         {% endfor %}
@@ -852,7 +852,7 @@
                         {# Savoir si l'entité se trouve bien dans l'un des espaces de nom actifs (filtrage) #}
                         {% set isInActiveNamespaces = false %}
                         {% for activeNamespace in activeNamespaces %}
-                            {% if activeNamespace.standardLabel == outgoingInheritedProperty.namespace %}
+                            {% if activeNamespace.id == outgoingInheritedProperty.namespaceId %}
                                 {% set isInActiveNamespaces = true %}
                             {% endif %}
                         {% endfor %}
@@ -907,7 +907,7 @@
                         {# Savoir si l'entité se trouve bien dans l'un des espaces de nom actifs (filtrage) #}
                         {% set isInActiveNamespaces = false %}
                         {% for activeNamespace in activeNamespaces %}
-                            {% if activeNamespace.standardLabel == ingoingProperty.namespace %}
+                            {% if activeNamespace.id == ingoingProperty.namespaceId %}
                                 {% set isInActiveNamespaces = true %}
                             {% endif %}
                         {% endfor %}
@@ -951,7 +951,7 @@
                         {# Savoir si l'entité se trouve bien dans l'un des espaces de nom actifs (filtrage) #}
                         {% set isInActiveNamespaces = false %}
                         {% for activeNamespace in activeNamespaces %}
-                            {% if activeNamespace.standardLabel == ingoingInheritedProperty.namespace %}
+                            {% if activeNamespace.id == ingoingInheritedProperty.namespaceId %}
                                 {% set isInActiveNamespaces = true %}
                             {% endif %}
                         {% endfor %}

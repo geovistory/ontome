@@ -117,7 +117,8 @@ class PropertyRepository extends EntityRepository
                        pk_range AS \"rangeId\",
                        identifier_domain AS domain,
                        che.get_root_namespace(nsp.pk_namespace) AS \"rootNamespaceId\",
-                      (SELECT label FROM che.get_namespace_labels(nsp.pk_namespace) WHERE language_iso_code = 'en') AS namespace
+                      (SELECT label FROM che.get_namespace_labels(nsp.pk_namespace) WHERE language_iso_code = 'en') AS namespace,
+                        nsp.pk_namespace AS \"namespaceId\"
                 FROM  che.v_properties_with_domain_range,
                       che.associates_namespace asnsp,
                       che.namespace nsp
@@ -163,7 +164,7 @@ class PropertyRepository extends EntityRepository
         if(!in_array($isClassNamespace, $filteredNamespaces)){
             $filteredNamespaces[] = $isClassNamespace;
         }
-        
+
         $idsFilteredNamespaces = array();
         $qFilteredNamespaces = array();
         foreach ($filteredNamespaces as $namespace)
@@ -183,7 +184,8 @@ class PropertyRepository extends EntityRepository
                         pk_range AS \"rangeId\",
                         identifier_domain AS domain,
                         che.get_root_namespace(nsp.pk_namespace) AS \"rootNamespaceId\",
-                        (SELECT label FROM che.get_namespace_labels(nsp.pk_namespace) WHERE language_iso_code = 'en') AS namespace
+                        (SELECT label FROM che.get_namespace_labels(nsp.pk_namespace) WHERE language_iso_code = 'en') AS namespace,
+                        nsp.pk_namespace AS \"namespaceId\"
                     FROM che.v_properties_with_domain_range,
                         che.associates_namespace asnsp,
                         che.namespace nsp
@@ -215,7 +217,8 @@ class PropertyRepository extends EntityRepository
                         pk_range AS \"rangeId\",
                         identifier_range AS range,
                         replace(ancestors, '|', '→') AS ancestors,
-                        (SELECT label FROM che.get_namespace_labels(nsp.pk_namespace) WHERE language_iso_code = 'en') AS namespace
+                        (SELECT label FROM che.get_namespace_labels(nsp.pk_namespace) WHERE language_iso_code = 'en') AS namespace,
+                        nsp.pk_namespace AS \"namespaceId\"
                 FROM 	che.class_outgoing_inherited_properties(:class),
                         che.associates_namespace asnsp,
                         che.namespace nsp
@@ -284,7 +287,8 @@ class PropertyRepository extends EntityRepository
                         pk_range AS \"rangeId\",
                         identifier_range AS range,
                         replace(ancestors, '|', '→') AS ancestors,
-                        (SELECT label FROM che.get_namespace_labels(nsp.pk_namespace) WHERE language_iso_code = 'en') AS namespace
+                        (SELECT label FROM che.get_namespace_labels(nsp.pk_namespace) WHERE language_iso_code = 'en') AS namespace,
+                        nsp.pk_namespace AS \"namespaceId\"
                 FROM 	che.class_outgoing_inherited_properties(?),
                         che.associates_namespace asnsp,
                         che.namespace nsp
@@ -314,7 +318,8 @@ class PropertyRepository extends EntityRepository
                         pk_range AS \"rangeId\",
                         identifier_range AS range,
                         che.get_root_namespace(nsp.pk_namespace) AS \"rootNamespaceId\",
-                        (SELECT label FROM che.get_namespace_labels(nsp.pk_namespace) WHERE language_iso_code = 'en') AS namespace
+                        (SELECT label FROM che.get_namespace_labels(nsp.pk_namespace) WHERE language_iso_code = 'en') AS namespace,
+                        nsp.pk_namespace AS \"namespaceId\"
                 FROM  che.v_properties_with_domain_range,
                       che.associates_namespace asnsp,
                       che.namespace nsp 
@@ -381,7 +386,8 @@ class PropertyRepository extends EntityRepository
                         pk_range AS \"rangeId\",
                         identifier_range AS range,
                         che.get_root_namespace(nsp.pk_namespace) AS \"rootNamespaceId\",
-                        (SELECT label FROM che.get_namespace_labels(nsp.pk_namespace) WHERE language_iso_code = 'en') AS namespace
+                        (SELECT label FROM che.get_namespace_labels(nsp.pk_namespace) WHERE language_iso_code = 'en') AS namespace,
+                        nsp.pk_namespace AS \"namespaceId\"
                 FROM  che.v_properties_with_domain_range,
                       che.associates_namespace asnsp,
                       che.namespace nsp 
@@ -412,7 +418,8 @@ class PropertyRepository extends EntityRepository
                         pk_parent AS \"rangeId\",
                         parent_identifier AS range,
                         replace(ancestors, '|', '→') AS ancestors,
-                        (SELECT label FROM che.get_namespace_labels(nsp.pk_namespace) WHERE language_iso_code = 'en') AS namespace
+                        (SELECT label FROM che.get_namespace_labels(nsp.pk_namespace) WHERE language_iso_code = 'en') AS namespace,
+                        nsp.pk_namespace AS \"namespaceId\"
                 FROM  che.class_ingoing_inherited_properties(:class),
                       che.associates_namespace asnsp,
                       che.namespace nsp 
@@ -478,7 +485,8 @@ class PropertyRepository extends EntityRepository
                         pk_parent AS \"rangeId\",
                         parent_identifier AS range,
                         replace(ancestors, '|', '→') AS ancestors,
-                        (SELECT label FROM che.get_namespace_labels(nsp.pk_namespace) WHERE language_iso_code = 'en') AS namespace
+                        (SELECT label FROM che.get_namespace_labels(nsp.pk_namespace) WHERE language_iso_code = 'en') AS namespace,
+                        nsp.pk_namespace AS \"namespaceId\"
                 FROM  che.class_ingoing_inherited_properties(?),
                       che.associates_namespace asnsp,
                       che.namespace nsp 
