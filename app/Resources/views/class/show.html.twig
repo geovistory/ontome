@@ -1,6 +1,8 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}{{ class }}{% endblock %}
+{% block title %}
+    {{ classVersion }}
+{% endblock %}
 
 {% block stylesheets %}
     {{ parent() }}
@@ -8,19 +10,39 @@
 {% endblock %}
 
 {% block body %}
-
     <div class="container">
         <h2 class="class-name">
-            {{ class }}
-            {% if is_granted('edit', class) %}
-                <a href="{{ path('class_edit', {
-                    id: class.id
-                }) }}" class="pull-right btn btn-success btn-edit">
-                    <i class="fa fa-edit"></i>
-                </a>
+            {{ classVersion }}
+            <span class="dropdown">
+                <button class="btn btn-default dropdown-toggle" type="button" id="dropdownVersions" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                    {{ classVersion.namespaceForVersion }} <span class="label label-{{ classVersion.namespaceForVersion.status.classCss }}">{{ classVersion.namespaceForVersion.status.label }}</span>
+                    <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="dropdownVersions">
+                    {% if classVersion.class.classVersions|length > 1 %}
+                        {% for otherClassVersion in classVersion.class.classVersions if otherClassVersion != classVersion %}
+                            <li>
+                                <a href="#">
+                                    {{ otherClassVersion.namespaceForVersion }}
+                                    <span class="label label-{{ otherClassVersion.namespaceForVersion.status.classCss }}">{{ otherClassVersion.namespaceForVersion.status.label }}</span>
+                                </a>
+                            </li>
+                        {% endfor %}
+                    {% else %}
+                        <li class="disabled">
+                            <a href="#">No other version</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </span>
+            {% if is_granted('edit', classVersion) %}
+            <a href="{{ path('class_edit', {
+                'id': classVersion.class.id
+            }) }}" class="pull-right btn btn-success btn-edit">
+                <i class="fa fa-edit"></i>
+            </a>
             {% endif %}
         </h2>
-
         <ul class="nav nav-tabs" id="main-tabs">
             <li class="active"><a data-toggle="tab" href="#summary">Summary</a></li>
             <li><a data-toggle="tab" href="#identification">Identification</a></li>
@@ -31,47 +53,28 @@
             <li><a data-toggle="tab" href="#relations">Relations</a></li>
             <li><a data-toggle="tab" href="#profiles">Profiles</a></li>
             <li><a data-toggle="tab" href="#graph">Graph</a></li>
-            <li><a data-toggle="tab" href="#comments" class="updateViewComment" data-id="{{ class.id }}" data-object="class">Comments <span class="badge {% if class.comments|length > 0  %}progress-bar-danger {% endif %}">{{ class.comments|length }}</span></a></li>
+            <li>
+                <a data-toggle="tab" href="#comments" class="updateViewComment" data-id="{{ classVersion.class.id }}" data-object="class">
+                    Comments
+                    <span class="badge {% if classVersion.class.comments|length > 0  %}progress-bar-danger {% endif %}">
+                        {{ classVersion.class.comments|length }}
+                    </span>
+                </a>
+            </li>
         </ul>
-
         <div class="tab-content">
             <div id="summary" class="tab-pane fade in active">
-                <h3>
-                {% if class.identifierInNamespace != class.standardLabel %}
-                    {{ class.identifierInNamespace }} {{ class.standardLabel }}
-                {% else %}
-                    {{ class.standardLabel }}
-                {% endif %}
-                </h3>
+                <h3>{{ classVersion }}</h3>
                 <div class="container">
-                    <!-- <div class="row">
-                        <div class="col-lg-2">
-                            <p>Namespace:</p>
-                        </div>
-                        <div class="col-lg-10">
-                            <ul class="list-unstyled">
-                                {% for namespace in class.namespaces %}
-                                    <li><a href="{{ path('namespace_show', {'id': namespace.id}) }}">{{ namespace.standardLabel }}</a></li>
-                                {% endfor %}
-                            </ul>
-                        </div>
-                    </div> -->
-                    {% if class.childClassAssociations|length > 0 %}
+                    {% if classVersion.class.childClassAssociations|length > 0 %}
                     <div class="row">
                         <div class="col-lg-2">
                             <p>Subclass of:</p>
                         </div>
                         <div class="col-lg-10">
                             <ul class="list-unstyled">
-                            {% for association in class.childClassAssociations %}
-                                {# Savoir si cet entité se trouve bien dans l'un des espaces de nom actifs (filtrage) #}
-                                {% set isInActiveNamespaces = false %}
-                                {% for activeNamespace in activeNamespaces %}
-                                    {% if activeNamespace in association.namespaces %}
-                                        {% set isInActiveNamespaces = true %}
-                                    {% endif %}
-                                {% endfor %}
-                                {% if isInActiveNamespaces %}
+                            {# Filtrer les associations is_subclass_of #}
+                            {% for association in classVersion.class.childClassAssociations if association.namespaceForVersion.id in namespacesId %}
                                 <li>
                                     <a href="{{ path('class_show', {'id': association.parentClass.id }) }}">
                                         {% if association.parentClass.identifierInNamespace != association.parentClass.standardLabel %}
@@ -81,29 +84,20 @@
                                         {% endif %}
                                     </a>
                                 </li>
-                                {% endif %}
                             {% endfor %}
                             </ul>
                         </div>
                     </div>
                     {% endif %}
-                    {% if class.parentClassAssociations|length > 0 %}
+                    {% if classVersion.class.parentClassAssociations|length > 0 %}
                     <div class="row">
                         <div class="col-lg-2">
                             <p>Superclass of:</p>
                         </div>
                         <div class="col-lg-10">
                             <ul class="list-unstyled">
-                            {% for association in class.parentClassAssociations %}
-                                {# Savoir si cet entité se trouve bien dans l'un des espaces de nom actifs (filtrage) #}
-                                {% set isInActiveNamespaces = false %}
-                                {% for activeNamespace in activeNamespaces %}
-                                    {% if activeNamespace in association.namespaces %}
-                                        {% set isInActiveNamespaces = true %}
-                                    {% endif %}
-                                {% endfor %}
-                                {% if isInActiveNamespaces %}
-                                <li>
+                            {% for association in classVersion.class.parentClassAssociations if association.namespaceForVersion.id in namespacesId %}
+                               <li>
                                     <a href="{{ path('class_show', {'id': association.childClass.id}) }}">
                                         {% if association.childClass.identifierInNamespace != association.childClass.standardLabel %}
                                             {{ association.childClass.identifierInNamespace }} {{ association.childClass.standardLabel }}
@@ -112,30 +106,21 @@
                                         {% endif %}
                                     </a>
                                 </li>
-                                {% endif %}
                             {% endfor %}
                             </ul>
                         </div>
                     </div>
                     {% endif %}
-                    {% if class.entityAssociations|length > 0 %}
+                    {% if classVersion.class.entityAssociations|length > 0 %}
                     <div class="row">
                         <div class="col-lg-2">
                             <p>Relations:</p>
                         </div>
                         <div class="col-lg-10">
                             <ul class="list-unstyled">
-                            {% for relation in class.entityAssociations if relation.systemType.id == 4 or relation.systemType.id == 19 %}
-                                {# Savoir si cet entité se trouve bien dans l'un des espaces de nom actifs (filtrage) #}
-                                {% set isInActiveNamespaces = false %}
-                                {% for activeNamespace in activeNamespaces %}
-                                    {% if activeNamespace in relation.namespaces and activeNamespace in relation.namespaces %}
-                                        {% set isInActiveNamespaces = true %}
-                                    {% endif %}
-                                {% endfor %}
-                                {% if isInActiveNamespaces %}
+                            {% for relation in classVersion.class.entityAssociations if relation.systemType.id == 4 or relation.systemType.id == 19 and relation.namespaceForVersion.id in namespacesId %}
                                 <li>{{ relation.systemType.standardLabel }}
-                                    {% if relation.sourceClass.id == class.id %}
+                                    {% if relation.sourceClass.id == classVersion.class.id %}
                                     <a href="{{ path("class_show", {'id': relation.targetClass.id }) }}">
                                         {{ relation.targetClass.invertedLabel }}
                                     </a>
@@ -145,7 +130,6 @@
                                     </a>
                                     {% endif %}
                                 </li>
-                                {% endif %}
                             {% endfor %}
                             </ul>
                         </div>
@@ -157,23 +141,14 @@
                         </div>
                         <div class="col-lg-10">
                             {% set scopeNote, break = '<i>No scope note yet.</i>', false %}
-                            {% for textProperty in class.textProperties if textProperty.systemType.id == 1 %}
-                                {# Savoir si cet entité se trouve bien dans l'un des espaces de nom actifs (filtrage) #}
-                                {% set isInActiveNamespaces = false %}
-                                {% for activeNamespace in activeNamespaces %}
-                                    {% if activeNamespace in textProperty.namespaces %}
-                                        {% set isInActiveNamespaces = true %}
-                                    {% endif %}
-                                {% endfor %}
-                                {% if isInActiveNamespaces %}
-                                    {% if not break %}
-                                        {% if textProperty.languageIsoCode == 'en' %}
-                                            {% set break = true %}
+                            {% for textProperty in classVersion.class.textProperties if textProperty.systemType.id == 1 and textProperty.namespaceForVersion.id in namespacesId %}
+                                {% if not break %}
+                                    {% if textProperty.languageIsoCode == 'en' %}
+                                        {% set break = true %}
+                                        {% set scopeNote = textProperty.textProperty %}
+                                    {% else %}
+                                        {% if scopeNote == '<i>No scope note yet.</i>' %}
                                             {% set scopeNote = textProperty.textProperty %}
-                                        {% else %}
-                                            {% if scopeNote == '<i>No scope note yet.</i>' %}
-                                                {% set scopeNote = textProperty.textProperty %}
-                                            {% endif %}
                                         {% endif %}
                                     {% endif %}
                                 {% endif %}
@@ -187,18 +162,9 @@
                         </div>
                         <div class="col-lg-10">
                             {% set isExamplesEmpty = true %}
-                            {% for textProperty in class.textProperties if textProperty.systemType.id == 7 %}
-                                {# Savoir si cet entité se trouve bien dans l'un des espaces de nom actifs (filtrage) #}
-                                {% set isInActiveNamespaces = false %}
-                                {% for activeNamespace in activeNamespaces %}
-                                    {% if activeNamespace in textProperty.namespaces %}
-                                        {% set isInActiveNamespaces = true %}
-                                    {% endif %}
-                                {% endfor %}
-                                {% if isInActiveNamespaces %}
-                                    {% set isExamplesEmpty = false %}
-                                    {{ textProperty.textProperty|raw }}
-                                {% endif %}
+                            {% for textProperty in classVersion.class.textProperties if textProperty.systemType.id == 7 and textProperty.namespaceForVersion.id in namespacesId %}
+                                {% set isExamplesEmpty = false %}
+                                {{ textProperty.textProperty|raw }}
                             {% endfor %}
                             {% if isExamplesEmpty %}
                                 <p><i>No example yet.</i></p>
@@ -211,17 +177,8 @@
                         </div>
                         <div class="col-lg-10">
                             <ul class="list-unstyled">
-                            {% for association in class.childClassAssociations %}
-                                {# Savoir si cet entité se trouve bien dans l'un des espaces de nom actifs (filtrage) #}
-                                {% set isInActiveNamespaces = false %}
-                                {% for activeNamespace in activeNamespaces %}
-                                    {% if activeNamespace in association.namespaces %}
-                                        {% set isInActiveNamespaces = true %}
-                                    {% endif %}
-                                {% endfor %}
-                                {% if isInActiveNamespaces %}
-                                    <li>{{ class.identifierInNamespace }}(x) ⊃ {{ association.parentClass.identifierInNamespace }}(x)</li>
-                                {% endif %}
+                            {% for association in classVersion.class.childClassAssociations if association.namespaceForVersion.id in namespacesId %}
+                                <li>{{ classVersion.class.identifierInNamespace }}(x) ⊃ {{ association.parentClass.identifierInNamespace }}(x)</li>
                             {% endfor %}
                             </ul>
                         </div>
@@ -233,7 +190,7 @@
                             </div>
                             <div class="col-lg-10">
                                 <ul class="list-unstyled">
-                                    {% for outgoingProperty in outgoingProperties|sort if outgoingProperty.rootNamespaceId == class.topLevelNamespace.id %}
+                                    {% for outgoingProperty in outgoingProperties|sort if outgoingProperty.rootNamespaceId == classVersion.class.topLevelNamespace.id %}
                                         <li>
                                             <a href="{{ path('property_show', {'id': outgoingProperty.propertyId}) }}">{{ outgoingProperty.property }}</a>
                                             → <a href="{{ path('class_show', {'id': outgoingProperty.rangeId }) }}">{{ outgoingProperty.range }}</a>
@@ -250,7 +207,7 @@
                             </div>
                             <div class="col-lg-10">
                                 <ul class="list-unstyled">
-                                    {% for ingoingProperty in ingoingProperties|sort if ingoingProperty.rootNamespaceId == class.topLevelNamespace.id %}
+                                    {% for ingoingProperty in ingoingProperties|sort if ingoingProperty.rootNamespaceId == classVersion.class.topLevelNamespace.id %}
                                         <li><a href="{{ path('class_show', {'id': ingoingProperty.domainId }) }}">{{ ingoingProperty.domain }}</a>
                                             → <a href="{{ path('property_show', {'id': ingoingProperty.propertyId}) }}">{{ ingoingProperty.property }}</a>
                                         </li>
@@ -275,47 +232,38 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for textProperty in class.textProperties if textProperty.systemType.id == 1 %}
-                        {# Savoir si le scope note se trouve bien dans l'un des espaces de nom actifs (filtrage) #}
-                        {% set isInActiveNamespaces = false %}
-                        {% for activeNamespace in activeNamespaces %}
-                            {% if activeNamespace in textProperty.namespaces %}
-                                {% set isInActiveNamespaces = true %}
-                            {% endif %}
-                        {% endfor %}
-                        {% if isInActiveNamespaces %}
-                            {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
-                            <tr>
-                                <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
-                                <td class="truncated-text">
-                                    <span>{{ textProperty.textProperty|striptags|raw }}</span>
-                                </td>
-                                <td>{{ textProperty.languageIsoCode}}</td>
-                                <td>
-                                    <!-- {% if textProperty.namespace is not null %}
-                                        {% for label in textProperty.namespace.topLevelNamespace.labels %}
-                                            {% if label.isStandardLabelForLanguage == true and label.languageIsoCode == 'en' %}
-                                                {{ label.label }}
-                                            {% endif %}
-                                        {% endfor %}
-                                    {% endif %} -->
-                                </td>
-                                <td>
-                                    <a class="btn" href="{{ path('text_property_show', {
-                                        'id': textProperty.id
-                                    }) }}">
-                                        <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
-                                    </a>
-                                </td>
-                                <td>
-                                    <a class="btn updateViewComment" href="{{ path('text_property_show', {
-                                        'id': textProperty.id
-                                    }) }}#comments" data-id="{{ textProperty.id }}" data-object="text-property">
-                                        <span class="badge {% if textProperty.comments|length > 0  %}progress-bar-danger {% endif %}">{{ textProperty.comments|length }}</span>
-                                    </a>
-                                </td>
-                            </tr>
-                        {% endif %}
+                    {% for textProperty in classVersion.class.textProperties if textProperty.systemType.id == 1 and textProperty.namespaceForVersion.id in namespacesId%}
+                        {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
+                        <tr>
+                            <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
+                            <td class="truncated-text">
+                                <span>{{ textProperty.textProperty|striptags|raw }}</span>
+                            </td>
+                            <td>{{ textProperty.languageIsoCode}}</td>
+                            <td>
+                                <!-- {% if textProperty.namespace is not null %}
+                                    {% for label in textProperty.namespace.topLevelNamespace.labels %}
+                                        {% if label.isStandardLabelForLanguage == true and label.languageIsoCode == 'en' %}
+                                            {{ label.label }}
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endif %} -->
+                            </td>
+                            <td>
+                                <a class="btn" href="{{ path('text_property_show', {
+                                    'id': textProperty.id
+                                }) }}">
+                                    <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
+                                </a>
+                            </td>
+                            <td>
+                                <a class="btn updateViewComment" href="{{ path('text_property_show', {
+                                    'id': textProperty.id
+                                }) }}#comments" data-id="{{ textProperty.id }}" data-object="text-property">
+                                    <span class="badge {% if textProperty.comments|length > 0  %}progress-bar-danger {% endif %}">{{ textProperty.comments|length }}</span>
+                                </a>
+                            </td>
+                        </tr>
                     {% endfor %}
                     </tbody>
                 </table>
@@ -333,15 +281,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for textProperty in class.textProperties if textProperty.systemType.id == 7 %}
-                        {# Savoir si l'entité se trouve bien dans l'un des espaces de nom actifs (filtrage) #}
-                        {% set isInActiveNamespaces = false %}
-                        {% for activeNamespace in activeNamespaces %}
-                            {% if activeNamespace in textProperty.namespaces %}
-                                {% set isInActiveNamespaces = true %}
-                            {% endif %}
-                        {% endfor %}
-                        {% if isInActiveNamespaces %}
+                    {% for textProperty in classVersion.class.textProperties if textProperty.systemType.id == 7 and textProperty.namespaceForVersion.id in namespacesId %}
                         {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
                         <tr>
                             <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
@@ -365,7 +305,6 @@
                                 </a>
                             </td>
                         </tr>
-                    {% endif %}
                     {% endfor %}
                     </tbody>
                 </table>
@@ -382,15 +321,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for textProperty in class.textProperties if textProperty.systemType.id == 12 %}
-                        {# Savoir si l'additional note se trouve bien dans l'un des espaces de nom actifs (filtrage) #}
-                        {% set isInActiveNamespaces = false %}
-                        {% for activeNamespace in activeNamespaces %}
-                            {% if activeNamespace in textProperty.namespaces %}
-                                {% set isInActiveNamespaces = true %}
-                            {% endif %}
-                        {% endfor %}
-                        {% if isInActiveNamespaces %}
+                    {% for textProperty in classVersion.class.textProperties if textProperty.systemType.id == 12 and textProperty.namespaceForVersion.id in namespacesId %}
                         {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
                         <tr>
                             <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
@@ -414,13 +345,12 @@
                                 </a>
                             </td>
                         </tr>
-                        {% endif %}
                     {% endfor %}
                     </tbody>
                 </table>
             </div>
             <div id="identification" class="tab-pane fade">
-                <h3>Identifier : {{ class.identifierInNamespace }}</h3>
+                <h3>Identifier : {{ classVersion.class.identifierInNamespace }}</h3>
                 <h3>Labels</h3>
                 <table class="table table-striped" id="labels-table">
                     <thead>
@@ -433,15 +363,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for label in class.labels %}
-                        {# Savoir si l'entité se trouve bien dans l'un des espaces de nom actifs (filtrage) #}
-                        {% set isInActiveNamespaces = false %}
-                        {% for activeNamespace in activeNamespaces %}
-                            {% if activeNamespace in label.namespaces %}
-                                {% set isInActiveNamespaces = true %}
-                            {% endif %}
-                        {% endfor %}
-                        {% if isInActiveNamespaces %}
+                    {% for label in classVersion.class.labels if label.namespaceForVersion.id in namespacesId %}
                         <tr>
                             <td>
                                 <a href="{{ path('label_show', {
@@ -465,7 +387,6 @@
                                 </a>
                             </td>
                         </tr>
-                        {% endif %}
                     {% endfor %}
                     </tbody>
                 </table>
@@ -482,7 +403,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for namespace in class.namespaces %}
+                    {% for namespace in classVersion.class.namespaces %}
                         <tr>
                             <td>
                                 <a href="{{ path('namespace_show', {
@@ -500,10 +421,10 @@
             <div id="class-hierarchy" class="tab-pane fade">
                 <h3>Parent classes
                     {% set tooltipClass = "rdfs:subclassOf the class below" %}
-                    {% if class.childClassAssociations|length > 1  %}
+                    {% if classVersion.class.childClassAssociations|length > 1  %}
                         {% set tooltipClass = "rdfs:subclassOf the classes listed below" %}
                     {% endif %}
-                    <a data-toggle="tooltip" data-placement="right" title="{{ class }} {{ tooltipClass }}">
+                    <a data-toggle="tooltip" data-placement="right" title="{{ classVersion.class }} {{ tooltipClass }}">
                         <span class="fas fa-info-circle"></span>
                     </a>
                 </h3>
@@ -519,15 +440,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for association in class.childClassAssociations %}
-                        {# Savoir si l'entité se trouve bien dans l'un des espaces de nom actifs (filtrage) #}
-                        {% set isInActiveNamespaces = false %}
-                        {% for activeNamespace in activeNamespaces %}
-                            {% if activeNamespace in association.namespaces %}
-                                {% set isInActiveNamespaces = true %}
-                            {% endif %}
-                        {% endfor %}
-                        {% if isInActiveNamespaces %}
+                    {% for association in classVersion.class.childClassAssociations if association.namespaceForVersion.id in namespacesId %}
                         <tr>
                             <td>
                                 <a href="{{ path('class_show', {
@@ -568,7 +481,6 @@
                                 </a>
                             </td>
                         </tr>
-                        {% endif %}
                     {% endfor %}
                     </tbody>
                 </table>
@@ -583,14 +495,6 @@
                     </thead>
                     <tbody>
                     {% for ancestor in ancestors|sort %}
-                        {# Savoir si l'entité se trouve bien dans l'un des espaces de nom actifs (filtrage) #}
-                        {% set isInActiveNamespaces = false %}
-                        {% for activeNamespace in activeNamespaces %}
-                            {% if activeNamespace.standardLabel == ancestor.classNamespaceLabel %}
-                                {% set isInActiveNamespaces = true %}
-                            {% endif %}
-                        {% endfor %}
-                        {% if isInActiveNamespaces %}
                         <tr>
                             <td>
                                 <a href="{{ path('class_show', {
@@ -603,7 +507,6 @@
                             <td>{{ ancestor.depth }}</td>
                             <td>{{ ancestor.classNamespaceLabel }}</td>
                         </tr>
-                        {% endif %}
                     {% endfor %}
                     </tbody>
                 </table>
@@ -618,14 +521,6 @@
                     </thead>
                     <tbody>
                     {% for descendant in descendants|sort %}
-                        {# Savoir si l'entité se trouve bien dans l'un des espaces de nom actifs (filtrage) #}
-                        {% set isInActiveNamespaces = false %}
-                        {% for activeNamespace in activeNamespaces %}
-                            {% if activeNamespace.standardLabel == descendant.classNamespaceLabel %}
-                                {% set isInActiveNamespaces = true %}
-                            {% endif %}
-                        {% endfor %}
-                        {% if isInActiveNamespaces %}
                         <tr>
                             <td>
                                 <a href="{{ path('class_show', {
@@ -638,7 +533,6 @@
                             <td>{{ descendant.depth }}</td>
                             <td>{{ descendant.classNamespaceLabel }}</td>
                         </tr>
-                        {% endif %}
                     {% endfor %}
                     </tbody>
                 </table>
@@ -657,18 +551,10 @@
                         </tr>
                     </thead>
                     <tbody>
-                    {% for relation in class.entityAssociations if relation.systemType.id == 4 or relation.systemType.id == 19 %}
-                        {# Savoir si l'entité se trouve bien dans l'un des espaces de nom actifs (filtrage) #}
-                        {% set isInActiveNamespaces = false %}
-                        {% for activeNamespace in activeNamespaces %}
-                            {% if activeNamespace in relation.namespaces %}
-                                {% set isInActiveNamespaces = true %}
-                            {% endif %}
-                        {% endfor %}
-                        {% if isInActiveNamespaces %}
+                    {% for relation in classVersion.class.entityAssociations if relation.systemType.id == 4 or relation.systemType.id == 19 and relation.namespaceForVersion.id in namespacesId %}
                         <tr>
                             <td>{{ relation.systemType }}</td>
-                            {% if class.id == relation.sourceClass.id %}
+                            {% if classVersion.class.id == relation.sourceClass.id %}
                             <td><a href="{{ path('class_show', {
                                     'id': relation.targetClass.id
                                 }) }}">
@@ -701,7 +587,7 @@
                                 {% endif %}
                             </td>
                             <td>
-                                {% if class.id == relation.sourceClass.id %}
+                                {% if classVersion.class.id == relation.sourceClass.id %}
                                 <a href="{{ path('entity_association_show', {
                                     'id': relation.id
                                 }) }}">
@@ -716,7 +602,7 @@
                                 {% endif %}
                             </td>
                             <td>
-                                {% if class.id == relation.sourceClass.id %}
+                                {% if classVersion.class.id == relation.sourceClass.id %}
                                     <a class="btn updateViewComment" href="{{ path('entity_association_show', {
                                         'id': relation.id
                                     }) }}#comments" data-id="{{ relation.id }}" data-object="entity-association">
@@ -731,7 +617,6 @@
                                 {% endif %}
                             </td>
                         </tr>
-                        {% endif %}
                     {% endfor %}
                     </tbody>
                 </table>
@@ -749,14 +634,6 @@
                     </thead>
                     <tbody>
                     {% for outgoingProperty in outgoingProperties|sort %}
-                        {# Savoir si l'entité se trouve bien dans l'un des espaces de nom actifs (filtrage) #}
-                        {% set isInActiveNamespaces = false %}
-                        {% for activeNamespace in activeNamespaces %}
-                            {% if activeNamespace.id == outgoingProperty.namespaceId %}
-                                {% set isInActiveNamespaces = true %}
-                            {% endif %}
-                        {% endfor %}
-                        {% if isInActiveNamespaces %}
                         <tr>
                             <td>
                                 {{ outgoingProperty.domain }}
@@ -777,7 +654,6 @@
                             </td>
                             <td>{{ outgoingProperty.namespace }}</td>
                         </tr>
-                        {% endif %}
                     {% endfor %}
                     </tbody>
                 </table>
@@ -793,14 +669,6 @@
                     </thead>
                     <tbody>
                     {% for outgoingInheritedProperty in outgoingInheritedProperties|sort %}
-                        {# Savoir si l'entité se trouve bien dans l'un des espaces de nom actifs (filtrage) #}
-                        {% set isInActiveNamespaces = false %}
-                        {% for activeNamespace in activeNamespaces %}
-                            {% if activeNamespace.id == outgoingInheritedProperty.namespaceId %}
-                                {% set isInActiveNamespaces = true %}
-                            {% endif %}
-                        {% endfor %}
-                        {% if isInActiveNamespaces %}
                         <tr>
                             <td>
                                 {{ outgoingInheritedProperty.domain }} (is a
@@ -827,7 +695,6 @@
                             </td>
                             <td>{{ outgoingInheritedProperty.namespace }}</td>
                         </tr>
-                        {% endif %}
                     {% endfor %}
                     </tbody>
                 </table>
@@ -843,14 +710,6 @@
                     </thead>
                     <tbody>
                     {% for ingoingProperty in ingoingProperties|sort %}
-                        {# Savoir si l'entité se trouve bien dans l'un des espaces de nom actifs (filtrage) #}
-                        {% set isInActiveNamespaces = false %}
-                        {% for activeNamespace in activeNamespaces %}
-                            {% if activeNamespace.id == ingoingProperty.namespaceId %}
-                                {% set isInActiveNamespaces = true %}
-                            {% endif %}
-                        {% endfor %}
-                        {% if isInActiveNamespaces %}
                         <tr>
                             <td>
                                 <a href="{{ path('class_show', {
@@ -871,7 +730,6 @@
                             </td>
                             <td>{{ ingoingProperty.namespace }}</td>
                         </tr>
-                        {% endif %}
                     {% endfor %}
                     </tbody>
                 </table>
@@ -887,14 +745,6 @@
                     </thead>
                     <tbody>
                     {% for ingoingInheritedProperty in ingoingInheritedProperties|sort %}
-                        {# Savoir si l'entité se trouve bien dans l'un des espaces de nom actifs (filtrage) #}
-                        {% set isInActiveNamespaces = false %}
-                        {% for activeNamespace in activeNamespaces %}
-                            {% if activeNamespace.id == ingoingInheritedProperty.namespaceId %}
-                                {% set isInActiveNamespaces = true %}
-                            {% endif %}
-                        {% endfor %}
-                        {% if isInActiveNamespaces %}
                         <tr>
                             <td>
                                 <a href="{{ path('class_show', {
@@ -911,7 +761,7 @@
                                 </a>
                             </td>
                             <td>
-                                {{ class.invertedLabel }} (is a
+                                {{ classVersion.class.invertedLabel }} (is a
                                 <a
                                         href="{{ path('class_show', {
                                             'id': ingoingInheritedProperty.rangeId
@@ -921,7 +771,6 @@
                             </td>
                             <td>{{ ingoingInheritedProperty.namespace }}</td>
                         </tr>
-                        {% endif %}
                     {% endfor %}
                     </tbody>
                 </table>
@@ -938,7 +787,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for profile in class.profiles %}
+                    {% for profile in classVersion.class.profiles %}
                         <tr>
                             <td>
                                 <a href="{{ path('profile_show', {
@@ -961,7 +810,7 @@
                     <button id="reset-tree" onclick="reset();">Reset</button>
                 </p>
                 <div id="graph-container" data-url="{{ path('class_graph_json', {
-                    'class': class.id})
+                    'class': classVersion.class.id})
                 }}">
                 </div>
                 <p><span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span><em>Use mouse wheel to zoom in/out.</em></p>
@@ -970,11 +819,11 @@
                 <h3>Comments</h3>
                 <div class="comment-box js-user-info" data-fullname="{{ app.user }}">
                     <div class="action-box">
-                        {% if class.comments is empty %}
+                        {% if classVersion.class.comments is empty %}
                             <p id="comment-not-found"><em>No comment found.</em></p>
                         {% endif %}
                         <ul id="comments-list" class="comments-list">
-                            {% for comment in class.comments %}
+                            {% for comment in classVersion.class.comments %}
                                 <li>
                                     <div class="comment-text">
                                         <p><strong><a href="#">{{ comment.creator.fullName }}</a></strong></p>
@@ -987,7 +836,7 @@
 
                         {% if app.user %}
                             <div class="new-comment-form" id="new-comment-form">
-                                {{ render(controller('AppBundle:Comment:new', {'object' : 'class', 'objectId' : class.id})) }}
+                                {{ render(controller('AppBundle:Comment:new', {'object' : 'class', 'objectId' : classVersion.class.id})) }}
                             </div>
                         {% endif %}
                     </div>
@@ -1053,7 +902,7 @@
             });
         });
     </script>
-    {% include 'comment/js-bock.html.twig'  with {'objectType': 'class', 'objectId' : class.id  } %}
+    {% include 'comment/js-bock.html.twig'  with {'objectType': 'class', 'objectId' : classVersion.class.id  } %}
     <script src="https://d3js.org/d3.v4.min.js"></script>
     <script type="text/javascript" src="{{ asset('js/class-graph.js') }}"></script>
 

@@ -353,7 +353,7 @@ class NamespaceRepository extends EntityRepository
      * @return array - An array with namespace keys
      * @throws \Doctrine\DBAL\DBALException
      */
-    public function findNamespacesIdFilteredByUser(User $user){
+    public function findNamespacesIdByUser(User $user){
         $conn = $this->getEntityManager()->getConnection();
 
         $sql = "WITH selectionNamespacesId AS(

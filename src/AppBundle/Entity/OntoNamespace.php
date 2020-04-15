@@ -849,4 +849,21 @@ class OntoNamespace
         return $s;
     }
 
+    /**
+     * @return array
+     * Utilisé pour le dropdown sélection espace de noms sur une classe / propriété / etc
+     * Peut être réutilisé sur une fonctionnalité similaire
+     */
+    public function getStatus()
+    {
+        if($this->getIsOngoing()){
+            return ["classCss"=>"warning", "label"=>"Ongoing"];
+        }
+        elseif(is_null($this->getDeprecatedAt())){
+            return ["classCss"=>"success", "label"=>"Published"];
+        }
+        else{
+            return ["classCss"=>"danger", "label"=>"Deprecated"];
+        }
+    }
 }

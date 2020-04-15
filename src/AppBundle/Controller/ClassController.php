@@ -11,6 +11,7 @@ namespace AppBundle\Controller;
 
 use AppBundle\Entity\Label;
 use AppBundle\Entity\OntoClass;
+use AppBundle\Entity\OntoClassVersion;
 use AppBundle\Entity\OntoNamespace;
 use AppBundle\Entity\Project;
 use AppBundle\Entity\TextProperty;
@@ -32,16 +33,16 @@ class ClassController extends Controller
     public function listAction(){
         $em = $this->getDoctrine()->getManager();
 
-        // Récupérer les namespaces pour le filtrage
+        // FILTRAGE : Récupérer les namespaces
         if(is_null($this->getUser()) || $this->getUser()->getCurrentActiveProject()->getId() == 21){ // Utilisateur non connecté OU connecté et utilisant le projet public
             $namespacesId = $em->getRepository('AppBundle:OntoNamespace')->findPublicProjectNamespacesId();
         }
         else{ // Utilisateur connecté et utilisant un autre projet
-            $namespacesId = $em->getRepository('AppBundle:OntoNamespace')->findNamespacesIdFilteredByUser($this->getUser());
+            $namespacesId = $em->getRepository('AppBundle:OntoNamespace')->findNamespacesIdByUser($this->getUser());
         }
 
         // Récupérer les classes selon le filtrage obtenu
-        $classes = $em->getRepository('AppBundle:OntoClass')->findClassesFilteredByNamespacesId($namespacesId);
+        $classes = $em->getRepository('AppBundle:OntoClass')->findClassesByNamespacesId($namespacesId);
 
         return $this->render('class/list.html.twig', [
             'classes' => $classes,
@@ -137,120 +138,60 @@ class ClassController extends Controller
      */
     public function showAction(OntoClass $class)
     {
+        // Récupérer la version de la classe demandée
+        // Dans l'ordre : (la version demandée - TO DO) > la version ongoing > la version la plus récente > la première version dans la boucle
+        $classVersion = null;
+        foreach($class->getClassVersions() as $iClassVersion){
+            if(is_null($classVersion)){
+                $classVersion = $iClassVersion;
+            }
+            if($iClassVersion->getNamespaceForVersion()->getIsOngoing()){
+                $classVersion = $iClassVersion;
+                break;
+            }
+            if($iClassVersion->getCreationTime() > $classVersion->getCreationTime()){
+                $classVersion = $iClassVersion;
+            }
+        }
+        // On doit avoir une version de la classe sinon on lance une exception.
+        if(is_null($classVersion)){
+            throw $this->createNotFoundException('The class n°'.$class->getId().' has no version. Please contact an administrator.');
+        }
+
         $em = $this->getDoctrine()->getManager();
 
-        if (!is_null($this->getUser())) {
-            // L'utilisateur est connecté
-            $user = $this->getUser();
-
-            $ancestors = $em->getRepository('AppBundle:OntoClass')
-                ->findFilteredAncestorsById($class, $user);
-
-            $descendants = $em->getRepository('AppBundle:OntoClass')
-                ->findFilteredDescendantsById($class, $user);
-
-            $equivalences = $em->getRepository('AppBundle:OntoClass')
-                ->findFilteredEquivalencesById($class, $user);
-
-            $relations = $em->getRepository('AppBundle:OntoClass')
-                ->findFilteredRelationsById($class, $user);
-
-            $outgoingProperties = $em->getRepository('AppBundle:Property')
-                ->findFilteredOutgoingPropertiesById($class, $user);
-
-            $outgoingInheritedProperties = $em->getRepository('AppBundle:Property')
-                ->findFilteredOutgoingInheritedPropertiesById($class, $user);
-
-            $ingoingProperties = $em->getRepository('AppBundle:Property')
-                ->findFilteredIngoingPropertiesById($class, $user);
-
-            $ingoingInheritedProperties = $em->getRepository('AppBundle:Property')
-                ->findFilteredIngoingInheritedPropertiesById($class, $user);
-
-            $userProjectAssociation = $em->getRepository('AppBundle:UserProjectAssociation')
-                ->findOneBy(array('user' => $user, 'project' => $user->getCurrentActiveProject()));
-
-            $activeNamespaces = $em->getRepository('AppBundle:OntoNamespace')
-                ->findAllActiveNamespacesForUser($user);
-
-            $classVersionNamespace = null;
-            foreach ($class->getNamespaces() as $namespace){
-                if(is_null($classVersionNamespace)){
-                    $classVersionNamespace = $namespace;
-                }
-
-                if($namespace->getCreationTime() > $classVersionNamespace->getCreationTime()){
-                    $classVersionNamespace = $namespace;
-                }
-
-                if($namespace->getIsOngoing()){
-                    $classVersionNamespace = $namespace;
-                    break;
-                }
-            }
-            $activeNamespaces[] = $classVersionNamespace;
+        // FILTRAGE : Récupérer les clés de namespaces à utiliser
+        if(is_null($this->getUser()) || $this->getUser()->getCurrentActiveProject()->getId() == 21){ // Utilisateur non connecté OU connecté et utilisant le projet public
+            $namespacesId = $em->getRepository('AppBundle:OntoNamespace')->findPublicProjectNamespacesId();
         }
-        else{ // L'utilisateur n'est pas connecté
-            $ancestors = $em->getRepository('AppBundle:OntoClass')
-                ->findAncestorsById($class);
-
-            $descendants = $em->getRepository('AppBundle:OntoClass')
-                ->findDescendantsById($class);
-
-            $equivalences = $em->getRepository('AppBundle:OntoClass')
-                ->findEquivalencesById($class);
-
-            $relations = $em->getRepository('AppBundle:OntoClass')
-                ->findRelationsById($class);
-
-            $outgoingProperties = $em->getRepository('AppBundle:Property')
-                ->findOutgoingPropertiesById($class);
-
-            $outgoingInheritedProperties = $em->getRepository('AppBundle:Property')
-                ->findOutgoingInheritedPropertiesById($class);
-
-            $ingoingProperties = $em->getRepository('AppBundle:Property')
-                ->findIngoingPropertiesById($class);
-
-            $ingoingInheritedProperties = $em->getRepository('AppBundle:Property')
-                ->findIngoingInheritedPropertiesById($class);
-
-            $activeNamespaces = $em->getRepository('AppBundle:OntoNamespace')
-                ->findActiveNamespacesInPublicProject();
-
-            $classVersionNamespace = null;
-            foreach ($class->getNamespaces() as $namespace){
-                if(is_null($classVersionNamespace)){
-                    $classVersionNamespace = $namespace;
-                }
-
-                if($namespace->getCreationTime() > $classVersionNamespace->getCreationTime()){
-                    $classVersionNamespace = $namespace;
-                }
-
-                if($namespace->getIsOngoing()){
-                    $classVersionNamespace = $namespace;
-                    break;
-                }
-            }
-            $activeNamespaces[] = $classVersionNamespace;
+        else{ // Utilisateur connecté et utilisant un autre projet
+            $namespacesId = $em->getRepository('AppBundle:OntoNamespace')->findNamespacesIdByUser($this->getUser());
         }
 
-        $this->get('logger')
-            ->info('Showing class: '.$class->getIdentifierInNamespace());
+        // Affaiblir le filtrage en rajoutant le namespaceForVersion si indisponible
+        if (!in_array($classVersion->getNamespaceForVersion()->getId(), $namespacesId)) {
+            $namespacesId[] = $classVersion->getNamespaceForVersion()->getId();
+        }
 
+        $ancestors = $em->getRepository('AppBundle:OntoClass')->findAncestorsByClassVersionAndNamespacesId($classVersion, $namespacesId);
+        $descendants = $em->getRepository('AppBundle:OntoClass')->findDescendantsByClassVersionAndNamespacesId($classVersion, $namespacesId);
+        $relations = $em->getRepository('AppBundle:OntoClass')->findRelationsByClassVersionAndNamespacesId($classVersion, $namespacesId);
+
+        $outgoingProperties = $em->getRepository('AppBundle:property')->findOutgoingPropertiesByClassVersionAndNamespacesId($classVersion, $namespacesId);
+        $outgoingInheritedProperties = $em->getRepository('AppBundle:property')->findOutgoingInheritedPropertiesByClassVersionAndNamespacesId($classVersion, $namespacesId);
+        $ingoingProperties = $em->getRepository('AppBundle:property')->findIngoingPropertiesByClassVersionAndNamespacesId($classVersion, $namespacesId);
+        $ingoingInheritedProperties =  $em->getRepository('AppBundle:property')->findIngoingInheritedPropertiesByClassVersionAndNamespacesId($classVersion, $namespacesId);
 
         return $this->render('class/show.html.twig', array(
-            'class' => $class,
+            'classVersion' => $classVersion,
             'ancestors' => $ancestors,
             'descendants' => $descendants,
-            'equivalences' => $equivalences,
             'relations' => $relations,
             'outgoingProperties' => $outgoingProperties,
             'outgoingInheritedProperties' => $outgoingInheritedProperties,
             'ingoingProperties' => $ingoingProperties,
             'ingoingInheritedProperties' => $ingoingInheritedProperties,
-            'activeNamespaces' => $activeNamespaces
+            'namespacesId' => $namespacesId
         ));
     }
 

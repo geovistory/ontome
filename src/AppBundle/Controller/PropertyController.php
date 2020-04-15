@@ -35,16 +35,16 @@ class PropertyController extends Controller
     public function listAction(){
         $em = $this->getDoctrine()->getManager();
 
-        // Récupérer les namespaces pour le filtrage
+        // FILTRAGE : Récupérer les clés de namespaces à utiliser
         if(is_null($this->getUser()) || $this->getUser()->getCurrentActiveProject()->getId() == 21){ // Utilisateur non connecté OU connecté et utilisant le projet public
             $namespacesId = $em->getRepository('AppBundle:OntoNamespace')->findPublicProjectNamespacesId();
         }
         else{ // Utilisateur connecté et utilisant un autre projet
-            $namespacesId = $em->getRepository('AppBundle:OntoNamespace')->findNamespacesIdFilteredByUser($this->getUser());
+            $namespacesId = $em->getRepository('AppBundle:OntoNamespace')->findNamespacesIdByUser($this->getUser());
         }
 
         // Récupérer les classes selon le filtrage obtenu
-        $properties = $em->getRepository('AppBundle:Property')->findPropertiesFilteredByNamespacesId($namespacesId);
+        $properties = $em->getRepository('AppBundle:Property')->findPropertiesByNamespacesId($namespacesId);
 
         return $this->render('property/list.html.twig', [
             'properties' => $properties,
