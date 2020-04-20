@@ -333,6 +333,10 @@ class NamespaceRepository extends EntityRepository
 	                SELECT fk_namespace 
                     FROM che.associates_project 
                     WHERE fk_system_type = 17
+                    UNION
+                    SELECT pk_namespace AS fk_namespace
+                    FROM che.namespace
+                    WHERE pk_namespace = 4
                 )
                 SELECT fk_namespace
                 FROM publicNamespacesId
@@ -364,6 +368,10 @@ class NamespaceRepository extends EntityRepository
 	                WHERE us.pk_user = :userId
 	                AND eupa.fk_namespace IS NOT NULL
 	                AND eupa.fk_system_type = 25
+                    UNION
+                    SELECT pk_namespace AS fk_namespace
+                    FROM che.namespace
+                    WHERE pk_namespace = 4
                 )
                 SELECT fk_namespace
                 FROM selectionNamespacesId

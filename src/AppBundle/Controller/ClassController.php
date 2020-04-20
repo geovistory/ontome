@@ -168,9 +168,16 @@ class ClassController extends Controller
             $namespacesId = $em->getRepository('AppBundle:OntoNamespace')->findNamespacesIdByUser($this->getUser());
         }
 
-        // Affaiblir le filtrage en rajoutant le namespaceForVersion si indisponible
-        if (!in_array($classVersion->getNamespaceForVersion()->getId(), $namespacesId)) {
-            $namespacesId[] = $classVersion->getNamespaceForVersion()->getId();
+        // Affaiblir le filtrage en rajoutant le namespaceForVersion de la classVersion si indisponible
+        $namespaceForClassVersion = $classVersion->getNamespaceForVersion();
+        if(!in_array($namespaceForClassVersion->getId(), $namespacesId)){
+            $namespacesId[] = $namespaceForClassVersion->getId();
+        }
+        // Sans oublier les namespaces références si indisponibles
+        foreach($namespaceForClassVersion->getReferencedNamespaceAssociations() as $referencedNamespacesAssociation){
+            if(!in_array($referencedNamespacesAssociation->getReferencedNamespace()->getId(), $namespacesId)){
+                $namespacesId[] = $referencedNamespacesAssociation->getReferencedNamespace()->getId();
+            }
         }
 
         $ancestors = $em->getRepository('AppBundle:OntoClass')->findAncestorsByClassVersionAndNamespacesId($classVersion, $namespacesId);

@@ -11,38 +11,46 @@
 
 {% block body %}
     <div class="container">
-        <h2 class="class-name">
-            {{ classVersion }}
-            <span class="dropdown">
-                <button class="btn btn-default dropdown-toggle" type="button" id="dropdownVersions" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-                    {{ classVersion.namespaceForVersion }} <span class="label label-{{ classVersion.namespaceForVersion.status.classCss }}">{{ classVersion.namespaceForVersion.status.label }}</span>
-                    <span class="caret"></span>
-                </button>
-                <ul class="dropdown-menu" aria-labelledby="dropdownVersions">
-                    {% if classVersion.class.classVersions|length > 1 %}
-                        {% for otherClassVersion in classVersion.class.classVersions if otherClassVersion != classVersion %}
-                            <li>
-                                <a href="#">
-                                    {{ otherClassVersion.namespaceForVersion }}
-                                    <span class="label label-{{ otherClassVersion.namespaceForVersion.status.classCss }}">{{ otherClassVersion.namespaceForVersion.status.label }}</span>
-                                </a>
+        <div class="clearfix">
+            <div class="pull-right" style="margin-top: 20px; margin-bottom: 10px;">
+                <div class="dropdown inline-block">
+                    <button class="btn btn-default dropdown-toggle" type="button" id="dropdownVersions" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                        {{ classVersion.namespaceForVersion }}
+                        <span class="label label-{{ classVersion.namespaceForVersion.status.classCss }}">
+                            {{ classVersion.namespaceForVersion.status.label }}
+                        </span>
+                        <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="dropdownVersions">
+                        {% if classVersion.class.classVersions|length > 1 %}
+                            {% for otherClassVersion in classVersion.class.classVersions if otherClassVersion != classVersion %}
+                                <li>
+                                    <a href="#">{{ otherClassVersion.namespaceForVersion }}
+                                        <span class="label label-{{ otherClassVersion.namespaceForVersion.status.classCss }}">
+                                            {{ otherClassVersion.namespaceForVersion.status.label }}
+                                        </span>
+                                    </a>
+                                </li>
+                            {% endfor %}
+                        {% else %}
+                            <li class="disabled">
+                                <a href="#">No other version</a>
                             </li>
-                        {% endfor %}
-                    {% else %}
-                        <li class="disabled">
-                            <a href="#">No other version</a>
-                        </li>
-                    {% endif %}
-                </ul>
-            </span>
-            {% if is_granted('edit', classVersion) %}
-            <a href="{{ path('class_edit', {
-                'id': classVersion.class.id
-            }) }}" class="pull-right btn btn-success btn-edit">
-                <i class="fa fa-edit"></i>
-            </a>
-            {% endif %}
-        </h2>
+                        {% endif %}
+                    </ul>
+                </div>
+                {% if is_granted('edit', classVersion) %}
+                <p class="inline-block">
+                    <a href="{{ path('class_edit', {
+                        'id': classVersion.class.id
+                    }) }}" class="btn btn-success btn-edit">
+                        <i class="fa fa-edit"></i>
+                    </a>
+                </p>
+                {% endif %}
+            </div>
+            <h2>{{ classVersion }} ns:{% for i in namespacesId %}{{ i }};{% endfor %}</h2>
+        </div>
         <ul class="nav nav-tabs" id="main-tabs">
             <li class="active"><a data-toggle="tab" href="#summary">Summary</a></li>
             <li><a data-toggle="tab" href="#identification">Identification</a></li>
@@ -64,24 +72,29 @@
         </ul>
         <div class="tab-content">
             <div id="summary" class="tab-pane fade in active">
-                <h3>{{ classVersion }}</h3>
+                <h3>{{ classVersion.invertedLabel }}</h3>
                 <div class="container">
-                    {% if classVersion.class.childClassAssociations|length > 0 %}
+                    {% set associationCount = 0 %}
+                    {% for association in classVersion.class.childClassAssociations
+                        if association.namespaceForVersion.id in namespacesId %}
+                        {% set associationCount = associationCount + 1 %}
+                    {% endfor %}
+                    {% if associationCount > 0 %}
                     <div class="row">
                         <div class="col-lg-2">
                             <p>Subclass of:</p>
                         </div>
                         <div class="col-lg-10">
                             <ul class="list-unstyled">
-                            {# Filtrer les associations is_subclass_of #}
-                            {% for association in classVersion.class.childClassAssociations if association.namespaceForVersion.id in namespacesId %}
+                            {# Filtrer les associations is_subclass_of avec namespacesId #}
+                            {% for association in classVersion.class.childClassAssociations
+                                if association.namespaceForVersion.id in namespacesId %}
                                 <li>
                                     <a href="{{ path('class_show', {'id': association.parentClass.id }) }}">
-                                        {% if association.parentClass.identifierInNamespace != association.parentClass.standardLabel %}
-                                            {{ association.parentClass.identifierInNamespace }} {{ association.parentClass.standardLabel }}
-                                        {% else %}
-                                            {{ association.parentClass.standardLabel }}
-                                        {% endif %}
+                                        {% for parentClassVersion in association.parentClass.classVersions
+                                            if parentClassVersion.namespaceForVersion.id in namespacesId %}
+                                            {{ parentClassVersion.invertedLabel }}
+                                        {% endfor %}
                                     </a>
                                 </li>
                             {% endfor %}
@@ -89,21 +102,27 @@
                         </div>
                     </div>
                     {% endif %}
-                    {% if classVersion.class.parentClassAssociations|length > 0 %}
+                    {% set associationCount = 0 %}
+                    {% for association in classVersion.class.parentClassAssociations
+                        if association.namespaceForVersion.id in namespacesId %}
+                        {% set associationCount = associationCount + 1 %}
+                    {% endfor %}
+                    {% if associationCount > 0 %}
                     <div class="row">
                         <div class="col-lg-2">
                             <p>Superclass of:</p>
                         </div>
                         <div class="col-lg-10">
                             <ul class="list-unstyled">
-                            {% for association in classVersion.class.parentClassAssociations if association.namespaceForVersion.id in namespacesId %}
+                            {# Filtrer les associations is_subclass_of avec namespacesId #}
+                            {% for association in classVersion.class.parentClassAssociations
+                                if association.namespaceForVersion.id in namespacesId %}
                                <li>
                                     <a href="{{ path('class_show', {'id': association.childClass.id}) }}">
-                                        {% if association.childClass.identifierInNamespace != association.childClass.standardLabel %}
-                                            {{ association.childClass.identifierInNamespace }} {{ association.childClass.standardLabel }}
-                                        {% else %}
-                                            {{ association.childClass.standardLabel }}
-                                        {% endif %}
+                                        {% for childClassVersion in association.childClass.classVersions
+                                            if childClassVersion.namespaceForVersion == association.namespaceForVersion %}
+                                            {{ childClassVersion.invertedLabel }}
+                                        {% endfor %}
                                     </a>
                                 </li>
                             {% endfor %}
@@ -111,22 +130,41 @@
                         </div>
                     </div>
                     {% endif %}
-                    {% if classVersion.class.entityAssociations|length > 0 %}
+                    {% set relationCount = 0 %}
+                    {% for relation in classVersion.class.entityAssociations
+                        if relation.namespaceForVersion.id in namespacesId
+                        and relation.systemType.id == 4
+                        or relation.systemType.id == 19 %}
+                        {% set relationCount = relationCount + 1 %}
+                    {% endfor %}
+                    {% if relationCount > 0 %}
                     <div class="row">
                         <div class="col-lg-2">
                             <p>Relations:</p>
                         </div>
                         <div class="col-lg-10">
                             <ul class="list-unstyled">
-                            {% for relation in classVersion.class.entityAssociations if relation.systemType.id == 4 or relation.systemType.id == 19 and relation.namespaceForVersion.id in namespacesId %}
+                            {# Filtrer les associations entity_associations avec namespacesId #}
+                            {# SystemTypes utilisés: 4=owl:equivalentClass, 19=owl:DisjointWith #}
+                            {% for relation in classVersion.class.entityAssociations
+                                if relation.namespaceForVersion.id in namespacesId
+                                and relation.systemType.id == 4
+                                or relation.systemType.id == 19 %}
                                 <li>{{ relation.systemType.standardLabel }}
+                                    {# la classe peut être "source" et/ou "target" #}
                                     {% if relation.sourceClass.id == classVersion.class.id %}
                                     <a href="{{ path("class_show", {'id': relation.targetClass.id }) }}">
-                                        {{ relation.targetClass.invertedLabel }}
+                                        {% for targetClassVersion in relation.targetClass.classVersions
+                                            if targetClassVersion.namespaceForVersion.id in namespacesId %}
+                                            {{ targetClassVersion.invertedLabel }}
+                                        {% endfor %}
                                     </a>
                                     {% else %}
                                     <a href="{{ path("class_show", {'id': relation.sourceClass.id }) }}">
-                                        {{ relation.sourceClass.invertedLabel }}
+                                        {% for sourceClassVersion in relation.sourceClass.classVersions
+                                            if sourceClassVersion.namespaceForVersion.id in namespacesId %}
+                                            {{ sourceClassVersion.invertedLabel }}
+                                        {% endfor %}
                                     </a>
                                     {% endif %}
                                 </li>
@@ -140,19 +178,27 @@
                             <p>Scope note:</p>
                         </div>
                         <div class="col-lg-10">
-                            {% set scopeNote, break = '<i>No scope note yet.</i>', false %}
-                            {% for textProperty in classVersion.class.textProperties if textProperty.systemType.id == 1 and textProperty.namespaceForVersion.id in namespacesId %}
-                                {% if not break %}
-                                    {% if textProperty.languageIsoCode == 'en' %}
-                                        {% set break = true %}
+                            {% set scopeNote=null %}
+                            {% set break=false %}
+                            {# Filtrer les textproperties avec namespacesId #}
+                            {# SystemType utilisé: 1=Scope note #}
+                            {# Retrouver en priorité le scope note en anglais #}
+                            {% for textProperty in classVersion.class.textProperties
+                                if textProperty.namespaceForVersion.id in namespacesId
+                                and textProperty.systemType.id == 1
+                                and not break %}
+                                {% if textProperty.languageIsoCode == 'en' %}
+                                    {% set break = true %}{# En anglais donc prioritaire: break #}
+                                    {% set scopeNote = textProperty.textProperty %}
+                                {% else %}
+                                    {% if scopeNote is null %}
                                         {% set scopeNote = textProperty.textProperty %}
-                                    {% else %}
-                                        {% if scopeNote == '<i>No scope note yet.</i>' %}
-                                            {% set scopeNote = textProperty.textProperty %}
-                                        {% endif %}
                                     {% endif %}
                                 {% endif %}
                             {% endfor %}
+                            {% if scopeNote is null %}
+                                {% set scopeNote = '<i>No scope note yet.</i>' %}
+                            {% endif %}
                             {{ scopeNote|raw }}
                         </div>
                     </div>
@@ -162,7 +208,11 @@
                         </div>
                         <div class="col-lg-10">
                             {% set isExamplesEmpty = true %}
-                            {% for textProperty in classVersion.class.textProperties if textProperty.systemType.id == 7 and textProperty.namespaceForVersion.id in namespacesId %}
+                            {# Filtrer les textproperties avec namespacesId #}
+                            {# SystemType utilisé: 7=Example #}
+                            {% for textProperty in classVersion.class.textProperties
+                                if textProperty.namespaceForVersion.id in namespacesId
+                                and textProperty.systemType.id == 7 %}
                                 {% set isExamplesEmpty = false %}
                                 {{ textProperty.textProperty|raw }}
                             {% endfor %}
@@ -171,18 +221,26 @@
                             {% endif %}
                         </div>
                     </div>
+                    {% set associationCount = 0 %}
+                    {% for association in classVersion.class.childClassAssociations
+                        if association.namespaceForVersion.id in namespacesId %}
+                        {% set associationCount = associationCount + 1 %}
+                    {% endfor %}
+                    {% if associationCount > 0 %}
                     <div class="row">
                         <div class="col-lg-2">
                             <p>In First Order Logic:</p>
                         </div>
                         <div class="col-lg-10">
                             <ul class="list-unstyled">
-                            {% for association in classVersion.class.childClassAssociations if association.namespaceForVersion.id in namespacesId %}
+                            {% for association in classVersion.class.childClassAssociations
+                                if association.namespaceForVersion.id in namespacesId %}
                                 <li>{{ classVersion.class.identifierInNamespace }}(x) ⊃ {{ association.parentClass.identifierInNamespace }}(x)</li>
                             {% endfor %}
                             </ul>
                         </div>
                     </div>
+                    {% endif %}
                     {% if outgoingProperties|length > 0 %}
                         <div class="row">
                             <div class="col-lg-2">
@@ -190,7 +248,9 @@
                             </div>
                             <div class="col-lg-10">
                                 <ul class="list-unstyled">
-                                    {% for outgoingProperty in outgoingProperties|sort if outgoingProperty.rootNamespaceId == classVersion.class.topLevelNamespace.id %}
+                                    {# inutile de filtrer outgoingProperties car déjà fait par le repository #}
+                                    {% for outgoingProperty in outgoingProperties|sort
+                                        if outgoingProperty.rootNamespaceId == classVersion.class.topLevelNamespace.id %}
                                         <li>
                                             <a href="{{ path('property_show', {'id': outgoingProperty.propertyId}) }}">{{ outgoingProperty.property }}</a>
                                             → <a href="{{ path('class_show', {'id': outgoingProperty.rangeId }) }}">{{ outgoingProperty.range }}</a>
@@ -844,7 +904,6 @@
             </div>
         </div>
     </div>
-
 {% endblock %}
 
 {% block javascripts %}

@@ -58,11 +58,6 @@ class ClassRepository extends EntityRepository
      * Remplace les fonctions obsolètes findAncestorsById et findFilteredAncestorsById
      */
     public function findAncestorsByClassVersionAndNamespacesId(OntoClassVersion $classVersion, array $namespacesId){
-        // Affaiblir le filtrage si le namespaceForVersion n'y est pas inclus
-        if(!in_array($classVersion->getNamespaceForVersion()->getId(), $namespacesId)){
-            $namespacesId[] = $classVersion->getNamespaceForVersion()->getId();
-        }
-
         // Construit la chaine ?,? pour les namespacesId dans la requête SQL
         $in  = str_repeat('?,', count($namespacesId) - 1) . '?';
 
@@ -108,11 +103,6 @@ class ClassRepository extends EntityRepository
      * Remplace les fonctions obsolètes findDescendantsById et findFilteredDescendantsById
      */
     public function findDescendantsByClassVersionAndNamespacesId(OntoClassVersion $classVersion, array $namespacesId){
-        // Affaiblir le filtrage si le namespaceForVersion n'y est pas inclus
-        if(!in_array($classVersion->getNamespaceForVersion()->getId(), $namespacesId)){
-            $namespacesId[] = $classVersion->getNamespaceForVersion()->getId();
-        }
-
         // Construit la chaine ?,? pour les namespacesId dans la requête SQL
         $in  = str_repeat('?,', count($namespacesId) - 1) . '?';
 
@@ -147,11 +137,6 @@ class ClassRepository extends EntityRepository
      * Remplace les fonctions obsolètes findRelationsById et findFilteredRelationsById
      */
     public function findRelationsByClassVersionAndNamespacesId(OntoClassVersion $classVersion, array $namespacesId){
-        // Affaiblir le filtrage si le namespaceForVersion n'y est pas inclus
-        if(!in_array($classVersion->getNamespaceForVersion()->getId(), $namespacesId)){
-            $namespacesId[] = $classVersion->getNamespaceForVersion()->getId();
-        }
-
         // Construit la chaine ?,? pour les namespacesId dans la requête SQL
         $in  = str_repeat('?,', count($namespacesId) - 1) . '?';
 

@@ -59,11 +59,6 @@ class PropertyRepository extends EntityRepository
      * Remplace les fonctions obsolètes findFilteredOutgoingPropertiesById et findOutgoingPropertiesById
      */
     public function findOutgoingPropertiesByClassVersionAndNamespacesId(OntoClassVersion $classVersion, array $namespacesId){
-        // Affaiblir le filtrage en rajoutant le namespaceForVersion
-        if (!in_array($classVersion->getNamespaceForVersion()->getId(), $namespacesId)) {
-            $namespacesId[] = $classVersion->getNamespaceForVersion()->getId();
-        }
-
         // Construit la chaine ?,? pour les namespacesId dans la requête SQL
         $in  = str_repeat('?,', count($namespacesId) - 1) . '?';
 
@@ -97,11 +92,6 @@ class PropertyRepository extends EntityRepository
      * Remplace les fonctions obsolètes findFilteredOutgoingInheritedPropertiesById et findOutgoingInheritedPropertiesById
      */
     public function findOutgoingInheritedPropertiesByClassVersionAndNamespacesId(OntoClassVersion $classVersion, array $namespacesId){
-        // Affaiblir le filtrage en rajoutant le namespaceForVersion
-        if (!in_array($classVersion->getNamespaceForVersion()->getId(), $namespacesId)) {
-            $namespacesId[] = $classVersion->getNamespaceForVersion()->getId();
-        }
-
         // Construit la chaine ?,? pour les namespacesId dans la requête SQL
         $in  = str_repeat('?,', count($namespacesId) - 1) . '?';
 
@@ -136,11 +126,6 @@ class PropertyRepository extends EntityRepository
      * Remplace les fonctions obsolètes findFilteredIngoingPropertiesById et findIngoingPropertiesById
      */
     public function findIngoingPropertiesByClassVersionAndNamespacesId(OntoClassVersion $classVersion, array $namespacesId){
-        // Affaiblir le filtrage en rajoutant le namespaceForVersion
-        if (!in_array($classVersion->getNamespaceForVersion()->getId(), $namespacesId)) {
-            $namespacesId[] = $classVersion->getNamespaceForVersion()->getId();
-        }
-
         // Construit la chaine ?,? pour les namespacesId dans la requête SQL
         $in  = str_repeat('?,', count($namespacesId) - 1) . '?';
 
@@ -175,11 +160,6 @@ class PropertyRepository extends EntityRepository
      * Remplace les fonctions obsolètes findFilteredIngoingInheritedPropertiesById et findIngoingInheritedPropertiesById
      */
     public function findIngoingInheritedPropertiesByClassVersionAndNamespacesId(OntoClassVersion $classVersion, array $namespacesId){
-        // Affaiblir le filtrage en rajoutant le namespaceForVersion
-        if (!in_array($classVersion->getNamespaceForVersion()->getId(), $namespacesId)) {
-            $namespacesId[] = $classVersion->getNamespaceForVersion()->getId();
-        }
-
         // Construit la chaine ?,? pour les namespacesId dans la requête SQL
         $in  = str_repeat('?,', count($namespacesId) - 1) . '?';
 
