@@ -70,17 +70,24 @@ class OutgoingPropertyQuickAddForm extends AbstractType
                     '0' => 0,
                     '1' => 1,
                     'n' => -1,
+                    '2' => 2,
+                    '3' => 3,
+                    '4' => 4,
+                    '5' => 5,
                 ),
-                'label' => 'Min'
+                'preferred_choices' => [null, 0, 1, -1],
             ))
             ->add('domainMaxQuantifier',ChoiceType::class, array(
                 'choices'  => array(
                     'Max' => null,
-                    '0' => 0,
                     '1' => 1,
                     'n' => -1,
+                    '2' => 2,
+                    '3' => 3,
+                    '4' => 4,
+                    '5' => 5,
                 ),
-                'label' => 'Max'
+                'preferred_choices' => [null, 1, -1],
             ))
             ->add('rangeMinQuantifier',ChoiceType::class, array(
                 'choices'  => array(
@@ -88,17 +95,24 @@ class OutgoingPropertyQuickAddForm extends AbstractType
                     '0' => 0,
                     '1' => 1,
                     'n' => -1,
+                    '2' => 2,
+                    '3' => 3,
+                    '4' => 4,
+                    '5' => 5,
                 ),
-                'label' => 'Min'
+                'preferred_choices' => [null, 0, 1, -1],
             ))
             ->add('rangeMaxQuantifier',ChoiceType::class, array(
                 'choices'  => array(
                     'Max' => null,
-                    '0' => 0,
                     '1' => 1,
                     'n' => -1,
+                    '2' => 2,
+                    '3' => 3,
+                    '4' => 4,
+                    '5' => 5,
                 ),
-                'label' => 'Max'
+                'preferred_choices' => [null, 1, -1],
             ))
             ->add('textProperties', CollectionType::class, array(
                 'entry_type' => TextPropertyType::class,
