@@ -249,8 +249,7 @@
                             <div class="col-lg-10">
                                 <ul class="list-unstyled">
                                     {# inutile de filtrer outgoingProperties car déjà fait par le repository #}
-                                    {% for outgoingProperty in outgoingProperties|sort
-                                        if outgoingProperty.rootNamespaceId == classVersion.class.topLevelNamespace.id %}
+                                    {% for outgoingProperty in outgoingProperties %}
                                         <li>
                                             <a href="{{ path('property_show', {'id': outgoingProperty.propertyId}) }}">{{ outgoingProperty.property }}</a>
                                             → <a href="{{ path('class_show', {'id': outgoingProperty.rangeId }) }}">{{ outgoingProperty.range }}</a>
@@ -267,7 +266,7 @@
                             </div>
                             <div class="col-lg-10">
                                 <ul class="list-unstyled">
-                                    {% for ingoingProperty in ingoingProperties|sort if ingoingProperty.rootNamespaceId == classVersion.class.topLevelNamespace.id %}
+                                    {% for ingoingProperty in ingoingProperties %}
                                         <li><a href="{{ path('class_show', {'id': ingoingProperty.domainId }) }}">{{ ingoingProperty.domain }}</a>
                                             → <a href="{{ path('property_show', {'id': ingoingProperty.propertyId}) }}">{{ ingoingProperty.property }}</a>
                                         </li>

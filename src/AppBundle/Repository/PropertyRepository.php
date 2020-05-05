@@ -67,19 +67,15 @@ class PropertyRepository extends EntityRepository
                   pk_property AS \"propertyId\",
                   pk_range AS \"rangeId\",
                   identifier_domain AS domain,
-                  che.get_root_namespace(nsp.pk_namespace) AS \"rootNamespaceId\",
-                  (SELECT label FROM che.get_namespace_labels(nsp.pk_namespace) WHERE language_iso_code = 'en') AS namespace
-                FROM che.v_properties_with_domain_range,
-                  che.associates_namespace asnsp,
-                  che.namespace nsp
-                WHERE asnsp.fk_property = pk_property
-                AND pk_domain = ?
-                AND nsp.pk_namespace = asnsp.fk_namespace
-                AND nsp.pk_namespace IN (".$in.");";
+                  che.get_root_namespace(fk_property_namespace_for_version) AS \"rootNamespaceId\",
+                  (SELECT label FROM che.get_namespace_labels(fk_property_namespace_for_version) WHERE language_iso_code = 'en') AS namespace
+                FROM che.v_properties_version_with_domain_version_range_version
+                WHERE pk_domain_version = ?
+                AND fk_property_namespace_for_version IN (".$in.");";
 
         $conn = $this->getEntityManager()->getConnection();
         $stmt = $conn->prepare($sql);
-        $stmt->execute(array_merge(array($classVersion->getClass()->getId()), $namespacesId));
+        $stmt->execute(array_merge(array($classVersion->getId()), $namespacesId));
 
         return $stmt->fetchAll();
     }
@@ -135,15 +131,11 @@ class PropertyRepository extends EntityRepository
                   pk_property AS \"propertyId\",
                   pk_range AS \"rangeId\",
                   identifier_range AS range,
-                  che.get_root_namespace(nsp.pk_namespace) AS \"rootNamespaceId\",
-                  (SELECT label FROM che.get_namespace_labels(nsp.pk_namespace) WHERE language_iso_code = 'en') AS namespace
-                FROM che.v_properties_with_domain_range,
-                  che.associates_namespace asnsp,
-                  che.namespace nsp
-                WHERE pk_range = ?
-                AND asnsp.fk_property = pk_property
-                AND nsp.pk_namespace = asnsp.fk_namespace
-                AND nsp.pk_namespace IN (".$in.");";
+                  che.get_root_namespace(fk_property_namespace_for_version) AS \"rootNamespaceId\",
+                  (SELECT label FROM che.get_namespace_labels(fk_property_namespace_for_version) WHERE language_iso_code = 'en') AS namespace
+                FROM che.v_properties_version_with_domain_version_range_version
+                WHERE pk_range_version = ?
+                AND fk_property_namespace_for_version IN (".$in.");";
 
         $conn = $this->getEntityManager()->getConnection();
         $stmt = $conn->prepare($sql);
