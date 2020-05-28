@@ -291,7 +291,9 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for textProperty in classVersion.class.textProperties if textProperty.systemType.id == 1 and textProperty.namespaceForVersion.id in namespacesId%}
+                    {% for textProperty in classVersion.class.textProperties
+                        if textProperty.systemType.id == 1
+                        and textProperty.namespaceForVersion.id in namespacesId %}
                         {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
                         <tr>
                             <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
@@ -340,7 +342,9 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for textProperty in classVersion.class.textProperties if textProperty.systemType.id == 7 and textProperty.namespaceForVersion.id in namespacesId %}
+                    {% for textProperty in classVersion.class.textProperties
+                        if textProperty.systemType.id == 7
+                        and textProperty.namespaceForVersion.id in namespacesId %}
                         {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
                         <tr>
                             <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
@@ -380,7 +384,9 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for textProperty in classVersion.class.textProperties if textProperty.systemType.id == 12 and textProperty.namespaceForVersion.id in namespacesId %}
+                    {% for textProperty in classVersion.class.textProperties
+                        if textProperty.systemType.id == 12
+                        and textProperty.namespaceForVersion.id in namespacesId %}
                         {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
                         <tr>
                             <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
@@ -422,7 +428,8 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for label in classVersion.class.labels if label.namespaceForVersion.id in namespacesId %}
+                    {% for label in classVersion.class.labels
+                        if label.namespaceForVersion.id in namespacesId %}
                         <tr>
                             <td>
                                 <a href="{{ path('label_show', {
@@ -499,7 +506,8 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for association in classVersion.class.childClassAssociations if association.namespaceForVersion.id in namespacesId %}
+                    {% for association in classVersion.class.childClassAssociations
+                        if association.namespaceForVersion.id in namespacesId %}
                         <tr>
                             <td>
                                 <a href="{{ path('class_show', {
@@ -521,7 +529,8 @@
                             </td>
                             <td>
                                 {% if association.textProperties is not null %}
-                                    {% for textProperty in association.textProperties if textProperty.systemType.id == 15 %}
+                                    {% for textProperty in association.textProperties
+                                        if textProperty.systemType.id == 15 %}
                                         {% if loop.index == 1 %}
                                             <a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="fas fa-eye" aria-hidden="true"></span></a>
                                             {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
@@ -610,7 +619,9 @@
                         </tr>
                     </thead>
                     <tbody>
-                    {% for relation in classVersion.class.entityAssociations if relation.systemType.id == 4 or relation.systemType.id == 19 and relation.namespaceForVersion.id in namespacesId %}
+                    {% for relation in classVersion.class.entityAssociations
+                        if relation.systemType.id == 4 or relation.systemType.id == 19
+                        and relation.namespaceForVersion.id in namespacesId %}
                         <tr>
                             <td>{{ relation.systemType }}</td>
                             {% if classVersion.class.id == relation.sourceClass.id %}
@@ -630,7 +641,8 @@
                             {% endif %}
                             <td>
                                 {% if relation.textProperties is not null %}
-                                    {% for textProperty in relation.textProperties if textProperty.systemType.id == 15 %}
+                                    {% for textProperty in relation.textProperties
+                                        if textProperty.systemType.id == 15 %}
                                         {% if loop.index == 1 %}
                                             <a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="fas fa-eye" aria-hidden="true"></span></a>
                                             {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
