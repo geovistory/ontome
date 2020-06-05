@@ -60,118 +60,117 @@ class PropertyRepository extends EntityRepository
      */
     public function findAncestorsByPropertyVersionAndNamespacesId(PropertyVersion $propertyVersion, array $namespacesId)
     {
-        return array();
-//        $conn = $this->getEntityManager()
-//            ->getConnection();
-//
-//        $sql = "WITH tw1 AS
-//                (
-//                  SELECT pk_parent,
-//                     parent_identifier,
-//                     DEPTH,
-//                     ARRAY_TO_STRING(_path,'|') ancestors
-//                  FROM che.ascendant_property_hierarchy(:property)
-//                )
-//                SELECT tw1.pk_parent  AS id,
-//                       tw1.parent_identifier AS identifier,
-//                       p.has_domain,
-//                       domain.identifier_in_namespace AS \"domainIdentifier\",
-//                       domain.standard_label AS \"domainStandardLabel\",
-//                       p.domain_instances_min_quantifier,
-//                       p.domain_instances_max_quantifier,
-//                       p.has_range,
-//                       range.identifier_in_namespace AS \"rangeIdentifier\",
-//                       range.standard_label AS \"rangeStandardLabel\",
-//                       p.range_instances_min_quantifier,
-//                       p.range_instances_max_quantifier,
-//                       tw1.DEPTH,
-//                       replace(tw1.ancestors, '|', '→') AS ancestors,
-//                       che.get_root_namespace(nsp.pk_namespace) AS \"rootNamespaceId\",
-//                       (SELECT label FROM che.get_namespace_labels(che.get_root_namespace(nsp.pk_namespace)) WHERE language_iso_code = 'en') AS \"rootNamespaceLabel\",
-//                       nsp.pk_namespace AS \"propertyNamespaceId\",
-//                       nsp.standard_label AS \"propertyNamespaceLabel\"
-//                FROM tw1,
-//                     che.associates_namespace asnsp,
-//                     che.namespace nsp,
-//                     che.property p,
-//                     che.class domain,
-//                     che.class range
-//                WHERE asnsp.fk_property = tw1.pk_parent
-//                AND   nsp.pk_namespace = asnsp.fk_namespace
-//                AND depth > 1
-//                AND p.pk_property = tw1.pk_parent
-//                AND p.has_domain = domain.pk_class
-//                AND p.has_range = range.pk_class
-//                GROUP BY tw1.pk_parent,
-//                     tw1.parent_identifier,
-//                     p.has_domain,
-//                       domain.identifier_in_namespace,
-//                       domain.standard_label,
-//                       p.domain_instances_min_quantifier,
-//                       p.domain_instances_max_quantifier,
-//                       p.has_range,
-//                       range.identifier_in_namespace,
-//                       range.standard_label,
-//                       p.range_instances_min_quantifier,
-//                       p.range_instances_max_quantifier,
-//                     tw1.depth,
-//                     tw1.ancestors,
-//                     nsp.pk_namespace";
-//
-//        $stmt = $conn->prepare($sql);
-//        $stmt->execute(array('property' => $property->getId()));
-//
-//        return $stmt->fetchAll();
+        $conn = $this->getEntityManager()
+            ->getConnection();
+
+        $sql = "WITH tw1 AS
+                (
+                  SELECT pk_parent,
+                     parent_identifier,
+                     DEPTH,
+                     ARRAY_TO_STRING(_path,'|') ancestors
+                  FROM che.ascendant_property_hierarchy(:property)
+                )
+                SELECT tw1.pk_parent  AS id,
+                       tw1.parent_identifier AS identifier,
+                       p.has_domain,
+                       domain.identifier_in_namespace AS \"domainIdentifier\",
+                       domain.standard_label AS \"domainStandardLabel\",
+                       p.domain_instances_min_quantifier,
+                       p.domain_instances_max_quantifier,
+                       p.has_range,
+                       range.identifier_in_namespace AS \"rangeIdentifier\",
+                       range.standard_label AS \"rangeStandardLabel\",
+                       p.range_instances_min_quantifier,
+                       p.range_instances_max_quantifier,
+                       tw1.DEPTH,
+                       replace(tw1.ancestors, '|', '→') AS ancestors,
+                       che.get_root_namespace(nsp.pk_namespace) AS \"rootNamespaceId\",
+                       (SELECT label FROM che.get_namespace_labels(che.get_root_namespace(nsp.pk_namespace)) WHERE language_iso_code = 'en') AS \"rootNamespaceLabel\",
+                       nsp.pk_namespace AS \"propertyNamespaceId\",
+                       nsp.standard_label AS \"propertyNamespaceLabel\"
+                FROM tw1,
+                     che.associates_namespace asnsp,
+                     che.namespace nsp,
+                     che.property p,
+                     che.class domain,
+                     che.class range
+                WHERE asnsp.fk_property = tw1.pk_parent
+                AND   nsp.pk_namespace = asnsp.fk_namespace
+                AND depth > 1
+                AND p.pk_property = tw1.pk_parent
+                AND p.has_domain = domain.pk_class
+                AND p.has_range = range.pk_class
+                GROUP BY tw1.pk_parent,
+                     tw1.parent_identifier,
+                     p.has_domain,
+                       domain.identifier_in_namespace,
+                       domain.standard_label,
+                       p.domain_instances_min_quantifier,
+                       p.domain_instances_max_quantifier,
+                       p.has_range,
+                       range.identifier_in_namespace,
+                       range.standard_label,
+                       p.range_instances_min_quantifier,
+                       p.range_instances_max_quantifier,
+                     tw1.depth,
+                     tw1.ancestors,
+                     nsp.pk_namespace";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->execute(array('property' => $propertyVersion->getProperty()->getId()));
+
+        return $stmt->fetchAll();
     }
 
 
     /**
      * @param PropertyVersion $propertyVersion
      * @param array $namespacesId
-     * @return void
+     * @return array Remplace les fonctions obsolètes findDescendantsById et findFilteredDescendantsById
      * Remplace les fonctions obsolètes findDescendantsById et findFilteredDescendantsById
+     * @throws \Doctrine\DBAL\DBALException
      */
     public function findDescendantsByPropertyVersionAndNamespacesId(PropertyVersion $propertyVersion, array $namespacesId)
     {
-        return array();
-//        $conn = $this->getEntityManager()
-//            ->getConnection();
-//
-//        $sql = "SELECT  pk_child AS id,
-//                        child_identifier as identifier,
-//                       p.has_domain,
-//                       domain.identifier_in_namespace AS \"domainIdentifier\",
-//                       domain.standard_label AS \"domainStandardLabel\",
-//                       p.domain_instances_min_quantifier,
-//                       p.domain_instances_max_quantifier,
-//                       p.has_range,
-//                       range.identifier_in_namespace AS \"rangeIdentifier\",
-//                       range.standard_label AS \"rangeStandardLabel\",
-//                       p.range_instances_min_quantifier,
-//                       p.range_instances_max_quantifier,
-//                        depth,
-//                        replace(descendants, '|', '→') AS descendants,
-//                        che.get_root_namespace(nsp.pk_namespace) AS \"rootNamespaceId\",
-//                       (SELECT label FROM che.get_namespace_labels(che.get_root_namespace(nsp.pk_namespace)) WHERE language_iso_code = 'en') AS \"rootNamespaceLabel\",
-//                       nsp.pk_namespace AS \"propertyNamespaceId\",
-//                       nsp.standard_label AS \"propertyNamespaceLabel\"
-//                    FROM che.descendant_property_hierarchy((:property)),
-//                         che.associates_namespace asnsp,
-//                         che.namespace nsp,
-//                         che.property p,
-//                         che.class domain,
-//                         che.class range
-//                    WHERE asnsp.fk_property = pk_child
-//                    AND   nsp.pk_namespace = asnsp.fk_namespace
-//                    AND p.pk_property = pk_child
-//                    AND p.has_domain = domain.pk_class
-//                    AND p.has_range = range.pk_class;
-//                         ";
-//
-//        $stmt = $conn->prepare($sql);
-//        $stmt->execute(array('property' => $property->getId()));
-//
-//        return $stmt->fetchAll();
+        $conn = $this->getEntityManager()
+            ->getConnection();
+
+        $sql = "SELECT  pk_child AS id,
+                        child_identifier as identifier,
+                       p.has_domain,
+                       domain.identifier_in_namespace AS \"domainIdentifier\",
+                       domain.standard_label AS \"domainStandardLabel\",
+                       p.domain_instances_min_quantifier,
+                       p.domain_instances_max_quantifier,
+                       p.has_range,
+                       range.identifier_in_namespace AS \"rangeIdentifier\",
+                       range.standard_label AS \"rangeStandardLabel\",
+                       p.range_instances_min_quantifier,
+                       p.range_instances_max_quantifier,
+                        depth,
+                        replace(descendants, '|', '→') AS descendants,
+                        che.get_root_namespace(nsp.pk_namespace) AS \"rootNamespaceId\",
+                       (SELECT label FROM che.get_namespace_labels(che.get_root_namespace(nsp.pk_namespace)) WHERE language_iso_code = 'en') AS \"rootNamespaceLabel\",
+                       nsp.pk_namespace AS \"propertyNamespaceId\",
+                       nsp.standard_label AS \"propertyNamespaceLabel\"
+                    FROM che.descendant_property_hierarchy((:property)),
+                         che.associates_namespace asnsp,
+                         che.namespace nsp,
+                         che.property p,
+                         che.class domain,
+                         che.class range
+                    WHERE asnsp.fk_property = pk_child
+                    AND   nsp.pk_namespace = asnsp.fk_namespace
+                    AND p.pk_property = pk_child
+                    AND p.has_domain = domain.pk_class
+                    AND p.has_range = range.pk_class;
+                         ";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->execute(array('property' => $propertyVersion->getProperty()->getId()));
+
+        return $stmt->fetchAll();
     }
 
 
@@ -300,29 +299,6 @@ class PropertyRepository extends EntityRepository
 
         return $stmt->fetchAll();
     }
-
-    /**
-     * @param Property $property
-     * @return array
-     */
-    /*public function findDomainRangeById(Property $property)
-    {
-        $conn = $this->getEntityManager()
-            ->getConnection();
-
-        $sql = "SELECT  pk_domain AS \"domainId\",
-                        identifier_domain AS \"domainIdentifier\",
-                        identifier_property AS \"propertyIdentifier\",
-                        pk_range AS \"rangeId\",
-                        identifier_range AS \"rangeIdentifier\"
-                FROM che.v_properties_with_domain_range
-                WHERE pk_property = :property";
-
-        $stmt = $conn->prepare($sql);
-        $stmt->execute(array('property' => $property->getId()));
-
-        return $stmt->fetch();
-    }*/
 
     /**
      * @param PropertyVersion $propertyVersion

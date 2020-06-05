@@ -105,9 +105,6 @@
                                     {% set associationCount = 0 %}
                                     {% for association in propertyVersion.property.parentPropertyAssociations
                                         if association.namespaceForVersion.id in namespacesId %}
-                                        {% set associationCount = associationCount + 1 %}
-                                    {% endfor %}
-                                    {% if associationCount > 0 %}
                                         <li>
                                             <a href="{{ path('class_show', {'id': association.childProperty.domain.id}) }}">
                                                 {{ association.childProperty.domain.identifierInNamespace }} {{ association.childProperty.domain.standardLabel }}
@@ -119,7 +116,7 @@
                                                 {{ association.childProperty.range.identifierInNamespace }} {{ association.childProperty.range.standardLabel }}
                                             </a>
                                         </li>
-                                    {% endif %}
+                                    {% endfor %}
                                 </ul>
                             </div>
                         </div>
