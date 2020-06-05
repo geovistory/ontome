@@ -210,80 +210,10 @@ class PropertyController extends Controller
             }
         }
 
-        $ancestors = array();
-        $descendants = array();
-        $domainRange = null;
-        $relations = array();
-
-        /*if (!is_null($this->getUser())) {
-            // L'utilisateur est connecté et le projet actif n'est pas le projet public
-            $user = $this->getUser();
-
-            $ancestors = $em->getRepository('AppBundle:Property')
-                ->findFilteredAncestorsById($property, $user);
-
-            $descendants = $em->getRepository('AppBundle:Property')
-                ->findFilteredDescendantsById($property, $user);
-
-            $domainRange = $em->getRepository('AppBundle:Property')
-                ->findDomainRangeById($property);
-
-            $relations = $em->getRepository('AppBundle:Property')
-                ->findFilteredRelationsById($property, $user);
-
-            $activeNamespaces = $em->getRepository('AppBundle:OntoNamespace')
-                ->findAllActiveNamespacesForUser($user);
-
-            $propertyVersionNamespace = null;
-            foreach ($property->getNamespaces() as $namespace){
-                if(is_null($propertyVersionNamespace)){
-                    $propertyVersionNamespace = $namespace;
-                }
-
-                if($namespace->getCreationTime() > $propertyVersionNamespace->getCreationTime()){
-                    $propertyVersionNamespace = $namespace;
-                }
-
-                if($namespace->getIsOngoing()){
-                    $propertyVersionNamespace = $namespace;
-                    break;
-                }
-            }
-            $activeNamespaces[] = $propertyVersionNamespace;
-        }
-        else{
-            $ancestors = $em->getRepository('AppBundle:Property')
-                ->findAncestorsById($property);
-
-            $descendants = $em->getRepository('AppBundle:Property')
-                ->findDescendantsById($property);
-
-            $domainRange = $em->getRepository('AppBundle:Property')
-                ->findDomainRangeById($property);
-
-            $relations = $em->getRepository('AppBundle:Property')
-                ->findRelationsById($property);
-
-            $activeNamespaces = $em->getRepository('AppBundle:OntoNamespace')
-                ->findActiveNamespacesInPublicProject();
-
-            $propertyVersionNamespace = null;
-            foreach ($property->getNamespaces() as $namespace){
-                if(is_null($propertyVersionNamespace)){
-                    $propertyVersionNamespace = $namespace;
-                }
-
-                if($namespace->getCreationTime() > $propertyVersionNamespace->getCreationTime()){
-                    $propertyVersionNamespace = $namespace;
-                }
-
-                if($namespace->getIsOngoing()){
-                    $propertyVersionNamespace = $namespace;
-                    break;
-                }
-            }
-            $activeNamespaces[] = $propertyVersionNamespace;
-        }*/
+        $ancestors = $em->getRepository('AppBundle:Property')->findAncestorsByPropertyVersionAndNamespacesId($propertyVersion, $namespacesId);
+        $descendants = $em->getRepository('AppBundle:Property')->findDescendantsByPropertyVersionAndNamespacesId($propertyVersion, $namespacesId);
+        $domainRange = $em->getRepository('AppBundle:Property')->findDomainAndRangeByPropertyVersionAndNamespacesId($propertyVersion, $namespacesId);
+        $relations = $em->getRepository('AppBundle:Property')->findRelationsByPropertyVersionAndNamespacesId($propertyVersion, $namespacesId);
 
         $this->get('logger')->info('Showing property: ' . $property->getIdentifierInNamespace());
 
