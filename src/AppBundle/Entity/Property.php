@@ -760,4 +760,18 @@ class Property
         return array_merge($this->getSourceEntityAssociations()->toArray(), $this->getTargetEntityAssociations()->toArray());
     }
 
+    /**
+     * @return PropertyVersion the propertyVersion to be displayed
+     */
+    public function getPropertyVersionForDisplay()
+    {
+        $pvCollection = $this->getPropertyVersions();
+        if($pvCollection->count()>1){
+            $pvCollection = $this->getPropertyVersions()->filter(function(PropertyVersion $propertyVersion) {
+                return $propertyVersion->getNamespaceForVersion()->getIsOngoing();
+            });
+        }
+        return $pvCollection->first();
+    }
+
 }

@@ -35,15 +35,26 @@ class ClassRepository extends EntityRepository
 
     /**
      * @param array $namespacesId
-     * @return OntoClass[]
+     * @return \Doctrine\ORM\QueryBuilder
      * Remplace les fonctions obsolètes findFilteredClassByActiveProjectOrderedById et findFilteredByActiveProjectOrderedById
      */
-    public function findClassesByNamespacesId(array $namespacesId){
+    public function findClassesByNamespacesIdQueryBuilder(array $namespacesId){
         $qb = $this->createQueryBuilder('class')
             ->join('class.classVersions','cv')
             ->join('cv.namespaceForVersion','nfv')
             ->where('nfv.id IN (:namespacesId)')
             ->setParameter('namespacesId', $namespacesId);
+
+        return $qb;
+    }
+
+    /**
+     * @param array $namespacesId
+     * @return OntoClass[]
+     * Remplace les fonctions obsolètes findFilteredClassByActiveProjectOrderedById et findFilteredByActiveProjectOrderedById
+     */
+    public function findClassesByNamespacesId(array $namespacesId){
+        $qb = $this->findClassesByNamespacesIdQueryBuilder($namespacesId);
 
         $classes = $qb->getQuery()->execute();
 
