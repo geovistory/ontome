@@ -41,6 +41,7 @@ class OntoClass
 
     /**
      * @ORM\OneToMany(targetEntity="AppBundle\Entity\OntoClassVersion", mappedBy="class")
+     * @ORM\OrderBy({"creationTime" = "DESC"})
      */
     private $classVersions;
 
@@ -592,6 +593,20 @@ class OntoClass
         }
         else $s = $this->getIdentifierInNamespace();
         return (string) $s;
+    }
+
+    /**
+     * @return OntoClassVersion the classVersion to be displayed
+     */
+    public function getClassVersionForDisplay()
+    {
+        $cvCollection = $this->getClassVersions();
+        if($cvCollection->count()>1){
+            $cvCollection = $this->getClassVersions()->filter(function(OntoClassVersion $classVersion) {
+                return $classVersion->getNamespaceForVersion()->getIsOngoing();
+            });
+        }
+        return $cvCollection->first();
     }
 
 }
