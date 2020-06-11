@@ -64,10 +64,19 @@ class ClassController extends Controller
         $systemTypeScopeNote = $em->getRepository('AppBundle:SystemType')->find(1); //systemType 1 = scope note
         $systemTypeExample = $em->getRepository('AppBundle:SystemType')->find(7); //systemType 1 = scope note
 
+        $classVersion = new OntoClassVersion();
+        $classVersion->setClass($class);
+        $classVersion->setNamespaceForVersion($namespace);
+        $classVersion->setCreator($this->getUser());
+        $classVersion->setModifier($this->getUser());
+        $classVersion->setCreationTime(new \DateTime('now'));
+        $classVersion->setModificationTime(new \DateTime('now'));
+
         $scopeNote = new TextProperty();
         $scopeNote->setClass($class);
         $scopeNote->setSystemType($systemTypeScopeNote);
-        $scopeNote->addNamespace($namespace);
+        //$scopeNote->addNamespace($namespace); TODO: delete this line after successful test of the SolutionD branch
+        $scopeNote->setNamespaceForVersion($namespace);
         $scopeNote->setCreator($this->getUser());
         $scopeNote->setModifier($this->getUser());
         $scopeNote->setCreationTime(new \DateTime('now'));
@@ -77,7 +86,8 @@ class ClassController extends Controller
 
         $label = new Label();
         $label->setClass($class);
-        $label->addNamespace($namespace);
+        //$label->addNamespace($namespace); TODO: delete this line after succesful test of the SolutionD branch
+        $label->setNamespaceForVersion($namespace);
         $label->setIsStandardLabelForLanguage(true);
         $label->setCreator($this->getUser());
         $label->setModifier($this->getUser());
@@ -85,7 +95,7 @@ class ClassController extends Controller
         $label->setModificationTime(new \DateTime('now'));
 
         $class->setIsManualIdentifier(is_null($namespace->getTopLevelNamespace()->getClassPrefix()));
-        $class->addNamespace($namespace);
+        //$class->addNamespace($namespace); TODO: delete this line after successful test of the SolutionD branch
         $class->addLabel($label);
         $class->setCreator($this->getUser());
         $class->setModifier($this->getUser());
@@ -97,7 +107,7 @@ class ClassController extends Controller
         if ($form->isSubmitted() && $form->isValid()) {
             $class = $form->getData();
             $class->setIsManualIdentifier(is_null($namespace->getTopLevelNamespace()->getClassPrefix()));
-            $class->addNamespace($namespace);
+            //$class->addNamespace($namespace); TODO: delete this line after successful test of the SolutionD branch
             $class->setCreator($this->getUser());
             $class->setModifier($this->getUser());
             $class->setCreationTime(new \DateTime('now'));
@@ -107,7 +117,8 @@ class ClassController extends Controller
                 $class->getTextProperties()[1]->setCreationTime(new \DateTime('now'));
                 $class->getTextProperties()[1]->setModificationTime(new \DateTime('now'));
                 $class->getTextProperties()[1]->setSystemType($systemTypeExample);
-                $class->getTextProperties()[1]->addNamespace($namespace);
+                //$class->getTextProperties()[1]->addNamespace($namespace); TODO: delete this line after successful test of the SolutionD branch
+                $class->getTextProperties()[1]->setNamespaceForVersion($namespace);
                 $class->getTextProperties()[1]->setClass($class);
             }
 
