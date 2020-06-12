@@ -261,12 +261,12 @@ class ClassController extends Controller
         $ingoingProperties = $em->getRepository('AppBundle:property')->findIngoingPropertiesByClassVersionAndNamespacesId($classVersion, $namespacesId);
         $ingoingInheritedProperties =  $em->getRepository('AppBundle:property')->findIngoingInheritedPropertiesByClassVersionAndNamespacesId($classVersion, $namespacesId);
 
-        $this->denyAccessUnlessGranted('edit', $class);
+        $this->denyAccessUnlessGranted('edit', $classVersion);
 
         $classTemp = new OntoClass();
-        $classTemp->addNamespace($class->getOngoingNamespace());
+        //$classTemp->addNamespace($class->getOngoingNamespace()); TODO: à supprimer pour le projet Delta
         $classTemp->setIdentifierInNamespace($class->getIdentifierInNamespace());
-        $classTemp->setIsManualIdentifier(is_null($class->getOngoingNamespace()->getTopLevelNamespace()->getClassPrefix()));
+        $classTemp->setIsManualIdentifier(is_null($classVersion->getNamespaceForVersion()->getTopLevelNamespace()->getClassPrefix()));
         $classTemp->setCreator($this->getUser());
         $classTemp->setModifier($this->getUser());
         $classTemp->setCreationTime(new \DateTime('now'));
