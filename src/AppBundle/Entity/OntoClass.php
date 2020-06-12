@@ -35,12 +35,12 @@ class OntoClass
     /**
      * @var boolean
      * A non-persisted field that's used to know if the $identifierInNamespace field is manually set by the user
-     * or automatically set by a trigger in the database     *
+     * or automatically set by a trigger in the database
      */
     private $isManualIdentifier;
 
     /**
-     * @ORM\OneToMany(targetEntity="AppBundle\Entity\OntoClassVersion", mappedBy="class")
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\OntoClassVersion", mappedBy="class", cascade={"persist"})
      * @ORM\OrderBy({"creationTime" = "DESC"})
      */
     private $classVersions;
@@ -476,6 +476,19 @@ class OntoClass
     public function setModificationTime($modificationTime)
     {
         $this->modificationTime = $modificationTime;
+    }
+
+    /**
+     * @param OntoClassVersion $classVersion
+     */
+    public function addClassVersion(OntoClassVersion $classVersion)
+    {
+        if ($this->classVersions->contains($classVersion)) {
+            return;
+        }
+        $this->classVersions[] = $classVersion;
+        // needed to update the owning side of the relationship!
+        $classVersion->setClass($this);
     }
 
     public function addTextProperty(TextProperty $textProperty)

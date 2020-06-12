@@ -97,6 +97,7 @@ class ClassController extends Controller
         $class->setIsManualIdentifier(is_null($namespace->getTopLevelNamespace()->getClassPrefix()));
         //$class->addNamespace($namespace); TODO: delete this line after successful test of the SolutionD branch
         $class->addLabel($label);
+        $class->addClassVersion($classVersion);
         $class->setCreator($this->getUser());
         $class->setModifier($this->getUser());
 
