@@ -5,20 +5,49 @@
 {% block body %}
 
     <div class="container">
-        <h2 class="property-name">
-            {{ propertyVersion }} ns:{% for i in namespacesId %}{{ i }};{% endfor %}</h2>
+        <div class="clearfix">
+            <div class="pull-right" style="margin-top: 20px; margin-bottom: 10px;">
+                <div class="dropdown inline-block">
+                    <button class="btn btn-default dropdown-toggle" type="button" id="dropdownVersions" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                        {{ propertyVersion.namespaceForVersion }}
+                        <span class="label label-{{ propertyVersion.namespaceForVersion.status.classCss }}">
+                            {{ propertyVersion.namespaceForVersion.status.label }}
+                        </span>
+                        <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="dropdownVersions">
+                        {% if propertyVersion.property.propertyVersions|length > 1 %}
+                            {% for otherPropertyVersion in propertyVersion.property.propertyVersions if otherPropertyVersion != propertyVersion %}
+                                <li>
+                                    <a href="#">{{ otherPropertyVersion.namespaceForVersion }}
+                                        <span class="label label-{{ otherPropertyVersion.namespaceForVersion.status.classCss }}">
+                                            {{ otherPropertyVersion.namespaceForVersion.status.label }}
+                                        </span>
+                                    </a>
+                                </li>
+                            {% endfor %}
+                        {% else %}
+                            <li class="disabled">
+                                <a href="#">No other version</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </div>
+                {% if is_granted('edit', propertyVersion.property) %}
+                <p class="inline-block">
+                    <a href="{{ path('property_edit', {
+                        id: propertyVersion.property.id
+                    }) }}" class="btn btn-success btn-edit">
+                        <i class="fa fa-edit"></i>
+                    </a>
+                </p>
+                {% endif %}
+            </div>
+            <h2>{{ propertyVersion }} ns:{% for i in namespacesId %}{{ i }};{% endfor %}</h2>
             {% if propertyVersion.property.propertyOfOrigin is not null %}
                 [inherited, cf. <a href="{{ path('property_show', {'id': propertyVersion.property.propertyOfOrigin.id}) }}" target="_blank"><em>original</em></a>]
             {% endif %}
-            {% if is_granted('edit', propertyVersion.property) %}
-                <a href="{{ path('property_edit', {
-                    id: propertyVersion.property.id
-                }) }}" class="pull-right btn btn-success btn-edit">
-                    <i class="fa fa-edit"></i>
-                </a>
-            {% endif %}
-        </h2>
-
+        </div>
         <ul class="nav nav-tabs">
             <li class="active"><a data-toggle="tab" href="#summary">Summary</a></li>
             <li><a data-toggle="tab" href="#identification">Identification</a></li>

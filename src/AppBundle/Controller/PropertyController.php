@@ -168,21 +168,8 @@ class PropertyController extends Controller
     public function showAction(Property $property)
     {
         // Récupérer la version de la propriété demandée
-        // Dans l'ordre : (la version demandée - TO DO) > la version ongoing > la version la plus récente > la première version dans la boucle
+        $propertyVersion = $property->getPropertyVersionForDisplay();
 
-        $propertyVersion = null;
-        foreach($property->getPropertyVersions() as $iPropertyVersion){
-            if(is_null($propertyVersion)){
-                $propertyVersion = $iPropertyVersion;
-            }
-            if($iPropertyVersion->getNamespaceForVersion()->getIsOngoing()){
-                $propertyVersion = $iPropertyVersion;
-                break;
-            }
-            if($iPropertyVersion->getCreationTime() > $propertyVersion->getCreationTime()){
-                $propertyVersion = $iPropertyVersion;
-            }
-        }
         // On doit avoir une version de la propriété sinon on lance une exception.
         if(is_null($propertyVersion)){
             throw $this->createNotFoundException('The property n°'.$property->getId().' has no version. Please contact an administrator.');
@@ -235,8 +222,6 @@ class PropertyController extends Controller
     public function editAction(Property $property, Request $request)
     {
         // Récupérer la version de la propriété demandée
-        // Dans l'ordre : (la version demandée - TO DO) > la version ongoing > la version la plus récente > la première version dans la boucle
-
         $propertyVersion = $property->getPropertyVersionForDisplay();
 
         // On doit avoir une version de la propriété sinon on lance une exception.

@@ -152,19 +152,7 @@ class ClassController extends Controller
     {
         // Récupérer la version de la classe demandée
         // Dans l'ordre : (la version demandée - TO DO) > la version ongoing > la version la plus récente > la première version dans la boucle
-        $classVersion = null;
-        foreach($class->getClassVersions() as $iClassVersion){
-            if(is_null($classVersion)){
-                $classVersion = $iClassVersion;
-            }
-            if($iClassVersion->getNamespaceForVersion()->getIsOngoing()){
-                $classVersion = $iClassVersion;
-                break;
-            }
-            if($iClassVersion->getCreationTime() > $classVersion->getCreationTime()){
-                $classVersion = $iClassVersion;
-            }
-        }
+        $classVersion = $class->getClassVersionForDisplay();
         // On doit avoir une version de la classe sinon on lance une exception.
         if(is_null($classVersion)){
             throw $this->createNotFoundException('The class n°'.$class->getId().' has no version. Please contact an administrator.');

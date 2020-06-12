@@ -34,6 +34,7 @@ class Property
 
     /**
      * @ORM\OneToMany(targetEntity="AppBundle\Entity\PropertyVersion", mappedBy="property")
+     * @ORM\OrderBy({"creationTime" = "DESC"})
      */
     private $propertyVersions;
 
