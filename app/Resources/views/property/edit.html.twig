@@ -39,15 +39,6 @@
                         {% endif %}
                     </ul>
                 </div>
-                {% if is_granted('edit', propertyVersion.property) %}
-                    <p class="inline-block">
-                        <a href="{{ path('property_edit', {
-                            id: propertyVersion.property.id
-                        }) }}" class="btn btn-success btn-edit">
-                            <i class="fa fa-edit"></i>
-                        </a>
-                    </p>
-                {% endif %}
             </div>
             <h2>{{ propertyVersion }} ns:{% for i in namespacesId %}{{ i }};{% endfor %}</h2>
             {% if propertyVersion.property.propertyOfOrigin is not null %}
@@ -779,7 +770,7 @@
                 </table>
             </div>
             <div id="relations" class="tab-pane fade">
-                {% if is_granted('edit', propertyVersion.property) %}
+                {% if is_granted('edit', propertyVersion) %}
                     <div class="pull-right add-div">
                         <a href="{{ path('new_entity_association_form', {
                             'object': 'property',

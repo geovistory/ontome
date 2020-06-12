@@ -33,7 +33,7 @@
                         {% endif %}
                     </ul>
                 </div>
-                {% if is_granted('edit', propertyVersion.property) %}
+                {% if is_granted('edit', propertyVersion) %}
                 <p class="inline-block">
                     <a href="{{ path('property_edit', {
                         id: propertyVersion.property.id

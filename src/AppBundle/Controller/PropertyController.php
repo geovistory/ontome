@@ -162,7 +162,7 @@ class PropertyController extends Controller
 
     /**
      * @Route("/property/{id}", name="property_show")
-     * @param string $id
+     * @param Property $property
      * @return Response the rendered template
      */
     public function showAction(Property $property)
@@ -216,8 +216,10 @@ class PropertyController extends Controller
 
     /**
      * @Route("/property/{id}/edit", name="property_edit")
-     * @param string $id
+     * @param Property $property
+     * @param Request $request
      * @return Response the rendered template
+     * @throws \Exception
      */
     public function editAction(Property $property, Request $request)
     {
@@ -228,6 +230,8 @@ class PropertyController extends Controller
         if(is_null($propertyVersion)){
             throw $this->createNotFoundException('The property n°'.$property->getId().' has no version. Please contact an administrator.');
         }
+
+        $this->denyAccessUnlessGranted('edit', $propertyVersion);
 
         $em = $this->getDoctrine()->getManager();
 
@@ -256,8 +260,6 @@ class PropertyController extends Controller
         $domainRange = $em->getRepository('AppBundle:Property')->findDomainAndRangeByPropertyVersionAndNamespacesId($propertyVersion, $namespacesId);
         $relations = $em->getRepository('AppBundle:Property')->findRelationsByPropertyVersionAndNamespacesId($propertyVersion, $namespacesId);
 
-        $this->denyAccessUnlessGranted('edit', $property);
-
         $form = $this->createForm(PropertyEditForm::class, $property);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
@@ -273,7 +275,7 @@ class PropertyController extends Controller
         }
 
         $propertyTemp = new Property();
-        $propertyTemp->addNamespace($property->getOngoingNamespace());
+        //$propertyTemp->addNamespace($property->getOngoingNamespace());
         $propertyTemp->setIdentifierInNamespace($property->getIdentifierInNamespace());
         $propertyTemp->setIsManualIdentifier(is_null($property->getOngoingNamespace()->getTopLevelNamespace()->getPropertyPrefix()));
         $propertyTemp->setCreator($this->getUser());
