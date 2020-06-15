@@ -131,19 +131,23 @@
                             </div>
                             <div class="col-lg-10">
                                 <ul class="list-unstyled">
-                                    {% set associationCount = 0 %}
                                     {% for association in propertyVersion.property.parentPropertyAssociations
                                         if association.namespaceForVersion.id in namespacesId %}
                                         <li>
+                                            {% if association.childProperty.domain is not null %}
                                             <a href="{{ path('class_show', {'id': association.childProperty.domain.id}) }}">
                                                 {{ association.childProperty.domain.identifierInNamespace }} {{ association.childProperty.domain.standardLabel }}
-                                            </a> →
+                                            </a>
+                                            {% endif %}
+                                            →
                                             <a href="{{ path('property_show', {'id': association.childProperty.id}) }}">
                                                 {{ association.childProperty.identifierInNamespace }} {{ association.childProperty.standardLabel }}
                                             </a> →
+                                            {% if association.childProperty.range is not null %}
                                             <a href="{{ path('class_show', {'id': association.childProperty.range.id}) }}">
                                                 {{ association.childProperty.range.identifierInNamespace }} {{ association.childProperty.range.standardLabel }}
                                             </a>
+                                            {% endif %}
                                         </li>
                                     {% endfor %}
                                 </ul>
@@ -463,7 +467,7 @@
                     </thead>
                     <tbody>
                     {% for namespace in propertyVersion.property.namespaces %}
-                        <tr>
+                        <tr {% if namespace.id == propertyVersion.namespaceForVersion.id %}class="success"{% endif %}>
                             <td>
                                 <a href="{{ path('namespace_show', {
                                     'id': namespace.id

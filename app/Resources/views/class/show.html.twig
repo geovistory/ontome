@@ -470,7 +470,7 @@
                     </thead>
                     <tbody>
                     {% for namespace in classVersion.class.namespaces %}
-                        <tr>
+                        <tr {% if namespace.id == classVersion.namespaceForVersion.id %}class="success"{% endif %}>
                             <td>
                                 <a href="{{ path('namespace_show', {
                                     'id': namespace.id
