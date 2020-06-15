@@ -650,13 +650,7 @@
                                     {% endfor %}
                                 {% endif %}
                             </td>
-                            <td>
-                                {% if relation.namespaces is not null %}
-                                    {% if relation.namespaces|first.topLevelNamespace is not null %}
-                                        {{ relation.namespaces|first.topLevelNamespace }}
-                                    {% endif %}
-                                {% endif %}
-                            </td>
+                            <td>{{ relation.namespaceForVersion.topLevelNamespace }}</td>
                             <td>
                                 {% if classVersion.class.id == relation.sourceClass.id %}
                                 <a href="{{ path('entity_association_show', {

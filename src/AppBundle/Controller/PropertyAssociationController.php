@@ -27,7 +27,7 @@ class PropertyAssociationController extends Controller
     {
         $propertyAssociation = new PropertyAssociation();
 
-        $this->denyAccessUnlessGranted('edit', $childProperty);
+        $this->denyAccessUnlessGranted('edit', $childProperty->getPropertyVersionForDisplay());
 
 
         $em = $this->getDoctrine()->getManager();
@@ -37,7 +37,7 @@ class PropertyAssociationController extends Controller
         $justification = new TextProperty();
         $justification->setPropertyAssociation($propertyAssociation);
         $justification->setSystemType($systemTypeJustification);
-        $justification->addNamespace($this->getUser()->getCurrentOngoingNamespace());
+        $justification->setNamespaceForVersion($this->getUser()->getCurrentOngoingNamespace());
         $justification->setCreator($this->getUser());
         $justification->setModifier($this->getUser());
         $justification->setCreationTime(new \DateTime('now'));
@@ -52,7 +52,7 @@ class PropertyAssociationController extends Controller
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $propertyAssociation = $form->getData();
-            $propertyAssociation->addNamespace($this->getUser()->getCurrentOngoingNamespace());
+            $propertyAssociation->setNamespaceForVersion($this->getUser()->getCurrentOngoingNamespace());
             $propertyAssociation->setCreator($this->getUser());
             $propertyAssociation->setModifier($this->getUser());
             $propertyAssociation->setCreationTime(new \DateTime('now'));
@@ -62,7 +62,7 @@ class PropertyAssociationController extends Controller
                 $propertyAssociation->getTextProperties()[1]->setCreationTime(new \DateTime('now'));
                 $propertyAssociation->getTextProperties()[1]->setModificationTime(new \DateTime('now'));
                 $propertyAssociation->getTextProperties()[1]->setSystemType($systemTypeExample);
-                $propertyAssociation->getTextProperties()[1]->addNamespace($this->getUser()->getCurrentOngoingNamespace());
+                $propertyAssociation->getTextProperties()[1]->setNamespaceForVersion($this->getUser()->getCurrentOngoingNamespace());
                 $propertyAssociation->getTextProperties()[1]->setPropertyAssociation($propertyAssociation);
             }
 
@@ -80,8 +80,17 @@ class PropertyAssociationController extends Controller
 
         $em = $this->getDoctrine()->getManager();
 
+        // FILTRAGE : Récupérer les clés de namespaces à utiliser
+        if(is_null($this->getUser()) || $this->getUser()->getCurrentActiveProject()->getId() == 21){ // Utilisateur non connecté OU connecté et utilisant le projet public
+            $namespacesId = $em->getRepository('AppBundle:OntoNamespace')->findPublicProjectNamespacesId();
+        }
+        else{ // Utilisateur connecté et utilisant un autre projet
+            $namespacesId = $em->getRepository('AppBundle:OntoNamespace')->findNamespacesIdByUser($this->getUser());
+        }
+
         $ancestors = $em->getRepository('AppBundle:Property')
-            ->findAncestorsById($childProperty);
+            ->findAncestorsByPropertyVersionAndNamespacesId($childProperty->getPropertyVersionForDisplay(), $namespacesId);
+
         return $this->render('propertyAssociation/newParent.html.twig', [
             'childProperty' => $childProperty,
             'parentPropertyAssociationForm' => $form->createView(),
@@ -113,7 +122,7 @@ class PropertyAssociationController extends Controller
     public function editAction(Request $request, PropertyAssociation $propertyAssociation)
     {
 
-        $this->denyAccessUnlessGranted('edit', $propertyAssociation->getChildProperty());
+        $this->denyAccessUnlessGranted('edit', $propertyAssociation->getChildProperty()->getPropertyVersionForDisplay());
 
         $form = $this->createForm(PropertyAssociationEditForm::class, $propertyAssociation);
 
@@ -121,7 +130,6 @@ class PropertyAssociationController extends Controller
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $propertyAssociation = $form->getData();
-            //$propertyAssociation->addNamespace($propertyAssociation->getChildProperty()->getOngoingNamespace());
             $propertyAssociation->setModifier($this->getUser());
             $propertyAssociation->setModificationTime(new \DateTime('now'));
 

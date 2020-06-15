@@ -10,6 +10,8 @@ namespace AppBundle\Controller;
 
 
 use AppBundle\Entity\EntityAssociation;
+use AppBundle\Entity\OntoClass;
+use AppBundle\Entity\Property;
 use AppBundle\Entity\TextProperty;
 use AppBundle\Form\EntityAssociationForm;
 use AppBundle\Form\EntityAssociationEditForm;
@@ -46,7 +48,12 @@ class EntityAssociationController extends Controller
             $entityAssociation->setSourceProperty($source);
         }
 
-        $this->denyAccessUnlessGranted('edit', $source);
+        if($source instanceof OntoClass){
+            $this->denyAccessUnlessGranted('edit', $source->getClassVersionForDisplay());
+        }
+        elseif($source instanceof Property){
+            $this->denyAccessUnlessGranted('edit', $source->getPropertyVersionForDisplay());
+        }
 
         $systemTypeJustification = $em->getRepository('AppBundle:SystemType')->find(15); //systemType 15 = justification
         $systemTypeExample = $em->getRepository('AppBundle:SystemType')->find(7); //systemType 1 = example
@@ -54,7 +61,7 @@ class EntityAssociationController extends Controller
         $justification = new TextProperty();
         $justification->setEntityAssociation($entityAssociation);
         $justification->setSystemType($systemTypeJustification);
-        $justification->addNamespace($this->getUser()->getCurrentOngoingNamespace());
+        $justification->setNamespaceForVersion($this->getUser()->getCurrentOngoingNamespace());
         $justification->setCreator($this->getUser());
         $justification->setModifier($this->getUser());
         $justification->setCreationTime(new \DateTime('now'));
@@ -67,7 +74,7 @@ class EntityAssociationController extends Controller
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $entityAssociation = $form->getData();
-            $entityAssociation->addNamespace($this->getUser()->getCurrentOngoingNamespace());
+            $entityAssociation->setNamespaceForVersion($this->getUser()->getCurrentOngoingNamespace());
             $entityAssociation->setCreator($this->getUser());
             $entityAssociation->setModifier($this->getUser());
             $entityAssociation->setCreationTime(new \DateTime('now'));
@@ -78,7 +85,7 @@ class EntityAssociationController extends Controller
                 $entityAssociation->getTextProperties()[1]->setCreationTime(new \DateTime('now'));
                 $entityAssociation->getTextProperties()[1]->setModificationTime(new \DateTime('now'));
                 $entityAssociation->getTextProperties()[1]->setSystemType($systemTypeExample);
-                $entityAssociation->getTextProperties()[1]->addNamespace($this->getUser()->getCurrentOngoingNamespace());
+                $entityAssociation->getTextProperties()[1]->setNamespaceForVersion($this->getUser()->getCurrentOngoingNamespace());
                 $entityAssociation->getTextProperties()[1]->setEntityAssociation($entityAssociation);
             }
 
