@@ -45,6 +45,15 @@ class OutgoingPropertyQuickAddForm extends AbstractType
             );
         }
 
+        // FILTRAGE : Récupérer les clés de namespaces à utiliser
+        // Il n'y a pas besoin de rajouter le namespace de la propriété actuelle : il doit être activé pour le formulaire.
+        if(is_null($user) || $user->getCurrentActiveProject()->getId() == 21){ // Utilisateur non connecté OU connecté et utilisant le projet public
+            $namespacesId = $this->em->getRepository('AppBundle:OntoNamespace')->findPublicProjectNamespacesId();
+        }
+        else{ // Utilisateur connecté et utilisant un autre projet
+            $namespacesId = $this->em->getRepository('AppBundle:OntoNamespace')->findNamespacesIdByUser($user);
+        }
+
         $builder
             ->add('identifierInNamespace', TextType::class, array(
             ))
@@ -60,8 +69,8 @@ class OutgoingPropertyQuickAddForm extends AbstractType
                 array(
                     'class' => OntoClass::class,
                     'label' => "Range",
-                    'query_builder' => function(ClassRepository $repo) use ($user){
-                        return $repo->findFilteredClassByActiveProjectOrderedById($user);
+                    'query_builder' => function(ClassRepository $repo) use ($namespacesId){
+                        return $repo->findClassesByNamespacesIdQueryBuilder($namespacesId);
                     }
                 ))
             ->add('domainMinQuantifier',ChoiceType::class, array(

@@ -33,7 +33,7 @@ class Property
     private $identifierInNamespace;
 
     /**
-     * @ORM\OneToMany(targetEntity="AppBundle\Entity\PropertyVersion", mappedBy="property")
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\PropertyVersion", mappedBy="property", cascade={"persist"})
      * @ORM\OrderBy({"creationTime" = "DESC"})
      */
     private $propertyVersions;
@@ -638,6 +638,19 @@ class Property
     public function setLabels($labels)
     {
         $this->labels = $labels;
+    }
+
+    /**
+     * @param PropertyVersion $propertyVersion
+     */
+    public function addPropertyVersion(PropertyVersion $propertyVersion)
+    {
+        if ($this->propertyVersions->contains($propertyVersion)) {
+            return;
+        }
+        $this->propertyVersions[] = $propertyVersion;
+        // needed to update the owning side of the relationship!
+        $propertyVersion->setProperty($this);
     }
 
     public function addTextProperty(TextProperty $textProperty)

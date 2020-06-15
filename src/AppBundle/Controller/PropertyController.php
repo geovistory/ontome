@@ -60,7 +60,10 @@ class PropertyController extends Controller
     {
         $property = new Property();
 
-        $this->denyAccessUnlessGranted('edit', $class);
+        //get the right version of the class
+        $classVersion = $class->getClassVersionForDisplay();
+
+        $this->denyAccessUnlessGranted('edit', $classVersion);
 
         if($type !== 'ingoing' && $type !== 'outgoing') throw $this->createNotFoundException('The requested property type "'.$type.'" does not exist!');
 
@@ -68,10 +71,19 @@ class PropertyController extends Controller
         $systemTypeScopeNote = $em->getRepository('AppBundle:SystemType')->find(1); //systemType 1 = scope note
         $systemTypeExample = $em->getRepository('AppBundle:SystemType')->find(7); //systemType 1 = scope note
 
+        $propertyVersion = new PropertyVersion();
+        $propertyVersion->setProperty($property);
+        $propertyVersion->setNamespaceForVersion($classVersion->getNamespaceForVersion());
+        $propertyVersion->setCreator($this->getUser());
+        $propertyVersion->setModifier($this->getUser());
+        $propertyVersion->setCreationTime(new \DateTime('now'));
+        $propertyVersion->setModificationTime(new \DateTime('now'));
+
         $scopeNote = new TextProperty();
         $scopeNote->setProperty($property);
         $scopeNote->setSystemType($systemTypeScopeNote);
-        $scopeNote->addNamespace($this->getUser()->getCurrentOngoingNamespace());
+        //$scopeNote->addNamespace($this->getUser()->getCurrentOngoingNamespace());TODO: delete this line after successful test of the SolutionD branch
+        $scopeNote->setNamespaceForVersion($classVersion->getNamespaceForVersion());
         $scopeNote->setCreator($this->getUser());
         $scopeNote->setModifier($this->getUser());
         $scopeNote->setCreationTime(new \DateTime('now'));
@@ -81,7 +93,8 @@ class PropertyController extends Controller
 
         $label = new Label();
         $label->setProperty($property);
-        $label->addNamespace($this->getUser()->getCurrentOngoingNamespace());
+        //$label->addNamespace($this->getUser()->getCurrentOngoingNamespace());TODO: delete this line after successful test of the SolutionD branch
+        $label->setNamespaceForVersion($classVersion->getNamespaceForVersion());
         $label->setIsStandardLabelForLanguage(true);
         $label->setCreator($this->getUser());
         $label->setModifier($this->getUser());
@@ -90,14 +103,16 @@ class PropertyController extends Controller
 
         $property->addLabel($label);
         if($type == 'outgoing') {
-            $property->setDomain($class);
+            $propertyVersion->setDomain($class);
         }
         elseif ($type == 'ingoing') {
-            $property->setRange($class);
+            $propertyVersion->setRange($class);
         }
 
-        $property->setIsManualIdentifier(is_null($class->getOngoingNamespace()->getTopLevelNamespace()->getPropertyPrefix()));
-        $property->addNamespace($this->getUser()->getCurrentOngoingNamespace());
+        $property->addPropertyVersion($propertyVersion);
+
+        $property->setIsManualIdentifier(is_null($classVersion->getNamespaceForVersion()->getTopLevelNamespace()->getPropertyPrefix()));
+        //$property->addNamespace($this->getUser()->getCurrentOngoingNamespace());TODO: delete this line after successful test of the SolutionD branch
         $property->setCreator($this->getUser());
         $property->setModifier($this->getUser());
 
@@ -115,11 +130,18 @@ class PropertyController extends Controller
         if ($form->isSubmitted() && $form->isValid()) {
             $property = $form->getData();
             if($type == 'outgoing') {
-                $property->setDomain($class);
+                $propertyVersion->setDomain($class);
+                $propertyVersion->setRange($property->getRange());
             }
             elseif ($type == 'ingoing') {
-                $property->setRange($class);
+                $propertyVersion->setRange($class);
+                $propertyVersion->setDomain($property->getDomain());
             }
+
+            $propertyVersion->setDomainMinQuantifier($property->getDomainMinQuantifier());
+            $propertyVersion->setDomainMaxQuantifier($property->getDomainMaxQuantifier());
+            $propertyVersion->setRangeMinQuantifier($property->getRangeMinQuantifier());
+            $propertyVersion->setRangeMaxQuantifier($property->getRangeMaxQuantifier());
 
             $property->setCreator($this->getUser());
             $property->setModifier($this->getUser());
@@ -130,7 +152,8 @@ class PropertyController extends Controller
                 $property->getTextProperties()[1]->setCreationTime(new \DateTime('now'));
                 $property->getTextProperties()[1]->setModificationTime(new \DateTime('now'));
                 $property->getTextProperties()[1]->setSystemType($systemTypeExample);
-                $property->getTextProperties()[1]->addNamespace($this->getUser()->getCurrentOngoingNamespace());
+                //$property->getTextProperties()[1]->addNamespace($this->getUser()->getCurrentOngoingNamespace());TODO: delete this line after successful test of the SolutionD branch
+                $property->getTextProperties()[1]->setNamespaceForVersion($classVersion->getNamespaceForVersion());
                 $property->getTextProperties()[1]->setProperty($property);
             }
 
