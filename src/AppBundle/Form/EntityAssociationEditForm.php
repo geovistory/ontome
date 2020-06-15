@@ -39,6 +39,15 @@ class EntityAssociationEditForm extends AbstractType
             );
         }
 
+        // FILTRAGE : Récupérer les clés de namespaces à utiliser
+        // Il n'y a pas besoin de rajouter le namespace de la propriété actuelle : il doit être activé pour le formulaire.
+        if(is_null($user) || $user->getCurrentActiveProject()->getId() == 21){ // Utilisateur non connecté OU connecté et utilisant le projet public
+            $namespacesId = $this->em->getRepository('AppBundle:OntoNamespace')->findPublicProjectNamespacesId();
+        }
+        else{ // Utilisateur connecté et utilisant un autre projet
+            $namespacesId = $this->em->getRepository('AppBundle:OntoNamespace')->findNamespacesIdByUser($user);
+        }
+
         if($options['object'] == 'class')
         {
             $builder
@@ -64,16 +73,16 @@ class EntityAssociationEditForm extends AbstractType
                     array(
                         'class' => Property::class,
                         'label' => "Target property",
-                        'query_builder' => function(PropertyRepository $repo) use ($user){
-                            return $repo->findFilteredPropertiesByActiveProjectOrderedById($user);
+                        'query_builder' => function(PropertyRepository $repo) use ($namespacesId){
+                            return $repo->findPropertiesByNamespacesIdQueryBuilder($namespacesId);
                         }
                     ))
                 ->add('sourceProperty', EntityType::class,
                     array(
                         'class' => Property::class,
                         'label' => "Source property",
-                        'query_builder' => function(PropertyRepository $repo) use ($user){
-                            return $repo->findFilteredPropertiesByActiveProjectOrderedById($user);
+                        'query_builder' => function(PropertyRepository $repo) use ($namespacesId){
+                            return $repo->findPropertiesByNamespacesIdQueryBuilder($namespacesId);
                         }
                     ));
         }

@@ -40,12 +40,22 @@ class PropertyRepository extends EntityRepository
      * @param array $namespacesId
      * @return Property[]
      */
-    public function findPropertiesByNamespacesId(array $namespacesId){
+    public function findPropertiesByNamespacesIdQueryBuilder(array $namespacesId){
         $qb = $this->createQueryBuilder('property')
             ->join('property.propertyVersions','pv')
             ->join('pv.namespaceForVersion','nfv')
             ->where('nfv.id IN (:namespacesId)')
             ->setParameter('namespacesId', $namespacesId);
+
+        return $qb;
+    }
+
+    /**
+     * @param array $namespacesId
+     * @return Property[]
+     */
+    public function findPropertiesByNamespacesId(array $namespacesId){
+        $qb = $this->findPropertiesByNamespacesIdQueryBuilder($namespacesId);
 
         $properties = $qb->getQuery()->execute();
 

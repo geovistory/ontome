@@ -13,6 +13,7 @@ use AppBundle\Entity\Label;
 use AppBundle\Entity\OntoClass;
 use AppBundle\Entity\Project;
 use AppBundle\Entity\Property;
+use AppBundle\Entity\PropertyVersion;
 use AppBundle\Entity\TextProperty;
 use AppBundle\Form\IngoingPropertyQuickAddForm;
 use AppBundle\Form\OutgoingPropertyQuickAddForm;
@@ -275,15 +276,24 @@ class PropertyController extends Controller
         }
 
         $propertyTemp = new Property();
+        $propertyVersionTemp = new PropertyVersion();
+        $propertyVersionTemp->setProperty($propertyTemp);
+
         //$propertyTemp->addNamespace($property->getOngoingNamespace());
         $propertyTemp->setIdentifierInNamespace($property->getIdentifierInNamespace());
-        $propertyTemp->setIsManualIdentifier(is_null($property->getOngoingNamespace()->getTopLevelNamespace()->getPropertyPrefix()));
+        $propertyTemp->setIsManualIdentifier(is_null($propertyVersion->getNamespaceForVersion()->getTopLevelNamespace()->getPropertyPrefix()));
         $propertyTemp->setCreator($this->getUser());
         $propertyTemp->setModifier($this->getUser());
         $propertyTemp->setCreationTime(new \DateTime('now'));
         $propertyTemp->setModificationTime(new \DateTime('now'));
-        $propertyTemp->setDomain($property->getDomain());
-        $propertyTemp->setRange($property->getRange());
+
+        $propertyVersionTemp->setCreator($this->getUser());
+        $propertyVersionTemp->setModifier($this->getUser());
+        $propertyVersionTemp->setCreationTime(new \DateTime('now'));
+        $propertyVersionTemp->setModificationTime(new \DateTime('now'));
+
+        $propertyVersionTemp->setDomain($propertyVersion->getDomain());
+        $propertyVersionTemp->setRange($propertyVersion->getRange());
 
         $formIdentifier = $this->createForm(PropertyEditIdentifierForm::class, $propertyTemp);
         $formIdentifier->handleRequest($request);
@@ -291,6 +301,7 @@ class PropertyController extends Controller
             $property->setIdentifierInNamespace($propertyTemp->getIdentifierInNamespace());
             $em = $this->getDoctrine()->getManager();
             $em->persist($property);
+            $em->persist($propertyVersion);
             $em->flush();
 
             $this->addFlash('success', 'Property updated!');
