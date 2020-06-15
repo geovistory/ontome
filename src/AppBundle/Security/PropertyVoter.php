@@ -62,11 +62,11 @@ class PropertyVoter extends Voter
         foreach($user->getUserProjectAssociations()->getIterator() as $i => $userProjectAssociation) {
             // Il faut absolument un espace de nom pour pouvoir associer les entités à un espace de nom.
             // Or les projets n'ont pas forcément un espace de nom ongoing. Il faut donc à ce moment là empêcher le mode Edit.
-            if(is_null($property->getOngoingNamespace()) || is_null($user->getCurrentOngoingNamespace())) {
+            if(!$property->getPropertyVersionForDisplay()->getNamespaceForVersion()->getIsOngoing() || count($property->getPropertyVersions()) > 1) {
                 return false;
             }
 
-            if($userProjectAssociation->getProject() === $property->getOngoingNamespace()->getProjectForTopLevelNamespace()
+            if($userProjectAssociation->getProject() === $property->getPropertyVersionForDisplay()->getNamespaceForVersion()->getProjectForTopLevelNamespace()
                 && $userProjectAssociation->getPermission() <= 3){
                 return true;
             }

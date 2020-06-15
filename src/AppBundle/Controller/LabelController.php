@@ -40,12 +40,12 @@ class LabelController  extends Controller
         $canInverseLabel = false;
 
         if(!is_null($label->getClass())){
-            $object = $label->getClass();
+            $object = $label->getClass()->getClassVersionForDisplay();
             $redirectToRoute = 'class_edit';
             $redirectToRouteFragment = 'identification';
         }
         else if(!is_null($label->getProperty())){
-            $object = $label->getProperty();
+            $object = $label->getProperty()->getPropertyVersionForDisplay();
             $redirectToRoute = 'property_edit';
             $redirectToRouteFragment = 'identification';
             $canInverseLabel = true;
@@ -163,7 +163,7 @@ class LabelController  extends Controller
 
         //ongoingNamespace associated to the label for any kind of object, except Project or Profile
         if($object !== 'project' && $object !== 'profile'  && $object !== 'namespace') {
-            $label->addNamespace($this->getUser()->getCurrentOngoingNamespace());
+            $label->setNamespaceForVersion($this->getUser()->getCurrentOngoingNamespace());
         }
 
         $label->setCreator($this->getUser());
@@ -181,7 +181,7 @@ class LabelController  extends Controller
 
             //ongoingNamespace associated to the label for any kind of object, except Project or Profile
             if($object !== 'project' && $object !== 'profile' && $object !== 'namespace') {
-                $label->addNamespace($this->getUser()->getCurrentOngoingNamespace());
+                $label->setNamespaceForVersion($this->getUser()->getCurrentOngoingNamespace());
             }
 
             $label->setCreator($this->getUser());
