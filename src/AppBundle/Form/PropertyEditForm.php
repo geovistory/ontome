@@ -121,7 +121,7 @@ class PropertyEditForm extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
-            'data_class' => 'AppBundle\Entity\Property'
+            'data_class' => 'AppBundle\Entity\PropertyVersion'
         ]);
     }
 }

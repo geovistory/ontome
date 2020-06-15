@@ -67,7 +67,6 @@ class Property
     private $domain;
 
     /**
-     * @Assert\NotBlank()
      * @ORM\ManyToOne(targetEntity="OntoClass")
      * @ORM\JoinColumn(name="has_range", referencedColumnName="pk_class", nullable=false)
      */

@@ -419,7 +419,7 @@
                         {% endfor %}
                     {% endif %}
                 {% endfor %}
-                {% if propertyVersion.property.ongoingNamespace.topLevelNamespace.propertyPrefix is null and not isIdentifierExistAndPublished %}
+                {% if propertyVersion.namespaceForVersion.topLevelNamespace.propertyPrefix is null and not isIdentifierExistAndPublished %}
                     <div id="identifier-form-block">
                         {{ form_start(propertyIdentifierForm) }}
                         {{ form_errors(propertyIdentifierForm) }}

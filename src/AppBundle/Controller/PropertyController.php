@@ -284,11 +284,11 @@ class PropertyController extends Controller
         $domainRange = $em->getRepository('AppBundle:Property')->findDomainAndRangeByPropertyVersionAndNamespacesId($propertyVersion, $namespacesId);
         $relations = $em->getRepository('AppBundle:Property')->findRelationsByPropertyVersionAndNamespacesId($propertyVersion, $namespacesId);
 
-        $form = $this->createForm(PropertyEditForm::class, $property);
+        $form = $this->createForm(PropertyEditForm::class, $propertyVersion);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $em = $this->getDoctrine()->getManager();
-            $em->persist($property);
+            $em->persist($propertyVersion);
             $em->flush();
 
             $this->addFlash('success', 'Property updated!');
