@@ -43,7 +43,7 @@
                 </p>
                 {% endif %}
             </div>
-            <h2>{{ propertyVersion }} ns:{% for i in namespacesId %}{{ i }};{% endfor %}</h2>
+            <h2>{{ propertyVersion }}</h2>
             {% if propertyVersion.property.propertyOfOrigin is not null %}
                 [inherited, cf. <a href="{{ path('property_show', {'id': propertyVersion.property.propertyOfOrigin.id}) }}" target="_blank"><em>original</em></a>]
             {% endif %}

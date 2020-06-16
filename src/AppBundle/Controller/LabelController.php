@@ -10,6 +10,8 @@ namespace AppBundle\Controller;
 
 
 use AppBundle\Entity\Label;
+use AppBundle\Entity\OntoClass;
+use AppBundle\Entity\Property;
 use AppBundle\Form\LabelForm;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -40,12 +42,12 @@ class LabelController  extends Controller
         $canInverseLabel = false;
 
         if(!is_null($label->getClass())){
-            $object = $label->getClass()->getClassVersionForDisplay();
+            $object = $label->getClass();
             $redirectToRoute = 'class_edit';
             $redirectToRouteFragment = 'identification';
         }
         else if(!is_null($label->getProperty())){
-            $object = $label->getProperty()->getPropertyVersionForDisplay();
+            $object = $label->getProperty();
             $redirectToRoute = 'property_edit';
             $redirectToRouteFragment = 'identification';
             $canInverseLabel = true;
@@ -67,7 +69,15 @@ class LabelController  extends Controller
         }
         else throw $this->createNotFoundException('The related object for the label n° '.$label->getId().' does not exist. Please contact an administrator.');
 
-        $this->denyAccessUnlessGranted('edit', $object);
+        if($object instanceof OntoClass){
+            $this->denyAccessUnlessGranted('edit', $object->getClassVersionForDisplay());
+        }
+        elseif($object instanceof Property){
+            $this->denyAccessUnlessGranted('edit', $object->getPropertyVersionForDisplay());
+        }
+        else{
+            $this->denyAccessUnlessGranted('edit', $object);
+        }
 
         $label->setModifier($this->getUser());
 
