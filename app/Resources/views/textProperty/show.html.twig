@@ -58,15 +58,11 @@
                     {% elseif textProperty.propertyAssociation is not null %}
                         {% set route = 'property_association_show' %}
                     {% elseif textProperty.entityAssociation is not null %}
-                        {% set route = 'property_association_show' %}
-                        {% if textProperty.object is not null %}
-                            {% if textProperty.object.identifierInNamespace is not null %}
-                                {{ textProperty.object.standardLabel }} – {{ textProperty.object.identifierInNamespace }}: {{ textProperty.systemType.standardLabel }}
-                            {% else %}
-                                {{ textProperty.object.objectIdentification }}: {{ textProperty.systemType.standardLabel }}
-                            {% endif %}
-                        {% else %}
-                            {{ textProperty.systemType.standardLabel }}
+                        {% set route = 'entity_association_show' %}
+                        {% if textProperty.entityAssociation.sourceClass is not null %}
+                            {{ textProperty.entityAssociation.sourceClass }} {{ textProperty.entityAssociation.systemType.standardLabel }} {{ textProperty.entityAssociation.targetClass }} : {{ textProperty.systemType.standardLabel }}
+                        {% elseif textProperty.entityAssociation.sourceProperty is not null %}
+                            {{ textProperty.entityAssociation.sourceClass }} {{ textProperty.entityAssociation.systemType.standardLabel }} {{ textProperty.entityAssociation.targetClass }} : {{ textProperty.systemType.standardLabel }}
                         {% endif %}
                     {% endif %}
 

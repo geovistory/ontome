@@ -53,11 +53,7 @@
                 <h3>Relation</h3>
                 <h4>{{ entityAssociation.systemType.standardLabel }}</h4>
                 <h3>Defined in namespace</h3>
-                <h4>
-                    {% for ns in entityAssociation.namespaces %}
-                        {{ ns.standardLabel }}
-                    {% endfor %}
-                </h4>
+                <h4>{{ entityAssociation.namespaceForVersion.standardLabel }}</h4>
                 {% if is_granted('edit', entityAssociation) %}
                     <div class="pull-right add-div">
                         <a href="{{ path('text_property_new', {'type': 'justification', 'object': 'entity-association', 'objectId': entityAssociation.id })}}"

@@ -251,8 +251,12 @@
                         </div>
                         <div class="col-lg-10">
                             <ul class="list-unstyled">
-                                <li>{{ propertyVersion.property.identifierInNamespace }}(x,y) ⊃ {{ propertyVersion.property.domain.identifierInNamespace }}(x)</li>
-                                <li>{{ propertyVersion.property.identifierInNamespace }}(x,y) ⊃ {{ propertyVersion.property.range.identifierInNamespace }}(y)</li>
+                                {% if propertyVersion.domain is not null %}
+                                <li>{{ propertyVersion.property.identifierInNamespace }}(x,y) ⊃ {{ propertyVersion.domain.identifierInNamespace }}(x)</li>
+                                {% endif %}
+                                {% if propertyVersion.range is not null %}
+                                <li>{{ propertyVersion.property.identifierInNamespace }}(x,y) ⊃ {{ propertyVersion.range.identifierInNamespace }}(y)</li>
+                                {% endif %}
                                 {% for association in propertyVersion.property.childPropertyAssociations
                                     if association.namespaceForVersion.id in namespacesId %}
                                     <li>{{ propertyVersion.property.identifierInNamespace }}(x,y) ⊃ {{ association.parentProperty.identifierInNamespace }}(x,y)</li>
@@ -286,15 +290,7 @@
                                 <span>{{ textProperty.textProperty|striptags|raw }}</span>
                             </td>
                             <td>{{ textProperty.languageIsoCode}}</td>
-                            <td>
-                                <!-- {% if textProperty.namespace is not null %}
-                                    {% for label in textProperty.namespace.topLevelNamespace.labels %}
-                                        {% if label.isStandardLabelForLanguage == true and label.languageIsoCode == 'en' %}
-                                            {{ label.label }}
-                                        {% endif %}
-                                    {% endfor %}
-                                {% endif %} -->
-                            </td>
+                            <td>{{ textProperty.namespaceForVersion}}</td>
                             <td>
                                 <a class="btn" href="{{ path('text_property_show', {
                                     'id': textProperty.id
@@ -337,7 +333,7 @@
                                 <span>{{ textProperty.textProperty|striptags|raw }}</span>
                             </td>
                             <td>{{ textProperty.languageIsoCode}}</td>
-                            <td>WIP</td>
+                            <td>{{ textProperty.namespaceForVersion}}</td>
                             <td>
                                 <a class="btn" href="{{ path('text_property_show', {
                                     'id': textProperty.id
@@ -379,7 +375,7 @@
                                 <span>{{ textProperty.textProperty|striptags|raw }}</span>
                             </td>
                             <td>{{ textProperty.languageIsoCode }}</td>
-                            <td>WIP</td>
+                            <td>{{ textProperty.namespaceForVersion}}</td>
                             <td>
                                 <a class="btn" href="{{ path('text_property_show', {
                                     'id': textProperty.id
@@ -401,8 +397,8 @@
             </div>
 
             <div id="identification" class="tab-pane fade">
-                {% if domainRange is not empty %}
-                    <h3>Identifier : {{ propertyVersion.property.identifierInNamespace }}</h3>
+                <h3>Identifier : {{ propertyVersion.property.identifierInNamespace }}</h3>
+                {% if domainRange is not empty and domainRange.domainId is not null and domainRange.rangeId is not null %}
                     <h3>Domain and range</h3>
                     <p>
                         <a href="{{ path('class_show', {'id': domainRange.domainId}) }}">{{ domainRange.domainIdentifier }}</a> → {{ domainRange.propertyIdentifier }} → <a href="{{ path('class_show', {'id': domainRange.rangeId}) }}">{{ domainRange.rangeIdentifier }}</a>
@@ -551,15 +547,7 @@
                                     {% endfor %}
                                 {% endif %}
                             </td>
-                            <td>
-                                {% if association.namespaces is not null %}
-                                    {% for ns in association.namespaces %}
-                                        {{ ns.standardLabel }}
-                                    {% endfor %}
-                                {% else %}
-                                    WIP
-                                {% endif %}
-                            </td>
+                            <td>{{ association.namespaceForVersion }}</td>
                             <td>
                                 <a href="{{ path('property_association_show', {'id': association.id}) }}"><span class="fa fa-info-circle"></span></a>
                             </td>

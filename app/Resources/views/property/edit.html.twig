@@ -246,8 +246,12 @@
                         </div>
                         <div class="col-lg-10">
                             <ul class="list-unstyled">
-                                <li>{{ propertyVersion.property.identifierInNamespace }}(x,y) ⊃ {{ propertyVersion.property.domain.identifierInNamespace }}(x)</li>
-                                <li>{{ propertyVersion.property.identifierInNamespace }}(x,y) ⊃ {{ propertyVersion.property.range.identifierInNamespace }}(y)</li>
+                                {% if propertyVersion.domain is not null %}
+                                    <li>{{ propertyVersion.property.identifierInNamespace }}(x,y) ⊃ {{ propertyVersion.domain.identifierInNamespace }}(x)</li>
+                                {% endif %}
+                                {% if propertyVersion.range is not null %}
+                                    <li>{{ propertyVersion.property.identifierInNamespace }}(x,y) ⊃ {{ propertyVersion.range.identifierInNamespace }}(y)</li>
+                                {% endif %}
                                 {% for association in propertyVersion.property.childPropertyAssociations
                                     if association.namespaceForVersion.id in namespacesId %}
                                     <li>{{ propertyVersion.property.identifierInNamespace }}(x,y) ⊃ {{ association.parentProperty.identifierInNamespace }}(x,y)</li>
@@ -287,7 +291,7 @@
                                 <span>{{ textProperty.textProperty|striptags|raw }}</span>
                             </td>
                             <td>{{ textProperty.languageIsoCode}}</td>
-                            <td>WIP</td>
+                            <td>{{ textProperty.namespaceForVersion }}</td>
                             <td>
                                 <a href="{{ path('text_property_edit', {
                                     'id': textProperty.id
@@ -337,7 +341,7 @@
                                 <span>{{ textProperty.textProperty|striptags|raw }}</span>
                             </td>
                             <td>{{ textProperty.languageIsoCode}}</td>
-                            <td>WIP</td>
+                            <td>{{ textProperty.namespaceForVersion }}</td>
                             <td>
                                 <a href="{{ path('text_property_edit', {
                                     'id': textProperty.id
@@ -386,7 +390,7 @@
                                 <span>{{ textProperty.textProperty|striptags|raw }}</span>
                             </td>
                             <td>{{ textProperty.languageIsoCode}}</td>
-                            <td>WIP</td>
+                            <td>{{ textProperty.namespaceForVersion }}</td>
                             <td>
                                 <a href="{{ path('text_property_edit', {
                                     'id': textProperty.id
@@ -432,7 +436,7 @@
                 {% else %}
                     <h3 id="identifier-details-block">Identifier : {{ propertyVersion.property.identifierInNamespace }}</h3>
                 {% endif %}
-                {% if domainRange is not empty %}
+                {% if domainRange is not empty and domainRange.domainId is not null and domainRange.rangeId is not null %}
                     <h3>Domain and range</h3>
                     <div id="domain-range-form-block">
                         {{ form_start(propertyForm) }}
@@ -625,15 +629,7 @@
                                     {% endfor %}
                                 {% endif %}
                             </td>
-                            <td>
-                                {% if association.namespaces is not null %}
-                                    {% for ns in association.namespaces %}
-                                        {{ ns.standardLabel }}
-                                    {% endfor %}
-                                {% else %}
-                                    WIP
-                                {% endif %}
-                            </td>
+                            <td>{{ association.namespaceForVersion }}</td>
                             <td>
                                 <a href="{{ path('property_association_edit', {'id': association.id}) }}" class="btn btn-xs btn-success"><span class="fa fa-edit"></span></a>
                             </td>

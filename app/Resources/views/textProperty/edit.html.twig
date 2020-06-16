@@ -101,15 +101,11 @@
                     <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
                 </a>
                 {% elseif textProperty.entityAssociation is not null %}
-                    {% if textProperty.object is not null %}
-                        {% if textProperty.object.identifierInNamespace is not null %}
-                            {{ textProperty.object.standardLabel }} – {{ textProperty.object.identifierInNamespace }}: {{ textProperty.systemType.standardLabel }}
-                        {% else %}
-                            {{ textProperty.object.objectIdentification }}: {{ textProperty.systemType.standardLabel }}
-                        {% endif %}
-                    {% else %}
-                        {{ textProperty.systemType.standardLabel }}
-                    {% endif %}
+                {% if textProperty.entityAssociation.sourceClass is not null %}
+                    {{ textProperty.entityAssociation.sourceClass }} {{ textProperty.entityAssociation.systemType.standardLabel }} {{ textProperty.entityAssociation.targetClass }} : {{ textProperty.systemType.standardLabel }}
+                {% elseif textProperty.entityAssociation.sourceProperty is not null %}
+                    {{ textProperty.entityAssociation.sourceClass }} {{ textProperty.entityAssociation.systemType.standardLabel }} {{ textProperty.entityAssociation.targetClass }} : {{ textProperty.systemType.standardLabel }}
+                {% endif %}
                     <a href="{{ path('entity_association_edit', {
                         id: textProperty.entityAssociation.id
                     }) }}#definition"

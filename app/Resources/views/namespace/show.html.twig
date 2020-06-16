@@ -339,16 +339,16 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for class in namespace.classVersions %}
+                    {% for classVersion in namespace.classVersions %}
                         <tr>
                             <td>
                                 <a href="{{ path('class_show', {
-                                    'id': class.id
+                                    'id': classVersion.class.id
                                 }) }}">
-                                    {{ class }}
+                                    {{ classVersion }}
                                 </a>
                             </td>
-                            <td>{{ class.modificationTime|date('Y-m-d') }}</td>
+                            <td>{{ classVersion.class.modificationTime|date('Y-m-d') }}</td>
                         </tr>
                     {% endfor %}
                     </tbody>
@@ -369,38 +369,38 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for property in namespace.properties %}
+                    {% for propertyVersion in namespace.propertyVersions %}
                         <tr>
                             <td class="text-right small">
-                                {% if property.domain is not null %}
-                                    <a href="{{ path('class_show', {'id': property.domain.id }) }}">
-                                        {{ property.domain }}
+                                {% if propertyVersion.domain is not null %}
+                                    <a href="{{ path('class_show', {'id': propertyVersion.domain.id }) }}">
+                                        {{ propertyVersion.domain }}
                                     </a>
                                 {% endif %}
                             </td>
                             <td class="small" style="padding-left: 30px;">
-                                {% if property.domainMinQuantifier is not null and property.domainMaxQuantifier is not null %}
-                                    ({% if  property.domainMinQuantifier != -1 %}{{ property.domainMinQuantifier }}{% else %}n{% endif %},{% if  property.domainMaxQuantifier != -1 %}{{ property.domainMaxQuantifier }}{% else %}n{% endif %})
+                                {% if propertyVersion.domainMinQuantifier is not null and propertyVersion.domainMaxQuantifier is not null %}
+                                    ({% if  propertyVersion.domainMinQuantifier != -1 %}{{ propertyVersion.domainMinQuantifier }}{% else %}n{% endif %},{% if  propertyVersion.domainMaxQuantifier != -1 %}{{ propertyVersion.domainMaxQuantifier }}{% else %}n{% endif %})
                                 {% endif %}
                             </td>
                             <td class="text-center">
-                                <a href="{{ path('property_show', {'id': property.id}) }}">
-                                    {{ property }}
+                                <a href="{{ path('property_show', {'id': propertyVersion.property.id}) }}">
+                                    {{ propertyVersion }}
                                 </a>
                             </td>
                             <td class="small" style="padding-right: 30px;">
-                                {% if property.rangeMinQuantifier is not null and property.rangeMaxQuantifier is not null %}
-                                    ({% if  property.rangeMinQuantifier != -1 %}{{ property.rangeMinQuantifier }}{% else %}n{% endif %},{% if  property.rangeMaxQuantifier != -1 %}{{ property.rangeMaxQuantifier }}{% else %}n{% endif %})
+                                {% if propertyVersion.rangeMinQuantifier is not null and propertyVersion.rangeMaxQuantifier is not null %}
+                                    ({% if  propertyVersion.rangeMinQuantifier != -1 %}{{ propertyVersion.rangeMinQuantifier }}{% else %}n{% endif %},{% if  propertyVersion.rangeMaxQuantifier != -1 %}{{ propertyVersion.rangeMaxQuantifier }}{% else %}n{% endif %})
                                 {% endif %}
                             </td>
                             <td class="small">
-                                {% if property.range is not null %}
-                                    <a href="{{ path('class_show', {'id': property.range.id }) }}">
-                                        {{ property.range }}
+                                {% if propertyVersion.range is not null %}
+                                    <a href="{{ path('class_show', {'id': propertyVersion.range.id }) }}">
+                                        {{ propertyVersion.range }}
                                     </a>
                                 {% endif %}
                             </td>
-                            <td>{{ property.modificationTime|date('Y-m-d') }}</td>
+                            <td>{{ propertyVersion.modificationTime|date('Y-m-d') }}</td>
                         </tr>
                     {% endfor %}
                     </tbody>

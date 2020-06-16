@@ -282,7 +282,7 @@ class OntoNamespace
      * @ORM\OneToMany(targetEntity="AppBundle\Entity\PropertyVersion", mappedBy="namespaceForVersion")
      * @ORM\OrderBy({"creationTime" = "DESC"})
      */
-    private $propetyVersions;
+    private $propertyVersions;
 
     /**
      * @ORM\OneToMany(targetEntity="AppBundle\Entity\PropertyAssociation", mappedBy="namespaceForVersion")
@@ -315,7 +315,7 @@ class OntoNamespace
         $this->entityAssociationVersions = new ArrayCollection();
         $this->labelVersions = new ArrayCollection();
         $this->classVersions = new ArrayCollection();
-        $this->propetyVersions = new ArrayCollection();
+        $this->propertyVersions = new ArrayCollection();
         $this->propertyAssociationVersions = new ArrayCollection();
         $this->textPropertyVersions = new ArrayCollection();
     }
@@ -607,9 +607,9 @@ class OntoNamespace
     /**
      * @return ArrayCollection
      */
-    public function getPropetyVersions()
+    public function getPropertyVersions()
     {
-        return $this->propetyVersions;
+        return $this->propertyVersions;
     }
 
     /**

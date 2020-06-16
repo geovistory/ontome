@@ -297,15 +297,7 @@
                                     <span>{{ textProperty.textProperty|striptags|raw }}</span>
                                 </td>
                                 <td>{{ textProperty.languageIsoCode}}</td>
-                                <td>
-                                    <!-- {% if textProperty.namespace is not null %}
-                                        {% for label in textProperty.namespace.topLevelNamespace.labels %}
-                                            {% if label.isStandardLabelForLanguage == true and label.languageIsoCode == 'en' %}
-                                                {{ label.label }}
-                                            {% endif %}
-                                        {% endfor %}
-                                    {% endif %} -->
-                                </td>
+                                <td>{{ textProperty.namespaceForVersion }}</td>
                                 <td>
                                     <a href="{{ path('text_property_edit', {
                                         'id': textProperty.id
@@ -355,7 +347,7 @@
                                 <span>{{ textProperty.textProperty|striptags|raw }}</span>
                             </td>
                             <td>{{ textProperty.languageIsoCode}}</td>
-                            <td>WIP</td>
+                            <td>{{ textProperty.namespaceForVersion }}</td>
                             <td>
                                 <a href="{{ path('text_property_edit', {
                                     'id': textProperty.id
@@ -405,7 +397,7 @@
                                 <span>{{ textProperty.textProperty|striptags|raw }}</span>
                             </td>
                             <td>{{ textProperty.languageIsoCode}}</td>
-                            <td>WIP</td>
+                            <td>{{ textProperty.namespaceForVersion }}</td>
                             <td>
                                 <a href="{{ path('text_property_edit', {
                                     'id': textProperty.id
@@ -562,15 +554,7 @@
                                 </a>
                             </td>
                             <td>{{ association.parentClass.ongoingNamespace }}</td>
-                            <td>
-                                {% if association.namespaces is not null %}
-                                    {% for ns in association.namespaces %}
-                                        {{ ns.standardLabel }}
-                                    {% endfor %}
-                                {% else %}
-                                    WIP
-                                {% endif %}
-                            </td>
+                            <td>{{ association.namespaceForVersion }}</td>
                             <td>
                                 {% if association.textProperties is not null %}
                                     {% for textProperty in association.textProperties if textProperty.systemType.id == 15 %}

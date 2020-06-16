@@ -180,6 +180,7 @@ class CommentController extends Controller
         $comment->setModifier($this->getUser());
         $comment->setCreationTime(new \DateTime('now'));
         $comment->setModificationTime(new \DateTime('now'));
+        $comment->setNamespaceForVersion($this->getUser()->getCurrentOngoingNamespace());
 
 
         $form = $this->createForm(CommentForm::class, $comment);
@@ -196,6 +197,7 @@ class CommentController extends Controller
             $comment->setModifier($this->getUser());
             $comment->setCreationTime(new \DateTime('now'));
             $comment->setModificationTime(new \DateTime('now'));
+            $comment->setNamespaceForVersion($this->getUser()->getCurrentOngoingNamespace());
 
             $em = $this->getDoctrine()->getManager();
             $em->persist($comment);
