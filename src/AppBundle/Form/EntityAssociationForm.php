@@ -90,8 +90,8 @@ class EntityAssociationForm extends AbstractType
                     array(
                         'class' => Property::class,
                         'label' => "Related property",
-                        'query_builder' => function(ClassRepository $repo) use ($namespacesId){
-                            return $repo->findClassesByNamespacesIdQueryBuilder($namespacesId);
+                        'query_builder' => function(PropertyRepository $repo) use ($namespacesId){
+                            return $repo->findPropertiesByNamespacesIdQueryBuilder($namespacesId);
                         }
                     ));
         }
