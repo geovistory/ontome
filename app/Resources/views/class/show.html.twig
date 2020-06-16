@@ -469,16 +469,16 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for namespace in classVersion.class.namespaces %}
-                        <tr {% if namespace.id == classVersion.namespaceForVersion.id %}class="success"{% endif %}>
+                    {% for cversion in classVersion.class.classVersions %}
+                        <tr {% if cversion.namespaceForVersion.id == classVersion.namespaceForVersion.id %}class="success"{% endif %}>
                             <td>
                                 <a href="{{ path('namespace_show', {
-                                    'id': namespace.id
+                                    'id': cversion.namespaceForVersion.id
                                 }) }}">
-                                    {{ namespace }}
+                                    {{ cversion.namespaceForVersion }}
                                 </a>
                             </td>
-                            <td>{{ namespace.modificationTime|date('Y-m-d') }}</td>
+                            <td>{{ cversion.namespaceForVersion.modificationTime|date('Y-m-d') }}</td>
                         </tr>
                     {% endfor %}
                     </tbody>
