@@ -54,8 +54,10 @@
             <li>
                 <a data-toggle="tab" href="#comments" class="updateViewComment" data-id="{{ classVersion.class.id }}" data-object="class">
                     Comments
-                    <span class="badge {% if classVersion.class.comments|length > 0  %}progress-bar-danger {% endif %}">
-                        {{ classVersion.class.comments|length }}
+                    {% set commentsClass = classVersion.class.comments %}
+                    {% set commentsClassVersion = commentsClass|filter(commentsClass => commentsClass.namespaceForVersion.id == classVersion.namespaceForVersion.id) %}
+                    <span class="badge {% if commentsClassVersion is empty %}progress-bar-danger {% endif %}">
+                        {{ commentsClassVersion|length }}
                     </span>
                 </a>
             </li>
@@ -926,11 +928,13 @@
                 <h3>Comments</h3>
                 <div class="comment-box js-user-info" data-fullname="{{ app.user }}">
                     <div class="action-box">
-                        {% if classVersion.class.comments is empty %}
+                        {% set commentsClass = classVersion.class.comments %}
+                        {% set commentsClassVersion = commentsClass|filter(commentsClass => commentsClass.namespaceForVersion.id == classVersion.namespaceForVersion.id) %}
+                        {% if commentsClassVersion is empty %}
                             <p id="comment-not-found"><em>No comment found.</em></p>
                         {% endif %}
                         <ul id="comments-list" class="comments-list">
-                            {% for comment in classVersion.class.comments %}
+                            {% for comment in commentsClassVersion %}
                                 <li>
                                     <div class="comment-text">
                                         <p><strong><a href="#">{{ comment.creator.fullName }}</a></strong></p>
@@ -943,7 +947,7 @@
 
                         {% if app.user %}
                             <div class="new-comment-form" id="new-comment-form">
-                                {{ render(controller('AppBundle:Comment:new', {'object' : 'class', 'objectId' : classVersion.class.id})) }}
+                                {{ render(controller('AppBundle:Comment:new', {'object' : 'class-version', 'objectId' : classVersion.id})) }}
                             </div>
                         {% endif %}
                     </div>
@@ -1015,7 +1019,7 @@
             });
         } );
     </script>
-    {% include 'comment/js-bock.html.twig'  with {'objectType': 'class', 'objectId' : classVersion.class.id  } %}
+    {% include 'comment/js-bock.html.twig'  with {'objectType': 'class-version', 'objectId' : classVersion.id} %}
     <script src="https://d3js.org/d3.v4.min.js"></script>
     <script type="text/javascript" src="{{ asset('js/class-graph.js') }}"></script>
 

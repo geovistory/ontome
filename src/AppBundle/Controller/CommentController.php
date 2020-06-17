@@ -109,18 +109,22 @@ class CommentController extends Controller
 
         $comment = new Comment();
 
-        if($object === 'class') {
-            $associatedEntity = $em->getRepository('AppBundle:OntoClass')->find($objectId);
+        if($object === 'class-version') {
+            $classVersion = $em->getRepository('AppBundle:OntoClassVersion')->find($objectId);
+            $associatedEntity = $classVersion->getClass();
             if (!$associatedEntity) {
                 throw $this->createNotFoundException('The class n° '.$objectId.' does not exist');
             }
+            $namespaceForVersion = $em->getRepository('AppBundle:OntoNamespace')->find($classVersion->getNamespaceForVersion());
             $comment->setClass($associatedEntity);
         }
-        else if($object === 'property') {
-            $associatedEntity = $em->getRepository('AppBundle:Property')->find($objectId);
+        else if($object === 'property-version') {
+            $propertyVersion = $em->getRepository('AppBundle:PropertyVersion')->find($objectId);
+            $associatedEntity = $propertyVersion->getProperty();
             if (!$associatedEntity) {
                 throw $this->createNotFoundException('The property n° '.$objectId.' does not exist');
             }
+            $namespaceForVersion = $em->getRepository('AppBundle:OntoNamespace')->find($propertyVersion->getNamespaceForVersion());
             $comment->setProperty($associatedEntity);
         }
         else if($object === 'class-association') {
@@ -128,6 +132,7 @@ class CommentController extends Controller
             if (!$associatedEntity) {
                 throw $this->createNotFoundException('The class association n° '.$objectId.' does not exist');
             }
+            $namespaceForVersion = $em->getRepository('AppBundle:OntoNamespace')->find($associatedEntity->getNamespaceForVersion());
             $comment->setClassAssociation($associatedEntity);
         }
         else if($object === 'property-association') {
@@ -135,6 +140,7 @@ class CommentController extends Controller
             if (!$associatedEntity) {
                 throw $this->createNotFoundException('The property association n° '.$objectId.' does not exist');
             }
+            $namespaceForVersion = $em->getRepository('AppBundle:OntoNamespace')->find($associatedEntity->getNamespaceForVersion());
             $comment->setPropertyAssociation($associatedEntity);
         }
         else if($object === 'entity-association') {
@@ -142,6 +148,7 @@ class CommentController extends Controller
             if (!$associatedEntity) {
                 throw $this->createNotFoundException('The entity association n° '.$objectId.' does not exist');
             }
+            $namespaceForVersion = $em->getRepository('AppBundle:OntoNamespace')->find($associatedEntity->getNamespaceForVersion());
             $comment->setEntityAssociation($associatedEntity);
         }
         else if($object === 'text-property') {
@@ -149,6 +156,7 @@ class CommentController extends Controller
             if (!$associatedEntity) {
                 throw $this->createNotFoundException('The text property n° '.$objectId.' does not exist');
             }
+            $namespaceForVersion = $em->getRepository('AppBundle:OntoNamespace')->find($associatedEntity->getNamespaceForVersion());
             $comment->setTextProperty($associatedEntity);
         }
         else if($object === 'label') {
@@ -156,6 +164,7 @@ class CommentController extends Controller
             if (!$associatedEntity) {
                 throw $this->createNotFoundException('The label n° '.$objectId.' does not exist');
             }
+            $namespaceForVersion = $em->getRepository('AppBundle:OntoNamespace')->find($associatedEntity->getNamespaceForVersion());
             $comment->setLabel($associatedEntity);
         }
         else if($object === 'namespace') {
@@ -163,6 +172,7 @@ class CommentController extends Controller
             if (!$associatedEntity) {
                 throw $this->createNotFoundException('The namespace n° '.$objectId.' does not exist');
             }
+            $namespaceForVersion = $em->getRepository('AppBundle:OntoNamespace')->find($associatedEntity->getNamespaceForVersion());
             $comment->setNamespace($associatedEntity);
         }
         else throw $this->createNotFoundException('The requested object "'.$object.'" does not exist!');
@@ -180,7 +190,7 @@ class CommentController extends Controller
         $comment->setModifier($this->getUser());
         $comment->setCreationTime(new \DateTime('now'));
         $comment->setModificationTime(new \DateTime('now'));
-        $comment->setNamespaceForVersion($this->getUser()->getCurrentOngoingNamespace());
+        $comment->setNamespaceForVersion($namespaceForVersion);
 
 
         $form = $this->createForm(CommentForm::class, $comment);
@@ -197,7 +207,7 @@ class CommentController extends Controller
             $comment->setModifier($this->getUser());
             $comment->setCreationTime(new \DateTime('now'));
             $comment->setModificationTime(new \DateTime('now'));
-            $comment->setNamespaceForVersion($this->getUser()->getCurrentOngoingNamespace());
+            $comment->setNamespaceForVersion($namespaceForVersion);
 
             $em = $this->getDoctrine()->getManager();
             $em->persist($comment);

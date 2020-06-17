@@ -56,9 +56,15 @@
             <li><a data-toggle="tab" href="#property-hierarchy">Hierarchy</a></li>
             <li><a data-toggle="tab" href="#relations">Relations</a></li>
             <li><a data-toggle="tab" href="#profiles">Profiles</a></li>
-            {% if propertyVersion.property.ongoingNamespace is not null %}
-                <li><a data-toggle="tab" href="#comments" class="updateViewComment" data-id="{{ propertyVersion.property.id }}" data-object="property">Comments <span class="badge {% if propertyVersion.property.comments|length > 0  %}progress-bar-danger {% endif %}">{{ propertyVersion.property.comments|length }}</span></a></li>
-            {% endif %}
+            <li><a data-toggle="tab" href="#comments" class="updateViewComment" data-id="{{ propertyVersion.property.id }}" data-object="property">
+                    Comments
+                    {% set commentsProperty = propertyVersion.property.comments %}
+                    {% set commentsPropertyVersion = commentsProperty|filter(commentsProperty => commentsProperty.namespaceForVersion.id == propertyVersion.namespaceForVersion.id) %}
+                    <span class="badge {% if commentsPropertyVersion is empty %}progress-bar-danger {% endif %}">
+                        {{ commentsPropertyVersion|length }}
+                    </span>
+                </a>
+            </li>
         </ul>
 
         <div class="tab-content">
@@ -801,11 +807,13 @@
                 <h3>Comments</h3>
                 <div class="comment-box js-user-info" data-fullname="{{ app.user }}">
                     <div class="action-box">
-                        {% if propertyVersion.property.comments is empty %}
+                        {% set commentsProperty = propertyVersion.property.comments %}
+                        {% set commentsPropertyVersion = commentsProperty|filter(commentsProperty => commentsProperty.namespaceForVersion.id == propertyVersion.namespaceForVersion.id) %}
+                        {% if commentsPropertyVersion is empty %}
                             <p id="comment-not-found"><em>No comment found.</em></p>
                         {% endif %}
                         <ul id="comments-list" class="comments-list">
-                            {% for comment in propertyVersion.property.comments %}
+                            {% for comment in commentsPropertyVersion.comments %}
                                 <li>
                                     <div class="comment-text">
                                         <p><strong><a href="#">{{ comment.creator.fullName }}</a></strong></p>
@@ -818,7 +826,7 @@
 
                         {% if app.user %}
                             <div class="new-comment-form" id="new-comment-form">
-                                {{ render(controller('AppBundle:Comment:new', {'object' : 'property', 'objectId' : propertyVersion.property.id})) }}
+                                {{ render(controller('AppBundle:Comment:new', {'object' : 'property-version', 'objectId' : propertyVersion.id})) }}
                             </div>
                         {% endif %}
                     </div>
