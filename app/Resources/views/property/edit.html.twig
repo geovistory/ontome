@@ -57,7 +57,7 @@
                     Comments
                     {% set commentsProperty = propertyVersion.property.comments %}
                     {% set commentsPropertyVersion = commentsProperty|filter(commentsProperty => commentsProperty.namespaceForVersion.id == propertyVersion.namespaceForVersion.id) %}
-                    <span class="badge {% if commentsPropertyVersion is empty %}progress-bar-danger {% endif %}">
+                    <span class="badge {% if commentsPropertyVersion is not empty %}progress-bar-danger {% endif %}">
                         {{ commentsPropertyVersion|length }}
                     </span>
                 </a>
@@ -904,7 +904,7 @@
                             <p id="comment-not-found"><em>No comment found.</em></p>
                         {% endif %}
                         <ul id="comments-list" class="comments-list">
-                            {% for comment in commentsPropertyVersion.comments %}
+                            {% for comment in commentsPropertyVersion %}
                                 <li>
                                     <div class="comment-text">
                                         <p><strong><a href="#">{{ comment.creator.fullName }}</a></strong></p>
@@ -1037,6 +1037,6 @@
             });
         } );
     </script>
-    {% include 'comment/js-bock.html.twig'  with {'objectType': 'property', 'objectId' : propertyVersion.property.id  } %}
+    {% include 'comment/js-bock.html.twig'  with {'objectType': 'property-version', 'objectId' : propertyVersion.id  } %}
 
 {% endblock %}

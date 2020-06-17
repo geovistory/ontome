@@ -56,7 +56,7 @@
                     Comments
                     {% set commentsClass = classVersion.class.comments %}
                     {% set commentsClassVersion = commentsClass|filter(commentsClass => commentsClass.namespaceForVersion.id == classVersion.namespaceForVersion.id) %}
-                    <span class="badge {% if commentsClassVersion is empty %}progress-bar-danger {% endif %}">
+                    <span class="badge {% if commentsClassVersion is not empty %}progress-bar-danger {% endif %}">
                         {{ commentsClassVersion|length }}
                     </span>
                 </a>
