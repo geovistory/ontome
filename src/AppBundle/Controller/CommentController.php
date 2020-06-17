@@ -164,7 +164,7 @@ class CommentController extends Controller
             if (!$associatedEntity) {
                 throw $this->createNotFoundException('The label n° '.$objectId.' does not exist');
             }
-            $namespaceForVersion = $em->getRepository('AppBundle:OntoNamespace')->find($associatedEntity->getNamespaceForVersion());
+            $namespaceForVersion = null;
             $comment->setLabel($associatedEntity);
         }
         else if($object === 'namespace') {
@@ -172,7 +172,7 @@ class CommentController extends Controller
             if (!$associatedEntity) {
                 throw $this->createNotFoundException('The namespace n° '.$objectId.' does not exist');
             }
-            $namespaceForVersion = $em->getRepository('AppBundle:OntoNamespace')->find($associatedEntity->getNamespaceForVersion());
+            $namespaceForVersion = $associatedEntity;
             $comment->setNamespace($associatedEntity);
         }
         else throw $this->createNotFoundException('The requested object "'.$object.'" does not exist!');
