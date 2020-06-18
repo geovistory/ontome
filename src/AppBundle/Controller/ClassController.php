@@ -150,11 +150,12 @@ class ClassController extends Controller
      * @param int|null $namespaceFromUrlId
      * @return Response the rendered template
      */
-    public function showAction(OntoClass $class, int $namespaceFromUrlId=null)
+    public function showAction(OntoClass $class, $namespaceFromUrlId=null)
     {
         //Vérifier si le namespace -si renseigné- est bien associé à la classe
         $namespaceFromUrl = null;
         if(!is_null($namespaceFromUrlId)) {
+            $namespaceFromUrlId = intval($namespaceFromUrlId);
             $cvCollection = $class->getClassVersions()->filter(function (OntoClassVersion $classVersion) use ($namespaceFromUrlId) {
                 return $classVersion->getNamespaceForVersion()->getId() === $namespaceFromUrlId;
             });
