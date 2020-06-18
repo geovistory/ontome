@@ -191,16 +191,17 @@ class PropertyController extends Controller
      * @param int|null $namespaceFromUrlId
      * @return Response the rendered template
      */
-    public function showAction(Property $property, int $namespaceFromUrlId=null)
+    public function showAction(Property $property, $namespaceFromUrlId=null)
     {
         //Vérifier si le namespace -si renseigné- est bien associé à la propriété
         $namespaceFromUrl = null;
         if(!is_null($namespaceFromUrlId)) {
+            $namespaceFromUrlId = intval($namespaceFromUrlId);
             $pvCollection = $property->getPropertyVersions()->filter(function (PropertyVersion $propertyVersion) use ($namespaceFromUrlId) {
                 return $propertyVersion->getNamespaceForVersion()->getId() === $namespaceFromUrlId;
             });
             if($pvCollection->count() == 0){
-                return $this->redirectToRoute('class_show', [
+                return $this->redirectToRoute('property_show', [
                     'id' => $property->getId()
                 ]);
             }
