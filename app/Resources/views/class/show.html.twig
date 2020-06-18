@@ -25,7 +25,10 @@
                         {% if classVersion.class.classVersions|length > 1 %}
                             {% for otherClassVersion in classVersion.class.classVersions if otherClassVersion != classVersion %}
                                 <li>
-                                    <a href="#">{{ otherClassVersion.namespaceForVersion }}
+                                    <a href="{{ path('class_show_with_version', {
+                                        'id': classVersion.class.id,
+                                        'namespaceFromUrlId': otherClassVersion.namespaceForVersion.id
+                                        }) }}">{{ otherClassVersion.namespaceForVersion }}
                                         <span class="label label-{{ otherClassVersion.namespaceForVersion.status.classCss }}">
                                             {{ otherClassVersion.namespaceForVersion.status.label }}
                                         </span>

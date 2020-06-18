@@ -145,14 +145,33 @@ class ClassController extends Controller
 
     /**
      * @Route("/class/{id}", name="class_show")
+     * @Route("/class/{id}/namespace/{namespaceFromUrlId}", name="class_show_with_version")
      * @param OntoClass $class
+     * @param int|null $namespaceFromUrlId
      * @return Response the rendered template
      */
-    public function showAction(OntoClass $class)
+    public function showAction(OntoClass $class, int $namespaceFromUrlId=null)
     {
+        //Vérifier si le namespace -si renseigné- est bien associé à la classe
+        $namespaceFromUrl = null;
+        if(!is_null($namespaceFromUrlId)) {
+            $cvCollection = $class->getClassVersions()->filter(function (OntoClassVersion $classVersion) use ($namespaceFromUrlId) {
+                return $classVersion->getNamespaceForVersion()->getId() === $namespaceFromUrlId;
+            });
+            if($cvCollection->count() == 0){
+                return $this->redirectToRoute('class_show', [
+                    'id' => $class->getId()
+                ]);
+            }
+            else{
+                $namespaceFromUrl = $cvCollection->first()->getNamespaceForVersion();
+            }
+        }
+
         // Récupérer la version de la classe demandée
         // Dans l'ordre : (la version demandée - TO DO) > la version ongoing > la version la plus récente > la première version dans la boucle
-        $classVersion = $class->getClassVersionForDisplay();
+        $classVersion = $class->getClassVersionForDisplay($namespaceFromUrl);
+
         // On doit avoir une version de la classe sinon on lance une exception.
         if(is_null($classVersion)){
             throw $this->createNotFoundException('The class n°'.$class->getId().' has no version. Please contact an administrator.');

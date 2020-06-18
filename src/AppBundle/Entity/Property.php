@@ -776,13 +776,20 @@ class Property
     /**
      * @return PropertyVersion the propertyVersion to be displayed
      */
-    public function getPropertyVersionForDisplay()
+    public function getPropertyVersionForDisplay(OntoNamespace $namespace=null)
     {
         $pvCollection = $this->getPropertyVersions();
-        if($pvCollection->count()>1){
-            $pvCollection = $this->getPropertyVersions()->filter(function(PropertyVersion $propertyVersion) {
-                return $propertyVersion->getNamespaceForVersion()->getIsOngoing();
+        if(!is_null($namespace)){
+            $pvCollection = $this->getPropertyVersions()->filter(function(PropertyVersion $propertyVersion) use ($namespace){
+                return $propertyVersion->getNamespaceForVersion() === $namespace;
             });
+        }
+        else{
+            if($pvCollection->count()>1){
+                $pvCollection = $this->getPropertyVersions()->filter(function(PropertyVersion $propertyVersion) {
+                    return $propertyVersion->getNamespaceForVersion()->getIsOngoing();
+                });
+            }
         }
         return $pvCollection->first();
     }

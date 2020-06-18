@@ -609,15 +609,23 @@ class OntoClass
     }
 
     /**
+     * @param OntoNamespace|null $namespace
      * @return OntoClassVersion the classVersion to be displayed
      */
-    public function getClassVersionForDisplay()
+    public function getClassVersionForDisplay(OntoNamespace $namespace=null)
     {
         $cvCollection = $this->getClassVersions();
-        if($cvCollection->count()>1){
-            $cvCollection = $this->getClassVersions()->filter(function(OntoClassVersion $classVersion) {
-                return $classVersion->getNamespaceForVersion()->getIsOngoing();
+        if(!is_null($namespace)){
+            $cvCollection = $this->getClassVersions()->filter(function(OntoClassVersion $classVersion) use ($namespace){
+                return $classVersion->getNamespaceForVersion() === $namespace;
             });
+        }
+        else{
+            if($cvCollection->count()>1){
+                $cvCollection = $this->getClassVersions()->filter(function(OntoClassVersion $classVersion) {
+                    return $classVersion->getNamespaceForVersion()->getIsOngoing();
+                });
+            }
         }
         return $cvCollection->first();
     }

@@ -186,13 +186,30 @@ class PropertyController extends Controller
 
     /**
      * @Route("/property/{id}", name="property_show")
+     * @Route("/property/{id}/namespace/{namespaceFromUrlId}", name="property_show_with_version")
      * @param Property $property
+     * @param int|null $namespaceFromUrlId
      * @return Response the rendered template
      */
-    public function showAction(Property $property)
+    public function showAction(Property $property, int $namespaceFromUrlId=null)
     {
+        //Vérifier si le namespace -si renseigné- est bien associé à la propriété
+        $namespaceFromUrl = null;
+        if(!is_null($namespaceFromUrlId)) {
+            $pvCollection = $property->getPropertyVersions()->filter(function (PropertyVersion $propertyVersion) use ($namespaceFromUrlId) {
+                return $propertyVersion->getNamespaceForVersion()->getId() === $namespaceFromUrlId;
+            });
+            if($pvCollection->count() == 0){
+                return $this->redirectToRoute('class_show', [
+                    'id' => $property->getId()
+                ]);
+            }
+            else{
+                $namespaceFromUrl = $pvCollection->first()->getNamespaceForVersion();
+            }
+        }
         // Récupérer la version de la propriété demandée
-        $propertyVersion = $property->getPropertyVersionForDisplay();
+        $propertyVersion = $property->getPropertyVersionForDisplay($namespaceFromUrl);
 
         // On doit avoir une version de la propriété sinon on lance une exception.
         if(is_null($propertyVersion)){
