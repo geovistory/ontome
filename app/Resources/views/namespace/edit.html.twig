@@ -462,8 +462,9 @@
                     {% for classVersion in namespace.classVersions %}
                         <tr>
                             <td>
-                                <a href="{{ path('class_show', {
-                                    'id': classVersion.class.id
+                                <a href="{{ path('class_show_with_version', {
+                                    'id': classVersion.class.id,
+                                    'namespaceFromUrlId': classVersion.namespaceForVersion.id
                                 }) }}">
                                     {{ classVersion }}
                                 </a>
@@ -493,7 +494,10 @@
                         <tr>
                             <td class="text-right small">
                                 {% if propertyVersion.domain is not null %}
-                                    <a href="{{ path('class_show', {'id': propertyVersion.domain.id }) }}">
+                                    <a href="{{ path('class_show_with_version', {
+                                        'id': propertyVersion.domain.id,
+                                        'namespaceFromUrlId': propertyVersion.namespaceForVersion.id
+                                    }) }}">
                                         {{ propertyVersion.domain }}
                                     </a>
                                 {% endif %}
@@ -504,7 +508,9 @@
                                 {% endif %}
                             </td>
                             <td class="text-center">
-                                <a href="{{ path('property_show', {'id': propertyVersion.property.id}) }}">
+                                <a href="{{ path('property_show_with_version', {
+                                    'id': propertyVersion.property.id,
+                                    'namespaceFromUrlId': propertyVersion.namespaceForVersion.id}) }}">
                                     {{ propertyVersion }}
                                 </a>
                             </td>
@@ -515,7 +521,10 @@
                             </td>
                             <td class="small">
                                 {% if propertyVersion.range is not null %}
-                                    <a href="{{ path('class_show', {'id': propertyVersion.range.id }) }}">
+                                    <a href="{{ path('class_show_with_version', {
+                                        'id': propertyVersion.range.id,
+                                        'namespaceFromUrlId': propertyVersion.namespaceForVersion.id
+                                    }) }}">
                                         {{ propertyVersion.range }}
                                     </a>
                                 {% endif %}
