@@ -195,13 +195,10 @@
                 window.scrollTo(0, 0);
             });
 
-            $('a.btn-edit').click(function(){
-                $('a.btn-edit').attr('href', $('a.btn-edit').attr('href')+window.location.hash);
+            // Garder le même onglet ouvert quand on clique sur les liens
+            $('a.btn-edit, ul.navi a, ul.dropdown-menu a').click(function(){
+                $(this).attr('href', $(this).attr('href')+window.location.hash);
             });
-
-            $('ul.navi a').click(function(){
-                $('ul.navi a').attr('href', $('ul.navi a').attr('href')+window.location.hash);
-            })
 
             $.extend( true, $.fn.dataTable.defaults, {
                 "pageLength": 25

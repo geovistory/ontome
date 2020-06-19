@@ -21,13 +21,13 @@
                         </span>
                         <span class="caret"></span>
                     </button>
-                    <ul class="dropdown-menu" aria-labelledby="dropdownVersions">
+                    <ul class="dropdown-menu" aria-labelledby="dropdown-versions">
                         {% if classVersion.class.classVersions|length > 1 %}
                             {% for otherClassVersion in classVersion.class.classVersions if otherClassVersion != classVersion %}
                                 <li>
                                     <a href="{{ path('class_show_with_version', {
                                         'id': classVersion.class.id,
-                                        'namespaceFromUrlId': otherClassVersion.namespaceForVersion.id
+                                        'namespaceFromUrlId': otherClassVersion.namespaceForVersion.id,
                                         }) }}">{{ otherClassVersion.namespaceForVersion }}
                                         <span class="label label-{{ otherClassVersion.namespaceForVersion.status.classCss }}">
                                             {{ otherClassVersion.namespaceForVersion.status.label }}
@@ -95,7 +95,10 @@
                             {% for association in classVersion.class.childClassAssociations
                                 if association.namespaceForVersion.id in namespacesId %}
                                 <li>
-                                    <a href="{{ path('class_show', {'id': association.parentClass.id }) }}">
+                                    <a href="{{ path('class_show_with_version', {
+                                        'id': association.parentClass.id,
+                                        'namespaceFromUrlId': classVersion.namespaceForVersion.id
+                                        }) }}">
                                         {% for parentClassVersion in association.parentClass.classVersions
                                             if parentClassVersion.namespaceForVersion.id in namespacesId %}
                                             {{ parentClassVersion.invertedLabel }}
@@ -123,7 +126,9 @@
                             {% for association in classVersion.class.parentClassAssociations
                                 if association.namespaceForVersion.id in namespacesId %}
                                <li>
-                                    <a href="{{ path('class_show', {'id': association.childClass.id}) }}">
+                                    <a href="{{ path('class_show_with_version', {
+                                        'id': association.childClass.id,
+                                        'namespaceFromUrlId': classVersion.namespaceForVersion.id }) }}">
                                         {% for childClassVersion in association.childClass.classVersions
                                             if childClassVersion.namespaceForVersion == association.namespaceForVersion %}
                                             {{ childClassVersion.invertedLabel }}
@@ -158,14 +163,18 @@
                                 <li>{{ relation.systemType.standardLabel }}
                                     {# la classe peut être "source" et/ou "target" #}
                                     {% if relation.sourceClass.id == classVersion.class.id %}
-                                    <a href="{{ path("class_show", {'id': relation.targetClass.id }) }}">
+                                    <a href="{{ path("class_show_with_version", {
+                                        'id': relation.targetClass.id,
+                                        'namespaceFromUrlId': classVersion.namespaceForVersion.id }) }}">
                                         {% for targetClassVersion in relation.targetClass.classVersions
                                             if targetClassVersion.namespaceForVersion.id in namespacesId %}
                                             {{ targetClassVersion.invertedLabel }}
                                         {% endfor %}
                                     </a>
                                     {% else %}
-                                    <a href="{{ path("class_show", {'id': relation.sourceClass.id }) }}">
+                                    <a href="{{ path("class_show_with_version", {
+                                        'id': relation.sourceClass.id,
+                                        'namespaceFromUrlId': classVersion.namespaceForVersion.id }) }}">
                                         {% for sourceClassVersion in relation.sourceClass.classVersions
                                             if sourceClassVersion.namespaceForVersion.id in namespacesId %}
                                             {{ sourceClassVersion.invertedLabel }}
@@ -256,8 +265,12 @@
                                     {# inutile de filtrer outgoingProperties car déjà fait par le repository #}
                                     {% for outgoingProperty in outgoingProperties %}
                                         <li>
-                                            <a href="{{ path('property_show', {'id': outgoingProperty.propertyId}) }}">{{ outgoingProperty.property }}</a>
-                                            → <a href="{{ path('class_show', {'id': outgoingProperty.rangeId }) }}">{{ outgoingProperty.range }}</a>
+                                            <a href="{{ path('property_show_with_version', {
+                                                'id': outgoingProperty.propertyId,
+                                                'namespaceFromUrlId': classVersion.namespaceForVersion.id }) }}">{{ outgoingProperty.property }}</a>
+                                            → <a href="{{ path('class_show_with_version', {
+                                                'id': outgoingProperty.rangeId,
+                                                'namespaceFromUrlId': classVersion.namespaceForVersion.id  }) }}">{{ outgoingProperty.range }}</a>
                                         </li>
                                     {% endfor %}
                                 </ul>
@@ -272,8 +285,12 @@
                             <div class="col-lg-10">
                                 <ul class="list-unstyled">
                                     {% for ingoingProperty in ingoingProperties %}
-                                        <li><a href="{{ path('class_show', {'id': ingoingProperty.domainId }) }}">{{ ingoingProperty.domain }}</a>
-                                            → <a href="{{ path('property_show', {'id': ingoingProperty.propertyId}) }}">{{ ingoingProperty.property }}</a>
+                                        <li><a href="{{ path('class_show_with_version', {
+                                                'id': ingoingProperty.domainId,
+                                                'namespaceFromUrlId': classVersion.namespaceForVersion.id  }) }}">{{ ingoingProperty.domain }}</a>
+                                            → <a href="{{ path('property_show_with_version', {
+                                                'id': ingoingProperty.propertyId,
+                                                'namespaceFromUrlId': classVersion.namespaceForVersion.id }) }}">{{ ingoingProperty.property }}</a>
                                         </li>
                                     {% endfor %}
                                 </ul>
@@ -507,8 +524,9 @@
                         if association.namespaceForVersion.id in namespacesId %}
                         <tr>
                             <td>
-                                <a href="{{ path('class_show', {
+                                <a href="{{ path('class_show_with_version', {
                                     'id': association.parentClass.id,
+                                    'namespaceFromUrlId': classVersion.namespaceForVersion.id,
                                     '_fragment': 'class-hierarchy'
                                 }) }}">
                                     {{ association.parentClass.invertedLabel }}
@@ -554,8 +572,9 @@
                     {% for ancestor in ancestors|sort %}
                         <tr>
                             <td>
-                                <a href="{{ path('class_show', {
+                                <a href="{{ path('class_show_with_version', {
                                     'id': ancestor.id,
+                                    'namespaceFromUrlId': classVersion.namespaceForVersion.id,
                                     '_fragment': 'class-hierarchy'
                                 }) }}">
                                     {{ ancestor.identifier }}
@@ -580,8 +599,9 @@
                     {% for descendant in descendants|sort %}
                         <tr>
                             <td>
-                                <a href="{{ path('class_show', {
+                                <a href="{{ path('class_show_with_version', {
                                     'id': descendant.id,
+                                    'namespaceFromUrlId': classVersion.namespaceForVersion.id,
                                     '_fragment': 'class-hierarchy'
                                 }) }}">
                                     {{ descendant.identifier }}
@@ -614,15 +634,17 @@
                         <tr>
                             <td>{{ relation.systemType }}</td>
                             {% if classVersion.class.id == relation.sourceClass.id %}
-                            <td><a href="{{ path('class_show', {
-                                    'id': relation.targetClass.id
+                            <td><a href="{{ path('class_show_with_version', {
+                                    'id': relation.targetClass.id,
+                                    'namespaceFromUrlId': classVersion.namespaceForVersion.id
                                 }) }}">
                                     {{ relation.targetClass.invertedLabel }}
                                 </a>
                             </td>
                             {% else %}
-                            <td><a href="{{ path('class_show', {
-                                    'id': relation.sourceClass.id
+                            <td><a href="{{ path('class_show_with_version', {
+                                    'id': relation.sourceClass.id,
+                                    'namespaceFromUrlId': classVersion.namespaceForVersion.id
                                 }) }}">
                                     {{ relation.sourceClass.invertedLabel }}
                                 </a>
@@ -693,15 +715,17 @@
                                 {{ outgoingProperty.domain }}
                             </td>
                             <td>
-                                <a href="{{ path('property_show', {
-                                    'id': outgoingProperty.propertyId
+                                <a href="{{ path('property_show_with_version', {
+                                    'id': outgoingProperty.propertyId,
+                                    'namespaceFromUrlId': classVersion.namespaceForVersion.id
                                 }) }}">
                                     {{ outgoingProperty.property }}
                                 </a>
                             </td>
                             <td>
-                                <a href="{{ path('class_show', {
-                                    'id': outgoingProperty.rangeId
+                                <a href="{{ path('class_show_with_version', {
+                                    'id': outgoingProperty.rangeId,
+                                    'namespaceFromUrlId': classVersion.namespaceForVersion.id
                                 }) }}">
                                     {{ outgoingProperty.range }}
                                 </a>
@@ -727,22 +751,25 @@
                             <td>
                                 {{ outgoingInheritedProperty.domain }} (is a
                                 <a
-                                        href="{{ path('class_show', {
-                                            'id': outgoingInheritedProperty.parentClassId
+                                        href="{{ path('class_show_with_version', {
+                                            'id': outgoingInheritedProperty.parentClassId,
+                                            'namespaceFromUrlId': classVersion.namespaceForVersion.id
                                         }) }}"
                                         title="{{ outgoingInheritedProperty.ancestors }}">
                                     {{ outgoingInheritedProperty.parentClass }}</a>)
                             </td>
                             <td>
-                                <a href="{{ path('property_show', {
-                                    'id': outgoingInheritedProperty.propertyId
+                                <a href="{{ path('property_show_with_version', {
+                                    'id': outgoingInheritedProperty.propertyId,
+                                    'namespaceFromUrlId': classVersion.namespaceForVersion.id
                                 }) }}">
                                     {{ outgoingInheritedProperty.property }}
                                 </a>
                             </td>
                             <td>
-                                <a href="{{ path('class_show', {
-                                    'id': outgoingInheritedProperty.rangeId
+                                <a href="{{ path('class_show_with_version', {
+                                    'id': outgoingInheritedProperty.rangeId,
+                                    'namespaceFromUrlId': classVersion.namespaceForVersion.id
                                 }) }}">
                                     {{ outgoingInheritedProperty.range }}
                                 </a>
@@ -766,8 +793,9 @@
                     {% for ingoingProperty in ingoingProperties|sort %}
                         <tr>
                             <td>
-                                <a href="{{ path('class_show', {
-                                    'id': ingoingProperty.domainId
+                                <a href="{{ path('class_show_with_version', {
+                                    'id': ingoingProperty.domainId,
+                                    'namespaceFromUrlId': classVersion.namespaceForVersion.id
                                 }) }}">
                                     {{ ingoingProperty.domain }}
                                 </a>
@@ -801,15 +829,17 @@
                     {% for ingoingInheritedProperty in ingoingInheritedProperties|sort %}
                         <tr>
                             <td>
-                                <a href="{{ path('class_show', {
-                                    'id': ingoingInheritedProperty.domainId
+                                <a href="{{ path('class_show_with_version', {
+                                    'id': ingoingInheritedProperty.domainId,
+                                    'namespaceFromUrlId': classVersion.namespaceForVersion.id
                                 }) }}">
                                     {{ ingoingInheritedProperty.domain }}
                                 </a>
                             </td>
                             <td>
-                                <a href="{{ path('property_show', {
-                                    'id': ingoingInheritedProperty.propertyId
+                                <a href="{{ path('property_show_with_version', {
+                                    'id': ingoingInheritedProperty.propertyId,
+                                    'namespaceFromUrlId': classVersion.namespaceForVersion.id
                                 }) }}">
                                     {{ ingoingInheritedProperty.property }}
                                 </a>
@@ -817,8 +847,9 @@
                             <td>
                                 {{ classVersion.class.invertedLabel }} (is a
                                 <a
-                                        href="{{ path('class_show', {
-                                            'id': ingoingInheritedProperty.rangeId
+                                        href="{{ path('class_show_with_version', {
+                                            'id': ingoingInheritedProperty.rangeId,
+                                            'namespaceFromUrlId': classVersion.namespaceForVersion.id
                                         }) }}"
                                         title="{{ ingoingInheritedProperty.ancestors }}">
                                     {{ ingoingInheritedProperty.range }}</a>)

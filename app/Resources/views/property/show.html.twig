@@ -15,7 +15,7 @@
                         </span>
                         <span class="caret"></span>
                     </button>
-                    <ul class="dropdown-menu" aria-labelledby="dropdownVersions">
+                    <ul class="dropdown-menu" aria-labelledby="dropdown-versions">
                         {% if propertyVersion.property.propertyVersions|length > 1 %}
                             {% for otherPropertyVersion in propertyVersion.property.propertyVersions if otherPropertyVersion != propertyVersion %}
                                 <li>
