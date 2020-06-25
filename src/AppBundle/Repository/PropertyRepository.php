@@ -390,10 +390,12 @@ class PropertyRepository extends EntityRepository
      */
     public function findPropertiesByProfileId(Profile $profile){
         return $this->createQueryBuilder('property')
-            ->join('property.namespaces','nspc')
+            ->join('property.propertyVersions','pv')
+            ->join('pv.namespaceForVersion','nspc')
             ->join('property.profiles', 'profile')
             ->where('profile.id = :profile')
             ->addSelect('profile')
+            ->addSelect('pv')
             ->addSelect('nspc')
             ->leftJoin('nspc.referencedVersion', 'referencedVersion')
             ->addSelect('referencedVersion')

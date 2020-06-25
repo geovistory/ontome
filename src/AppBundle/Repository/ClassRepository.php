@@ -304,7 +304,8 @@ class ClassRepository extends EntityRepository
                         class_standard_label AS \"standardLabel\",
                         identifier_in_namespace AS \"identifierInNamespace\" ,
                         namespace AS \"namespace\" ,
-                        profile_association_type AS \"associationType\"
+                        profile_association_type AS \"associationType\",
+                        fk_class_namespace_for_version AS \"namespaceForVersion\"
                 FROM che.v_all_classes_profile WHERE fk_profile = :profile;";
         $stmt = $conn->prepare($sql);
         $stmt->execute(array('profile' => $profile->getId()));
@@ -326,9 +327,9 @@ class ClassRepository extends EntityRepository
                         cls.standard_label AS \"standardLabel\",
                         nsp.standard_label AS \"namespace\"
                 FROM che.class cls
-                JOIN che.associates_namespace asnsp ON cls.pk_class = asnsp.fk_class
-                JOIN che.associates_referenced_namespace arfnsp ON asnsp.fk_namespace = arfnsp.fk_referenced_namespace
-                JOIN che.namespace nsp ON asnsp.fk_namespace = nsp.pk_namespace
+                JOIN che.class_version cv ON cls.pk_class = cv.fk_class
+                JOIN che.associates_referenced_namespace arfnsp ON cv.fk_namespace_for_version = arfnsp.fk_referenced_namespace
+                JOIN che.namespace nsp ON cv.fk_namespace_for_version = nsp.pk_namespace
                 WHERE arfnsp.fk_profile = :profile
                 EXCEPT
                 SELECT pk_class, identifier_in_namespace, class_standard_label, namespace

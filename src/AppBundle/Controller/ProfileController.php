@@ -43,8 +43,7 @@ class ProfileController  extends Controller
         $classes = $em->getRepository('AppBundle:OntoClass')
             ->findClassesByProfileId($profile);
 
-        $properties = $em->getRepository('AppBundle:Property')
-            ->findPropertiesByProfileId($profile);
+        //$properties = $em->getRepository('AppBundle:Property')->findPropertiesByProfileId($profile);
 
         $profileAssociations = $em->getRepository('AppBundle:ProfileAssociation')
             ->findBy(array('profile' => $profile));
@@ -52,7 +51,7 @@ class ProfileController  extends Controller
         return $this->render('profile/show.html.twig', array(
             'profile' => $profile,
             'classes' => $classes,
-            'properties' => $properties,
+            //'properties' => $properties,
             'profileAssociations' => $profileAssociations
         ));
 
@@ -208,8 +207,7 @@ class ProfileController  extends Controller
         $selectableClasses = $em->getRepository('AppBundle:OntoClass')
             ->findClassesForAssociationWithProfileByProfileId($profile);
 
-        $properties = $em->getRepository('AppBundle:Property')
-            ->findPropertiesByProfileId($profile);
+        //$properties = $em->getRepository('AppBundle:Property')->findPropertiesByProfileId($profile);
 
         $rootNamespaces = $em->getRepository('AppBundle:OntoNamespace')
             ->findAllNonAssociatedToProfileByProfileId($profile);
@@ -223,7 +221,7 @@ class ProfileController  extends Controller
             'classes' => $classes,
             'selectableClasses' => $selectableClasses,
             'rootNamespaces' => $rootNamespaces,
-            'properties' => $properties,
+            //'properties' => $properties,
             'profileAssociations' => $profileAssociations
         ));
     }

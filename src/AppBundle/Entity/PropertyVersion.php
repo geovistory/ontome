@@ -76,7 +76,7 @@ class PropertyVersion
     private $propertyOfOrigin;
 
     /**
-     * @ORM\ManyToOne(targetEntity="OntoNamespace", inversedBy="propetyVersions")
+     * @ORM\ManyToOne(targetEntity="OntoNamespace", inversedBy="propertyVersions")
      * @ORM\JoinColumn(name="fk_namespace_for_version", referencedColumnName="pk_namespace", nullable=false)
      */
     private $namespaceForVersion;

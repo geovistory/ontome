@@ -303,10 +303,12 @@
                     </thead>
                     <tbody>
                     {% for class in classes %}
+                        {# classes n'est pas un ensemble d'entités ORM, c'est un résultat d'une requête manuelle. #}
                         <tr>
                             <td>
-                                <a href="{{ path('class_show', {
-                                    'id': class.id
+                                <a href="{{ path('class_show_with_version', {
+                                    'id': class.id,
+                                    'namespaceFromUrlId': class.namespaceForVersion
                                 }) }}">
                                     {% if class.identifierInNamespace != class.standardLabel and class.standardLabel is not null %}
                                         {{ class.standardLabel }} – {{ class.identifierInNamespace }}
@@ -329,7 +331,8 @@
             <h3>
                 Associated properties
                 <span class="pull-right">
-                    {% if (not profile.isOngoing and profile.wasClosedAt is not null and profile.endDate is null) or (profile.isForcedPublication and profile.isOngoing ) %}
+                    {% if (not profile.isOngoing and profile.wasClosedAt is not null and profile.endDate is null)
+                        or (profile.isForcedPublication and profile.isOngoing ) %}
                         <a  href="{{ path('api_properties_profile_json', {
                             'lang': 'en',
                             'available-in-profile': profile.id
@@ -355,37 +358,60 @@
                 <tbody>
                 {% for profileAssociation in profileAssociations if profileAssociation.property is not null %}
                     {% set showProperty = true %}
-                    {% if profileAssociation.property.domain is not null %}
+                    {% set propertyVersion = null %}
 
-                        {% for profileAssociationClass in profileAssociation.property.domain.profileAssociations if profileAssociationClass.profile.id == profileAssociation.profile.id and profileAssociationClass.systemType.id == 6 %}
+                    {% for iPropertyVersion in profileAssociation.property.propertyVersions
+                        if iPropertyVersion.namespaceForVersion in profile.namespaces %}
+                        {% set propertyVersion = iPropertyVersion %}
+                    {% endfor %}
+
+                    {% if propertyVersion is not null and propertyVersion.domain is not null %}
+                        {% for profileAssociationClass in propertyVersion.domain.profileAssociations
+                            if profileAssociationClass.profile.id == profileAssociation.profile.id
+                            and profileAssociationClass.systemType.id == 6 %}
                             {% set showProperty = false %}
                         {% endfor %}
                     {% endif %}
-                    {% if profileAssociation.property.range is not null %}
-                        {% for profileAssociationClass in profileAssociation.property.range.profileAssociations if profileAssociationClass.profile.id == profileAssociation.profile.id and profileAssociationClass.systemType.id == 6 %}
+
+                    {% if propertyVersion is not null and propertyVersion.range is not null %}
+                        {% for profileAssociationClass in propertyVersion.range.profileAssociations
+                            if profileAssociationClass.profile.id == profileAssociation.profile.id
+                            and profileAssociationClass.systemType.id == 6 %}
                             {% set showProperty = false %}
                         {% endfor %}
                     {% endif %}
+
                     {% if profileAssociation.domain is not null %}
-                        {% for profileAssociationClass in profileAssociation.domain.profileAssociations if profileAssociationClass.profile.id == profileAssociation.profile.id and profileAssociationClass.systemType.id == 6 %}
-                            {% set showProperty = false %}
-                        {% endfor %}
-                    {% endif %}
-                    {% if profileAssociation.range is not null %}
-                        {% for profileAssociationClass in profileAssociation.range.profileAssociations if profileAssociationClass.profile.id == profileAssociation.profile.id and profileAssociationClass.systemType.id == 6 %}
+                        {% for profileAssociationClass in profileAssociation.domain.profileAssociations
+                            if profileAssociationClass.profile.id == profileAssociation.profile.id
+                            and profileAssociationClass.systemType.id == 6 %}
                             {% set showProperty = false %}
                         {% endfor %}
                     {% endif %}
 
-                    {% if showProperty == true %}
+                    {% if profileAssociation.range is not null %}
+                        {% for profileAssociationClass in profileAssociation.range.profileAssociations
+                            if profileAssociationClass.profile.id == profileAssociation.profile.id
+                            and profileAssociationClass.systemType.id == 6 %}
+                            {% set showProperty = false %}
+                        {% endfor %}
+                    {% endif %}
+
+                    {% if showProperty == true and propertyVersion is not null %}
                     <tr>
                         <td class="text-nowrap text-right small">
                             {% if profileAssociation.domain is not null %}
-                                <a href="{{ path('class_show', {'id': profileAssociation.domain.id }) }}">
+                                <a href="{{ path('class_show_with_version', {
+                                    'id': profileAssociation.domain.id,
+                                    'namespaceFromUrlId': propertyVersion.namespaceForVersion.id
+                                }) }}">
                                     {{ profileAssociation.domain }}
                                 </a>
                             {% elseif profileAssociation.property.domain is not null  %}
-                                <a href="{{ path('class_show', {'id': profileAssociation.property.domain.id }) }}">
+                                <a href="{{ path('class_show_with_version', {
+                                    'id': profileAssociation.property.domain.id,
+                                    'namespaceFromUrlId': propertyVersion.namespaceForVersion.id
+                                }) }}">
                                     {{ profileAssociation.property.domain }}
                                 </a>
                             {% endif %}
@@ -396,7 +422,10 @@
                             {% endif %}
                         </td>
                         <td class="text-nowrap text-center">
-                            <a href="{{ path('property_show', {'id': profileAssociation.property.id}) }}">
+                            <a href="{{ path('property_show_with_version', {
+                                'id': profileAssociation.property.id,
+                                'namespaceFromUrlId': propertyVersion.namespaceForVersion.id
+                            }) }}">
                                 {{ profileAssociation.property }}
                             </a>
                         </td>
@@ -407,11 +436,17 @@
                         </td>
                         <td class="text-nowrap small">
                             {% if profileAssociation.range is not null %}
-                                <a href="{{ path('class_show', {'id': profileAssociation.range.id }) }}">
+                                <a href="{{ path('class_show_with_version', {
+                                    'id': profileAssociation.range.id,
+                                    'namespaceFromUrlId': propertyVersion.namespaceForVersion.id
+                                }) }}">
                                     {{ profileAssociation.range }}
                                 </a>
                             {% elseif profileAssociation.property.range is not null %}
-                                <a href="{{ path('class_show', {'id': profileAssociation.property.range.id }) }}">
+                                <a href="{{ path('class_show_with_version', {
+                                    'id': profileAssociation.property.range.id,
+                                    'namespaceFromUrlId': propertyVersion.namespaceForVersion.id
+                                }) }}">
                                     {{ profileAssociation.property.range }}
                                 </a>
                             {% endif %}
@@ -650,8 +685,9 @@
                 {
                     targets: 3,
                     render: function ( data, type, row, meta ) {
-                        var urlClass = '{{ path("class_show", {'id' : 'classID'}) }}';
+                        var urlClass = '{{ path("class_show_with_version", {'id' : 'classID', 'namespaceFromUrlId': 'namespaceFromUrlId'}) }}';
                         urlClass = urlClass.replace("classID", row.id);
+                        urlClass = urlClass.replace("namespaceFromUrlId", row.namespaceForVersion);
 
                         return '<a href="' + urlClass + '">' + data + ' – ' + row.identifierInNamespace + '</a>';
 
