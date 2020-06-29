@@ -189,7 +189,7 @@ class NamespaceController  extends Controller
 
     /**
      * @Route("/namespace/{id}", name="namespace_show")
-     * @param string $namespace
+     * @param OntoNamespace $namespace
      * @return Response the rendered template
      */
     public function showAction(OntoNamespace $namespace)
