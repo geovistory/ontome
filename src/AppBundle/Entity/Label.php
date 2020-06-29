@@ -91,9 +91,9 @@ class Label
 
     /**
      * @ORM\ManyToMany(targetEntity="OntoNamespace",  inversedBy="Label", fetch="EXTRA_LAZY")
-     * @ORM\JoinTable(schema="che", name="associates_namespace",
+     * @ORM\JoinTable(schema="che", name="label",
      *      joinColumns={@ORM\JoinColumn(name="fk_label", referencedColumnName="pk_label")},
-     *      inverseJoinColumns={@ORM\JoinColumn(name="fk_namespace", referencedColumnName="pk_namespace")}
+     *      inverseJoinColumns={@ORM\JoinColumn(name="fk_namespace_for_version", referencedColumnName="pk_namespace")}
      *      )
      */
     private $namespaces;

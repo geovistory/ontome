@@ -100,13 +100,13 @@ class PropertyRepository extends EntityRepository
                        nsp.pk_namespace AS \"propertyNamespaceId\",
                        nsp.standard_label AS \"propertyNamespaceLabel\"
                 FROM tw1,
-                     che.associates_namespace asnsp,
+                     che.property_version pv,
                      che.namespace nsp,
                      che.property p,
                      che.class domain,
                      che.class range
-                WHERE asnsp.fk_property = tw1.pk_parent
-                AND   nsp.pk_namespace = asnsp.fk_namespace
+                WHERE pv.fk_property = tw1.pk_parent
+                AND   nsp.pk_namespace = pv.fk_namespace_for_version
                 AND depth > 1
                 AND p.pk_property = tw1.pk_parent
                 AND p.has_domain = domain.pk_class
@@ -165,13 +165,13 @@ class PropertyRepository extends EntityRepository
                        nsp.pk_namespace AS \"propertyNamespaceId\",
                        nsp.standard_label AS \"propertyNamespaceLabel\"
                     FROM che.descendant_property_hierarchy((:property)),
-                         che.associates_namespace asnsp,
+                         che.property_version pv,
                          che.namespace nsp,
                          che.property p,
                          che.class domain,
                          che.class range
-                    WHERE asnsp.fk_property = pk_child
-                    AND   nsp.pk_namespace = asnsp.fk_namespace
+                    WHERE pv.fk_property = pk_child
+                    AND   nsp.pk_namespace = pv.fk_namespace_for_version
                     AND p.pk_property = pk_child
                     AND p.has_domain = domain.pk_class
                     AND p.has_range = range.pk_class;
@@ -234,10 +234,10 @@ class PropertyRepository extends EntityRepository
                   replace(ancestors, '|', '→') AS ancestors,
                   (SELECT label FROM che.get_namespace_labels(nsp.pk_namespace) WHERE language_iso_code = 'en') AS namespace
                 FROM che.class_outgoing_inherited_properties(?),
-                  che.associates_namespace asnsp,
+                  che.property_version pv,
                   che.namespace nsp
-                WHERE asnsp.fk_property = pk_property
-                AND nsp.pk_namespace = asnsp.fk_namespace
+                WHERE pv.fk_property = pk_property
+                AND nsp.pk_namespace = pv.fk_namespace_for_version
                 AND nsp.pk_namespace IN (".$in.");";
 
         $conn = $this->getEntityManager()->getConnection();
@@ -297,10 +297,10 @@ class PropertyRepository extends EntityRepository
                   replace(ancestors, '|', '→') AS ancestors,
                   (SELECT label FROM che.get_namespace_labels(nsp.pk_namespace) WHERE language_iso_code = 'en') AS namespace
                 FROM che.class_ingoing_inherited_properties(?),
-                  che.associates_namespace asnsp,
+                  che.property_version pv,
                   che.namespace nsp 
-                WHERE asnsp.fk_property = pk_property
-                AND nsp.pk_namespace = asnsp.fk_namespace
+                WHERE pv.fk_property = pk_property
+                AND nsp.pk_namespace = pv.fk_namespace_for_version
                 AND nsp.pk_namespace IN (".$in.");";
 
         $conn = $this->getEntityManager()->getConnection();
@@ -426,8 +426,8 @@ class PropertyRepository extends EntityRepository
                                     ELSE aspro.fk_system_type
                                 END AS fk_system_type
                 FROM che.v_properties_with_domain_range
-                JOIN che.associates_namespace asnsp ON asnsp.fk_property = pk_property
-                JOIN che.namespace nsp ON nsp.pk_namespace = asnsp.fk_namespace 
+                JOIN che.property_version pv ON pv.fk_property = pk_property
+                JOIN che.namespace nsp ON nsp.pk_namespace = pv.fk_namespace_for_version 
                 LEFT JOIN che.associates_profile aspro ON aspro.fk_property = pk_property AND aspro.fk_profile = :profile AND aspro.fk_inheriting_range_class IS NULL AND aspro.fk_inheriting_domain_class IS NULL
                 
                 WHERE pk_domain = :class;";
@@ -460,8 +460,8 @@ class PropertyRepository extends EntityRepository
                             ELSE aspro.fk_system_type
                         END AS fk_system_type
                 FROM  che.v_properties_with_domain_range
-                JOIN che.associates_namespace asnsp ON asnsp.fk_property = pk_property
-                JOIN che.namespace nsp ON nsp.pk_namespace = asnsp.fk_namespace 
+                JOIN che.property_version pv ON pv.fk_property = pk_property
+                JOIN che.namespace nsp ON nsp.pk_namespace = pv.fk_namespace_for_version 
                 LEFT JOIN che.associates_profile aspro ON aspro.fk_property = pk_property AND aspro.fk_profile = :profile AND aspro.fk_inheriting_range_class IS NULL AND aspro.fk_inheriting_domain_class IS NULL
                 WHERE pk_range = :class;";
 
@@ -490,8 +490,8 @@ class PropertyRepository extends EntityRepository
                     ELSE aspro.fk_system_type
                     END AS fk_system_type
                 FROM che.class_outgoing_inherited_properties(:class)
-                JOIN che.associates_namespace asnsp ON asnsp.fk_property = pk_property
-                JOIN che.namespace nsp ON nsp.pk_namespace = asnsp.fk_namespace
+                JOIN che.property_version pv ON pv.fk_property = pk_property
+                JOIN che.namespace nsp ON nsp.pk_namespace = pv.fk_namespace_for_version
                 LEFT JOIN che.associates_profile aspro ON aspro.fk_property = pk_property AND aspro.fk_inheriting_domain_class = :class AND aspro.fk_inheriting_range_class = pk_range AND aspro.fk_profile = :profile
                 
                 UNION DISTINCT
@@ -536,8 +536,8 @@ class PropertyRepository extends EntityRepository
                             ELSE aspro.fk_system_type
                             END AS fk_system_type
                 FROM che.class_ingoing_inherited_properties(:class)
-                JOIN che.associates_namespace asnsp ON asnsp.fk_property = pk_property
-                JOIN che.namespace nsp ON nsp.pk_namespace = asnsp.fk_namespace
+                JOIN che.property_version pv ON pv.fk_property = pk_property
+                JOIN che.namespace nsp ON nsp.pk_namespace = pv.fk_namespace_for_version
                 JOIN che.class cls ON cls.pk_class = :class
                 LEFT JOIN che.associates_profile aspro ON aspro.fk_property = pk_property AND aspro.fk_inheriting_range_class = :class AND aspro.fk_inheriting_domain_class = pk_domain AND aspro.fk_profile = :profile
                 
@@ -564,166 +564,6 @@ class PropertyRepository extends EntityRepository
 
         return $stmt->fetchAll();
     }
-
-    /**
-     * @param Property $property
-     * @return array
-     */
-//    public function findRelationsById(Property $property)
-//    {
-//        $conn = $this->getEntityManager()
-//            ->getConnection();
-//
-//        $sql = "SELECT
-//                ea.pk_entity_association,
-//                ea.fk_target_property AS fk_related_property,
-//                p.identifier_in_namespace,
-//                p.standard_label,
-//                st.standard_label AS relation,
-//                txtp.pk_text_property,
-//                ns.pk_namespace AS \"rootNamespaceId\",
-//                ns.standard_label AS \"standardLabelNamespace\"
-//                FROM
-//                che.entity_association AS ea
-//                LEFT JOIN che.system_type AS st
-//                ON st.pk_system_type = ea.fk_system_type
-//                LEFT JOIN che.property AS p
-//                ON ea.fk_target_property = p.pk_property
-//                LEFT JOIN (SELECT * FROM che.text_property WHERE fk_text_property_type = 15) AS txtp
-//                ON txtp.fk_entity_association = ea.pk_entity_association
-//                LEFT JOIN che.associates_namespace AS ans
-//                ON ans.fk_entity_association = ea.pk_entity_association
-//                LEFT JOIN che.namespace AS ns
-//                ON ns.pk_namespace= che.get_root_namespace(ans.fk_namespace)
-//                WHERE
-//                ea.fk_system_type IN (18, 20)
-//                AND p.pk_property IS NOT NULL
-//                AND ea.fk_source_property = :property
-//                UNION
-//                SELECT
-//                ea.pk_entity_association,
-//                ea.fk_source_property AS fk_related_property,
-//                p.identifier_in_namespace,
-//                p.standard_label,
-//                st.standard_label AS relation,
-//                txtp.pk_text_property,
-//                ns.pk_namespace AS \"rootNamespaceId\",
-//                ns.standard_label AS \"standardLabelNamespace\"
-//                FROM
-//                che.entity_association AS ea
-//                LEFT JOIN che.system_type AS st
-//                ON st.pk_system_type = ea.fk_system_type
-//                LEFT JOIN che.property AS p
-//                ON ea.fk_source_property = p.pk_property
-//                LEFT JOIN (SELECT * FROM che.text_property WHERE fk_text_property_type = 15) AS txtp
-//                ON txtp.fk_entity_association = ea.pk_entity_association
-//                LEFT JOIN che.associates_namespace AS ans
-//                ON ans.fk_entity_association = ea.pk_entity_association
-//                LEFT JOIN che.namespace AS ns
-//                ON ns.pk_namespace= che.get_root_namespace(ans.fk_namespace)
-//                WHERE
-//                ea.fk_system_type IN (18, 20)
-//                AND p.pk_property IS NOT NULL
-//                AND ea.fk_target_property = :property";
-//
-//        $stmt = $conn->prepare($sql);
-//        $stmt->execute(array('property' => $property->getId()));
-//
-//        return $stmt->fetchAll();
-//    }
-
-    /**
-     * @param Property $property
-     * @return array
-     */
-//    public function findFilteredRelationsById(Property $property, User $user)
-//    {
-//        $conn = $this->getEntityManager()
-//            ->getConnection();
-//
-//        // Trouver d'abord les espaces de noms filtrés - juste les clés pour le IN de la requête ci-dessous
-//        $em = $this->getEntityManager();
-//        $filteredNamespaces = $em->getRepository('AppBundle:OntoNamespace')
-//            ->findAllActiveNamespacesForUser($user);
-//
-//        $propertyNamespace = $property->getOngoingNamespace();
-//        if(!in_array($propertyNamespace, $filteredNamespaces)){
-//            $filteredNamespaces[] = $propertyNamespace;
-//        }
-//
-//        $idsFilteredNamespaces = array();
-//        $qFilteredNamespaces = array();
-//        foreach ($filteredNamespaces as $namespace)
-//        {
-//            $idsFilteredNamespaces[] = $namespace->getId();
-//        }
-//
-//        // Construire la variable qui permet d'avoir ?,?,?... pour la requête ci-dessous
-//        for($i=0;$i<count($idsFilteredNamespaces);$i++){
-//            $qFilteredNamespaces[] = "?";
-//        }
-//        $strQFilteredNamespaces = join(',',$qFilteredNamespaces);
-//
-//        $sql = "SELECT
-//                ea.pk_entity_association,
-//                ea.fk_target_property AS fk_related_property,
-//                p.identifier_in_namespace,
-//                p.standard_label,
-//                st.standard_label AS relation,
-//                txtp.pk_text_property,
-//                ns.pk_namespace AS \"rootNamespaceId\",
-//                ns.standard_label AS \"standardLabelNamespace\"
-//                FROM
-//                che.entity_association AS ea
-//                LEFT JOIN che.system_type AS st
-//                ON st.pk_system_type = ea.fk_system_type
-//                LEFT JOIN che.property AS p
-//                ON ea.fk_target_property = p.pk_property
-//                LEFT JOIN (SELECT * FROM che.text_property WHERE fk_text_property_type = 15) AS txtp
-//                ON txtp.fk_entity_association = ea.pk_entity_association
-//                LEFT JOIN che.associates_namespace AS ans
-//                ON ans.fk_entity_association = ea.pk_entity_association
-//                LEFT JOIN che.namespace AS ns
-//                ON ns.pk_namespace= che.get_root_namespace(ans.fk_namespace)
-//                WHERE
-//                ea.fk_system_type IN (18, 20)
-//                AND p.pk_property IS NOT NULL
-//                AND ea.fk_source_property = ?
-//                AND ns.pk_namespace IN (".$strQFilteredNamespaces.")
-//                UNION
-//                SELECT
-//                ea.pk_entity_association,
-//                ea.fk_source_property AS fk_related_property,
-//                p.identifier_in_namespace,
-//                p.standard_label,
-//                st.standard_label AS relation,
-//                txtp.pk_text_property,
-//                ns.pk_namespace AS \"rootNamespaceId\",
-//                ns.standard_label AS \"standardLabelNamespace\"
-//                FROM
-//                che.entity_association AS ea
-//                LEFT JOIN che.system_type AS st
-//                ON st.pk_system_type = ea.fk_system_type
-//                LEFT JOIN che.property AS p
-//                ON ea.fk_source_property = p.pk_property
-//                LEFT JOIN (SELECT * FROM che.text_property WHERE fk_text_property_type = 15) AS txtp
-//                ON txtp.fk_entity_association = ea.pk_entity_association
-//                LEFT JOIN che.associates_namespace AS ans
-//                ON ans.fk_entity_association = ea.pk_entity_association
-//                LEFT JOIN che.namespace AS ns
-//                ON ns.pk_namespace= che.get_root_namespace(ans.fk_namespace)
-//                WHERE
-//                ea.fk_system_type IN (18, 20)
-//                AND p.pk_property IS NOT NULL
-//                AND ea.fk_target_property = ?
-//                AND ns.pk_namespace IN (".$strQFilteredNamespaces.");";
-//
-//        $stmt = $conn->prepare($sql);
-//        $stmt->execute(array_merge(array($property->getId()) , $idsFilteredNamespaces, array($property->getId()), $idsFilteredNamespaces));
-//
-//        return $stmt->fetchAll();
-//    }
-
 
     /**
      * @param PropertyVersion $propertyVersion

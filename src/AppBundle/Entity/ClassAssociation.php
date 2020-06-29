@@ -65,9 +65,9 @@ class ClassAssociation
 
     /**
      * @ORM\ManyToMany(targetEntity="OntoNamespace",  inversedBy="OntoClass", fetch="EXTRA_LAZY")
-     * @ORM\JoinTable(schema="che", name="associates_namespace",
+     * @ORM\JoinTable(schema="che", name="is_subclass_of",
      *      joinColumns={@ORM\JoinColumn(name="fk_is_subclass_of", referencedColumnName="pk_is_subclass_of")},
-     *      inverseJoinColumns={@ORM\JoinColumn(name="fk_namespace", referencedColumnName="pk_namespace")}
+     *      inverseJoinColumns={@ORM\JoinColumn(name="fk_namespace_for_version", referencedColumnName="pk_namespace")}
      *      )
      */
     private $namespaces;

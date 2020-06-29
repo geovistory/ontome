@@ -397,9 +397,9 @@ class ClassRepository extends EntityRepository
                     SELECT DISTINCT pk_child AS id,
                                     child_identifier AS \"text\"
                     FROM che.descendant_class_hierarchy (:range) cls
-                    JOIN che.associates_namespace asnsp ON asnsp.fk_class = cls.pk_child
+                    JOIN che.class_version cv ON cv.fk_class = cls.pk_child
                     JOIN che.associates_referenced_namespace asrefnsp 
-                        ON asrefnsp.fk_referenced_namespace = asnsp.fk_namespace AND asrefnsp.fk_profile = :profile 
+                        ON asrefnsp.fk_referenced_namespace = cv.fk_namespace_for_version AND asrefnsp.fk_profile = :profile 
                     
                     EXCEPT 
                     
@@ -454,9 +454,9 @@ class ClassRepository extends EntityRepository
                     SELECT DISTINCT pk_child AS id,
                                     child_identifier AS \"text\"
                     FROM che.descendant_class_hierarchy (:domain) cls
-                    JOIN che.associates_namespace asnsp ON asnsp.fk_class = cls.pk_child
+                    JOIN che.class_version cv ON cv.fk_class = cls.pk_child
                     JOIN che.associates_referenced_namespace asrefnsp 
-                        ON asrefnsp.fk_referenced_namespace = asnsp.fk_namespace AND asrefnsp.fk_profile = :profile 
+                        ON asrefnsp.fk_referenced_namespace = cv.fk_namespace_for_version AND asrefnsp.fk_profile = :profile 
                     
                     EXCEPT 
                     
