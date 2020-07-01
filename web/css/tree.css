@@ -1,3 +1,27 @@
+.node {
+    cursor: pointer;
+}
+
+.link {
+    fill: none;
+    stroke: #ccc;
+    stroke-width: 1.5px;
+}
+
+.templink {
+    fill: none;
+    stroke: red;
+    stroke-width: 3px;
+}
+
+.ghostCircle.show{
+    display:block;
+}
+
+.ghostCircle, .activeDrag .ghostCircle{
+    display: none;
+}
+
 /* classes tree */
 
 .search {
@@ -5,7 +29,8 @@
 }
 
 #tree-container {
-    overflow-x:scroll;
+    border: solid 1px #CCC;
+    margin-top: 20px;
 }
 
 #tree-container-properties {

@@ -10,12 +10,12 @@
 
 {% block body %}
 
-    <div id="content" class="container">
+    <div id="content-classes-tree">
         <h3>Classes tree</h3>
-
-        <select id="search"></select>
+        <p><select id="search"></select></p>
         <p>
             <button id="reset-tree" onclick="javascript:reset();">Reset</button>
+            <span class="pull-right"><span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>&nbsp;<em><small>Use mouse wheel (or double click / shift + double click) to zoom in/out. Use left mouse button to pan.</small></em></span>
         </p>
         <div id="tree-container" data-url="{{ url('classes_tree_json') }}"></div>
         <div>
@@ -23,7 +23,7 @@
                 <em>Legend: </em>
             </p>
             <svg id="legend-container" data-url="{{ url('classes_tree_legend_json') }}" width="300"/>
-            <p><span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span><em>Use mouse wheel to zoom in/out.</em></p>
+
         </div>
     </div>
 
