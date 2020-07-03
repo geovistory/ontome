@@ -527,11 +527,12 @@
                                 {% endif %}
                             </td>
                             <td class="text-center">
-                                <a href="{{ path('property_show', {
+                                <a href="{{ path('property_show_with_version', {
                                     'id': association.parentProperty.id,
+                                    'namespaceFromUrlId': propertyVersion.namespaceForVersion.id,
                                     '_fragment': 'property-hierarchy'
                                 }) }}">
-                                    {{ association.parentProperty.invertedLabel }}
+                                    {{ association.parentProperty.propertyVersionForDisplay(propertyVersion.namespaceForVersion).invertedLabel }}
                                 </a>
                             </td>
                             <td class="small" style="padding-right: 30px;">

@@ -528,7 +528,7 @@
                     {% if classVersion.class.childClassAssociations|length > 1  %}
                         {% set tooltipClass = "rdfs:subclassOf the classes listed below" %}
                     {% endif %}
-                    <a data-toggle="tooltip" data-placement="right" title="{{ classVersion.class }} {{ tooltipClass }}">
+                    <a data-toggle="tooltip" data-placement="right" title="{{ classVersion }} {{ tooltipClass }}">
                         <span class="fas fa-info-circle"></span>
                     </a>
                 </h3>
@@ -552,10 +552,10 @@
                                     'id': association.parentClass.id,
                                     '_fragment': 'class-hierarchy'
                                 }) }}">
-                                    {{ association.parentClass.invertedLabel }}
+                                    {{ association.parentClass.classVersionForDisplay(classVersion.namespaceForVersion).invertedLabel }}
                                 </a>
                             </td>
-                            <td>{{ association.parentClass.ongoingNamespace }}</td>
+                            <td>{{ association.parentClass.classVersionForDisplay(classVersion.namespaceForVersion).namespaceForVersion }}</td>
                             <td>{{ association.namespaceForVersion }}</td>
                             <td>
                                 {% if association.textProperties is not null %}
@@ -870,7 +870,7 @@
                                 </a>
                             </td>
                             <td>
-                                {{ classVersion.class.invertedLabel }} (is a
+                                {{ classVersion.invertedLabel }} (is a
                                 <a
                                         href="{{ path('class_show', {
                                             'id': ingoingInheritedProperty.rangeId

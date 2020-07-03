@@ -493,12 +493,12 @@
                     {% for propertyVersion in namespace.propertyVersions %}
                         <tr>
                             <td class="text-right small">
-                                {% if propertyVersion.domain is not null %}
+                                {% if propertyVersion.domain is not null and propertyVersion.domainNamespace is not null %}
                                     <a href="{{ path('class_show_with_version', {
                                         'id': propertyVersion.domain.id,
-                                        'namespaceFromUrlId': propertyVersion.namespaceForVersion.id
+                                        'namespaceFromUrlId': propertyVersion.domainNamespace.id
                                     }) }}">
-                                        {{ propertyVersion.domain }}
+                                        {{ propertyVersion.domain.classVersionForDisplay(propertyVersion.domainNamespace) }}
                                     </a>
                                 {% endif %}
                             </td>
@@ -520,12 +520,12 @@
                                 {% endif %}
                             </td>
                             <td class="small">
-                                {% if propertyVersion.range is not null %}
+                                {% if propertyVersion.range is not null and propertyVersion.rangeNamespace is not null %}
                                     <a href="{{ path('class_show_with_version', {
                                         'id': propertyVersion.range.id,
-                                        'namespaceFromUrlId': propertyVersion.namespaceForVersion.id
+                                        'namespaceFromUrlId': propertyVersion.rangeNamespace.id
                                     }) }}">
-                                        {{ propertyVersion.range }}
+                                        {{ propertyVersion.range.classVersionForDisplay(propertyVersion.rangeNamespace) }}
                                     </a>
                                 {% endif %}
                             </td>

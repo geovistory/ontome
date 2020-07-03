@@ -451,7 +451,7 @@
                         <div class="row well well-sm" style="margin: 19px 0;">
                             <div class="col-lg-2">
                                 <p class="text-center"><label>Domain</label></p>
-                                <p>{{ form_widget(propertyForm.domain) }}</p>
+                                <p>{{ form_widget(propertyForm.domainVersion) }}</p>
                             </div>
                             <div class="col-lg-2">
                                 <p class="text-center"><label>Domain quantifiers</label></p>
@@ -473,7 +473,7 @@
                             </div>
                             <div class="col-lg-2">
                                 <p class="text-center"><label>Range</label></p>
-                                <p>{{ form_widget(propertyForm.range) }}</p>
+                                <p>{{ form_widget(propertyForm.rangeVersion) }}</p>
                             </div>
                         </div>
                         <button type="submit" class="btn btn-primary" formnovalidate>Save</button>
@@ -573,7 +573,7 @@
                     {% if propertyVersion.property.childPropertyAssociations|length > 1  %}
                         {% set tooltipProperty = "rdfs:subpropertyOf the properties listed below" %}
                     {% endif %}
-                    <a data-toggle="tooltip" data-placement="right" title="{{ propertyVersion.property }} {{ tooltipProperty }}">
+                    <a data-toggle="tooltip" data-placement="right" title="{{ propertyVersion }} {{ tooltipProperty }}">
                         <span class="fas fa-info-circle"></span>
                     </a>
                 </h3>
@@ -608,11 +608,12 @@
                                 {% endif %}
                             </td>
                             <td class="text-center">
-                                <a href="{{ path('property_show', {
+                                <a href="{{ path('property_show_with_version', {
                                     'id': association.parentProperty.id,
+                                    'namespaceFromUrlId': propertyVersion.namespaceForVersion.id,
                                     '_fragment': 'property-hierarchy'
                                 }) }}">
-                                    {{ association.parentProperty.invertedLabel }}
+                                    {{ association.parentProperty.propertyVersionForDisplay(propertyVersion.namespaceForVersion).invertedLabel }}
                                 </a>
                             </td>
                             <td class="small" style="padding-right: 30px;">

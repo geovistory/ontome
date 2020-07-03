@@ -26,6 +26,7 @@ use Symfony\Component\Form\Form;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class PropertyController extends Controller
@@ -302,9 +303,27 @@ class PropertyController extends Controller
         $domainRange = $em->getRepository('AppBundle:Property')->findDomainAndRangeByPropertyVersionAndNamespacesId($propertyVersion, $namespacesId);
         $relations = $em->getRepository('AppBundle:Property')->findRelationsByPropertyVersionAndNamespacesId($propertyVersion, $namespacesId);
 
-        $form = $this->createForm(PropertyEditForm::class, $propertyVersion);
+
+        //$classesVersion = $em->getRepository('AppBundle:OntoClassVersion')->findBy(array('namespaceForVersion' => $namespacesId));
+        $arrayClassesVersion = $em->getRepository('AppBundle:OntoClassVersion')
+            ->findIdAndStandardLabelOfClassesVersionByNamespacesId($namespacesId);
+        //var_dump($arrayClassesVersion); die;
+
+        $propertyVersion->setCreator($this->getUser());
+        $propertyVersion->setModifier($this->getUser());
+        $propertyVersion->setCreationTime(new \DateTime('now'));
+        $propertyVersion->setModificationTime(new \DateTime('now'));
+
+        $form = $this->createForm(PropertyEditForm::class, $propertyVersion, array(
+            'classesVersion'=>$arrayClassesVersion,
+            'defaultDomain' => $propertyVersion->getDomain()->getId(),
+            'defaultRange' => $propertyVersion->getRange()->getId()));
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
+            $domain = $em->getRepository("AppBundle:OntoClass")->find($form->get("domainVersion")->getData());
+            $propertyVersion->setDomain($domain);
+            $range = $em->getRepository("AppBundle:OntoClass")->find($form->get("rangeVersion")->getData());
+            $propertyVersion->setRange($range);
             $em = $this->getDoctrine()->getManager();
             $em->persist($propertyVersion);
             $em->flush();
@@ -354,7 +373,6 @@ class PropertyController extends Controller
 
         $this->get('logger')
             ->info('Showing property: '.$property->getIdentifierInNamespace());
-
 
         return $this->render('property/edit.html.twig', array(
             'propertyVersion' => $propertyVersion,
