@@ -690,52 +690,6 @@ class Property
         $profileAssociation->setProperty($this);
     }
 
-    // TODO Projet Delta A supprimer
-    public function getInvertedLabel()
-    {
-        if($this->getIdentifierInNamespace() === $this->getStandardLabel()){
-            $s = $this->getIdentifierInNamespace();
-        }
-        else if(!is_null($this->getStandardLabel())) {
-            $s = $this->getIdentifierInNamespace().' '.$this->getStandardLabel();
-        }
-        else $s = $this->getIdentifierInNamespace();
-        return (string) $s;
-    }
-
-    // TODO Projet Delta A supprimer
-    public function getInvertedLabelWithoutInverseLabel()
-    {
-        if($this->getIdentifierInNamespace() === $this->getStandardLabel()){
-            $s = $this->getIdentifierInNamespace();
-        }
-        else if(!is_null($this->getStandardLabel())) {
-            $standardLabelWithoutInverseLabel = "";
-            foreach($this->getLabels() as $label){
-                if($label->getIsStandardLabelForLanguage() && $label->getLanguageIsoCode() == "en"){
-                    $standardLabelWithoutInverseLabel = $label->getLabel();
-                    break;
-                }
-            }
-            $s = $this->getIdentifierInNamespace().' '.$standardLabelWithoutInverseLabel;
-        }
-        else $s = $this->getIdentifierInNamespace();
-        return (string) $s;
-    }
-
-    // TODO Projet Delta A supprimer
-    public function __toString()
-    {
-        if($this->getIdentifierInNamespace() === explode(' (',$this->getStandardLabel())[0]){
-            $s = $this->getStandardLabel();
-        }
-        else if(!is_null($this->getStandardLabel())) {
-            $s = $this->getStandardLabel().' – '.$this->getIdentifierInNamespace();
-        }
-        else $s = $this->getIdentifierInNamespace();
-        return (string) $s;
-    }
-
     /**
      * @return mixed
      */

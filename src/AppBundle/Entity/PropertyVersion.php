@@ -43,11 +43,23 @@ class PropertyVersion
     private $domain;
 
     /**
+     * @ORM\ManyToOne(targetEntity="OntoNamespace")
+     * @ORM\JoinColumn(name="fk_domain_namespace", referencedColumnName="pk_namespace", nullable=false)
+     */
+    private $domainNamespace;
+
+    /**
      * @Assert\NotBlank()
      * @ORM\ManyToOne(targetEntity="OntoClass")
      * @ORM\JoinColumn(name="has_range", referencedColumnName="pk_class", nullable=false)
      */
     private $range;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="OntoNamespace")
+     * @ORM\JoinColumn(name="fk_range_namespace", referencedColumnName="pk_namespace", nullable=false)
+     */
+    private $rangeNamespace;
 
     /**
      * @ORM\Column(type="smallint", name="domain_instances_min_quantifier")
@@ -244,6 +256,22 @@ class PropertyVersion
     }
 
     /**
+     * @return mixed
+     */
+    public function getDomainNamespace()
+    {
+        return $this->domainNamespace;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getRangeNamespace()
+    {
+        return $this->rangeNamespace;
+    }
+
+    /**
      * @return string the formatted quantifiers string
      */
     public function getQuantifiers()
@@ -368,6 +396,22 @@ class PropertyVersion
     public function setNamespaceForVersion($namespaceForVersion)
     {
         $this->namespaceForVersion = $namespaceForVersion;
+    }
+
+    /**
+     * @param mixed $domainNamespace
+     */
+    public function setDomainNamespace($domainNamespace)
+    {
+        $this->domainNamespace = $domainNamespace;
+    }
+
+    /**
+     * @param mixed $rangeNamespace
+     */
+    public function setRangeNamespace($rangeNamespace)
+    {
+        $this->rangeNamespace = $rangeNamespace;
     }
 
     /**

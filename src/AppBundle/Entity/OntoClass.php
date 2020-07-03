@@ -151,12 +151,6 @@ class OntoClass
     private $comments;
 
     /**
-     * @ORM\ManyToOne(targetEntity="OntoNamespace")
-     * @ORM\JoinColumn(name="fk_ongoing_namespace", referencedColumnName="pk_namespace", nullable=true)
-     */
-    private $ongoingNamespace;
-
-    /**
      * @Assert\Valid()
      * @ORM\OneToMany(targetEntity="AppBundle\Entity\ProfileAssociation", mappedBy="class", cascade={"persist"})
      * @ORM\OrderBy({"systemType" = "ASC"})
@@ -580,32 +574,6 @@ class OntoClass
     public function getEntityAssociations()
     {
         return array_merge($this->getSourceEntityAssociations()->toArray(), $this->getTargetEntityAssociations()->toArray());
-    }
-
-    // TODO Projet Delta A supprimer
-    public function getInvertedLabel()
-    {
-        if($this->getIdentifierInNamespace() === $this->getStandardLabel()){
-            $s = $this->getIdentifierInNamespace();
-        }
-        else if(!is_null($this->getStandardLabel())) {
-            $s = $this->getIdentifierInNamespace().' '.$this->getStandardLabel();
-        }
-        else $s = $this->getIdentifierInNamespace();
-        return (string) $s;
-    }
-
-    // TODO Projet Delta A supprimer
-    public function __toString()
-    {
-        if($this->getIdentifierInNamespace() === $this->getStandardLabel()){
-            $s = $this->getIdentifierInNamespace();
-        }
-        else if(!is_null($this->getStandardLabel())) {
-            $s = $this->getStandardLabel().' – '.$this->getIdentifierInNamespace();
-        }
-        else $s = $this->getIdentifierInNamespace();
-        return (string) $s;
     }
 
     /**

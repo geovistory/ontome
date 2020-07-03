@@ -13,7 +13,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Class OntoClassVersion
- * @ORM\Entity
+ * @ORM\Entity(repositoryClass="AppBundle\Repository\ClassVersionRepository")
  * @ORM\Table(schema="che", name="class_version")
  */
 class OntoClassVersion

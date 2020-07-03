@@ -400,5 +400,4 @@ class ClassController extends Controller
         //return new JsonResponse(null,404, array('content-type'=>'application/problem+json'));
         return new JsonResponse($classes[0]['json'],200, array(), true);
     }
-
 }
