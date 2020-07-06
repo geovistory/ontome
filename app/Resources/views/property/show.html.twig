@@ -515,9 +515,9 @@
                         if association.namespaceForVersion.id in namespacesId %}
                         <tr>
                             <td class="text-right small">
-                                {% if association.parentProperty.domain is not null %}
+                                {% if association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).domain is not null %}
                                     <a href="{{ path('class_show', {'id': association.parentProperty.domain.id }) }}">
-                                        {{ association.parentProperty.domain }}
+                                        {{ association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).domain.classVersionForDisplay(association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).domainNamespace) }}
                                     </a>
                                 {% endif %}
                             </td>
@@ -541,9 +541,9 @@
                                 {% endif %}
                             </td>
                             <td class="small">
-                                {% if association.parentProperty.range is not null %}
+                                {% if association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).range is not null %}
                                     <a href="{{ path('class_show', {'id': association.parentProperty.range.id }) }}">
-                                        {{ association.parentProperty.range }}
+                                        {{ association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).range.classVersionForDisplay(association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).rangeNamespace) }}
                                     </a>
                                 {% endif %}
                             </td>

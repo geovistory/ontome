@@ -634,11 +634,10 @@
                         <tr>
                             <td>{{ relation.systemType }}</td>
                             {% if classVersion.class.id == relation.sourceClass.id %}
-                            <td><a href="{{ path('class_show_with_version', {
-                                    'id': relation.targetClass.id,
-                                    'namespaceFromUrlId': classVersion.namespaceForVersion.id
+                            <td><a href="{{ path('class_show', {
+                                    'id': relation.targetClass.id
                                 }) }}">
-                                    {{ relation.targetClass.invertedLabel }}
+                                    {{ relation.targetClass.classVersionForDisplay().invertedLabel }}
                                 </a>
                             </td>
                             {% else %}

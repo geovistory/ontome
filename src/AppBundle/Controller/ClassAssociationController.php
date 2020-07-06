@@ -46,12 +46,39 @@ class ClassAssociationController extends Controller
         $classAssociation->addTextProperty($justification);
         $classAssociation->setChildClass($childClass);
 
-        $form = $this->createForm(ParentClassAssociationForm::class, $classAssociation);
+        // FILTRAGE : Récupérer les clés de namespaces à utiliser
+        if(is_null($this->getUser()) || $this->getUser()->getCurrentActiveProject()->getId() == 21){ // Utilisateur non connecté OU connecté et utilisant le projet public
+            $namespacesId = $em->getRepository('AppBundle:OntoNamespace')->findPublicProjectNamespacesId();
+        }
+        else{ // Utilisateur connecté et utilisant un autre projet
+            $namespacesId = $em->getRepository('AppBundle:OntoNamespace')->findNamespacesIdByUser($this->getUser());
+        }
+
+        // Affaiblir le filtrage en rajoutant le namespaceForVersion de la classVersion si indisponible
+        $namespaceForChildClassVersion = $childClass->getClassVersionForDisplay()->getNamespaceForVersion();
+        if(!in_array($namespaceForChildClassVersion->getId(), $namespacesId)){
+            $namespacesId[] = $namespaceForChildClassVersion->getId();
+        }
+        // Sans oublier les namespaces références si indisponibles
+        foreach($namespaceForChildClassVersion->getReferencedNamespaceAssociations() as $referencedNamespacesAssociation){
+            if(!in_array($referencedNamespacesAssociation->getReferencedNamespace()->getId(), $namespacesId)){
+                $namespacesId[] = $referencedNamespacesAssociation->getReferencedNamespace()->getId();
+            }
+        }
+
+        $arrayClassesVersion = $em->getRepository('AppBundle:OntoClassVersion')
+            ->findIdAndStandardLabelOfClassesVersionByNamespacesId($namespacesId);
+
+        $form = $this->createForm(ParentClassAssociationForm::class, $classAssociation, array(
+            "classesVersion" => $arrayClassesVersion
+        ));
 
         // only handles data on POST
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $classAssociation = $form->getData();
+            $parentClass = $em->getRepository("AppBundle:OntoClass")->find($form->get("parentClassVersion")->getData());
+            $classAssociation->setParentClass($parentClass);
             $classAssociation->setNamespaceForVersion($this->getUser()->getCurrentOngoingNamespace());
             $classAssociation->setCreator($this->getUser());
             $classAssociation->setModifier($this->getUser());
@@ -120,14 +147,50 @@ class ClassAssociationController extends Controller
      */
     public function editAction(Request $request, ClassAssociation $classAssociation)
     {
+        // Récupérer la version de la classe demandée
+        $childClassVersion = $classAssociation->getChildClass()->getClassVersionForDisplay();
 
-        $this->denyAccessUnlessGranted('edit', $classAssociation->getChildClass()->getClassVersionForDisplay());
+        // On doit avoir une version de la classe sinon on lance une exception.
+        if(is_null($childClassVersion)){
+            throw $this->createNotFoundException('The class n°'.$classAssociation->getChildClass()->getId().' has no version. Please contact an administrator.');
+        }
 
-        $form = $this->createForm(ClassAssociationEditForm::class, $classAssociation);
+        $this->denyAccessUnlessGranted('edit', $childClassVersion);
+
+        $em = $this->getDoctrine()->getManager();
+
+        // FILTRAGE : Récupérer les clés de namespaces à utiliser
+        if(is_null($this->getUser()) || $this->getUser()->getCurrentActiveProject()->getId() == 21){ // Utilisateur non connecté OU connecté et utilisant le projet public
+            $namespacesId = $em->getRepository('AppBundle:OntoNamespace')->findPublicProjectNamespacesId();
+        }
+        else{ // Utilisateur connecté et utilisant un autre projet
+            $namespacesId = $em->getRepository('AppBundle:OntoNamespace')->findNamespacesIdByUser($this->getUser());
+        }
+
+        // Affaiblir le filtrage en rajoutant le namespaceForVersion de la classVersion si indisponible
+        $namespaceForChildClassVersion = $childClassVersion->getNamespaceForVersion();
+        if(!in_array($namespaceForChildClassVersion->getId(), $namespacesId)){
+            $namespacesId[] = $namespaceForChildClassVersion->getId();
+        }
+        // Sans oublier les namespaces références si indisponibles
+        foreach($namespaceForChildClassVersion->getReferencedNamespaceAssociations() as $referencedNamespacesAssociation){
+            if(!in_array($referencedNamespacesAssociation->getReferencedNamespace()->getId(), $namespacesId)){
+                $namespacesId[] = $referencedNamespacesAssociation->getReferencedNamespace()->getId();
+            }
+        }
+
+        $arrayClassesVersion = $em->getRepository('AppBundle:OntoClassVersion')
+            ->findIdAndStandardLabelOfClassesVersionByNamespacesId($namespacesId);
+
+        $form = $this->createForm(ClassAssociationEditForm::class, $classAssociation, array(
+            'classesVersion' => $arrayClassesVersion,
+            'defaultParent' => $classAssociation->getParentClass()->getId()));
 
         // only handles data on POST
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
+            $parentClass = $em->getRepository("AppBundle:OntoClass")->find($form->get("parentClassVersion")->getData());
+            $classAssociation->setParentClass($parentClass);
             $classAssociation = $form->getData();
             $classAssociation->setModifier($this->getUser());
             $classAssociation->setModificationTime(new \DateTime('now'));

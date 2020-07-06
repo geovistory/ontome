@@ -40,12 +40,6 @@ class PropertyEditForm extends AbstractType
             );
         }
 
-        /*$choices = array();
-        foreach ($options['classesVersion'] as $cv){
-            $standardLabel = $cv->__toString();
-            $choices[$cv->getClass()->getId()] = $standardLabel;
-        }*/
-
         $choices = array();
         foreach ($options['classesVersion'] as $cv){
             if($cv['standardLabel'] != $cv['identifierInNamespace'])

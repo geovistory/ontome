@@ -121,18 +121,54 @@ class PropertyAssociationController extends Controller
      */
     public function editAction(Request $request, PropertyAssociation $propertyAssociation)
     {
+        // Récupérer la version de la propriété demandée
+        $childPropertyVersion = $propertyAssociation->getChildProperty()->getPropertyVersionForDisplay();
 
-        $this->denyAccessUnlessGranted('edit', $propertyAssociation->getChildProperty()->getPropertyVersionForDisplay());
+        // On doit avoir une version de la propriété sinon on lance une exception.
+        if(is_null($childPropertyVersion)){
+            throw $this->createNotFoundException('The property n°'.$propertyAssociation->getChildProperty()->getId().' has no version. Please contact an administrator.');
+        }
 
-        $form = $this->createForm(PropertyAssociationEditForm::class, $propertyAssociation);
+        $this->denyAccessUnlessGranted('edit', $childPropertyVersion);
+
+        $em = $this->getDoctrine()->getManager();
+
+        // FILTRAGE : Récupérer les clés de namespaces à utiliser
+        if(is_null($this->getUser()) || $this->getUser()->getCurrentActiveProject()->getId() == 21){ // Utilisateur non connecté OU connecté et utilisant le projet public
+            $namespacesId = $em->getRepository('AppBundle:OntoNamespace')->findPublicProjectNamespacesId();
+        }
+        else{ // Utilisateur connecté et utilisant un autre projet
+            $namespacesId = $em->getRepository('AppBundle:OntoNamespace')->findNamespacesIdByUser($this->getUser());
+        }
+
+        // Affaiblir le filtrage en rajoutant le namespaceForVersion de la classVersion si indisponible
+        $namespaceForChildPropertyVersion = $childPropertyVersion->getNamespaceForVersion();
+        if(!in_array($namespaceForChildPropertyVersion->getId(), $namespacesId)){
+            $namespacesId[] = $namespaceForChildPropertyVersion->getId();
+        }
+        // Sans oublier les namespaces références si indisponibles
+        foreach($namespaceForChildPropertyVersion->getReferencedNamespaceAssociations() as $referencedNamespacesAssociation){
+            if(!in_array($referencedNamespacesAssociation->getReferencedNamespace()->getId(), $namespacesId)){
+                $namespacesId[] = $referencedNamespacesAssociation->getReferencedNamespace()->getId();
+            }
+        }
+
+        $arrayPropertiesVersion = $em->getRepository('AppBundle:PropertyVersion')
+            ->findIdAndStandardLabelOfPropertiesVersionByNamespacesId($namespacesId);
+
+        $form = $this->createForm(PropertyAssociationEditForm::class, $propertyAssociation, array(
+            'propertiesVersion' => $arrayPropertiesVersion,
+            'defaultParent' => $propertyAssociation->getParentProperty()->getId()));
 
         // only handles data on POST
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
+            $parentProperty = $em->getRepository("AppBundle:Property")->find($form->get("parentPropertyVersion")->getData());
+            $propertyAssociation->setParentProperty($parentProperty);
+
             $propertyAssociation = $form->getData();
             $propertyAssociation->setModifier($this->getUser());
             $propertyAssociation->setModificationTime(new \DateTime('now'));
-
 
             $em = $this->getDoctrine()->getManager();
             $em->persist($propertyAssociation);

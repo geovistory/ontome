@@ -45,13 +45,12 @@ class OutgoingPropertyQuickAddForm extends AbstractType
             );
         }
 
-        // FILTRAGE : Récupérer les clés de namespaces à utiliser
-        // Il n'y a pas besoin de rajouter le namespace de la propriété actuelle : il doit être activé pour le formulaire.
-        if(is_null($user) || $user->getCurrentActiveProject()->getId() == 21){ // Utilisateur non connecté OU connecté et utilisant le projet public
-            $namespacesId = $this->em->getRepository('AppBundle:OntoNamespace')->findPublicProjectNamespacesId();
-        }
-        else{ // Utilisateur connecté et utilisant un autre projet
-            $namespacesId = $this->em->getRepository('AppBundle:OntoNamespace')->findNamespacesIdByUser($user);
+        $choices = array();
+        foreach ($options['classesVersion'] as $cv){
+            if($cv['standardLabel'] != $cv['identifierInNamespace'])
+                $choices[$cv['identifierInNamespace']." ".$cv['standardLabel']] = $cv['id'];
+            else
+                $choices[$cv['standardLabel']] = $cv['id'];
         }
 
         $builder
@@ -65,14 +64,11 @@ class OutgoingPropertyQuickAddForm extends AbstractType
                 'allow_add' => true,
                 'by_reference' => false,
             ))
-            ->add('range', EntityType::class,
-                array(
-                    'class' => OntoClass::class,
-                    'label' => "Range",
-                    'query_builder' => function(ClassRepository $repo) use ($namespacesId){
-                        return $repo->findClassesByNamespacesIdQueryBuilder($namespacesId);
-                    }
-                ))
+            ->add('rangeVersion', ChoiceType::class, array(
+                'mapped' => false,
+                'placeholder'       => '',
+                'choices'           => $choices
+            ))
             ->add('domainMinQuantifier',ChoiceType::class, array(
                 'choices'  => array(
                     'Min' => null,
@@ -137,7 +133,8 @@ class OutgoingPropertyQuickAddForm extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => 'AppBundle\Entity\Property',
-            "allow_extra_fields" => true
+            "allow_extra_fields" => true,
+            'classesVersion' => null
         ]);
     }
 }

@@ -83,7 +83,6 @@ class PropertyController extends Controller
         $scopeNote = new TextProperty();
         $scopeNote->setProperty($property);
         $scopeNote->setSystemType($systemTypeScopeNote);
-        //$scopeNote->addNamespace($this->getUser()->getCurrentOngoingNamespace());TODO: delete this line after successful test of the SolutionD branch
         $scopeNote->setNamespaceForVersion($classVersion->getNamespaceForVersion());
         $scopeNote->setCreator($this->getUser());
         $scopeNote->setModifier($this->getUser());
@@ -94,7 +93,6 @@ class PropertyController extends Controller
 
         $label = new Label();
         $label->setProperty($property);
-        //$label->addNamespace($this->getUser()->getCurrentOngoingNamespace());TODO: delete this line after successful test of the SolutionD branch
         $label->setNamespaceForVersion($classVersion->getNamespaceForVersion());
         $label->setIsStandardLabelForLanguage(true);
         $label->setCreator($this->getUser());
@@ -113,18 +111,45 @@ class PropertyController extends Controller
         $property->addPropertyVersion($propertyVersion);
 
         $property->setIsManualIdentifier(is_null($classVersion->getNamespaceForVersion()->getTopLevelNamespace()->getPropertyPrefix()));
-        //$property->addNamespace($this->getUser()->getCurrentOngoingNamespace());TODO: delete this line after successful test of the SolutionD branch
         $property->setCreator($this->getUser());
         $property->setModifier($this->getUser());
 
-        $form = null;
-        if($type == 'outgoing') {
-            $form = $this->createForm(OutgoingPropertyQuickAddForm::class, $property);
+        $em = $this->getDoctrine()->getManager();
+
+        // FILTRAGE : Récupérer les clés de namespaces à utiliser
+        if(is_null($this->getUser()) || $this->getUser()->getCurrentActiveProject()->getId() == 21){ // Utilisateur non connecté OU connecté et utilisant le projet public
+            $namespacesId = $em->getRepository('AppBundle:OntoNamespace')->findPublicProjectNamespacesId();
         }
-        elseif ($type == 'ingoing') {
-            $form = $this->createForm(IngoingPropertyQuickAddForm::class, $property);
+        else{ // Utilisateur connecté et utilisant un autre projet
+            $namespacesId = $em->getRepository('AppBundle:OntoNamespace')->findNamespacesIdByUser($this->getUser());
         }
 
+        // Affaiblir le filtrage en rajoutant le namespaceForVersion de la classVersion si indisponible
+        $namespaceForPropertyVersion = $propertyVersion->getNamespaceForVersion();
+        if(!in_array($namespaceForPropertyVersion->getId(), $namespacesId)){
+            $namespacesId[] = $namespaceForPropertyVersion->getId();
+        }
+        // Sans oublier les namespaces références si indisponibles
+        foreach($namespaceForPropertyVersion->getReferencedNamespaceAssociations() as $referencedNamespacesAssociation){
+            if(!in_array($referencedNamespacesAssociation->getReferencedNamespace()->getId(), $namespacesId)){
+                $namespacesId[] = $referencedNamespacesAssociation->getReferencedNamespace()->getId();
+            }
+        }
+
+        $arrayClassesVersion = $em->getRepository('AppBundle:OntoClassVersion')
+            ->findIdAndStandardLabelOfClassesVersionByNamespacesId($namespacesId);
+
+        $form = null;
+        if($type == 'outgoing') {
+            $form = $this->createForm(OutgoingPropertyQuickAddForm::class, $property, array(
+                "classesVersion" => $arrayClassesVersion
+            ));
+        }
+        elseif ($type == 'ingoing') {
+            $form = $this->createForm(IngoingPropertyQuickAddForm::class, $property, array(
+                "classesVersion" => $arrayClassesVersion
+            ));
+        }
 
         // only handles data on POST
         $form->handleRequest($request);
@@ -132,11 +157,13 @@ class PropertyController extends Controller
             $property = $form->getData();
             if($type == 'outgoing') {
                 $propertyVersion->setDomain($class);
-                $propertyVersion->setRange($property->getRange());
+                $range = $em->getRepository("AppBundle:OntoClass")->find($form->get("rangeVersion")->getData());
+                $propertyVersion->setRange($range);
             }
             elseif ($type == 'ingoing') {
                 $propertyVersion->setRange($class);
-                $propertyVersion->setDomain($property->getDomain());
+                $domain = $em->getRepository("AppBundle:OntoClass")->find($form->get("domainVersion")->getData());
+                $propertyVersion->setDomain($domain);
             }
 
             $propertyVersion->setDomainMinQuantifier($property->getDomainMinQuantifier());
@@ -303,21 +330,33 @@ class PropertyController extends Controller
         $domainRange = $em->getRepository('AppBundle:Property')->findDomainAndRangeByPropertyVersionAndNamespacesId($propertyVersion, $namespacesId);
         $relations = $em->getRepository('AppBundle:Property')->findRelationsByPropertyVersionAndNamespacesId($propertyVersion, $namespacesId);
 
-
-        //$classesVersion = $em->getRepository('AppBundle:OntoClassVersion')->findBy(array('namespaceForVersion' => $namespacesId));
         $arrayClassesVersion = $em->getRepository('AppBundle:OntoClassVersion')
             ->findIdAndStandardLabelOfClassesVersionByNamespacesId($namespacesId);
-        //var_dump($arrayClassesVersion); die;
 
         $propertyVersion->setCreator($this->getUser());
         $propertyVersion->setModifier($this->getUser());
         $propertyVersion->setCreationTime(new \DateTime('now'));
         $propertyVersion->setModificationTime(new \DateTime('now'));
 
+        if(!is_null($propertyVersion->getDomain())){
+            $defaultDomain = $propertyVersion->getDomain()->getId();
+        }
+        else{
+            $defaultDomain = null;
+        }
+
+        if(!is_null($propertyVersion->getRange())){
+            $defaultRange = $propertyVersion->getRange()->getId();
+        }
+        else{
+            $defaultRange = null;
+        }
+
         $form = $this->createForm(PropertyEditForm::class, $propertyVersion, array(
-            'classesVersion'=>$arrayClassesVersion,
-            'defaultDomain' => $propertyVersion->getDomain()->getId(),
-            'defaultRange' => $propertyVersion->getRange()->getId()));
+            'classesVersion' => $arrayClassesVersion,
+            'defaultDomain' => $defaultDomain,
+            'defaultRange' => $defaultRange));
+
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $domain = $em->getRepository("AppBundle:OntoClass")->find($form->get("domainVersion")->getData());

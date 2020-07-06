@@ -39,10 +39,22 @@ class ClassAssociation
     private $childClass;
 
     /**
+     * @ORM\ManyToOne(targetEntity="OntoNamespace")
+     * @ORM\JoinColumn(name="fk_child_class_namespace", referencedColumnName="pk_namespace", nullable=false)
+     */
+    private $childClassNamespace;
+
+    /**
      * @ORM\ManyToOne(targetEntity="OntoClass", inversedBy="parentClassAssociations")
      * @ORM\JoinColumn(name="is_parent_class", referencedColumnName="pk_class")
      */
     private $parentClass;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="OntoNamespace")
+     * @ORM\JoinColumn(name="fk_child_class_namespace", referencedColumnName="pk_namespace", nullable=false)
+     */
+    private $parentClassNamespace;
 
     /**
      * @ORM\ManyToOne(targetEntity="OntoNamespace", inversedBy="classAssociationVersions")
@@ -216,6 +228,22 @@ class ClassAssociation
     }
 
     /**
+     * @return mixed
+     */
+    public function getChildClassNamespace()
+    {
+        return $this->childClassNamespace;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getParentClassNamespace()
+    {
+        return $this->parentClassNamespace;
+    }
+
+    /**
      * @param mixed $namespaceForVersion
      */
     public function setNamespaceForVersion($namespaceForVersion)
@@ -295,6 +323,22 @@ class ClassAssociation
         $this->modificationTime = $modificationTime;
     }
 
+    /**
+     * @param mixed $childClassNamespace
+     */
+    public function setChildClassNamespace($childClassNamespace)
+    {
+        $this->childClassNamespace = $childClassNamespace;
+    }
+
+    /**
+     * @param mixed $parentClassNamespace
+     */
+    public function setParentClassNamespace($parentClassNamespace)
+    {
+        $this->parentClassNamespace = $parentClassNamespace;
+    }
+
     public function addTextProperty(TextProperty $textProperty)
     {
         if ($this->textProperties->contains($textProperty)) {
@@ -317,7 +361,7 @@ class ClassAssociation
 
     public function __toString()
     {
-        return (string) $this->childClass.': parent class association';
+        return (string) $this->childClass->getClassVersionForDisplay().': parent class association';
     }
 
 }

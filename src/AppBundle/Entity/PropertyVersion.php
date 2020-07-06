@@ -13,7 +13,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Class PropertyVersion
- * @ORM\Entity
+ * @ORM\Entity(repositoryClass="AppBundle\Repository\PropertyVersionRepository")
  * @ORM\Table(schema="che", name="property_version")
  */
 class PropertyVersion

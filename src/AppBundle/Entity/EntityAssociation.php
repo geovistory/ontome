@@ -33,10 +33,22 @@ class EntityAssociation
     private $sourceClass;
 
     /**
+     * @ORM\ManyToOne(targetEntity="OntoNamespace")
+     * @ORM\JoinColumn(name="fk_source_class_namespace", referencedColumnName="pk_namespace", nullable=false)
+     */
+    //private $sourceClassNamespace;
+
+    /**
      * @ORM\ManyToOne(targetEntity="OntoClass", inversedBy="targetEntityAssociations")
      * @ORM\JoinColumn(name="fk_target_class", referencedColumnName="pk_class")
      */
     private $targetClass;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="OntoNamespace")
+     * @ORM\JoinColumn(name="fk_target_class_namespace", referencedColumnName="pk_namespace", nullable=false)
+     */
+    //private $targetClassNamespace;
 
     /**
      * @ORM\ManyToOne(targetEntity="Property", inversedBy="sourceEntityAssociations")
@@ -45,10 +57,22 @@ class EntityAssociation
     private $sourceProperty;
 
     /**
+     * @ORM\ManyToOne(targetEntity="OntoNamespace")
+     * @ORM\JoinColumn(name="fk_source_property_namespace", referencedColumnName="pk_namespace", nullable=false)
+     */
+    //private $sourcePropertyNamespace;
+
+    /**
      * @ORM\ManyToOne(targetEntity="Property", inversedBy="targetEntityAssociations")
      * @ORM\JoinColumn(name="fk_target_property", referencedColumnName="pk_property")
      */
     private $targetProperty;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="OntoNamespace")
+     * @ORM\JoinColumn(name="fk_target_property_namespace", referencedColumnName="pk_namespace", nullable=false)
+     */
+    //private $targetPropertyNamespace;
 
     /**
      * @ORM\ManyToOne(targetEntity="SystemType", inversedBy="entityAssociations")
@@ -300,6 +324,38 @@ class EntityAssociation
     }
 
     /**
+     * @return mixed
+     */
+//    public function getSourceClassNamespace()
+//    {
+//        return $this->sourceClassNamespace;
+//    }
+
+    /**
+     * @return mixed
+     */
+//    public function getTargetClassNamespace()
+//    {
+//        return $this->targetClassNamespace;
+//    }
+
+    /**
+     * @return mixed
+     */
+//    public function getSourcePropertyNamespace()
+//    {
+//        return $this->sourcePropertyNamespace;
+//    }
+
+    /**
+     * @return mixed
+     */
+//    public function getTargetPropertyNamespace()
+//    {
+//        return $this->targetPropertyNamespace;
+//    }
+
+    /**
      * @param mixed $namespaceForVersion
      */
     public function setNamespaceForVersion($namespaceForVersion)
@@ -409,6 +465,38 @@ class EntityAssociation
     public function setModificationTime($modificationTime)
     {
         $this->modificationTime = $modificationTime;
+    }
+
+    /**
+     * @param mixed $sourceClassNamespace
+     */
+    public function setSourceClassNamespace($sourceClassNamespace)
+    {
+        $this->sourceClassNamespace = $sourceClassNamespace;
+    }
+
+    /**
+     * @param mixed $targetClassNamespace
+     */
+    public function setTargetClassNamespace($targetClassNamespace)
+    {
+        $this->targetClassNamespace = $targetClassNamespace;
+    }
+
+    /**
+     * @param mixed $sourcePropertyNamespace
+     */
+    public function setSourcePropertyNamespace($sourcePropertyNamespace)
+    {
+        $this->sourcePropertyNamespace = $sourcePropertyNamespace;
+    }
+
+    /**
+     * @param mixed $targetPropertyNamespace
+     */
+    public function setTargetPropertyNamespace($targetPropertyNamespace)
+    {
+        $this->targetPropertyNamespace = $targetPropertyNamespace;
     }
 
     public function addTextProperty(TextProperty $textProperty)
