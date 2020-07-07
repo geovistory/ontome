@@ -7,7 +7,14 @@
                 <h2>
                     {% if label.object is not null %}
                         {% if label.object.identifierInNamespace is not null %}
-                            {{ label.object.standardLabel }} – {{ label.object.identifierInNamespace }}: Label
+                            {% if label.object.classVersionForDisplay(label.namespaceForVersion) is not null %}
+                                {{ label.object.classVersionForDisplay(label.namespaceForVersion) }}
+                            {% elseif label.object.propertyVersionForDisplay(label.namespaceForVersion) is not null %}
+                                {{ label.object.propertyVersionForDisplay(label.namespaceForVersion) }}
+                            {% else %}
+                                {{ label.object.standardLabel }}
+                            {% endif %}
+                             – {{ label.object.identifierInNamespace }}: Label
                         {% else %}
                             {{ label.object.objectIdentification }}: Label
                         {% endif %}

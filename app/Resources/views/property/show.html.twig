@@ -183,25 +183,25 @@
                         <div class="col-lg-10">
                             <ul class="list-unstyled">
                             {% set relationCount = 0 %}
-                                {% for relation in property.entityAssociations
+                                {% for relation in propertyVersion.property.entityAssociations
                                     if relation.systemType.id == 18
                                     or relation.systemType.id == 20
                                     and relation.namespaceForVersion.id in namespacesId %}
                                     {% set relationCount = relationCount + 1 %}
-                                {% endfor %}
                                 {% if relationCount > 0 %}
                                     <li>{{ relation.systemType.standardLabel }}
-                                        {% if relation.sourceProperty.id == property.id %}
+                                        {% if relation.sourceProperty.id == propertyVersion.property.id %}
                                             <a href="{{ path("property_show", {'id': relation.targetProperty.id }) }}">
-                                                {{ relation.targetProperty.invertedLabel }}
+                                                {{ relation.targetProperty.propertyVersionForDisplay(relation.targetNamespaceForVersion).invertedLabel }}
                                             </a>
                                         {% else %}
                                             <a href="{{ path("property_show", {'id': relation.sourceProperty.id }) }}">
-                                                {{ relation.sourceProperty.invertedLabel }}
+                                                {{ relation.sourceProperty.propertyVersionForDisplay(relation.sourceNamespaceForVersion).invertedLabel }}
                                             </a>
                                         {% endif %}
                                     </li>
                                     {% endif %}
+                                {% endfor %}
                             </ul>
                         </div>
                     </div>
@@ -721,14 +721,14 @@
                                 <td><a href="{{ path('property_show', {
                                         'id': relation.targetProperty.id
                                     }) }}">
-                                        {{ relation.targetProperty.invertedLabel }}
+                                        {{ relation.targetProperty.propertyVersionForDisplay(relation.targetNamespaceForVersion).invertedLabel }}
                                     </a>
                                 </td>
                             {% else %}
                                 <td><a href="{{ path('property_show', {
                                         'id': relation.sourceProperty.id
                                     }) }}">
-                                        {{ relation.sourceProperty.invertedLabel }}
+                                        {{ relation.sourceProperty.propertyVersionForDisplay(relation.sourceNamespaceForVersion).invertedLabel }}
                                     </a>
                                 </td>
                             {% endif %}

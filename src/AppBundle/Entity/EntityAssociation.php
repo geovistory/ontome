@@ -33,22 +33,10 @@ class EntityAssociation
     private $sourceClass;
 
     /**
-     * @ORM\ManyToOne(targetEntity="OntoNamespace")
-     * @ORM\JoinColumn(name="fk_source_class_namespace", referencedColumnName="pk_namespace", nullable=false)
-     */
-    //private $sourceClassNamespace;
-
-    /**
      * @ORM\ManyToOne(targetEntity="OntoClass", inversedBy="targetEntityAssociations")
      * @ORM\JoinColumn(name="fk_target_class", referencedColumnName="pk_class")
      */
     private $targetClass;
-
-    /**
-     * @ORM\ManyToOne(targetEntity="OntoNamespace")
-     * @ORM\JoinColumn(name="fk_target_class_namespace", referencedColumnName="pk_namespace", nullable=false)
-     */
-    //private $targetClassNamespace;
 
     /**
      * @ORM\ManyToOne(targetEntity="Property", inversedBy="sourceEntityAssociations")
@@ -58,9 +46,9 @@ class EntityAssociation
 
     /**
      * @ORM\ManyToOne(targetEntity="OntoNamespace")
-     * @ORM\JoinColumn(name="fk_source_property_namespace", referencedColumnName="pk_namespace", nullable=false)
+     * @ORM\JoinColumn(name="fk_source_namespace_for_version", referencedColumnName="pk_namespace", nullable=false)
      */
-    //private $sourcePropertyNamespace;
+    private $sourceNamespaceForVersion;
 
     /**
      * @ORM\ManyToOne(targetEntity="Property", inversedBy="targetEntityAssociations")
@@ -70,9 +58,9 @@ class EntityAssociation
 
     /**
      * @ORM\ManyToOne(targetEntity="OntoNamespace")
-     * @ORM\JoinColumn(name="fk_target_property_namespace", referencedColumnName="pk_namespace", nullable=false)
+     * @ORM\JoinColumn(name="fk_target_namespace_for_version", referencedColumnName="pk_namespace", nullable=false)
      */
-    //private $targetPropertyNamespace;
+    private $targetNamespaceForVersion;
 
     /**
      * @ORM\ManyToOne(targetEntity="SystemType", inversedBy="entityAssociations")
@@ -98,15 +86,6 @@ class EntityAssociation
      * @ORM\OrderBy({"languageIsoCode" = "ASC"})
      */
     private $textProperties;
-
-    /**
-     * @ORM\ManyToMany(targetEntity="OntoNamespace",  inversedBy="EntityAssociation", fetch="EXTRA_LAZY")
-     * @ORM\JoinTable(schema="che", name="entity_association",
-     *      joinColumns={@ORM\JoinColumn(name="fk_entity_association", referencedColumnName="pk_entity_association")},
-     *      inverseJoinColumns={@ORM\JoinColumn(name="fk_namespace_for_version", referencedColumnName="pk_namespace")}
-     *      )
-     */
-    private $namespaces;
 
     /**
      * @ORM\ManyToOne(targetEntity="User")
@@ -326,34 +305,18 @@ class EntityAssociation
     /**
      * @return mixed
      */
-//    public function getSourceClassNamespace()
-//    {
-//        return $this->sourceClassNamespace;
-//    }
+    public function getSourceNamespaceForVersion()
+    {
+        return $this->sourceNamespaceForVersion;
+    }
 
     /**
      * @return mixed
      */
-//    public function getTargetClassNamespace()
-//    {
-//        return $this->targetClassNamespace;
-//    }
-
-    /**
-     * @return mixed
-     */
-//    public function getSourcePropertyNamespace()
-//    {
-//        return $this->sourcePropertyNamespace;
-//    }
-
-    /**
-     * @return mixed
-     */
-//    public function getTargetPropertyNamespace()
-//    {
-//        return $this->targetPropertyNamespace;
-//    }
+    public function getTargetNamespaceForVersion()
+    {
+        return $this->targetNamespaceForVersion;
+    }
 
     /**
      * @param mixed $namespaceForVersion
@@ -468,35 +431,19 @@ class EntityAssociation
     }
 
     /**
-     * @param mixed $sourceClassNamespace
+     * @param mixed $sourceNamespaceForVersion
      */
-    public function setSourceClassNamespace($sourceClassNamespace)
+    public function setSourceNamespaceForVersion($sourceNamespaceForVersion)
     {
-        $this->sourceClassNamespace = $sourceClassNamespace;
+        $this->sourceNamespaceForVersion = $sourceNamespaceForVersion;
     }
 
     /**
-     * @param mixed $targetClassNamespace
+     * @param mixed $targetNamespaceForVersion
      */
-    public function setTargetClassNamespace($targetClassNamespace)
+    public function setTargetNamespaceForVersion($targetNamespaceForVersion)
     {
-        $this->targetClassNamespace = $targetClassNamespace;
-    }
-
-    /**
-     * @param mixed $sourcePropertyNamespace
-     */
-    public function setSourcePropertyNamespace($sourcePropertyNamespace)
-    {
-        $this->sourcePropertyNamespace = $sourcePropertyNamespace;
-    }
-
-    /**
-     * @param mixed $targetPropertyNamespace
-     */
-    public function setTargetPropertyNamespace($targetPropertyNamespace)
-    {
-        $this->targetPropertyNamespace = $targetPropertyNamespace;
+        $this->targetNamespaceForVersion = $targetNamespaceForVersion;
     }
 
     public function addTextProperty(TextProperty $textProperty)
@@ -519,6 +466,9 @@ class EntityAssociation
 
     public function __toString()
     {
-        return (string) $this->sourceClass.' - '.$this->targetClass.' : '.$this->systemType;
+        if(!is_null($this->sourceClass))
+            return (string) $this->sourceClass->getClassVersionForDisplay().' - '.$this->targetClass->getClassVersionForDisplay().' : '.$this->systemType;
+        elseif(!is_null($this->sourceProperty))
+            return (string) $this->sourceProperty->getPropertyVersionForDisplay().' - '.$this->targetProperty->getPropertyVersionForDisplay().' : '.$this->systemType;
     }
 }

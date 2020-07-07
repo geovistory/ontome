@@ -76,15 +76,6 @@ class PropertyAssociation
     private $textProperties;
 
     /**
-     * @ORM\ManyToMany(targetEntity="OntoNamespace",  inversedBy="Property", fetch="EXTRA_LAZY")
-     * @ORM\JoinTable(schema="che", name="is_subproperty_of",
-     *      joinColumns={@ORM\JoinColumn(name="fk_is_subproperty_of", referencedColumnName="pk_is_subproperty_of")},
-     *      inverseJoinColumns={@ORM\JoinColumn(name="fk_namespace_for_version", referencedColumnName="pk_namespace")}
-     *      )
-     */
-    private $namespaces;
-
-    /**
      * @ORM\OneToMany(targetEntity="AppBundle\Entity\Comment", mappedBy="propertyAssociation")
      * @ORM\OrderBy({"creationTime" = "DESC"})
      */

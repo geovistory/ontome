@@ -664,14 +664,14 @@
                                 <td><a href="{{ path('class_show', {
                                         'id': relation.targetClass.id
                                     }) }}">
-                                        {{ relation.targetClass.classVersionForDisplay().invertedLabel }}
+                                        {{ relation.targetClass.classVersionForDisplay(relation.targetNamespaceForVersion).invertedLabel }}
                                     </a>
                                 </td>
                             {% else %}
                                 <td><a href="{{ path('class_show', {
                                         'id': relation.sourceClass.id
                                     }) }}">
-                                        {{ relation.sourceClass.invertedLabel }}
+                                        {{ relation.sourceClass.classVersionForDisplay(relation.sourceNamespaceForVersion).invertedLabel }}
                                     </a>
                                 </td>
                             {% endif %}

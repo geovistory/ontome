@@ -16,7 +16,9 @@ class ClassVersionRepository extends EntityRepository
 {
     /**
      * @param OntoClass $class
-     * @param array $namespaces
+     * @param array $namespacesId
+     * @return object|null
+     * @throws \Doctrine\DBAL\DBALException
      */
     public function findClassVersionByClassAndNamespacesId(OntoClass $class, array $namespacesId)
     {

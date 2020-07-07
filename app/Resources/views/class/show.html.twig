@@ -637,7 +637,7 @@
                             <td><a href="{{ path('class_show', {
                                     'id': relation.targetClass.id
                                 }) }}">
-                                    {{ relation.targetClass.classVersionForDisplay().invertedLabel }}
+                                    {{ relation.targetClass.classVersionForDisplay(relation.targetNamespaceForVersion).invertedLabel }}
                                 </a>
                             </td>
                             {% else %}
@@ -645,7 +645,7 @@
                                     'id': relation.sourceClass.id,
                                     'namespaceFromUrlId': classVersion.namespaceForVersion.id
                                 }) }}">
-                                    {{ relation.sourceClass.invertedLabel }}
+                                    {{ relation.sourceClass.classVersionForDisplay(relation.sourceNamespaceForVersion).invertedLabel }}
                                 </a>
                             </td>
                             {% endif %}

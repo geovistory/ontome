@@ -39,16 +39,15 @@ class EntityAssociationEditForm extends AbstractType
             );
         }
 
-        // FILTRAGE : Récupérer les clés de namespaces à utiliser
-        // Il n'y a pas besoin de rajouter le namespace de la propriété actuelle : il doit être activé pour le formulaire.
-        if(is_null($user) || $user->getCurrentActiveProject()->getId() == 21){ // Utilisateur non connecté OU connecté et utilisant le projet public
-            $namespacesId = $this->em->getRepository('AppBundle:OntoNamespace')->findPublicProjectNamespacesId();
-        }
-        else{ // Utilisateur connecté et utilisant un autre projet
-            $namespacesId = $this->em->getRepository('AppBundle:OntoNamespace')->findNamespacesIdByUser($user);
+        $choices = array();
+        foreach ($options['entitiesVersion'] as $ev){
+            if($ev['standardLabel'] != $ev['identifierInNamespace'])
+                $choices[$ev['identifierInNamespace']." ".$ev['standardLabel']] = $ev['id'];
+            else
+                $choices[$ev['standardLabel']] = $ev['id'];
         }
 
-        if($options['object'] == 'class')
+        if($options['object'] == 'class' and $options['inverse'])
         {
             $builder
                 ->add('systemType', ChoiceType::class, array(
@@ -57,10 +56,34 @@ class EntityAssociationEditForm extends AbstractType
                         'owl:disjointWith' => 19
                     ),
                     'label' => 'Relation'))
-                ->add('targetClass')
-                ->add('sourceClass');
+                ->add('sourceClassVersion', ChoiceType::class,
+                    array(
+                        'mapped' => false,
+                        'label' => "Source class",
+                        'placeholder'       => '',
+                        'choices'           => $choices,
+                        'data'              => $options['defaultSource']
+                    ));
         }
-        elseif($options['object'] == 'property')
+        elseif($options['object'] == 'class' and !$options['inverse'])
+        {
+            $builder
+                ->add('systemType', ChoiceType::class, array(
+                    'choices'  => array(
+                        'owl:equivalentClass' => 4,
+                        'owl:disjointWith' => 19
+                    ),
+                    'label' => 'Relation'))
+                ->add('targetClassVersion', ChoiceType::class,
+                    array(
+                        'mapped' => false,
+                        'label' => "Target class",
+                        'placeholder'       => '',
+                        'choices'           => $choices,
+                        'data'              => $options['defaultTarget']
+                    ));
+        }
+        elseif($options['object'] == 'property' and $options['inverse'])
         {
             $builder
                 ->add('systemType', ChoiceType::class, array(
@@ -69,21 +92,31 @@ class EntityAssociationEditForm extends AbstractType
                         'owl:inverseOf' => 20
                     ),
                     'label' => 'Relation'))
-                ->add('targetProperty', EntityType::class,
+                ->add('sourcePropertyVersion', ChoiceType::class,
                     array(
-                        'class' => Property::class,
-                        'label' => "Target property",
-                        'query_builder' => function(PropertyRepository $repo) use ($namespacesId){
-                            return $repo->findPropertiesByNamespacesIdQueryBuilder($namespacesId);
-                        }
-                    ))
-                ->add('sourceProperty', EntityType::class,
-                    array(
-                        'class' => Property::class,
+                        'mapped' => false,
                         'label' => "Source property",
-                        'query_builder' => function(PropertyRepository $repo) use ($namespacesId){
-                            return $repo->findPropertiesByNamespacesIdQueryBuilder($namespacesId);
-                        }
+                        'placeholder'       => '',
+                        'choices'           => $choices,
+                        'data'              => $options['defaultSource']
+                    ));
+        }
+        elseif($options['object'] == 'property' and !$options['inverse'])
+        {
+            $builder
+                ->add('systemType', ChoiceType::class, array(
+                    'choices'  => array(
+                        'owl:equivalentProperty' => 18,
+                        'owl:inverseOf' => 20
+                    ),
+                    'label' => 'Relation'))
+                ->add('targetPropertyVersion', ChoiceType::class,
+                    array(
+                        'mapped' => false,
+                        'label' => "Target property",
+                        'placeholder'       => '',
+                        'choices'           => $choices,
+                        'data'              => $options['defaultTarget']
                     ));
         }
 
@@ -96,7 +129,11 @@ class EntityAssociationEditForm extends AbstractType
         $resolver->setDefaults([
             'data_class' => 'AppBundle\Entity\EntityAssociation',
             "allow_extra_fields" => true,
-            'object' => 'class'
+            'object' => 'class',
+            'inverse' => false,
+            'entitiesVersion' => null,
+            'defaultSource' => null,
+            'defaultTarget' => null
         ]);
     }
 }

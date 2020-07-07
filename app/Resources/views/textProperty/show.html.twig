@@ -7,10 +7,10 @@
 
                     {% if textProperty.class is not null %}
                         {% set route = 'class_show' %}
-                        {{ textProperty.systemType.standardLabel|capitalize }} for the class {{ textProperty.class }}
+                        {{ textProperty.systemType.standardLabel|capitalize }} for the class {{ textProperty.class.classVersionForDisplay(textProperty.namespaceForVersion) }}
                     {% elseif textProperty.property is not null %}
                         {% set route = 'property_show' %}
-                        {{ textProperty.systemType.standardLabel|capitalize }} for the property {{ textProperty.property }}
+                        {{ textProperty.systemType.standardLabel|capitalize }} for the property {{ textProperty.property.propertyVersionForDisplay(textProperty.namespaceForVersion) }}
                     {% elseif textProperty.namespace is not null %}
                         {% set route = 'namespace_show' %}
                         {% if textProperty.object is not null %}

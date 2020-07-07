@@ -38,6 +38,7 @@ class EntityAssociationController extends Controller
                 throw $this->createNotFoundException('The class n° '.$objectId.' does not exist');
             }
             $entityAssociation->setSourceClass($source);
+            $namespaceForEntityVersion = $source->getClassVersionForDisplay()->getNamespaceForVersion();
         }
         elseif($object == 'property')
         {
@@ -46,6 +47,7 @@ class EntityAssociationController extends Controller
                 throw $this->createNotFoundException('The property n° '.$objectId.' does not exist');
             }
             $entityAssociation->setSourceProperty($source);
+            $namespaceForEntityVersion = $source->getPropertyVersionForDisplay()->getNamespaceForVersion();
         }
 
         if($source instanceof OntoClass){
@@ -68,11 +70,61 @@ class EntityAssociationController extends Controller
         $justification->setModificationTime(new \DateTime('now'));
 
         $entityAssociation->addTextProperty($justification);
-        $form = $this->createForm(EntityAssociationForm::class, $entityAssociation, ['object' => $object]);
+
+        // FILTRAGE : Récupérer les clés de namespaces à utiliser
+        if(is_null($this->getUser()) || $this->getUser()->getCurrentActiveProject()->getId() == 21){ // Utilisateur non connecté OU connecté et utilisant le projet public
+            $namespacesId = $em->getRepository('AppBundle:OntoNamespace')->findPublicProjectNamespacesId();
+        }
+        else{ // Utilisateur connecté et utilisant un autre projet
+            $namespacesId = $em->getRepository('AppBundle:OntoNamespace')->findNamespacesIdByUser($this->getUser());
+        }
+
+        // Affaiblir le filtrage en rajoutant le namespaceForVersion de la classVersion si indisponible
+        if(!in_array($namespaceForEntityVersion->getId(), $namespacesId)){
+            $namespacesId[] = $namespaceForEntityVersion->getId();
+        }
+        // Sans oublier les namespaces références si indisponibles
+        foreach($namespaceForEntityVersion->getReferencedNamespaceAssociations() as $referencedNamespacesAssociation){
+            if(!in_array($referencedNamespacesAssociation->getReferencedNamespace()->getId(), $namespacesId)){
+                $namespacesId[] = $referencedNamespacesAssociation->getReferencedNamespace()->getId();
+            }
+        }
+
+        $entityAssociation->setSourceNamespaceForVersion($namespaceForEntityVersion);
+
+        if($entityAssociation->getSourceObjectType() == "class"){
+            $arrayEntitiesVersion = $em->getRepository('AppBundle:OntoClassVersion')
+                ->findIdAndStandardLabelOfClassesVersionByNamespacesId($namespacesId);
+        }
+        elseif($entityAssociation->getSourceObjectType() == "property"){
+            $arrayEntitiesVersion = $em->getRepository('AppBundle:PropertyVersion')
+                ->findIdAndStandardLabelOfPropertiesVersionByNamespacesId($namespacesId);
+        }
+
+        $form = $this->createForm(EntityAssociationForm::class, $entityAssociation, array(
+            'object' => $object,
+            'entitiesVersion' => $arrayEntitiesVersion));
 
         // only handles data on POST
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
+            if($entityAssociation->getSourceObjectType() == 'class'){
+                $targetClass = $em->getRepository("AppBundle:OntoClass")->find($form->get("targetClassVersion")->getData());
+                $entityAssociation->setTargetClass($targetClass);
+                $targetNamespace = $em->getRepository("AppBundle:OntoClassVersion")
+                    ->findClassVersionByClassAndNamespacesId($targetClass, $namespacesId)
+                    ->getNamespaceForVersion();
+                $entityAssociation->setTargetNamespaceForVersion($targetNamespace);
+            }
+            elseif($entityAssociation->getSourceObjectType() == 'property'){
+                $targetProperty = $em->getRepository("AppBundle:Property")->find($form->get("targetPropertyVersion")->getData());
+                $entityAssociation->setTargetProperty($targetProperty);
+                $targetNamespace = $em->getRepository("AppBundle:PropertyVersion")
+                    ->findPropertyVersionByPropertyAndNamespacesId($targetProperty, $namespacesId)
+                    ->getNamespaceForVersion();
+                $entityAssociation->setTargetNamespaceForVersion($targetNamespace);
+            }
+
             $entityAssociation = $form->getData();
             $entityAssociation->setNamespaceForVersion($this->getUser()->getCurrentOngoingNamespace());
             $entityAssociation->setCreator($this->getUser());
@@ -146,6 +198,7 @@ class EntityAssociationController extends Controller
             if (!$firstEntity) {
                 throw $this->createNotFoundException('The class n° '.$entityAssociation->getSourceClass()->getId().' does not exist');
             }
+            $namespaceForEntityVersion = $firstEntity->getClassVersionForDisplay()->getNamespaceForVersion();
         }
         elseif($entityAssociation->getSourceObjectType() == 'property' and !$inverse)
         {
@@ -153,6 +206,7 @@ class EntityAssociationController extends Controller
             if (!$firstEntity) {
                 throw $this->createNotFoundException('The property n° '.$entityAssociation->getSourceProperty()->getId().' does not exist');
             }
+            $namespaceForEntityVersion = $firstEntity->getPropertyVersionForDisplay()->getNamespaceForVersion();
         }
         elseif($entityAssociation->getTargetObjectType() == 'class' and $inverse)
         {
@@ -160,6 +214,7 @@ class EntityAssociationController extends Controller
             if (!$firstEntity) {
                 throw $this->createNotFoundException('The class n° '.$entityAssociation->getTargetClass()->getId().' does not exist');
             }
+            $namespaceForEntityVersion = $firstEntity->getClassVersionForDisplay()->getNamespaceForVersion();
         }
         elseif($entityAssociation->getTargetObjectType() == 'property' and $inverse)
         {
@@ -167,40 +222,86 @@ class EntityAssociationController extends Controller
             if (!$firstEntity) {
                 throw $this->createNotFoundException('The property n° '.$entityAssociation->getTargetProperty()->getId().' does not exist');
             }
+            $namespaceForEntityVersion = $firstEntity->getPropertyVersionForDisplay()->getNamespaceForVersion();
         }
 
         $this->denyAccessUnlessGranted('edit', $firstEntity);
 
-        $form = $this->createForm(EntityAssociationEditForm::class, $entityAssociation, ['object' => $entityAssociation->getSourceObjectType()]);
+        // FILTRAGE : Récupérer les clés de namespaces à utiliser
+        if(is_null($this->getUser()) || $this->getUser()->getCurrentActiveProject()->getId() == 21){ // Utilisateur non connecté OU connecté et utilisant le projet public
+            $namespacesId = $em->getRepository('AppBundle:OntoNamespace')->findPublicProjectNamespacesId();
+        }
+        else{ // Utilisateur connecté et utilisant un autre projet
+            $namespacesId = $em->getRepository('AppBundle:OntoNamespace')->findNamespacesIdByUser($this->getUser());
+        }
 
-        if(!$inverse)
-        {
-            if($entityAssociation->getSourceObjectType() == 'class'){
-                $form->remove('sourceClass');
-            }
-
-            if($entityAssociation->getSourceObjectType() == 'property'){
-                $form->remove('sourceProperty');
+        // Affaiblir le filtrage en rajoutant le namespaceForVersion de la classVersion si indisponible
+        if(!in_array($namespaceForEntityVersion->getId(), $namespacesId)){
+            $namespacesId[] = $namespaceForEntityVersion->getId();
+        }
+        // Sans oublier les namespaces références si indisponibles
+        foreach($namespaceForEntityVersion->getReferencedNamespaceAssociations() as $referencedNamespacesAssociation){
+            if(!in_array($referencedNamespacesAssociation->getReferencedNamespace()->getId(), $namespacesId)){
+                $namespacesId[] = $referencedNamespacesAssociation->getReferencedNamespace()->getId();
             }
         }
-        else
-        {
-            if($entityAssociation->getTargetObjectType() == 'class'){
-                $form->remove('targetClass');
-            }
 
-            if($entityAssociation->getTargetObjectType() == 'property'){
-                $form->remove('targetProperty');
-            }
+        if($entityAssociation->getSourceObjectType() == "class"){
+            $arrayEntitiesVersion = $em->getRepository('AppBundle:OntoClassVersion')
+                ->findIdAndStandardLabelOfClassesVersionByNamespacesId($namespacesId);
         }
+        elseif($entityAssociation->getSourceObjectType() == "property"){
+            $arrayEntitiesVersion = $em->getRepository('AppBundle:PropertyVersion')
+                ->findIdAndStandardLabelOfPropertiesVersionByNamespacesId($namespacesId);
+        }
+
+        $form = $this->createForm(EntityAssociationEditForm::class, $entityAssociation, array(
+            'object' => $entityAssociation->getSourceObjectType(),
+            'inverse' => $inverse,
+            'entitiesVersion' => $arrayEntitiesVersion,
+            'defaultSource' => $entityAssociation->getSource()->getId(),
+            'defaultTarget' => $entityAssociation->getTarget()->getId()
+        ));
 
         // only handles data on POST
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
+            if($entityAssociation->getTargetObjectType() == 'class' and $inverse){
+                $sourceClass = $em->getRepository("AppBundle:OntoClass")->find($form->get("sourceClassVersion")->getData());
+                $entityAssociation->setSourceClass($sourceClass);
+                $sourceNamespace = $em->getRepository("AppBundle:OntoClassVersion")
+                    ->findClassVersionByClassAndNamespacesId($sourceClass, $namespacesId)
+                    ->getNamespaceForVersion();
+                $entityAssociation->setSourceNamespaceForVersion($sourceNamespace);
+            }
+            elseif($entityAssociation->getTargetObjectType() == 'class' and !$inverse){
+                $targetClass = $em->getRepository("AppBundle:OntoClass")->find($form->get("targetClassVersion")->getData());
+                $entityAssociation->setTargetClass($targetClass);
+                $targetNamespace = $em->getRepository("AppBundle:OntoClassVersion")
+                    ->findClassVersionByClassAndNamespacesId($targetClass, $namespacesId)
+                    ->getNamespaceForVersion();
+                $entityAssociation->setTargetNamespaceForVersion($targetNamespace);
+            }
+            elseif($entityAssociation->getTargetObjectType() == 'property' and $inverse){
+                $sourceProperty = $em->getRepository("AppBundle:Property")->find($form->get("sourcePropertyVersion")->getData());
+                $entityAssociation->setSourceProperty($sourceProperty);
+                $sourceNamespace = $em->getRepository("AppBundle:PropertyVersion")
+                    ->findPropertyVersionByPropertyAndNamespacesId($sourceProperty, $namespacesId)
+                    ->getNamespaceForVersion();
+                $entityAssociation->setSourceNamespaceForVersion($sourceNamespace);
+            }
+            elseif($entityAssociation->getTargetObjectType() == 'property' and !$inverse){
+                $targetProperty = $em->getRepository("AppBundle:Property")->find($form->get("targetPropertyVersion")->getData());
+                $entityAssociation->setTargetProperty($targetProperty);
+                $targetNamespace = $em->getRepository("AppBundle:PropertyVersion")
+                    ->findPropertyVersionByPropertyAndNamespacesId($targetProperty, $namespacesId)
+                    ->getNamespaceForVersion();
+                $entityAssociation->setTargetNamespaceForVersion($targetNamespace);
+            }
+
             $entityAssociation = $form->getData();
             $entityAssociation->setModifier($this->getUser());
             $entityAssociation->setModificationTime(new \DateTime('now'));
-
 
             $em = $this->getDoctrine()->getManager();
             $em->persist($entityAssociation);

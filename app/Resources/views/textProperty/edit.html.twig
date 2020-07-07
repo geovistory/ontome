@@ -39,7 +39,7 @@
                         <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
                     </a>
                 {% elseif textProperty.class is not null %}
-                    {{ textProperty.systemType.standardLabel|lower }} for the class {{ textProperty.class }}
+                    {{ textProperty.systemType.standardLabel|lower }} for the class {{ textProperty.class.classVersionForDisplay(textProperty.namespaceForVersion) }}
                     <a href="{{ path('class_edit', {
                         id: textProperty.class.id
                     }) }}#definition"
@@ -48,7 +48,7 @@
                         <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
                     </a>
                 {% elseif textProperty.property is not null %}
-                    {{ textProperty.systemType.standardLabel|lower }} for the property {{ textProperty.property }}
+                    {{ textProperty.systemType.standardLabel|lower }} for the property {{ textProperty.propertyVersionForDisplay(textProperty.namespaceForVersion) }}
                     <a href="{{ path('property_edit', {
                         id: textProperty.property.id
                     }) }}#definition"
