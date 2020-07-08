@@ -33,19 +33,6 @@ class Property
     private $identifierInNamespace;
 
     /**
-     * @ORM\OneToMany(targetEntity="AppBundle\Entity\PropertyVersion", mappedBy="property", cascade={"persist"})
-     * @ORM\OrderBy({"creationTime" = "DESC"})
-     */
-    private $propertyVersions;
-
-    /**
-     * @var boolean
-     * A non-persisted field that's used to know if the $identifierInNamespace field is manually set by the user
-     * or automatically set by a trigger in the database     *
-     */
-    private $isManualIdentifier;
-
-    /**
      * @ORM\Column(type="text")
      */
     private $importerXmlField;
@@ -54,54 +41,6 @@ class Property
      * @ORM\Column(type="text")
      */
     private $importerTextField;
-
-    /**
-     * @ORM\Column(type="string")
-     */
-    private $standardLabel;
-
-    /**
-     * @ORM\ManyToOne(targetEntity="OntoClass", inversedBy="propertiesAsDomain")
-     * @ORM\JoinColumn(name="has_domain", referencedColumnName="pk_class", nullable=false)
-     */
-    private $domain;
-
-    /**
-     * @ORM\ManyToOne(targetEntity="OntoClass")
-     * @ORM\JoinColumn(name="has_range", referencedColumnName="pk_class", nullable=false)
-     */
-    private $range;
-
-    /**
-     * @ORM\Column(type="smallint", name="domain_instances_min_quantifier")
-     */
-    private $domainMinQuantifier;
-
-    /**
-     * @ORM\Column(type="smallint", name="domain_instances_max_quantifier")
-     */
-    private $domainMaxQuantifier;
-
-    /**
-     * @ORM\Column(type="smallint", name="range_instances_min_quantifier")
-     */
-    private $rangeMinQuantifier;
-
-    /**
-     * @ORM\Column(type="smallint", name="range_instances_max_quantifier")
-     */
-    private $rangeMaxQuantifier;
-
-    /**
-     * @ORM\ManyToOne(targetEntity="Property")
-     * @ORM\JoinColumn(name="fk_property_of_origin", referencedColumnName="pk_property")
-     */
-    private $propertyOfOrigin;
-
-    /**
-     * @ORM\Column(type="text")
-     */
-    private $notes;
 
     /**
      * @Assert\NotBlank()
@@ -128,12 +67,38 @@ class Property
     private $modificationTime;
 
     /**
+     * @ORM\Column(type="text")
+     */
+    private $notes;
+
+    /**
+     * @var boolean
+     * A non-persisted field that's used to know if the $identifierInNamespace field is manually set by the user
+     * or automatically set by a trigger in the database     *
+     */
+    private $isManualIdentifier;
+
+    /**
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\PropertyVersion", mappedBy="property", cascade={"persist"})
+     * @ORM\OrderBy({"creationTime" = "DESC"})
+     */
+    private $propertyVersions;
+
+    /**
      * @Assert\Valid()
      * @Assert\NotNull()
      * @ORM\OneToMany(targetEntity="AppBundle\Entity\TextProperty", mappedBy="property", cascade={"persist"})
      * @ORM\OrderBy({"languageIsoCode" = "ASC"})
      */
     private $textProperties;
+
+    /**
+     * @Assert\Valid()
+     * @Assert\NotNull()
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Label", mappedBy="property", cascade={"persist"})
+     * @ORM\OrderBy({"languageIsoCode" = "ASC"})
+     */
+    private $labels;
 
     /**
      * @ORM\ManyToMany(targetEntity="Profile",  inversedBy="Property", fetch="EXTRA_LAZY")
@@ -143,6 +108,13 @@ class Property
      *      )
      */
     private $profiles;
+
+    /**
+     * @Assert\Valid()
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\ProfileAssociation", mappedBy="property", cascade={"persist"})
+     * @ORM\OrderBy({"systemType" = "ASC"})
+     */
+    private $profileAssociations;
 
     /**
      * @ORM\OneToMany(targetEntity="AppBundle\Entity\Comment", mappedBy="property")
@@ -178,21 +150,6 @@ class Property
      *      )
      */
     private $namespaces;
-
-    /**
-     * @Assert\Valid()
-     * @Assert\NotNull()
-     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Label", mappedBy="property", cascade={"persist"})
-     * @ORM\OrderBy({"languageIsoCode" = "ASC"})
-     */
-    private $labels;
-
-    /**
-     * @Assert\Valid()
-     * @ORM\OneToMany(targetEntity="AppBundle\Entity\ProfileAssociation", mappedBy="property", cascade={"persist"})
-     * @ORM\OrderBy({"systemType" = "ASC"})
-     */
-    private $profileAssociations;
 
     /**
      * @ORM\ManyToOne(targetEntity="OntoNamespace")
@@ -279,35 +236,11 @@ class Property
     }
 
     /**
-     * @return OntoClass
-     */
-    public function getDomain()
-    {
-        return $this->domain;
-    }
-
-    /**
      * @return mixed
      */
     public function getImporterTextField()
     {
         return $this->importerTextField;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getStandardLabel()
-    {
-        return $this->standardLabel;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getPropertyOfOrigin()
-    {
-        return $this->propertyOfOrigin;
     }
 
     /**
@@ -399,77 +332,6 @@ class Property
     }
 
     /**
-     * @return OntoClass
-     */
-    public function getRange()
-    {
-        return $this->range;
-    }
-
-    /**
-     * @return integer
-     */
-    public function getDomainMinQuantifier()
-    {
-        return $this->domainMinQuantifier;
-    }
-
-    /**
-     * @return integer
-     */
-    public function getDomainMaxQuantifier()
-    {
-        return $this->domainMaxQuantifier;
-    }
-
-    /**
-     * @return integer
-     */
-    public function getRangeMinQuantifier()
-    {
-        return $this->rangeMinQuantifier;
-    }
-
-    /**
-     * @return integer
-     */
-    public function getRangeMaxQuantifier()
-    {
-        return $this->rangeMaxQuantifier;
-    }
-
-    /**
-     * @return string the formatted quantifiers string
-     */
-    public function getQuantifiers()
-    {
-        $s = null;
-
-        if(!is_null($this->domainMinQuantifier)&&!is_null($this->domainMaxQuantifier)&&!is_null($this->rangeMinQuantifier)&&!is_null($this->rangeMaxQuantifier)){
-            if($this->domainMinQuantifier == -1)
-                $domainMinQ = 'n';
-            else $domainMinQ = $this->domainMinQuantifier;
-
-            if($this->domainMaxQuantifier == -1)
-                $domainMaxQ = 'n';
-            else $domainMaxQ = $this->domainMaxQuantifier;
-
-            if($this->rangeMinQuantifier == -1)
-                $rangeMinQ = 'n';
-            else $rangeMinQ = $this->rangeMinQuantifier;
-
-            if($this->rangeMaxQuantifier == -1)
-                $rangeMaxQ = 'n';
-            else $rangeMaxQ = $this->rangeMaxQuantifier;
-
-            $s = $domainMinQ.','.$domainMaxQ.':'.$rangeMinQ.','.$rangeMaxQ;
-        }
-
-        return $s;
-
-    }
-
-    /**
      * @return ArrayCollection|PropertyAssociation[]
      */
     public function getParentPropertyAssociations()
@@ -525,54 +387,6 @@ class Property
     public function setPropertyVersions($propertyVersions)
     {
         $this->propertyVersions = $propertyVersions;
-    }
-
-    /**
-     * @param mixed $range
-     */
-    public function setRange($range)
-    {
-        $this->range = $range;
-    }
-
-    /**
-     * @param mixed $domain
-     */
-    public function setDomain($domain)
-    {
-        $this->domain = $domain;
-    }
-
-    /**
-     * @param mixed $domainMinQuantifier
-     */
-    public function setDomainMinQuantifier($domainMinQuantifier)
-    {
-        $this->domainMinQuantifier = $domainMinQuantifier;
-    }
-
-    /**
-     * @param mixed $domainMaxQuantifier
-     */
-    public function setDomainMaxQuantifier($domainMaxQuantifier)
-    {
-        $this->domainMaxQuantifier = $domainMaxQuantifier;
-    }
-
-    /**
-     * @param mixed $rangeMinQuantifier
-     */
-    public function setRangeMinQuantifier($rangeMinQuantifier)
-    {
-        $this->rangeMinQuantifier = $rangeMinQuantifier;
-    }
-
-    /**
-     * @param mixed $rangeMaxQuantifier
-     */
-    public function setRangeMaxQuantifier($rangeMaxQuantifier)
-    {
-        $this->rangeMaxQuantifier = $rangeMaxQuantifier;
     }
 
     /**
@@ -672,14 +486,6 @@ class Property
         $label->setProperty($this);
     }
 
-    public function addNamespace(OntoNamespace $namespace)
-    {
-        if ($this->namespaces->contains($namespace)) {
-            return;
-        }
-        $this->namespaces[] = $namespace;
-    }
-
     public function addProfileAssociation(ProfileAssociation $profileAssociation)
     {
         if ($this->profileAssociations->contains($profileAssociation)) {
@@ -728,6 +534,7 @@ class Property
     }
 
     /**
+     * @param OntoNamespace|null $namespace
      * @return PropertyVersion the propertyVersion to be displayed
      */
     public function getPropertyVersionForDisplay(OntoNamespace $namespace=null)

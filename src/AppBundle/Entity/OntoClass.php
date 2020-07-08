@@ -57,11 +57,6 @@ class OntoClass
     private $importerTextField;
 
     /**
-     * @ORM\Column(type="string")
-     */
-    private $standardLabel;
-
-    /**
      * @ORM\Column(type="text")
      */
     private $notes;

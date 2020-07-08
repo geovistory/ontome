@@ -41,7 +41,7 @@
                 </div>
             </div>
             <h2>{{ propertyVersion }}</h2>
-            {% if propertyVersion.property.propertyOfOrigin is not null %}
+            {% if propertyVersion.propertyOfOrigin is not null %}
                 [inherited, cf. <a href="{{ path('property_show', {'id': propertyVersion.property.propertyOfOrigin.id}) }}" target="_blank"><em>original</em></a>]
             {% endif %}
         </div>
@@ -67,10 +67,10 @@
         <div class="tab-content">
             <div id="summary" class="tab-pane fade in active">
                 <h3>
-                    {% if propertyVersion.property.identifierInNamespace != propertyVersion.property.standardLabel %}
-                        {{ propertyVersion.property.identifierInNamespace }} {{ propertyVersion.property.standardLabel }}
+                    {% if propertyVersion.property.identifierInNamespace != propertyVersion.standardLabel %}
+                        {{ propertyVersion.property.identifierInNamespace }} {{ propertyVersion.standardLabel }}
                     {% else %}
-                        {{ propertyVersion.property.standardLabel }}
+                        {{ propertyVersion.standardLabel }}
                     {% endif %}
                 </h3>
                 <div class="container">
@@ -108,17 +108,26 @@
                                     {% for association in propertyVersion.property.childPropertyAssociations
                                         if association.namespaceForVersion.id in namespacesId %}
                                         <li>
-                                            {% if association.parentProperty.domain is not null %}
-                                                <a href="{{ path('class_show', {'id': association.parentProperty.domain.id}) }}">
-                                                    {{ association.parentProperty.domain.identifierInNamespace }} {{ association.parentProperty.domain.standardLabel }}
+                                            {% if association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).domain is not null %}
+                                                <a href="{{ path('class_show_with_version', {
+                                                    'id': association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).domain.id,
+                                                    'namespaceFromUrlId': association.parentPropertyNamespace.id
+                                                }) }}">
+                                                    {{ association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).domain.identifierInNamespace }} {{ association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).domain.classVersionForDisplay(association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).domainNamespace).standardLabel }}
                                                 </a>
                                             {% endif %} →
-                                            <a href="{{ path('property_show', {'id': association.parentProperty.id}) }}">
-                                                {{ association.parentProperty.identifierInNamespace }} {{ association.parentProperty.standardLabel }}
+                                            <a href="{{ path('property_show_with_version', {
+                                                'id': association.parentProperty.id,
+                                                'namespaceFromUrlId': association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).namespaceForVersion.id
+                                            }) }}">
+                                                {{ association.parentProperty.identifierInNamespace }} {{ association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).standardLabel }}
                                             </a> →
-                                            {% if association.parentProperty.range is not null %}
-                                                <a href="{{ path('class_show', {'id': association.parentProperty.range.id}) }}">
-                                                    {{ association.parentProperty.range.identifierInNamespace }} {{ association.parentProperty.range.standardLabel }}
+                                            {% if association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).range is not null %}
+                                                <a href="{{ path('class_show_with_version', {
+                                                    'id': association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).range.id,
+                                                    'namespaceFromUrlId': association.parentPropertyNamespace.id
+                                                }) }}">
+                                                    {{ association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).range.identifierInNamespace }} {{ association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).range.classVersionForDisplay(association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).rangeNamespace).standardLabel }}
                                                 </a>
                                             {% endif %}
                                         </li>
@@ -462,7 +471,7 @@
                             </div>
                             <div class="col-lg-4">
                                 <p class="text-center"><label>Property</label></p>
-                                <p class="text-center">→ {{ propertyVersion.property.standardLabel }} →</p>
+                                <p class="text-center">→ {{ propertyVersion.standardLabel }} →</p>
                             </div>
                             <div class="col-lg-2">
                                 <p class="text-center"><label>Range quantifiers</label></p>
@@ -598,15 +607,25 @@
                             <td class="text-right small">
                                 {% if association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).domain is not null %}
                                     <a href="{{ path('class_show_with_version', {
-                                        'id': association.parentProperty.domain.id,
-                                        'namespaceFromUrlID': association.parentPropertyNamespace.id}) }}">
+                                        'id': association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).domain.id,
+                                        'namespaceFromUrlID': association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).domainNamespace.id}) }}">
                                         {{ association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).domain.classVersionForDisplay(association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).domainNamespace) }}
                                     </a>
                                 {% endif %}
                             </td>
                             <td class="small" style="padding-left: 30px;">
-                                {% if association.parentProperty.domainMinQuantifier is not null and association.parentProperty.domainMaxQuantifier is not null %}
-                                    ({% if  association.parentProperty.domainMinQuantifier != -1 %}{{ association.parentProperty.domainMinQuantifier }}{% else %}n{% endif %},{% if  association.parentProperty.domainMaxQuantifier != -1 %}{{ association.parentProperty.domainMaxQuantifier }}{% else %}n{% endif %})
+                                {% if association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).domainMinQuantifier is not null and association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).domainMaxQuantifier is not null %}
+                                    ({% if  association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).domainMinQuantifier != -1 %}
+                                    {{ association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).domainMinQuantifier }}
+                                {% else %}
+                                    n
+                                {% endif %}
+                                    ,
+                                    {% if  association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).domainMaxQuantifier != -1 %}
+                                        {{ association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).domainMaxQuantifier }}
+                                    {% else %}
+                                        n
+                                    {% endif %})
                                 {% endif %}
                             </td>
                             <td class="text-center">
@@ -619,13 +638,26 @@
                                 </a>
                             </td>
                             <td class="small" style="padding-right: 30px;">
-                                {% if association.parentProperty.rangeMinQuantifier is not null and association.parentProperty.rangeMaxQuantifier is not null %}
-                                    ({% if  association.parentProperty.rangeMinQuantifier != -1 %}{{ association.parentProperty.rangeMinQuantifier }}{% else %}n{% endif %},{% if  association.parentProperty.rangeMaxQuantifier != -1 %}{{ association.parentProperty.rangeMaxQuantifier }}{% else %}n{% endif %})
+                                {% if association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).rangeMinQuantifier is not null and association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).rangeMaxQuantifier is not null %}
+                                    ({% if  association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).rangeMinQuantifier != -1 %}
+                                    {{ association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).rangeMinQuantifier }}
+                                {% else %}
+                                    n
+                                {% endif %}
+                                    ,
+                                    {% if  association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).rangeMaxQuantifier != -1 %}
+                                        {{ association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).rangeMaxQuantifier }}
+                                    {% else %}
+                                        n
+                                    {% endif %})
                                 {% endif %}
                             </td>
                             <td class="small">
                                 {% if association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).range is not null %}
-                                    <a href="{{ path('class_show', {'id': association.parentProperty.range.id }) }}">
+                                    <a href="{{ path('class_show_with_version', {
+                                        'id': association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).range.id,
+                                        'id': association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).rangeNamespace.id
+                                    }) }}">
                                         {{ association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).range.classVersionForDisplay(association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).rangeNamespace) }}
                                     </a>
                                 {% endif %}

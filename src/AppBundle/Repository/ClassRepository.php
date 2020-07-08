@@ -72,35 +72,32 @@ class ClassRepository extends EntityRepository
         // Construit la chaine ?,? pour les namespacesId dans la requête SQL
         $in  = str_repeat('?,', count($namespacesId) - 1) . '?';
 
-        $sql = "WITH ascendants AS(
+        $sql = "WITH t_ascendants_classes AS(
 	                SELECT pk_parent,
-                        pk_parent_version,
                         parent_identifier,
                         DEPTH,
                         ARRAY_TO_STRING(_path,'|') ancestors,
-                        pk_is_subclass_of
-                        FROM che.ascendant_class_version_hierarchy(?)
+                        pk_is_subclass_of,
+                        fk_namespace_for_version
+                        FROM che.ascendant_class_hierarchy(?)
                 )
-                SELECT ascendants.pk_parent AS id,
-                    ascendants.pk_parent_version AS \"idVersion\",
-                    ascendants.parent_identifier AS identifier,
-                    ascendants.DEPTH,
+                SELECT t_ascendants_classes.pk_parent AS id,
+                    t_ascendants_classes.parent_identifier AS identifier,
+                    t_ascendants_classes.DEPTH,
                     che.get_root_namespace(nsp.pk_namespace) AS \"rootNamespaceId\",
                     (SELECT label FROM che.get_namespace_labels(che.get_root_namespace(nsp.pk_namespace)) WHERE language_iso_code = 'en') AS \"rootNamespaceLabel\",
                     nsp.pk_namespace AS \"classNamespaceId\",
-                    nsp.standard_label AS \"classNamespaceLabel\"
-                FROM ascendants,
-                che.class_version cv,
+                    nsp.standard_label AS \"classNamespaceLabel\",
+                    t_ascendants_classes.fk_namespace_for_version
+                FROM t_ascendants_classes,
                 che.namespace nsp
                 WHERE depth > 1
-                AND ascendants.pk_parent_version = cv.pk_class_version
-                AND cv.fk_namespace_for_version = nsp.pk_namespace
                 AND nsp.pk_namespace IN (".$in.")
-                GROUP BY ascendants.pk_parent,
-                ascendants.pk_parent_version ,
-                ascendants.parent_identifier,
-                ascendants.depth,
-                nsp.pk_namespace
+                GROUP BY t_ascendants_classes.pk_parent,
+                t_ascendants_classes.parent_identifier,
+                t_ascendants_classes.depth,
+                nsp.pk_namespace,
+		        t_ascendants_classes.fk_namespace_for_version
                 ORDER BY depth DESC;";
 
         $conn = $this->getEntityManager()->getConnection();
@@ -122,20 +119,18 @@ class ClassRepository extends EntityRepository
         $in  = str_repeat('?,', count($namespacesId) - 1) . '?';
 
         $sql = "SELECT pk_child AS id,
-                  pk_child_version AS \"idVersion\",
                   child_identifier AS identifier,
                   depth,
                   che.get_root_namespace(nsp.pk_namespace) AS \"rootNamespaceId\",
                   ( SELECT label FROM che.get_namespace_labels(che.get_root_namespace(nsp.pk_namespace)) WHERE language_iso_code = 'en') AS \"rootNamespaceLabel\",
                   nsp.pk_namespace AS \"classNamespaceId\",
-                  nsp.standard_label AS \"classNamespaceLabel\"
-                FROM che.descendant_class_version_hierarchy(?) cls,
-                     che.class_version cv,
+                  nsp.standard_label AS \"classNamespaceLabel\",
+                  fk_namespace_for_version
+                FROM che.descendant_class_hierarchy(?) cls,
                   che.namespace nsp
-                WHERE nsp.pk_namespace = cv.fk_namespace_for_version
-                AND cv.pk_class_version = cls.pk_child_version
+                WHERE nsp.pk_namespace = cls.fk_namespace_for_version
                 AND nsp.pk_namespace IN (".$in.")
-                GROUP BY pk_child, pk_child_version, child_identifier, depth, nsp.pk_namespace, che.get_root_namespace(nsp.pk_namespace)
+                GROUP BY pk_child, child_identifier, depth, nsp.pk_namespace, che.get_root_namespace(nsp.pk_namespace), fk_namespace_for_version
                 ORDER BY depth ASC;";
 
         $conn = $this->getEntityManager()->getConnection();
@@ -156,49 +151,43 @@ class ClassRepository extends EntityRepository
         // Construit la chaine ?,? pour les namespacesId dans la requête SQL
         $in  = str_repeat('?,', count($namespacesId) - 1) . '?';
 
-        $sql = "SELECT ea.pk_entity_association,
-                  ea.fk_target_class AS fk_related_class,
-                  c.identifier_in_namespace,
-                  c.standard_label,
-                  st.standard_label AS relation,
-                  txtp.pk_text_property,
-                  ns.pk_namespace AS \"rootNamespaceId\",
-                  ns.standard_label AS \"standardLabelNamespace\"
-                FROM che.entity_association AS ea
-                LEFT JOIN che.system_type AS st
-                ON st.pk_system_type = ea.fk_system_type
-                LEFT JOIN che.class AS c
-                ON ea.fk_target_class = c.pk_class
-                LEFT JOIN (SELECT * FROM che.text_property WHERE fk_text_property_type = 15) AS txtp
-                ON txtp.fk_entity_association = ea.pk_entity_association
-                LEFT JOIN che.namespace AS ns
-                ON ns.pk_namespace= che.get_root_namespace(ea.fk_namespace_for_version)
-                WHERE ea.fk_system_type IN (4, 19)
-                AND ea.fk_source_class = ?
-                AND c.pk_class IS NOT NULL
-                AND ns.pk_namespace IN (".$in.")
+        $sql = "SELECT 
+                ea.pk_entity_association, 
+                ea.fk_target_class AS fk_related_class,
+                c.identifier_in_namespace,
+                cv.standard_label,
+                st.standard_label AS relation,
+                txtp.pk_text_property,
+                ns.pk_namespace AS \"rootNamespaceId\",
+                ns.standard_label AS \"standardLabelNamespace\"
+                FROM che.entity_association ea 
+                JOIN che.system_type st ON ea.fk_system_type = st.pk_system_type 
+                JOIN che.class c ON ea.fk_target_class = c.pk_class
+                JOIN che.namespace ns ON ns.pk_namespace = che.get_root_namespace(ea.fk_namespace_for_version)
+                JOIN che.class_version cv ON c.pk_class = cv.fk_class
+                LEFT JOIN (SELECT * FROM che.text_property WHERE fk_text_property_type = 15) AS txtp ON txtp.fk_entity_association = ea.pk_entity_association
+                WHERE st.pk_system_type IN (4,19)
+                AND c.pk_class = ?
+                AND ea.fk_namespace_for_version IN (".$in.")
                 UNION
-                SELECT ea.pk_entity_association,
-                    ea.fk_source_class AS fk_related_class,
-                    c.identifier_in_namespace,
-                    c.standard_label,
-                    st.standard_label AS relation,
-                    txtp.pk_text_property,
-                    ns.pk_namespace AS \"rootNamespaceId\",
-                    ns.standard_label AS \"standardLabelNamespace\"
-                FROM che.entity_association AS ea
-                LEFT JOIN che.system_type AS st
-                ON st.pk_system_type = ea.fk_system_type
-                LEFT JOIN che.class AS c
-                ON ea.fk_source_class = c.pk_class
-                LEFT JOIN (SELECT * FROM che.text_property WHERE fk_text_property_type = 15) AS txtp
-                ON txtp.fk_entity_association = ea.pk_entity_association
-                LEFT JOIN che.namespace AS ns
-                ON ns.pk_namespace= che.get_root_namespace(ea.fk_namespace_for_version)
-                WHERE ea.fk_system_type IN (4, 19)
-                AND ea.fk_target_class = ?
-                AND c.pk_class IS NOT NULL
-                AND ns.pk_namespace IN (".$in.");";
+                SELECT 
+                ea.pk_entity_association,
+                ea.fk_source_class AS fk_related_class,
+                c.identifier_in_namespace,
+                cv.standard_label,
+                st.standard_label AS relation,
+                txtp.pk_text_property,
+                ns.pk_namespace AS \"rootNamespaceId\",
+                ns.standard_label AS \"standardLabelNamespace\" 
+                FROM che.entity_association ea 
+                JOIN che.system_type st ON ea.fk_system_type = st.pk_system_type 
+                JOIN che.class c ON ea.fk_source_class = c.pk_class
+                JOIN che.namespace ns ON ns.pk_namespace = che.get_root_namespace(ea.fk_namespace_for_version)
+                JOIN che.class_version cv ON c.pk_class = cv.fk_class
+                LEFT JOIN (SELECT * FROM che.text_property WHERE fk_text_property_type = 15) AS txtp ON txtp.fk_entity_association = ea.pk_entity_association
+                WHERE st.pk_system_type IN (4,19)
+                AND c.pk_class = ?
+                AND ea.fk_namespace_for_version IN (".$in.");";
 
         $conn = $this->getEntityManager()->getConnection();
         $stmt = $conn->prepare($sql);

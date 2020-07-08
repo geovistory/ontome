@@ -75,7 +75,6 @@ class ClassController extends Controller
         $scopeNote = new TextProperty();
         $scopeNote->setClass($class);
         $scopeNote->setSystemType($systemTypeScopeNote);
-        //$scopeNote->addNamespace($namespace); TODO: delete this line after successful test of the SolutionD branch
         $scopeNote->setNamespaceForVersion($namespace);
         $scopeNote->setCreator($this->getUser());
         $scopeNote->setModifier($this->getUser());
@@ -86,7 +85,6 @@ class ClassController extends Controller
 
         $label = new Label();
         $label->setClass($class);
-        //$label->addNamespace($namespace); TODO: delete this line after succesful test of the SolutionD branch
         $label->setNamespaceForVersion($namespace);
         $label->setIsStandardLabelForLanguage(true);
         $label->setCreator($this->getUser());
@@ -95,7 +93,6 @@ class ClassController extends Controller
         $label->setModificationTime(new \DateTime('now'));
 
         $class->setIsManualIdentifier(is_null($namespace->getTopLevelNamespace()->getClassPrefix()));
-        //$class->addNamespace($namespace); TODO: delete this line after successful test of the SolutionD branch
         $class->addLabel($label);
         $class->addClassVersion($classVersion);
         $class->setCreator($this->getUser());
@@ -108,7 +105,6 @@ class ClassController extends Controller
         if ($form->isSubmitted() && $form->isValid()) {
             $class = $form->getData();
             $class->setIsManualIdentifier(is_null($namespace->getTopLevelNamespace()->getClassPrefix()));
-            //$class->addNamespace($namespace); TODO: delete this line after successful test of the SolutionD branch
             $class->setCreator($this->getUser());
             $class->setModifier($this->getUser());
             $class->setCreationTime(new \DateTime('now'));
@@ -118,7 +114,6 @@ class ClassController extends Controller
                 $class->getTextProperties()[1]->setCreationTime(new \DateTime('now'));
                 $class->getTextProperties()[1]->setModificationTime(new \DateTime('now'));
                 $class->getTextProperties()[1]->setSystemType($systemTypeExample);
-                //$class->getTextProperties()[1]->addNamespace($namespace); TODO: delete this line after successful test of the SolutionD branch
                 $class->getTextProperties()[1]->setNamespaceForVersion($namespace);
                 $class->getTextProperties()[1]->setClass($class);
             }
