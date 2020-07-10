@@ -428,7 +428,7 @@
                                     'id': profileAssociation.range.id,
                                     'namespaceFromUrlId': profileAssociation.rangeNamespace.id
                                 }) }}">
-                                    {{ profileAssociation.range }}
+                                    {{ profileAssociation.range.classVersionForDisplay(profileAssociation.rangeNamespace) }}
                                 </a>
                             {% elseif profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).range is not null %}
                                 {# propriété non héritée #}

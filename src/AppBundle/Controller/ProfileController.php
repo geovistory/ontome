@@ -461,6 +461,14 @@ class ProfileController  extends Controller
             $profileAssociation = new ProfileAssociation();
             $profileAssociation->setProfile($profile);
             $profileAssociation->setClass($class);
+
+            $namespacesId = array();
+            foreach($profile->getNamespaces() as $namespace){
+                $namespacesId[] = $namespace->getId();
+            }
+            $classVersion = $em->getRepository("AppBundle:OntoClassVersion")->findClassVersionByClassAndNamespacesId($class, $namespacesId);
+            $profileAssociation->setEntityNamespaceForVersion($classVersion->getNamespaceForVersion());
+
             $systemType = $em->getRepository('AppBundle:SystemType')->find(5); //systemType 5 = selected
             $profileAssociation->setSystemType($systemType);
             $profileAssociation->setCreator($this->getUser());
@@ -520,6 +528,14 @@ class ProfileController  extends Controller
             $profileAssociation = new ProfileAssociation();
             $profileAssociation->setProfile($profile);
             $profileAssociation->setProperty($property);
+
+            $namespacesId = array();
+            foreach($profile->getNamespaces() as $namespace){
+                $namespacesId[] = $namespace->getId();
+            }
+            $propertyVersion = $em->getRepository("AppBundle:PropertyVersion")->findPropertyVersionByPropertyAndNamespacesId($property, $namespacesId);
+            $profileAssociation->setEntityNamespaceForVersion($propertyVersion->getNamespaceForVersion());
+
             $systemType = $em->getRepository('AppBundle:SystemType')->find(5); //systemType 5 = selected
             $profileAssociation->setSystemType($systemType);
             $profileAssociation->setCreator($this->getUser());
@@ -581,8 +597,22 @@ class ProfileController  extends Controller
             $profileAssociation = new ProfileAssociation();
             $profileAssociation->setProfile($profile);
             $profileAssociation->setProperty($property);
+
+            $namespacesId = array();
+            foreach($profile->getNamespaces() as $namespace){
+                $namespacesId[] = $namespace->getId();
+            }
+            $propertyVersion = $em->getRepository("AppBundle:PropertyVersion")->findPropertyVersionByPropertyAndNamespacesId($property, $namespacesId);
+            $profileAssociation->setEntityNamespaceForVersion($propertyVersion->getNamespaceForVersion());
+
             $profileAssociation->setDomain($domain);
+            $domainVersion = $em->getRepository("AppBundle:OntoClassVersion")->findClassVersionByClassAndNamespacesId($domain, $namespacesId);
+            $profileAssociation->setDomainNamespace($domainVersion->getNamespaceForVersion());
+
             $profileAssociation->setRange($range);
+            $rangeVersion = $em->getRepository("AppBundle:OntoClassVersion")->findClassVersionByClassAndNamespacesId($range, $namespacesId);
+            $profileAssociation->setRangeNamespace($rangeVersion->getNamespaceForVersion());
+
             $systemType = $em->getRepository('AppBundle:SystemType')->find(5); //systemType 5 = selected
             $profileAssociation->setSystemType($systemType);
             $profileAssociation->setCreator($this->getUser());

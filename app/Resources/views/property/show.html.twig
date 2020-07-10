@@ -152,19 +152,28 @@
                                     {% for association in propertyVersion.property.parentPropertyAssociations
                                         if association.namespaceForVersion.id in namespacesId %}
                                         <li>
-                                            {% if association.childProperty.domain is not null %}
-                                            <a href="{{ path('class_show', {'id': association.childProperty.domain.id}) }}">
-                                                {{ association.childProperty.domain.identifierInNamespace }} {{ association.childProperty.domain.standardLabel }}
+                                            {% if association.childProperty.propertyVersionForDisplay(association.childPropertyNamespace).domain is not null %}
+                                            <a href="{{ path('class_show_with_version', {
+                                                'id': association.childProperty.propertyVersionForDisplay(association.childPropertyNamespace).domain.id,
+                                                'namespaceFromUrlId': association.childProperty.propertyVersionForDisplay(association.childPropertyNamespace).domainNamespace.id
+                                            }) }}">
+                                                {{ association.childProperty.propertyVersionForDisplay(association.childPropertyNamespace).domain.identifierInNamespace }} {{ association.childProperty.propertyVersionForDisplay(association.childPropertyNamespace).domain.classVersionForDisplay(association.childProperty.propertyVersionForDisplay(association.childPropertyNamespace).domainNamespace).standardLabel }}
                                             </a>
                                             {% endif %}
                                             →
-                                            <a href="{{ path('property_show', {'id': association.childProperty.id}) }}">
-                                                {{ association.childProperty.identifierInNamespace }} {{ association.childProperty.standardLabel }}
+                                            <a href="{{ path('property_show_with_version', {
+                                                'id': association.childProperty.id,
+                                                'namespaceFromUrlId': association.childPropertyNamespace.id
+                                            }) }}">
+                                                {{ association.childProperty.identifierInNamespace }} {{ association.childProperty.propertyVersionForDisplay(association.childPropertyNamespace).standardLabel }}
                                             </a> →
-                                            {% if association.childProperty.range is not null %}
-                                            <a href="{{ path('class_show', {'id': association.childProperty.range.id}) }}">
-                                                {{ association.childProperty.range.identifierInNamespace }} {{ association.childProperty.range.standardLabel }}
-                                            </a>
+                                            {% if association.childProperty.propertyVersionForDisplay(association.childPropertyNamespace).range is not null %}
+                                                <a href="{{ path('class_show_with_version', {
+                                                    'id': association.childProperty.propertyVersionForDisplay(association.childPropertyNamespace).range.id,
+                                                    'namespaceFromUrlId': association.childProperty.propertyVersionForDisplay(association.childPropertyNamespace).rangeNamespace.id
+                                                }) }}">
+                                                    {{ association.childProperty.propertyVersionForDisplay(association.childPropertyNamespace).range.identifierInNamespace }} {{ association.childProperty.propertyVersionForDisplay(association.childPropertyNamespace).range.classVersionForDisplay(association.childProperty.propertyVersionForDisplay(association.childPropertyNamespace).rangeNamespace).standardLabel }}
+                                                </a>
                                             {% endif %}
                                         </li>
                                     {% endfor %}
@@ -554,7 +563,7 @@
                                     'namespaceFromUrlId': propertyVersion.namespaceForVersion.id,
                                     '_fragment': 'property-hierarchy'
                                 }) }}">
-                                    {{ association.parentProperty.propertyVersionForDisplay(propertyVersion.namespaceForVersion).invertedLabel }}
+                                    {{ association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).invertedLabel }}
                                 </a>
                             </td>
                             <td class="small" style="padding-right: 30px;">

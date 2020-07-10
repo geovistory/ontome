@@ -313,10 +313,9 @@ class ClassRepository extends EntityRepository
 
         $sql = "SELECT DISTINCT cls.pk_class AS \"classId\",
                         cls.identifier_in_namespace AS \"identifierInNamespace\",
-                        cls.standard_label AS \"standardLabel\",
+                        cv.standard_label AS \"standardLabel\",
                         nsp.standard_label AS \"namespace\"
-                FROM che.class cls
-                JOIN che.class_version cv ON cls.pk_class = cv.fk_class
+                FROM che.class cls JOIN che.class_version cv ON cls.pk_class = cv.fk_class
                 JOIN che.associates_referenced_namespace arfnsp ON cv.fk_namespace_for_version = arfnsp.fk_referenced_namespace
                 JOIN che.namespace nsp ON cv.fk_namespace_for_version = nsp.pk_namespace
                 WHERE arfnsp.fk_profile = :profile
@@ -342,14 +341,16 @@ class ClassRepository extends EntityRepository
         $sql = "SELECT DISTINCT cls.pk_class
                 FROM che.associates_profile aspro
                 JOIN che.property prop ON aspro.fk_property = prop.pk_property
-                JOIN che.class cls ON prop.has_domain = cls.pk_class
-                WHERE aspro.fk_profile = :profile AND fk_property IS NOT NULL AND aspro.fk_system_type = 5 AND cls.pk_class = :class
+                JOIN che.property_version pv ON prop.pk_property = pv.fk_property
+                JOIN che.class cls ON pv.has_domain = cls.pk_class
+                WHERE aspro.fk_profile = :profile AND aspro.fk_property IS NOT NULL AND aspro.fk_system_type = 5 AND cls.pk_class = :class
                 UNION
                 SELECT DISTINCT cls.pk_class
                 FROM che.associates_profile aspro
                 JOIN che.property prop ON aspro.fk_property = prop.pk_property
-                JOIN che.class cls ON prop.has_range = cls.pk_class
-                WHERE aspro.fk_profile = :profile AND fk_property IS NOT NULL AND aspro.fk_system_type = 5 AND cls.pk_class = :class;";
+                JOIN che.property_version pv ON prop.pk_property = pv.fk_property
+                JOIN che.class cls ON pv.has_range = cls.pk_class
+                WHERE aspro.fk_profile = :profile AND aspro.fk_property IS NOT NULL AND aspro.fk_system_type = 5 AND cls.pk_class = :class;";
         $stmt = $conn->prepare($sql);
         $stmt->execute(array('profile' => $profile->getId(), 'class' => $class->getId()));
 
@@ -393,10 +394,10 @@ class ClassRepository extends EntityRepository
                     EXCEPT 
                     
                     SELECT  aspro.fk_inheriting_range_class AS id,
-                            cls.identifier_in_namespace || ' ' || cls.standard_label AS \"text\"
+                            cls.identifier_in_namespace || ' ' || cv.standard_label AS \"text\"
                     FROM che.associates_profile aspro
-                    JOIN che.class cls 
-                        ON aspro.fk_inheriting_range_class = cls.pk_class
+                    JOIN che.class cls ON aspro.fk_inheriting_range_class = cls.pk_class
+                    JOIN che.class_version cv ON cls.pk_class = cv.fk_class
                             AND aspro.fk_profile = :profile
                             AND   aspro.fk_property = :property
                             AND   aspro.fk_system_type = 5
