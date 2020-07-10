@@ -20,45 +20,37 @@
     <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}" />
 </head>
 <body>
-<header class="header">
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-xs-8">
-                <h1 class="logo">OntoME</h1>
+<header id="masthead" class="site-header" role="banner">
+    <div class="row" id="logo-main-menu-row">
+        <div id="logo" class="site-branding col-sm-6">
+            <div id="site-logo">
+                <a href="/" title="OntoME">
+                    <img src="{{ asset('images/logo.png') }}" alt="OntoME">
+                </a>
             </div>
-            <div class="col-xs-4">
+            <h4  id="site-title">
+                <strong><em>Ontology Management Environment - beta version</em></strong>
+            </h4>
+        </div>
+        <div class="col-sm-6 right-header-part">
+            <div id="login-logout-block">
                 {% if is_granted('ROLE_USER') %}
                     <p class="text-right"><a class="btn btn-default" href="{{ path('security_logout') }}">LOGOUT</a></p>
                 {% else %}
                     <p class="text-right"><a class="btn btn-default" href="{{ path('security_login') }}">LOGIN</a></p>
                 {% endif %}
             </div>
-        </div>
-        <div class="row">
-            <div class="col-xs-6">
-                <h4>
-                    <strong><em class="text-muted">Ontology Management Environment - beta version</em></strong>
-                </h4>
-            </div>
-            <div class="col-xs-6">
+            <div id="dfhc-block">
                 <h4 class="text-right">
                     <strong>
                         <em>
-                            <a class="text-muted" href="http://dataforhistory.org" target="_blank">Data for History Consortium </a>
+                            <a class="text-white" href="http://dataforhistory.org" target="_blank">Data for History Consortium</a>
                         </em>
                     </strong>
                 </h4>
             </div>
         </div>
     </div>
-    {#
-    <ul class="navi">
-        {% if is_granted('ROLE_USER') %}
-            <li><a href="{{ path('security_logout') }}">Logout</a></li>
-        {% else %}
-            <li><a href="{{ path('security_login') }}">Login</a></li>
-        {% endif %}
-    </ul>#}
 </header>
 <nav class="navbar navbar-default">
     <div class="container-fluid">

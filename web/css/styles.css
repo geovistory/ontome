@@ -9,6 +9,7 @@ Flexbox Layout
 
 .header {
     justify-content: space-between;
+    display: block;
 }
 
 .navi {
@@ -51,10 +52,54 @@ body {
     margin: 0;
 }
 
+#masthead{
+    position: relative;
+    max-width: 100%;
+}
+
 .header {
     padding: 10px 10px;
     margin: 0 auto;
     background-color: #81B9BA;
+}
+
+#logo-main-menu-row{
+    height: 130px;
+    margin-left: 0px;
+    margin-right: 0px;
+}
+
+.site-branding {
+    height: 100%;
+    margin-bottom: 0px;
+    width: 39%;
+}
+
+h4#site-title {
+    color: rgb(225, 115, 102);
+    /*color: #81B9BA;*/
+    font-weight: 800;
+    margin-top: 5px;
+    clear: none;
+}
+
+.right-header-part{
+    width:100%;
+    background-color: rgb(225, 115, 102);
+    /*background-color: #81B9BA;*/
+    height: 100%;
+    width: 61%;
+}
+
+#login-logout-block{
+    margin-top: 15px;
+}
+
+#dfhc-block{
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    padding-right: 30px;
 }
 
 .logo-icon {
@@ -109,6 +154,18 @@ body {
     margin-bottom: 15px;
 }
 
+@media screen and (max-width: 1200px) {
+    #logo-main-menu-row {
+        height: 150px;
+    }
+}
+
+@media screen and (max-width: 1140px) {
+    #site-logo {
+        float: none;
+    }
+}
+
 @media all and (min-width: 1030px) {
     .header {
         min-width: 768px;
@@ -124,6 +181,10 @@ body {
 /******************************
 BODY Styling
 *******************************/
+
+.text-white{
+    color: white;
+}
 
 .object-details-list, .notes-header {
     padding-left: 20px;
@@ -514,6 +575,46 @@ Main components
         -moz-animation: cd-bounce-2-inverse 0.6s;
         animation: cd-bounce-2-inverse 0.6s;
     }
+}
+
+@media screen and (max-width: 768px) {
+    /*Pre Header et Header*/
+    h1#site-title{
+        text-align: center;
+    }
+
+    .site-branding {
+        width: 100%;
+    }
+
+    .right-header-part {
+        width: 100%;
+        padding-top: 5px;
+    }
+
+    #dfhc-block{
+        position: relative;
+        padding-right: 0;
+    }
+
+    #site-logo {
+        padding-top: 15px;
+        float: none;
+    }
+
+    #logo-main-menu-row {
+        height: 100%;
+    }
+
+    select.mnav{
+        width: 100%;
+        margin-bottom: 20px;
+    }
+
+    #main-menu{
+        display:none;
+    }
+
 }
 
 @-webkit-keyframes cd-bounce-2 {
