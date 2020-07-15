@@ -157,19 +157,27 @@ class PropertyController extends Controller
             $property = $form->getData();
             if($type == 'outgoing') {
                 $propertyVersion->setDomain($class);
+                $domainNamespace = $em->getRepository("AppBundle:OntoClassVersion")->findClassVersionByClassAndNamespacesId($class, $namespacesId)->getNamespaceForVersion();
+                $propertyVersion->setDomainNamespace($domainNamespace);
                 $range = $em->getRepository("AppBundle:OntoClass")->find($form->get("rangeVersion")->getData());
                 $propertyVersion->setRange($range);
+                $rangeNamespace = $em->getRepository("AppBundle:OntoClassVersion")->findClassVersionByClassAndNamespacesId($range, $namespacesId)->getNamespaceForVersion();
+                $propertyVersion->setRangeNamespace($rangeNamespace);
             }
             elseif ($type == 'ingoing') {
                 $propertyVersion->setRange($class);
+                $rangeNamespace = $em->getRepository("AppBundle:OntoClassVersion")->findClassVersionByClassAndNamespacesId($class, $namespacesId)->getNamespaceForVersion();
+                $propertyVersion->setRangeNamespace($rangeNamespace);
                 $domain = $em->getRepository("AppBundle:OntoClass")->find($form->get("domainVersion")->getData());
                 $propertyVersion->setDomain($domain);
+                $domainNamespace = $em->getRepository("AppBundle:OntoClassVersion")->findClassVersionByClassAndNamespacesId($domain, $namespacesId)->getNamespaceForVersion();
+                $propertyVersion->setDomainNamespace($domainNamespace);
             }
 
-            $propertyVersion->setDomainMinQuantifier($property->getDomainMinQuantifier());
-            $propertyVersion->setDomainMaxQuantifier($property->getDomainMaxQuantifier());
-            $propertyVersion->setRangeMinQuantifier($property->getRangeMinQuantifier());
-            $propertyVersion->setRangeMaxQuantifier($property->getRangeMaxQuantifier());
+            $propertyVersion->setDomainMinQuantifier($form->get("domainMinQuantifierVersion")->getData());
+            $propertyVersion->setDomainMaxQuantifier($form->get("domainMaxQuantifierVersion")->getData());
+            $propertyVersion->setRangeMinQuantifier($form->get("rangeMinQuantifierVersion")->getData());
+            $propertyVersion->setRangeMaxQuantifier($form->get("rangeMaxQuantifierVersion")->getData());
 
             $property->setCreator($this->getUser());
             $property->setModifier($this->getUser());
@@ -393,6 +401,8 @@ class PropertyController extends Controller
 
         $propertyVersionTemp->setDomain($propertyVersion->getDomain());
         $propertyVersionTemp->setRange($propertyVersion->getRange());
+
+        $propertyTemp->addPropertyVersion($propertyVersionTemp);
 
         $formIdentifier = $this->createForm(PropertyEditIdentifierForm::class, $propertyTemp);
         $formIdentifier->handleRequest($request);

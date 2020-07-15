@@ -15,7 +15,7 @@
                             <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
                         </a>
                     {% elseif label.property is not null %}
-                        property {{ label.property }}
+                        property {{ label.property.propertyVersionForDisplay(label.namespaceForVersion) }}
                         <a href="{{ path('property_edit', {
                             id: label.property.id
                         }) }}#identification"

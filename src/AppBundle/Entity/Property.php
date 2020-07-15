@@ -182,7 +182,12 @@ class Property
                 ->addViolation();
         }
         else if($this->isManualIdentifier) {
-            foreach ($this->getNamespaces() as $namespace) {
+            // Retrouver l'ensemble d'espaces de noms concernés pour l'identifiant.
+            // Il ne faut donc PAS utiliser $this->getNamespaces qui ne retrouve que les namespaces de CETTE classe
+            // (d'autres namespaces du même root mais qui n'ont pas cette classe, peuvent donc échapper)
+            // il faut donc simplement récupérer le root et boucler dessus
+            $rootNamespace = $this->getPropertyVersionForDisplay()->getNamespaceForVersion()->getTopLevelNamespace();
+            foreach ($rootNamespace->getChildVersions() as $namespace) {
                 foreach ($namespace->getProperties() as $property) {
                     if ($property->identifierInNamespace == $this->identifierInNamespace) {
                         $context->buildViolation('The identifier must be unique. Please enter another one.')

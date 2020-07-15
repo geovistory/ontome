@@ -64,7 +64,8 @@ class IngoingPropertyQuickAddForm extends AbstractType
                 'placeholder'       => '',
                 'choices'           => $choices
             ))
-            ->add('domainMinQuantifier',ChoiceType::class, array(
+            ->add('domainMinQuantifierVersion',ChoiceType::class, array(
+                'mapped' => false,
                 'choices'  => array(
                     'Min' => null,
                     '0' => 0,
@@ -77,7 +78,8 @@ class IngoingPropertyQuickAddForm extends AbstractType
                 ),
                 'preferred_choices' => [null, 0, 1, -1],
             ))
-            ->add('domainMaxQuantifier',ChoiceType::class, array(
+            ->add('domainMaxQuantifierVersion',ChoiceType::class, array(
+                'mapped' => false,
                 'choices'  => array(
                     'Max' => null,
                     '1' => 1,
@@ -89,7 +91,8 @@ class IngoingPropertyQuickAddForm extends AbstractType
                 ),
                 'preferred_choices' => [null, 1, -1],
             ))
-            ->add('rangeMinQuantifier',ChoiceType::class, array(
+            ->add('rangeMinQuantifierVersion',ChoiceType::class, array(
+                'mapped' => false,
                 'choices'  => array(
                     'Min' => null,
                     '0' => 0,
@@ -102,7 +105,8 @@ class IngoingPropertyQuickAddForm extends AbstractType
                 ),
                 'preferred_choices' => [null, 0, 1, -1],
             ))
-            ->add('rangeMaxQuantifier',ChoiceType::class, array(
+            ->add('rangeMaxQuantifierVersion',ChoiceType::class, array(
+                'mapped' => false,
                 'choices'  => array(
                     'Max' => null,
                     '1' => 1,
