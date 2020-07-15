@@ -477,6 +477,10 @@ class OntoClass
             return;
         }
         $this->classVersions[] = $classVersion;
+
+        //Utile pour vérifier la contrainte d'unicité de l'identifiant dans un namespace
+        $this->addNamespace($classVersion->getNamespaceForVersion());
+
         // needed to update the owning side of the relationship!
         $classVersion->setClass($this);
     }

@@ -52,6 +52,10 @@ class ClassController extends Controller
 
     /**
      * @Route("class/new/{namespace}", name="class_new")
+     * @param Request $request
+     * @param OntoNamespace $namespace
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse|Response
+     * @throws \Exception
      */
     public function newAction(Request $request, OntoNamespace $namespace)
     {
@@ -71,6 +75,8 @@ class ClassController extends Controller
         $classVersion->setModifier($this->getUser());
         $classVersion->setCreationTime(new \DateTime('now'));
         $classVersion->setModificationTime(new \DateTime('now'));
+
+        $class->addClassVersion($classVersion);
 
         $scopeNote = new TextProperty();
         $scopeNote->setClass($class);
@@ -92,9 +98,10 @@ class ClassController extends Controller
         $label->setCreationTime(new \DateTime('now'));
         $label->setModificationTime(new \DateTime('now'));
 
-        $class->setIsManualIdentifier(is_null($namespace->getTopLevelNamespace()->getClassPrefix()));
         $class->addLabel($label);
-        $class->addClassVersion($classVersion);
+
+        $class->setIsManualIdentifier(is_null($namespace->getTopLevelNamespace()->getClassPrefix()));
+
         $class->setCreator($this->getUser());
         $class->setModifier($this->getUser());
 
