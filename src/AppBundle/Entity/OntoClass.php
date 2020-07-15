@@ -188,7 +188,12 @@ class OntoClass
                 ->addViolation();
         }
         else if($this->isManualIdentifier) {
-            foreach ($this->getNamespaces() as $namespace) {
+            // Retrouver l'ensemble d'espaces de noms concernés pour l'identifiant.
+            // Il ne faut donc PAS utiliser $this->getNamespaces qui ne retrouve que les namespaces de CETTE classe
+            // (d'autres namespaces du même root mais qui n'ont pas cette classe, peuvent donc échapper)
+            // il faut donc simplement récupérer le root et boucler dessus
+            $rootNamespace = $this->getClassVersionForDisplay()->getNamespaceForVersion()->getTopLevelNamespace();
+            foreach ($rootNamespace->getChildVersions() as $namespace) {
                 foreach ($namespace->getClasses() as $class) {
                     if ($class->identifierInNamespace == $this->identifierInNamespace) {
                         $context->buildViolation('The identifier must be unique. Please enter another one.')
@@ -477,10 +482,6 @@ class OntoClass
             return;
         }
         $this->classVersions[] = $classVersion;
-
-        //Utile pour vérifier la contrainte d'unicité de l'identifiant dans un namespace
-        $this->addNamespace($classVersion->getNamespaceForVersion());
-
         // needed to update the owning side of the relationship!
         $classVersion->setClass($this);
     }
