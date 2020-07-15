@@ -273,8 +273,11 @@ class ClassController extends Controller
 
         $this->denyAccessUnlessGranted('edit', $classVersion);
 
+        $classVersionTemp = new OntoClassVersion();
+        $classVersionTemp->setNamespaceForVersion($classVersion->getNamespaceForVersion());
+
         $classTemp = new OntoClass();
-        //$classTemp->addNamespace($class->getOngoingNamespace()); TODO: à supprimer pour le projet Delta
+        $classTemp->addClassVersion($classVersionTemp);
         $classTemp->setIdentifierInNamespace($class->getIdentifierInNamespace());
         $classTemp->setIsManualIdentifier(is_null($classVersion->getNamespaceForVersion()->getTopLevelNamespace()->getClassPrefix()));
         $classTemp->setCreator($this->getUser());
