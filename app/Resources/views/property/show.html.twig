@@ -48,7 +48,9 @@
             </div>
             <h2>{{ propertyVersion }}</h2>
             {% if propertyVersion.propertyOfOrigin is not null %}
-                [inherited, cf. <a href="{{ path('property_show', {'id': propertyVersion.propertyOfOrigin.id}) }}" target="_blank"><em>original</em></a>]
+                [inherited, cf. <a href="{{ path('property_show', {
+                'id': propertyVersion.propertyOfOrigin.id
+            }) }}" target="_blank"><em>original</em></a>]
             {% endif %}
         </div>
         <ul class="nav nav-tabs">
@@ -87,7 +89,10 @@
                         </div>
                         <div class="col-lg-10">
                             <p>
-                                <a href="{{ path('class_show', {'id': domainRange.domainId}) }}">{{ domainRange.domainIdentifier }}</a>
+                                <a href="{{ path('class_show_with_version', {
+                                    'id': domainRange.domainId,
+                                    'namespaceFromUrlId': domainRange.domainNamespaceId
+                                }) }}">{{ domainRange.domainIdentifier }}</a>
                             </p>
                         </div>
                     </div>
@@ -99,7 +104,10 @@
                         </div>
                         <div class="col-lg-10">
                             <p>
-                                <a href="{{ path('class_show', {'id': domainRange.rangeId }) }}">{{ domainRange.rangeIdentifier }}</a>
+                                <a href="{{ path('class_show_with_version', {
+                                    'id': domainRange.rangeId,
+                                    'namespaceFromUrlId': domainRange.rangeNamespaceId
+                                }) }}">{{ domainRange.rangeIdentifier }}</a>
                             </p>
                         </div>
                     </div>
@@ -428,7 +436,15 @@
                 {% if domainRange is not empty and domainRange.domainId is not null and domainRange.rangeId is not null %}
                     <h3>Domain and range</h3>
                     <p>
-                        <a href="{{ path('class_show', {'id': domainRange.domainId}) }}">{{ domainRange.domainIdentifier }}</a> → {{ domainRange.propertyIdentifier }} → <a href="{{ path('class_show', {'id': domainRange.rangeId}) }}">{{ domainRange.rangeIdentifier }}</a>
+                        <a href="{{ path('class_show_with_version', {
+                            'id': domainRange.domainId,
+                            'namespaceFromUrlId': domainRange.domainNamespaceId
+                        }) }}">{{ domainRange.domainIdentifier }}</a>
+                        → {{ domainRange.propertyIdentifier }} →
+                        <a href="{{ path('class_show_with_version', {
+                            'id': domainRange.rangeId,
+                            'namespaceFromUrlId': domainRange.rangeNamespaceId
+                        }) }}">{{ domainRange.rangeIdentifier }}</a>
                         {% if propertyVersion.quantifiers is not null %}
                             &nbsp;(Quantifiers {{ propertyVersion.quantifiers }})
                         {% endif %}
@@ -560,7 +576,7 @@
                             <td class="text-center">
                                 <a href="{{ path('property_show_with_version', {
                                     'id': association.parentProperty.id,
-                                    'namespaceFromUrlId': propertyVersion.namespaceForVersion.id,
+                                    'namespaceFromUrlId': association.parentPropertyNamespace.id,
                                     '_fragment': 'property-hierarchy'
                                 }) }}">
                                     {{ association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).invertedLabel }}
@@ -585,7 +601,7 @@
                                 {% if association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).range is not null %}
                                     <a href="{{ path('class_show_with_version', {
                                         'id': association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).range.id,
-                                        'id': association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).rangeNamespace.id
+                                        'namespaceFromUrlId': association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).rangeNamespace.id
                                     }) }}">
                                         {{ association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).range.classVersionForDisplay(association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).rangeNamespace) }}
                                     </a>
@@ -634,7 +650,10 @@
                         <tr>
                             <td class="text-right small">
                                 {% if ancestor.domainIdentifier is not null %}
-                                    <a href="{{ path('class_show', {'id': ancestor.has_domain }) }}">
+                                    <a href="{{ path('class_show_with_version', {
+                                        'id': ancestor.has_domain,
+                                        'namespaceFromUrlId': ancestor.domainNamespaceId
+                                    }) }}">
                                         {% if ancestor.domainStandardLabel == ancestor.domainIdentifier %}
                                             {{ ancestor.domainStandardLabel }}
                                         {% else %}
@@ -649,8 +668,9 @@
                                 {% endif %}
                             </td>
                             <td class="text-center">
-                                <a href="{{ path('property_show', {
+                                <a href="{{ path('property_show_with_version', {
                                     'id': ancestor.id,
+                                    'namespaceFromUrlId': ancestor.propertyNamespaceId,
                                     '_fragment': 'property-hierarchy'
                                 }) }}">
                                     {{ ancestor.identifier }}
@@ -663,7 +683,10 @@
                             </td>
                             <td class="small">
                                 {% if ancestor.rangeIdentifier is not null %}
-                                    <a href="{{ path('class_show', {'id': ancestor.has_range }) }}">
+                                    <a href="{{ path('class_show_with_version', {
+                                        'id': ancestor.has_range,
+                                        'namespaceFromUrlId': ancestor.rangeNamespaceId
+                                    }) }}">
                                         {% if ancestor.rangeStandardLabel == ancestor.rangeIdentifier %}
                                         {{ ancestor.rangeStandardLabel }}
                                         {% else %}
@@ -696,7 +719,10 @@
                         <tr>
                             <td class="text-right small">
                                 {% if descendant.domainIdentifier is not null %}
-                                    <a href="{{ path('class_show', {'id': descendant.has_domain }) }}">
+                                    <a href="{{ path('class_show_with_version', {
+                                        'id': descendant.has_domain,
+                                        'namespaceFromUrlId': descendant.domainNamespaceId
+                                    }) }}">
                                         {% if descendant.domainStandardLabel == descendant.domainIdentifier %}
                                             {{ descendant.domainStandardLabel }}
                                         {% else %}
@@ -711,8 +737,9 @@
                                 {% endif %}
                             </td>
                             <td class="text-center">
-                                <a href="{{ path('property_show', {
+                                <a href="{{ path('property_show_with_version', {
                                     'id': descendant.id,
+                                    'namespaceFromUrlId': descendant.propertyNamespaceId,
                                     '_fragment': 'property-hierarchy'
                                 }) }}">
                                     {{ descendant.identifier }}
@@ -725,7 +752,10 @@
                             </td>
                             <td class="small">
                                 {% if descendant.rangeIdentifier is not null %}
-                                    <a href="{{ path('class_show', {'id': descendant.has_range }) }}">
+                                    <a href="{{ path('class_show_with_version', {
+                                        'id': descendant.has_range,
+                                        'namespaceFromUrlId': descendant.rangeNamespaceId
+                                    }) }}">
                                         {% if descendant.rangeStandardLabel == descendant.rangeIdentifier %}
                                             {{ descendant.rangeStandardLabel }}
                                         {% else %}

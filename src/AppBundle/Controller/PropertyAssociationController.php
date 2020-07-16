@@ -46,13 +46,50 @@ class PropertyAssociationController extends Controller
         $propertyAssociation->addTextProperty($justification);
         $propertyAssociation->setChildProperty($childProperty);
 
-        $form = $this->createForm(ParentPropertyAssociationForm::class, $propertyAssociation);
+        // FILTRAGE : Récupérer les clés de namespaces à utiliser
+        if(is_null($this->getUser()) || $this->getUser()->getCurrentActiveProject()->getId() == 21){ // Utilisateur non connecté OU connecté et utilisant le projet public
+            $namespacesId = $em->getRepository('AppBundle:OntoNamespace')->findPublicProjectNamespacesId();
+        }
+        else{ // Utilisateur connecté et utilisant un autre projet
+            $namespacesId = $em->getRepository('AppBundle:OntoNamespace')->findNamespacesIdByUser($this->getUser());
+        }
+
+        // Affaiblir le filtrage en rajoutant le namespaceForVersion de la classVersion si indisponible
+        $namespaceForChildPropertyVersion = $childProperty->getPropertyVersionForDisplay()->getNamespaceForVersion();
+        if(!in_array($namespaceForChildPropertyVersion->getId(), $namespacesId)){
+            $namespacesId[] = $namespaceForChildPropertyVersion->getId();
+        }
+        // Sans oublier les namespaces références si indisponibles
+        foreach($namespaceForChildPropertyVersion->getReferencedNamespaceAssociations() as $referencedNamespacesAssociation){
+            if(!in_array($referencedNamespacesAssociation->getReferencedNamespace()->getId(), $namespacesId)){
+                $namespacesId[] = $referencedNamespacesAssociation->getReferencedNamespace()->getId();
+            }
+        }
+
+        $arrayPropertiesVersion = $em->getRepository('AppBundle:PropertyVersion')
+            ->findIdAndStandardLabelOfPropertiesVersionByNamespacesId($namespacesId);
+
+        $form = $this->createForm(ParentPropertyAssociationForm::class, $propertyAssociation, array(
+            "propertiesVersion" => $arrayPropertiesVersion
+        ));
 
         // only handles data on POST
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $propertyAssociation = $form->getData();
+            $parentProperty = $em->getRepository("AppBundle:Property")->find($form->get("parentPropertyVersion")->getData());
+            $propertyAssociation->setParentProperty($parentProperty);
             $propertyAssociation->setNamespaceForVersion($this->getUser()->getCurrentOngoingNamespace());
+            $propertyAssociation->setChildPropertyNamespace(
+                $em->getRepository("AppBundle:PropertyVersion")
+                    ->findPropertyVersionByPropertyAndNamespacesId($childProperty, $namespacesId)
+                    ->getNamespaceForVersion()
+            );
+            $propertyAssociation->setParentPropertyNamespace(
+                $em->getRepository("AppBundle:PropertyVersion")
+                    ->findPropertyVersionByPropertyAndNamespacesId($parentProperty, $namespacesId)
+                    ->getNamespaceForVersion()
+            );
             $propertyAssociation->setCreator($this->getUser());
             $propertyAssociation->setModifier($this->getUser());
             $propertyAssociation->setCreationTime(new \DateTime('now'));

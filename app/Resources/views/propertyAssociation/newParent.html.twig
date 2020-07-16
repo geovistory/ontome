@@ -39,7 +39,7 @@
 
                 {{ form_start(parentPropertyAssociationForm) }}
                     {{ form_errors(parentPropertyAssociationForm) }}
-                    {{ form_row(parentPropertyAssociationForm.parentProperty) }}
+                    {{ form_row(parentPropertyAssociationForm.parentPropertyVersion) }}
 
                     {{ form_row(parentPropertyAssociationForm.childProperty) }}
 
@@ -98,6 +98,10 @@
     <script>
 
         $(document).ready(function() {
+            $('#parent_property_association_form_parentPropertyVersion').change(function() {
+                $('#parent_property_association_form_parentProperty').val($(this).val());
+            });
+
             $('#parent_property_association_form_parentProperty').select2({
                 sorter: function(data) {
                     /* Sort data using lowercase comparison */

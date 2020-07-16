@@ -23,7 +23,7 @@
                     </a>
                 {% elseif textProperty.propertyAssociation is not null %}
                     {% if textProperty.object is not null %}
-                        {% if textProperty.object.identifierInNamespace is not null %}
+                        {% if textProperty.class is not null or textProperty.property is not null %}
                             {{ textProperty.object.standardLabel }} – {{ textProperty.object.identifierInNamespace }}: {{ textProperty.systemType.standardLabel }}
                         {% else %}
                             {{ textProperty.object.objectIdentification }}: {{ textProperty.systemType.standardLabel }}
@@ -85,7 +85,7 @@
                     </a>
                 {% elseif textProperty.entityAssociation is not null and app.request.attributes.get('_route') == 'text_property_inverse_new' %}
                     {% if textProperty.object is not null %}
-                        {% if textProperty.object.identifierInNamespace is not null %}
+                        {% if textProperty.class is not null or textProperty.property is not null %}
                             {{ textProperty.object.standardLabel }} – {{ textProperty.object.identifierInNamespace }}: {{ textProperty.systemType.standardLabel }}
                         {% else %}
                             {{ textProperty.object.objectIdentification }}: {{ textProperty.systemType.standardLabel }}

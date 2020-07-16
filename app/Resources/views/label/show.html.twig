@@ -23,9 +23,11 @@
                     {% endif %}
 
                     {% if label.class is not null %}
-                        {% set route = 'class_show' %}
+                        {% set route = 'class_show_with_version' %}
+                        {% set namespaceFromUrlId = label.namespaceForVersion.id %}
                     {% elseif label.property is not null %}
-                        {% set route = 'property_show' %}
+                        {% set route = 'property_show_with_version' %}
+                        {% set namespaceFromUrlId = label.namespaceForVersion.id %}
                     {% elseif label.namespace is not null %}
                         {% set route = 'namespace_show' %}
                     {% elseif label.project is not null %}
@@ -40,7 +42,16 @@
                         {% set route = 'property_association_show' %}
                     {% endif %}
 
-                    {% if route is not null %}
+                    {% if route is not null and namespaceFromUrlId is not null %}
+                    <a href="{{ path(route, {
+                        'id':label.object.id,
+                        'namespaceFromUrlId': namespaceFromUrlId,
+                        '_fragment': 'identification'}) }}"
+                       class="pull-right btn btn-link"
+                       role="button">
+                        <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
+                    </a>
+                    {% elseif  route is not null %}
                     <a href="{{ path(route, {'id':label.object.id, '_fragment': 'identification'}) }}"
                        class="pull-right btn btn-link"
                        role="button">

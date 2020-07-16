@@ -88,11 +88,13 @@ class PropertyRepository extends EntityRepository
                        pv.has_domain,
                        domain.identifier_in_namespace AS \"domainIdentifier\",
                        domain_version.standard_label AS \"domainStandardLabel\",
+                       domain_version.fk_namespace_for_version AS \"domainNamespaceId\",
                        pv.domain_instances_min_quantifier,
                        pv.domain_instances_max_quantifier,
                        pv.has_range,
                        range.identifier_in_namespace AS \"rangeIdentifier\",
                        range_version.standard_label AS \"rangeStandardLabel\",
+                       range_version.fk_namespace_for_version AS \"rangeNamespaceId\",
                        pv.range_instances_min_quantifier,
                        pv.range_instances_max_quantifier,
                        t_ascendants_properties.DEPTH,
@@ -118,11 +120,13 @@ class PropertyRepository extends EntityRepository
                      pv.has_domain,
                        domain.identifier_in_namespace,
                        domain_version.standard_label,
+                       domain_version.fk_namespace_for_version,
                        pv.domain_instances_min_quantifier,
                        pv.domain_instances_max_quantifier,
                        pv.has_range,
                        range.identifier_in_namespace,
                        range_version.standard_label,
+                       range_version.fk_namespace_for_version,
                        pv.range_instances_min_quantifier,
                        pv.range_instances_max_quantifier,
                      t_ascendants_properties.depth,
@@ -154,11 +158,13 @@ class PropertyRepository extends EntityRepository
                        pv.has_domain,
                        domain_class.identifier_in_namespace AS \"domainIdentifier\",
                        domain_cv.standard_label AS \"domainStandardLabel\",
+                       domain_cv.fk_namespace_for_version AS \"domainNamespaceId\",
                        pv.domain_instances_min_quantifier,
                        pv.domain_instances_max_quantifier,
                        pv.has_range,
                        range_class.identifier_in_namespace AS \"rangeIdentifier\",
                        range_cv.standard_label AS \"rangeStandardLabel\",
+                       range_cv.fk_namespace_for_version AS \"rangeNamespaceId\",
                        pv.range_instances_min_quantifier,
                        pv.range_instances_max_quantifier,
                         t_descendants_properties.depth,
@@ -197,12 +203,15 @@ class PropertyRepository extends EntityRepository
 
         $sql = "SELECT identifier_property AS property,
                   identifier_range AS range,
+                  v.fk_range_namespace AS \"rangeNamespaceId\",
                   pk_property AS \"propertyId\",
                   pk_range AS \"rangeId\",
+                  v.fk_namespace_for_version AS \"propertyNamespaceId\",
                   identifier_domain AS domain,
+                  v.fk_domain_namespace AS \"domainNamespaceId\",
                   che.get_root_namespace(fk_namespace_for_version) AS \"rootNamespaceId\",
                   (SELECT label FROM che.get_namespace_labels(fk_namespace_for_version) WHERE language_iso_code = 'en') AS namespace
-                FROM che.v_properties_with_domain_range
+                FROM che.v_properties_with_domain_range v
                 WHERE pk_domain = ?
                 AND fk_domain_namespace IN (".$in.");";
 
@@ -229,11 +238,14 @@ class PropertyRepository extends EntityRepository
                   parent_identifier AS \"parentClass\",
                   pk_property AS \"propertyId\",
                   identifier_property AS property,
+                  v.fk_namespace_for_version AS \"propertyNamespaceId\",
                   pk_range AS \"rangeId\",
                   identifier_range AS range,
+                  v.fk_range_namespace AS \"rangeNamespaceId\",
+                  v.fk_domain_namespace AS \"domainNamespaceId\",
                   replace(ancestors, '|', '→') AS ancestors,
                   (SELECT label FROM che.get_namespace_labels(nsp.pk_namespace) WHERE language_iso_code = 'en') AS namespace
-                FROM che.class_outgoing_inherited_properties(?),
+                FROM che.class_outgoing_inherited_properties(?) v,
                   che.property_version pv,
                   che.namespace nsp
                 WHERE pv.fk_property = pk_property
@@ -262,11 +274,14 @@ class PropertyRepository extends EntityRepository
                   identifier_domain AS domain,
                   identifier_property AS property,
                   pk_property AS \"propertyId\",
+                  v.fk_namespace_for_version AS \"propertyNamespaceId\",
                   pk_range AS \"rangeId\",
                   identifier_range AS range,
+                  v.fk_range_namespace AS \"rangeNamespaceId\",
+                  v.fk_domain_namespace AS \"domainNamespaceId\",
                   che.get_root_namespace(fk_namespace_for_version) AS \"rootNamespaceId\",
                   (SELECT label FROM che.get_namespace_labels(fk_namespace_for_version) WHERE language_iso_code = 'en') AS namespace
-                FROM che.v_properties_with_domain_range
+                FROM che.v_properties_with_domain_range v
                 WHERE pk_range = ?
                 AND fk_range_namespace IN (".$in.");";
 
@@ -292,11 +307,14 @@ class PropertyRepository extends EntityRepository
                   identifier_domain AS domain,
                   identifier_property AS property,
                   pk_property AS \"propertyId\",
+                  v.fk_namespace_for_version AS \"propertyNamespaceId\",
                   pk_parent AS \"rangeId\",
                   parent_identifier AS range,
+                  v.fk_range_namespace AS \"rangeNamespaceId\",
+                  v.fk_domain_namespace AS \"domainNamespaceId\",
                   replace(ancestors, '|', '→') AS ancestors,
                   (SELECT label FROM che.get_namespace_labels(nsp.pk_namespace) WHERE language_iso_code = 'en') AS namespace
-                FROM che.class_ingoing_inherited_properties(?),
+                FROM che.class_ingoing_inherited_properties(?) v,
                   che.property_version pv,
                   che.namespace nsp 
                 WHERE pv.fk_property = pk_property
@@ -322,8 +340,10 @@ class PropertyRepository extends EntityRepository
 
         $sql = "SELECT  pk_domain AS \"domainId\",
                         identifier_domain AS \"domainIdentifier\",
+                        fk_domain_namespace AS \"domainNamespaceId\",
                         identifier_property AS \"propertyIdentifier\",
                         pk_range AS \"rangeId\",
+                        fk_range_namespace AS \"rangeNamespaceId\",
                         identifier_range AS \"rangeIdentifier\"
                 FROM che.v_properties_with_domain_range
                 WHERE pk_property = ?

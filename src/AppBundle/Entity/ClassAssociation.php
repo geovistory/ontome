@@ -52,7 +52,7 @@ class ClassAssociation
 
     /**
      * @ORM\ManyToOne(targetEntity="OntoNamespace")
-     * @ORM\JoinColumn(name="fk_child_class_namespace", referencedColumnName="pk_namespace", nullable=false)
+     * @ORM\JoinColumn(name="fk_parent_class_namespace", referencedColumnName="pk_namespace", nullable=false)
      */
     private $parentClassNamespace;
 

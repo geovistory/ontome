@@ -26,8 +26,9 @@
                 {% for classVersion in class.classVersions if classVersion.namespaceForVersion.id in namespacesId %}
                 <tr>
                     <td>
-                        <a href="{{ path('class_show', {
-                            'id': class.id
+                        <a href="{{ path('class_show_with_version', {
+                            'id': class.id,
+                            'namespaceFromUrlId': classVersion.namespaceForVersion.id
                         }) }}">
                                 {{ classVersion }}
                         </a>

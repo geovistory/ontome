@@ -9,6 +9,7 @@ use AppBundle\Repository\PropertyRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -39,24 +40,22 @@ class ParentPropertyAssociationForm extends AbstractType
             );
         }
 
-        // FILTRAGE : Récupérer les clés de namespaces à utiliser
-        // Il n'y a pas besoin de rajouter le namespace de la propriété actuelle : il doit être activé pour le formulaire.
-        if(is_null($user) || $user->getCurrentActiveProject()->getId() == 21){ // Utilisateur non connecté OU connecté et utilisant le projet public
-            $namespacesId = $this->em->getRepository('AppBundle:OntoNamespace')->findPublicProjectNamespacesId();
-        }
-        else{ // Utilisateur connecté et utilisant un autre projet
-            $namespacesId = $this->em->getRepository('AppBundle:OntoNamespace')->findNamespacesIdByUser($user);
+        $choices = array();
+        foreach ($options['propertiesVersion'] as $pv){
+            if($pv['standardLabel'] != $pv['identifierInNamespace'])
+                $choices[$pv['identifierInNamespace']." ".$pv['standardLabel']] = $pv['id'];
+            else
+                $choices[$pv['standardLabel']] = $pv['id'];
         }
 
+
         $builder
-            ->add('parentProperty', EntityType::class,
-                array(
-                    'class' => Property::class,
-                    'label' => "Parent property",
-                    'query_builder' => function(PropertyRepository $repo) use ($namespacesId){
-                        return $repo->findPropertiesByNamespacesIdQueryBuilder($namespacesId);
-                    }
-                ))
+            ->add('parentPropertyVersion', ChoiceType::class, array(
+                'mapped' => false,
+                'placeholder'       => '',
+                'choices'           => $choices
+            ))
+            ->add('parentProperty', HiddenType::class)
             ->add('childProperty', HiddenType::class)
             ->add('textProperties', CollectionType::class, array(
                 'entry_type' => TextPropertyType::class,
@@ -75,7 +74,8 @@ class ParentPropertyAssociationForm extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => 'AppBundle\Entity\PropertyAssociation',
-            "allow_extra_fields" => true
+            "allow_extra_fields" => true,
+            "propertiesVersion" => null
         ]);
     }
 }

@@ -80,6 +80,16 @@ class ClassAssociationController extends Controller
             $parentClass = $em->getRepository("AppBundle:OntoClass")->find($form->get("parentClassVersion")->getData());
             $classAssociation->setParentClass($parentClass);
             $classAssociation->setNamespaceForVersion($this->getUser()->getCurrentOngoingNamespace());
+            $classAssociation->setChildClassNamespace(
+                $em->getRepository("AppBundle:OntoClassVersion")
+                    ->findClassVersionByClassAndNamespacesId($childClass, $namespacesId)
+                    ->getNamespaceForVersion()
+            );
+            $classAssociation->setParentClassNamespace(
+                $em->getRepository("AppBundle:OntoClassVersion")
+                    ->findClassVersionByClassAndNamespacesId($parentClass, $namespacesId)
+                    ->getNamespaceForVersion()
+            );
             $classAssociation->setCreator($this->getUser());
             $classAssociation->setModifier($this->getUser());
             $classAssociation->setCreationTime(new \DateTime('now'));

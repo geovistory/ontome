@@ -6,10 +6,12 @@
                 <h2>
 
                     {% if textProperty.class is not null %}
-                        {% set route = 'class_show' %}
+                        {% set route = 'class_show_with_version' %}
+                        {% set namespaceFromUrlId = textProperty.namespaceForVersion.id %}
                         {{ textProperty.systemType.standardLabel|capitalize }} for the class {{ textProperty.class.classVersionForDisplay(textProperty.namespaceForVersion) }}
                     {% elseif textProperty.property is not null %}
-                        {% set route = 'property_show' %}
+                        {% set route = 'property_show_with_version' %}
+                        {% set namespaceFromUrlId = textProperty.namespaceForVersion.id %}
                         {{ textProperty.systemType.standardLabel|capitalize }} for the property {{ textProperty.property.propertyVersionForDisplay(textProperty.namespaceForVersion) }}
                     {% elseif textProperty.namespace is not null %}
                         {% set route = 'namespace_show' %}
@@ -66,7 +68,16 @@
                         {% endif %}
                     {% endif %}
 
-                    {% if route is not null %}
+                    {% if route is not null and namespaceFromUrlId is not null %}
+                    <a href="{{ path(route, {
+                        'id':textProperty.object.id,
+                        'namespaceFromUrlId': namespaceFromUrlId,
+                        '_fragment': 'definition'}) }}"
+                       class="pull-right btn btn-link"
+                       role="button">
+                        <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
+                    </a>
+                    {% elseif route is not null %}
                     <a href="{{ path(route, {'id':textProperty.object.id, '_fragment': 'definition'}) }}"
                        class="pull-right btn btn-link"
                        role="button">

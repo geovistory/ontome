@@ -28,9 +28,10 @@
             <div id="justifications" class="tab-pane fade in active">
                 <h3>Parent property</h3>
                 <h4>
-                    <a href="{{ path('property_show', {
-                        'id': propertyAssociation.parentProperty.id
-                    }) }}">{{ propertyAssociation.parentProperty }}
+                    <a href="{{ path('property_show_with_version', {
+                        'id': propertyAssociation.parentProperty.id,
+                        'namespaceFromUrlId': propertyAssociation.parentPropertyNamespace.id
+                    }) }}">{{ propertyAssociation.parentProperty.propertyVersionForDisplay(propertyAssociation.parentPropertyNamespace) }}
                     </a>
                 </h4>
                 {% if is_granted('edit', property) %}

@@ -43,8 +43,9 @@
                         {{ propertyVersion.domainQuantifiers }}
                     </td>
                     <td class="text-center">
-                        <a href="{{ path('property_show', {
-                            'id': property.id
+                        <a href="{{ path('property_show_with_version', {
+                            'id': property.id,
+                            'namespaceFromUrlId': propertyVersion.namespaceForVersion.id
                         }) }}">
                             {{ propertyVersion }}
                         </a>
