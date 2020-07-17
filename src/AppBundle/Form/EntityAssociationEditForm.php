@@ -42,7 +42,7 @@ class EntityAssociationEditForm extends AbstractType
         $choices = array();
         foreach ($options['entitiesVersion'] as $ev){
             if($ev['standardLabel'] != $ev['identifierInNamespace'])
-                $choices[$ev['identifierInNamespace']." ".$ev['standardLabel']] = $ev['id'];
+                $choices[$ev['standardLabel']." – ".$ev['identifierInNamespace']] = $ev['id'];
             else
                 $choices[$ev['standardLabel']] = $ev['id'];
         }
@@ -60,7 +60,6 @@ class EntityAssociationEditForm extends AbstractType
                     array(
                         'mapped' => false,
                         'label' => "Source class",
-                        'placeholder'       => '',
                         'choices'           => $choices,
                         'data'              => $options['defaultSource']
                     ));
@@ -78,7 +77,6 @@ class EntityAssociationEditForm extends AbstractType
                     array(
                         'mapped' => false,
                         'label' => "Target class",
-                        'placeholder'       => '',
                         'choices'           => $choices,
                         'data'              => $options['defaultTarget']
                     ));
@@ -96,7 +94,6 @@ class EntityAssociationEditForm extends AbstractType
                     array(
                         'mapped' => false,
                         'label' => "Source property",
-                        'placeholder'       => '',
                         'choices'           => $choices,
                         'data'              => $options['defaultSource']
                     ));
@@ -114,7 +111,6 @@ class EntityAssociationEditForm extends AbstractType
                     array(
                         'mapped' => false,
                         'label' => "Target property",
-                        'placeholder'       => '',
                         'choices'           => $choices,
                         'data'              => $options['defaultTarget']
                     ));

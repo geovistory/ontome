@@ -44,7 +44,7 @@ class ParentClassAssociationForm extends AbstractType
         $choices = array();
         foreach ($options['classesVersion'] as $cv){
             if($cv['standardLabel'] != $cv['identifierInNamespace'])
-                $choices[$cv['identifierInNamespace']." ".$cv['standardLabel']] = $cv['id'];
+                $choices[$cv['standardLabel']." – ".$cv['identifierInNamespace']] = $cv['id'];
             else
                 $choices[$cv['standardLabel']] = $cv['id'];
         }
@@ -52,7 +52,6 @@ class ParentClassAssociationForm extends AbstractType
         $builder
             ->add('parentClassVersion', ChoiceType::class, array(
                 'mapped' => false,
-                'placeholder'       => '',
                 'choices'           => $choices
             ))
             ->add('parentClass', HiddenType::class)

@@ -235,7 +235,7 @@
     <script>
         $(document).ready(function() {
             {% if entityAssociation.sourceObjectType == 'class' %}
-            $('#entity_association_edit_form_sourceClass').select2({
+            $('#entity_association_edit_form_sourceClassVersion').select2({
                 sorter: function(data) {
                     /* Sort data using lowercase comparison */
                     return data.sort(function (a, b) {
@@ -250,7 +250,7 @@
                     });
                 }
             });
-            $('#entity_association_edit_form_targetClass').select2({
+            $('#entity_association_edit_form_targetClassVersion').select2({
                 sorter: function(data) {
                     /* Sort data using lowercase comparison */
                     return data.sort(function (a, b) {
@@ -266,7 +266,7 @@
                 }
             });
             {% elseif entityAssociation.sourceObjectType == 'property' %}
-            $('#entity_association_edit_form_sourceProperty').select2({
+            $('#entity_association_edit_form_sourcePropertyVersion').select2({
                 sorter: function(data) {
                     /* Sort data using lowercase comparison */
                     return data.sort(function (a, b) {
@@ -281,7 +281,7 @@
                     });
                 }
             });
-            $('#entity_association_edit_form_targetProperty').select2({
+            $('#entity_association_edit_form_targetPropertyVersion').select2({
                 sorter: function(data) {
                     /* Sort data using lowercase comparison */
                     return data.sort(function (a, b) {

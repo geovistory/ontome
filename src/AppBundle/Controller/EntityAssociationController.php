@@ -71,18 +71,9 @@ class EntityAssociationController extends Controller
 
         $entityAssociation->addTextProperty($justification);
 
-        // FILTRAGE : Récupérer les clés de namespaces à utiliser
-        if(is_null($this->getUser()) || $this->getUser()->getCurrentActiveProject()->getId() == 21){ // Utilisateur non connecté OU connecté et utilisant le projet public
-            $namespacesId = $em->getRepository('AppBundle:OntoNamespace')->findPublicProjectNamespacesId();
-        }
-        else{ // Utilisateur connecté et utilisant un autre projet
-            $namespacesId = $em->getRepository('AppBundle:OntoNamespace')->findNamespacesIdByUser($this->getUser());
-        }
+        // Filtrage
+        $namespacesId[] = $namespaceForEntityVersion->getId();
 
-        // Affaiblir le filtrage en rajoutant le namespaceForVersion de la classVersion si indisponible
-        if(!in_array($namespaceForEntityVersion->getId(), $namespacesId)){
-            $namespacesId[] = $namespaceForEntityVersion->getId();
-        }
         // Sans oublier les namespaces références si indisponibles
         foreach($namespaceForEntityVersion->getReferencedNamespaceAssociations() as $referencedNamespacesAssociation){
             if(!in_array($referencedNamespacesAssociation->getReferencedNamespace()->getId(), $namespacesId)){
@@ -227,18 +218,9 @@ class EntityAssociationController extends Controller
 
         $this->denyAccessUnlessGranted('edit', $firstEntity);
 
-        // FILTRAGE : Récupérer les clés de namespaces à utiliser
-        if(is_null($this->getUser()) || $this->getUser()->getCurrentActiveProject()->getId() == 21){ // Utilisateur non connecté OU connecté et utilisant le projet public
-            $namespacesId = $em->getRepository('AppBundle:OntoNamespace')->findPublicProjectNamespacesId();
-        }
-        else{ // Utilisateur connecté et utilisant un autre projet
-            $namespacesId = $em->getRepository('AppBundle:OntoNamespace')->findNamespacesIdByUser($this->getUser());
-        }
+        // FILTRAGE
+        $namespacesId[] = $namespaceForEntityVersion->getId();
 
-        // Affaiblir le filtrage en rajoutant le namespaceForVersion de la classVersion si indisponible
-        if(!in_array($namespaceForEntityVersion->getId(), $namespacesId)){
-            $namespacesId[] = $namespaceForEntityVersion->getId();
-        }
         // Sans oublier les namespaces références si indisponibles
         foreach($namespaceForEntityVersion->getReferencedNamespaceAssociations() as $referencedNamespacesAssociation){
             if(!in_array($referencedNamespacesAssociation->getReferencedNamespace()->getId(), $namespacesId)){

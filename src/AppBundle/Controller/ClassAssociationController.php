@@ -46,25 +46,17 @@ class ClassAssociationController extends Controller
         $classAssociation->addTextProperty($justification);
         $classAssociation->setChildClass($childClass);
 
-        // FILTRAGE : Récupérer les clés de namespaces à utiliser
-        if(is_null($this->getUser()) || $this->getUser()->getCurrentActiveProject()->getId() == 21){ // Utilisateur non connecté OU connecté et utilisant le projet public
-            $namespacesId = $em->getRepository('AppBundle:OntoNamespace')->findPublicProjectNamespacesId();
-        }
-        else{ // Utilisateur connecté et utilisant un autre projet
-            $namespacesId = $em->getRepository('AppBundle:OntoNamespace')->findNamespacesIdByUser($this->getUser());
+        // Filtrage : ID de la version de childClass
+        $namespaceForChildClassVersion = $childClass->getClassVersionForDisplay()->getNamespaceForVersion();
+        $namespacesId[] = $namespaceForChildClassVersion->getId();
+
+        // Sans oublier les namespaces références
+        foreach($namespaceForChildClassVersion->getReferencedNamespaceAssociations() as $referencedNamespacesAssociation){
+            $namespacesId[] = $referencedNamespacesAssociation->getReferencedNamespace()->getId();
         }
 
-        // Affaiblir le filtrage en rajoutant le namespaceForVersion de la classVersion si indisponible
-        $namespaceForChildClassVersion = $childClass->getClassVersionForDisplay()->getNamespaceForVersion();
-        if(!in_array($namespaceForChildClassVersion->getId(), $namespacesId)){
-            $namespacesId[] = $namespaceForChildClassVersion->getId();
-        }
-        // Sans oublier les namespaces références si indisponibles
-        foreach($namespaceForChildClassVersion->getReferencedNamespaceAssociations() as $referencedNamespacesAssociation){
-            if(!in_array($referencedNamespacesAssociation->getReferencedNamespace()->getId(), $namespacesId)){
-                $namespacesId[] = $referencedNamespacesAssociation->getReferencedNamespace()->getId();
-            }
-        }
+        // Sans oublier OntoME internal model - active version
+        $namespacesId[] = 4;
 
         $arrayClassesVersion = $em->getRepository('AppBundle:OntoClassVersion')
             ->findIdAndStandardLabelOfClassesVersionByNamespacesId($namespacesId);
@@ -169,25 +161,17 @@ class ClassAssociationController extends Controller
 
         $em = $this->getDoctrine()->getManager();
 
-        // FILTRAGE : Récupérer les clés de namespaces à utiliser
-        if(is_null($this->getUser()) || $this->getUser()->getCurrentActiveProject()->getId() == 21){ // Utilisateur non connecté OU connecté et utilisant le projet public
-            $namespacesId = $em->getRepository('AppBundle:OntoNamespace')->findPublicProjectNamespacesId();
-        }
-        else{ // Utilisateur connecté et utilisant un autre projet
-            $namespacesId = $em->getRepository('AppBundle:OntoNamespace')->findNamespacesIdByUser($this->getUser());
+        // Filtrage : ID de la version de childClass
+        $namespaceForChildClassVersion = $childClassVersion->getNamespaceForVersion();
+        $namespacesId[] = $namespaceForChildClassVersion->getId();
+
+        // Sans oublier les namespaces références
+        foreach($namespaceForChildClassVersion->getReferencedNamespaceAssociations() as $referencedNamespacesAssociation){
+            $namespacesId[] = $referencedNamespacesAssociation->getReferencedNamespace()->getId();
         }
 
-        // Affaiblir le filtrage en rajoutant le namespaceForVersion de la classVersion si indisponible
-        $namespaceForChildClassVersion = $childClassVersion->getNamespaceForVersion();
-        if(!in_array($namespaceForChildClassVersion->getId(), $namespacesId)){
-            $namespacesId[] = $namespaceForChildClassVersion->getId();
-        }
-        // Sans oublier les namespaces références si indisponibles
-        foreach($namespaceForChildClassVersion->getReferencedNamespaceAssociations() as $referencedNamespacesAssociation){
-            if(!in_array($referencedNamespacesAssociation->getReferencedNamespace()->getId(), $namespacesId)){
-                $namespacesId[] = $referencedNamespacesAssociation->getReferencedNamespace()->getId();
-            }
-        }
+        // Sans oublier OntoME internal model - active version
+        $namespacesId[] = 4;
 
         $arrayClassesVersion = $em->getRepository('AppBundle:OntoClassVersion')
             ->findIdAndStandardLabelOfClassesVersionByNamespacesId($namespacesId);

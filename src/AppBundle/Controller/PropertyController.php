@@ -116,19 +116,10 @@ class PropertyController extends Controller
 
         $em = $this->getDoctrine()->getManager();
 
-        // FILTRAGE : Récupérer les clés de namespaces à utiliser
-        if(is_null($this->getUser()) || $this->getUser()->getCurrentActiveProject()->getId() == 21){ // Utilisateur non connecté OU connecté et utilisant le projet public
-            $namespacesId = $em->getRepository('AppBundle:OntoNamespace')->findPublicProjectNamespacesId();
-        }
-        else{ // Utilisateur connecté et utilisant un autre projet
-            $namespacesId = $em->getRepository('AppBundle:OntoNamespace')->findNamespacesIdByUser($this->getUser());
-        }
-
-        // Affaiblir le filtrage en rajoutant le namespaceForVersion de la classVersion si indisponible
+        // Filtrage
         $namespaceForPropertyVersion = $propertyVersion->getNamespaceForVersion();
-        if(!in_array($namespaceForPropertyVersion->getId(), $namespacesId)){
-            $namespacesId[] = $namespaceForPropertyVersion->getId();
-        }
+        $namespacesId[] = $namespaceForPropertyVersion->getId();
+
         // Sans oublier les namespaces références si indisponibles
         foreach($namespaceForPropertyVersion->getReferencedNamespaceAssociations() as $referencedNamespacesAssociation){
             if(!in_array($referencedNamespacesAssociation->getReferencedNamespace()->getId(), $namespacesId)){
@@ -313,19 +304,10 @@ class PropertyController extends Controller
 
         $em = $this->getDoctrine()->getManager();
 
-        // FILTRAGE : Récupérer les clés de namespaces à utiliser
-        if(is_null($this->getUser()) || $this->getUser()->getCurrentActiveProject()->getId() == 21){ // Utilisateur non connecté OU connecté et utilisant le projet public
-            $namespacesId = $em->getRepository('AppBundle:OntoNamespace')->findPublicProjectNamespacesId();
-        }
-        else{ // Utilisateur connecté et utilisant un autre projet
-            $namespacesId = $em->getRepository('AppBundle:OntoNamespace')->findNamespacesIdByUser($this->getUser());
-        }
-
-        // Affaiblir le filtrage en rajoutant le namespaceForVersion de la classVersion si indisponible
+        // FILTRAGE
         $namespaceForPropertyVersion = $propertyVersion->getNamespaceForVersion();
-        if(!in_array($namespaceForPropertyVersion->getId(), $namespacesId)){
-            $namespacesId[] = $namespaceForPropertyVersion->getId();
-        }
+        $namespacesId[] = $namespaceForPropertyVersion->getId();
+
         // Sans oublier les namespaces références si indisponibles
         foreach($namespaceForPropertyVersion->getReferencedNamespaceAssociations() as $referencedNamespacesAssociation){
             if(!in_array($referencedNamespacesAssociation->getReferencedNamespace()->getId(), $namespacesId)){

@@ -13,7 +13,7 @@
         <h2 class="class-name">
             {{ classAssociation }}
             <a href="{{ path('class_edit', {
-                id: classAssociation.childClass.id,
+                'id': classAssociation.childClass.id,
                 '_fragment': 'class-hierarchy'
             }) }}" class="pull-right btn btn-link">
                 <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
@@ -175,7 +175,7 @@
 
     <script>
         $(document).ready(function() {
-            $('#class_association_edit_form_parentClass').select2({
+            $('#class_association_edit_form_parentClassVersion').select2({
                 sorter: function(data) {
                     /* Sort data using lowercase comparison */
                     return data.sort(function (a, b) {

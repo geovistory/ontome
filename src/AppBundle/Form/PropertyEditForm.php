@@ -43,7 +43,7 @@ class PropertyEditForm extends AbstractType
         $choices = array();
         foreach ($options['classesVersion'] as $cv){
             if($cv['standardLabel'] != $cv['identifierInNamespace'])
-                $choices[$cv['identifierInNamespace']." ".$cv['standardLabel']] = $cv['id'];
+                $choices[$cv['standardLabel']." – ".$cv['identifierInNamespace']] = $cv['id'];
             else
                 $choices[$cv['standardLabel']] = $cv['id'];
         }
@@ -51,13 +51,11 @@ class PropertyEditForm extends AbstractType
         $builder
             ->add('domainVersion', ChoiceType::class, array(
                 'mapped' => false,
-                'placeholder'       => '',
                 'choices'           => $choices,
                 'data'              => $options['defaultDomain']
             ))
             ->add('rangeVersion', ChoiceType::class, array(
                 'mapped' => false,
-                'placeholder'       => '',
                 'choices'           => $choices,
                 'data'              => $options['defaultRange']
             ))
