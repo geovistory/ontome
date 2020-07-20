@@ -165,6 +165,9 @@
                         {% endif %}
                     </span>
                 </h3>
+                {% if profile.classes|length == 0 %}
+                    <em id="empty-namespace-list-message">No class has been associated with this profile.</em>
+                {% else %}
                 <table class="table table-striped" id="classes-table">
                     <thead>
                     <tr>
@@ -197,6 +200,7 @@
                     {% endfor %}
                     </tbody>
                 </table>
+                {% endif %}
             </div>
             <div id="properties" class="tab-pane fade">
                 <h3>
@@ -214,6 +218,9 @@
                         {% endif %}
                     </span>
                 </h3>
+                {% if profile.properties|length == 0 %}
+                <em id="empty-namespace-list-message">No property has been associated with this profile.</em>
+                {% else %}
                 <table class="table table-striped" id="properties-table">
                     <thead>
                     <tr>
@@ -321,6 +328,7 @@
                     {% endfor %}
                     </tbody>
                 </table>
+                {% endif %}
             </div>
             <div id="projects" class="tab-pane fade">
                 <h3>Projects using the current profile</h3>
@@ -348,7 +356,7 @@
                 </table>
             </div>
             <div id="namespaces" class="tab-pane fade">
-                <h4>Namespaces used by this profile</h4>
+                <h3>Namespaces used by this profile</h3>
                 {% if profile.namespaces|length == 0 %}
                     <em id="empty-namespace-list-message">There is currently no namespace used by this profile.</em>
                 {% endif %}
@@ -372,7 +380,7 @@
                     <embed src="http://visualdataweb.de/webvowl/#url={{ url('profile_json', {'id': profile.id}) }}" width="100%" height="1000px"><br><br>
                     <a href="http://visualdataweb.de/webvowl/#url={{ url('profile_json', {'id': profile.id}) }}" target="_blank" class="btn btn-primary">Full screen (WebVOWL) <span class="fa fa-desktop"></span></a>
                 {% else %}
-                    <p>The webvowl graph cannot be displayed because there is no class or property in this namespace.</p>
+                    <p>The webvowl graph cannot be displayed because no class or property has been associated with this profile.</p>
                 {% endif %}
             </div>
         </div>

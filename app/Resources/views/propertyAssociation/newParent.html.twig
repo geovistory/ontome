@@ -98,6 +98,8 @@
     <script>
 
         $(document).ready(function() {
+            $('#parent_property_association_form_parentProperty').val($('#parent_property_association_form_parentPropertyVersion').val());
+
             $('#parent_property_association_form_parentPropertyVersion').change(function() {
                 $('#parent_property_association_form_parentProperty').val($(this).val());
             });

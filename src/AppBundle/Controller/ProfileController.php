@@ -127,7 +127,7 @@ class ProfileController  extends Controller
                 $profile->getTextProperties()[1]->setCreationTime(new \DateTime('now'));
                 $profile->getTextProperties()[1]->setModificationTime(new \DateTime('now'));
                 $profile->getTextProperties()[1]->setSystemType($systemTypeAdditionalNote);
-                $profile->getTextProperties()[1]->setClass($profile);
+                $profile->getTextProperties()[1]->setProfile($profile);
             }
 
             // Créer les entity_to_user_project pour les activer par défaut

@@ -99,6 +99,9 @@
     <script>
 
         $(document).ready(function() {
+            // Remplissage par défaut
+            $('#parent_class_association_form_parentClass').val($('#parent_class_association_form_parentClassVersion').val());
+
             $('#parent_class_association_form_parentClassVersion').change(function() {
                 $('#parent_class_association_form_parentClass').val($(this).val());
             });
