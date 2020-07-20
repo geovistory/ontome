@@ -22,17 +22,14 @@
 <body>
 <header id="masthead" class="site-header" role="banner">
     <div class="row" id="logo-main-menu-row">
-        <div id="logo" class="site-branding col-sm-6">
+        <div id="logo" class="site-branding">
             <div id="site-logo">
                 <a href="/" title="OntoME">
                     <img src="{{ asset('images/logo.png') }}" alt="OntoME">
                 </a>
             </div>
-            <h4  id="site-title">
-                <strong><em>Ontology Management Environment - beta version</em></strong>
-            </h4>
         </div>
-        <div class="col-sm-6 right-header-part">
+        <div class="right-header-part">
             <div id="login-logout-block">
                 {% if is_granted('ROLE_USER') %}
                     <p class="text-right"><a class="btn btn-default" href="{{ path('security_logout') }}">LOGOUT</a></p>
@@ -40,14 +37,21 @@
                     <p class="text-right"><a class="btn btn-default" href="{{ path('security_login') }}">LOGIN</a></p>
                 {% endif %}
             </div>
-            <div id="dfhc-block">
-                <h4 class="text-right">
-                    <strong>
-                        <em>
-                            <a class="text-white" href="http://dataforhistory.org" target="_blank">Data for History Consortium</a>
-                        </em>
-                    </strong>
-                </h4>
+            <div class="row no-margin">
+                <div id="ontome-title-block" class="col-xs-6">
+                    <h4  id="site-title">
+                        <strong><em>Ontology Management Environment - beta version</em></strong>
+                    </h4>
+                </div>
+                <div id="dfhc-block" class="col-xs-6">
+                    <h4 class="text-right">
+                        <strong>
+                            <em>
+                                <a class="text-white" href="http://dataforhistory.org" target="_blank">Data for History Consortium</a>
+                            </em>
+                        </strong>
+                    </h4>
+                </div>
             </div>
         </div>
     </div>

@@ -64,42 +64,39 @@ body {
 }
 
 #logo-main-menu-row{
-    height: 130px;
     margin-left: 0px;
     margin-right: 0px;
+    display: flex;
 }
 
 .site-branding {
     height: 100%;
     margin-bottom: 0px;
-    width: 39%;
+    width: 263px;
 }
 
 h4#site-title {
-    color: rgb(225, 115, 102);
-    /*color: #81B9BA;*/
+    /*color: rgb(225, 115, 102); dev*/
+    color: white;
     font-weight: 800;
     margin-top: 5px;
     clear: none;
 }
 
 .right-header-part{
-    width:100%;
-    background-color: rgb(225, 115, 102);
-    /*background-color: #81B9BA;*/
+    /*background-color: rgb(225, 115, 102); dev*/
+    background-color: #81B9BA;
     height: 100%;
-    width: 61%;
+    flex: 1;
 }
 
 #login-logout-block{
     margin-top: 15px;
+    margin-right: 15px;
 }
 
-#dfhc-block{
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-    padding-right: 30px;
+.no-margin{
+    margin:0;
 }
 
 .logo-icon {
@@ -156,7 +153,7 @@ h4#site-title {
 
 @media screen and (max-width: 1200px) {
     #logo-main-menu-row {
-        height: 150px;
+
     }
 }
 
@@ -592,9 +589,15 @@ Main components
         padding-top: 5px;
     }
 
+    #login-logout-block{
+        position: absolute;
+        top: 0;
+        right: 0;
+    }
+
     #dfhc-block{
         position: relative;
-        padding-right: 0;
+        padding-right: 15px;
     }
 
     #site-logo {
@@ -604,6 +607,7 @@ Main components
 
     #logo-main-menu-row {
         height: 100%;
+        display: block;
     }
 
     select.mnav{
