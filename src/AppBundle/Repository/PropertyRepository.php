@@ -447,7 +447,8 @@ class PropertyRepository extends EntityRepository
                                 END AS fk_system_type
                 FROM che.v_properties_with_domain_range
                 JOIN che.property_version pv ON pv.fk_property = pk_property
-                JOIN che.namespace nsp ON nsp.pk_namespace = pv.fk_namespace_for_version 
+                JOIN che.namespace nsp ON nsp.pk_namespace = pv.fk_namespace_for_version
+                JOIN che.associates_referenced_namespace asrefns ON asrefns.fk_referenced_namespace = pv.fk_namespace_for_version AND asrefns.fk_profile = :profile                    
                 LEFT JOIN che.associates_profile aspro ON aspro.fk_property = pk_property AND aspro.fk_profile = :profile AND aspro.fk_inheriting_range_class IS NULL AND aspro.fk_inheriting_domain_class IS NULL
                 
                 WHERE pk_domain = :class;";
@@ -482,6 +483,7 @@ class PropertyRepository extends EntityRepository
                 FROM  che.v_properties_with_domain_range
                 JOIN che.property_version pv ON pv.fk_property = pk_property
                 JOIN che.namespace nsp ON nsp.pk_namespace = pv.fk_namespace_for_version 
+                JOIN che.associates_referenced_namespace asrefns ON asrefns.fk_referenced_namespace = pv.fk_namespace_for_version AND asrefns.fk_profile = :profile
                 LEFT JOIN che.associates_profile aspro ON aspro.fk_property = pk_property AND aspro.fk_profile = :profile AND aspro.fk_inheriting_range_class IS NULL AND aspro.fk_inheriting_domain_class IS NULL
                 WHERE pk_range = :class;";
 
@@ -509,7 +511,9 @@ class PropertyRepository extends EntityRepository
                     WHEN aspro.fk_system_type IS NULL THEN 999
                     ELSE aspro.fk_system_type
                     END AS fk_system_type
-                FROM che.class_outgoing_inherited_properties(:class)
+                FROM che.class_outgoing_inherited_properties(:class) coip
+                JOIN che.property_version pv ON pv.fk_property = coip.pk_property
+                JOIN che.associates_referenced_namespace asrefns ON asrefns.fk_referenced_namespace = pv.fk_namespace_for_version AND asrefns.fk_profile = :profile
                 LEFT JOIN che.associates_profile aspro ON aspro.fk_property = pk_property AND aspro.fk_inheriting_domain_class = :class AND aspro.fk_inheriting_range_class = pk_range AND aspro.fk_profile = :profile
                 
                 UNION DISTINCT
@@ -526,6 +530,7 @@ class PropertyRepository extends EntityRepository
                 FROM che.associates_profile aspro
                 JOIN che.property prop ON aspro.fk_property = prop.pk_property
                 JOIN che.property_version pv ON prop.pk_property = pv.fk_property
+                JOIN che.associates_referenced_namespace asrefns ON asrefns.fk_referenced_namespace = pv.fk_namespace_for_version AND asrefns.fk_profile = :profile
                 JOIN che.class clsdmn ON aspro.fk_inheriting_domain_class = clsdmn.pk_class
                 JOIN che.class_version domain_cv ON clsdmn.pk_class = domain_cv.fk_class 
                 JOIN che.class clsrng ON aspro.fk_inheriting_range_class = clsrng.pk_class
@@ -556,7 +561,9 @@ class PropertyRepository extends EntityRepository
                             WHEN aspro.fk_system_type IS NULL THEN 999
                             ELSE aspro.fk_system_type
                             END AS fk_system_type
-                FROM che.class_ingoing_inherited_properties(:class)
+                FROM che.class_ingoing_inherited_properties(:class) ciip
+                JOIN che.property_version pv ON pv.fk_property = ciip.pk_property
+                JOIN che.associates_referenced_namespace asrefns ON asrefns.fk_referenced_namespace = pv.fk_namespace_for_version AND asrefns.fk_profile = :profile
                 JOIN che.class cls ON cls.pk_class = :class
                 JOIN che.class_version cv ON cls.pk_class = cv.fk_class
                 LEFT JOIN che.associates_profile aspro ON aspro.fk_property = pk_property AND aspro.fk_inheriting_range_class = :class AND aspro.fk_inheriting_domain_class = pk_domain AND aspro.fk_profile = :profile
@@ -575,7 +582,8 @@ class PropertyRepository extends EntityRepository
                            END AS fk_system_type
                 FROM che.associates_profile aspro
                 JOIN che.property prop ON aspro.fk_property = prop.pk_property
-                JOIN che.property_version pv ON prop.pk_property = pv.fk_property
+                JOIN che.property_version pv ON prop.pk_property = pv.fk_property   
+                JOIN che.associates_referenced_namespace asrefns ON asrefns.fk_referenced_namespace = pv.fk_namespace_for_version AND asrefns.fk_profile = :profile
                 JOIN che.class clsdmn ON aspro.fk_inheriting_domain_class = clsdmn.pk_class
                 JOIN che.class_version domain_cv ON clsdmn.pk_class = domain_cv.fk_class
                 JOIN che.class clsrng ON aspro.fk_inheriting_range_class = clsrng.pk_class
