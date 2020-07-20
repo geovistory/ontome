@@ -446,12 +446,13 @@ class ClassRepository extends EntityRepository
                     FROM che.descendant_class_hierarchy (:domain) cls
                     JOIN che.class_version cv ON cv.fk_class = cls.pk_child
                     JOIN che.associates_referenced_namespace asrefnsp 
-                        ON asrefnsp.fk_referenced_namespace = cv.fk_namespace_for_version AND asrefnsp.fk_profile = :profile 
+                        ON asrefnsp.fk_referenced_namespace = cv.fk_namespace_for_version 
+                               AND asrefnsp.fk_profile = :profile 
                     
                     EXCEPT 
                     
                     SELECT  aspro.fk_inheriting_range_class AS id,
-                            cls.identifier_in_namespace || ' ' || cls.standard_label AS \"text\"
+                            cls.identifier_in_namespace || ' ' || cv.standard_label AS \"text\"
                     FROM che.associates_profile aspro
                     JOIN che.class cls 
                         ON aspro.fk_inheriting_domain_class = cls.pk_class
@@ -459,6 +460,8 @@ class ClassRepository extends EntityRepository
                             AND   aspro.fk_property = :property
                             AND   aspro.fk_system_type = 5
                             AND   aspro.fk_inheriting_range_class = :range
+                    JOIN che.class_version cv
+                    ON cls.pk_class = cv.fk_class
                     ORDER BY id ASC) 
                 AS result
                 WHERE TRUE".$iLike.";";
