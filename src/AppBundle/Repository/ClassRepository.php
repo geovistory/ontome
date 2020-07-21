@@ -295,7 +295,7 @@ class ClassRepository extends EntityRepository
                         namespace AS \"namespace\" ,
                         profile_association_type AS \"associationType\",
                         fk_class_namespace_for_version AS \"namespaceForVersion\"
-                FROM che.v_all_classes_profile WHERE fk_profile = :profile;";
+                FROM che.get_all_classes_for_profile(:profile);";
         $stmt = $conn->prepare($sql);
         $stmt->execute(array('profile' => $profile->getId()));
 
@@ -321,7 +321,7 @@ class ClassRepository extends EntityRepository
                 WHERE arfnsp.fk_profile = :profile
                 EXCEPT
                 SELECT pk_class, identifier_in_namespace, class_standard_label, namespace
-                FROM che.v_all_classes_profile WHERE fk_profile = :profile AND profile_association_type = 'selected';";
+                FROM che.get_all_classes_for_profile(:profile) WHERE profile_association_type = 'selected';";
         $stmt = $conn->prepare($sql);
         $stmt->execute(array('profile' => $profile->getId()));
 
