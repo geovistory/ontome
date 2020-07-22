@@ -1,6 +1,12 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Add new related {{ object }} for {{ source }}{% endblock %}
+{% block title %}
+    {% if object == "class" %}
+        Add new related {{ object }} for {{ source.classVersionForDisplay() }}
+    {% elseif object == "property" %}
+        Add new related {{ object }} for {{ source.propertyVersionForDisplay() }}
+    {% endif %}
+{% endblock %}
 
 {% block stylesheets %}
     {{ parent() }}
@@ -29,7 +35,11 @@
                     <a href="{{ path('new_entity_association_form', {object: object, objectId: source.id}) }}" class="btn btn-primary pull-right">Reset <span class="fa fa-undo"></span></a>
                 </div>
                 <h2>
-                    Add new related {{ object }} for {{ source }}
+                    {% if object == "class" %}
+                        Add new related {{ object }} for {{ source.classVersionForDisplay() }}
+                    {% elseif object == "property" %}
+                        Add new related {{ object }} for {{ source.propertyVersionForDisplay() }}
+                    {% endif %}
                     <a href="{{ path(object~'_edit', {
                         id: source.id,
                         '_fragment': 'relations'
@@ -43,9 +53,9 @@
 
                 {{ form_row(entityAssociationForm.systemType) }}
                 {% if object == 'class' %}
-                {{ form_row(entityAssociationForm.targetClass) }}
+                {{ form_row(entityAssociationForm.targetClassVersion) }}
                 {% elseif object == 'property' %}
-                {{ form_row(entityAssociationForm.targetProperty) }}
+                {{ form_row(entityAssociationForm.targetPropertyVersion) }}
                 {% endif %}
 
                 <div class="js-text-property-wrapper"
@@ -85,13 +95,13 @@
                                 <a href="{{ path('class_show', {
                                     'id': relation.targetClass.id
                                 }) }}">
-                                    {{ relation.targetClass }}
+                                    {{ relation.targetClass.classVersionForDisplay(relation.targetNamespaceForVersion) }}
                                 </a>
                                 {% elseif object == 'property' %}
                                     <a href="{{ path('property_show', {
                                         'id': relation.targetProperty.id
                                     }) }}">
-                                        {{ relation.targetProperty }}
+                                        {{ relation.targetProperty.propertyVersionForDisplay(relation.targetNamespaceForVersion) }}
                                     </a>
                                 {% endif %}
                             </td>
@@ -106,11 +116,7 @@
                                 {% endif %}
                             </td>
                             <td>
-                                {% if relation.namespaces is not null %}
-                                    {% if relation.namespaces|first.topLevelNamespace is not null %}
-                                        {{ relation.namespaces|first.topLevelNamespace }}
-                                    {% endif %}
-                                {% endif %}
+                                {{ relation.namespaceForVersion.topLevelNamespace }}
                             </td>
                             <td> <a href="{{ path('entity_association_show', {
                                     'id': relation.id,
@@ -134,7 +140,7 @@
     <script>
         $(document).ready(function() {
             {% if object == 'class' %}
-            $('#entity_association_form_targetClass').select2({
+            $('#entity_association_form_targetClassVersion').select2({
                 sorter: function(data) {
                     /* Sort data using lowercase comparison */
                     return data.sort(function (a, b) {
@@ -150,7 +156,7 @@
                 }
             });
             {% elseif object == 'property' %}
-            $('#entity_association_form_targetProperty').select2({
+            $('#entity_association_form_targetPropertyVersion').select2({
                 sorter: function(data) {
                     /* Sort data using lowercase comparison */
                     return data.sort(function (a, b) {

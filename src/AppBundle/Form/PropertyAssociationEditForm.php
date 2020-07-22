@@ -8,6 +8,7 @@ use AppBundle\Repository\PropertyRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -37,15 +38,21 @@ class PropertyAssociationEditForm extends AbstractType
             );
         }
 
+        $choices = array();
+        foreach ($options['propertiesVersion'] as $pv){
+            if($pv['standardLabel'] != $pv['identifierInNamespace'])
+                $choices[$pv['identifierInNamespace']." ".$pv['standardLabel']] = $pv['id'];
+            else
+                $choices[$pv['standardLabel']] = $pv['id'];
+        }
+
         $builder
-            ->add('parentProperty', EntityType::class,
-                array(
-                    'class' => Property::class,
-                    'label' => "Parent property",
-                    'query_builder' => function(PropertyRepository $repo) use ($user){
-                        return $repo->findFilteredPropertiesByActiveProjectOrderedById($user);
-                    }
-                ))
+            ->add('parentPropertyVersion', ChoiceType::class, array(
+                'mapped' => false,
+                'placeholder'       => '',
+                'choices'           => $choices,
+                'data'              => $options['defaultParent']
+            ))
             ->add('childProperty', HiddenType::class);
 
         $builder->get('childProperty')
@@ -56,7 +63,10 @@ class PropertyAssociationEditForm extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
-            'data_class' => 'AppBundle\Entity\PropertyAssociation'
+            'data_class' => 'AppBundle\Entity\PropertyAssociation',
+            'allow_extra_fields' => true,
+            'propertiesVersion' => null,
+            'defaultParent' => null
         ]);
     }
 }

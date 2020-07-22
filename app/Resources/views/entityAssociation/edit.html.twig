@@ -11,7 +11,11 @@
     <div class="container">
         <h2 class="class-name">
             {% if not inverse %}
-                {{ entityAssociation.source }}: {{ entityAssociation.systemType.standardLabel }}
+                {% if entityAssociation.sourceObjectType == "class" %}
+                    {{ entityAssociation.source.classVersionForDisplay() }}: {{ entityAssociation.systemType.standardLabel }}
+                {% elseif entityAssociation.sourceObjectType == "property" %}
+                    {{ entityAssociation.source.propertyVersionForDisplay() }}: {{ entityAssociation.systemType.standardLabel }}
+                 {% endif %}
                 <a href="{{ path(entityAssociation.sourceObjectType~'_edit', {
                     id: entityAssociation.source.id,
                     '_fragment': "relations"
@@ -19,7 +23,11 @@
                     <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
                 </a>
             {% else %}
-                {{ entityAssociation.target }}: {{ entityAssociation.systemType.standardLabel }}
+                {% if entityAssociation.targetObjectType == "class" %}
+                    {{ entityAssociation.target.classVersionForDisplay() }}: {{ entityAssociation.systemType.standardLabel }}
+                {% elseif entityAssociation.targetObjectType == "property" %}
+                    {{ entityAssociation.target.propertyVersionForDisplay() }}: {{ entityAssociation.systemType.standardLabel }}
+                {% endif %}
                 <a href="{{ path(entityAssociation.targetObjectType~'_edit', {
                     id: entityAssociation.target.id,
                     '_fragment': "relations"
@@ -43,15 +51,15 @@
                 {{ form_row(entityAssociationForm.systemType) }}
                 {% if entityAssociation.sourceObjectType == 'class' %}
                     {% if not inverse %}
-                        {{ form_row(entityAssociationForm.targetClass, {'label': 'Related class'}) }}
+                        {{ form_row(entityAssociationForm.targetClassVersion, {'label': 'Related class'}) }}
                     {% else %}
-                        {{ form_row(entityAssociationForm.sourceClass, {'label': 'Related class'}) }}
+                        {{ form_row(entityAssociationForm.sourceClassVersion, {'label': 'Related class'}) }}
                     {% endif %}
                 {% elseif entityAssociation.sourceObjectType == 'property' %}
                     {% if not inverse %}
-                        {{ form_row(entityAssociationForm.targetProperty, {'label': 'Related property'}) }}
+                        {{ form_row(entityAssociationForm.targetPropertyVersion, {'label': 'Related property'}) }}
                     {% else %}
-                        {{ form_row(entityAssociationForm.sourceProperty, {'label': 'Related property'}) }}
+                        {{ form_row(entityAssociationForm.sourcePropertyVersion, {'label': 'Related property'}) }}
                     {% endif %}
                 {% endif %}
                 <button type="submit" class="btn btn-primary" formnovalidate>Save <span class="far fa-save"></span></button>
@@ -227,7 +235,7 @@
     <script>
         $(document).ready(function() {
             {% if entityAssociation.sourceObjectType == 'class' %}
-            $('#entity_association_edit_form_sourceClass').select2({
+            $('#entity_association_edit_form_sourceClassVersion').select2({
                 sorter: function(data) {
                     /* Sort data using lowercase comparison */
                     return data.sort(function (a, b) {
@@ -242,7 +250,7 @@
                     });
                 }
             });
-            $('#entity_association_edit_form_targetClass').select2({
+            $('#entity_association_edit_form_targetClassVersion').select2({
                 sorter: function(data) {
                     /* Sort data using lowercase comparison */
                     return data.sort(function (a, b) {
@@ -258,7 +266,7 @@
                 }
             });
             {% elseif entityAssociation.sourceObjectType == 'property' %}
-            $('#entity_association_edit_form_sourceProperty').select2({
+            $('#entity_association_edit_form_sourcePropertyVersion').select2({
                 sorter: function(data) {
                     /* Sort data using lowercase comparison */
                     return data.sort(function (a, b) {
@@ -273,7 +281,7 @@
                     });
                 }
             });
-            $('#entity_association_edit_form_targetProperty').select2({
+            $('#entity_association_edit_form_targetPropertyVersion').select2({
                 sorter: function(data) {
                     /* Sort data using lowercase comparison */
                     return data.sort(function (a, b) {

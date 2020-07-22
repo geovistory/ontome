@@ -8,6 +8,7 @@ use AppBundle\Repository\ClassRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -38,15 +39,20 @@ class ClassAssociationEditForm extends AbstractType
             );
         }
 
+        $choices = array();
+        foreach ($options['classesVersion'] as $cv){
+            if($cv['standardLabel'] != $cv['identifierInNamespace'])
+                $choices[$cv['standardLabel']." – ".$cv['identifierInNamespace']] = $cv['id'];
+            else
+                $choices[$cv['standardLabel']] = $cv['id'];
+        }
+
         $builder
-            ->add('parentClass', EntityType::class,
-                array(
-                    'class' => OntoClass::class,
-                    'label' => "Parent class",
-                    'query_builder' => function(ClassRepository $repo) use ($user){
-                        return $repo->findFilteredClassByActiveProjectOrderedById($user);
-                    }
-                ))
+            ->add('parentClassVersion', ChoiceType::class, array(
+                'mapped' => false,
+                'choices'           => $choices,
+                'data'              => $options['defaultParent']
+            ))
             ->add('childClass', HiddenType::class);
 
         $builder->get('childClass')
@@ -57,7 +63,10 @@ class ClassAssociationEditForm extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
-            'data_class' => 'AppBundle\Entity\ClassAssociation'
+            'data_class' => 'AppBundle\Entity\ClassAssociation',
+            'allow_extra_fields' => true,
+            'classesVersion' => null,
+            'defaultParent' => null
         ]);
     }
 }

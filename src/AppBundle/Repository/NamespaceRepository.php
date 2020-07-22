@@ -322,4 +322,87 @@ class NamespaceRepository extends EntityRepository
         return $stmt->fetchAll();
     }
 
+    /**
+     * @return array - An array with namespace keys
+     * @throws \Doctrine\DBAL\DBALException
+     */
+    public function findPublicProjectNamespacesId(){
+        $conn = $this->getEntityManager()->getConnection();
+
+        $sql = "WITH publicNamespacesId AS(
+	                SELECT fk_namespace 
+                    FROM che.associates_project 
+                    WHERE fk_system_type = 17
+                    UNION
+                    SELECT pk_namespace AS fk_namespace
+                    FROM che.namespace
+                    WHERE pk_namespace = 4
+                )
+                SELECT fk_namespace
+                FROM publicNamespacesId
+                UNION
+                SELECT fk_referenced_namespace AS fk_namespace
+                FROM che.associates_referenced_namespace
+                WHERE fk_namespace IN(  SELECT fk_namespace 
+                                        FROM publicNamespacesId);";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->execute();
+
+        return $stmt->fetchAll(\PDO::FETCH_COLUMN);
+    }
+
+    /**
+     * @param User $user
+     * @return array - An array with namespace keys
+     * @throws \Doctrine\DBAL\DBALException
+     */
+    public function findNamespacesIdByUser(User $user){
+        $conn = $this->getEntityManager()->getConnection();
+
+        $sql = "WITH selectionNamespacesId AS(
+	                SELECT eupa.fk_namespace
+	                FROM che.admin_user us
+	                LEFT JOIN che.associate_user_to_project upa ON upa.fk_project = us.fk_current_active_project AND upa.fk_user = us.pk_user
+                    LEFT JOIN che.associates_entity_to_user_project eupa ON eupa.fk_associate_user_to_project = upa.pk_associate_user_to_project
+	                WHERE us.pk_user = :userId
+	                AND eupa.fk_namespace IS NOT NULL
+	                AND eupa.fk_system_type = 25
+                    UNION
+                    SELECT pk_namespace AS fk_namespace
+                    FROM che.namespace
+                    WHERE pk_namespace = 4
+                )
+                SELECT fk_namespace
+                FROM selectionNamespacesId
+                UNION
+                SELECT fk_referenced_namespace AS fk_namespace 
+                FROM che.associates_referenced_namespace 
+                WHERE fk_namespace IN (SELECT fk_namespace FROM selectionNamespacesId);";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->execute(array('userId' => $user->getId()));
+
+        return $stmt->fetchAll(\PDO::FETCH_COLUMN);
+    }
+
+    /**
+     * @param array $namespacesId - An array with namespace keys
+     * @return \Doctrine\ORM\Query
+     */
+    private function createQueryBuilderNamespacesByNamespacesId(array $namespacesId){
+        return $this->createQueryBuilder('namespace')
+            ->where('namespace.id IN (:namespacesId)')
+            ->setParameter('namespacesId', $namespacesId)
+            ->getQuery();
+    }
+
+    /**
+     * @param array $namespacesId - An array with namespace keys
+     * @return OntoNamespace[]
+     */
+    public function findNamespacesByNamespacesId(array $namespacesId){
+        $namespaces = $this->createQueryBuilderNamespacesByNamespacesId($namespacesId)->execute();
+        return $namespaces;
+    }
 }

@@ -39,10 +39,28 @@ class PropertyAssociation
     private $childProperty;
 
     /**
+     * @ORM\ManyToOne(targetEntity="OntoNamespace")
+     * @ORM\JoinColumn(name="fk_child_property_namespace", referencedColumnName="pk_namespace", nullable=false)
+     */
+    private $childPropertyNamespace;
+
+    /**
      * @ORM\ManyToOne(targetEntity="Property", inversedBy="parentPropertyAssociations")
      * @ORM\JoinColumn(name="is_parent_property", referencedColumnName="pk_property")
      */
     private $parentProperty;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="OntoNamespace")
+     * @ORM\JoinColumn(name="fk_parent_property_namespace", referencedColumnName="pk_namespace", nullable=false)
+     */
+    private $parentPropertyNamespace;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="OntoNamespace", inversedBy="propertyAssociationVersions")
+     * @ORM\JoinColumn(name="fk_namespace_for_version", referencedColumnName="pk_namespace", nullable=false)
+     */
+    private $namespaceForVersion;
 
     /**
      * @ORM\Column(type="text")
@@ -56,15 +74,6 @@ class PropertyAssociation
      * @ORM\OrderBy({"languageIsoCode" = "ASC"})
      */
     private $textProperties;
-
-    /**
-     * @ORM\ManyToMany(targetEntity="OntoNamespace",  inversedBy="Property", fetch="EXTRA_LAZY")
-     * @ORM\JoinTable(schema="che", name="associates_namespace",
-     *      joinColumns={@ORM\JoinColumn(name="fk_is_subproperty_of", referencedColumnName="pk_is_subproperty_of")},
-     *      inverseJoinColumns={@ORM\JoinColumn(name="fk_namespace", referencedColumnName="pk_namespace")}
-     *      )
-     */
-    private $namespaces;
 
     /**
      * @ORM\OneToMany(targetEntity="AppBundle\Entity\Comment", mappedBy="propertyAssociation")
@@ -110,6 +119,14 @@ class PropertyAssociation
     public function getId()
     {
         return $this->id;
+    }
+
+    /**
+     * @return OntoNamespace
+     */
+    public function getNamespaceForVersion()
+    {
+        return $this->namespaceForVersion;
     }
 
     /**
@@ -202,6 +219,30 @@ class PropertyAssociation
     }
 
     /**
+     * @return mixed
+     */
+    public function getChildPropertyNamespace()
+    {
+        return $this->childPropertyNamespace;
+    }
+
+    /**
+     * @param mixed $childPropertyNamespace
+     */
+    public function setChildPropertyNamespace($childPropertyNamespace)
+    {
+        $this->childPropertyNamespace = $childPropertyNamespace;
+    }
+
+    /**
+     * @param mixed $namespaceForVersion
+     */
+    public function setNamespaceForVersion($namespaceForVersion)
+    {
+        $this->namespaceForVersion = $namespaceForVersion;
+    }
+
+    /**
      * @param mixed $childProperty
      */
     public function setChildProperty($childProperty)
@@ -273,6 +314,22 @@ class PropertyAssociation
         $this->modificationTime = $modificationTime;
     }
 
+    /**
+     * @return mixed
+     */
+    public function getParentPropertyNamespace()
+    {
+        return $this->parentPropertyNamespace;
+    }
+
+    /**
+     * @param mixed $parentPropertyNamespace
+     */
+    public function setParentPropertyNamespace($parentPropertyNamespace)
+    {
+        $this->parentPropertyNamespace = $parentPropertyNamespace;
+    }
+
     public function addTextProperty(TextProperty $textProperty)
     {
         if ($this->textProperties->contains($textProperty)) {
@@ -295,7 +352,7 @@ class PropertyAssociation
 
     public function __toString()
     {
-        return (string) $this->childProperty.': parent property association';
+        return (string) $this->childProperty->getPropertyVersionForDisplay().': parent property association';
     }
 
 }

@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}{{ property }}{% endblock %}
+{% block title %}{{ propertyVersion }}{% endblock %}
 
 {% block stylesheets %}
     {{ parent() }}
@@ -11,13 +11,40 @@
 {% block body %}
 
     <div class="container">
-        <h2 class="property-name">
-            {{ property }}
-            {% if property.propertyOfOrigin is not null %}
-                [inherited, cf. <a href="{{ path('property_show', {'id': property.propertyOfOrigin.id}) }}" target="_blank"><em>original</em></a>]
+        <div class="clearfix">
+            <div class="pull-right" style="margin-top: 20px; margin-bottom: 10px;">
+                <div class="dropdown inline-block">
+                    <button class="btn btn-default dropdown-toggle" type="button" id="dropdownVersions" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                        {{ propertyVersion.namespaceForVersion }}
+                        <span class="label label-{{ propertyVersion.namespaceForVersion.status.classCss }}">
+                            {{ propertyVersion.namespaceForVersion.status.label }}
+                        </span>
+                        <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="dropdownVersions">
+                        {% if propertyVersion.property.propertyVersions|length > 1 %}
+                            {% for otherPropertyVersion in propertyVersion.property.propertyVersions if otherPropertyVersion != propertyVersion %}
+                                <li>
+                                    <a href="#">{{ otherPropertyVersion.namespaceForVersion }}
+                                        <span class="label label-{{ otherPropertyVersion.namespaceForVersion.status.classCss }}">
+                                            {{ otherPropertyVersion.namespaceForVersion.status.label }}
+                                        </span>
+                                    </a>
+                                </li>
+                            {% endfor %}
+                        {% else %}
+                            <li class="disabled">
+                                <a href="#">No other version</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+            <h2>{{ propertyVersion }}</h2>
+            {% if propertyVersion.propertyOfOrigin is not null %}
+                [inherited, cf. <a href="{{ path('property_show', {'id': propertyVersion.property.propertyOfOrigin.id}) }}" target="_blank"><em>original</em></a>]
             {% endif %}
-        </h2>
-
+        </div>
         <ul class="nav nav-tabs" id="main-tabs">
             <li class="active"><a data-toggle="tab" href="#summary">Summary</a></li>
             <li><a data-toggle="tab" href="#identification">Identification</a></li>
@@ -26,116 +53,129 @@
             <li><a data-toggle="tab" href="#property-hierarchy">Hierarchy</a></li>
             <li><a data-toggle="tab" href="#relations">Relations</a></li>
             <li><a data-toggle="tab" href="#profiles">Profiles</a></li>
-            <li><a data-toggle="tab" href="#comments" class="updateViewComment" data-id="{{ property.id }}" data-object="property">Comments <span class="badge {% if property.comments|length > 0  %}progress-bar-danger {% endif %}">{{ property.comments|length }}</span></a></li>
+            <li><a data-toggle="tab" href="#comments" class="updateViewComment" data-id="{{ propertyVersion.property.id }}" data-object="property">
+                    Comments
+                    {% set commentsProperty = propertyVersion.property.comments %}
+                    {% set commentsPropertyVersion = commentsProperty|filter(commentsProperty => commentsProperty.namespaceForVersion.id == propertyVersion.namespaceForVersion.id) %}
+                    <span class="badge {% if commentsPropertyVersion is not empty %}progress-bar-danger {% endif %}">
+                        {{ commentsPropertyVersion|length }}
+                    </span>
+                </a>
+            </li>
         </ul>
 
         <div class="tab-content">
             <div id="summary" class="tab-pane fade in active">
                 <h3>
-                    {% if property.identifierInNamespace != property.standardLabel %}
-                        {{ property.identifierInNamespace }} {{ property.standardLabel }}
+                    {% if propertyVersion.property.identifierInNamespace != propertyVersion.standardLabel %}
+                        {{ propertyVersion.property.identifierInNamespace }} {{ propertyVersion.standardLabel }}
                     {% else %}
-                        {{ property.standardLabel }}
+                        {{ propertyVersion.standardLabel }}
                     {% endif %}
                 </h3>
                 <div class="container">
-                    <!--<div class="row">
-                        <div class="col-lg-2">
-                            <p>Namespace{% if property.namespaces|length > 1 %}s{% endif %}:</p>
+                    {% if domainRange is not null and domainRange.domainId is not null %}
+                        <div class="row">
+                            <div class="col-lg-2">
+                                <p>Domain:</p>
+                            </div>
+                            <div class="col-lg-10">
+                                <p>
+                                    <a href="{{ path('class_show_with_version', {
+                                        'id': domainRange.domainId,
+                                        'namespaceFromUrlId': domainRange.domainNamespaceId
+                                    }) }}">{{ domainRange.domainIdentifier }}</a>
+                                </p>
+                            </div>
                         </div>
-                        <div class="col-lg-10">
-                            <ul class="list-unstyled">
-                                {% for namespace in property.namespaces %}
-                                    <li><a href="{{ path('namespace_show', {'id': namespace.id}) }}">{{ namespace.standardLabel }}</a></li>
-                                {% endfor %}
-                            </ul>
+                    {% endif %}
+                    {% if domainRange is not null and domainRange.rangeId is not null %}
+                        <div class="row">
+                            <div class="col-lg-2">
+                                <p>Range:</p>
+                            </div>
+                            <div class="col-lg-10">
+                                <p>
+                                    <a href="{{ path('class_show_with_version', {
+                                        'id': domainRange.rangeId,
+                                        'namespaceFromUrlId': domainRange.rangeNamespaceId
+                                    }) }}">{{ domainRange.rangeIdentifier }}</a>
+                                </p>
+                            </div>
                         </div>
-                    </div>-->
-                    <div class="row">
-                        <div class="col-lg-2">
-                            <p>Domain:</p>
-                        </div>
-                        <div class="col-lg-10">
-                            <p>
-                                <a href="{{ path('class_show', {'id': domainRange.domainId}) }}">{{ domainRange.domainIdentifier }}</a>
-                            </p>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-lg-2">
-                            <p>Range:</p>
-                        </div>
-                        <div class="col-lg-10">
-                            <p>
-                                <a href="{{ path('class_show', {'id': domainRange.rangeId }) }}">{{ domainRange.rangeIdentifier }}</a>
-                            </p>
-                        </div>
-                    </div>
-                    {% if property.childPropertyAssociations|length > 0 %}
+                    {% endif %}
+                    {% if propertyVersion.property.childPropertyAssociations|length > 0 %}
                         <div class="row">
                             <div class="col-lg-2">
                                 <p>Subproperty of:</p>
                             </div>
                             <div class="col-lg-10">
                                 <ul class="list-unstyled">
-                                    {% for association in property.childPropertyAssociations %}
-                                        {# Savoir si cet entité se trouve bien dans l'un des espaces de nom actifs (filtrage) #}
-                                        {% set isInActiveNamespaces = false %}
-                                        {% for activeNamespace in activeNamespaces %}
-                                            {% if activeNamespace in association.namespaces %}
-                                                {% set isInActiveNamespaces = true %}
+                                    {% for association in propertyVersion.property.childPropertyAssociations
+                                        if association.namespaceForVersion.id in namespacesId %}
+                                        <li>
+                                            {% if association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).domain is not null %}
+                                                <a href="{{ path('class_show_with_version', {
+                                                    'id': association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).domain.id,
+                                                    'namespaceFromUrlId': association.parentPropertyNamespace.id
+                                                }) }}">
+                                                    {{ association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).domain.identifierInNamespace }} {{ association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).domain.classVersionForDisplay(association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).domainNamespace).standardLabel }}
+                                                </a>
+                                            {% endif %} →
+                                            <a href="{{ path('property_show_with_version', {
+                                                'id': association.parentProperty.id,
+                                                'namespaceFromUrlId': association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).namespaceForVersion.id
+                                            }) }}">
+                                                {{ association.parentProperty.identifierInNamespace }} {{ association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).standardLabel }}
+                                            </a> →
+                                            {% if association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).range is not null %}
+                                                <a href="{{ path('class_show_with_version', {
+                                                    'id': association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).range.id,
+                                                    'namespaceFromUrlId': association.parentPropertyNamespace.id
+                                                }) }}">
+                                                    {{ association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).range.identifierInNamespace }} {{ association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).range.classVersionForDisplay(association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).rangeNamespace).standardLabel }}
+                                                </a>
                                             {% endif %}
-                                        {% endfor %}
-                                        {% if isInActiveNamespaces %}
-                                            <li>
-                                                {% if association.parentProperty.domain is not null %}
-                                                <a href="{{ path('class_show', {'id': association.parentProperty.domain.id}) }}">
-                                                    {{ association.parentProperty.domain.identifierInNamespace }} {{ association.parentProperty.domain.standardLabel }}
-                                                </a>
-                                                {% endif %}→
-                                                <a href="{{ path('property_show', {'id': association.parentProperty.id}) }}">
-                                                    {{ association.parentProperty.identifierInNamespace }} {{ association.parentProperty.standardLabel }}
-                                                </a> →
-                                                {% if association.parentProperty.range is not null %}
-                                                <a href="{{ path('class_show', {'id': association.parentProperty.range.id}) }}">
-                                                    {{ association.parentProperty.range.identifierInNamespace }} {{ association.parentProperty.range.standardLabel }}
-                                                </a>
-                                                {% endif %}
-                                            </li>
-                                        {% endif %}
+                                        </li>
                                     {% endfor %}
                                 </ul>
                             </div>
                         </div>
                     {% endif %}
-                    {% if property.parentPropertyAssociations|length > 0 %}
+                    {% if propertyVersion.property.parentPropertyAssociations|length > 0 %}
                         <div class="row">
                             <div class="col-lg-2">
                                 <p>Superproperty of:</p>
                             </div>
                             <div class="col-lg-10">
                                 <ul class="list-unstyled">
-                                    {% for association in property.parentPropertyAssociations %}
-                                        {# Savoir si cet entité se trouve bien dans l'un des espaces de nom actifs (filtrage) #}
-                                        {% set isInActiveNamespaces = false %}
-                                        {% for activeNamespace in activeNamespaces %}
-                                            {% if activeNamespace in association.namespaces %}
-                                                {% set isInActiveNamespaces = true %}
-                                            {% endif %}
-                                        {% endfor %}
-                                        {% if isInActiveNamespaces %}
-                                            <li>
-                                                <a href="{{ path('class_show', {'id': association.childProperty.domain.id}) }}">
-                                                    {{ association.childProperty.domain.identifierInNamespace }} {{ association.childProperty.domain.standardLabel }}
-                                                </a> →
-                                                <a href="{{ path('property_show', {'id': association.childProperty.id}) }}">
-                                                    {{ association.childProperty.identifierInNamespace }} {{ association.childProperty.standardLabel }}
-                                                </a> →
-                                                <a href="{{ path('class_show', {'id': association.childProperty.range.id}) }}">
-                                                    {{ association.childProperty.range.identifierInNamespace }} {{ association.childProperty.range.standardLabel }}
+                                    {% for association in propertyVersion.property.parentPropertyAssociations
+                                        if association.namespaceForVersion.id in namespacesId %}
+                                        <li>
+                                            {% if association.childProperty.propertyVersionForDisplay(association.childPropertyNamespace).domain is not null %}
+                                                <a href="{{ path('class_show_with_version', {
+                                                    'id': association.childProperty.propertyVersionForDisplay(association.childPropertyNamespace).domain.id,
+                                                    'namespaceFromUrlId': association.childProperty.propertyVersionForDisplay(association.childPropertyNamespace).domainNamespace.id
+                                                }) }}">
+                                                    {{ association.childProperty.propertyVersionForDisplay(association.childPropertyNamespace).domain.identifierInNamespace }} {{ association.childProperty.propertyVersionForDisplay(association.childPropertyNamespace).domain.classVersionForDisplay(association.childProperty.propertyVersionForDisplay(association.childPropertyNamespace).domainNamespace).standardLabel }}
                                                 </a>
-                                            </li>
-                                        {% endif %}
+                                            {% endif %}
+                                            →
+                                            <a href="{{ path('property_show_with_version', {
+                                                'id': association.childProperty.id,
+                                                'namespaceFromUrlId': association.childPropertyNamespace.id
+                                            }) }}">
+                                                {{ association.childProperty.identifierInNamespace }} {{ association.childProperty.propertyVersionForDisplay(association.childPropertyNamespace).standardLabel }}
+                                            </a> →
+                                            {% if association.childProperty.propertyVersionForDisplay(association.childPropertyNamespace).range is not null %}
+                                                <a href="{{ path('class_show_with_version', {
+                                                    'id': association.childProperty.propertyVersionForDisplay(association.childPropertyNamespace).range.id,
+                                                    'namespaceFromUrlId': association.childProperty.propertyVersionForDisplay(association.childPropertyNamespace).rangeNamespace.id
+                                                }) }}">
+                                                    {{ association.childProperty.propertyVersionForDisplay(association.childPropertyNamespace).range.identifierInNamespace }} {{ association.childProperty.propertyVersionForDisplay(association.childPropertyNamespace).range.classVersionForDisplay(association.childProperty.propertyVersionForDisplay(association.childPropertyNamespace).rangeNamespace).standardLabel }}
+                                                </a>
+                                            {% endif %}
+                                        </li>
                                     {% endfor %}
                                 </ul>
                             </div>
@@ -146,73 +186,70 @@
                             <p>Quantification:</p>
                         </div>
                         <div class="col-lg-10">
-                            {% if property.quantifiers is not null %}
-                                <p>{{ property.quantifiers }}</p>
+                            {% if propertyVersion.quantifiers is not null %}
+                                <p>{{ propertyVersion.quantifiers }}</p>
                             {% else %}
                                 <p><i>No quantifiers yet.</i></p>
                             {% endif %}
                         </div>
                     </div>
-                    {% if property.entityAssociations|length > 0 %}
-                    <div class="row">
-                        <div class="col-lg-2">
-                            <p>Relations:</p>
-                        </div>
-                        <div class="col-lg-10">
-                            <ul class="list-unstyled">
-                                {% for relation in property.entityAssociations if relation.systemType.id == 18 or relation.systemType.id == 20 %}
-                                    {# Savoir si cet entité se trouve bien dans l'un des espaces de nom actifs (filtrage) #}
-                                    {% set isInActiveNamespaces = false %}
-                                    {% for activeNamespace in activeNamespaces %}
-                                        {% if activeNamespace in relation.namespaces %}
-                                            {% set isInActiveNamespaces = true %}
+                    {% if propertyVersion.property.entityAssociations|length > 0 %}
+                        <div class="row">
+                            <div class="col-lg-2">
+                                <p>Relations:</p>
+                            </div>
+                            <div class="col-lg-10">
+                                <ul class="list-unstyled">
+                                    {% set relationCount = 0 %}
+                                    {% for relation in propertyVersion.property.entityAssociations
+                                        if relation.systemType.id == 18
+                                        or relation.systemType.id == 20
+                                        and relation.namespaceForVersion.id in namespacesId %}
+                                        {% set relationCount = relationCount + 1 %}
+                                        {% if relationCount > 0 %}
+                                            <li>{{ relation.systemType.standardLabel }}
+                                                {% if relation.sourceProperty.id == propertyVersion.property.id %}
+                                                    <a href="{{ path("property_show", {'id': relation.targetProperty.id }) }}">
+                                                        {{ relation.targetProperty.propertyVersionForDisplay(relation.targetNamespaceForVersion).invertedLabel }}
+                                                    </a>
+                                                {% else %}
+                                                    <a href="{{ path("property_show", {'id': relation.sourceProperty.id }) }}">
+                                                        {{ relation.sourceProperty.invertedLabel }}
+                                                    </a>
+                                                {% endif %}
+                                            </li>
                                         {% endif %}
                                     {% endfor %}
-                                    {% if isInActiveNamespaces %}
-                                    <li>{{ relation.systemType.standardLabel }}
-                                        {% if relation.sourceProperty.id == property.id %}
-                                            <a href="{{ path("property_show", {'id': relation.targetProperty.id }) }}">
-                                                {{ relation.targetProperty.invertedLabel }}
-                                            </a>
-                                        {% else %}
-                                            <a href="{{ path("property_show", {'id': relation.sourceProperty.id }) }}">
-                                                {{ relation.sourceProperty.invertedLabel }}
-                                            </a>
-                                        {% endif %}
-                                    </li>
-                                    {% endif %}
-                                {% endfor %}
-                            </ul>
+                                </ul>
+                            </div>
                         </div>
-                    </div>
                     {% endif %}
                     <div class="row">
                         <div class="col-lg-2">
                             <p>Scope note:</p>
                         </div>
                         <div class="col-lg-10">
-                            {% set scopeNote, break = '<i>No scope note yet.</i>', false %}
-                            {% for textProperty in property.textProperties if textProperty.systemType.id == 1 %}
-                                {# Savoir si cet entité se trouve bien dans l'un des espaces de nom actifs (filtrage) #}
-                                {% set isInActiveNamespaces = false %}
-                                {% for activeNamespace in activeNamespaces %}
-                                    {% if activeNamespace in textProperty.namespaces %}
-                                        {% set isInActiveNamespaces = true %}
-                                    {% endif %}
-                                {% endfor %}
-                                {% if isInActiveNamespaces %}
-                                    {% if not break %}
-                                        {% if textProperty.languageIsoCode == 'en' %}
-                                            {% set break = true %}
-                                            {% set scopeNote = textProperty.textProperty %}
-                                        {% else %}
-                                            {% if scopeNote == '<i>No scope note yet.</i>' %}
-                                                {% set scopeNote = textProperty.textProperty %}
-                                            {% endif %}
-                                        {% endif %}
+                            {% set scopeNote=null %}
+                            {% set break=false %}
+                            {# Filtrer les textproperties avec namespacesId #}
+                            {# SystemType utilisé: 1=Scope note #}
+                            {# Retrouver en priorité le scope note en anglais #}
+                            {% for textProperty in propertyVersion.property.textProperties
+                                if textProperty.namespaceForVersion.id in namespacesId
+                                and textProperty.systemType.id == 1
+                                and not break %}
+                                {% if textProperty.languageIsoCode == 'en' %}
+                                    {% set break = true %}{# En anglais donc prioritaire: break #}
+                                    {% set scopeNote = textProperty.textProperty %}
+                                {% else %}
+                                    {% if scopeNote is null %}
+                                        {% set scopeNote = textProperty.textProperty %}
                                     {% endif %}
                                 {% endif %}
                             {% endfor %}
+                            {% if scopeNote is null %}
+                                {% set scopeNote = '<i>No scope note yet.</i>' %}
+                            {% endif %}
                             {{ scopeNote|raw }}
                         </div>
                     </div>
@@ -221,21 +258,16 @@
                             <p>Examples:</p>
                         </div>
                         <div class="col-lg-10">
-                            {% set empty = true %}
-                            {% for textProperty in property.textProperties if textProperty.systemType.id == 7 %}
-                                {# Savoir si cet entité se trouve bien dans l'un des espaces de nom actifs (filtrage) #}
-                                {% set isInActiveNamespaces = false %}
-                                {% for activeNamespace in activeNamespaces %}
-                                    {% if activeNamespace in textProperty.namespaces %}
-                                        {% set isInActiveNamespaces = true %}
-                                    {% endif %}
-                                {% endfor %}
-                                {% if isInActiveNamespaces %}
-                                    {% set empty = false %}
-                                    {{ textProperty.textProperty|raw }}
-                                {% endif %}
+                            {% set isExamplesEmpty = true %}
+                            {# Filtrer les textproperties avec namespacesId #}
+                            {# SystemType utilisé: 7=Example #}
+                            {% for textProperty in propertyVersion.property.textProperties
+                                if textProperty.namespaceForVersion.id in namespacesId
+                                and textProperty.systemType.id == 7 %}
+                                {% set isExamplesEmpty = false %}
+                                {{ textProperty.textProperty|raw }}
                             {% endfor %}
-                            {% if empty %}
+                            {% if isExamplesEmpty %}
                                 <p><i>No example yet.</i></p>
                             {% endif %}
                         </div>
@@ -246,19 +278,15 @@
                         </div>
                         <div class="col-lg-10">
                             <ul class="list-unstyled">
-                                <li>{{ property.identifierInNamespace }}(x,y) ⊃ {{ property.domain.identifierInNamespace }}(x)</li>
-                                <li>{{ property.identifierInNamespace }}(x,y) ⊃ {{ property.range.identifierInNamespace }}(y)</li>
-                                {% for association in property.childPropertyAssociations %}
-                                    {# Savoir si cet entité se trouve bien dans l'un des espaces de nom actifs (filtrage) #}
-                                    {% set isInActiveNamespaces = false %}
-                                    {% for activeNamespace in activeNamespaces %}
-                                        {% if activeNamespace in association.namespaces %}
-                                            {% set isInActiveNamespaces = true %}
-                                        {% endif %}
-                                    {% endfor %}
-                                    {% if isInActiveNamespaces %}
-                                        <li>{{ property.identifierInNamespace }}(x,y) ⊃ {{ association.parentProperty.identifierInNamespace }}(x,y)</li>
-                                    {% endif %}
+                                {% if propertyVersion.domain is not null %}
+                                    <li>{{ propertyVersion.property.identifierInNamespace }}(x,y) ⊃ {{ propertyVersion.domain.identifierInNamespace }}(x)</li>
+                                {% endif %}
+                                {% if propertyVersion.range is not null %}
+                                    <li>{{ propertyVersion.property.identifierInNamespace }}(x,y) ⊃ {{ propertyVersion.range.identifierInNamespace }}(y)</li>
+                                {% endif %}
+                                {% for association in propertyVersion.property.childPropertyAssociations
+                                    if association.namespaceForVersion.id in namespacesId %}
+                                    <li>{{ propertyVersion.property.identifierInNamespace }}(x,y) ⊃ {{ association.parentProperty.identifierInNamespace }}(x,y)</li>
                                 {% endfor %}
                             </ul>
                         </div>
@@ -267,7 +295,7 @@
             </div>
             <div id="definition" class="tab-pane fade">
                 <div class="pull-right add-div">
-                    <a href="{{ path('text_property_new', {'type': 'scope-note', 'object': 'property', 'objectId': property.id })}}"
+                    <a href="{{ path('text_property_new', {'type': 'scope-note', 'object': 'property', 'objectId': propertyVersion.property.id })}}"
                        class="btn btn-primary pull-right">
                         Add <span class="fa fa-plus-circle"></span>
                     </a>
@@ -285,15 +313,9 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for textProperty in property.textProperties if textProperty.systemType.id == 1 %}
-                        {# Savoir si le scope note se trouve bien dans l'un des espaces de nom actifs (filtrage) #}
-                        {% set isInActiveNamespaces = false %}
-                        {% for activeNamespace in activeNamespaces %}
-                            {% if activeNamespace in textProperty.namespaces %}
-                                {% set isInActiveNamespaces = true %}
-                            {% endif %}
-                        {% endfor %}
-                        {% if isInActiveNamespaces %}
+                    {% for textProperty in propertyVersion.property.textProperties
+                        if textProperty.systemType.id == 1
+                        and textProperty.namespaceForVersion.id in namespacesId %}
                         {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
                         <tr>
                             <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
@@ -301,7 +323,7 @@
                                 <span>{{ textProperty.textProperty|striptags|raw }}</span>
                             </td>
                             <td>{{ textProperty.languageIsoCode}}</td>
-                            <td>WIP</td>
+                            <td>{{ textProperty.namespaceForVersion }}</td>
                             <td>
                                 <a href="{{ path('text_property_edit', {
                                     'id': textProperty.id
@@ -318,12 +340,11 @@
                                 </a>
                             </td>
                         </tr>
-                        {% endif %}
                     {% endfor %}
                     </tbody>
                 </table>
                 <div class="pull-right add-div">
-                    <a href="{{ path('text_property_new', {'type': 'example', 'object': 'property', 'objectId': property.id })}}"
+                    <a href="{{ path('text_property_new', {'type': 'example', 'object': 'property', 'objectId': propertyVersion.property.id })}}"
                        class="btn btn-primary pull-right">
                         Add <span class="fa fa-plus-circle"></span>
                     </a>
@@ -341,15 +362,10 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for textProperty in property.textProperties if textProperty.systemType.id == 7 %}
-                        {# Savoir si le scope note se trouve bien dans l'un des espaces de nom actifs (filtrage) #}
-                        {% set isInActiveNamespaces = false %}
-                        {% for activeNamespace in activeNamespaces %}
-                            {% if activeNamespace in textProperty.namespaces %}
-                                {% set isInActiveNamespaces = true %}
-                            {% endif %}
-                        {% endfor %}
-                        {% if isInActiveNamespaces %}
+                    {% for textProperty in propertyVersion.property.textProperties
+                        if textProperty.systemType.id == 7
+                        and textProperty.namespaceForVersion.id in namespacesId %}
+                        {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
                         <tr>
                             {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
                             <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
@@ -357,7 +373,7 @@
                                 <span>{{ textProperty.textProperty|striptags|raw }}</span>
                             </td>
                             <td>{{ textProperty.languageIsoCode}}</td>
-                            <td>WIP</td>
+                            <td>{{ textProperty.namespaceForVersion }}</td>
                             <td>
                                 <a href="{{ path('text_property_edit', {
                                     'id': textProperty.id
@@ -374,12 +390,11 @@
                                 </a>
                             </td>
                         </tr>
-                        {% endif %}
                     {% endfor %}
                     </tbody>
                 </table>
                 <div class="pull-right add-div">
-                    <a href="{{ path('text_property_new', {'type': 'additional-note', 'object': 'property', 'objectId': property.id })}}"
+                    <a href="{{ path('text_property_new', {'type': 'additional-note', 'object': 'property', 'objectId': propertyVersion.property.id })}}"
                        class="btn btn-primary pull-right">
                         Add <span class="fa fa-plus-circle"></span>
                     </a>
@@ -397,15 +412,9 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for textProperty in property.textProperties if textProperty.systemType.id == 12 %}
-                        {# Savoir si le scope note se trouve bien dans l'un des espaces de nom actifs (filtrage) #}
-                        {% set isInActiveNamespaces = false %}
-                        {% for activeNamespace in activeNamespaces %}
-                            {% if activeNamespace in textProperty.namespaces %}
-                                {% set isInActiveNamespaces = true %}
-                            {% endif %}
-                        {% endfor %}
-                        {% if isInActiveNamespaces %}
+                    {% for textProperty in propertyVersion.property.textProperties
+                        if textProperty.systemType.id == 12
+                        and textProperty.namespaceForVersion.id in namespacesId %}
                         {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
                         <tr>
                             <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
@@ -413,7 +422,7 @@
                                 <span>{{ textProperty.textProperty|striptags|raw }}</span>
                             </td>
                             <td>{{ textProperty.languageIsoCode}}</td>
-                            <td>WIP</td>
+                            <td>{{ textProperty.namespaceForVersion }}</td>
                             <td>
                                 <a href="{{ path('text_property_edit', {
                                     'id': textProperty.id
@@ -430,7 +439,6 @@
                                 </a>
                             </td>
                         </tr>
-                        {% endif %}
                     {% endfor %}
                     </tbody>
                 </table>
@@ -438,7 +446,7 @@
             <div id="identification" class="tab-pane fade">
                 {# Test de vérification si cet identifiant existe déjà dans un namespace fermé (il n'est donc plus éditable #}
                 {% set isIdentifierExistAndPublished = false %}
-                {% for namespace in property.namespaces %}
+                {% for namespace in propertyVersion.property.namespaces %}
                     {% if not namespace.isOngoing %}
                         {% for propertyNamespace in namespace.properties %}
                             {% if propertyNamespace.identifierInNamespace == property.identifierInNamespace %}
@@ -447,7 +455,7 @@
                         {% endfor %}
                     {% endif %}
                 {% endfor %}
-                {% if property.ongoingNamespace.topLevelNamespace.propertyPrefix is null and not isIdentifierExistAndPublished %}
+                {% if propertyVersion.namespaceForVersion.topLevelNamespace.propertyPrefix is null and not isIdentifierExistAndPublished %}
                     <div id="identifier-form-block">
                         {{ form_start(propertyIdentifierForm) }}
                         {{ form_errors(propertyIdentifierForm) }}
@@ -456,18 +464,18 @@
                         <button type="button" id="identifier-edit-btn-close" class="btn">Close</button>
                         {{ form_end(propertyIdentifierForm) }}
                     </div>
-                    <h3 id="identifier-details-block">Identifier : {{ property.identifierInNamespace }}<a class="btn" id="identifier-edit-btn" href="#identification"><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span></a></h3>
+                    <h3 id="identifier-details-block">Identifier : {{ propertyVersion.property.identifierInNamespace }}<a class="btn" id="identifier-edit-btn" href="#identification"><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span></a></h3>
                 {% else %}
-                    <h3 id="identifier-details-block">Identifier : {{ property.identifierInNamespace }}</h3>
+                    <h3 id="identifier-details-block">Identifier : {{ propertyVersion.property.identifierInNamespace }}</h3>
                 {% endif %}
-                {% if domainRange is not empty %}
+                {% if domainRange is not empty and domainRange.domainId is not null and domainRange.rangeId is not null %}
                     <h3>Domain and range</h3>
                     <div id="domain-range-form-block">
                         {{ form_start(propertyForm) }}
                         <div class="row well well-sm" style="margin: 19px 0;">
                             <div class="col-lg-2">
                                 <p class="text-center"><label>Domain</label></p>
-                                <p>{{ form_widget(propertyForm.domain) }}</p>
+                                <p>{{ form_widget(propertyForm.domainVersion) }}</p>
                             </div>
                             <div class="col-lg-2">
                                 <p class="text-center"><label>Domain quantifiers</label></p>
@@ -478,7 +486,7 @@
                             </div>
                             <div class="col-lg-4">
                                 <p class="text-center"><label>Property</label></p>
-                                <p class="text-center">→ {{ property.standardLabel }} →</p>
+                                <p class="text-center">→ {{ propertyVersion.standardLabel }} →</p>
                             </div>
                             <div class="col-lg-2">
                                 <p class="text-center"><label>Range quantifiers</label></p>
@@ -489,22 +497,30 @@
                             </div>
                             <div class="col-lg-2">
                                 <p class="text-center"><label>Range</label></p>
-                                <p>{{ form_widget(propertyForm.range) }}</p>
+                                <p>{{ form_widget(propertyForm.rangeVersion) }}</p>
                             </div>
                         </div>
                         <button type="submit" class="btn btn-primary" formnovalidate>Save</button>
                         {{ form_end(propertyForm) }}
                     </div>
                     <p id="domain-range-details-block">
-                        <a href="{{ path('class_show', {'id': domainRange.domainId}) }}">{{ domainRange.domainIdentifier }}</a> → {{ domainRange.propertyIdentifier }} → <a href="{{ path('class_show', {'id': domainRange.rangeId}) }}">{{ domainRange.rangeIdentifier }}</a>
-                        {% if property.quantifiers is not null %}
-                            &nbsp;(Quantifiers {{ property.quantifiers }})
+                        <a href="{{ path('class_show_with_version', {
+                            'id': domainRange.domainId,
+                            'namespaceFromUrlId': domainRange.domainNamespaceId
+                        }) }}">{{ domainRange.domainIdentifier }}</a>
+                        → {{ domainRange.propertyIdentifier }} →
+                        <a href="{{ path('class_show_with_version', {
+                            'id': domainRange.rangeId,
+                            'namespaceFromUrlId': domainRange.rangeNamespaceId
+                        }) }}">{{ domainRange.rangeIdentifier }}</a>
+                        {% if propertyVersion.quantifiers is not null %}
+                            &nbsp;(Quantifiers {{ propertyVersion.quantifiers }})
                         {% endif %}
                         <a class="btn" id="domain-range-edit-btn" href="#identification"><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span></a>
                     </p>
                 {% endif %}
                 <div class="pull-right add-div">
-                    <a href="{{ path('label_new', {'object': 'property', 'objectId': property.id })}}"
+                    <a href="{{ path('label_new', {'object': 'property', 'objectId': propertyVersion.property.id })}}"
                        class="btn btn-primary pull-right">
                         Add <span class="fa fa-plus-circle"></span>
                     </a>
@@ -521,15 +537,8 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for label in property.labels %}
-                        {# Savoir si l'entité se trouve bien dans l'un des espaces de nom actifs (filtrage) #}
-                        {% set isInActiveNamespaces = false %}
-                        {% for activeNamespace in activeNamespaces %}
-                            {% if activeNamespace in label.namespaces %}
-                                {% set isInActiveNamespaces = true %}
-                            {% endif %}
-                        {% endfor %}
-                        {% if isInActiveNamespaces %}
+                    {% for label in propertyVersion.property.labels
+                        if label.namespaceForVersion.id in namespacesId %}
                         <tr>
                             <td>
                                 <a href="{{ path('label_show', {
@@ -554,7 +563,6 @@
                                 </a>
                             </td>
                         </tr>
-                        {% endif %}
                     {% endfor %}
                     </tbody>
                 </table>
@@ -573,16 +581,16 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for namespace in property.namespaces %}
-                        <tr>
+                    {% for pversion in propertyVersion.property.propertyVersions %}
+                        <tr {% if pversion.namespaceForVersion.id == propertyVersion.namespaceForVersion.id %}class="success"{% endif %}>
                             <td>
                                 <a href="{{ path('namespace_show', {
-                                    'id': namespace.id
+                                    'id': pversion.namespaceForVersion.id
                                 }) }}">
-                                    {{ namespace }}
+                                    {{ pversion.namespaceForVersion }}
                                 </a>
                             </td>
-                            <td>{{ namespace.modificationTime|date('Y-m-d') }}</td>
+                            <td>{{ pversion.namespaceForVersion.modificationTime|date('Y-m-d') }}</td>
                         </tr>
                     {% endfor %}
                     </tbody>
@@ -590,14 +598,14 @@
             </div>
             <div id="property-hierarchy" class="tab-pane fade">
                 <div class="pull-right add-div">
-                    <a href="{{ path('new_parent_property_form', {'childProperty': property.id}) }}" class="btn btn-primary pull-right">Add <span class="fa fa-plus-circle"></span></a>
+                    <a href="{{ path('new_parent_property_form', {'childProperty': propertyVersion.property.id}) }}" class="btn btn-primary pull-right">Add <span class="fa fa-plus-circle"></span></a>
                 </div>
                 <h3>Parent properties
                     {% set tooltipProperty = "rdfs:subpropertyOf the property below" %}
-                    {% if property.childPropertyAssociations|length > 1  %}
+                    {% if propertyVersion.property.childPropertyAssociations|length > 1  %}
                         {% set tooltipProperty = "rdfs:subpropertyOf the properties listed below" %}
                     {% endif %}
-                    <a data-toggle="tooltip" data-placement="right" title="{{ property }} {{ tooltipProperty }}">
+                    <a data-toggle="tooltip" data-placement="right" title="{{ propertyVersion }} {{ tooltipProperty }}">
                         <span class="fas fa-info-circle"></span>
                     </a>
                 </h3>
@@ -616,45 +624,64 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for association in property.childPropertyAssociations %}
-                        {# Savoir si l'entité se trouve bien dans l'un des espaces de nom actifs (filtrage) #}
-                        {% set isInActiveNamespaces = false %}
-                        {% for activeNamespace in activeNamespaces %}
-                            {% if activeNamespace in association.namespaces %}
-                                {% set isInActiveNamespaces = true %}
-                            {% endif %}
-                        {% endfor %}
-                        {% if isInActiveNamespaces %}
+                    {% for association in propertyVersion.property.childPropertyAssociations
+                        if association.namespaceForVersion.id in namespacesId %}
                         <tr>
                             <td class="text-right small">
-                                {% if association.parentProperty.domain is not null %}
-                                    <a href="{{ path('class_show', {'id': association.parentProperty.domain.id }) }}">
-                                        {{ association.parentProperty.domain }}
+                                {% if association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).domain is not null %}
+                                    <a href="{{ path('class_show_with_version', {
+                                        'id': association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).domain.id,
+                                        'namespaceFromUrlId': association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).domainNamespace.id}) }}">
+                                        {{ association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).domain.classVersionForDisplay(association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).domainNamespace) }}
                                     </a>
                                 {% endif %}
                             </td>
                             <td class="small" style="padding-left: 30px;">
-                                {% if association.parentProperty.domainMinQuantifier is not null and association.parentProperty.domainMaxQuantifier is not null %}
-                                    ({% if  association.parentProperty.domainMinQuantifier != -1 %}{{ association.parentProperty.domainMinQuantifier }}{% else %}n{% endif %},{% if  association.parentProperty.domainMaxQuantifier != -1 %}{{ association.parentProperty.domainMaxQuantifier }}{% else %}n{% endif %})
+                                {% if association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).domainMinQuantifier is not null and association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).domainMaxQuantifier is not null %}
+                                    ({% if  association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).domainMinQuantifier != -1 %}
+                                    {{ association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).domainMinQuantifier }}
+                                {% else %}
+                                    n
+                                {% endif %}
+                                    ,
+                                    {% if  association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).domainMaxQuantifier != -1 %}
+                                        {{ association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).domainMaxQuantifier }}
+                                    {% else %}
+                                        n
+                                    {% endif %})
                                 {% endif %}
                             </td>
                             <td class="text-center">
-                                <a href="{{ path('property_show', {
+                                <a href="{{ path('property_show_with_version', {
                                     'id': association.parentProperty.id,
+                                    'namespaceFromUrlId': association.parentPropertyNamespace.id,
                                     '_fragment': 'property-hierarchy'
                                 }) }}">
-                                    {{ association.parentProperty.invertedLabel }}
+                                    {{ association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).invertedLabel }}
                                 </a>
                             </td>
                             <td class="small" style="padding-right: 30px;">
-                                {% if association.parentProperty.rangeMinQuantifier is not null and association.parentProperty.rangeMaxQuantifier is not null %}
-                                    ({% if  association.parentProperty.rangeMinQuantifier != -1 %}{{ association.parentProperty.rangeMinQuantifier }}{% else %}n{% endif %},{% if  association.parentProperty.rangeMaxQuantifier != -1 %}{{ association.parentProperty.rangeMaxQuantifier }}{% else %}n{% endif %})
+                                {% if association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).rangeMinQuantifier is not null and association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).rangeMaxQuantifier is not null %}
+                                    ({% if  association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).rangeMinQuantifier != -1 %}
+                                    {{ association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).rangeMinQuantifier }}
+                                {% else %}
+                                    n
+                                {% endif %}
+                                    ,
+                                    {% if  association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).rangeMaxQuantifier != -1 %}
+                                        {{ association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).rangeMaxQuantifier }}
+                                    {% else %}
+                                        n
+                                    {% endif %})
                                 {% endif %}
                             </td>
                             <td class="small">
-                                {% if association.parentProperty.range is not null %}
-                                    <a href="{{ path('class_show', {'id': association.parentProperty.range.id }) }}">
-                                        {{ association.parentProperty.range }}
+                                {% if association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).range is not null %}
+                                    <a href="{{ path('class_show_with_version', {
+                                        'id': association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).range.id,
+                                        'namespaceFromUrlId': association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).rangeNamespace.id
+                                    }) }}">
+                                        {{ association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).range.classVersionForDisplay(association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).rangeNamespace) }}
                                     </a>
                                 {% endif %}
                             </td>
@@ -668,15 +695,7 @@
                                     {% endfor %}
                                 {% endif %}
                             </td>
-                            <td>
-                                {% if association.namespaces is not null %}
-                                    {% for ns in association.namespaces %}
-                                        {{ ns.standardLabel }}
-                                    {% endfor %}
-                                {% else %}
-                                    WIP
-                                {% endif %}
-                            </td>
+                            <td>{{ association.namespaceForVersion }}</td>
                             <td>
                                 <a href="{{ path('property_association_edit', {'id': association.id}) }}" class="btn btn-xs btn-success"><span class="fa fa-edit"></span></a>
                             </td>
@@ -688,7 +707,6 @@
                                 </a>
                             </td>
                         </tr>
-                        {% endif %}
                     {% endfor %}
                     </tbody>
                 </table>
@@ -707,18 +725,13 @@
                     </thead>
                     <tbody>
                     {% for ancestor in ancestors|sort %}
-                        {# Savoir si l'entité se trouve bien dans l'un des espaces de nom actifs (filtrage) #}
-                        {% set isInActiveNamespaces = false %}
-                        {% for activeNamespace in activeNamespaces %}
-                            {% if activeNamespace.standardLabel == ancestor.propertyNamespaceLabel %}
-                                {% set isInActiveNamespaces = true %}
-                            {% endif %}
-                        {% endfor %}
-                        {% if isInActiveNamespaces %}
                         <tr>
                             <td class="text-right small">
                                 {% if ancestor.domainIdentifier is not null %}
-                                    <a href="{{ path('class_show', {'id': ancestor.has_domain }) }}">
+                                    <a href="{{ path('class_show_with_version', {
+                                        'id': ancestor.has_domain,
+                                        'namespaceFromUrlId': ancestor.domainNamespaceId
+                                    }) }}">
                                         {% if ancestor.domainStandardLabel == ancestor.domainIdentifier %}
                                             {{ ancestor.domainStandardLabel }}
                                         {% else %}
@@ -733,8 +746,9 @@
                                 {% endif %}
                             </td>
                             <td class="text-center">
-                                <a href="{{ path('property_show', {
+                                <a href="{{ path('property_show_with_version', {
                                     'id': ancestor.id,
+                                    'namespaceFromUrlId': ancestor.propertyNamespaceId,
                                     '_fragment': 'property-hierarchy'
                                 }) }}">
                                     {{ ancestor.identifier }}
@@ -747,7 +761,10 @@
                             </td>
                             <td class="small">
                                 {% if ancestor.rangeIdentifier is not null %}
-                                    <a href="{{ path('class_show', {'id': ancestor.has_range }) }}">
+                                    <a href="{{ path('class_show_with_version', {
+                                        'id': ancestor.has_range,
+                                        'namespaceFromUrlId': ancestor.rangeNamespaceId
+                                    }) }}">
                                         {% if ancestor.rangeStandardLabel == ancestor.rangeIdentifier %}
                                             {{ ancestor.rangeStandardLabel }}
                                         {% else %}
@@ -759,7 +776,6 @@
                             <td>{{ ancestor.depth }}</td>
                             <td>{{ ancestor.propertyNamespaceLabel }}</td>
                         </tr>
-                        {% endif %}
                     {% endfor %}
                     </tbody>
                 </table>
@@ -778,18 +794,13 @@
                     </thead>
                     <tbody>
                     {% for descendant in descendants|sort %}
-                        {# Savoir si l'entité se trouve bien dans l'un des espaces de nom actifs (filtrage) #}
-                        {% set isInActiveNamespaces = false %}
-                        {% for activeNamespace in activeNamespaces %}
-                            {% if activeNamespace.standardLabel == descendant.propertyNamespaceLabel %}
-                                {% set isInActiveNamespaces = true %}
-                            {% endif %}
-                        {% endfor %}
-                        {% if isInActiveNamespaces %}
                         <tr>
                             <td class="text-right small">
                                 {% if descendant.domainIdentifier is not null %}
-                                    <a href="{{ path('class_show', {'id': descendant.has_domain }) }}">
+                                    <a href="{{ path('class_show_with_version', {
+                                        'id': descendant.has_domain,
+                                        'namespaceFromUrlId': descendant.domainNamespaceId
+                                    }) }}">
                                         {% if descendant.domainStandardLabel == descendant.domainIdentifier %}
                                             {{ descendant.domainStandardLabel }}
                                         {% else %}
@@ -804,8 +815,9 @@
                                 {% endif %}
                             </td>
                             <td class="text-center">
-                                <a href="{{ path('property_show', {
+                                <a href="{{ path('property_show_with_version', {
                                     'id': descendant.id,
+                                    'namespaceFromUrlId': descendant.propertyNamespaceId,
                                     '_fragment': 'property-hierarchy'
                                 }) }}">
                                     {{ descendant.identifier }}
@@ -818,7 +830,10 @@
                             </td>
                             <td class="small">
                                 {% if descendant.rangeIdentifier is not null %}
-                                    <a href="{{ path('class_show', {'id': descendant.has_range }) }}">
+                                    <a href="{{ path('class_show_with_version', {
+                                        'id': descendant.has_range,
+                                        'namespaceFromUrlId': descendant.rangeNamespaceId
+                                    }) }}">
                                         {% if descendant.rangeStandardLabel == descendant.rangeIdentifier %}
                                             {{ descendant.rangeStandardLabel }}
                                         {% else %}
@@ -830,17 +845,16 @@
                             <td>{{ descendant.depth }}</td>
                             <td>{{ descendant.propertyNamespaceLabel }}</td>
                         </tr>
-                        {% endif %}
                     {% endfor %}
                     </tbody>
                 </table>
             </div>
             <div id="relations" class="tab-pane fade">
-                {% if is_granted('edit', property) %}
+                {% if is_granted('edit', propertyVersion) %}
                     <div class="pull-right add-div">
                         <a href="{{ path('new_entity_association_form', {
                             'object': 'property',
-                            'objectId': property.id}) }}" class="btn btn-primary pull-right">Add <span class="fa fa-plus-circle"></span></a>
+                            'objectId': propertyVersion.property.id}) }}" class="btn btn-primary pull-right">Add <span class="fa fa-plus-circle"></span></a>
                     </div>
                 {% endif %}
                 <h3>Related properties</h3>
@@ -856,29 +870,26 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for relation in property.entityAssociations if relation.systemType.id == 18 or relation.systemType.id == 20 %}
-                        {# Savoir si l'entité se trouve bien dans l'un des espaces de nom actifs (filtrage) #}
-                        {% set isInActiveNamespaces = false %}
-                        {% for activeNamespace in activeNamespaces %}
-                            {% if activeNamespace in relation.namespaces %}
-                                {% set isInActiveNamespaces = true %}
-                            {% endif %}
-                        {% endfor %}
-                        {% if isInActiveNamespaces %}
+                    {% for relation in propertyVersion.property.entityAssociations
+                        if relation.systemType.id == 18
+                        or relation.systemType.id == 20
+                        and relation.namespaceForVersion.id in namespacesId %}
                         <tr>
                             <td>{{ relation.systemType }}</td>
-                            {% if property.id == relation.sourceProperty.id %}
-                                <td><a href="{{ path('property_show', {
-                                        'id': relation.targetProperty.id
+                            {% if propertyVersion.property.id == relation.sourceProperty.id %}
+                                <td><a href="{{ path('property_show_with_version', {
+                                        'id': relation.targetProperty.id,
+                                        'namespaceFromUrlId': relation.targetNamespaceForVersion.id
                                     }) }}">
-                                        {{ relation.targetProperty.invertedLabel }}
+                                        {{ relation.targetProperty.propertyVersionForDisplay(relation.targetNamespaceForVersion).invertedLabel }}
                                     </a>
                                 </td>
                             {% else %}
-                                <td><a href="{{ path('property_show', {
-                                        'id': relation.sourceProperty.id
+                                <td><a href="{{ path('property_show_with_version', {
+                                        'id': relation.sourceProperty.id,
+                                        'namespaceFromUrlId': relation.sourceNamespaceForVersion.id
                                     }) }}">
-                                        {{ relation.sourceProperty.invertedLabel }}
+                                        {{ relation.sourceProperty.propertyVersionForDisplay(relation.sourceNamespaceForVersion).invertedLabel }}
                                     </a>
                                 </td>
                             {% endif %}
@@ -892,15 +903,9 @@
                                     {% endfor %}
                                 {% endif %}
                             </td>
+                            <td>{{ relation.namespaceForVersion.topLevelNamespace }}</td>
                             <td>
-                                {% if relation.namespaces is not null %}
-                                    {% if relation.namespaces|first.topLevelNamespace is not null %}
-                                        {{ relation.namespaces|first.topLevelNamespace }}
-                                    {% endif %}
-                                {% endif %}
-                            </td>
-                            <td>
-                                {% if property.id == relation.sourceProperty.id %}
+                                {% if propertyVersion.property.id == relation.sourceProperty.id %}
                                     <a href="{{ path('entity_association_edit', {
                                         'id': relation.id
                                     }) }}" class="btn btn-xs btn-success">
@@ -915,7 +920,7 @@
                                 {% endif %}
                             </td>
                             <td>
-                                {% if property.id == relation.sourceProperty.id %}
+                                {% if propertyVersion.property.id == relation.sourceProperty.id %}
                                     <a class="btn updateViewComment" href="{{ path('entity_association_edit', {
                                         'id': relation.id
                                     }) }}#comments" data-id="{{ relation.id }}" data-object="entity-association">
@@ -930,7 +935,6 @@
                                 {% endif %}
                             </td>
                         </tr>
-                        {% endif %}
                     {% endfor %}
                     </tbody>
                 </table>
@@ -947,7 +951,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for profile in property.profiles %}
+                    {% for profile in propertyVersion.property.profiles %}
                         <tr>
                             <td>
                                 <a href="{{ path('profile_show', {
@@ -968,11 +972,13 @@
                 <h3>Comments</h3>
                 <div class="comment-box js-user-info" data-fullname="{{ app.user }}">
                     <div class="action-box">
-                        {% if property.comments is empty %}
+                        {% set commentsProperty = propertyVersion.property.comments %}
+                        {% set commentsPropertyVersion = commentsProperty|filter(commentsProperty => commentsProperty.namespaceForVersion.id == propertyVersion.namespaceForVersion.id) %}
+                        {% if commentsPropertyVersion is empty %}
                             <p id="comment-not-found"><em>No comment found.</em></p>
                         {% endif %}
                         <ul id="comments-list" class="comments-list">
-                            {% for comment in property.comments %}
+                            {% for comment in commentsPropertyVersion %}
                                 <li>
                                     <div class="comment-text">
                                         <p><strong><a href="#">{{ comment.creator.fullName }}</a></strong></p>
@@ -985,7 +991,7 @@
 
                         {% if app.user %}
                             <div class="new-comment-form" id="new-comment-form">
-                                {{ render(controller('AppBundle:Comment:new', {'object' : 'property', 'objectId' : property.id})) }}
+                                {{ render(controller('AppBundle:Comment:new', {'object' : 'property-version', 'objectId' : propertyVersion.id})) }}
                             </div>
                         {% endif %}
                     </div>
@@ -1030,7 +1036,7 @@
             $('#relations-table').DataTable();
             $('#profiles-table').DataTable();
 
-            $('#property_edit_form_domain').select2({
+            $('#property_edit_form_domainVersion').select2({
                 width: '100%',
                 sorter: function(data) {
                     /* Sort data using lowercase comparison */
@@ -1047,7 +1053,7 @@
                 }
             });
 
-            $('#property_edit_form_range').select2({
+            $('#property_edit_form_rangeVersion').select2({
                 width: '100%',
                 sorter: function(data) {
                     /* Sort data using lowercase comparison */
@@ -1105,6 +1111,6 @@
             });
         } );
     </script>
-    {% include 'comment/js-bock.html.twig'  with {'objectType': 'property', 'objectId' : property.id  } %}
+    {% include 'comment/js-bock.html.twig'  with {'objectType': 'property-version', 'objectId' : propertyVersion.id  } %}
 
 {% endblock %}

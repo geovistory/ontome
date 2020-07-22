@@ -29,7 +29,7 @@
                     <a href="{{ path('property_new', {'type':type,'class': app.request.get('class').id}) }}" class="btn btn-primary pull-right">Reset <span class="fa fa-undo"></span></a>
                 </div>
                 <h2>
-                    Create a new property with {{ app.request.get('class') }} as range
+                    Create a new property with {{ app.request.get('class').classVersionForDisplay() }} as range
                     <a href="{{ path('class_edit', {'id': app.request.get('class').id}) }}#properties" class="pull-right btn btn-link">
                         <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
                     </a>
@@ -46,13 +46,13 @@
                 <div class="row well well-sm" style="margin: 19px 0;">
                     <div class="col-lg-2">
                         <p class="text-center"><label>Domain</label></p>
-                        <p>{{ form_widget(propertyForm.domain) }}</p>
+                        <p>{{ form_widget(propertyForm.domainVersion) }}</p>
                     </div>
                     <div class="col-lg-2">
                         <p class="text-center"><label>Domain quantifiers</label></p>
                         <div>
-                            {{ form_widget(propertyForm.domainMinQuantifier, {'attr' : {'style': 'background-color: white; width: 49%; float: left;'}}) }}
-                            {{ form_widget(propertyForm.domainMaxQuantifier, {'attr' : {'style': 'background-color: white; width: 49%; float: right;'}}) }}
+                            {{ form_widget(propertyForm.domainMinQuantifierVersion, {'attr' : {'style': 'background-color: white; width: 49%; float: left;'}}) }}
+                            {{ form_widget(propertyForm.domainMaxQuantifierVersion, {'attr' : {'style': 'background-color: white; width: 49%; float: right;'}}) }}
                         </div>
                     </div>
                     <div class="col-lg-4">
@@ -62,13 +62,13 @@
                     <div class="col-lg-2">
                         <p class="text-center"><label>Range quantifiers</label></p>
                         <div>
-                            {{ form_widget(propertyForm.rangeMinQuantifier, {'attr' : {'style': 'background-color: white; width: 49%; float: left;'}}) }}
-                            {{ form_widget(propertyForm.rangeMaxQuantifier, {'attr' : {'style': 'background-color: white; width: 49%; float: right;'}}) }}
+                            {{ form_widget(propertyForm.rangeMinQuantifierVersion, {'attr' : {'style': 'background-color: white; width: 49%; float: left;'}}) }}
+                            {{ form_widget(propertyForm.rangeMaxQuantifierVersion, {'attr' : {'style': 'background-color: white; width: 49%; float: right;'}}) }}
                         </div>
                     </div>
                     <div class="col-lg-2">
                         <p class="text-center"><label>Range</label></p>
-                        <p class="text-center">{{ app.request.get('class') }}</p>
+                        <p class="text-center">{{ app.request.get('class').classVersionForDisplay() }}</p>
                     </div>
                 </div>
                 <div class="js-text-property-wrapper"
@@ -99,7 +99,7 @@
     <script>
 
         $(document).ready(function() {
-            $('#ingoing_property_quick_add_form_domain').select2({
+            $('#ingoing_property_quick_add_form_domainVersion').select2({
                 sorter: function(data) {
                     /* Sort data using lowercase comparison */
                     return data.sort(function (a, b) {

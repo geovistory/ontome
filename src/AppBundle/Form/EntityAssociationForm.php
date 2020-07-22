@@ -37,8 +37,16 @@ class EntityAssociationForm extends AbstractType
 
         if (!$user) {
             throw new \LogicException(
-                'The IngoingPropertyQuickAddForm cannot be used without an authenticated user!'
+                'The EntityAssociationForm cannot be used without an authenticated user!'
             );
+        }
+
+        $choices = array();
+        foreach ($options['entitiesVersion'] as $ev){
+            if($ev['standardLabel'] != $ev['identifierInNamespace'])
+                $choices[$ev['standardLabel']." – ".$ev['identifierInNamespace']] = $ev['id'];
+            else
+                $choices[$ev['standardLabel']] = $ev['id'];
         }
 
         $builder
@@ -54,18 +62,16 @@ class EntityAssociationForm extends AbstractType
         {
             $builder
                 ->add('systemType', ChoiceType::class, array(
-                        'choices'  => array(
+                    'choices'  => array(
                         'owl:equivalentClass' => 4,
                         'owl:disjointWith' => 19
                     ),
                     'label' => 'Relation'))
-                ->add('targetClass', EntityType::class,
+                ->add('targetClassVersion', ChoiceType::class,
                     array(
-                        'class' => OntoClass::class,
-                        'label' => "Related class",
-                        'query_builder' => function(ClassRepository $repo) use ($user){
-                            return $repo->findFilteredClassByActiveProjectOrderedById($user);
-                        }
+                        'mapped' => false,
+                        'label' => "Target class",
+                        'choices'           => $choices
                     ));
         }
         elseif($options['object'] == 'property')
@@ -77,13 +83,11 @@ class EntityAssociationForm extends AbstractType
                         'owl:inverseOf' => 20
                     ),
                     'label' => 'Relation'))
-                ->add('targetProperty', EntityType::class,
+                ->add('targetPropertyVersion', ChoiceType::class,
                     array(
-                        'class' => Property::class,
-                        'label' => "Related property",
-                        'query_builder' => function(PropertyRepository $repo) use ($user){
-                            return $repo->findFilteredPropertiesByActiveProjectOrderedById($user);
-                        }
+                        'mapped' => false,
+                        'label' => "Target property",
+                        'choices'           => $choices
                     ));
         }
 
@@ -96,7 +100,8 @@ class EntityAssociationForm extends AbstractType
         $resolver->setDefaults([
             'data_class' => 'AppBundle\Entity\EntityAssociation',
             "allow_extra_fields" => true,
-            'object' => 'class'
+            'object' => 'class',
+            "entitiesVersion" => null
         ]);
     }
 }

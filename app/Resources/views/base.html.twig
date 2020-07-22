@@ -20,45 +20,41 @@
     <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}" />
 </head>
 <body>
-<header class="header">
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-xs-8">
-                <h1 class="logo">OntoME</h1>
+<header id="masthead" class="site-header" role="banner">
+    <div class="row" id="logo-main-menu-row">
+        <div id="logo" class="site-branding">
+            <div id="site-logo">
+                <a href="/" title="OntoME">
+                    <img src="{{ asset('images/logo.png') }}" alt="OntoME">
+                </a>
             </div>
-            <div class="col-xs-4">
+        </div>
+        <div class="right-header-part">
+            <div id="login-logout-block">
                 {% if is_granted('ROLE_USER') %}
                     <p class="text-right"><a class="btn btn-default" href="{{ path('security_logout') }}">LOGOUT</a></p>
                 {% else %}
                     <p class="text-right"><a class="btn btn-default" href="{{ path('security_login') }}">LOGIN</a></p>
                 {% endif %}
             </div>
-        </div>
-        <div class="row">
-            <div class="col-xs-6">
-                <h4>
-                    <strong><em class="text-muted">Ontology Management Environment - beta version</em></strong>
-                </h4>
-            </div>
-            <div class="col-xs-6">
-                <h4 class="text-right">
-                    <strong>
-                        <em>
-                            <a class="text-muted" href="http://dataforhistory.org" target="_blank">Data for History Consortium </a>
-                        </em>
-                    </strong>
-                </h4>
+            <div class="row no-margin">
+                <div id="ontome-title-block" class="col-xs-6">
+                    <h4  id="site-title">
+                        <strong><em>Ontology Management Environment - beta version</em></strong>
+                    </h4>
+                </div>
+                <div id="dfhc-block" class="col-xs-6">
+                    <h4 class="text-right">
+                        <strong>
+                            <em>
+                                <a class="text-white" href="http://dataforhistory.org" target="_blank">Data for History Consortium</a>
+                            </em>
+                        </strong>
+                    </h4>
+                </div>
             </div>
         </div>
     </div>
-    {#
-    <ul class="navi">
-        {% if is_granted('ROLE_USER') %}
-            <li><a href="{{ path('security_logout') }}">Logout</a></li>
-        {% else %}
-            <li><a href="{{ path('security_login') }}">Login</a></li>
-        {% endif %}
-    </ul>#}
 </header>
 <nav class="navbar navbar-default">
     <div class="container-fluid">
@@ -138,7 +134,7 @@
                         <h3>CREDITS</h3>
                         <div class="content">
                             <p>Powered by the <a href="http://larhra.ish-lyon.cnrs.fr/pole-histoire-numerique" target="_blank">Pôle Histoire Numérique</a> -  <a href="http://larhra.ish-lyon.cnrs.fr/" target="_blank">LARHRA</a></p>
-                            <p>Release 200415</p>
+                            <p>Release 200422</p>
                         </div>
                     </div>
                 </div>
@@ -195,13 +191,10 @@
                 window.scrollTo(0, 0);
             });
 
-            $('a.btn-edit').click(function(){
-                $('a.btn-edit').attr('href', $('a.btn-edit').attr('href')+window.location.hash);
+            // Garder le même onglet ouvert quand on clique sur les liens
+            $('a.btn-edit, ul.navi a, ul.dropdown-menu a').click(function(){
+                $(this).attr('href', $(this).attr('href')+window.location.hash);
             });
-
-            $('ul.navi a').click(function(){
-                $('ul.navi a').attr('href', $('ul.navi a').attr('href')+window.location.hash);
-            })
 
             $.extend( true, $.fn.dataTable.defaults, {
                 "pageLength": 25

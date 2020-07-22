@@ -39,10 +39,28 @@ class ClassAssociation
     private $childClass;
 
     /**
+     * @ORM\ManyToOne(targetEntity="OntoNamespace")
+     * @ORM\JoinColumn(name="fk_child_class_namespace", referencedColumnName="pk_namespace", nullable=false)
+     */
+    private $childClassNamespace;
+
+    /**
      * @ORM\ManyToOne(targetEntity="OntoClass", inversedBy="parentClassAssociations")
      * @ORM\JoinColumn(name="is_parent_class", referencedColumnName="pk_class")
      */
     private $parentClass;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="OntoNamespace")
+     * @ORM\JoinColumn(name="fk_parent_class_namespace", referencedColumnName="pk_namespace", nullable=false)
+     */
+    private $parentClassNamespace;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="OntoNamespace", inversedBy="classAssociationVersions")
+     * @ORM\JoinColumn(name="fk_namespace_for_version", referencedColumnName="pk_namespace", nullable=false)
+     */
+    private $namespaceForVersion;
 
     /**
      * @ORM\Column(type="text")
@@ -56,15 +74,6 @@ class ClassAssociation
      * @ORM\OrderBy({"languageIsoCode" = "ASC"})
      */
     private $textProperties;
-
-    /**
-     * @ORM\ManyToMany(targetEntity="OntoNamespace",  inversedBy="OntoClass", fetch="EXTRA_LAZY")
-     * @ORM\JoinTable(schema="che", name="associates_namespace",
-     *      joinColumns={@ORM\JoinColumn(name="fk_is_subclass_of", referencedColumnName="pk_is_subclass_of")},
-     *      inverseJoinColumns={@ORM\JoinColumn(name="fk_namespace", referencedColumnName="pk_namespace")}
-     *      )
-     */
-    private $namespaces;
 
     /**
      * @ORM\OneToMany(targetEntity="AppBundle\Entity\Comment", mappedBy="classAssociation")
@@ -110,6 +119,14 @@ class ClassAssociation
     public function getId()
     {
         return $this->id;
+    }
+
+    /**
+     * @return OntoNamespace
+     */
+    public function getNamespaceForVersion()
+    {
+        return $this->namespaceForVersion;
     }
 
     /**
@@ -202,6 +219,30 @@ class ClassAssociation
     }
 
     /**
+     * @return mixed
+     */
+    public function getChildClassNamespace()
+    {
+        return $this->childClassNamespace;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getParentClassNamespace()
+    {
+        return $this->parentClassNamespace;
+    }
+
+    /**
+     * @param mixed $namespaceForVersion
+     */
+    public function setNamespaceForVersion($namespaceForVersion)
+    {
+        $this->namespaceForVersion = $namespaceForVersion;
+    }
+
+    /**
      * @param mixed $childClass
      */
     public function setChildClass($childClass)
@@ -273,6 +314,22 @@ class ClassAssociation
         $this->modificationTime = $modificationTime;
     }
 
+    /**
+     * @param mixed $childClassNamespace
+     */
+    public function setChildClassNamespace($childClassNamespace)
+    {
+        $this->childClassNamespace = $childClassNamespace;
+    }
+
+    /**
+     * @param mixed $parentClassNamespace
+     */
+    public function setParentClassNamespace($parentClassNamespace)
+    {
+        $this->parentClassNamespace = $parentClassNamespace;
+    }
+
     public function addTextProperty(TextProperty $textProperty)
     {
         if ($this->textProperties->contains($textProperty)) {
@@ -295,7 +352,7 @@ class ClassAssociation
 
     public function __toString()
     {
-        return (string) $this->childClass.': parent class association';
+        return (string) $this->childClass->getClassVersionForDisplay().': parent class association';
     }
 
 }

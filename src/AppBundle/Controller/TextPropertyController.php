@@ -8,6 +8,9 @@
 
 namespace AppBundle\Controller;
 
+use AppBundle\Entity\OntoClass;
+use AppBundle\Entity\OntoClassVersion;
+use AppBundle\Entity\Property;
 use AppBundle\Entity\TextProperty;
 use AppBundle\Form\TextPropertyForm;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
@@ -33,6 +36,9 @@ class TextPropertyController extends Controller
     /**
      * @Route("/text-property/{id}/edit", name="text_property_edit")
      * @Route("/text-property/{id}/inverse/edit", name="text_property_inverse_edit")
+     * @param TextProperty $textProperty
+     * @param Request $request
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
      */
     public function editAction(TextProperty $textProperty, Request $request)
     {
@@ -84,13 +90,18 @@ class TextPropertyController extends Controller
         else throw $this->createNotFoundException('The related object for the text property  n° '.$textProperty->getId().' does not exist. Please contact an administrator.');
 
         if(!is_null($textProperty->getClassAssociation())){
-            $this->denyAccessUnlessGranted('edit', $object->getChildClass());
+            $this->denyAccessUnlessGranted('edit', $object->getChildClass()->getClassVersionForDisplay());
         }
         else if(!is_null($textProperty->getPropertyAssociation())){
-            $this->denyAccessUnlessGranted('edit', $object->getChildProperty());
+            $this->denyAccessUnlessGranted('edit', $object->getChildProperty()->getPropertyVersionForDisplay());
         }
         else if(!is_null($textProperty->getEntityAssociation())){
-            $this->denyAccessUnlessGranted('edit', $object->getSource());
+            if($object->getSource() instanceof OntoClass){
+                $this->denyAccessUnlessGranted('edit', $object->getSource()->getClassVersionForDisplay());
+            }
+            elseif($object->getSource() instanceof Property){
+                $this->denyAccessUnlessGranted('edit', $object->getSource()->getPropertyVersionForDisplay());
+            }
         }
         else{
             $this->denyAccessUnlessGranted('edit', $object);
@@ -139,7 +150,7 @@ class TextPropertyController extends Controller
                 throw $this->createNotFoundException('The class association n° '.$objectId.' does not exist');
             }
             $textProperty->setClassAssociation($associatedEntity);
-            $associatedObject = $associatedEntity->getChildClass();
+            $associatedObject = $associatedEntity->getChildClass()->getClassVersionForDisplay();
             $redirectToRoute = 'class_association_edit';
             $redirectToRouteFragment = 'justifications';
         }
@@ -149,7 +160,7 @@ class TextPropertyController extends Controller
                 throw $this->createNotFoundException('The property association n° '.$objectId.' does not exist');
             }
             $textProperty->setPropertyAssociation($associatedEntity);
-            $associatedObject = $associatedEntity->getChildProperty();
+            $associatedObject = $associatedEntity->getChildProperty()->getPropertyVersionForDisplay();
             $redirectToRoute = 'property_association_edit';
             $redirectToRouteFragment = 'justifications';
         }
@@ -159,7 +170,7 @@ class TextPropertyController extends Controller
                 throw $this->createNotFoundException('The class n° '.$objectId.' does not exist');
             }
             $textProperty->setClass($associatedEntity);
-            $associatedObject = $associatedEntity;
+            $associatedObject = $associatedEntity->getClassVersionForDisplay();
             $redirectToRoute = 'class_edit';
             $redirectToRouteFragment = 'definition';
         }
@@ -169,7 +180,7 @@ class TextPropertyController extends Controller
                 throw $this->createNotFoundException('The property n° '.$objectId.' does not exist');
             }
             $textProperty->setProperty($associatedEntity);
-            $associatedObject = $associatedEntity;
+            $associatedObject = $associatedEntity->getPropertyVersionForDisplay();
             $redirectToRoute = 'property_edit';
             $redirectToRouteFragment = 'definition';
         }
@@ -246,8 +257,9 @@ class TextPropertyController extends Controller
 
         //ongoingNamespace associated to the textProperty for any kind of object, except Project or Profile
         if($object !== 'project' && $object !== 'profile' && $object !== 'namespace') {
-            $textProperty->addNamespace($this->getUser()->getCurrentOngoingNamespace());
+            $textProperty->setNamespaceForVersion($this->getUser()->getCurrentOngoingNamespace());
         }
+
 
         $textProperty->setCreator($this->getUser());
         $textProperty->setModifier($this->getUser());
@@ -265,7 +277,7 @@ class TextPropertyController extends Controller
 
             //ongoingNamespace associated to the textProperty for any kind of object, except Project or Profile
             if($object !== 'project' && $object !== 'profile' && $object !== 'namespace') {
-                $textProperty->addNamespace($this->getUser()->getCurrentOngoingNamespace());
+                $textProperty->setNamespaceForVersion($this->getUser()->getCurrentOngoingNamespace());
             }
 
             $textProperty->setCreator($this->getUser());

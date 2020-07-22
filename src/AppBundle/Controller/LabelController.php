@@ -10,6 +10,8 @@ namespace AppBundle\Controller;
 
 
 use AppBundle\Entity\Label;
+use AppBundle\Entity\OntoClass;
+use AppBundle\Entity\Property;
 use AppBundle\Form\LabelForm;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -67,7 +69,15 @@ class LabelController  extends Controller
         }
         else throw $this->createNotFoundException('The related object for the label n° '.$label->getId().' does not exist. Please contact an administrator.');
 
-        $this->denyAccessUnlessGranted('edit', $object);
+        if($object instanceof OntoClass){
+            $this->denyAccessUnlessGranted('edit', $object->getClassVersionForDisplay());
+        }
+        elseif($object instanceof Property){
+            $this->denyAccessUnlessGranted('edit', $object->getPropertyVersionForDisplay());
+        }
+        else{
+            $this->denyAccessUnlessGranted('edit', $object);
+        }
 
         $label->setModifier($this->getUser());
 
@@ -163,7 +173,7 @@ class LabelController  extends Controller
 
         //ongoingNamespace associated to the label for any kind of object, except Project or Profile
         if($object !== 'project' && $object !== 'profile'  && $object !== 'namespace') {
-            $label->addNamespace($this->getUser()->getCurrentOngoingNamespace());
+            $label->setNamespaceForVersion($this->getUser()->getCurrentOngoingNamespace());
         }
 
         $label->setCreator($this->getUser());
@@ -181,7 +191,7 @@ class LabelController  extends Controller
 
             //ongoingNamespace associated to the label for any kind of object, except Project or Profile
             if($object !== 'project' && $object !== 'profile' && $object !== 'namespace') {
-                $label->addNamespace($this->getUser()->getCurrentOngoingNamespace());
+                $label->setNamespaceForVersion($this->getUser()->getCurrentOngoingNamespace());
             }
 
             $label->setCreator($this->getUser());

@@ -7,7 +7,14 @@
                 <h2>
                     {% if label.object is not null %}
                         {% if label.object.identifierInNamespace is not null %}
-                            {{ label.object.standardLabel }} – {{ label.object.identifierInNamespace }}: Label
+                            {% if label.class is not null %}
+                                {{ label.object.classVersionForDisplay(label.namespaceForVersion) }}
+                            {% elseif label.property is not null %}
+                                {{ label.object.propertyVersionForDisplay(label.namespaceForVersion) }}
+                            {% else %}
+                                {{ label.object.standardLabel }}
+                            {% endif %}
+                             – {{ label.object.identifierInNamespace }}: Label
                         {% else %}
                             {{ label.object.objectIdentification }}: Label
                         {% endif %}
@@ -16,9 +23,11 @@
                     {% endif %}
 
                     {% if label.class is not null %}
-                        {% set route = 'class_show' %}
+                        {% set route = 'class_show_with_version' %}
+                        {% set namespaceFromUrlId = label.namespaceForVersion.id %}
                     {% elseif label.property is not null %}
-                        {% set route = 'property_show' %}
+                        {% set route = 'property_show_with_version' %}
+                        {% set namespaceFromUrlId = label.namespaceForVersion.id %}
                     {% elseif label.namespace is not null %}
                         {% set route = 'namespace_show' %}
                     {% elseif label.project is not null %}
@@ -33,7 +42,16 @@
                         {% set route = 'property_association_show' %}
                     {% endif %}
 
-                    {% if route is not null %}
+                    {% if route is not null and namespaceFromUrlId is not null %}
+                    <a href="{{ path(route, {
+                        'id':label.object.id,
+                        'namespaceFromUrlId': namespaceFromUrlId,
+                        '_fragment': 'identification'}) }}"
+                       class="pull-right btn btn-link"
+                       role="button">
+                        <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
+                    </a>
+                    {% elseif  route is not null %}
                     <a href="{{ path(route, {'id':label.object.id, '_fragment': 'identification'}) }}"
                        class="pull-right btn btn-link"
                        role="button">
@@ -49,7 +67,7 @@
                 </h2>
                 <ul class="nav nav-tabs" id="main-tabs">
                     <li class="active"><a data-toggle="tab" href="#label">Label</a></li>
-                    {% if label.object == 'class' or label.object == 'property' %}
+                    {% if label.class is not null or label.property is not null %}
                     <li><a data-toggle="tab" href="#comments">Comments</a></li>
                     {% endif %}
                 </ul>
@@ -71,7 +89,7 @@
                             </dl>
                         </div>
                     </div>
-                    {% if label.object == 'class' or label.object == 'property' %}
+                    {% if label.class is not null or label.property is not null %}
                     <div id="comments" class="tab-pane fade">
                         <h3>Comments</h3>
                         <div class="comment-box js-user-info" data-fullname="{{ app.user }}">

@@ -45,6 +45,14 @@ class OutgoingPropertyQuickAddForm extends AbstractType
             );
         }
 
+        $choices = array();
+        foreach ($options['classesVersion'] as $cv){
+            if($cv['standardLabel'] != $cv['identifierInNamespace'])
+                $choices[$cv['standardLabel']." – ".$cv['identifierInNamespace']] = $cv['id'];
+            else
+                $choices[$cv['standardLabel']] = $cv['id'];
+        }
+
         $builder
             ->add('identifierInNamespace', TextType::class, array(
             ))
@@ -56,15 +64,12 @@ class OutgoingPropertyQuickAddForm extends AbstractType
                 'allow_add' => true,
                 'by_reference' => false,
             ))
-            ->add('range', EntityType::class,
-                array(
-                    'class' => OntoClass::class,
-                    'label' => "Range",
-                    'query_builder' => function(ClassRepository $repo) use ($user){
-                        return $repo->findFilteredClassByActiveProjectOrderedById($user);
-                    }
-                ))
-            ->add('domainMinQuantifier',ChoiceType::class, array(
+            ->add('rangeVersion', ChoiceType::class, array(
+                'mapped' => false,
+                'choices'           => $choices
+            ))
+            ->add('domainMinQuantifierVersion',ChoiceType::class, array(
+                'mapped' => false,
                 'choices'  => array(
                     'Min' => null,
                     '0' => 0,
@@ -77,7 +82,8 @@ class OutgoingPropertyQuickAddForm extends AbstractType
                 ),
                 'preferred_choices' => [null, 0, 1, -1],
             ))
-            ->add('domainMaxQuantifier',ChoiceType::class, array(
+            ->add('domainMaxQuantifierVersion',ChoiceType::class, array(
+                'mapped' => false,
                 'choices'  => array(
                     'Max' => null,
                     '1' => 1,
@@ -89,7 +95,8 @@ class OutgoingPropertyQuickAddForm extends AbstractType
                 ),
                 'preferred_choices' => [null, 1, -1],
             ))
-            ->add('rangeMinQuantifier',ChoiceType::class, array(
+            ->add('rangeMinQuantifierVersion',ChoiceType::class, array(
+                'mapped' => false,
                 'choices'  => array(
                     'Min' => null,
                     '0' => 0,
@@ -102,7 +109,8 @@ class OutgoingPropertyQuickAddForm extends AbstractType
                 ),
                 'preferred_choices' => [null, 0, 1, -1],
             ))
-            ->add('rangeMaxQuantifier',ChoiceType::class, array(
+            ->add('rangeMaxQuantifierVersion',ChoiceType::class, array(
+                'mapped' => false,
                 'choices'  => array(
                     'Max' => null,
                     '1' => 1,
@@ -128,7 +136,8 @@ class OutgoingPropertyQuickAddForm extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => 'AppBundle\Entity\Property',
-            "allow_extra_fields" => true
+            "allow_extra_fields" => true,
+            'classesVersion' => null
         ]);
     }
 }

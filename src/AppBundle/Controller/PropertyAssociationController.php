@@ -27,7 +27,7 @@ class PropertyAssociationController extends Controller
     {
         $propertyAssociation = new PropertyAssociation();
 
-        $this->denyAccessUnlessGranted('edit', $childProperty);
+        $this->denyAccessUnlessGranted('edit', $childProperty->getPropertyVersionForDisplay());
 
 
         $em = $this->getDoctrine()->getManager();
@@ -37,7 +37,7 @@ class PropertyAssociationController extends Controller
         $justification = new TextProperty();
         $justification->setPropertyAssociation($propertyAssociation);
         $justification->setSystemType($systemTypeJustification);
-        $justification->addNamespace($this->getUser()->getCurrentOngoingNamespace());
+        $justification->setNamespaceForVersion($this->getUser()->getCurrentOngoingNamespace());
         $justification->setCreator($this->getUser());
         $justification->setModifier($this->getUser());
         $justification->setCreationTime(new \DateTime('now'));
@@ -46,13 +46,41 @@ class PropertyAssociationController extends Controller
         $propertyAssociation->addTextProperty($justification);
         $propertyAssociation->setChildProperty($childProperty);
 
-        $form = $this->createForm(ParentPropertyAssociationForm::class, $propertyAssociation);
+        // FILTRAGE
+        $namespaceForChildPropertyVersion = $childProperty->getPropertyVersionForDisplay()->getNamespaceForVersion();
+        $namespacesId[] = $namespaceForChildPropertyVersion->getId();
+
+        // Sans oublier les namespaces références si indisponibles
+        foreach($namespaceForChildPropertyVersion->getReferencedNamespaceAssociations() as $referencedNamespacesAssociation){
+            if(!in_array($referencedNamespacesAssociation->getReferencedNamespace()->getId(), $namespacesId)){
+                $namespacesId[] = $referencedNamespacesAssociation->getReferencedNamespace()->getId();
+            }
+        }
+
+        $arrayPropertiesVersion = $em->getRepository('AppBundle:PropertyVersion')
+            ->findIdAndStandardLabelOfPropertiesVersionByNamespacesId($namespacesId);
+
+        $form = $this->createForm(ParentPropertyAssociationForm::class, $propertyAssociation, array(
+            "propertiesVersion" => $arrayPropertiesVersion
+        ));
 
         // only handles data on POST
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $propertyAssociation = $form->getData();
-            $propertyAssociation->addNamespace($this->getUser()->getCurrentOngoingNamespace());
+            $parentProperty = $em->getRepository("AppBundle:Property")->find($form->get("parentPropertyVersion")->getData());
+            $propertyAssociation->setParentProperty($parentProperty);
+            $propertyAssociation->setNamespaceForVersion($this->getUser()->getCurrentOngoingNamespace());
+            $propertyAssociation->setChildPropertyNamespace(
+                $em->getRepository("AppBundle:PropertyVersion")
+                    ->findPropertyVersionByPropertyAndNamespacesId($childProperty, $namespacesId)
+                    ->getNamespaceForVersion()
+            );
+            $propertyAssociation->setParentPropertyNamespace(
+                $em->getRepository("AppBundle:PropertyVersion")
+                    ->findPropertyVersionByPropertyAndNamespacesId($parentProperty, $namespacesId)
+                    ->getNamespaceForVersion()
+            );
             $propertyAssociation->setCreator($this->getUser());
             $propertyAssociation->setModifier($this->getUser());
             $propertyAssociation->setCreationTime(new \DateTime('now'));
@@ -62,7 +90,7 @@ class PropertyAssociationController extends Controller
                 $propertyAssociation->getTextProperties()[1]->setCreationTime(new \DateTime('now'));
                 $propertyAssociation->getTextProperties()[1]->setModificationTime(new \DateTime('now'));
                 $propertyAssociation->getTextProperties()[1]->setSystemType($systemTypeExample);
-                $propertyAssociation->getTextProperties()[1]->addNamespace($this->getUser()->getCurrentOngoingNamespace());
+                $propertyAssociation->getTextProperties()[1]->setNamespaceForVersion($this->getUser()->getCurrentOngoingNamespace());
                 $propertyAssociation->getTextProperties()[1]->setPropertyAssociation($propertyAssociation);
             }
 
@@ -80,8 +108,17 @@ class PropertyAssociationController extends Controller
 
         $em = $this->getDoctrine()->getManager();
 
+        // FILTRAGE : Récupérer les clés de namespaces à utiliser
+        if(is_null($this->getUser()) || $this->getUser()->getCurrentActiveProject()->getId() == 21){ // Utilisateur non connecté OU connecté et utilisant le projet public
+            $namespacesId = $em->getRepository('AppBundle:OntoNamespace')->findPublicProjectNamespacesId();
+        }
+        else{ // Utilisateur connecté et utilisant un autre projet
+            $namespacesId = $em->getRepository('AppBundle:OntoNamespace')->findNamespacesIdByUser($this->getUser());
+        }
+
         $ancestors = $em->getRepository('AppBundle:Property')
-            ->findAncestorsById($childProperty);
+            ->findAncestorsByPropertyVersionAndNamespacesId($childProperty->getPropertyVersionForDisplay(), $namespacesId);
+
         return $this->render('propertyAssociation/newParent.html.twig', [
             'childProperty' => $childProperty,
             'parentPropertyAssociationForm' => $form->createView(),
@@ -112,19 +149,54 @@ class PropertyAssociationController extends Controller
      */
     public function editAction(Request $request, PropertyAssociation $propertyAssociation)
     {
+        // Récupérer la version de la propriété demandée
+        $childPropertyVersion = $propertyAssociation->getChildProperty()->getPropertyVersionForDisplay();
 
-        $this->denyAccessUnlessGranted('edit', $propertyAssociation->getChildProperty());
+        // On doit avoir une version de la propriété sinon on lance une exception.
+        if(is_null($childPropertyVersion)){
+            throw $this->createNotFoundException('The property n°'.$propertyAssociation->getChildProperty()->getId().' has no version. Please contact an administrator.');
+        }
 
-        $form = $this->createForm(PropertyAssociationEditForm::class, $propertyAssociation);
+        $this->denyAccessUnlessGranted('edit', $childPropertyVersion);
+
+        $em = $this->getDoctrine()->getManager();
+
+        // FILTRAGE : Récupérer les clés de namespaces à utiliser
+        if(is_null($this->getUser()) || $this->getUser()->getCurrentActiveProject()->getId() == 21){ // Utilisateur non connecté OU connecté et utilisant le projet public
+            $namespacesId = $em->getRepository('AppBundle:OntoNamespace')->findPublicProjectNamespacesId();
+        }
+        else{ // Utilisateur connecté et utilisant un autre projet
+            $namespacesId = $em->getRepository('AppBundle:OntoNamespace')->findNamespacesIdByUser($this->getUser());
+        }
+
+        // Affaiblir le filtrage en rajoutant le namespaceForVersion de la classVersion si indisponible
+        $namespaceForChildPropertyVersion = $childPropertyVersion->getNamespaceForVersion();
+        if(!in_array($namespaceForChildPropertyVersion->getId(), $namespacesId)){
+            $namespacesId[] = $namespaceForChildPropertyVersion->getId();
+        }
+        // Sans oublier les namespaces références si indisponibles
+        foreach($namespaceForChildPropertyVersion->getReferencedNamespaceAssociations() as $referencedNamespacesAssociation){
+            if(!in_array($referencedNamespacesAssociation->getReferencedNamespace()->getId(), $namespacesId)){
+                $namespacesId[] = $referencedNamespacesAssociation->getReferencedNamespace()->getId();
+            }
+        }
+
+        $arrayPropertiesVersion = $em->getRepository('AppBundle:PropertyVersion')
+            ->findIdAndStandardLabelOfPropertiesVersionByNamespacesId($namespacesId);
+
+        $form = $this->createForm(PropertyAssociationEditForm::class, $propertyAssociation, array(
+            'propertiesVersion' => $arrayPropertiesVersion,
+            'defaultParent' => $propertyAssociation->getParentProperty()->getId()));
 
         // only handles data on POST
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
+            $parentProperty = $em->getRepository("AppBundle:Property")->find($form->get("parentPropertyVersion")->getData());
+            $propertyAssociation->setParentProperty($parentProperty);
+
             $propertyAssociation = $form->getData();
-            //$propertyAssociation->addNamespace($propertyAssociation->getChildProperty()->getOngoingNamespace());
             $propertyAssociation->setModifier($this->getUser());
             $propertyAssociation->setModificationTime(new \DateTime('now'));
-
 
             $em = $this->getDoctrine()->getManager();
             $em->persist($propertyAssociation);

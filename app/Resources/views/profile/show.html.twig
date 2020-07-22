@@ -153,7 +153,8 @@
                 <h3>
                     Associated classes
                     <span class="pull-right">
-                        {% if (not profile.isOngoing and profile.wasClosedAt is not null and profile.endDate is null) or (profile.isForcedPublication and profile.isOngoing ) %}
+                        {% if (not profile.isOngoing and profile.wasClosedAt is not null and profile.endDate is null)
+                            or (profile.isForcedPublication and profile.isOngoing ) %}
                             <a  href="{{ path('api_classes_profile_json', {
                                 'lang': 'en',
                                 'available-in-profile': profile.id
@@ -164,6 +165,9 @@
                         {% endif %}
                     </span>
                 </h3>
+                {% if profile.classes|length == 0 %}
+                    <em id="empty-namespace-list-message">No class has been associated with this profile.</em>
+                {% else %}
                 <table class="table table-striped" id="classes-table">
                     <thead>
                     <tr>
@@ -174,10 +178,12 @@
                     </thead>
                     <tbody>
                     {% for class in classes %}
+                        {# classes n'est pas un ensemble d'entités ORM, c'est un résultat d'une requête manuelle. #}
                         <tr>
                             <td>
-                                <a href="{{ path('class_show', {
-                                    'id': class.id
+                                <a href="{{ path('class_show_with_version', {
+                                    'id': class.id,
+                                    'namespaceFromUrlId': class.namespaceForVersion
                                 }) }}">
                                     {% if class.identifierInNamespace != class.standardLabel and class.standardLabel is not null %}
                                         {{ class.standardLabel }} – {{ class.identifierInNamespace }}
@@ -194,12 +200,14 @@
                     {% endfor %}
                     </tbody>
                 </table>
+                {% endif %}
             </div>
             <div id="properties" class="tab-pane fade">
                 <h3>
                     Associated properties
                     <span class="pull-right">
-                        {% if (not profile.isOngoing and profile.wasClosedAt is not null and profile.endDate is null) or (profile.isForcedPublication and profile.isOngoing ) %}
+                        {% if (not profile.isOngoing and profile.wasClosedAt is not null and profile.endDate is null)
+                            or (profile.isForcedPublication and profile.isOngoing ) %}
                             <a  href="{{ path('api_properties_profile_json', {
                                 'lang': 'en',
                                 'available-in-profile': profile.id
@@ -210,6 +218,9 @@
                         {% endif %}
                     </span>
                 </h3>
+                {% if profile.properties|length == 0 %}
+                <em id="empty-namespace-list-message">No property has been associated with this profile.</em>
+                {% else %}
                 <table class="table table-striped" id="properties-table">
                     <thead>
                     <tr>
@@ -223,82 +234,101 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for profileAssociation in profileAssociations if profileAssociation.property is not null %}
-                        {% set showProperty = true %}
-                        {% if profileAssociation.property.domain is not null %}
-
-                            {% for profileAssociationClass in profileAssociation.property.domain.profileAssociations if profileAssociationClass.profile.id == profileAssociation.profile.id and profileAssociationClass.systemType.id == 6 %}
-                                {% set showProperty = false %}
-                            {% endfor %}
-                        {% endif %}
-                        {% if profileAssociation.property.range is not null %}
-                            {% for profileAssociationClass in profileAssociation.property.range.profileAssociations if profileAssociationClass.profile.id == profileAssociation.profile.id and profileAssociationClass.systemType.id == 6 %}
-                                {% set showProperty = false %}
-                            {% endfor %}
-                        {% endif %}
-                        {% if profileAssociation.domain is not null %}
-                            {% for profileAssociationClass in profileAssociation.domain.profileAssociations if profileAssociationClass.profile.id == profileAssociation.profile.id and profileAssociationClass.systemType.id == 6 %}
-                                {% set showProperty = false %}
-                            {% endfor %}
-                        {% endif %}
-                        {% if profileAssociation.range is not null %}
-                            {% for profileAssociationClass in profileAssociation.range.profileAssociations if profileAssociationClass.profile.id == profileAssociation.profile.id and profileAssociationClass.systemType.id == 6 %}
-                                {% set showProperty = false %}
-                            {% endfor %}
-                        {% endif %}
-
-                        {% if showProperty == true %}
+                    {% for profileAssociation in profileAssociations
+                        if profileAssociation.property is not null
+                        and profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion) is not null %}
                         <tr>
                             <td class="text-nowrap text-right small">
                                 {% if profileAssociation.domain is not null %}
-                                    <a href="{{ path('class_show', {'id': profileAssociation.domain.id }) }}">
-                                        {{ profileAssociation.domain }}
+                                    {# Propriété héritée #}
+                                    <a href="{{ path('class_show_with_version', {
+                                        'id': profileAssociation.domain.id,
+                                        'namespaceFromUrlId': profileAssociation.domainNamespace.id
+                                    }) }}">
+                                        {{ profileAssociation.domain.classVersionForDisplay(profileAssociation.domainNamespace) }}
                                     </a>
-                                {% elseif profileAssociation.property.domain is not null  %}
-                                    <a href="{{ path('class_show', {'id': profileAssociation.property.domain.id }) }}">
-                                        {{ profileAssociation.property.domain }}
+                                {% elseif profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).domain is not null  %}
+                                    {# Propriété non héritée #}
+                                    <a href="{{ path('class_show_with_version', {
+                                        'id': profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).domain.id,
+                                        'namespaceFromUrlId': profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).domainNamespace.id
+                                    }) }}">
+                                        {{ profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).domain.classVersionForDisplay(profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).domainNamespace) }}
                                     </a>
                                 {% endif %}
                             </td>
                             <td class="text-nowrap small" style="padding-left: 30px;">
-                                {% if profileAssociation.property.domainMinQuantifier is not null and  profileAssociation.property.domainMaxQuantifier is not null %}
-                                    ({% if profileAssociation.property.domainMinQuantifier != -1 %}{{ profileAssociation.property.domainMinQuantifier }}{% else %}n{% endif %},{% if  profileAssociation.property.domainMaxQuantifier != -1 %}{{ profileAssociation.property.domainMaxQuantifier }}{% else %}n{% endif %})
+                                {% if profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).domainMinQuantifier is not null
+                                    and  profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).domainMaxQuantifier is not null %}
+                                    (
+                                    {% if profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).domainMinQuantifier != -1 %}
+                                        {{ profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).domainMinQuantifier }}
+                                    {% else %}
+                                        n
+                                    {% endif %}
+                                    ,
+                                    {% if profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).domainMaxQuantifier != -1 %}
+                                        {{ profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).domainMaxQuantifier }}
+                                    {% else %}
+                                        n
+                                    {% endif %})
                                 {% endif %}
                             </td>
                             <td class="text-nowrap text-center">
-                                <a href="{{ path('property_show', {'id': profileAssociation.property.id}) }}">
-                                    {{ profileAssociation.property }}
+                                <a href="{{ path('property_show_with_version', {
+                                    'id': profileAssociation.property.id,
+                                    'namespaceFromUrlId': profileAssociation.entityNamespaceForVersion.id
+                                }) }}">
+                                    {{ profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion) }}
                                 </a>
                             </td>
                             <td class="text-nowrap small" style="padding-right: 30px;">
-                                {% if profileAssociation.property.rangeMinQuantifier is not null and profileAssociation.property.rangeMaxQuantifier is not null %}
-                                    ({% if  profileAssociation.property.rangeMinQuantifier != -1 %}{{ profileAssociation.property.rangeMinQuantifier }}{% else %}n{% endif %},{% if  profileAssociation.property.rangeMaxQuantifier != -1 %}{{ profileAssociation.property.rangeMaxQuantifier }}{% else %}n{% endif %})
+                                {% if profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).rangeMinQuantifier is not null
+                                    and  profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).rangeMaxQuantifier is not null %}
+                                    (
+                                    {% if profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).rangeMinQuantifier != -1 %}
+                                        {{ profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).rangeMinQuantifier }}
+                                    {% else %}
+                                        n
+                                    {% endif %}
+                                    ,
+                                    {% if profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).rangeMaxQuantifier != -1 %}
+                                        {{ profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).rangeMaxQuantifier }}
+                                    {% else %}
+                                        n
+                                    {% endif %})
                                 {% endif %}
                             </td>
                             <td class="text-nowrap small">
                                 {% if profileAssociation.range is not null %}
-                                    <a href="{{ path('class_show', {'id': profileAssociation.range.id }) }}">
-                                        {{ profileAssociation.range }}
+                                    {# propriété héritée #}
+                                    <a href="{{ path('class_show_with_version', {
+                                        'id': profileAssociation.range.id,
+                                        'namespaceFromUrlId': profileAssociation.rangeNamespace.id
+                                    }) }}">
+                                        {{ profileAssociation.range.classVersionForDisplay(profileAssociation.rangeNamespace) }}
                                     </a>
-                                {% elseif profileAssociation.property.range is not null %}
-                                    <a href="{{ path('class_show', {'id': profileAssociation.property.range.id }) }}">
-                                        {{ profileAssociation.property.range }}
+                                {% elseif profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).range is not null %}
+                                    {# propriété non héritée #}
+                                    <a href="{{ path('class_show_with_version', {
+                                        'id': profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).range.id,
+                                        'namespaceFromUrlId': profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).rangeNamespace.id
+                                    }) }}">
+                                        {{ profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).range.classVersionForDisplay(profileAssociation.rangeNamespace) }}
                                     </a>
                                 {% endif %}
                             </td>
                             <td>
-                                {% if profileAssociation.property.namespaces|first.referencedVersion is not null %}
-                                    {{ profileAssociation.property.namespaces|first.referencedVersion }}
-                                {% endif %}
+                                {{ profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).namespaceForVersion }}
                             </td>
                             <td>
                                 {{ profileAssociation.systemType }}
                             </td>
                         </tr>
-                        {% endif %}
                     {% endfor %}
                     </tbody>
                 </table>
+                {% endif %}
             </div>
             <div id="projects" class="tab-pane fade">
                 <h3>Projects using the current profile</h3>
@@ -326,7 +356,7 @@
                 </table>
             </div>
             <div id="namespaces" class="tab-pane fade">
-                <h4>Namespaces used by this profile</h4>
+                <h3>Namespaces used by this profile</h3>
                 {% if profile.namespaces|length == 0 %}
                     <em id="empty-namespace-list-message">There is currently no namespace used by this profile.</em>
                 {% endif %}
@@ -350,7 +380,7 @@
                     <embed src="http://visualdataweb.de/webvowl/#url={{ url('profile_json', {'id': profile.id}) }}" width="100%" height="1000px"><br><br>
                     <a href="http://visualdataweb.de/webvowl/#url={{ url('profile_json', {'id': profile.id}) }}" target="_blank" class="btn btn-primary">Full screen (WebVOWL) <span class="fa fa-desktop"></span></a>
                 {% else %}
-                    <p>The webvowl graph cannot be displayed because there is no class or property in this namespace.</p>
+                    <p>The webvowl graph cannot be displayed because no class or property has been associated with this profile.</p>
                 {% endif %}
             </div>
         </div>

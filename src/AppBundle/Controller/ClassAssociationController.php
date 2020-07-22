@@ -27,7 +27,7 @@ class ClassAssociationController extends Controller
     {
         $classAssociation = new ClassAssociation();
 
-        $this->denyAccessUnlessGranted('edit', $childClass);
+        $this->denyAccessUnlessGranted('edit', $childClass->getClassVersionForDisplay());
 
 
         $em = $this->getDoctrine()->getManager();
@@ -37,7 +37,7 @@ class ClassAssociationController extends Controller
         $justification = new TextProperty();
         $justification->setClassAssociation($classAssociation);
         $justification->setSystemType($systemTypeJustification);
-        $justification->addNamespace($this->getUser()->getCurrentOngoingNamespace());
+        $justification->setNamespaceForVersion($this->getUser()->getCurrentOngoingNamespace());
         $justification->setCreator($this->getUser());
         $justification->setModifier($this->getUser());
         $justification->setCreationTime(new \DateTime('now'));
@@ -46,13 +46,42 @@ class ClassAssociationController extends Controller
         $classAssociation->addTextProperty($justification);
         $classAssociation->setChildClass($childClass);
 
-        $form = $this->createForm(ParentClassAssociationForm::class, $classAssociation);
+        // Filtrage : ID de la version de childClass
+        $namespaceForChildClassVersion = $childClass->getClassVersionForDisplay()->getNamespaceForVersion();
+        $namespacesId[] = $namespaceForChildClassVersion->getId();
+
+        // Sans oublier les namespaces références
+        foreach($namespaceForChildClassVersion->getReferencedNamespaceAssociations() as $referencedNamespacesAssociation){
+            $namespacesId[] = $referencedNamespacesAssociation->getReferencedNamespace()->getId();
+        }
+
+        // Sans oublier OntoME internal model - active version
+        $namespacesId[] = 4;
+
+        $arrayClassesVersion = $em->getRepository('AppBundle:OntoClassVersion')
+            ->findIdAndStandardLabelOfClassesVersionByNamespacesId($namespacesId);
+
+        $form = $this->createForm(ParentClassAssociationForm::class, $classAssociation, array(
+            "classesVersion" => $arrayClassesVersion
+        ));
 
         // only handles data on POST
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $classAssociation = $form->getData();
-            $classAssociation->addNamespace($this->getUser()->getCurrentOngoingNamespace());
+            $parentClass = $em->getRepository("AppBundle:OntoClass")->find($form->get("parentClassVersion")->getData());
+            $classAssociation->setParentClass($parentClass);
+            $classAssociation->setNamespaceForVersion($this->getUser()->getCurrentOngoingNamespace());
+            $classAssociation->setChildClassNamespace(
+                $em->getRepository("AppBundle:OntoClassVersion")
+                    ->findClassVersionByClassAndNamespacesId($childClass, $namespacesId)
+                    ->getNamespaceForVersion()
+            );
+            $classAssociation->setParentClassNamespace(
+                $em->getRepository("AppBundle:OntoClassVersion")
+                    ->findClassVersionByClassAndNamespacesId($parentClass, $namespacesId)
+                    ->getNamespaceForVersion()
+            );
             $classAssociation->setCreator($this->getUser());
             $classAssociation->setModifier($this->getUser());
             $classAssociation->setCreationTime(new \DateTime('now'));
@@ -62,7 +91,7 @@ class ClassAssociationController extends Controller
                 $classAssociation->getTextProperties()[1]->setCreationTime(new \DateTime('now'));
                 $classAssociation->getTextProperties()[1]->setModificationTime(new \DateTime('now'));
                 $classAssociation->getTextProperties()[1]->setSystemType($systemTypeExample);
-                $classAssociation->getTextProperties()[1]->addNamespace($this->getUser()->getCurrentOngoingNamespace());
+                $classAssociation->getTextProperties()[1]->setNamespaceForVersion($this->getUser()->getCurrentOngoingNamespace());
                 $classAssociation->getTextProperties()[1]->setClassAssociation($classAssociation);
             }
 
@@ -80,8 +109,16 @@ class ClassAssociationController extends Controller
 
         $em = $this->getDoctrine()->getManager();
 
-        $ancestors = $em->getRepository('AppBundle:OntoClass')
-            ->findAncestorsById($childClass);
+        // FILTRAGE : Récupérer les clés de namespaces à utiliser
+        if(is_null($this->getUser()) || $this->getUser()->getCurrentActiveProject()->getId() == 21){ // Utilisateur non connecté OU connecté et utilisant le projet public
+            $namespacesId = $em->getRepository('AppBundle:OntoNamespace')->findPublicProjectNamespacesId();
+        }
+        else{ // Utilisateur connecté et utilisant un autre projet
+            $namespacesId = $em->getRepository('AppBundle:OntoNamespace')->findNamespacesIdByUser($this->getUser());
+        }
+
+        $ancestors = $em->getRepository('AppBundle:OntoClass')->findAncestorsByClassVersionAndNamespacesId($childClass->getClassVersionForDisplay(), $namespacesId);
+
         return $this->render('classAssociation/newParent.html.twig', [
             'childClass' => $childClass,
             'parentClassAssociationForm' => $form->createView(),
@@ -112,16 +149,43 @@ class ClassAssociationController extends Controller
      */
     public function editAction(Request $request, ClassAssociation $classAssociation)
     {
+        // Récupérer la version de la classe demandée
+        $childClassVersion = $classAssociation->getChildClass()->getClassVersionForDisplay();
 
-        $this->denyAccessUnlessGranted('edit', $classAssociation->getChildClass());
+        // On doit avoir une version de la classe sinon on lance une exception.
+        if(is_null($childClassVersion)){
+            throw $this->createNotFoundException('The class n°'.$classAssociation->getChildClass()->getId().' has no version. Please contact an administrator.');
+        }
 
-        $form = $this->createForm(ClassAssociationEditForm::class, $classAssociation);
+        $this->denyAccessUnlessGranted('edit', $childClassVersion);
+
+        $em = $this->getDoctrine()->getManager();
+
+        // Filtrage : ID de la version de childClass
+        $namespaceForChildClassVersion = $childClassVersion->getNamespaceForVersion();
+        $namespacesId[] = $namespaceForChildClassVersion->getId();
+
+        // Sans oublier les namespaces références
+        foreach($namespaceForChildClassVersion->getReferencedNamespaceAssociations() as $referencedNamespacesAssociation){
+            $namespacesId[] = $referencedNamespacesAssociation->getReferencedNamespace()->getId();
+        }
+
+        // Sans oublier OntoME internal model - active version
+        $namespacesId[] = 4;
+
+        $arrayClassesVersion = $em->getRepository('AppBundle:OntoClassVersion')
+            ->findIdAndStandardLabelOfClassesVersionByNamespacesId($namespacesId);
+
+        $form = $this->createForm(ClassAssociationEditForm::class, $classAssociation, array(
+            'classesVersion' => $arrayClassesVersion,
+            'defaultParent' => $classAssociation->getParentClass()->getId()));
 
         // only handles data on POST
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
+            $parentClass = $em->getRepository("AppBundle:OntoClass")->find($form->get("parentClassVersion")->getData());
+            $classAssociation->setParentClass($parentClass);
             $classAssociation = $form->getData();
-            //$classAssociation->addNamespace($classAssociation->getChildClass()->getOngoingNamespace());
             $classAssociation->setModifier($this->getUser());
             $classAssociation->setModificationTime(new \DateTime('now'));
 

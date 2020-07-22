@@ -11,8 +11,9 @@
     <div class="container">
         <h2 class="class-name">
             {{ classAssociation }}
-            <a href="{{ path('class_show', {
-                id: classAssociation.childClass.id,
+            <a href="{{ path('class_show_with_version', {
+                'id': classAssociation.parentClass.id,
+                'namespaceFromUrlId': classAssociation.parentClassNamespace.id,
                 '_fragment': 'class-hierarchy'
             }) }}" class="pull-right btn btn-link">
                 <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
@@ -28,9 +29,10 @@
             <div id="justifications" class="tab-pane fade in active">
                 <h3>Parent class</h3>
                 <h4>
-                    <a href="{{ path('class_show', {
-                        'id': classAssociation.parentClass.id
-                    }) }}">{{ classAssociation.parentClass }}
+                    <a href="{{ path('class_show_with_version', {
+                        'id': classAssociation.parentClass.id,
+                        'namespaceFromUrlId': classAssociation.parentClassNamespace.id,
+                    }) }}">{{ classAssociation.parentClass.classVersionForDisplay(classAssociation.parentClassNamespace) }}
                     </a>
                 </h4>
                 {% if is_granted('edit', class) %}

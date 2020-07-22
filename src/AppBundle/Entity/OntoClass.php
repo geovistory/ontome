@@ -10,6 +10,7 @@ namespace AppBundle\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
@@ -35,9 +36,15 @@ class OntoClass
     /**
      * @var boolean
      * A non-persisted field that's used to know if the $identifierInNamespace field is manually set by the user
-     * or automatically set by a trigger in the database     *
+     * or automatically set by a trigger in the database
      */
     private $isManualIdentifier;
+
+    /**
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\OntoClassVersion", mappedBy="class", cascade={"persist"})
+     * @ORM\OrderBy({"creationTime" = "DESC"})
+     */
+    private $classVersions;
 
     /**
      * @ORM\Column(type="text")
@@ -48,11 +55,6 @@ class OntoClass
      * @ORM\Column(type="text")
      */
     private $importerTextField;
-
-    /**
-     * @ORM\Column(type="string")
-     */
-    private $standardLabel;
 
     /**
      * @ORM\Column(type="text")
@@ -106,9 +108,9 @@ class OntoClass
 
     /**
      * @ORM\ManyToMany(targetEntity="OntoNamespace",  inversedBy="classes", fetch="EXTRA_LAZY")
-     * @ORM\JoinTable(schema="che", name="associates_namespace",
+     * @ORM\JoinTable(schema="che", name="class_version",
      *      joinColumns={@ORM\JoinColumn(name="fk_class", referencedColumnName="pk_class")},
-     *      inverseJoinColumns={@ORM\JoinColumn(name="fk_namespace", referencedColumnName="pk_namespace")}
+     *      inverseJoinColumns={@ORM\JoinColumn(name="fk_namespace_for_version", referencedColumnName="pk_namespace")}
      *      )
      */
     private $namespaces;
@@ -145,12 +147,6 @@ class OntoClass
     private $comments;
 
     /**
-     * @ORM\ManyToOne(targetEntity="OntoNamespace")
-     * @ORM\JoinColumn(name="fk_ongoing_namespace", referencedColumnName="pk_namespace", nullable=true)
-     */
-    private $ongoingNamespace;
-
-    /**
      * @Assert\Valid()
      * @ORM\OneToMany(targetEntity="AppBundle\Entity\ProfileAssociation", mappedBy="class", cascade={"persist"})
      * @ORM\OrderBy({"systemType" = "ASC"})
@@ -167,6 +163,7 @@ class OntoClass
     public function __construct()
     {
         $this->namespaces = new ArrayCollection();
+        $this->classVersions = new ArrayCollection();
         $this->labels = new ArrayCollection();
         $this->textProperties = new ArrayCollection();
         $this->profiles = new ArrayCollection();
@@ -191,7 +188,12 @@ class OntoClass
                 ->addViolation();
         }
         else if($this->isManualIdentifier) {
-            foreach ($this->getNamespaces() as $namespace) {
+            // Retrouver l'ensemble d'espaces de noms concernés pour l'identifiant.
+            // Il ne faut donc PAS utiliser $this->getNamespaces qui ne retrouve que les namespaces de CETTE classe
+            // (d'autres namespaces du même root mais qui n'ont pas cette classe, peuvent donc échapper)
+            // il faut donc simplement récupérer le root et boucler dessus
+            $rootNamespace = $this->getClassVersionForDisplay()->getNamespaceForVersion()->getTopLevelNamespace();
+            foreach ($rootNamespace->getChildVersions() as $namespace) {
                 foreach ($namespace->getClasses() as $class) {
                     if ($class->identifierInNamespace == $this->identifierInNamespace) {
                         $context->buildViolation('The identifier must be unique. Please enter another one.')
@@ -229,6 +231,13 @@ class OntoClass
         return $this->isManualIdentifier;
     }
 
+    /**
+     * @return ArrayCollection|OntoClassVersion[]
+     */
+    public function getClassVersions()
+    {
+        return $this->classVersions;
+    }
 
     /**
      * @return mixed
@@ -464,6 +473,19 @@ class OntoClass
         $this->modificationTime = $modificationTime;
     }
 
+    /**
+     * @param OntoClassVersion $classVersion
+     */
+    public function addClassVersion(OntoClassVersion $classVersion)
+    {
+        if ($this->classVersions->contains($classVersion)) {
+            return;
+        }
+        $this->classVersions[] = $classVersion;
+        // needed to update the owning side of the relationship!
+        $classVersion->setClass($this);
+    }
+
     public function addTextProperty(TextProperty $textProperty)
     {
         if ($this->textProperties->contains($textProperty)) {
@@ -518,30 +540,6 @@ class OntoClass
         $profileAssociation->setClass($this);
     }
 
-    public function getInvertedLabel()
-    {
-        if($this->getIdentifierInNamespace() === $this->getStandardLabel()){
-            $s = $this->getIdentifierInNamespace();
-        }
-        else if(!is_null($this->getStandardLabel())) {
-            $s = $this->getIdentifierInNamespace().' '.$this->getStandardLabel();
-        }
-        else $s = $this->getIdentifierInNamespace();
-        return (string) $s;
-    }
-
-    public function __toString()
-    {
-        if($this->getIdentifierInNamespace() === $this->getStandardLabel()){
-            $s = $this->getIdentifierInNamespace();
-        }
-        else if(!is_null($this->getStandardLabel())) {
-            $s = $this->getStandardLabel().' – '.$this->getIdentifierInNamespace();
-        }
-        else $s = $this->getIdentifierInNamespace();
-        return (string) $s;
-    }
-
     /**
      * @return mixed
      */
@@ -579,4 +577,25 @@ class OntoClass
         return array_merge($this->getSourceEntityAssociations()->toArray(), $this->getTargetEntityAssociations()->toArray());
     }
 
+    /**
+     * @param OntoNamespace|null $namespace
+     * @return OntoClassVersion the classVersion to be displayed
+     */
+    public function getClassVersionForDisplay(OntoNamespace $namespace=null)
+    {
+        $cvCollection = $this->getClassVersions();
+        if(!is_null($namespace)){
+            $cvCollection = $this->getClassVersions()->filter(function(OntoClassVersion $classVersion) use ($namespace){
+                return $classVersion->getNamespaceForVersion() === $namespace;
+            });
+        }
+        else{
+            if($cvCollection->count()>1){
+                $cvCollection = $this->getClassVersions()->filter(function(OntoClassVersion $classVersion) {
+                    return $classVersion->getNamespaceForVersion()->getIsOngoing();
+                });
+            }
+        }
+        return $cvCollection->first();
+    }
 }

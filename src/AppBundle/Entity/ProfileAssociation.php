@@ -43,16 +43,34 @@ class ProfileAssociation
     private $class;
 
     /**
+     * @ORM\ManyToOne(targetEntity="OntoNamespace")
+     * @ORM\JoinColumn(name="fk_entity_namespace_for_version", referencedColumnName="pk_namespace", nullable=false)
+     */
+    private $entityNamespaceForVersion;
+
+    /**
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\OntoClass")
      * @ORM\JoinColumn(name="fk_inheriting_domain_class", referencedColumnName="pk_class")
      */
     private $domain;
 
     /**
+     * @ORM\ManyToOne(targetEntity="OntoNamespace")
+     * @ORM\JoinColumn(name="fk_domain_namespace", referencedColumnName="pk_namespace", nullable=false)
+     */
+    private $domainNamespace;
+
+    /**
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\OntoClass")
      * @ORM\JoinColumn(name="fk_inheriting_range_class", referencedColumnName="pk_class")
      */
     private $range;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="OntoNamespace")
+     * @ORM\JoinColumn(name="fk_range_namespace", referencedColumnName="pk_namespace", nullable=false)
+     */
+    private $rangeNamespace;
 
     /**
      * @ORM\ManyToOne(targetEntity="SystemType", inversedBy="profileAssociations")
@@ -184,6 +202,30 @@ class ProfileAssociation
     }
 
     /**
+     * @return mixed
+     */
+    public function getEntityNamespaceForVersion()
+    {
+        return $this->entityNamespaceForVersion;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getDomainNamespace()
+    {
+        return $this->domainNamespace;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getRangeNamespace()
+    {
+        return $this->rangeNamespace;
+    }
+
+    /**
      * @param mixed $profile
      */
     public function setProfile($profile)
@@ -269,6 +311,30 @@ class ProfileAssociation
     public function setModificationTime($modificationTime)
     {
         $this->modificationTime = $modificationTime;
+    }
+
+    /**
+     * @param mixed $entityNamespaceForVersion
+     */
+    public function setEntityNamespaceForVersion($entityNamespaceForVersion)
+    {
+        $this->entityNamespaceForVersion = $entityNamespaceForVersion;
+    }
+
+    /**
+     * @param mixed $domainNamespace
+     */
+    public function setDomainNamespace($domainNamespace)
+    {
+        $this->domainNamespace = $domainNamespace;
+    }
+
+    /**
+     * @param mixed $rangeNamespace
+     */
+    public function setRangeNamespace($rangeNamespace)
+    {
+        $this->rangeNamespace = $rangeNamespace;
     }
 
     public function __toString()

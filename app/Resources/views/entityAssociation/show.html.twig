@@ -11,17 +11,27 @@
     <div class="container">
         <h2 class="class-name">
             {% if not inverse %}
-                {{ entityAssociation.source }}: {{ entityAssociation.systemType.standardLabel }}
-                <a href="{{ path(entityAssociation.sourceObjectType~'_show', {
-                    id: entityAssociation.source.id,
+                {% if entityAssociation.sourceObjectType == "class" %}
+                    {{ entityAssociation.source.classVersionForDisplay() }}: {{ entityAssociation.systemType.standardLabel }}
+                {% elseif entityAssociation.sourceObjectType == "property" %}
+                    {{ entityAssociation.source.propertyVersionForDisplay() }}: {{ entityAssociation.systemType.standardLabel }}
+                {% endif %}
+                <a href="{{ path(entityAssociation.sourceObjectType~'_show_with_version', {
+                    'id': entityAssociation.source.id,
+                    'namespaceFromUrlId': entityAssociation.sourceNamespaceForVersion.id,
                     '_fragment': "relations"
                 }) }}" class="pull-right btn btn-link">
                     <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
                 </a>
             {% else %}
-                {{ entityAssociation.target }}: {{ entityAssociation.systemType.standardLabel }}
-                <a href="{{ path(entityAssociation.targetObjectType~'_show', {
-                    id: entityAssociation.target.id,
+                {% if entityAssociation.targetObjectType == "class" %}
+                    {{ entityAssociation.target.classVersionForDisplay() }}: {{ entityAssociation.systemType.standardLabel }}
+                {% elseif entityAssociation.targetObjectType == "property" %}
+                    {{ entityAssociation.target.propertyVersionForDisplay() }}: {{ entityAssociation.systemType.standardLabel }}
+                {% endif %}
+                <a href="{{ path(entityAssociation.targetObjectType~'_show_with_version', {
+                    'id': entityAssociation.target.id,
+                    'namespaceFromUrlId': entityAssociation.targetNamespaceForVersion.id,
                     '_fragment': "relations"
                 }) }}" class="pull-right btn btn-link">
                     <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
@@ -39,25 +49,33 @@
                 <h3>Related {{ entityAssociation.sourceObjectType }}</h3>
                 <h4>
                     {% if not inverse %}
-                    <a href="{{ path(entityAssociation.targetObjectType~'_show', {
-                        'id': entityAssociation.target.id
-                    }) }}">{{ entityAssociation.target }}
+                    <a href="{{ path(entityAssociation.targetObjectType~'_show_with_version', {
+                        'id': entityAssociation.target.id,
+                        'namespaceFromUrlId': entityAssociation.targetNamespaceForVersion.id
+                    }) }}">
+                        {% if entityAssociation.targetClass is not null %}
+                        {{ entityAssociation.targetClass.classVersionForDisplay(entityAssociation.targetNamespaceForVersion)}}
+                        {% elseif entityAssociation.targetProperty is not null %}
+                        {{ entityAssociation.targetProperty.propertyVersionForDisplay(entityAssociation.targetNamespaceForVersion)}}
+                        {% endif %}
                     </a>
                     {% else %}
-                    <a href="{{ path(entityAssociation.sourceObjectType~'_show', {
-                        'id': entityAssociation.source.id
-                    }) }}">{{ entityAssociation.source }}
+                    <a href="{{ path(entityAssociation.sourceObjectType~'_show_with_version', {
+                        'id': entityAssociation.source.id,
+                        'namespaceFromUrlId': entityAssociation.sourceNamespaceForVersion.id
+                    }) }}">
+                        {% if entityAssociation.sourceClass is not null %}
+                            {{ entityAssociation.sourceClass.classVersionForDisplay(entityAssociation.sourceNamespaceForVersion)}}
+                        {% elseif entityAssociation.targetProperty is not null %}
+                            {{ entityAssociation.sourceProperty.propertyVersionForDisplay(entityAssociation.sourceNamespaceForVersion)}}
+                        {% endif %}
                     </a>
                     {% endif %}
                 </h4>
                 <h3>Relation</h3>
                 <h4>{{ entityAssociation.systemType.standardLabel }}</h4>
                 <h3>Defined in namespace</h3>
-                <h4>
-                    {% for ns in entityAssociation.namespaces %}
-                        {{ ns.standardLabel }}
-                    {% endfor %}
-                </h4>
+                <h4>{{ entityAssociation.namespaceForVersion.standardLabel }}</h4>
                 {% if is_granted('edit', entityAssociation) %}
                     <div class="pull-right add-div">
                         <a href="{{ path('text_property_new', {'type': 'justification', 'object': 'entity-association', 'objectId': entityAssociation.id })}}"

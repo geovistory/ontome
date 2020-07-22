@@ -48,6 +48,12 @@ class TextProperty implements GroupSequenceProviderInterface
     private $languageIsoCode;
 
     /**
+     * @ORM\ManyToOne(targetEntity="OntoNamespace", inversedBy="textPropertyVersions")
+     * @ORM\JoinColumn(name="fk_namespace_for_version", referencedColumnName="pk_namespace", nullable=false)
+     */
+    private $namespaceForVersion;
+
+    /**
      * @ORM\ManyToOne(targetEntity="OntoClass", inversedBy="textProperties")
      * @ORM\JoinColumn(name="fk_class", referencedColumnName="pk_class")
      * @Assert\Type(type="AppBundle\Entity\OntoClass")
@@ -114,9 +120,9 @@ class TextProperty implements GroupSequenceProviderInterface
 
     /**
      * @ORM\ManyToMany(targetEntity="OntoNamespace",  inversedBy="TextProperty", fetch="EXTRA_LAZY")
-     * @ORM\JoinTable(schema="che", name="associates_namespace",
+     * @ORM\JoinTable(schema="che", name="text_property",
      *      joinColumns={@ORM\JoinColumn(name="fk_text_property", referencedColumnName="pk_text_property")},
-     *      inverseJoinColumns={@ORM\JoinColumn(name="fk_namespace", referencedColumnName="pk_namespace")}
+     *      inverseJoinColumns={@ORM\JoinColumn(name="fk_namespace_for_version", referencedColumnName="pk_namespace")}
      *      )
      */
     private $namespaces;
@@ -168,6 +174,14 @@ class TextProperty implements GroupSequenceProviderInterface
     public function getId()
     {
         return $this->id;
+    }
+
+    /**
+     * @return OntoNamespace
+     */
+    public function getNamespaceForVersion()
+    {
+        return $this->namespaceForVersion;
     }
 
     /**
@@ -337,6 +351,14 @@ class TextProperty implements GroupSequenceProviderInterface
     public function getObjectIdentification()
     {
         return 'Text property n°'.$this->id;
+    }
+
+    /**
+     * @param mixed $namespaceForVersion
+     */
+    public function setNamespaceForVersion($namespaceForVersion)
+    {
+        $this->namespaceForVersion = $namespaceForVersion;
     }
 
     /**

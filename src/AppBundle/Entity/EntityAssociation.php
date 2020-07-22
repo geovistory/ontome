@@ -45,10 +45,22 @@ class EntityAssociation
     private $sourceProperty;
 
     /**
+     * @ORM\ManyToOne(targetEntity="OntoNamespace")
+     * @ORM\JoinColumn(name="fk_source_namespace_for_version", referencedColumnName="pk_namespace", nullable=false)
+     */
+    private $sourceNamespaceForVersion;
+
+    /**
      * @ORM\ManyToOne(targetEntity="Property", inversedBy="targetEntityAssociations")
      * @ORM\JoinColumn(name="fk_target_property", referencedColumnName="pk_property")
      */
     private $targetProperty;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="OntoNamespace")
+     * @ORM\JoinColumn(name="fk_target_namespace_for_version", referencedColumnName="pk_namespace", nullable=false)
+     */
+    private $targetNamespaceForVersion;
 
     /**
      * @ORM\ManyToOne(targetEntity="SystemType", inversedBy="entityAssociations")
@@ -62,21 +74,18 @@ class EntityAssociation
     private $directed;
 
     /**
+     * @ORM\ManyToOne(targetEntity="OntoNamespace", inversedBy="entityAssociationVersions")
+     * @ORM\JoinColumn(name="fk_namespace_for_version", referencedColumnName="pk_namespace", nullable=false)
+     */
+    private $namespaceForVersion;
+
+    /**
      * @Assert\NotNull()
      * @Assert\Valid()
      * @ORM\OneToMany(targetEntity="AppBundle\Entity\TextProperty", mappedBy="entityAssociation", cascade={"persist"})
      * @ORM\OrderBy({"languageIsoCode" = "ASC"})
      */
     private $textProperties;
-
-    /**
-     * @ORM\ManyToMany(targetEntity="OntoNamespace",  inversedBy="EntityAssociation", fetch="EXTRA_LAZY")
-     * @ORM\JoinTable(schema="che", name="associates_namespace",
-     *      joinColumns={@ORM\JoinColumn(name="fk_entity_association", referencedColumnName="pk_entity_association")},
-     *      inverseJoinColumns={@ORM\JoinColumn(name="fk_namespace", referencedColumnName="pk_namespace")}
-     *      )
-     */
-    private $namespaces;
 
     /**
      * @ORM\ManyToOne(targetEntity="User")
@@ -121,6 +130,14 @@ class EntityAssociation
     public function getId()
     {
         return $this->id;
+    }
+
+    /**
+     * @return OntoNamespace
+     */
+    public function getNamespaceForVersion()
+    {
+        return $this->namespaceForVersion;
     }
 
     /**
@@ -286,6 +303,30 @@ class EntityAssociation
     }
 
     /**
+     * @return mixed
+     */
+    public function getSourceNamespaceForVersion()
+    {
+        return $this->sourceNamespaceForVersion;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getTargetNamespaceForVersion()
+    {
+        return $this->targetNamespaceForVersion;
+    }
+
+    /**
+     * @param mixed $namespaceForVersion
+     */
+    public function setNamespaceForVersion($namespaceForVersion)
+    {
+        $this->namespaceForVersion = $namespaceForVersion;
+    }
+
+    /**
      * @param mixed $id
      */
     public function setId($id)
@@ -389,6 +430,22 @@ class EntityAssociation
         $this->modificationTime = $modificationTime;
     }
 
+    /**
+     * @param mixed $sourceNamespaceForVersion
+     */
+    public function setSourceNamespaceForVersion($sourceNamespaceForVersion)
+    {
+        $this->sourceNamespaceForVersion = $sourceNamespaceForVersion;
+    }
+
+    /**
+     * @param mixed $targetNamespaceForVersion
+     */
+    public function setTargetNamespaceForVersion($targetNamespaceForVersion)
+    {
+        $this->targetNamespaceForVersion = $targetNamespaceForVersion;
+    }
+
     public function addTextProperty(TextProperty $textProperty)
     {
         if ($this->textProperties->contains($textProperty)) {
@@ -409,6 +466,9 @@ class EntityAssociation
 
     public function __toString()
     {
-        return (string) $this->sourceClass.' - '.$this->targetClass.' : '.$this->systemType;
+        if(!is_null($this->sourceClass))
+            return (string) $this->sourceClass->getClassVersionForDisplay().' - '.$this->targetClass->getClassVersionForDisplay().' : '.$this->systemType;
+        elseif(!is_null($this->sourceProperty))
+            return (string) $this->sourceProperty->getPropertyVersionForDisplay().' - '.$this->targetProperty->getPropertyVersionForDisplay().' : '.$this->systemType;
     }
 }

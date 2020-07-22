@@ -24,7 +24,7 @@
                     </a>
                 {% elseif textProperty.class is not null %}
                     Add a{% if textProperty.systemType.standardLabel|first|lower in ['a', 'e', 'i', 'o', 'u', 'y'] %}n{% endif %} {{ textProperty.systemType.standardLabel|lower }}
-                    for the class {{ textProperty.class }}
+                    for the class {{ textProperty.class.classVersionForDisplay(textProperty.namespaceForVersion) }}
                     <a href="{{ path('class_edit', {
                         id: textProperty.class.id,
                         "_fragment": "definition"

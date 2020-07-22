@@ -43,8 +43,7 @@ class ProfileController  extends Controller
         $classes = $em->getRepository('AppBundle:OntoClass')
             ->findClassesByProfileId($profile);
 
-        $properties = $em->getRepository('AppBundle:Property')
-            ->findPropertiesByProfileId($profile);
+        //$properties = $em->getRepository('AppBundle:Property')->findPropertiesByProfileId($profile);
 
         $profileAssociations = $em->getRepository('AppBundle:ProfileAssociation')
             ->findBy(array('profile' => $profile));
@@ -52,7 +51,7 @@ class ProfileController  extends Controller
         return $this->render('profile/show.html.twig', array(
             'profile' => $profile,
             'classes' => $classes,
-            'properties' => $properties,
+            //'properties' => $properties,
             'profileAssociations' => $profileAssociations
         ));
 
@@ -128,7 +127,7 @@ class ProfileController  extends Controller
                 $profile->getTextProperties()[1]->setCreationTime(new \DateTime('now'));
                 $profile->getTextProperties()[1]->setModificationTime(new \DateTime('now'));
                 $profile->getTextProperties()[1]->setSystemType($systemTypeAdditionalNote);
-                $profile->getTextProperties()[1]->setClass($profile);
+                $profile->getTextProperties()[1]->setProfile($profile);
             }
 
             // Créer les entity_to_user_project pour les activer par défaut
@@ -208,8 +207,7 @@ class ProfileController  extends Controller
         $selectableClasses = $em->getRepository('AppBundle:OntoClass')
             ->findClassesForAssociationWithProfileByProfileId($profile);
 
-        $properties = $em->getRepository('AppBundle:Property')
-            ->findPropertiesByProfileId($profile);
+        //$properties = $em->getRepository('AppBundle:Property')->findPropertiesByProfileId($profile);
 
         $rootNamespaces = $em->getRepository('AppBundle:OntoNamespace')
             ->findAllNonAssociatedToProfileByProfileId($profile);
@@ -223,7 +221,7 @@ class ProfileController  extends Controller
             'classes' => $classes,
             'selectableClasses' => $selectableClasses,
             'rootNamespaces' => $rootNamespaces,
-            'properties' => $properties,
+            //'properties' => $properties,
             'profileAssociations' => $profileAssociations
         ));
     }
@@ -463,6 +461,14 @@ class ProfileController  extends Controller
             $profileAssociation = new ProfileAssociation();
             $profileAssociation->setProfile($profile);
             $profileAssociation->setClass($class);
+
+            $namespacesId = array();
+            foreach($profile->getNamespaces() as $namespace){
+                $namespacesId[] = $namespace->getId();
+            }
+            $classVersion = $em->getRepository("AppBundle:OntoClassVersion")->findClassVersionByClassAndNamespacesId($class, $namespacesId);
+            $profileAssociation->setEntityNamespaceForVersion($classVersion->getNamespaceForVersion());
+
             $systemType = $em->getRepository('AppBundle:SystemType')->find(5); //systemType 5 = selected
             $profileAssociation->setSystemType($systemType);
             $profileAssociation->setCreator($this->getUser());
@@ -522,6 +528,14 @@ class ProfileController  extends Controller
             $profileAssociation = new ProfileAssociation();
             $profileAssociation->setProfile($profile);
             $profileAssociation->setProperty($property);
+
+            $namespacesId = array();
+            foreach($profile->getNamespaces() as $namespace){
+                $namespacesId[] = $namespace->getId();
+            }
+            $propertyVersion = $em->getRepository("AppBundle:PropertyVersion")->findPropertyVersionByPropertyAndNamespacesId($property, $namespacesId);
+            $profileAssociation->setEntityNamespaceForVersion($propertyVersion->getNamespaceForVersion());
+
             $systemType = $em->getRepository('AppBundle:SystemType')->find(5); //systemType 5 = selected
             $profileAssociation->setSystemType($systemType);
             $profileAssociation->setCreator($this->getUser());
@@ -583,8 +597,22 @@ class ProfileController  extends Controller
             $profileAssociation = new ProfileAssociation();
             $profileAssociation->setProfile($profile);
             $profileAssociation->setProperty($property);
+
+            $namespacesId = array();
+            foreach($profile->getNamespaces() as $namespace){
+                $namespacesId[] = $namespace->getId();
+            }
+            $propertyVersion = $em->getRepository("AppBundle:PropertyVersion")->findPropertyVersionByPropertyAndNamespacesId($property, $namespacesId);
+            $profileAssociation->setEntityNamespaceForVersion($propertyVersion->getNamespaceForVersion());
+
             $profileAssociation->setDomain($domain);
+            $domainVersion = $em->getRepository("AppBundle:OntoClassVersion")->findClassVersionByClassAndNamespacesId($domain, $namespacesId);
+            $profileAssociation->setDomainNamespace($domainVersion->getNamespaceForVersion());
+
             $profileAssociation->setRange($range);
+            $rangeVersion = $em->getRepository("AppBundle:OntoClassVersion")->findClassVersionByClassAndNamespacesId($range, $namespacesId);
+            $profileAssociation->setRangeNamespace($rangeVersion->getNamespaceForVersion());
+
             $systemType = $em->getRepository('AppBundle:SystemType')->find(5); //systemType 5 = selected
             $profileAssociation->setSystemType($systemType);
             $profileAssociation->setCreator($this->getUser());

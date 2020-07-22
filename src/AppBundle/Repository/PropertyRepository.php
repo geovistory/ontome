@@ -9,9 +9,11 @@
 namespace AppBundle\Repository;
 
 use AppBundle\Entity\OntoClass;
+use AppBundle\Entity\OntoClassVersion;
 use AppBundle\Entity\Profile;
 use AppBundle\Entity\Project;
 use AppBundle\Entity\Property;
+use AppBundle\Entity\PropertyVersion;
 use AppBundle\Entity\User;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\QueryBuilder;
@@ -35,767 +37,320 @@ class PropertyRepository extends EntityRepository
     }
 
     /**
+     * @param array $namespacesId
      * @return Property[]
      */
-    public function findFilteredByPublicProjectOrderedById()
-    {
-        return $this->createQueryBuilder('property')
-            ->join('property.namespaces', 'nspc')
-            ->join('nspc.projects', 'prj')
-            ->addSelect('nspc')
-            ->leftJoin('nspc.referencedVersion', 'referencedVersion')
-            ->addSelect('referencedVersion')
-            ->orderBy('property.id', 'DESC')
-            ->getQuery()
-            ->execute();
-    }
-
-    /**
-     * @return QueryBuilder
-     */
-    public function findFilteredPropertiesByActiveProjectOrderedById(User $user)
-    {
-        //D'abord trouver les fk_namespace sélectionnés
-        $conn = $this->getEntityManager()->getConnection();
-
-        $sql = "SELECT fk_namespace 
-                FROM che.associates_entity_to_user_project 
-                WHERE fk_system_type = 25 
-                AND fk_associate_user_to_project = (  SELECT pk_associate_user_to_project 
-                                                      FROM che.associate_user_to_project 
-                                                      WHERE fk_user = :fk_user AND fk_project = :fk_project)
-                AND fk_namespace IS NOT NULL
-                UNION
-                SELECT fk_referenced_namespace AS fk_namespace
-                FROM che.associates_referenced_namespace
-                WHERE fk_namespace IN (
-                  SELECT fk_namespace 
-                  FROM che.associates_entity_to_user_project 
-                  WHERE fk_system_type = 25 
-                  AND fk_associate_user_to_project = (  SELECT pk_associate_user_to_project 
-                                                        FROM che.associate_user_to_project 
-                                                        WHERE fk_user = :fk_user AND fk_project = :fk_project)
-                  AND fk_namespace IS NOT NULL
-                )";
-
-        $stmt = $conn->prepare($sql);
-        $stmt->execute(array(
-            'fk_user' => $user->getId(),
-            'fk_project' => $user->getCurrentActiveProject()->getId()
-        ));
-
-        $arrayActivesNamespaces = $stmt->fetchAll();
-
+    public function findPropertiesByNamespacesIdQueryBuilder(array $namespacesId){
         $qb = $this->createQueryBuilder('property')
-            ->join('property.namespaces','nspc')
-            ->where('nspc.id IN (:id_namespaces)')
-            ->setParameter('id_namespaces', $arrayActivesNamespaces);
+            ->join('property.propertyVersions','pv')
+            ->join('pv.namespaceForVersion','nfv')
+            ->where('nfv.id IN (:namespacesId)')
+            ->setParameter('namespacesId', $namespacesId);
 
         return $qb;
     }
 
     /**
+     * @param array $namespacesId
      * @return Property[]
      */
-    public function findFilteredByActiveProjectOrderedById(User $user)
-    {
-        return $this->findFilteredPropertiesByActiveProjectOrderedById($user)->getQuery()->execute();
+    public function findPropertiesByNamespacesId(array $namespacesId){
+        $qb = $this->findPropertiesByNamespacesIdQueryBuilder($namespacesId);
+
+        $properties = $qb->getQuery()->execute();
+
+        return $properties;
     }
 
     /**
-     * @param OntoClass $class
-     * @return array
+     * @param PropertyVersion $propertyVersion
+     * @param array $namespacesId
+     * @return void
+     * Remplace les fonctions obsolètes findAncestorsById et findFilteredAncestorsById
      */
-    public function findOutgoingPropertiesById(OntoClass $class)
+    public function findAncestorsByPropertyVersionAndNamespacesId(PropertyVersion $propertyVersion, array $namespacesId)
     {
         $conn = $this->getEntityManager()
             ->getConnection();
 
-        $sql = "SELECT identifier_property AS property,
-                       identifier_range AS range,
-                       pk_property AS \"propertyId\",
-                       pk_range AS \"rangeId\",
-                       identifier_domain AS domain,
-                       che.get_root_namespace(nsp.pk_namespace) AS \"rootNamespaceId\",
-                      (SELECT label FROM che.get_namespace_labels(nsp.pk_namespace) WHERE language_iso_code = 'en') AS namespace,
-                        nsp.pk_namespace AS \"namespaceId\"
-                FROM  che.v_properties_with_domain_range,
-                      che.associates_namespace asnsp,
-                      che.namespace nsp
-                WHERE asnsp.fk_property = pk_property
-                  AND nsp.pk_namespace = asnsp.fk_namespace 
-                  AND pk_domain = :class;";
-
-        $stmt = $conn->prepare($sql);
-        $stmt->execute(array('class' => $class->getId()));
-
-        return $stmt->fetchAll();
-    }
-
-    /**
-     * @param OntoClass $class
-     * @return array
-     */
-    public function findFilteredOutgoingPropertiesById(OntoClass $class, User $user)
-    {
-        $conn = $this->getEntityManager()
-            ->getConnection();
-
-        // Trouver d'abord les espaces de noms filtrés - juste les clés pour le IN de la requête ci-dessous
-        $em = $this->getEntityManager();
-        $filteredNamespaces = $em->getRepository('AppBundle:OntoNamespace')
-            ->findAllActiveNamespacesForUser($user);
-
-        $classNamespaces = $class->getNamespaces();
-        $isClassNamespace = null;
-
-        foreach ($classNamespaces as $classNamespace){
-            if(!$classNamespace->getIsTopLevelNamespace()){
-                if($classNamespace->getIsOngoing()){
-                    $isClassNamespace = $classNamespace;
-                    break;
-                }
-                else{
-                    $isClassNamespace = $classNamespace;
-                }
-            }
-        }
-
-        if(!in_array($isClassNamespace, $filteredNamespaces)){
-            $filteredNamespaces[] = $isClassNamespace;
-        }
-
-        $idsFilteredNamespaces = array();
-        $qFilteredNamespaces = array();
-        foreach ($filteredNamespaces as $namespace)
-        {
-            $idsFilteredNamespaces[] = $namespace->getId();
-        }
-
-        // Construire la variable qui permet d'avoir ?,?,?... pour la requête ci-dessous
-        for($i=0;$i<count($idsFilteredNamespaces);$i++){
-            $qFilteredNamespaces[] = "?";
-        }
-        $strQFilteredNamespaces = join(',',$qFilteredNamespaces);
-
-        $sql = "SELECT  identifier_property AS property,
-                        identifier_range AS range,
-                        pk_property AS \"propertyId\",
-                        pk_range AS \"rangeId\",
-                        identifier_domain AS domain,
-                        che.get_root_namespace(nsp.pk_namespace) AS \"rootNamespaceId\",
-                        (SELECT label FROM che.get_namespace_labels(nsp.pk_namespace) WHERE language_iso_code = 'en') AS namespace,
-                        nsp.pk_namespace AS \"namespaceId\"
-                    FROM che.v_properties_with_domain_range,
-                        che.associates_namespace asnsp,
-                        che.namespace nsp
-                    WHERE asnsp.fk_property = pk_property
-                    AND pk_domain = ?
-                    AND nsp.pk_namespace = asnsp.fk_namespace 
-                    AND nsp.pk_namespace IN (".$strQFilteredNamespaces.");";
-
-        $stmt = $conn->prepare($sql);
-        $stmt->execute(array_merge(array($class->getId()), $idsFilteredNamespaces));
-
-        return $stmt->fetchAll();
-    }
-
-    /**
-     * @param OntoClass $class
-     * @return array
-     */
-    public function findOutgoingInheritedPropertiesById(OntoClass $class)
-    {
-        $conn = $this->getEntityManager()
-            ->getConnection();
-
-        $sql = "SELECT 	identifier_in_namespace AS domain,
-                        pk_parent AS \"parentClassId\",
-                        parent_identifier AS \"parentClass\",
-                        pk_property AS \"propertyId\",
-                        identifier_property AS property,
-                        pk_range AS \"rangeId\",
-                        identifier_range AS range,
-                        replace(ancestors, '|', '→') AS ancestors,
-                        (SELECT label FROM che.get_namespace_labels(nsp.pk_namespace) WHERE language_iso_code = 'en') AS namespace,
-                        nsp.pk_namespace AS \"namespaceId\"
-                FROM 	che.class_outgoing_inherited_properties(:class),
-                        che.associates_namespace asnsp,
-                        che.namespace nsp
-                WHERE 	asnsp.fk_property = pk_property
-                  AND 	nsp.pk_namespace = asnsp.fk_namespace;";
-
-        $stmt = $conn->prepare($sql);
-        $stmt->execute(array('class' => $class->getId()));
-
-        return $stmt->fetchAll();
-    }
-
-    /**
-     * @param OntoClass $class
-     * @param User $user
-     * @return array
-     * @throws \Doctrine\DBAL\DBALException
-     */
-    public function findFilteredOutgoingInheritedPropertiesById(OntoClass $class, User $user)
-    {
-        $conn = $this->getEntityManager()
-            ->getConnection();
-
-        // Trouver d'abord les espaces de noms filtrés - juste les clés pour le IN de la requête ci-dessous
-        $em = $this->getEntityManager();
-        $filteredNamespaces = $em->getRepository('AppBundle:OntoNamespace')
-            ->findAllActiveNamespacesForUser($user);
-
-        $classNamespaces = $class->getNamespaces();
-        $isClassNamespace = null;
-
-        foreach ($classNamespaces as $classNamespace){
-            if(!$classNamespace->getIsTopLevelNamespace()){
-                if($classNamespace->getIsOngoing()){
-                    $isClassNamespace = $classNamespace;
-                    break;
-                }
-                else{
-                    $isClassNamespace = $classNamespace;
-                }
-            }
-        }
-
-        if(!in_array($isClassNamespace, $filteredNamespaces)){
-            $filteredNamespaces[] = $isClassNamespace;
-        }
-
-        $idsFilteredNamespaces = array();
-        $qFilteredNamespaces = array();
-        foreach ($filteredNamespaces as $namespace)
-        {
-            $idsFilteredNamespaces[] = $namespace->getId();
-        }
-
-        // Construire la variable qui permet d'avoir ?,?,?... pour la requête ci-dessous
-        for($i=0;$i<count($idsFilteredNamespaces);$i++){
-            $qFilteredNamespaces[] = "?";
-        }
-        $strQFilteredNamespaces = join(',',$qFilteredNamespaces);
-
-        $sql = "SELECT  identifier_in_namespace AS domain,
-                        pk_parent AS \"parentClassId\",
-                        parent_identifier AS \"parentClass\",
-                        pk_property AS \"propertyId\",
-                        identifier_property AS property,
-                        pk_range AS \"rangeId\",
-                        identifier_range AS range,
-                        replace(ancestors, '|', '→') AS ancestors,
-                        (SELECT label FROM che.get_namespace_labels(nsp.pk_namespace) WHERE language_iso_code = 'en') AS namespace,
-                        nsp.pk_namespace AS \"namespaceId\"
-                FROM 	che.class_outgoing_inherited_properties(?),
-                        che.associates_namespace asnsp,
-                        che.namespace nsp
-                WHERE 	asnsp.fk_property = pk_property
-                  AND 	nsp.pk_namespace = asnsp.fk_namespace
-                  AND   nsp.pk_namespace IN (".$strQFilteredNamespaces.");";
-
-        $stmt = $conn->prepare($sql);
-        $stmt->execute(array_merge(array($class->getId()), $idsFilteredNamespaces));
-
-        return $stmt->fetchAll();
-    }
-
-    /**
-     * @param OntoClass $class
-     * @return array
-     */
-    public function findIngoingPropertiesById(OntoClass $class)
-    {
-        $conn = $this->getEntityManager()
-            ->getConnection();
-
-        $sql = "SELECT  pk_domain AS \"domainId\",
-                        identifier_domain AS domain,
-                        identifier_property AS property,
-                        pk_property AS \"propertyId\",
-                        pk_range AS \"rangeId\",
-                        identifier_range AS range,
-                        che.get_root_namespace(nsp.pk_namespace) AS \"rootNamespaceId\",
-                        (SELECT label FROM che.get_namespace_labels(nsp.pk_namespace) WHERE language_iso_code = 'en') AS namespace,
-                        nsp.pk_namespace AS \"namespaceId\"
-                FROM  che.v_properties_with_domain_range,
-                      che.associates_namespace asnsp,
-                      che.namespace nsp 
-                WHERE pk_range = :class
-                  AND asnsp.fk_property = pk_property
-                  AND nsp.pk_namespace = asnsp.fk_namespace;";
-
-        $stmt = $conn->prepare($sql);
-        $stmt->execute(array('class' => $class->getId()));
-
-        return $stmt->fetchAll();
-    }
-
-    /**
-     * @param OntoClass $class
-     * @return array
-     */
-    public function findFilteredIngoingPropertiesById(OntoClass $class, User $user)
-    {
-        $conn = $this->getEntityManager()
-            ->getConnection();
-
-        // Trouver d'abord les espaces de noms filtrés - juste les clés pour le IN de la requête ci-dessous
-        $em = $this->getEntityManager();
-        $filteredNamespaces = $em->getRepository('AppBundle:OntoNamespace')
-            ->findAllActiveNamespacesForUser($user);
-
-        $classNamespaces = $class->getNamespaces();
-        $isClassNamespace = null;
-
-        foreach ($classNamespaces as $classNamespace){
-            if(!$classNamespace->getIsTopLevelNamespace()){
-                if($classNamespace->getIsOngoing()){
-                    $isClassNamespace = $classNamespace;
-                    break;
-                }
-                else{
-                    $isClassNamespace = $classNamespace;
-                }
-            }
-        }
-
-        if(!in_array($isClassNamespace, $filteredNamespaces)){
-            $filteredNamespaces[] = $isClassNamespace;
-        }
-
-        $idsFilteredNamespaces = array();
-        $qFilteredNamespaces = array();
-        foreach ($filteredNamespaces as $namespace)
-        {
-            $idsFilteredNamespaces[] = $namespace->getId();
-        }
-
-        // Construire la variable qui permet d'avoir ?,?,?... pour la requête ci-dessous
-        for($i=0;$i<count($idsFilteredNamespaces);$i++){
-            $qFilteredNamespaces[] = "?";
-        }
-        $strQFilteredNamespaces = join(',',$qFilteredNamespaces);
-
-        $sql = "SELECT  pk_domain AS \"domainId\",
-                        identifier_domain AS domain,
-                        identifier_property AS property,
-                        pk_property AS \"propertyId\",
-                        pk_range AS \"rangeId\",
-                        identifier_range AS range,
-                        che.get_root_namespace(nsp.pk_namespace) AS \"rootNamespaceId\",
-                        (SELECT label FROM che.get_namespace_labels(nsp.pk_namespace) WHERE language_iso_code = 'en') AS namespace,
-                        nsp.pk_namespace AS \"namespaceId\"
-                FROM  che.v_properties_with_domain_range,
-                      che.associates_namespace asnsp,
-                      che.namespace nsp 
-                WHERE pk_range = ?
-                  AND asnsp.fk_property = pk_property
-                  AND nsp.pk_namespace = asnsp.fk_namespace
-                  AND nsp.pk_namespace IN (".$strQFilteredNamespaces.");";
-
-        $stmt = $conn->prepare($sql);
-        $stmt->execute(array_merge(array($class->getId()), $idsFilteredNamespaces));
-
-        return $stmt->fetchAll();
-    }
-
-    /**
-     * @param OntoClass $class
-     * @return array
-     */
-    public function findIngoingInheritedPropertiesById(OntoClass $class)
-    {
-        $conn = $this->getEntityManager()
-            ->getConnection();
-
-        $sql = "SELECT  pk_domain AS \"domainId\",
-                        identifier_domain AS domain,
-                        identifier_property AS property,
-                        pk_property AS \"propertyId\",
-                        pk_parent AS \"rangeId\",
-                        parent_identifier AS range,
-                        replace(ancestors, '|', '→') AS ancestors,
-                        (SELECT label FROM che.get_namespace_labels(nsp.pk_namespace) WHERE language_iso_code = 'en') AS namespace,
-                        nsp.pk_namespace AS \"namespaceId\"
-                FROM  che.class_ingoing_inherited_properties(:class),
-                      che.associates_namespace asnsp,
-                      che.namespace nsp 
-                WHERE asnsp.fk_property = pk_property
-                  AND nsp.pk_namespace = asnsp.fk_namespace;";
-
-        $stmt = $conn->prepare($sql);
-        $stmt->execute(array('class' => $class->getId()));
-
-        return $stmt->fetchAll();
-    }
-
-    /**
-     * @param OntoClass $class
-     * @return array
-     */
-    public function findFilteredIngoingInheritedPropertiesById(OntoClass $class, User $user)
-    {
-        $conn = $this->getEntityManager()
-            ->getConnection();
-
-        // Trouver d'abord les espaces de noms filtrés - juste les clés pour le IN de la requête ci-dessous
-        $em = $this->getEntityManager();
-        $filteredNamespaces = $em->getRepository('AppBundle:OntoNamespace')
-            ->findAllActiveNamespacesForUser($user);
-
-        $classNamespaces = $class->getNamespaces();
-        $isClassNamespace = null;
-
-        foreach ($classNamespaces as $classNamespace){
-            if(!$classNamespace->getIsTopLevelNamespace()){
-                if($classNamespace->getIsOngoing()){
-                    $isClassNamespace = $classNamespace;
-                    break;
-                }
-                else{
-                    $isClassNamespace = $classNamespace;
-                }
-            }
-        }
-
-        if(!in_array($isClassNamespace, $filteredNamespaces)){
-            $filteredNamespaces[] = $isClassNamespace;
-        }
-
-        $idsFilteredNamespaces = array();
-        $qFilteredNamespaces = array();
-        foreach ($filteredNamespaces as $namespace)
-        {
-            $idsFilteredNamespaces[] = $namespace->getId();
-        }
-
-        // Construire la variable qui permet d'avoir ?,?,?... pour la requête ci-dessous
-        for($i=0;$i<count($idsFilteredNamespaces);$i++){
-            $qFilteredNamespaces[] = "?";
-        }
-        $strQFilteredNamespaces = join(',',$qFilteredNamespaces);
-
-        $sql = "SELECT  pk_domain AS \"domainId\",
-                        identifier_domain AS domain,
-                        identifier_property AS property,
-                        pk_property AS \"propertyId\",
-                        pk_parent AS \"rangeId\",
-                        parent_identifier AS range,
-                        replace(ancestors, '|', '→') AS ancestors,
-                        (SELECT label FROM che.get_namespace_labels(nsp.pk_namespace) WHERE language_iso_code = 'en') AS namespace,
-                        nsp.pk_namespace AS \"namespaceId\"
-                FROM  che.class_ingoing_inherited_properties(?),
-                      che.associates_namespace asnsp,
-                      che.namespace nsp 
-                WHERE asnsp.fk_property = pk_property
-                  AND nsp.pk_namespace = asnsp.fk_namespace
-                  AND nsp.pk_namespace IN (".$strQFilteredNamespaces.");";
-
-        $stmt = $conn->prepare($sql);
-        $stmt->execute(array_merge(array($class->getId()), $idsFilteredNamespaces));
-
-        return $stmt->fetchAll();
-    }
-
-    /**
-     * @param Property $property
-     * @return array
-     */
-    public function findAncestorsById(Property $property)
-    {
-        $conn = $this->getEntityManager()
-            ->getConnection();
-
-        $sql = "WITH tw1 AS
+        $sql = "WITH t_ascendants_properties AS
                 (
-                  SELECT pk_parent,
+                SELECT pk_parent,
                      parent_identifier,
                      DEPTH,
-                     ARRAY_TO_STRING(_path,'|') ancestors
+                     ARRAY_TO_STRING(_path,'|') ancestors,
+                        pk_is_subproperty_of,
+                        fk_namespace_for_version
                   FROM che.ascendant_property_hierarchy(:property)
                 )
-                SELECT tw1.pk_parent  AS id,
-                       tw1.parent_identifier AS identifier,
-                       p.has_domain,
+                SELECT t_ascendants_properties.pk_parent  AS id,
+                       t_ascendants_properties.parent_identifier AS identifier,
+                       pv.has_domain,
                        domain.identifier_in_namespace AS \"domainIdentifier\",
-                       domain.standard_label AS \"domainStandardLabel\",
-                       p.domain_instances_min_quantifier,
-                       p.domain_instances_max_quantifier,
-                       p.has_range,
+                       domain_version.standard_label AS \"domainStandardLabel\",
+                       domain_version.fk_namespace_for_version AS \"domainNamespaceId\",
+                       pv.domain_instances_min_quantifier,
+                       pv.domain_instances_max_quantifier,
+                       pv.has_range,
                        range.identifier_in_namespace AS \"rangeIdentifier\",
-                       range.standard_label AS \"rangeStandardLabel\",
-                       p.range_instances_min_quantifier,
-                       p.range_instances_max_quantifier,
-                       tw1.DEPTH,
-                       replace(tw1.ancestors, '|', '→') AS ancestors,
+                       range_version.standard_label AS \"rangeStandardLabel\",
+                       range_version.fk_namespace_for_version AS \"rangeNamespaceId\",
+                       pv.range_instances_min_quantifier,
+                       pv.range_instances_max_quantifier,
+                       t_ascendants_properties.DEPTH,
+                       replace(t_ascendants_properties.ancestors, '|', '→') AS ancestors,
                        che.get_root_namespace(nsp.pk_namespace) AS \"rootNamespaceId\",
                        (SELECT label FROM che.get_namespace_labels(che.get_root_namespace(nsp.pk_namespace)) WHERE language_iso_code = 'en') AS \"rootNamespaceLabel\",
                        nsp.pk_namespace AS \"propertyNamespaceId\",
-                       nsp.standard_label AS \"propertyNamespaceLabel\"
-                FROM tw1,
-                     che.associates_namespace asnsp,
+                       nsp.standard_label AS \"propertyNamespaceLabel\",
+                       t_ascendants_properties.fk_namespace_for_version
+                FROM t_ascendants_properties,
+                     che.property p JOIN che.property_version pv ON p.pk_property = pv.fk_property,
                      che.namespace nsp,
-                     che.property p,
-                     che.class domain,
-                     che.class range
-                WHERE asnsp.fk_property = tw1.pk_parent
-                AND   nsp.pk_namespace = asnsp.fk_namespace
-                AND depth > 1 
-                AND p.pk_property = tw1.pk_parent
-                AND p.has_domain = domain.pk_class
-                AND p.has_range = range.pk_class
-                GROUP BY tw1.pk_parent,
-                     tw1.parent_identifier,
-                     p.has_domain,
+                     che.class domain JOIN che.class_version domain_version ON domain.pk_class = domain_version.fk_class,
+                     che.class range JOIN che.class_version range_version ON range.pk_class = range_version.fk_class
+                WHERE p.pk_property = t_ascendants_properties.pk_parent
+    AND   nsp.pk_namespace = pv.fk_namespace_for_version
+    AND depth > 1
+    AND pv.has_domain = domain.pk_class
+    AND pv.has_range = range.pk_class
+    AND t_ascendants_properties.fk_namespace_for_version = pv.fk_namespace_for_version
+                GROUP BY t_ascendants_properties.pk_parent,
+                     t_ascendants_properties.parent_identifier,
+                     pv.has_domain,
                        domain.identifier_in_namespace,
-                       domain.standard_label,
-                       p.domain_instances_min_quantifier,
-                       p.domain_instances_max_quantifier,
-                       p.has_range,
+                       domain_version.standard_label,
+                       domain_version.fk_namespace_for_version,
+                       pv.domain_instances_min_quantifier,
+                       pv.domain_instances_max_quantifier,
+                       pv.has_range,
                        range.identifier_in_namespace,
-                       range.standard_label,
-                       p.range_instances_min_quantifier,
-                       p.range_instances_max_quantifier,
-                     tw1.depth,
-                     tw1.ancestors,
-                     nsp.pk_namespace";
+                       range_version.standard_label,
+                       range_version.fk_namespace_for_version,
+                       pv.range_instances_min_quantifier,
+                       pv.range_instances_max_quantifier,
+                     t_ascendants_properties.depth,
+                     t_ascendants_properties.ancestors,
+                     nsp.pk_namespace,
+                     t_ascendants_properties.fk_namespace_for_version;";
 
         $stmt = $conn->prepare($sql);
-        $stmt->execute(array('property' => $property->getId()));
+        $stmt->execute(array('property' => $propertyVersion->getProperty()->getId()));
 
         return $stmt->fetchAll();
     }
 
+
     /**
-     * @param Property $property
-     * @return array
+     * @param PropertyVersion $propertyVersion
+     * @param array $namespacesId
+     * @return array Remplace les fonctions obsolètes findDescendantsById et findFilteredDescendantsById
+     * Remplace les fonctions obsolètes findDescendantsById et findFilteredDescendantsById
+     * @throws \Doctrine\DBAL\DBALException
      */
-    public function findFilteredAncestorsById(Property $property, User $user)
+    public function findDescendantsByPropertyVersionAndNamespacesId(PropertyVersion $propertyVersion, array $namespacesId)
     {
         $conn = $this->getEntityManager()
             ->getConnection();
 
-        // Trouver d'abord les espaces de noms filtrés - juste les clés pour le IN de la requête ci-dessous
-        $em = $this->getEntityManager();
-        $filteredNamespaces = $em->getRepository('AppBundle:OntoNamespace')
-            ->findAllActiveNamespacesForUser($user);
-
-        $propertyNamespace = $property->getOngoingNamespace();
-        if(!in_array($propertyNamespace, $filteredNamespaces)){
-            $filteredNamespaces[] = $propertyNamespace;
-        }
-
-        $idsFilteredNamespaces = array();
-        $qFilteredNamespaces = array();
-        foreach ($filteredNamespaces as $namespace)
-        {
-            $idsFilteredNamespaces[] = $namespace->getId();
-        }
-
-        // Construire la variable qui permet d'avoir ?,?,?... pour la requête ci-dessous
-        for($i=0;$i<count($idsFilteredNamespaces);$i++){
-            $qFilteredNamespaces[] = "?";
-        }
-        $strQFilteredNamespaces = join(',',$qFilteredNamespaces);
-
-        $sql = "WITH tw1 AS
-                (
-                  SELECT pk_parent,
-                     parent_identifier,
-                     DEPTH,
-                     ARRAY_TO_STRING(_path,'|') ancestors
-                  FROM che.ascendant_property_hierarchy(?)
-                )
-                SELECT tw1.pk_parent  AS id,
-                       tw1.parent_identifier AS identifier,
-                       p.has_domain,
-                       domain.identifier_in_namespace AS \"domainIdentifier\",
-                       domain.standard_label AS \"domainStandardLabel\",
-                       p.domain_instances_min_quantifier,
-                       p.domain_instances_max_quantifier,
-                       p.has_range,
-                       range.identifier_in_namespace AS \"rangeIdentifier\",
-                       range.standard_label AS \"rangeStandardLabel\",
-                       p.range_instances_min_quantifier,
-                       p.range_instances_max_quantifier,
-                       tw1.DEPTH,
-                       replace(tw1.ancestors, '|', '→') AS ancestors,
-                       che.get_root_namespace(nsp.pk_namespace) AS \"rootNamespaceId\",
-                       (SELECT label FROM che.get_namespace_labels(che.get_root_namespace(nsp.pk_namespace)) WHERE language_iso_code = 'en') AS \"rootNamespaceLabel\",
-                       nsp.pk_namespace AS \"propertyNamespaceId\",
-                       nsp.standard_label AS \"propertyNamespaceLabel\"
-                FROM tw1,
-                     che.associates_namespace asnsp,
-                     che.namespace nsp,
-                     che.property p,
-                     che.class domain,
-                     che.class range
-                WHERE asnsp.fk_property = tw1.pk_parent
-                AND   nsp.pk_namespace = asnsp.fk_namespace
-                AND depth > 1 
-                AND p.pk_property = tw1.pk_parent
-                AND p.has_domain = domain.pk_class
-                AND p.has_range = range.pk_class
-                AND nsp.pk_namespace IN (".$strQFilteredNamespaces.")
-                GROUP BY tw1.pk_parent,
-                     tw1.parent_identifier,
-                     p.has_domain,
-                       domain.identifier_in_namespace,
-                       domain.standard_label,
-                       p.domain_instances_min_quantifier,
-                       p.domain_instances_max_quantifier,
-                       p.has_range,
-                       range.identifier_in_namespace,
-                       range.standard_label,
-                       p.range_instances_min_quantifier,
-                       p.range_instances_max_quantifier,
-                     tw1.depth,
-                     tw1.ancestors,
-                     nsp.pk_namespace";
-
-        $stmt = $conn->prepare($sql);
-        $stmt->execute(array_merge(array($property->getId()), $idsFilteredNamespaces));
-
-        return $stmt->fetchAll();
-    }
-
-    /**
-     * @param Property $property
-     * @return array
-     */
-    public function findDescendantsById(Property $property)
-    {
-        $conn = $this->getEntityManager()
-            ->getConnection();
-
-        $sql = "SELECT  pk_child AS id,
-                        child_identifier as identifier,
-                       p.has_domain,
-                       domain.identifier_in_namespace AS \"domainIdentifier\",
-                       domain.standard_label AS \"domainStandardLabel\",
-                       p.domain_instances_min_quantifier,
-                       p.domain_instances_max_quantifier,
-                       p.has_range,
-                       range.identifier_in_namespace AS \"rangeIdentifier\",
-                       range.standard_label AS \"rangeStandardLabel\",
-                       p.range_instances_min_quantifier,
-                       p.range_instances_max_quantifier,
-                        depth,
-                        replace(descendants, '|', '→') AS descendants,
+        $sql = "SELECT  t_descendants_properties.pk_child AS id,
+                       t_descendants_properties.child_identifier as identifier,
+                       pv.has_domain,
+                       domain_class.identifier_in_namespace AS \"domainIdentifier\",
+                       domain_cv.standard_label AS \"domainStandardLabel\",
+                       domain_cv.fk_namespace_for_version AS \"domainNamespaceId\",
+                       pv.domain_instances_min_quantifier,
+                       pv.domain_instances_max_quantifier,
+                       pv.has_range,
+                       range_class.identifier_in_namespace AS \"rangeIdentifier\",
+                       range_cv.standard_label AS \"rangeStandardLabel\",
+                       range_cv.fk_namespace_for_version AS \"rangeNamespaceId\",
+                       pv.range_instances_min_quantifier,
+                       pv.range_instances_max_quantifier,
+                        t_descendants_properties.depth,
+                        replace(t_descendants_properties.descendants, '|', '→') AS descendants,
                         che.get_root_namespace(nsp.pk_namespace) AS \"rootNamespaceId\",
                        (SELECT label FROM che.get_namespace_labels(che.get_root_namespace(nsp.pk_namespace)) WHERE language_iso_code = 'en') AS \"rootNamespaceLabel\",
                        nsp.pk_namespace AS \"propertyNamespaceId\",
-                       nsp.standard_label AS \"propertyNamespaceLabel\"                   
-                    FROM che.descendant_property_hierarchy((:property)),
-                         che.associates_namespace asnsp,
+                       nsp.standard_label AS \"propertyNamespaceLabel\"
+                    FROM che.descendant_property_hierarchy(:property) t_descendants_properties,
+                         che.property p JOIN che.property_version pv ON p.pk_property = pv.fk_property,
                          che.namespace nsp,
-                         che.property p,
-                         che.class domain,
-                         che.class range
-                    WHERE asnsp.fk_property = pk_child
-                    AND   nsp.pk_namespace = asnsp.fk_namespace    
-                    AND p.pk_property = pk_child
-                    AND p.has_domain = domain.pk_class
-                    AND p.has_range = range.pk_class;
-                         ";
+                         che.class domain_class JOIN che.class_version domain_cv ON domain_class.pk_class = domain_cv.fk_class,
+                         che.class range_class JOIN che.class_version range_cv ON range_class.pk_class = range_cv.fk_class
+                    WHERE pv.fk_property = pk_child
+                    AND   nsp.pk_namespace = pv.fk_namespace_for_version
+                    AND pv.has_domain = domain_class.pk_class
+                    AND pv.has_range = range_class.pk_class;";
 
         $stmt = $conn->prepare($sql);
-        $stmt->execute(array('property' => $property->getId()));
+        $stmt->execute(array('property' => $propertyVersion->getProperty()->getId()));
+
+        return $stmt->fetchAll();
+    }
+
+
+    /**
+     * @param OntoClassVersion $classVersion
+     * @param array $namespacesId
+     * @return Property[]
+     * @throws \Doctrine\DBAL\DBALException
+     * Remplace les fonctions obsolètes findFilteredOutgoingPropertiesById et findOutgoingPropertiesById
+     */
+    public function findOutgoingPropertiesByClassVersionAndNamespacesId(OntoClassVersion $classVersion, array $namespacesId){
+        // Construit la chaine ?,? pour les namespacesId dans la requête SQL
+        $in  = str_repeat('?,', count($namespacesId) - 1) . '?';
+
+        $sql = "SELECT identifier_property AS property,
+                  identifier_range AS range,
+                  v.fk_range_namespace AS \"rangeNamespaceId\",
+                  pk_property AS \"propertyId\",
+                  pk_range AS \"rangeId\",
+                  v.fk_namespace_for_version AS \"propertyNamespaceId\",
+                  identifier_domain AS domain,
+                  v.fk_domain_namespace AS \"domainNamespaceId\",
+                  che.get_root_namespace(fk_namespace_for_version) AS \"rootNamespaceId\",
+                  (SELECT label FROM che.get_namespace_labels(fk_namespace_for_version) WHERE language_iso_code = 'en') AS namespace
+                FROM che.v_properties_with_domain_range v
+                WHERE pk_domain = ?
+                AND fk_domain_namespace IN (".$in.");";
+
+        $conn = $this->getEntityManager()->getConnection();
+        $stmt = $conn->prepare($sql);
+        $stmt->execute(array_merge(array($classVersion->getClass()->getId()), $namespacesId));
 
         return $stmt->fetchAll();
     }
 
     /**
-     * @param Property $property
-     * @return array
+     * @param OntoClassVersion $classVersion
+     * @param array $namespacesId
+     * @return Property[]
+     * @throws \Doctrine\DBAL\DBALException
+     * Remplace les fonctions obsolètes findFilteredOutgoingInheritedPropertiesById et findOutgoingInheritedPropertiesById
      */
-    public function findFilteredDescendantsById(Property $property, User $user)
-    {
-        $conn = $this->getEntityManager()
-            ->getConnection();
+    public function findOutgoingInheritedPropertiesByClassVersionAndNamespacesId(OntoClassVersion $classVersion, array $namespacesId){
+        // Construit la chaine ?,? pour les namespacesId dans la requête SQL
+        $in  = str_repeat('?,', count($namespacesId) - 1) . '?';
 
-        // Trouver d'abord les espaces de noms filtrés - juste les clés pour le IN de la requête ci-dessous
-        $em = $this->getEntityManager();
-        $filteredNamespaces = $em->getRepository('AppBundle:OntoNamespace')
-            ->findAllActiveNamespacesForUser($user);
+        $sql = "SELECT identifier_in_namespace AS domain,
+                  pk_parent AS \"parentClassId\", 
+                  parent_identifier AS \"parentClass\",
+                  pk_property AS \"propertyId\",
+                  identifier_property AS property,
+                  v.fk_namespace_for_version AS \"propertyNamespaceId\",
+                  pk_range AS \"rangeId\",
+                  identifier_range AS range,
+                  v.fk_range_namespace AS \"rangeNamespaceId\",
+                  v.fk_domain_namespace AS \"domainNamespaceId\",
+                  replace(ancestors, '|', '→') AS ancestors,
+                  (SELECT label FROM che.get_namespace_labels(nsp.pk_namespace) WHERE language_iso_code = 'en') AS namespace
+                FROM che.class_outgoing_inherited_properties(?) v,
+                  che.property_version pv,
+                  che.namespace nsp
+                WHERE pv.fk_property = pk_property
+                AND nsp.pk_namespace = pv.fk_namespace_for_version
+                AND nsp.pk_namespace IN (".$in.");";
 
-        $propertyNamespace = $property->getOngoingNamespace();
-        if(!in_array($propertyNamespace, $filteredNamespaces)){
-            $filteredNamespaces[] = $propertyNamespace;
-        }
-
-        $idsFilteredNamespaces = array();
-        $qFilteredNamespaces = array();
-        foreach ($filteredNamespaces as $namespace)
-        {
-            $idsFilteredNamespaces[] = $namespace->getId();
-        }
-
-        // Construire la variable qui permet d'avoir ?,?,?... pour la requête ci-dessous
-        for($i=0;$i<count($idsFilteredNamespaces);$i++){
-            $qFilteredNamespaces[] = "?";
-        }
-        $strQFilteredNamespaces = join(',',$qFilteredNamespaces);
-
-        $sql = "SELECT  pk_child AS id,
-                        child_identifier as identifier,
-                       p.has_domain,
-                       domain.identifier_in_namespace AS \"domainIdentifier\",
-                       domain.standard_label AS \"domainStandardLabel\",
-                       p.domain_instances_min_quantifier,
-                       p.domain_instances_max_quantifier,
-                       p.has_range,
-                       range.identifier_in_namespace AS \"rangeIdentifier\",
-                       range.standard_label AS \"rangeStandardLabel\",
-                       p.range_instances_min_quantifier,
-                       p.range_instances_max_quantifier,
-                        depth,
-                        replace(descendants, '|', '→') AS descendants,
-                        che.get_root_namespace(nsp.pk_namespace) AS \"rootNamespaceId\",
-                       (SELECT label FROM che.get_namespace_labels(che.get_root_namespace(nsp.pk_namespace)) WHERE language_iso_code = 'en') AS \"rootNamespaceLabel\",
-                       nsp.pk_namespace AS \"propertyNamespaceId\",
-                       nsp.standard_label AS \"propertyNamespaceLabel\"                   
-                    FROM che.descendant_property_hierarchy(?),
-                         che.associates_namespace asnsp,
-                         che.namespace nsp,
-                         che.property p,
-                         che.class domain,
-                         che.class range
-                    WHERE asnsp.fk_property = pk_child
-                    AND   nsp.pk_namespace = asnsp.fk_namespace
-                    AND nsp.pk_namespace IN (".$strQFilteredNamespaces.")    
-                    AND p.pk_property = pk_child
-                    AND p.has_domain = domain.pk_class
-                    AND p.has_range = range.pk_class;";
-
+        $conn = $this->getEntityManager()->getConnection();
         $stmt = $conn->prepare($sql);
-        $stmt->execute(array_merge(array($property->getId()),$idsFilteredNamespaces));
+        $stmt->execute(array_merge(array($classVersion->getClass()->getId()), $namespacesId));
 
         return $stmt->fetchAll();
     }
 
     /**
-     * @param Property $property
-     * @return array
+     * @param OntoClassVersion $classVersion
+     * @param array $namespacesId
+     * @return Property[]
+     * @throws \Doctrine\DBAL\DBALException
+     * Remplace les fonctions obsolètes findFilteredIngoingPropertiesById et findIngoingPropertiesById
      */
-    public function findDomainRangeById(Property $property)
-    {
-        $conn = $this->getEntityManager()
-            ->getConnection();
+    public function findIngoingPropertiesByClassVersionAndNamespacesId(OntoClassVersion $classVersion, array $namespacesId){
+        // Construit la chaine ?,? pour les namespacesId dans la requête SQL
+        $in  = str_repeat('?,', count($namespacesId) - 1) . '?';
+
+        $sql = "SELECT pk_domain AS \"domainId\",
+                  identifier_domain AS domain,
+                  identifier_property AS property,
+                  pk_property AS \"propertyId\",
+                  v.fk_namespace_for_version AS \"propertyNamespaceId\",
+                  pk_range AS \"rangeId\",
+                  identifier_range AS range,
+                  v.fk_range_namespace AS \"rangeNamespaceId\",
+                  v.fk_domain_namespace AS \"domainNamespaceId\",
+                  che.get_root_namespace(fk_namespace_for_version) AS \"rootNamespaceId\",
+                  (SELECT label FROM che.get_namespace_labels(fk_namespace_for_version) WHERE language_iso_code = 'en') AS namespace
+                FROM che.v_properties_with_domain_range v
+                WHERE pk_range = ?
+                AND fk_range_namespace IN (".$in.");";
+
+        $conn = $this->getEntityManager()->getConnection();
+        $stmt = $conn->prepare($sql);
+        $stmt->execute(array_merge(array($classVersion->getClass()->getId()), $namespacesId));
+
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * @param OntoClassVersion $classVersion
+     * @param array $namespacesId
+     * @return Property[]
+     * @throws \Doctrine\DBAL\DBALException
+     * Remplace les fonctions obsolètes findFilteredIngoingInheritedPropertiesById et findIngoingInheritedPropertiesById
+     */
+    public function findIngoingInheritedPropertiesByClassVersionAndNamespacesId(OntoClassVersion $classVersion, array $namespacesId){
+        // Construit la chaine ?,? pour les namespacesId dans la requête SQL
+        $in  = str_repeat('?,', count($namespacesId) - 1) . '?';
+
+        $sql = "SELECT pk_domain AS \"domainId\",
+                  identifier_domain AS domain,
+                  identifier_property AS property,
+                  pk_property AS \"propertyId\",
+                  v.fk_namespace_for_version AS \"propertyNamespaceId\",
+                  pk_parent AS \"rangeId\",
+                  parent_identifier AS range,
+                  v.fk_range_namespace AS \"rangeNamespaceId\",
+                  v.fk_domain_namespace AS \"domainNamespaceId\",
+                  replace(ancestors, '|', '→') AS ancestors,
+                  (SELECT label FROM che.get_namespace_labels(nsp.pk_namespace) WHERE language_iso_code = 'en') AS namespace
+                FROM che.class_ingoing_inherited_properties(?) v,
+                  che.property_version pv,
+                  che.namespace nsp 
+                WHERE pv.fk_property = pk_property
+                AND nsp.pk_namespace = pv.fk_namespace_for_version
+                AND nsp.pk_namespace IN (".$in.");";
+
+        $conn = $this->getEntityManager()->getConnection();
+        $stmt = $conn->prepare($sql);
+        $stmt->execute(array_merge(array($classVersion->getClass()->getId()), $namespacesId));
+
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * @param PropertyVersion $propertyVersion
+     * @param array $namespacesId
+     * Remplace la fonction obsolète findDomainRangeById
+     */
+    public function findDomainAndRangeByPropertyVersionAndNamespacesId(PropertyVersion $propertyVersion, array $namespacesId){
+        $conn = $this->getEntityManager()->getConnection();
+        // Construit la chaine ?,? pour les namespacesId dans la requête SQL
+        $in  = str_repeat('?,', count($namespacesId) - 1) . '?';
 
         $sql = "SELECT  pk_domain AS \"domainId\",
                         identifier_domain AS \"domainIdentifier\",
+                        fk_domain_namespace AS \"domainNamespaceId\",
                         identifier_property AS \"propertyIdentifier\",
                         pk_range AS \"rangeId\",
+                        fk_range_namespace AS \"rangeNamespaceId\",
                         identifier_range AS \"rangeIdentifier\"
                 FROM che.v_properties_with_domain_range
-                WHERE pk_property = :property";
+                WHERE pk_property = ?
+                AND fk_namespace_for_version IN (".$in.");";
 
         $stmt = $conn->prepare($sql);
-        $stmt->execute(array('property' => $property->getId()));
+        $stmt->execute(array_merge(array($propertyVersion->getProperty()->getId()), $namespacesId));
 
         return $stmt->fetch();
     }
@@ -855,10 +410,12 @@ class PropertyRepository extends EntityRepository
      */
     public function findPropertiesByProfileId(Profile $profile){
         return $this->createQueryBuilder('property')
-            ->join('property.namespaces','nspc')
+            ->join('property.propertyVersions','pv')
+            ->join('pv.namespaceForVersion','nspc')
             ->join('property.profiles', 'profile')
             ->where('profile.id = :profile')
             ->addSelect('profile')
+            ->addSelect('pv')
             ->addSelect('nspc')
             ->leftJoin('nspc.referencedVersion', 'referencedVersion')
             ->addSelect('referencedVersion')
@@ -889,8 +446,9 @@ class PropertyRepository extends EntityRepository
                                     ELSE aspro.fk_system_type
                                 END AS fk_system_type
                 FROM che.v_properties_with_domain_range
-                JOIN che.associates_namespace asnsp ON asnsp.fk_property = pk_property
-                JOIN che.namespace nsp ON nsp.pk_namespace = asnsp.fk_namespace 
+                JOIN che.property_version pv ON pv.fk_property = pk_property
+                JOIN che.namespace nsp ON nsp.pk_namespace = pv.fk_namespace_for_version
+                JOIN che.associates_referenced_namespace asrefns ON asrefns.fk_referenced_namespace = pv.fk_namespace_for_version AND asrefns.fk_profile = :profile                    
                 LEFT JOIN che.associates_profile aspro ON aspro.fk_property = pk_property AND aspro.fk_profile = :profile AND aspro.fk_inheriting_range_class IS NULL AND aspro.fk_inheriting_domain_class IS NULL
                 
                 WHERE pk_domain = :class;";
@@ -923,8 +481,9 @@ class PropertyRepository extends EntityRepository
                             ELSE aspro.fk_system_type
                         END AS fk_system_type
                 FROM  che.v_properties_with_domain_range
-                JOIN che.associates_namespace asnsp ON asnsp.fk_property = pk_property
-                JOIN che.namespace nsp ON nsp.pk_namespace = asnsp.fk_namespace 
+                JOIN che.property_version pv ON pv.fk_property = pk_property
+                JOIN che.namespace nsp ON nsp.pk_namespace = pv.fk_namespace_for_version 
+                JOIN che.associates_referenced_namespace asrefns ON asrefns.fk_referenced_namespace = pv.fk_namespace_for_version AND asrefns.fk_profile = :profile
                 LEFT JOIN che.associates_profile aspro ON aspro.fk_property = pk_property AND aspro.fk_profile = :profile AND aspro.fk_inheriting_range_class IS NULL AND aspro.fk_inheriting_domain_class IS NULL
                 WHERE pk_range = :class;";
 
@@ -952,26 +511,30 @@ class PropertyRepository extends EntityRepository
                     WHEN aspro.fk_system_type IS NULL THEN 999
                     ELSE aspro.fk_system_type
                     END AS fk_system_type
-                FROM che.class_outgoing_inherited_properties(:class)
-                JOIN che.associates_namespace asnsp ON asnsp.fk_property = pk_property
-                JOIN che.namespace nsp ON nsp.pk_namespace = asnsp.fk_namespace
+                FROM che.class_outgoing_inherited_properties(:class) coip
+                JOIN che.property_version pv ON pv.fk_property = coip.pk_property
+                JOIN che.associates_referenced_namespace asrefns ON asrefns.fk_referenced_namespace = pv.fk_namespace_for_version AND asrefns.fk_profile = :profile
                 LEFT JOIN che.associates_profile aspro ON aspro.fk_property = pk_property AND aspro.fk_inheriting_domain_class = :class AND aspro.fk_inheriting_range_class = pk_range AND aspro.fk_profile = :profile
                 
                 UNION DISTINCT
                 
-                SELECT clsdmn.identifier_in_namespace || ' ' || clsdmn.standard_label AS domain,
+                SELECT clsdmn.identifier_in_namespace || ' ' || domain_cv.standard_label AS domain,
                        aspro.fk_property AS \"propertyId\",
-                       prop.identifier_in_namespace  || ' ' ||  prop.standard_label,
+                       prop.identifier_in_namespace  || ' ' ||  pv.standard_label,
                        aspro.fk_inheriting_range_class AS \"rangeId\",
-                       clsrng.identifier_in_namespace || ' ' || clsrng.standard_label AS range,
+                       clsrng.identifier_in_namespace || ' ' || range_cv.standard_label AS range,
                        CASE
                            WHEN aspro.fk_system_type IS NULL THEN 999
                            ELSE aspro.fk_system_type
                            END AS fk_system_type
                 FROM che.associates_profile aspro
                 JOIN che.property prop ON aspro.fk_property = prop.pk_property
+                JOIN che.property_version pv ON prop.pk_property = pv.fk_property
+                JOIN che.associates_referenced_namespace asrefns ON asrefns.fk_referenced_namespace = pv.fk_namespace_for_version AND asrefns.fk_profile = :profile
                 JOIN che.class clsdmn ON aspro.fk_inheriting_domain_class = clsdmn.pk_class
+                JOIN che.class_version domain_cv ON clsdmn.pk_class = domain_cv.fk_class 
                 JOIN che.class clsrng ON aspro.fk_inheriting_range_class = clsrng.pk_class
+                JOIN che.class_version range_cv ON clsrng.pk_class = range_cv.fk_class
                 WHERE aspro.fk_profile = :profile AND aspro.fk_system_type = 5 AND aspro.fk_inheriting_domain_class = :class;";
 
         $stmt = $conn->prepare($sql);
@@ -993,33 +556,38 @@ class PropertyRepository extends EntityRepository
                         identifier_property AS property,
                         pk_property AS \"propertyId\",
                         :class AS \"rangeId\",
-                        cls.identifier_in_namespace || ' ' || cls.standard_label AS range,
+                        cls.identifier_in_namespace || ' ' || cv.standard_label AS range,
                         CASE
                             WHEN aspro.fk_system_type IS NULL THEN 999
                             ELSE aspro.fk_system_type
                             END AS fk_system_type
-                FROM che.class_ingoing_inherited_properties(:class)
-                JOIN che.associates_namespace asnsp ON asnsp.fk_property = pk_property
-                JOIN che.namespace nsp ON nsp.pk_namespace = asnsp.fk_namespace
+                FROM che.class_ingoing_inherited_properties(:class) ciip
+                JOIN che.property_version pv ON pv.fk_property = ciip.pk_property
+                JOIN che.associates_referenced_namespace asrefns ON asrefns.fk_referenced_namespace = pv.fk_namespace_for_version AND asrefns.fk_profile = :profile
                 JOIN che.class cls ON cls.pk_class = :class
+                JOIN che.class_version cv ON cls.pk_class = cv.fk_class
                 LEFT JOIN che.associates_profile aspro ON aspro.fk_property = pk_property AND aspro.fk_inheriting_range_class = :class AND aspro.fk_inheriting_domain_class = pk_domain AND aspro.fk_profile = :profile
                 
                 UNION DISTINCT
                 
                 SELECT clsdmn.pk_class AS \"domainId\",
-                       clsdmn.identifier_in_namespace || ' ' || clsdmn.standard_label AS domain,
-                       prop.identifier_in_namespace  || ' ' ||  prop.standard_label AS property,
+                       clsdmn.identifier_in_namespace || ' ' || domain_cv.standard_label AS domain,
+                       prop.identifier_in_namespace  || ' ' ||  pv.standard_label AS property,
                        aspro.fk_property AS \"propertyId\",
                        aspro.fk_inheriting_range_class AS \"rangeId\",
-                       clsrng.identifier_in_namespace || ' ' || clsrng.standard_label AS range,
+                       clsrng.identifier_in_namespace || ' ' || range_cv.standard_label AS range,
                        CASE
                            WHEN aspro.fk_system_type IS NULL THEN 999
                            ELSE aspro.fk_system_type
                            END AS fk_system_type
                 FROM che.associates_profile aspro
-                         JOIN che.property prop ON aspro.fk_property = prop.pk_property
-                         JOIN che.class clsdmn ON aspro.fk_inheriting_domain_class = clsdmn.pk_class
-                         JOIN che.class clsrng ON aspro.fk_inheriting_range_class = clsrng.pk_class
+                JOIN che.property prop ON aspro.fk_property = prop.pk_property
+                JOIN che.property_version pv ON prop.pk_property = pv.fk_property   
+                JOIN che.associates_referenced_namespace asrefns ON asrefns.fk_referenced_namespace = pv.fk_namespace_for_version AND asrefns.fk_profile = :profile
+                JOIN che.class clsdmn ON aspro.fk_inheriting_domain_class = clsdmn.pk_class
+                JOIN che.class_version domain_cv ON clsdmn.pk_class = domain_cv.fk_class
+                JOIN che.class clsrng ON aspro.fk_inheriting_range_class = clsrng.pk_class
+                JOIN che.class_version range_cv ON clsrng.pk_class = range_cv.fk_class
                 WHERE aspro.fk_profile = :profile AND aspro.fk_system_type = 5 AND aspro.fk_inheriting_range_class = :class;";
 
         $stmt = $conn->prepare($sql);
@@ -1029,162 +597,13 @@ class PropertyRepository extends EntityRepository
     }
 
     /**
-     * @param Property $property
+     * @param PropertyVersion $propertyVersion
+     * @param array $namespacesId
      * @return array
+     * Remplace les fonctions obsolètes findRelationsById et findFilteredRelationsById
      */
-    public function findRelationsById(Property $property)
-    {
-        $conn = $this->getEntityManager()
-            ->getConnection();
-
-        $sql = "SELECT
-                ea.pk_entity_association,
-                ea.fk_target_property AS fk_related_property,
-                p.identifier_in_namespace,
-                p.standard_label,
-                st.standard_label AS relation,
-                txtp.pk_text_property,
-                ns.pk_namespace AS \"rootNamespaceId\",
-                ns.standard_label AS \"standardLabelNamespace\"
-                FROM
-                che.entity_association AS ea
-                LEFT JOIN che.system_type AS st
-                ON st.pk_system_type = ea.fk_system_type
-                LEFT JOIN che.property AS p
-                ON ea.fk_target_property = p.pk_property
-                LEFT JOIN (SELECT * FROM che.text_property WHERE fk_text_property_type = 15) AS txtp
-                ON txtp.fk_entity_association = ea.pk_entity_association
-                LEFT JOIN che.associates_namespace AS ans
-                ON ans.fk_entity_association = ea.pk_entity_association
-                LEFT JOIN che.namespace AS ns
-                ON ns.pk_namespace= che.get_root_namespace(ans.fk_namespace)
-                WHERE
-                ea.fk_system_type IN (18, 20)
-                AND p.pk_property IS NOT NULL
-                AND ea.fk_source_property = :property
-                UNION
-                SELECT
-                ea.pk_entity_association,
-                ea.fk_source_property AS fk_related_property,
-                p.identifier_in_namespace,
-                p.standard_label,
-                st.standard_label AS relation,
-                txtp.pk_text_property,
-                ns.pk_namespace AS \"rootNamespaceId\",
-                ns.standard_label AS \"standardLabelNamespace\"
-                FROM
-                che.entity_association AS ea
-                LEFT JOIN che.system_type AS st
-                ON st.pk_system_type = ea.fk_system_type
-                LEFT JOIN che.property AS p
-                ON ea.fk_source_property = p.pk_property
-                LEFT JOIN (SELECT * FROM che.text_property WHERE fk_text_property_type = 15) AS txtp
-                ON txtp.fk_entity_association = ea.pk_entity_association
-                LEFT JOIN che.associates_namespace AS ans
-                ON ans.fk_entity_association = ea.pk_entity_association
-                LEFT JOIN che.namespace AS ns
-                ON ns.pk_namespace= che.get_root_namespace(ans.fk_namespace)
-                WHERE
-                ea.fk_system_type IN (18, 20)
-                AND p.pk_property IS NOT NULL
-                AND ea.fk_target_property = :property";
-
-        $stmt = $conn->prepare($sql);
-        $stmt->execute(array('property' => $property->getId()));
-
-        return $stmt->fetchAll();
-    }
-
-    /**
-     * @param Property $property
-     * @return array
-     */
-    public function findFilteredRelationsById(Property $property, User $user)
-    {
-        $conn = $this->getEntityManager()
-            ->getConnection();
-
-        // Trouver d'abord les espaces de noms filtrés - juste les clés pour le IN de la requête ci-dessous
-        $em = $this->getEntityManager();
-        $filteredNamespaces = $em->getRepository('AppBundle:OntoNamespace')
-            ->findAllActiveNamespacesForUser($user);
-
-        $propertyNamespace = $property->getOngoingNamespace();
-        if(!in_array($propertyNamespace, $filteredNamespaces)){
-            $filteredNamespaces[] = $propertyNamespace;
-        }
-
-        $idsFilteredNamespaces = array();
-        $qFilteredNamespaces = array();
-        foreach ($filteredNamespaces as $namespace)
-        {
-            $idsFilteredNamespaces[] = $namespace->getId();
-        }
-
-        // Construire la variable qui permet d'avoir ?,?,?... pour la requête ci-dessous
-        for($i=0;$i<count($idsFilteredNamespaces);$i++){
-            $qFilteredNamespaces[] = "?";
-        }
-        $strQFilteredNamespaces = join(',',$qFilteredNamespaces);
-
-        $sql = "SELECT
-                ea.pk_entity_association,
-                ea.fk_target_property AS fk_related_property,
-                p.identifier_in_namespace,
-                p.standard_label,
-                st.standard_label AS relation,
-                txtp.pk_text_property,
-                ns.pk_namespace AS \"rootNamespaceId\",
-                ns.standard_label AS \"standardLabelNamespace\"
-                FROM
-                che.entity_association AS ea
-                LEFT JOIN che.system_type AS st
-                ON st.pk_system_type = ea.fk_system_type
-                LEFT JOIN che.property AS p
-                ON ea.fk_target_property = p.pk_property
-                LEFT JOIN (SELECT * FROM che.text_property WHERE fk_text_property_type = 15) AS txtp
-                ON txtp.fk_entity_association = ea.pk_entity_association
-                LEFT JOIN che.associates_namespace AS ans
-                ON ans.fk_entity_association = ea.pk_entity_association
-                LEFT JOIN che.namespace AS ns
-                ON ns.pk_namespace= che.get_root_namespace(ans.fk_namespace)
-                WHERE
-                ea.fk_system_type IN (18, 20)
-                AND p.pk_property IS NOT NULL
-                AND ea.fk_source_property = ?
-                AND ns.pk_namespace IN (".$strQFilteredNamespaces.")
-                UNION
-                SELECT
-                ea.pk_entity_association,
-                ea.fk_source_property AS fk_related_property,
-                p.identifier_in_namespace,
-                p.standard_label,
-                st.standard_label AS relation,
-                txtp.pk_text_property,
-                ns.pk_namespace AS \"rootNamespaceId\",
-                ns.standard_label AS \"standardLabelNamespace\"
-                FROM
-                che.entity_association AS ea
-                LEFT JOIN che.system_type AS st
-                ON st.pk_system_type = ea.fk_system_type
-                LEFT JOIN che.property AS p
-                ON ea.fk_source_property = p.pk_property
-                LEFT JOIN (SELECT * FROM che.text_property WHERE fk_text_property_type = 15) AS txtp
-                ON txtp.fk_entity_association = ea.pk_entity_association
-                LEFT JOIN che.associates_namespace AS ans
-                ON ans.fk_entity_association = ea.pk_entity_association
-                LEFT JOIN che.namespace AS ns
-                ON ns.pk_namespace= che.get_root_namespace(ans.fk_namespace)
-                WHERE
-                ea.fk_system_type IN (18, 20)
-                AND p.pk_property IS NOT NULL
-                AND ea.fk_target_property = ?
-                AND ns.pk_namespace IN (".$strQFilteredNamespaces.");";
-
-        $stmt = $conn->prepare($sql);
-        $stmt->execute(array_merge(array($property->getId()) , $idsFilteredNamespaces, array($property->getId()), $idsFilteredNamespaces));
-
-        return $stmt->fetchAll();
+    public function findRelationsByPropertyVersionAndNamespacesId(PropertyVersion $propertyVersion, array $namespacesId){
+        return array();
     }
 
     /**

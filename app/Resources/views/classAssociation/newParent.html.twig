@@ -30,8 +30,8 @@
                 </div>
                 <h2>
                     Add new parent class for {{ childClass.identifierInNamespace }}
-                    <a href="{{ path('class_show', {
-                        id: childClass.id,
+                    <a href="{{ path('class_edit', {
+                        'id': childClass.id,
                         '_fragment': 'class-hierarchy'
                     }) }}" class="pull-right btn btn-link">
                         <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
@@ -40,7 +40,7 @@
 
                 {{ form_start(parentClassAssociationForm) }}
                     {{ form_errors(parentClassAssociationForm) }}
-                    {{ form_row(parentClassAssociationForm.parentClass) }}
+                    {{ form_row(parentClassAssociationForm.parentClassVersion) }}
 
                     {{ form_row(parentClassAssociationForm.childClass) }}
 
@@ -99,7 +99,14 @@
     <script>
 
         $(document).ready(function() {
-            $('#parent_class_association_form_parentClass').select2({
+            // Remplissage par défaut
+            $('#parent_class_association_form_parentClass').val($('#parent_class_association_form_parentClassVersion').val());
+
+            $('#parent_class_association_form_parentClassVersion').change(function() {
+                $('#parent_class_association_form_parentClass').val($(this).val());
+            });
+
+            $('#parent_class_association_form_parentClassVersion').select2({
                 sorter: function(data) {
                     /* Sort data using lowercase comparison */
                     return data.sort(function (a, b) {

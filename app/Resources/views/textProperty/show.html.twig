@@ -6,11 +6,13 @@
                 <h2>
 
                     {% if textProperty.class is not null %}
-                        {% set route = 'class_show' %}
-                        {{ textProperty.systemType.standardLabel|capitalize }} for the class {{ textProperty.class }}
+                        {% set route = 'class_show_with_version' %}
+                        {% set namespaceFromUrlId = textProperty.namespaceForVersion.id %}
+                        {{ textProperty.systemType.standardLabel|capitalize }} for the class {{ textProperty.class.classVersionForDisplay(textProperty.namespaceForVersion) }}
                     {% elseif textProperty.property is not null %}
-                        {% set route = 'property_show' %}
-                        {{ textProperty.systemType.standardLabel|capitalize }} for the property {{ textProperty.property }}
+                        {% set route = 'property_show_with_version' %}
+                        {% set namespaceFromUrlId = textProperty.namespaceForVersion.id %}
+                        {{ textProperty.systemType.standardLabel|capitalize }} for the property {{ textProperty.property.propertyVersionForDisplay(textProperty.namespaceForVersion) }}
                     {% elseif textProperty.namespace is not null %}
                         {% set route = 'namespace_show' %}
                         {% if textProperty.object is not null %}
@@ -58,19 +60,24 @@
                     {% elseif textProperty.propertyAssociation is not null %}
                         {% set route = 'property_association_show' %}
                     {% elseif textProperty.entityAssociation is not null %}
-                        {% set route = 'property_association_show' %}
-                        {% if textProperty.object is not null %}
-                            {% if textProperty.object.identifierInNamespace is not null %}
-                                {{ textProperty.object.standardLabel }} – {{ textProperty.object.identifierInNamespace }}: {{ textProperty.systemType.standardLabel }}
-                            {% else %}
-                                {{ textProperty.object.objectIdentification }}: {{ textProperty.systemType.standardLabel }}
-                            {% endif %}
-                        {% else %}
-                            {{ textProperty.systemType.standardLabel }}
+                        {% set route = 'entity_association_show' %}
+                        {% if textProperty.entityAssociation.sourceClass is not null %}
+                            {{ textProperty.entityAssociation.sourceClass }} {{ textProperty.entityAssociation.systemType.standardLabel }} {{ textProperty.entityAssociation.targetClass }} : {{ textProperty.systemType.standardLabel }}
+                        {% elseif textProperty.entityAssociation.sourceProperty is not null %}
+                            {{ textProperty.entityAssociation.sourceClass }} {{ textProperty.entityAssociation.systemType.standardLabel }} {{ textProperty.entityAssociation.targetClass }} : {{ textProperty.systemType.standardLabel }}
                         {% endif %}
                     {% endif %}
 
-                    {% if route is not null %}
+                    {% if route is not null and namespaceFromUrlId is not null %}
+                    <a href="{{ path(route, {
+                        'id':textProperty.object.id,
+                        'namespaceFromUrlId': namespaceFromUrlId,
+                        '_fragment': 'definition'}) }}"
+                       class="pull-right btn btn-link"
+                       role="button">
+                        <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
+                    </a>
+                    {% elseif route is not null %}
                     <a href="{{ path(route, {'id':textProperty.object.id, '_fragment': 'definition'}) }}"
                        class="pull-right btn btn-link"
                        role="button">

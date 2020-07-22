@@ -9,6 +9,7 @@ Flexbox Layout
 
 .header {
     justify-content: space-between;
+    display: block;
 }
 
 .navi {
@@ -51,10 +52,51 @@ body {
     margin: 0;
 }
 
+#masthead{
+    position: relative;
+    max-width: 100%;
+}
+
 .header {
     padding: 10px 10px;
     margin: 0 auto;
     background-color: #81B9BA;
+}
+
+#logo-main-menu-row{
+    margin-left: 0px;
+    margin-right: 0px;
+    display: flex;
+}
+
+.site-branding {
+    height: 100%;
+    margin-bottom: 0px;
+    width: 263px;
+}
+
+h4#site-title {
+    /*color: rgb(225, 115, 102); dev*/
+    color: white;
+    font-weight: 800;
+    margin-top: 5px;
+    clear: none;
+}
+
+.right-header-part{
+    /*background-color: rgb(225, 115, 102); dev*/
+    background-color: #81B9BA;
+    height: 100%;
+    flex: 1;
+}
+
+#login-logout-block{
+    margin-top: 15px;
+    margin-right: 15px;
+}
+
+.no-margin{
+    margin:0;
 }
 
 .logo-icon {
@@ -109,6 +151,18 @@ body {
     margin-bottom: 15px;
 }
 
+@media screen and (max-width: 1200px) {
+    #logo-main-menu-row {
+
+    }
+}
+
+@media screen and (max-width: 1140px) {
+    #site-logo {
+        float: none;
+    }
+}
+
 @media all and (min-width: 1030px) {
     .header {
         min-width: 768px;
@@ -124,6 +178,10 @@ body {
 /******************************
 BODY Styling
 *******************************/
+
+.text-white{
+    color: white;
+}
 
 .object-details-list, .notes-header {
     padding-left: 20px;
@@ -516,6 +574,53 @@ Main components
     }
 }
 
+@media screen and (max-width: 768px) {
+    /*Pre Header et Header*/
+    h1#site-title{
+        text-align: center;
+    }
+
+    .site-branding {
+        width: 100%;
+    }
+
+    .right-header-part {
+        width: 100%;
+        padding-top: 5px;
+    }
+
+    #login-logout-block{
+        position: absolute;
+        top: 0;
+        right: 0;
+    }
+
+    #dfhc-block{
+        position: relative;
+        padding-right: 15px;
+    }
+
+    #site-logo {
+        padding-top: 15px;
+        float: none;
+    }
+
+    #logo-main-menu-row {
+        height: 100%;
+        display: block;
+    }
+
+    select.mnav{
+        width: 100%;
+        margin-bottom: 20px;
+    }
+
+    #main-menu{
+        display:none;
+    }
+
+}
+
 @-webkit-keyframes cd-bounce-2 {
     0% {
         opacity: 0;
@@ -753,4 +858,8 @@ FOOTER Styling
 #summary div.row div
 {
     padding: 10px;
+}
+
+.inline-block{
+    display: inline-block;
 }
