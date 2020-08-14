@@ -11,10 +11,12 @@ namespace AppBundle\Controller;
 use AppBundle\Entity\OntoClass;
 use AppBundle\Entity\OntoClassVersion;
 use AppBundle\Entity\Property;
+use AppBundle\Entity\SystemType;
 use AppBundle\Entity\TextProperty;
 use AppBundle\Form\TextPropertyForm;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 
 class TextPropertyController extends Controller
@@ -303,5 +305,122 @@ class TextPropertyController extends Controller
             'textPropertyForm' => $form->createView()
         ]);
 
+    }
+
+    /**
+     * @Route("/text-property/{id}/edit-validity/{status}", name="text_property_validation_status_edit")
+     * @Method({"POST"})
+     * @param TextProperty $textProperty
+     * @param SystemType $validationStatus
+     * @param Request $request
+     * @throws \Exception in case of unsuccessful association
+     * @return JsonResponse a Json formatted namespaces list
+     */
+    public function editValidationStatusAction(TextProperty $textProperty, SystemType $validationStatus, Request $request)
+    {
+        if(!is_null($textProperty->getClassAssociation())){
+            $object = $textProperty->getClassAssociation();
+            $redirectToRoute = 'class_association_edit';
+            $redirectToRouteFragment = 'justifications';
+        }
+        else if(!is_null($textProperty->getPropertyAssociation())){
+            $object = $textProperty->getPropertyAssociation();
+            $redirectToRoute = 'property_association_edit';
+            $redirectToRouteFragment = 'justifications';
+        }
+        else if(!is_null($textProperty->getEntityAssociation())){
+            $object = $textProperty->getEntityAssociation();
+
+            $redirectToRoute = 'entity_association_edit';
+            if($request->attributes->get('_route') == 'text_property_inverse_edit'){
+                $redirectToRoute = 'entity_association_inverse_edit';
+            }
+
+            $redirectToRouteFragment = 'justifications';
+        }
+        else if(!is_null($textProperty->getClass())){
+            $object = $textProperty->getClass();
+            $redirectToRoute = 'class_edit';
+            $redirectToRouteFragment = 'definition';
+        }
+        else if(!is_null($textProperty->getProperty())){
+            $object = $textProperty->getProperty();
+            $redirectToRoute = 'property_edit';
+            $redirectToRouteFragment = 'definition';
+        }
+        else if(!is_null($textProperty->getProject())){
+            $object = $textProperty->getProject();
+            $redirectToRoute = 'project_edit';
+            $redirectToRouteFragment = 'definition';
+        }
+        else if(!is_null($textProperty->getProfile())){
+            $object = $textProperty->getProfile();
+            $redirectToRoute = 'profile_edit';
+            $redirectToRouteFragment = 'identification';
+        }
+        else if(!is_null($textProperty->getNamespace())){
+            $object = $textProperty->getNamespace();
+            $redirectToRoute = 'namespace_edit';
+            $redirectToRouteFragment = 'definition';
+        }
+        else throw $this->createNotFoundException('The related object for the text property  n° '.$textProperty->getId().' does not exist. Please contact an administrator.');
+
+        if(!is_null($textProperty->getClassAssociation())){
+            $this->denyAccessUnlessGranted('edit', $object->getChildClass()->getClassVersionForDisplay());
+        }
+        else if(!is_null($textProperty->getPropertyAssociation())){
+            $this->denyAccessUnlessGranted('edit', $object->getChildProperty()->getPropertyVersionForDisplay());
+        }
+        else if(!is_null($textProperty->getEntityAssociation())){
+            if($object->getSource() instanceof OntoClass){
+                $this->denyAccessUnlessGranted('edit', $object->getSource()->getClassVersionForDisplay());
+            }
+            elseif($object->getSource() instanceof Property){
+                $this->denyAccessUnlessGranted('edit', $object->getSource()->getPropertyVersionForDisplay());
+            }
+        }
+        else{
+            $this->denyAccessUnlessGranted('edit', $object);
+        }
+
+        $textProperty->setModifier($this->getUser());
+
+        $newValidationStatus = new SystemType();
+
+        try{
+            $em = $this->getDoctrine()->getManager();
+            $newValidationStatus = $em->getRepository('AppBundle:SystemType')
+                ->findOneBy(array('id' => $validationStatus->getId()));
+        } catch (\Exception $e) {
+            $message = $e->getMessage();
+            $status = 'Error';
+            $response = array(
+                'status' => $status,
+                'message' => $message
+            );
+            return new JsonResponse($response,400, 'content-type:application/problem+json');
+        }
+
+        if (!is_null($newValidationStatus)) {
+            $statusId = int_val($newValidationStatus->getId());
+            if (in_array($statusId, [26,27,28], true)) {
+                $textProperty->setValidationStatus($newValidationStatus);
+                $textProperty->setModifier($this->getUser());
+                $textProperty->setModificationTime(new \DateTime('now'));
+
+                $em->persist($textProperty);
+
+                $em->flush();
+                $status = 'Success';
+                $message = 'Property successfully associated';
+            }
+        }
+
+        $response = array(
+            'status' => $status,
+            'message' => $message
+        );
+
+        return new JsonResponse($response);
     }
 }

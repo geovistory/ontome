@@ -10,12 +10,14 @@ namespace AppBundle\Security;
 
 use AppBundle\Entity\Property;
 use AppBundle\Entity\User;
+use LogicException;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 
 class PropertyVoter extends Voter
 {
     const EDIT = 'edit';
+    const EDITMANAGER = 'edit_manager';
 
     protected function supports($attribute, $subject)
     {
@@ -47,9 +49,11 @@ class PropertyVoter extends Voter
         switch ($attribute) {
             case self::EDIT:
                 return $this->canEdit($property, $user);
+            case self::EDITMANAGER:
+                return $this->canEditManager($property, $user);
         }
 
-        throw new \LogicException('This code should not be reached!');
+        throw new LogicException('This code should not be reached!');
     }
 
     /**
@@ -68,6 +72,27 @@ class PropertyVoter extends Voter
 
             if($userProjectAssociation->getProject() === $property->getPropertyVersionForDisplay()->getNamespaceForVersion()->getProjectForTopLevelNamespace()
                 && $userProjectAssociation->getPermission() <= 3){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * @param Property $property
+     * @param User $user
+     * @return bool TRUE if $user is the administrator or a manager of $class project and $user and $class have matching namespace (thanks to the $userProjectAssociation)
+     */
+    private function canEditManager(Property $property, User $user)
+    {
+        foreach($user->getUserProjectAssociations()->getIterator() as $i => $userProjectAssociation) {
+            // On ne peut éditer une property que si elle dispose d'une seule version
+            if(!$property->getPropertyVersionForDisplay()->getNamespaceForVersion()->getIsOngoing() || count($property->getPropertyVersions()) > 1) {
+                return false;
+            }
+
+            if($userProjectAssociation->getProject() === $property->getPropertyVersionForDisplay()->getNamespaceForVersion()->getProjectForTopLevelNamespace()
+                && $userProjectAssociation->getPermission() <= 2){
                 return true;
             }
         }
