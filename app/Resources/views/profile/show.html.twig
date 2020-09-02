@@ -238,7 +238,7 @@
                         if profileAssociation.property is not null
                         and profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion) is not null %}
                         <tr>
-                            <td class="text-nowrap text-right small">
+                            <td class="text-right small">
                                 {% if profileAssociation.domain is not null %}
                                     {# Propriété héritée #}
                                     <a href="{{ path('class_show_with_version', {
@@ -274,7 +274,7 @@
                                     {% endif %})
                                 {% endif %}
                             </td>
-                            <td class="text-nowrap text-center">
+                            <td class="text-center">
                                 <a href="{{ path('property_show_with_version', {
                                     'id': profileAssociation.property.id,
                                     'namespaceFromUrlId': profileAssociation.entityNamespaceForVersion.id
@@ -299,7 +299,7 @@
                                     {% endif %})
                                 {% endif %}
                             </td>
-                            <td class="text-nowrap small">
+                            <td class="small">
                                 {% if profileAssociation.range is not null %}
                                     {# propriété héritée #}
                                     <a href="{{ path('class_show_with_version', {

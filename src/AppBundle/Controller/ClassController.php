@@ -184,25 +184,25 @@ class ClassController extends Controller
 
         $em = $this->getDoctrine()->getManager();
 
-        // FILTRAGE : Récupérer les clés de namespaces à utiliser
-        if(is_null($this->getUser()) || $this->getUser()->getCurrentActiveProject()->getId() == 21){ // Utilisateur non connecté OU connecté et utilisant le projet public
-            $namespacesId = $em->getRepository('AppBundle:OntoNamespace')->findPublicProjectNamespacesId();
-        }
-        else{ // Utilisateur connecté et utilisant un autre projet
-            $namespacesId = $em->getRepository('AppBundle:OntoNamespace')->findNamespacesIdByUser($this->getUser());
+        // $namespacesIdFromClassVersion : Ensemble de namespaces provenant de la classe affiché (namespaceForVersion + references)
+        $namespacesIdFromClassVersion[] = $classVersion->getNamespaceForVersion()->getId();
+
+        foreach($classVersion->getNamespaceForVersion()->getReferencedNamespaceAssociations() as $referencedNamespacesAssociation){
+            $namespacesIdFromClassVersion[] = $referencedNamespacesAssociation->getReferencedNamespace()->getId();
         }
 
-        // Affaiblir le filtrage en rajoutant le namespaceForVersion de la classVersion si indisponible
-        $namespaceForClassVersion = $classVersion->getNamespaceForVersion();
-        if(!in_array($namespaceForClassVersion->getId(), $namespacesId)){
-            $namespacesId[] = $namespaceForClassVersion->getId();
+        // $namespacesIdFromUser : Ensemble de tous les namespaces activés par l'utilisateur
+        if(is_null($this->getUser()) || $this->getUser()->getCurrentActiveProject()->getId() == 21){
+            $namespacesIdFromUser = $em->getRepository('AppBundle:OntoNamespace')->findPublicProjectNamespacesId();
         }
-        // Sans oublier les namespaces références si indisponibles
-        foreach($namespaceForClassVersion->getReferencedNamespaceAssociations() as $referencedNamespacesAssociation){
-            if(!in_array($referencedNamespacesAssociation->getReferencedNamespace()->getId(), $namespacesId)){
-                $namespacesId[] = $referencedNamespacesAssociation->getReferencedNamespace()->getId();
-            }
+        else{ // Utilisateur connecté et utilisant un autre projet
+            $namespacesIdFromUser = $em->getRepository('AppBundle:OntoNamespace')->findNamespacesIdByUser($this->getUser());
         }
+        // sauf ceux automatiquement activés par l'entité
+        $namespacesIdFromUser = array_diff($namespacesIdFromUser, $namespacesIdFromClassVersion);
+
+        // $namespacesId : Tous les namespaces trouvés ci-dessus
+        $namespacesId = array_merge($namespacesIdFromClassVersion, $namespacesIdFromUser);
 
         $ancestors = $em->getRepository('AppBundle:OntoClass')->findAncestorsByClassVersionAndNamespacesId($classVersion, $namespacesId);
         $descendants = $em->getRepository('AppBundle:OntoClass')->findDescendantsByClassVersionAndNamespacesId($classVersion, $namespacesId);
@@ -222,7 +222,10 @@ class ClassController extends Controller
             'outgoingInheritedProperties' => $outgoingInheritedProperties,
             'ingoingProperties' => $ingoingProperties,
             'ingoingInheritedProperties' => $ingoingInheritedProperties,
-            'namespacesId' => $namespacesId
+            'namespacesId' => $namespacesId,
+            'namespacesIdFromClassVersion' => $namespacesIdFromClassVersion,
+            'namespacesIdFromUser' => $namespacesIdFromUser
+
         ));
     }
 
@@ -234,7 +237,8 @@ class ClassController extends Controller
     public function editAction(OntoClass $class, Request $request)
     {
         // Récupérer la version de la classe demandée
-        // Dans l'ordre : (la version demandée - TO DO) > la version ongoing > la version la plus récente > la première version dans la boucle
+        // En mode Edit on a besoin de la version ongoing
+        // la version automatiquement retournée par cette fonction est la version ongoing.
         $classVersion = $class->getClassVersionForDisplay();
 
         // On doit avoir une version de la classe sinon on lance une exception.
@@ -244,25 +248,25 @@ class ClassController extends Controller
 
         $em = $this->getDoctrine()->getManager();
 
-        // FILTRAGE : Récupérer les clés de namespaces à utiliser
-        if(is_null($this->getUser()) || $this->getUser()->getCurrentActiveProject()->getId() == 21){ // Utilisateur non connecté OU connecté et utilisant le projet public
-            $namespacesId = $em->getRepository('AppBundle:OntoNamespace')->findPublicProjectNamespacesId();
-        }
-        else{ // Utilisateur connecté et utilisant un autre projet
-            $namespacesId = $em->getRepository('AppBundle:OntoNamespace')->findNamespacesIdByUser($this->getUser());
+        // $namespacesIdFromClassVersion : Ensemble de namespaces provenant de la classe affiché (namespaceForVersion + references)
+        $namespacesIdFromClassVersion[] = $classVersion->getNamespaceForVersion()->getId();
+
+        foreach($classVersion->getNamespaceForVersion()->getReferencedNamespaceAssociations() as $referencedNamespacesAssociation){
+            $namespacesIdFromClassVersion[] = $referencedNamespacesAssociation->getReferencedNamespace()->getId();
         }
 
-        // Affaiblir le filtrage en rajoutant le namespaceForVersion de la classVersion si indisponible
-        $namespaceForClassVersion = $classVersion->getNamespaceForVersion();
-        if(!in_array($namespaceForClassVersion->getId(), $namespacesId)){
-            $namespacesId[] = $namespaceForClassVersion->getId();
+        // $namespacesIdFromUser : Ensemble de tous les namespaces activés par l'utilisateur
+        if(is_null($this->getUser()) || $this->getUser()->getCurrentActiveProject()->getId() == 21){
+            $namespacesIdFromUser = $em->getRepository('AppBundle:OntoNamespace')->findPublicProjectNamespacesId();
         }
-        // Sans oublier les namespaces références si indisponibles
-        foreach($namespaceForClassVersion->getReferencedNamespaceAssociations() as $referencedNamespacesAssociation){
-            if(!in_array($referencedNamespacesAssociation->getReferencedNamespace()->getId(), $namespacesId)){
-                $namespacesId[] = $referencedNamespacesAssociation->getReferencedNamespace()->getId();
-            }
+        else{ // Utilisateur connecté et utilisant un autre projet
+            $namespacesIdFromUser = $em->getRepository('AppBundle:OntoNamespace')->findNamespacesIdByUser($this->getUser());
         }
+        // sauf ceux automatiquement activés par l'entité
+        $namespacesIdFromUser = array_diff($namespacesIdFromUser, $namespacesIdFromClassVersion);
+
+        // $namespacesId : Tous les namespaces trouvés ci-dessus
+        $namespacesId = array_merge($namespacesIdFromClassVersion, $namespacesIdFromUser);
 
         $ancestors = $em->getRepository('AppBundle:OntoClass')->findAncestorsByClassVersionAndNamespacesId($classVersion, $namespacesId);
         $descendants = $em->getRepository('AppBundle:OntoClass')->findDescendantsByClassVersionAndNamespacesId($classVersion, $namespacesId);
@@ -331,6 +335,8 @@ class ClassController extends Controller
             'ingoingProperties' => $ingoingProperties,
             'ingoingInheritedProperties' => $ingoingInheritedProperties,
             'namespacesId' => $namespacesId,
+            'namespacesIdFromClassVersion' => $namespacesIdFromClassVersion,
+            'namespacesIdFromUser' => $namespacesIdFromUser,
             'classIdentifierForm' => $formIdentifier->createView()
         ));
     }
