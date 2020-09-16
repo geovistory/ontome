@@ -91,12 +91,12 @@
                 <h3>{{ classVersion.invertedLabel }}</h3>
                 <div class="container">
                     {# Subclass of #}
-                    {% set associationCount = 0 %}
+                    {% set isSubclassOf = false %}
                     {% for association in classVersion.class.childClassAssociations
                         if association.namespaceForVersion.id in namespacesId %}
-                        {% set associationCount = associationCount + 1 %}
+                        {% set isSubclassOf = true %}
                     {% endfor %}
-                    {% if associationCount > 0 %}
+                    {% if isSubclassOf %}
                         <div class="row">
                             <div class="col-lg-2">
                                 <p>Subclass of:</p>
@@ -106,25 +106,29 @@
                                     {# Filtrer les associations is_subclass_of avec namespacesId #}
                                     {% for association in classVersion.class.childClassAssociations
                                         if association.namespaceForVersion.id in namespacesId %}
+
+                                        {# Initialisation #}
                                         {% set parentClassVersion = null %}
                                         {% set isGoodNamespace = true %}
-                                        {# est ce qu'une version parentClass existe dans les namespaces de la classe affichée ? #}
+                                        {% set route = 'class_show_with_version' %}
+                                        {% set route_params = {'id': association.parentClass.id,  'namespaceFromUrlId': association.parentClassNamespace.id } %}
+
+                                        {# Est ce qu'une version parentClass existe dans les namespaces sélectionnés de l'association ? #}
                                         {% for iParentClassVersion in association.parentClass.classVersions
-                                            if iParentClassVersion.namespaceForVersion.id in namespacesIdFromClassVersion %}
+                                            if iParentClassVersion.namespaceForVersion.id in association.namespaceForVersion.selectedNamespacesId %}
                                             {% set parentClassVersion = iParentClassVersion %}
                                         {% endfor %}
-                                        {# aucune version n'a été retrouvée on prend celle par défaut et on le met en rouge  #}
+
+                                        {# Aucune version n'a été retrouvée on prend celle par défaut et on le met en rouge  #}
                                         {% if parentClassVersion is null %}
                                             {% set parentClassVersion = association.parentClass.classVersions|first %}
                                             {% set isGoodNamespace = false %}
+                                            {% set route = 'namespace_show' %}
+                                            {% set route_params = {'id': association.namespaceForVersion.id,  '_fragment': 'mismatches' } %}
                                         {% endif %}
                                         <li>
-                                            <a href="{{ path('class_show_with_version', {
-                                                'id': association.parentClass.id,
-                                                'namespaceFromUrlId': association.parentClassNamespace.id
-                                            }) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
-                                                {{ parentClassVersion.invertedLabel }}
-                                            </a>
+                                            <a href="{{ path(route, route_params) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
+                                                {{ parentClassVersion.invertedLabel }}</a>
                                         </li>
                                     {% endfor %}
                                 </ul>
@@ -133,12 +137,12 @@
                     {% endif %}
 
                     {# Superclass of #}
-                    {% set associationCount = 0 %}
+                    {% set isSuperclassOf = false %}
                     {% for association in classVersion.class.parentClassAssociations
                         if association.namespaceForVersion.id in namespacesId %}
-                        {% set associationCount = associationCount + 1 %}
+                        {% set isSuperclassOf = true %}
                     {% endfor %}
-                    {% if associationCount > 0 %}
+                    {% if isSuperclassOf %}
                         <div class="row">
                             <div class="col-lg-2">
                                 <p>Superclass of:</p>
@@ -148,25 +152,29 @@
                                     {# Filtrer les associations is_subclass_of avec namespacesId #}
                                     {% for association in classVersion.class.parentClassAssociations
                                         if association.namespaceForVersion.id in namespacesId %}
+
+                                        {# (Ré)initialisation #}
                                         {% set childClassVersion = null %}
                                         {% set isGoodNamespace = true %}
-                                        {# est ce qu'une version childClass existe dans les namespaces de la classe affichée ? #}
+                                        {% set route = 'class_show_with_version' %}
+                                        {% set route_params = {'id': association.childClass.id,  'namespaceFromUrlId': association.childClassNamespace.id } %}
+
+                                        {# est ce qu'une version childClass existe dans les namespaces sélectionnés de l'association ? #}
                                         {% for iChildClassVersion in association.childClass.classVersions
-                                            if iChildClassVersion.namespaceForVersion.id in namespacesIdFromClassVersion %}
+                                            if iChildClassVersion.namespaceForVersion.id in association.namespaceForVersion.selectedNamespacesId %}
                                             {% set childClassVersion = iChildClassVersion %}
                                         {% endfor %}
+
                                         {# aucune version n'a été retrouvée on prend celle par défaut et on le met en rouge #}
                                         {% if childClassVersion is null %}
                                             {% set childClassVersion = association.childClass.classVersions|first %}
                                             {% set isGoodNamespace = false %}
+                                            {% set route = 'namespace_show' %}
+                                            {% set route_params = {'id': association.namespaceForVersion.id,  '_fragment': 'mismatches' } %}
                                         {% endif %}
                                         <li>
-                                            <a href="{{ path('class_show_with_version', {
-                                                'id': association.childClass.id,
-                                                'namespaceFromUrlId': association.childClassNamespace.id }
-                                            ) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
-                                                {{ childClassVersion.invertedLabel }}
-                                            </a>
+                                            <a href="{{ path(route, route_params) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
+                                                {{ childClassVersion.invertedLabel }}</a>
                                         </li>
                                     {% endfor %}
                                 </ul>
@@ -175,14 +183,13 @@
                     {% endif %}
 
                     {# Relations #}
-                    {% set relationCount = 0 %}
+                    {% set isRelated = false %}
                     {% for relation in classVersion.class.entityAssociations
                         if relation.namespaceForVersion.id in namespacesId
-                        and relation.systemType.id == 4
-                        or relation.systemType.id == 19 %}
-                        {% set relationCount = relationCount + 1 %}
+                        and relation.systemType.id in [4,19] %}
+                        {% set isRelated = true %}
                     {% endfor %}
-                    {% if relationCount > 0 %}
+                    {% if isRelated %}
                         <div class="row">
                             <div class="col-lg-2">
                                 <p>Relations:</p>
@@ -193,46 +200,58 @@
                                     {# SystemTypes utilisés: 4=owl:equivalentClass, 19=owl:DisjointWith #}
                                     {% for relation in classVersion.class.entityAssociations
                                         if relation.namespaceForVersion.id in namespacesId
-                                        and relation.systemType.id == 4
-                                        or relation.systemType.id == 19 %}
+                                        and relation.systemType.id in [4,19] %}
                                         <li>{{ relation.systemType.standardLabel }}
-                                            {# la classe peut être "source" et/ou "target" #}
                                             {% if relation.sourceClass.id == classVersion.class.id %}
+                                                {# La classe affichée est "source", on cherche le "target" #}
+
+                                                {# Initialisation #}
                                                 {% set targetClassVersion = null %}
                                                 {% set isGoodNamespace = true %}
+                                                {% set route = 'class_show_with_version' %}
+                                                {% set route_params = {'id': relation.targetClass.id,  'namespaceFromUrlId': relation.targetNamespaceForVersion.id } %}
+
+                                                {# Est ce qu'une version targetClass existe dans les namespaces sélectionnés de l'association ? #}
                                                 {% for iTargetClassVersion in relation.targetClass.classVersions
-                                                    if iTargetClassVersion.namespaceForVersion.id in namespacesIdFromClassVersion %}
+                                                    if iTargetClassVersion.namespaceForVersion.id in relation.namespaceForVersion.selectedNamespacesId %}
                                                     {% set targetClassVersion = iTargetClassVersion %}
                                                 {% endfor %}
-                                                {# aucune version n'a été retrouvée on prend celle par défaut et on le met en rouge #}
+
+                                                {# Aucune version n'a été retrouvée on prend celle par défaut et on le met en rouge #}
                                                 {% if targetClassVersion is null %}
                                                     {% set targetClassVersion = relation.targetClass.classVersions|first %}
                                                     {% set isGoodNamespace = false %}
+                                                    {% set route = 'namespace_show' %}
+                                                    {% set route_params = {'id': relation.namespaceForVersion.id,  '_fragment': 'mismatches' } %}
                                                 {% endif %}
-                                                <a href="{{ path("class_show_with_version", {
-                                                    'id': relation.targetClass.id,
-                                                    'namespaceFromUrlId': relation.targetNamespaceForVersion.id }
-                                                ) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
-                                                    {{ targetClassVersion.invertedLabel }}
-                                                </a>
+
+                                                <a href="{{ path(route, route_params) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
+                                                    {{ targetClassVersion.invertedLabel }}</a>
                                             {% else %}
+                                                {# La classe affichée est "target", on cherche la "source" #}
+
+                                                {# Initialisation #}
                                                 {% set sourceClassVersion = null %}
                                                 {% set isGoodNamespace = true %}
+                                                {% set route = 'class_show_with_version' %}
+                                                {% set route_params = {'id': relation.sourceClass.id,  'namespaceFromUrlId': relation.sourceNamespaceForVersion.id } %}
+
+                                                {# Est ce qu'une version sourceClass existe dans les namespaces sélectionnés de l'association ? #}
                                                 {% for iSourceClassVersion in relation.sourceClass.classVersions
-                                                    if iSourceClassVersion.namespaceForVersion.id in namespacesIdFromClassVersion %}
+                                                    if iSourceClassVersion.namespaceForVersion.id in relation.namespaceForVersion.selectedNamespacesId %}
                                                     {% set sourceClassVersion = iSourceClassVersion %}
                                                 {% endfor %}
-                                                {# aucune version n'a été retrouvée on prend celle par défaut et on le met en rouge #}
+
+                                                {# Aucune version n'a été retrouvée on prend celle par défaut et on le met en rouge #}
                                                 {% if sourceClassVersion is null %}
                                                     {% set sourceClassVersion = relation.sourceClass.classVersions|first %}
                                                     {% set isGoodNamespace = false %}
+                                                    {% set route = 'namespace_show' %}
+                                                    {% set route_params = {'id': relation.namespaceForVersion.id,  '_fragment': 'mismatches' } %}
                                                 {% endif %}
-                                                <a href="{{ path("class_show_with_version", {
-                                                    'id': relation.sourceClass.id,
-                                                    'namespaceFromUrlId': relation.sourceNamespaceForVersion.id }
-                                                ) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
-                                                    {{ sourceClassVersion.invertedLabel }}
-                                                </a>
+
+                                                <a href="{{ path(route, route_params) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
+                                                    {{ sourceClassVersion.invertedLabel }}</a>
                                             {% endif %}
                                         </li>
                                     {% endfor %}
@@ -325,18 +344,26 @@
                                 <ul class="list-unstyled">
                                     {# inutile de filtrer outgoingProperties car déjà fait par le repository #}
                                     {% for outgoingProperty in outgoingProperties %}
+
+                                        {# Initialisation #}
                                         {% set isGoodNamespace = true %}
-                                        {% if outgoingProperty.rangeNamespaceId not in namespacesIdFromClassVersion %}
+                                        {% set route = 'class_show_with_version' %}
+                                        {% set route_params = {'id': outgoingProperty.rangeId,  'namespaceFromUrlId': outgoingProperty.rangeNamespaceId } %}
+
+                                        {# Vérification #}
+                                        {% if outgoingProperty.rangeNamespaceId not in outgoingProperty.selectedNamespacesId %}
                                             {% set isGoodNamespace = false %}
+                                            {% set route = 'namespace_show' %}
+                                            {% set route_params = {'id': outgoingProperty.propertyNamespaceId,  '_fragment': 'mismatches' } %}
                                         {% endif %}
+
                                         <li>
                                             <a href="{{ path('property_show_with_version', {
                                                 'id': outgoingProperty.propertyId,
-                                                'namespaceFromUrlId': classVersion.namespaceForVersion.id }) }}">{{ outgoingProperty.property }}</a>
-                                            → <a href="{{ path('class_show_with_version', {
-                                                'id': outgoingProperty.rangeId,
-                                                'namespaceFromUrlId': classVersion.namespaceForVersion.id  }
-                                            ) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
+                                                'namespaceFromUrlId': outgoingProperty.propertyNamespaceId
+                                            }) }}">{{ outgoingProperty.property }}</a>
+                                            →
+                                            <a href="{{ path(route, route_params) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
                                                 {{ outgoingProperty.range }}</a>
                                         </li>
                                     {% endfor %}
@@ -345,7 +372,7 @@
                         </div>
                     {% endif %}
 
-                    {# Ingoing properties #}
+                    {# Incoming properties #}
                     {% if ingoingProperties|length > 0 %}
                         <div class="row">
                             <div class="col-lg-2">
@@ -354,18 +381,27 @@
                             <div class="col-lg-10">
                                 <ul class="list-unstyled">
                                     {% for ingoingProperty in ingoingProperties %}
+
+                                        {# Initialisation #}
                                         {% set isGoodNamespace = true %}
-                                        {% if ingoingProperty.domainNamespaceId not in namespacesIdFromClassVersion %}
+                                        {% set route = 'class_show_with_version' %}
+                                        {% set route_params = {'id': ingoingProperty.domainId,  'namespaceFromUrlId': ingoingProperty.domainNamespaceId } %}
+
+                                        {# Vérification #}
+                                        {% if ingoingProperty.domainNamespaceId not in ingoingProperty.selectedNamespacesId %}
                                             {% set isGoodNamespace = false %}
+                                            {% set route = 'namespace_show' %}
+                                            {% set route_params = {'id': ingoingProperty.propertyNamespaceId,  '_fragment': 'mismatches' } %}
                                         {% endif %}
-                                        <li><a href="{{ path('class_show_with_version', {
-                                                'id': ingoingProperty.domainId,
-                                                'namespaceFromUrlId': classVersion.namespaceForVersion.id  }
-                                            ) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
+
+                                        <li>
+                                            <a href="{{ path(route, route_params) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
                                                 {{ ingoingProperty.domain }}</a>
-                                            → <a href="{{ path('property_show_with_version', {
+                                            →
+                                            <a href="{{ path('property_show_with_version', {
                                                 'id': ingoingProperty.propertyId,
-                                                'namespaceFromUrlId': classVersion.namespaceForVersion.id }) }}">{{ ingoingProperty.property }}</a>
+                                                'namespaceFromUrlId': classVersion.namespaceForVersion.id }) }}">
+                                                {{ ingoingProperty.property }}</a>
                                         </li>
                                     {% endfor %}
                                 </ul>
@@ -374,7 +410,6 @@
                     {% endif %}
                 </div>
             </div>
-
             <div id="definition" class="tab-pane fade">
                 <div class="pull-right add-div">
                     <a href="{{ path('text_property_new', {'type': 'scope-note', 'object': 'class', 'objectId': classVersion.class.id })}}"
@@ -587,7 +622,6 @@
                     </tbody>
                 </table>
             </div>
-
             <div id="identification" class="tab-pane fade">
                 {# Test de vérification si cet identifiant existe déjà dans un namespace fermé (il n'est donc plus éditable #}
                 {% set isIdentifierExistAndPublished = false %}
@@ -708,7 +742,6 @@
                     </tbody>
                 </table>
             </div>
-
             <div id="class-hierarchy" class="tab-pane fade">
                 <div class="pull-right add-div">
                     <a href="{{ path('new_parent_class_form', {'childClass': classVersion.class.id}) }}" class="btn btn-primary pull-right">Add <span class="fa fa-plus-circle"></span></a>
@@ -735,16 +768,21 @@
                     </tr>
                     </thead>
                     <tbody>
+                    {# Filtrer les associations is_subclass_of avec namespacesId #}
                     {% for association in classVersion.class.childClassAssociations
                         if association.namespaceForVersion.id in namespacesId %}
+
+                        {# Initialisation #}
                         {% set parentClassVersion = null %}
                         {% set isGoodNamespace = true %}
-                        {# est ce qu'une version parentClass existe dans les namespaces de la classe affichée ? #}
+
+                        {# Est ce qu'une version parentClass existe dans les namespaces sélectionnés de l'association ? #}
                         {% for iParentClassVersion in association.parentClass.classVersions
-                            if iParentClassVersion.namespaceForVersion.id in namespacesIdFromClassVersion %}
+                            if iParentClassVersion.namespaceForVersion.id in association.namespaceForVersion.selectedNamespacesId %}
                             {% set parentClassVersion = iParentClassVersion %}
                         {% endfor %}
-                        {# aucune version n'a été retrouvée on prend celle par défaut et on le met en rouge  #}
+
+                        {# Aucune version n'a été retrouvée on prend celle par défaut et on le met en rouge  #}
                         {% if parentClassVersion is null %}
                             {% set parentClassVersion = association.parentClass.classVersions|first %}
                             {% set isGoodNamespace = false %}
@@ -815,16 +853,12 @@
                     </thead>
                     <tbody>
                     {% for ancestor in ancestors|sort %}
-                        {% set isGoodNamespace = true %}
-                        {% if ancestor.classNamespaceId not in namespacesIdFromClassVersion %}
-                            {% set isGoodNamespace = false %}
-                        {% endif %}
                         <tr>
                             <td>
                                 <a href="{{ path('class_show', {
                                     'id': ancestor.id,
                                     '_fragment': 'class-hierarchy'
-                                }) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
+                                }) }}" >
                                     {{ ancestor.identifier }}
                                 </a>
                             </td>
@@ -845,16 +879,12 @@
                     </thead>
                     <tbody>
                     {% for descendant in descendants|sort %}
-                        {% set isGoodNamespace = true %}
-                        {% if descendant.classNamespaceId not in namespacesIdFromClassVersion %}
-                            {% set isGoodNamespace = false %}
-                        {% endif %}
                         <tr>
                             <td>
                                 <a href="{{ path('class_show', {
                                     'id': descendant.id,
                                     '_fragment': 'class-hierarchy'
-                                }) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
+                                }) }}">
                                     {{ descendant.identifier }}
                                 </a>
                             </td>
@@ -888,49 +918,63 @@
                     </thead>
                     <tbody>
                     {% for relation in classVersion.class.entityAssociations
-                        if relation.systemType.id == 4 or relation.systemType.id == 19
+                        if relation.systemType.id in [4,19]
                         and relation.namespaceForVersion.id in namespacesId %}
                         <tr>
                             <td>{{ relation.systemType }}</td>
-                            {% if classVersion.class.id == relation.sourceClass.id %}
-                                {% set targetClassVersion = null %}
-                                {% set isGoodNamespace = true %}
-                                {% for iTargetClassVersion in relation.targetClass.classVersions
-                                    if iTargetClassVersion.namespaceForVersion.id in namespacesIdFromClassVersion %}
-                                    {% set targetClassVersion = iTargetClassVersion %}
-                                {% endfor %}
-                                {# aucune version n'a été retrouvée on prend celle par défaut et on le met en rouge #}
-                                {% if targetClassVersion is null %}
-                                    {% set targetClassVersion = relation.targetClass.classVersions|first %}
-                                    {% set isGoodNamespace = false %}
+                            <td>
+                                {% if relation.sourceClass.id == classVersion.class.id %}
+                                    {# La classe affichée est "source", on cherche le "target" #}
+
+                                    {# Initialisation #}
+                                    {% set targetClassVersion = null %}
+                                    {% set isGoodNamespace = true %}
+                                    {% set route = 'class_show_with_version' %}
+                                    {% set route_params = {'id': relation.targetClass.id,  'namespaceFromUrlId': relation.targetNamespaceForVersion.id } %}
+
+                                    {# Est ce qu'une version targetClass existe dans les namespaces sélectionnés de l'association ? #}
+                                    {% for iTargetClassVersion in relation.targetClass.classVersions
+                                        if iTargetClassVersion.namespaceForVersion.id in relation.namespaceForVersion.selectedNamespacesId %}
+                                        {% set targetClassVersion = iTargetClassVersion %}
+                                    {% endfor %}
+
+                                    {# Aucune version n'a été retrouvée on prend celle par défaut et on le met en rouge #}
+                                    {% if targetClassVersion is null %}
+                                        {% set targetClassVersion = relation.targetClass.classVersions|first %}
+                                        {% set isGoodNamespace = false %}
+                                        {% set route = 'namespace_show' %}
+                                        {% set route_params = {'id': relation.namespaceForVersion.id,  '_fragment': 'mismatches' } %}
+                                    {% endif %}
+
+                                    <a href="{{ path(route, route_params) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
+                                        {{ targetClassVersion.invertedLabel }}</a>
+                                {% else %}
+                                    {# La classe affichée est "target", on cherche la "source" #}
+
+                                    {# Initialisation #}
+                                    {% set sourceClassVersion = null %}
+                                    {% set isGoodNamespace = true %}
+                                    {% set route = 'class_show_with_version' %}
+                                    {% set route_params = {'id': relation.sourceClass.id,  'namespaceFromUrlId': relation.sourceNamespaceForVersion.id } %}
+
+                                    {# Est ce qu'une version sourceClass existe dans les namespaces sélectionnés de l'association ? #}
+                                    {% for iSourceClassVersion in relation.sourceClass.classVersions
+                                        if iSourceClassVersion.namespaceForVersion.id in relation.namespaceForVersion.selectedNamespacesId %}
+                                        {% set sourceClassVersion = iSourceClassVersion %}
+                                    {% endfor %}
+
+                                    {# Aucune version n'a été retrouvée on prend celle par défaut et on le met en rouge #}
+                                    {% if sourceClassVersion is null %}
+                                        {% set sourceClassVersion = relation.sourceClass.classVersions|first %}
+                                        {% set isGoodNamespace = false %}
+                                        {% set route = 'namespace_show' %}
+                                        {% set route_params = {'id': relation.namespaceForVersion.id,  '_fragment': 'mismatches' } %}
+                                    {% endif %}
+
+                                    <a href="{{ path(route, route_params) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
+                                        {{ sourceClassVersion.invertedLabel }}</a>
                                 {% endif %}
-                                <td><a href="{{ path('class_show_with_version', {
-                                        'id': relation.targetClass.id,
-                                        'namespaceFromUrlId': relation.targetNamespaceForVersion.id
-                                    }) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
-                                        {{ relation.targetClass.classVersionForDisplay(relation.targetNamespaceForVersion).invertedLabel }}
-                                    </a>
-                                </td>
-                            {% else %}
-                                {% set sourceClassVersion = null %}
-                                {% set isGoodNamespace = true %}
-                                {% for iSourceClassVersion in relation.sourceClass.classVersions
-                                    if iSourceClassVersion.namespaceForVersion.id in namespacesIdFromClassVersion %}
-                                    {% set sourceClassVersion = iSourceClassVersion %}
-                                {% endfor %}
-                                {# aucune version n'a été retrouvée on prend celle par défaut et on le met en rouge #}
-                                {% if sourceClassVersion is null %}
-                                    {% set sourceClassVersion = relation.sourceClass.classVersions|first %}
-                                    {% set isGoodNamespace = false %}
-                                {% endif %}
-                                <td><a href="{{ path('class_show_with_version', {
-                                        'id': relation.sourceClass.id,
-                                        'namespaceFromUrlId': relation.sourceNamespaceForVersion.id
-                                    }) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
-                                        {{ relation.sourceClass.classVersionForDisplay(relation.sourceNamespaceForVersion).invertedLabel }}
-                                    </a>
-                                </td>
-                            {% endif %}
+                            </td>
                             <td>
                                 {% if relation.textProperties is not null %}
                                     {% for textProperty in relation.textProperties if textProperty.systemType.id == 15 %}
@@ -996,7 +1040,6 @@
                     </tbody>
                 </table>
             </div>
-
             <div id="properties" class="tab-pane fade">
                 {% if is_granted('edit', classVersion) %}
                     <div class="pull-right add-div">
@@ -1015,10 +1058,6 @@
                     </thead>
                     <tbody>
                     {% for outgoingProperty in outgoingProperties|sort %}
-                        {% set isGoodNamespace = true %}
-                        {% if outgoingProperty.rangeNamespaceId not in namespacesIdFromClassVersion %}
-                            {% set isGoodNamespace = false %}
-                        {% endif %}
                         <tr>
                             <td>
                                 {{ outgoingProperty.domain }}
@@ -1032,12 +1071,20 @@
                                 </a>
                             </td>
                             <td>
-                                <a href="{{ path('class_show_with_version', {
-                                    'id': outgoingProperty.rangeId,
-                                    'namespaceFromUrlId': outgoingProperty.rangeNamespaceId
-                                }) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
-                                    {{ outgoingProperty.range }}
-                                </a>
+                                {# Initialisation #}
+                                {% set isGoodNamespace = true %}
+                                {% set route = 'class_show_with_version' %}
+                                {% set route_params = {'id': outgoingProperty.rangeId,  'namespaceFromUrlId': outgoingProperty.rangeNamespaceId } %}
+
+                                {# Vérification #}
+                                {% if outgoingProperty.rangeNamespaceId not in outgoingProperty.selectedNamespacesId %}
+                                    {% set isGoodNamespace = false %}
+                                    {% set route = 'namespace_show' %}
+                                    {% set route_params = {'id': outgoingProperty.propertyNamespaceId,  '_fragment': 'mismatches' } %}
+                                {% endif %}
+
+                                <a href="{{ path(route, route_params) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
+                                    {{ outgoingProperty.range }}</a>
                             </td>
                             <td>{{ outgoingProperty.namespace }}</td>
                         </tr>
@@ -1116,17 +1163,25 @@
                     <tbody>
                     {% for ingoingProperty in ingoingProperties|sort %}
                         {% set isGoodNamespace = true %}
-                        {% if ingoingProperty.domainNamespaceId not in namespacesIdFromClassVersion %}
+                        {% if ingoingProperty.domainNamespaceId not in ingoingProperty.selectedNamespacesId %}
                             {% set isGoodNamespace = false %}
                         {% endif %}
                         <tr>
                             <td>
-                                <a href="{{ path('class_show_with_version', {
-                                    'id': ingoingProperty.domainId,
-                                    'namespaceFromUrlId': ingoingProperty.domainNamespaceId
-                                }) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
-                                    {{ ingoingProperty.domain }}
-                                </a>
+                                {# Initialisation #}
+                                {% set isGoodNamespace = true %}
+                                {% set route = 'class_show_with_version' %}
+                                {% set route_params = {'id': ingoingProperty.domainId,  'namespaceFromUrlId': ingoingProperty.domainNamespaceId } %}
+
+                                {# Vérification #}
+                                {% if ingoingProperty.domainNamespaceId not in ingoingProperty.selectedNamespacesId %}
+                                    {% set isGoodNamespace = false %}
+                                    {% set route = 'namespace_show' %}
+                                    {% set route_params = {'id': ingoingProperty.propertyNamespaceId,  '_fragment': 'mismatches' } %}
+                                {% endif %}
+
+                                <a href="{{ path(route, route_params) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
+                                    {{ ingoingProperty.domain }}</a>
                             </td>
                             <td>
                                 <a href="{{ path('property_show_with_version', {

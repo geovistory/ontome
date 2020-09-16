@@ -207,13 +207,16 @@ class PropertyRepository extends EntityRepository
                   pk_property AS \"propertyId\",
                   pk_range AS \"rangeId\",
                   v.fk_namespace_for_version AS \"propertyNamespaceId\",
+                  array_append(array_agg(asrefns.fk_referenced_namespace), v.fk_namespace_for_version) AS \"selectedNamespacesId\",
                   identifier_domain AS domain,
                   v.fk_domain_namespace AS \"domainNamespaceId\",
                   che.get_root_namespace(fk_namespace_for_version) AS \"rootNamespaceId\",
                   (SELECT label FROM che.get_namespace_labels(fk_namespace_for_version) WHERE language_iso_code = 'en') AS namespace
                 FROM che.v_properties_with_domain_range v
-                WHERE pk_domain = ?
-                AND fk_domain_namespace IN (".$in.");";
+                LEFT JOIN che.associates_referenced_namespace asrefns ON v.fk_namespace_for_version = asrefns.fk_namespace
+                WHERE v.pk_domain = ?
+                AND fk_domain_namespace IN (".$in.")
+                GROUP BY v.identifier_property, v.identifier_range, v.fk_range_namespace, v.pk_property, v.pk_range, v.fk_namespace_for_version, v.identifier_domain, v.fk_domain_namespace;";
 
         $conn = $this->getEntityManager()->getConnection();
         $stmt = $conn->prepare($sql);
@@ -239,18 +242,18 @@ class PropertyRepository extends EntityRepository
                   pk_property AS \"propertyId\",
                   identifier_property AS property,
                   v.fk_namespace_for_version AS \"propertyNamespaceId\",
+                  array_append(array_agg(asrefns.fk_referenced_namespace), v.fk_namespace_for_version) AS \"selectedNamespacesId\",
                   pk_range AS \"rangeId\",
                   identifier_range AS range,
                   v.fk_range_namespace AS \"rangeNamespaceId\",
                   v.fk_domain_namespace AS \"domainNamespaceId\",
                   replace(ancestors, '|', '→') AS ancestors,
                   (SELECT label FROM che.get_namespace_labels(nsp.pk_namespace) WHERE language_iso_code = 'en') AS namespace
-                FROM che.class_outgoing_inherited_properties(?) v,
-                  che.property_version pv,
-                  che.namespace nsp
-                WHERE pv.fk_property = pk_property
-                AND nsp.pk_namespace = pv.fk_namespace_for_version
-                AND nsp.pk_namespace IN (".$in.");";
+                FROM che.class_outgoing_inherited_properties(?) v
+                INNER JOIN che.property_version pv ON pv.fk_property = v.pk_property
+                INNER JOIN che.namespace nsp ON nsp.pk_namespace = pv.fk_namespace_for_version AND  nsp.pk_namespace IN (".$in.")
+                LEFT JOIN che.associates_referenced_namespace asrefns ON v.fk_namespace_for_version = asrefns.fk_namespace
+                GROUP BY nsp.pk_namespace, v.ancestors, v.identifier_in_namespace, v.pk_parent, v.parent_identifier, v.pk_property, v.identifier_property, v.fk_namespace_for_version, v.pk_range, v.identifier_range, v.fk_domain_namespace, v.fk_range_namespace;";
 
         $conn = $this->getEntityManager()->getConnection();
         $stmt = $conn->prepare($sql);
@@ -275,6 +278,7 @@ class PropertyRepository extends EntityRepository
                   identifier_property AS property,
                   pk_property AS \"propertyId\",
                   v.fk_namespace_for_version AS \"propertyNamespaceId\",
+                  array_append(array_agg(asrefns.fk_referenced_namespace), v.fk_namespace_for_version) AS \"selectedNamespacesId\",
                   pk_range AS \"rangeId\",
                   identifier_range AS range,
                   v.fk_range_namespace AS \"rangeNamespaceId\",
@@ -282,8 +286,10 @@ class PropertyRepository extends EntityRepository
                   che.get_root_namespace(fk_namespace_for_version) AS \"rootNamespaceId\",
                   (SELECT label FROM che.get_namespace_labels(fk_namespace_for_version) WHERE language_iso_code = 'en') AS namespace
                 FROM che.v_properties_with_domain_range v
+                LEFT JOIN che.associates_referenced_namespace asrefns ON v.fk_namespace_for_version = asrefns.fk_namespace
                 WHERE pk_range = ?
-                AND fk_range_namespace IN (".$in.");";
+                AND fk_range_namespace IN (".$in.")
+                GROUP BY v.pk_domain, v.identifier_property, v.identifier_range, v.fk_range_namespace, v.pk_property, v.pk_range, v.fk_namespace_for_version, v.identifier_domain, v.fk_domain_namespace;";
 
         $conn = $this->getEntityManager()->getConnection();
         $stmt = $conn->prepare($sql);

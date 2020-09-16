@@ -57,7 +57,7 @@ class ClassAssociation
     private $parentClassNamespace;
 
     /**
-     * @ORM\ManyToOne(targetEntity="OntoNamespace", inversedBy="classAssociationVersions")
+     * @ORM\ManyToOne(targetEntity="OntoNamespace", inversedBy="classAssociations")
      * @ORM\JoinColumn(name="fk_namespace_for_version", referencedColumnName="pk_namespace", nullable=false)
      */
     private $namespaceForVersion;

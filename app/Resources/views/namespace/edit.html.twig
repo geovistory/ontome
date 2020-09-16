@@ -36,12 +36,32 @@
             <li><a data-toggle="tab" href="#graph">Graph</a></li>
             {% endif %}
             <li><a data-toggle="tab" href="#comments" class="updateViewComment" data-id="{{ namespace.id }}" data-object="namespace">Comments</a></li>
+            {% if not namespace.isTopLevelNamespace %}
+                {% set hasMismatches = false %}
+                {% for classAssociation in namespace.classAssociations if classAssociation.parentClassNamespace.id not in namespace.selectedNamespacesId or classAssociation.childClassNamespace.id not in namespace.selectedNamespacesId %}{% set hasMismatches = true %}{% endfor %}
+                {% for propertyAssociation in namespace.propertyAssociations if propertyAssociation.parentPropertyNamespace.id not in namespace.selectedNamespacesId or propertyAssociation.childPropertyNamespace.id not in namespace.selectedNamespacesId %}{% set hasMismatches = true %}{% endfor %}
+                {% for property in namespace.properties if property.propertyVersionForDisplay(namespace).domainNamespace is not null and property.propertyVersionForDisplay(namespace).domainNamespace.id not in namespace.selectedNamespacesId or property.propertyVersionForDisplay(namespace).rangeNamespace is not null and property.propertyVersionForDisplay(namespace).rangeNamespace.id not in namespace.selectedNamespacesId %}{% set hasMismatches = true %}{% endfor %}
+                {% for entityAssociation in namespace.entityAssociations if entityAssociation.sourceNamespaceForVersion.id not in namespace.selectedNamespacesId or entityAssociation.targetNamespaceForVersion.id not in namespace.selectedNamespacesId %}{% set hasMismatches = true %}{% endfor %}
+                {% if hasMismatches %}
+                    <li><a data-toggle="tab" href="#mismatches" class="text-danger"><i class="fas fa-exclamation-triangle"></i> Mismatches</a></li>
+                {% endif %}
+            {% endif %}
         </ul>
 
         <div class="tab-content">
             <div id="summary" class="tab-pane fade in active">
                 <h3>{{ namespace }}</h3>
                 <div class="container">
+                    {% if hasMismatches %}
+                        <div class="row">
+                            <div class="col-lg-2">
+                                <p class="text-danger"><i class="fas fa-exclamation-triangle"></i> Warning:</p>
+                            </div>
+                            <div class="col-lg-10">
+                                <p class="text-danger">This namespace has some mismatched relations by missing references namespaces. More informations <a data-toggle="tab" href="#mismatches">here</a>.</p>
+                            </div>
+                        </div>
+                    {% endif %}
                     <div class="row">
                         <div class="col-lg-2">
                             <p>Description:</p>
@@ -813,6 +833,244 @@
                     </div>
                 </div>
             </div>
+            <div id="mismatches" class="tab-pane fade">
+                <h3>List of mismatches with reference namespaces</h3>
+                <p>Classes and/properties listed here are not correctly associated with your <a data-toggle="tab" href="#identification">reference namespaces</a>.
+                    They are displayed in red in your ongoing namespace. They may not be available in the version of the selected space.
+                    Or you may not have selected any version of a <a data-toggle="tab" href="#identification">reference namespace</a>. Please make the necessary corrections before proceeding.</p>
+                <table class="table table-striped" id="mismatches-table">
+                    <thead>
+                    <tr>
+                        <th>Show</th>
+                        <th>Type of relation</th>
+                        <th>Entity</th>
+                        <th>Namespace</th>
+                        <th>Error type</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% set errorType = "Missing reference namespace" %}
+
+                    {# Premiere boucle : les hierarchies de classes - vérification des parents #}
+                    {% for classAssociation in namespace.classAssociations if classAssociation.parentClassNamespace.id not in namespace.selectedNamespacesId %}
+                        {% if namespace.selectedNamespacesId|length != 1 %}
+                            {% set errorType = "Class not in any reference namespace" %}
+                        {% endif %}
+                        <tr>
+                            <td>
+                                <a href="{{ path('class_show_with_version', {
+                                    'id': classAssociation.childClass.id,
+                                    'namespaceFromUrlId': classAssociation.childClassNamespace.id,
+                                    '_fragment': 'class-hierarchy'
+                                }) }}">
+                                    <span class="glyphicon glyphicon-eye-open"></span>
+                                </a>
+                            </td>
+                            <td>hierarchy (rdfs:subclassOf)</td>
+                            <td>{{ classAssociation.parentClass.classVersionForDisplay(classAssociation.parentClassNamespace) }}</td>
+                            <td>{{ classAssociation.parentClassNamespace }}</td>
+                            <td>{{ errorType }}</td>
+                        </tr>
+                    {% endfor %}
+
+                    {# Deuxieme boucle : les hierarchies de classes - vérification des enfants#}
+                    {% for classAssociation in namespace.classAssociations if classAssociation.childClassNamespace.id not in namespace.selectedNamespacesId %}
+                        {% if namespace.selectedNamespacesId|length != 1 %}
+                            {% set errorType = "Class not in any reference namespace" %}
+                        {% endif %}
+                        <tr>
+                            <td>
+                                <a href="{{ path('class_show_with_version', {
+                                    'id': classAssociation.parentClass.id,
+                                    'namespaceFromUrlId': classAssociation.parentClassNamespace.id,
+                                    '_fragment': 'class-hierarchy'
+                                }) }}">
+                                    <span class="glyphicon glyphicon-eye-open"></span>
+                                </a>
+                            </td>
+                            <td>hierarchy (rdfs:subclassOf)</td>
+                            <td>{{ classAssociation.childClass.classVersionForDisplay(classAssociation.childClassNamespace) }}</td>
+                            <td>{{ classAssociation.childClassNamespace }}</td>
+                            <td>{{ errorType }}</td>
+                        </tr>
+                    {% endfor %}
+
+                    {# Troisieme boucle : les hierarchies de propriétés - vérification des parents #}
+                    {% for propertyAssociation in namespace.propertyAssociations if propertyAssociation.parentPropertyNamespace.id not in namespace.selectedNamespacesId %}
+                        {% if namespace.selectedNamespacesId|length != 1 %}
+                            {% set errorType = "Property not in any reference namespace" %}
+                        {% endif %}
+                        <tr>
+                            <td>
+                                <a href="{{ path('property_show_with_version', {
+                                    'id': propertyAssociation.childProperty.id,
+                                    'namespaceFromUrlId': propertyAssociation.childPropertyNamespace.id,
+                                    '_fragment': 'property-hierarchy'
+                                }) }}">
+                                    <span class="glyphicon glyphicon-eye-open"></span>
+                                </a>
+                            </td>
+                            <td>hierarchy (rdfs:subpropertyOf)</td>
+                            <td>{{ propertyAssociation.parentProperty.propertyVersionForDisplay(propertyAssociation.parentPropertyNamespace) }}</td>
+                            <td>{{ propertyAssociation.parentPropertyNamespace }}</td>
+                            <td>{{ errorType }}</td>
+                        </tr>
+                    {% endfor %}
+
+                    {# Quatrieme boucle : les hierarchies de propriétés - vérification des enfants #}
+                    {% for propertyAssociation in namespace.propertyAssociations if propertyAssociation.childPropertyNamespace.id not in namespace.selectedNamespacesId %}
+                        {% if namespace.selectedNamespacesId|length != 1 %}
+                            {% set errorType = "Property not in any reference namespace" %}
+                        {% endif %}
+                        <tr>
+                            <td>
+                                <a href="{{ path('property_show_with_version', {
+                                    'id': propertyAssociation.parentProperty.id,
+                                    'namespaceFromUrlId': propertyAssociation.parentPropertyNamespace.id,
+                                    '_fragment': 'property-hierarchy'
+                                }) }}">
+                                    <span class="glyphicon glyphicon-eye-open"></span>
+                                </a>
+                            </td>
+                            <td>hierarchy (rdfs:subpropertyOf)</td>
+                            <td>{{ propertyAssociation.childProperty.propertyVersionForDisplay(propertyAssociation.childPropertyNamespace) }}</td>
+                            <td>{{ propertyAssociation.childPropertyNamespace }}</td>
+                            <td>{{ errorType }}</td>
+                        </tr>
+                    {% endfor %}
+
+                    {# Cinquieme boucle : les propriétés - vérification des domains #}
+                    {% for property in namespace.properties if property.propertyVersionForDisplay(namespace).domainNamespace is not null and property.propertyVersionForDisplay(namespace).domainNamespace.id not in namespace.selectedNamespacesId %}
+                        {% if namespace.selectedNamespacesId|length != 1 %}
+                            {% set errorType = "Class not in any reference namespace" %}
+                        {% endif %}
+                        <tr>
+                            <td>
+                                <a href="{{ path('property_show_with_version', {
+                                    'id': property.id,
+                                    'namespaceFromUrlId': namespace.id,
+                                    '_fragment': 'identification'
+                                }) }}">
+                                    <span class="glyphicon glyphicon-eye-open"></span>
+                                </a>
+                            </td>
+                            <td>domain class (rdfs:domain)</td>
+                            <td>{{ property.propertyVersionForDisplay(namespace).domain.classVersionForDisplay(property.propertyVersionForDisplay(namespace).domainNamespace) }}</td>
+                            <td>{{ property.propertyVersionForDisplay(namespace).domainNamespace }}</td>
+                            <td>{{ errorType }}</td>
+                        </tr>
+                    {% endfor %}
+
+                    {# Sixieme boucle : les propriétés - vérification des ranges #}
+                    {% for property in namespace.properties if property.propertyVersionForDisplay(namespace).rangeNamespace is not null and property.propertyVersionForDisplay(namespace).rangeNamespace.id not in namespace.selectedNamespacesId %}
+                        {% if namespace.selectedNamespacesId|length != 1 %}
+                            {% set errorType = "Class not in any reference namespace" %}
+                        {% endif %}
+                        <tr>
+                            <td>
+                                <a href="{{ path('property_show_with_version', {
+                                    'id': property.id,
+                                    'namespaceFromUrlId': namespace.id,
+                                    '_fragment': 'identification'
+                                }) }}">
+                                    <span class="glyphicon glyphicon-eye-open"></span>
+                                </a>
+                            </td>
+                            <td>range class (rdfs:range)</td>
+                            <td>{{ property.propertyVersionForDisplay(namespace).range.classVersionForDisplay(property.propertyVersionForDisplay(namespace).rangeNamespace) }}</td>
+                            <td>{{ property.propertyVersionForDisplay(namespace).rangeNamespace }}</td>
+                            <td>{{ errorType }}</td>
+                        </tr>
+                    {% endfor %}
+
+                    {# Septième boucle : les relations - vérification des sources #}
+                    {% for entityAssociation in namespace.entityAssociations if entityAssociation.sourceNamespaceForVersion.id not in namespace.selectedNamespacesId %}
+                        {% if entityAssociation.sourceClass is not null %}
+                            {% if namespace.selectedNamespacesId|length != 1 %}
+                                {% set errorType = "Class not in any reference namespace" %}
+                            {% endif %}
+                            <tr>
+                                <td>
+                                    <a href="{{ path('class_show_with_version', {
+                                        'id': entityAssociation.targetClass.id,
+                                        'namespaceFromUrlId': entityAssociation.targetNamespaceForVersion.id,
+                                        '_fragment': 'relations'
+                                    }) }}">
+                                        <span class="glyphicon glyphicon-eye-open"></span>
+                                    </a>
+                                </td>
+                                <td>{{ entityAssociation.systemType }}</td>
+                                <td>{{ entityAssociation.sourceClass.classVersionForDisplay(entityAssociation.sourceNamespaceForVersion) }}</td>
+                                <td>{{ entityAssociation.sourceNamespaceForVersion }}</td>
+                                <td>{{ errorType }}</td>
+                            </tr>
+                        {% elseif entityAssociation.sourceProperty is not null %}
+                            {% if namespace.selectedNamespacesId|length != 1 %}
+                                {% set errorType = "Property not in any reference namespace" %}
+                            {% endif %}
+                            <tr>
+                                <td>
+                                    <a href="{{ path('property_show_with_version', {
+                                        'id': entityAssociation.targetProperty.id,
+                                        'namespaceFromUrlId': entityAssociation.targetNamespaceForVersion.id,
+                                        '_fragment': 'relations'
+                                    }) }}">
+                                        <span class="glyphicon glyphicon-eye-open"></span>
+                                    </a>
+                                </td>
+                                <td>{{ entityAssociation.systemType }}</td>
+                                <td>{{ entityAssociation.sourceProperty.propertyVersionForDisplay(entityAssociation.sourceNamespaceForVersion) }}</td>
+                                <td>{{ entityAssociation.sourceNamespaceForVersion }}</td>
+                                <td>{{ errorType }}</td>
+                            </tr>
+                        {% endif %}
+                    {% endfor %}
+
+                    {# Huitième boucle : les relations - vérification des targets #}
+                    {% for entityAssociation in namespace.entityAssociations if entityAssociation.targetNamespaceForVersion.id not in namespace.selectedNamespacesId %}
+                        {% if entityAssociation.targetClass is not null %}
+                            {% if namespace.selectedNamespacesId|length != 1 %}
+                                {% set errorType = "Class not in any reference namespace" %}
+                            {% endif %}
+                            <tr>
+                                <td>
+                                    <a href="{{ path('class_show_with_version', {
+                                        'id': entityAssociation.sourceClass.id,
+                                        'namespaceFromUrlId': entityAssociation.sourceNamespaceForVersion.id,
+                                        '_fragment': 'relations'
+                                    }) }}">
+                                        <span class="glyphicon glyphicon-eye-open"></span>
+                                    </a>
+                                </td>
+                                <td>{{ entityAssociation.systemType }}</td>
+                                <td>{{ entityAssociation.targetClass.classVersionForDisplay(entityAssociation.targetNamespaceForVersion) }}</td>
+                                <td>{{ entityAssociation.targetNamespaceForVersion }}</td>
+                                <td>{{ errorType }}</td>
+                            </tr>
+                        {% elseif entityAssociation.targetProperty is not null %}
+                            {% if namespace.selectedNamespacesId|length != 1 %}
+                                {% set errorType = "Property not in any reference namespace" %}
+                            {% endif %}
+                            <tr>
+                                <td>
+                                    <a href="{{ path('property_show_with_version', {
+                                        'id': entityAssociation.sourceProperty.id,
+                                        'namespaceFromUrlId': entityAssociation.sourceNamespaceForVersion.id,
+                                        '_fragment': 'relations'
+                                    }) }}">
+                                        <span class="glyphicon glyphicon-eye-open"></span>
+                                    </a>
+                                </td>
+                                <td>{{ entityAssociation.systemType }}</td>
+                                <td>{{ entityAssociation.targetProperty.propertyVersionForDisplay(entityAssociation.targetNamespaceForVersion) }}</td>
+                                <td>{{ entityAssociation.targetNamespaceForVersion }}</td>
+                                <td>{{ errorType }}</td>
+                            </tr>
+                        {% endif %}
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
@@ -831,6 +1089,7 @@
             $('#additional-notes-table').DataTable();
             $('#properties-table').DataTable();
             $('#classes-table').DataTable();
+            $('#mismatches-table').DataTable();
             $('#child-namespaces-table').DataTable({
                 "order": [[0, 'desc']],
                 "columnDefs": [

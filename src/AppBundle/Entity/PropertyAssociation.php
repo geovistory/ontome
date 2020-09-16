@@ -57,7 +57,7 @@ class PropertyAssociation
     private $parentPropertyNamespace;
 
     /**
-     * @ORM\ManyToOne(targetEntity="OntoNamespace", inversedBy="propertyAssociationVersions")
+     * @ORM\ManyToOne(targetEntity="OntoNamespace", inversedBy="propertyAssociations")
      * @ORM\JoinColumn(name="fk_namespace_for_version", referencedColumnName="pk_namespace", nullable=false)
      */
     private $namespaceForVersion;

@@ -173,13 +173,13 @@ class OntoNamespace
     private $properties;
 
     /**
-     * @ORM\ManyToMany(targetEntity="ClassAssociation", mappedBy="namespaces")
+     * @ORM\OneToMany(targetEntity="ClassAssociation", mappedBy="namespaceForVersion")
      * @ORM\OrderBy({"id" = "ASC"})
      */
     private $classAssociations;
 
     /**
-     * @ORM\ManyToMany(targetEntity="EntityAssociation", mappedBy="namespaces")
+     * @ORM\OneToMany(targetEntity="EntityAssociation", mappedBy="namespaceForVersion")
      * @ORM\OrderBy({"id" = "ASC"})
      */
     private $entityAssociations;
@@ -201,7 +201,7 @@ class OntoNamespace
     }
 
     /**
-     * @ORM\ManyToMany(targetEntity="PropertyAssociation", mappedBy="namespaces")
+     * @ORM\OneToMany(targetEntity="PropertyAssociation", mappedBy="namespaceForVersion")
      * @ORM\OrderBy({"id" = "ASC"})
      */
     private $propertyAssociations;
@@ -661,6 +661,14 @@ class OntoNamespace
     }
 
     /**
+     * @return ArrayCollection|ReferencedNamespaceAssociation[]
+     */
+    public function getReferencedNamespaceAssociations()
+    {
+        return $this->referencedNamespaceAssociations;
+    }
+
+    /**
      * @param mixed $namespaceURI
      */
     public function setNamespaceURI($namespaceURI)
@@ -805,14 +813,6 @@ class OntoNamespace
     }
 
     /**
-     * @return ArrayCollection|ReferencedNamespaceAssociation[]
-     */
-    public function getReferencedNamespaceAssociations()
-    {
-        return $this->referencedNamespaceAssociations;
-    }
-
-    /**
      * @param mixed $referencedNamespaceAssociations
      */
     public function setReferencedNamespaceAssociations($referencedNamespaceAssociations)
@@ -913,5 +913,18 @@ class OntoNamespace
         else{
             return ["classCss"=>"danger", "label"=>"Deprecated"];
         }
+    }
+
+    /**
+     * @return array
+     * Retourne un tableau des id de tous les namespaces (ce Namespace + les référéncés)
+     */
+    public function getSelectedNamespacesId()
+    {
+        $arrayIds[] = $this->getId();
+        foreach($this->getReferencedNamespaceAssociations() as $referencedNamespaceAssociation){
+            $arrayIds[] = $referencedNamespaceAssociation->getReferencedNamespace()->getId();
+        }
+        return $arrayIds;
     }
 }
