@@ -483,7 +483,7 @@ class NamespaceController  extends Controller
      * @Method({ "DELETE"})
      * @param OntoNamespace  $namespace    The namespace to be disassociated from a referenced namespace
      * @param OntoNamespace  $referencedNamespace    The referenced namespace to be disassociated from a namespace
-     * @return JsonResponse a Json 204 HTTP response
+     * @return JsonResponse
      */
     public function deleteProfileNamespaceAssociationAction(OntoNamespace $namespace, OntoNamespace $referencedNamespace, Request $request)
     {
@@ -497,7 +497,14 @@ class NamespaceController  extends Controller
         $em->remove($referencedNamespaceAssociation);
         $em->flush();
 
-        return new JsonResponse(null, 204);
+        $rootNamespaceReselectable = $referencedNamespace->getTopLevelNamespace();
+
+        $response = array(
+            'idRoot' => $rootNamespaceReselectable->getId(),
+            'labelRoot' => $rootNamespaceReselectable->getStandardLabel()
+        );
+
+        return new JsonResponse($response);
 
     }
 

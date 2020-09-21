@@ -54,15 +54,17 @@
             <div id="summary" class="tab-pane fade in active">
                 <h3>{{ namespace }}</h3>
                 <div class="container">
-                    {% if hasMismatches %}
-                    <div class="row">
-                        <div class="col-lg-2">
-                            <p class="text-danger"><i class="fas fa-exclamation-triangle"></i> Warning:</p>
+                    {% if not namespace.isTopLevelNamespace %}
+                        {% if hasMismatches %}
+                        <div class="row">
+                            <div class="col-lg-2">
+                                <p class="text-danger"><i class="fas fa-exclamation-triangle"></i> Warning:</p>
+                            </div>
+                            <div class="col-lg-10">
+                                <p class="text-danger">This namespace has mismatched relations due to a misconfiguration of your reference spaces. See <a data-toggle="tab" href="#mismatches">'Mismatches"</a> tab.</p>
+                            </div>
                         </div>
-                        <div class="col-lg-10">
-                            <p class="text-danger">This namespace has some mismatched relations due to a misconfiguration of your reference spaces. More information <a data-toggle="tab" href="#mismatches">here</a>.</p>
-                        </div>
-                    </div>
+                        {% endif %}
                     {% endif %}
                     <div class="row">
                         <div class="col-lg-2">
@@ -595,6 +597,9 @@
                         {% for classAssociation in namespace.classAssociations if classAssociation.parentClassNamespace.id not in namespace.selectedNamespacesId %}
                             {% if namespace.selectedNamespacesId|length != 2 %}
                                 {% set errorType = "Class not in any reference namespace" %}
+                                {% if classAssociation.parentClassNamespace.id in namespace.largeSelectedNamespacesId %}
+                                    {% set errorType = "Class not in the selected version of the reference namespace" %}
+                                {% endif %}
                             {% endif %}
                             <tr>
                                 <td>
@@ -617,6 +622,9 @@
                         {% for classAssociation in namespace.classAssociations if classAssociation.childClassNamespace.id not in namespace.selectedNamespacesId %}
                             {% if namespace.selectedNamespacesId|length != 2 %}
                                 {% set errorType = "Class not in any reference namespace" %}
+                                {% if classAssociation.childClassNamespace.id in namespace.largeSelectedNamespacesId %}
+                                    {% set errorType = "Class not in the selected version of the reference namespace" %}
+                                {% endif %}
                             {% endif %}
                             <tr>
                                 <td>
@@ -639,6 +647,9 @@
                         {% for propertyAssociation in namespace.propertyAssociations if propertyAssociation.parentPropertyNamespace.id not in namespace.selectedNamespacesId %}
                             {% if namespace.selectedNamespacesId|length != 2 %}
                                 {% set errorType = "Property not in any reference namespace" %}
+                                {% if propertyAssociation.parentPropertyNamespace.id in namespace.largeSelectedNamespacesId %}
+                                    {% set errorType = "Property not in the selected version of the reference namespace" %}
+                                {% endif %}
                             {% endif %}
                             <tr>
                                 <td>
@@ -661,6 +672,9 @@
                         {% for propertyAssociation in namespace.propertyAssociations if propertyAssociation.childPropertyNamespace.id not in namespace.selectedNamespacesId %}
                             {% if namespace.selectedNamespacesId|length != 2 %}
                                 {% set errorType = "Property not in any reference namespace" %}
+                                {% if propertyAssociation.childPropertyNamespace.id in namespace.largeSelectedNamespacesId %}
+                                    {% set errorType = "Property not in the selected version of the reference namespace" %}
+                                {% endif %}
                             {% endif %}
                             <tr>
                                 <td>
@@ -684,6 +698,9 @@
                             and property.propertyVersionForDisplay(namespace).domainNamespace.id not in namespace.selectedNamespacesId %}
                             {% if namespace.selectedNamespacesId|length != 2 %}
                                 {% set errorType = "Class not in any reference namespace" %}
+                                {% if property.propertyVersionForDisplay(namespace).domainNamespace.id in namespace.largeSelectedNamespacesId %}
+                                    {% set errorType = "Class not in the selected version of the reference namespace" %}
+                                {% endif %}
                             {% endif %}
                             <tr>
                                 <td>
@@ -703,9 +720,13 @@
                         {% endfor %}
 
                         {# Sixieme boucle : les propriétés - vérification des ranges #}
-                        {% for property in namespace.properties if property.propertyVersionForDisplay(namespace).rangeNamespace is not null and property.propertyVersionForDisplay(namespace).rangeNamespace.id not in namespace.selectedNamespacesId %}
+                        {% for property in namespace.properties if property.propertyVersionForDisplay(namespace).rangeNamespace is not null
+                            and property.propertyVersionForDisplay(namespace).rangeNamespace.id not in namespace.selectedNamespacesId %}
                             {% if namespace.selectedNamespacesId|length != 2 %}
                                 {% set errorType = "Class not in any reference namespace" %}
+                                {% if property.propertyVersionForDisplay(namespace).rangeNamespace.id in namespace.largeSelectedNamespacesId %}
+                                    {% set errorType = "Class not in the selected version of the reference namespace" %}
+                                {% endif %}
                             {% endif %}
                             <tr>
                                 <td>
@@ -729,6 +750,9 @@
                             {% if entityAssociation.sourceClass is not null %}
                                 {% if namespace.selectedNamespacesId|length != 2 %}
                                     {% set errorType = "Class not in any reference namespace" %}
+                                    {% if entityAssociation.sourceNamespaceForVersion.id in namespace.largeSelectedNamespacesId %}
+                                        {% set errorType = "Class not in the selected version of the reference namespace" %}
+                                    {% endif %}
                                 {% endif %}
                                 <tr>
                                     <td>
@@ -748,6 +772,9 @@
                             {% elseif entityAssociation.sourceProperty is not null %}
                                 {% if namespace.selectedNamespacesId|length != 2 %}
                                     {% set errorType = "Property not in any reference namespace" %}
+                                    {% if entityAssociation.sourceNamespaceForVersion.id in namespace.largeSelectedNamespacesId %}
+                                        {% set errorType = "Property not in the selected version of the reference namespace" %}
+                                    {% endif %}
                                 {% endif %}
                                 <tr>
                                     <td>
@@ -772,6 +799,9 @@
                             {% if entityAssociation.targetClass is not null %}
                                 {% if namespace.selectedNamespacesId|length != 2 %}
                                     {% set errorType = "Class not in any reference namespace" %}
+                                    {% if entityAssociation.targetNamespaceForVersion.id in namespace.largeSelectedNamespacesId %}
+                                        {% set errorType = "Class not in the selected version of the reference namespace" %}
+                                    {% endif %}
                                 {% endif %}
                                 <tr>
                                     <td>
@@ -791,6 +821,9 @@
                             {% elseif entityAssociation.targetProperty is not null %}
                                 {% if namespace.selectedNamespacesId|length != 2 %}
                                     {% set errorType = "Property not in any reference namespace" %}
+                                    {% if entityAssociation.targetNamespaceForVersion.id in namespace.largeSelectedNamespacesId %}
+                                        {% set errorType = "Property not in the selected version of the reference namespace" %}
+                                    {% endif %}
                                 {% endif %}
                                 <tr>
                                     <td>
@@ -841,12 +874,12 @@
             $('#summary a[href="#mismatches"]').click(function (e) {
                 e.preventDefault();
                 $('.nav-tabs a[href="#mismatches"]').tab('show');
-            })
+            });
 
             $('#mismatches a[href="#identification"]').click(function (e) {
                 e.preventDefault();
                 $('.nav-tabs a[href="#identification"]').tab('show');
-            })
+            });
 
             $('a.updateViewComment').on('click', function () {
                 var selectedObject = $(this).data("object");

@@ -930,4 +930,29 @@ class OntoNamespace
         }
         return $arrayIds;
     }
+
+    /**
+     * @return array
+     * Retourne un tableau des id de tous les namespaces (ce Namespace + les référéncés + toutes les versions du même root qu'eux)
+     * Utilisé notamment pour répérer les entités qui n'existent pas dans une version mais dans une autre du même root
+     */
+    public function getLargeSelectedNamespacesId()
+    {
+        // L'espace de noms 4 est systématiquement référencé par tous les NS c'est purement technique.
+        $arrayIds[] = 4;
+
+        // Boucle sur le root du namespace d'origine :
+        foreach ($this->getTopLevelNamespace()->getChildVersions() as $ns)
+        {
+            $arrayIds[] = $ns->getId();
+        }
+
+        foreach($this->getReferencedNamespaceAssociations() as $referencedNamespaceAssociation){
+            foreach ($referencedNamespaceAssociation->getReferencedNamespace()->getTopLevelNamespace()->getChildVersions() as $ns)
+            {
+                $arrayIds[] = $ns->getId();
+            }
+        }
+        return $arrayIds;
+    }
 }
