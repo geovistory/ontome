@@ -58,7 +58,7 @@
                                 <p class="text-danger"><i class="fas fa-exclamation-triangle"></i> Warning:</p>
                             </div>
                             <div class="col-lg-10">
-                                <p class="text-danger">This namespace has some mismatched relations by missing references namespaces. More informations <a data-toggle="tab" href="#mismatches">here</a>.</p>
+                                <p class="text-danger">This namespace has some mismatched relations due to a misconfiguration of your reference spaces. More information <a data-toggle="tab" href="#mismatches">here</a>.</p>
                             </div>
                         </div>
                     {% endif %}
@@ -835,9 +835,9 @@
             </div>
             <div id="mismatches" class="tab-pane fade">
                 <h3>List of mismatches with reference namespaces</h3>
-                <p>Classes and/properties listed here are not correctly associated with your <a data-toggle="tab" href="#identification">reference namespaces</a>.
+                <p>Entities listed here are not correctly associated with your <a data-toggle="tab" href="#identification">reference namespaces</a>.
                     They are displayed in red in your ongoing namespace. They may not be available in the version of the selected space.
-                    Or you may not have selected any version of a <a data-toggle="tab" href="#identification">reference namespace</a>. Please make the necessary corrections before proceeding.</p>
+                    Or you may not have selected any version of a <a data-toggle="tab" href="#identification">reference namespace</a>.<br>Please make the necessary corrections before proceeding.</p>
                 <table class="table table-striped" id="mismatches-table">
                     <thead>
                     <tr>
@@ -853,7 +853,7 @@
 
                     {# Premiere boucle : les hierarchies de classes - vérification des parents #}
                     {% for classAssociation in namespace.classAssociations if classAssociation.parentClassNamespace.id not in namespace.selectedNamespacesId %}
-                        {% if namespace.selectedNamespacesId|length != 1 %}
+                        {% if namespace.selectedNamespacesId|length != 2 %}
                             {% set errorType = "Class not in any reference namespace" %}
                         {% endif %}
                         <tr>
@@ -875,7 +875,7 @@
 
                     {# Deuxieme boucle : les hierarchies de classes - vérification des enfants#}
                     {% for classAssociation in namespace.classAssociations if classAssociation.childClassNamespace.id not in namespace.selectedNamespacesId %}
-                        {% if namespace.selectedNamespacesId|length != 1 %}
+                        {% if namespace.selectedNamespacesId|length != 2 %}
                             {% set errorType = "Class not in any reference namespace" %}
                         {% endif %}
                         <tr>
@@ -897,7 +897,7 @@
 
                     {# Troisieme boucle : les hierarchies de propriétés - vérification des parents #}
                     {% for propertyAssociation in namespace.propertyAssociations if propertyAssociation.parentPropertyNamespace.id not in namespace.selectedNamespacesId %}
-                        {% if namespace.selectedNamespacesId|length != 1 %}
+                        {% if namespace.selectedNamespacesId|length != 2 %}
                             {% set errorType = "Property not in any reference namespace" %}
                         {% endif %}
                         <tr>
@@ -919,7 +919,7 @@
 
                     {# Quatrieme boucle : les hierarchies de propriétés - vérification des enfants #}
                     {% for propertyAssociation in namespace.propertyAssociations if propertyAssociation.childPropertyNamespace.id not in namespace.selectedNamespacesId %}
-                        {% if namespace.selectedNamespacesId|length != 1 %}
+                        {% if namespace.selectedNamespacesId|length != 2 %}
                             {% set errorType = "Property not in any reference namespace" %}
                         {% endif %}
                         <tr>
@@ -941,7 +941,7 @@
 
                     {# Cinquieme boucle : les propriétés - vérification des domains #}
                     {% for property in namespace.properties if property.propertyVersionForDisplay(namespace).domainNamespace is not null and property.propertyVersionForDisplay(namespace).domainNamespace.id not in namespace.selectedNamespacesId %}
-                        {% if namespace.selectedNamespacesId|length != 1 %}
+                        {% if namespace.selectedNamespacesId|length != 2 %}
                             {% set errorType = "Class not in any reference namespace" %}
                         {% endif %}
                         <tr>
@@ -963,7 +963,7 @@
 
                     {# Sixieme boucle : les propriétés - vérification des ranges #}
                     {% for property in namespace.properties if property.propertyVersionForDisplay(namespace).rangeNamespace is not null and property.propertyVersionForDisplay(namespace).rangeNamespace.id not in namespace.selectedNamespacesId %}
-                        {% if namespace.selectedNamespacesId|length != 1 %}
+                        {% if namespace.selectedNamespacesId|length != 2 %}
                             {% set errorType = "Class not in any reference namespace" %}
                         {% endif %}
                         <tr>
@@ -986,7 +986,7 @@
                     {# Septième boucle : les relations - vérification des sources #}
                     {% for entityAssociation in namespace.entityAssociations if entityAssociation.sourceNamespaceForVersion.id not in namespace.selectedNamespacesId %}
                         {% if entityAssociation.sourceClass is not null %}
-                            {% if namespace.selectedNamespacesId|length != 1 %}
+                            {% if namespace.selectedNamespacesId|length != 2 %}
                                 {% set errorType = "Class not in any reference namespace" %}
                             {% endif %}
                             <tr>
@@ -1005,7 +1005,7 @@
                                 <td>{{ errorType }}</td>
                             </tr>
                         {% elseif entityAssociation.sourceProperty is not null %}
-                            {% if namespace.selectedNamespacesId|length != 1 %}
+                            {% if namespace.selectedNamespacesId|length != 2 %}
                                 {% set errorType = "Property not in any reference namespace" %}
                             {% endif %}
                             <tr>
@@ -1029,7 +1029,7 @@
                     {# Huitième boucle : les relations - vérification des targets #}
                     {% for entityAssociation in namespace.entityAssociations if entityAssociation.targetNamespaceForVersion.id not in namespace.selectedNamespacesId %}
                         {% if entityAssociation.targetClass is not null %}
-                            {% if namespace.selectedNamespacesId|length != 1 %}
+                            {% if namespace.selectedNamespacesId|length != 2 %}
                                 {% set errorType = "Class not in any reference namespace" %}
                             {% endif %}
                             <tr>
@@ -1048,7 +1048,7 @@
                                 <td>{{ errorType }}</td>
                             </tr>
                         {% elseif entityAssociation.targetProperty is not null %}
-                            {% if namespace.selectedNamespacesId|length != 1 %}
+                            {% if namespace.selectedNamespacesId|length != 2 %}
                                 {% set errorType = "Property not in any reference namespace" %}
                             {% endif %}
                             <tr>

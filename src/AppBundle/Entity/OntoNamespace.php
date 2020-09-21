@@ -921,6 +921,9 @@ class OntoNamespace
      */
     public function getSelectedNamespacesId()
     {
+        // L'espace de noms 4 est systématiquement référencé par tous les NS c'est purement technique.
+        $arrayIds[] = 4;
+
         $arrayIds[] = $this->getId();
         foreach($this->getReferencedNamespaceAssociations() as $referencedNamespaceAssociation){
             $arrayIds[] = $referencedNamespaceAssociation->getReferencedNamespace()->getId();
