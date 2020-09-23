@@ -12,11 +12,15 @@ namespace AppBundle\Controller;
 use AppBundle\Entity\Label;
 use AppBundle\Entity\OntoClass;
 use AppBundle\Entity\Property;
+use AppBundle\Entity\SystemType;
 use AppBundle\Form\LabelForm;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 class LabelController  extends Controller
 {
@@ -217,7 +221,83 @@ class LabelController  extends Controller
             'labelForm' => $form->createView(),
             'canInverseLabel' => $canInverseLabel
         ]);
-
     }
 
+    /**
+     * @Route("/label/{id}/edit-validity/{validationStatus}", name="label_validation_status_edit")
+     * @param Label $label
+     * @param SystemType $validationStatus
+     * @param Request $request
+     * @throws \Exception in case of unsuccessful association
+     * @return RedirectResponse
+     */
+    public function editValidationStatusAction(Label $label, SystemType $validationStatus, Request $request)
+    {
+        $object = null;
+        if(!is_null($label->getClass())){
+            $object = $label->getClass();
+        }
+        else if(!is_null($label->getProperty())){
+            $object = $label->getProperty();
+        }
+        else if(!is_null($label->getProject())){
+            $object = $label->getProject();
+        }
+        else if(!is_null($label->getProfile())){
+            $object = $label->getProfile();
+        }
+        else if(!is_null($label->getNamespace())){
+            $object = $label->getNamespace();
+        }
+        else throw $this->createNotFoundException('The related object for the text property  n° '.$label->getId().' does not exist. Please contact an administrator.');
+
+        if(!is_null($label->getClass())){
+            $this->denyAccessUnlessGranted('validate', $object->getClassVersionForDisplay());
+        }
+        else if(!is_null($label->getProperty())){
+            $this->denyAccessUnlessGranted('validate', $object->getPropertyVersionForDisplay());
+        }
+        else{
+            throw new AccessDeniedHttpException('The validation of this resource is forbidden.');
+        }
+
+        $label->setModifier($this->getUser());
+
+        $newValidationStatus = new SystemType();
+
+        try{
+            $em = $this->getDoctrine()->getManager();
+            $newValidationStatus = $em->getRepository('AppBundle:SystemType')
+                ->findOneBy(array('id' => $validationStatus->getId()));
+        } catch (\Exception $e) {
+            throw new BadRequestHttpException('The provided status does not exist.');
+        }
+
+        if (!is_null($newValidationStatus)) {
+            $statusId = intval($newValidationStatus->getId());
+            if (in_array($statusId, [26,27,28], true)) {
+                $label->setValidationStatus($newValidationStatus);
+                $label->setModifier($this->getUser());
+                $label->setModificationTime(new \DateTime('now'));
+
+                $em->persist($label);
+
+                $em->flush();
+
+                if ($statusId == 27){
+                    return $this->redirectToRoute('label_edit', [
+                        'id' => $label->getId()
+                    ]);
+                }
+                else return $this->redirectToRoute('label_show', [
+                    'id' => $label->getId()
+                ]);
+
+            }
+        }
+
+        return $this->redirectToRoute('label_show', [
+            'id' => $label->getId()
+        ]);
+    }
 }

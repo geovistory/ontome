@@ -88,6 +88,7 @@ h4#site-title {
     background-color: #81B9BA;
     height: 100%;
     flex: 1;
+    border: 4px #81B9BA solid;
 }
 
 #login-logout-block{
@@ -608,6 +609,7 @@ Main components
     #logo-main-menu-row {
         height: 100%;
         display: block;
+        border-bottom: 3px gray solid;
     }
 
     select.mnav{

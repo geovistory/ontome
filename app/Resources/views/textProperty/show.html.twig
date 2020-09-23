@@ -91,6 +91,27 @@
                     </a>
                     {% endif %}
                 </h2>
+                <h4>
+                    {% if textProperty.class is not null or textProperty.property is not null %}
+                        {% if textProperty.validationStatus is null %}
+                            <span class="label label-info">
+                                    Candidate
+                                </span>
+                        {% elseif textProperty.validationStatus.id == 26  %}
+                            <span class="label label-success">
+                                    {{ textProperty.validationStatus }}
+                                </span>
+                        {% elseif textProperty.validationStatus.id == 27  %}
+                            <span class="label label-danger">
+                                    {{ textProperty.validationStatus }}
+                                </span>
+                        {% elseif textProperty.validationStatus.id == 28  %}
+                            <span class="label label-warning">
+                                    {{ textProperty.validationStatus }}
+                                </span>
+                        {% endif %}
+                    {% endif %}
+                </h4>
                 <ul class="nav nav-tabs" id="main-tabs">
                     <li class="active"><a data-toggle="tab" href="#text-property">{{ textProperty.systemType }}</a></li>
                     <li><a data-toggle="tab" href="#comments">Comments</a></li>

@@ -295,6 +295,7 @@
                         <th>Namespace</th>
                         <th>Edit</th>
                         <th>Comments</th>
+                        <th>Validation</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -324,6 +325,25 @@
                                         <span class="badge {% if textProperty.comments|length > 0  %}progress-bar-danger {% endif %}">{{ textProperty.comments|length }}</span>
                                     </a>
                                 </td>
+                                <td>
+                                    {% if textProperty.validationStatus is null %}
+                                        <span class="label label-info">
+                                    Candidate
+                                </span>
+                                    {% elseif textProperty.validationStatus.id == 26  %}
+                                        <span class="label label-success">
+                                    {{ textProperty.validationStatus }}
+                                </span>
+                                    {% elseif textProperty.validationStatus.id == 27  %}
+                                        <span class="label label-danger">
+                                    {{ textProperty.validationStatus }}
+                                </span>
+                                    {% elseif textProperty.validationStatus.id == 28  %}
+                                        <span class="label label-warning">
+                                    {{ textProperty.validationStatus }}
+                                </span>
+                                    {% endif %}
+                                </td>
                             </tr>
                     {% endfor %}
                     </tbody>
@@ -345,6 +365,7 @@
                         <th>Namespace</th>
                         <th>Edit</th>
                         <th>Comments</th>
+                        <th>Validation</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -374,6 +395,25 @@
                                     <span class="badge {% if textProperty.comments|length > 0  %}progress-bar-danger {% endif %}">{{ textProperty.comments|length }}</span>
                                 </a>
                             </td>
+                            <td>
+                                {% if textProperty.validationStatus is null %}
+                                    <span class="label label-info">
+                                    Candidate
+                                </span>
+                                {% elseif textProperty.validationStatus.id == 26  %}
+                                    <span class="label label-success">
+                                    {{ textProperty.validationStatus }}
+                                </span>
+                                {% elseif textProperty.validationStatus.id == 27  %}
+                                    <span class="label label-danger">
+                                    {{ textProperty.validationStatus }}
+                                </span>
+                                {% elseif textProperty.validationStatus.id == 28  %}
+                                    <span class="label label-warning">
+                                    {{ textProperty.validationStatus }}
+                                </span>
+                                {% endif %}
+                            </td>
                         </tr>
                     {% endfor %}
                     </tbody>
@@ -395,6 +435,7 @@
                         <th>Namespace</th>
                         <th>Edit</th>
                         <th>Comments</th>
+                        <th>Validation</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -423,6 +464,25 @@
                                 }) }}#comments" data-id="{{ textProperty.id }}" data-object="text-property">
                                     <span class="badge {% if textProperty.comments|length > 0  %}progress-bar-danger {% endif %}">{{ textProperty.comments|length }}</span>
                                 </a>
+                            </td>
+                            <td>
+                                {% if textProperty.validationStatus is null %}
+                                    <span class="label label-info">
+                                    Candidate
+                                </span>
+                                {% elseif textProperty.validationStatus.id == 26  %}
+                                    <span class="label label-success">
+                                    {{ textProperty.validationStatus }}
+                                </span>
+                                {% elseif textProperty.validationStatus.id == 27  %}
+                                    <span class="label label-danger">
+                                    {{ textProperty.validationStatus }}
+                                </span>
+                                {% elseif textProperty.validationStatus.id == 28  %}
+                                    <span class="label label-warning">
+                                    {{ textProperty.validationStatus }}
+                                </span>
+                                {% endif %}
                             </td>
                         </tr>
                     {% endfor %}

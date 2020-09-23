@@ -65,6 +65,27 @@
                     </a>
                     {% endif %}
                 </h2>
+                <h4>
+                    {% if label.class is not null or label.property is not null %}
+                        {% if label.validationStatus is null %}
+                            <span class="label label-info">
+                                    Candidate
+                                </span>
+                        {% elseif label.validationStatus.id == 26  %}
+                            <span class="label label-success">
+                                    {{ label.validationStatus }}
+                                </span>
+                        {% elseif label.validationStatus.id == 27  %}
+                            <span class="label label-danger">
+                                    {{ label.validationStatus }}
+                                </span>
+                        {% elseif label.validationStatus.id == 28  %}
+                            <span class="label label-warning">
+                                    {{ label.validationStatus }}
+                                </span>
+                        {% endif %}
+                    {% endif %}
+                </h4>
                 <ul class="nav nav-tabs" id="main-tabs">
                     <li class="active"><a data-toggle="tab" href="#label">Label</a></li>
                     {% if label.class is not null or label.property is not null %}

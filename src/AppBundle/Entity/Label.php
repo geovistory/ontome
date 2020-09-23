@@ -90,6 +90,13 @@ class Label
     private $profile;
 
     /**
+     * @ORM\ManyToOne(targetEntity="SystemType")
+     * @ORM\JoinColumn(name="validation_status", referencedColumnName="pk_system_type")
+     * @Assert\Type(type="AppBundle\Entity\SystemType")
+     */
+    private $validationStatus;
+
+    /**
      * @ORM\ManyToMany(targetEntity="OntoNamespace",  inversedBy="Label", fetch="EXTRA_LAZY")
      * @ORM\JoinTable(schema="che", name="label",
      *      joinColumns={@ORM\JoinColumn(name="fk_label", referencedColumnName="pk_label")},
@@ -277,6 +284,14 @@ class Label
     /**
      * @return mixed
      */
+    public function getValidationStatus()
+    {
+        return $this->validationStatus;
+    }
+
+    /**
+     * @return mixed
+     */
     public function getNotes()
     {
         return $this->notes;
@@ -392,6 +407,14 @@ class Label
     public function setProfile($profile)
     {
         $this->profile = $profile;
+    }
+
+    /**
+     * @param mixed $validationStatus
+     */
+    public function setValidationStatus($validationStatus)
+    {
+        $this->validationStatus = $validationStatus;
     }
 
     /**

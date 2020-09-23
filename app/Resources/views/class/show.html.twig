@@ -310,6 +310,7 @@
                         <th>Namespace</th>
                         <th>View details</th>
                         <th>Comments</th>
+                        <th>Validation</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -338,6 +339,25 @@
                                     <span class="badge {% if textProperty.comments|length > 0  %}progress-bar-danger {% endif %}">{{ textProperty.comments|length }}</span>
                                 </a>
                             </td>
+                            <td>
+                                {% if textProperty.validationStatus is null %}
+                                    <span class="label label-info">
+                                    Candidate
+                                </span>
+                                {% elseif textProperty.validationStatus.id == 26  %}
+                                    <span class="label label-success">
+                                    {{ textProperty.validationStatus }}
+                                </span>
+                                {% elseif textProperty.validationStatus.id == 27  %}
+                                    <span class="label label-danger">
+                                    {{ textProperty.validationStatus }}
+                                </span>
+                                {% elseif textProperty.validationStatus.id == 28  %}
+                                    <span class="label label-warning">
+                                    {{ textProperty.validationStatus }}
+                                </span>
+                                {% endif %}
+                            </td>
                         </tr>
                     {% endfor %}
                     </tbody>
@@ -353,6 +373,7 @@
                         <th>Namespace</th>
                         <th>View details</th>
                         <th>Comments</th>
+                        <th>Validation</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -381,6 +402,25 @@
                                     <span class="badge {% if textProperty.comments|length > 0  %}progress-bar-danger {% endif %}">{{ textProperty.comments|length }}</span>
                                 </a>
                             </td>
+                            <td>
+                                {% if textProperty.validationStatus is null %}
+                                    <span class="label label-info">
+                                    Candidate
+                                </span>
+                                {% elseif textProperty.validationStatus.id == 26  %}
+                                    <span class="label label-success">
+                                    {{ textProperty.validationStatus }}
+                                </span>
+                                {% elseif textProperty.validationStatus.id == 27  %}
+                                    <span class="label label-danger">
+                                    {{ textProperty.validationStatus }}
+                                </span>
+                                {% elseif textProperty.validationStatus.id == 28  %}
+                                    <span class="label label-warning">
+                                    {{ textProperty.validationStatus }}
+                                </span>
+                                {% endif %}
+                            </td>
                         </tr>
                     {% endfor %}
                     </tbody>
@@ -395,6 +435,7 @@
                         <th>Namespace</th>
                         <th>View details</th>
                         <th>Comments</th>
+                        <th>Validation</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -422,6 +463,25 @@
                                 }) }}#comments" data-id="{{ textProperty.id }}" data-object="text-property">
                                     <span class="badge {% if textProperty.comments|length > 0  %}progress-bar-danger {% endif %}">{{ textProperty.comments|length }}</span>
                                 </a>
+                            </td>
+                            <td>
+                                {% if textProperty.validationStatus is null %}
+                                    <span class="label label-info">
+                                    Candidate
+                                </span>
+                                {% elseif textProperty.validationStatus.id == 26  %}
+                                    <span class="label label-success">
+                                    {{ textProperty.validationStatus }}
+                                </span>
+                                {% elseif textProperty.validationStatus.id == 27  %}
+                                    <span class="label label-danger">
+                                    {{ textProperty.validationStatus }}
+                                </span>
+                                {% elseif textProperty.validationStatus.id == 28  %}
+                                    <span class="label label-warning">
+                                    {{ textProperty.validationStatus }}
+                                </span>
+                                {% endif %}
                             </td>
                         </tr>
                     {% endfor %}
@@ -939,6 +999,9 @@
 
     <script>
         $(document).ready(function() {
+            //hide validation column for datatable when current namespace is not ongoing
+            var visible = '{{ classVersion.namespaceForVersion.isOngoing ? 'true' : 'false' }}';
+
             $('#namespaces-table').DataTable();
             $('#labels-table').DataTable();
             $('#scope-notes-table').DataTable({
@@ -948,12 +1011,35 @@
                     {"width": "50%", "targets": 1},
                     {"width": "1%", "targets": 2},
                     {"width": "1%", "targets": 4},
-                    {"width": "1%", "targets": 5}
+                    {"width": "1%", "targets": 5},
+                    {"width": "1%", "targets": 6, "visible": visible}
                     ],
                 "autoWidth": false
             });
-            $('#examples-table').DataTable();
-            $('#additional-notes-table').DataTable();
+            $('#examples-table').DataTable({
+                "order": [[5, 'desc']],
+                "columnDefs": [
+                    {"width": "1%", "orderable": false, "targets": 0},
+                    {"width": "50%", "targets": 1},
+                    {"width": "1%", "targets": 2},
+                    {"width": "1%", "targets": 4},
+                    {"width": "1%", "targets": 5},
+                    {"width": "1%", "targets": 6, "visible": visible}
+                ],
+                "autoWidth": false
+            });
+            $('#additional-notes-table').DataTable({
+                "order": [[5, 'desc']],
+                "columnDefs": [
+                    {"width": "1%", "orderable": false, "targets": 0},
+                    {"width": "50%", "targets": 1},
+                    {"width": "1%", "targets": 2},
+                    {"width": "1%", "targets": 4},
+                    {"width": "1%", "targets": 5},
+                    {"width": "1%", "targets": 6, "visible": visible}
+                ],
+                "autoWidth": false
+            });
             $('#parent-classes-table').DataTable();
             $('#ancestors-table').DataTable({
                 "order": [[ 1, "asc" ]]

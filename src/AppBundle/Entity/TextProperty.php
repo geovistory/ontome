@@ -208,7 +208,7 @@ class TextProperty implements GroupSequenceProviderInterface
     }
 
     /**
-     * @return mixed
+     * @return OntoClass
      */
     public function getClass()
     {
