@@ -491,7 +491,7 @@
             <div id="identification" class="tab-pane fade">
                 <h3>Identifier : {{ classVersion.class.identifierInNamespace }}</h3>
                 <h3>Labels</h3>
-                <table class="table table-striped" id="labels-table">
+                <table class="table table-striped" id="labels-table" style="width:100%">
                     <thead>
                     <tr>
                         <th>Label</th>
@@ -499,6 +499,7 @@
                         <th>Last updated</th>
                         <th>View details</th>
                         <th>Comments</th>
+                        <th>Validation</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -525,6 +526,25 @@
                                 }) }}#comments" data-id="{{ label.id }}" data-object="label">
                                     <span class="badge {% if label.comments|length > 0  %}progress-bar-danger {% endif %}">{{ label.comments|length }}</span>
                                 </a>
+                            </td>
+                            <td>
+                                {% if label.validationStatus is null %}
+                                    <span class="label label-info">
+                                    Candidate
+                                </span>
+                                {% elseif label.validationStatus.id == 26  %}
+                                    <span class="label label-success">
+                                    {{ label.validationStatus }}
+                                </span>
+                                {% elseif label.validationStatus.id == 27  %}
+                                    <span class="label label-danger">
+                                    {{ label.validationStatus }}
+                                </span>
+                                {% elseif label.validationStatus.id == 28  %}
+                                    <span class="label label-warning">
+                                    {{ label.validationStatus }}
+                                </span>
+                                {% endif %}
                             </td>
                         </tr>
                     {% endfor %}
@@ -1000,10 +1020,14 @@
     <script>
         $(document).ready(function() {
             //hide validation column for datatable when current namespace is not ongoing
-            var visible = '{{ classVersion.namespaceForVersion.isOngoing ? 'true' : 'false' }}';
+            var visible = '{{ classVersion.namespaceForVersion.isOngoing}}';
 
             $('#namespaces-table').DataTable();
-            $('#labels-table').DataTable();
+            $('#labels-table').DataTable({
+                "columnDefs": [
+                    {"targets": 5, "visible": visible}
+                ]
+            });
             $('#scope-notes-table').DataTable({
                 "order": [[5, 'desc']],
                 "columnDefs": [
