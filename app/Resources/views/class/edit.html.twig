@@ -60,7 +60,7 @@
             {% endfor %}
 
             {% if countValidationsTxtp > 0 and countValidationsLbl > 0 %}
-                <h6>Validation pending</h6>
+                {{ include('class/_validation.html.twig') }}
             {% else %}
                 <h6><span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span><em>This class does not yet have the minimum number of validated parts required for publication.</em></h6>
             {% endif %}

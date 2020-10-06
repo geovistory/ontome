@@ -14,6 +14,7 @@ use AppBundle\Entity\OntoClass;
 use AppBundle\Entity\Project;
 use AppBundle\Entity\Property;
 use AppBundle\Entity\PropertyVersion;
+use AppBundle\Entity\SystemType;
 use AppBundle\Entity\TextProperty;
 use AppBundle\Form\IngoingPropertyQuickAddForm;
 use AppBundle\Form\OutgoingPropertyQuickAddForm;
@@ -24,9 +25,11 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Form\Form;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class PropertyController extends Controller
@@ -405,6 +408,18 @@ class PropertyController extends Controller
         $this->get('logger')
             ->info('Showing property: '.$property->getIdentifierInNamespace());
 
+        //If validation status is in validation request or is validation, we can't allow edition of the entity and we rended the show template
+        if (!is_null($propertyVersion->getValidationStatus()) && ($propertyVersion->getValidationStatus()->getId() === 26 || $propertyVersion->getValidationStatus()->getId() === 28)) {
+            return $this->render('property/show.html.twig', [
+                'propertyVersion' => $propertyVersion,
+                'ancestors' => $ancestors,
+                'descendants' => $descendants,
+                'domainRange' => $domainRange,
+                'relations' => $relations,
+                'namespacesId' => $namespacesId
+            ]);
+        }
+
         return $this->render('property/edit.html.twig', array(
             'propertyVersion' => $propertyVersion,
             'ancestors' => $ancestors,
@@ -415,6 +430,65 @@ class PropertyController extends Controller
             'propertyIdentifierForm' => $formIdentifier->createView(),
             'namespacesId' => $namespacesId
         ));
+    }
+
+    /**
+     * @Route("/property-version/{id}/edit-validity/{validationStatus}", name="property_version_validation_status_edit")
+     * @param PropertyVersion $propertyVersion
+     * @param SystemType $validationStatus
+     * @param Request $request
+     * @throws \Exception in case of unsuccessful validation
+     * @return RedirectResponse|Response
+     */
+    public function editValidationStatusAction(PropertyVersion $propertyVersion, SystemType $validationStatus, Request $request)
+    {
+        // On doit avoir une version de la classe sinon on lance une exception.
+        if(is_null($propertyVersion)){
+            throw $this->createNotFoundException('The property version n°'.$propertyVersion->getId().' does not exist. Please contact an administrator.');
+        }
+
+        //Denied access if not an authorized validator
+        $this->denyAccessUnlessGranted('validate', $propertyVersion);
+
+
+        $propertyVersion->setModifier($this->getUser());
+
+        $newValidationStatus = new SystemType();
+
+        try{
+            $em = $this->getDoctrine()->getManager();
+            $newValidationStatus = $em->getRepository('AppBundle:SystemType')
+                ->findOneBy(array('id' => $validationStatus->getId()));
+        } catch (\Exception $e) {
+            throw new BadRequestHttpException('The provided status does not exist.');
+        }
+
+        if (!is_null($newValidationStatus)) {
+            $statusId = intval($newValidationStatus->getId());
+            if (in_array($statusId, [26,27,28], true)) {
+                $propertyVersion->setValidationStatus($newValidationStatus);
+                $propertyVersion->setModifier($this->getUser());
+                $propertyVersion->setModificationTime(new \DateTime('now'));
+
+                $em->persist($propertyVersion);
+
+                $em->flush();
+
+                if ($statusId == 27){
+                    return $this->redirectToRoute('property_edit', [
+                        'id' => $propertyVersion->getProperty()->getId()
+                    ]);
+                }
+                else return $this->redirectToRoute('property_show', [
+                    'id' => $propertyVersion->getProperty()->getId()
+                ]);
+
+            }
+        }
+
+        return $this->redirectToRoute('property_show', [
+            'id' => $propertyVersion->getProperty()->getId()
+        ]);
     }
 
     /**

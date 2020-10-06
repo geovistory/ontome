@@ -399,6 +399,30 @@ class TextPropertyController extends Controller
 
                 $em->persist($textProperty);
 
+                //if the status is not validated, then unvalidate the related class or property if necessary
+                if ($statusId != 26) {
+                    if (!is_null($textProperty->getClass())){
+                        $cv = $object->getClassVersionForDisplay();
+                        if (!is_null($cv->getValidationStatus()->getId())) {
+                            $validationRequestStatus = $em->getRepository('AppBundle:SystemType')
+                                ->findOneBy(array('id' => 28));
+                            $cv->setValidationStatus($validationRequestStatus);
+                        }
+                        else $cv->setValidationStatus(null);
+                        $em->persist($cv);
+                    }
+                    else if (!is_null($textProperty->getProperty())){
+                        $pv = $object->getPropertyVersionForDisplay();
+                        if (!is_null($pv->getValidationStatus()->getId())) {
+                            $validationRequestStatus = $em->getRepository('AppBundle:SystemType')
+                                ->findOneBy(array('id' => 28));
+                            $pv->setValidationStatus($validationRequestStatus);
+                        }
+                        else $pv->setValidationStatus(null);
+                        $em->persist($pv);
+                    }
+                }
+
                 $em->flush();
 
                 if ($statusId == 27){

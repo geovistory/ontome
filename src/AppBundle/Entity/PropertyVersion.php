@@ -94,6 +94,13 @@ class PropertyVersion
     private $namespaceForVersion;
 
     /**
+     * @ORM\ManyToOne(targetEntity="SystemType")
+     * @ORM\JoinColumn(name="validation_status", referencedColumnName="pk_system_type")
+     * @Assert\Type(type="AppBundle\Entity\SystemType")
+     */
+    private $validationStatus;
+
+    /**
      * @ORM\Column(type="text")
      */
     private $notes;
@@ -303,6 +310,14 @@ class PropertyVersion
     }
 
     /**
+     * @return mixed
+     */
+    public function getValidationStatus()
+    {
+        return $this->validationStatus;
+    }
+
+    /**
      * @param mixed $range
      */
     public function setRange($range)
@@ -412,6 +427,14 @@ class PropertyVersion
     public function setRangeNamespace($rangeNamespace)
     {
         $this->rangeNamespace = $rangeNamespace;
+    }
+
+    /**
+     * @param mixed $validationStatus
+     */
+    public function setValidationStatus($validationStatus)
+    {
+        $this->validationStatus = $validationStatus;
     }
 
     /**

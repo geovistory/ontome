@@ -45,6 +45,31 @@
                 [inherited, cf. <a href="{{ path('property_show', {'id': propertyVersion.property.propertyOfOrigin.id}) }}" target="_blank"><em>original</em></a>]
             {% endif %}
         </div>
+        <div>
+            {% set countValidationsTxtp = 0 %}
+            {% set countValidationsLbl = 0 %}
+
+            {% for textProperty in propertyVersion.property.textProperties
+                if textProperty.systemType.id == 1
+                and textProperty.namespaceForVersion.id in namespacesId %}
+                {% if textProperty.validationStatus.id == 26 %}
+                    {% set countValidationsTxtp = countValidationsTxtp + 1 %}
+                {% endif %}
+            {% endfor %}
+
+            {% for label in propertyVersion.property.labels
+                if label.namespaceForVersion.id in namespacesId %}
+                {% if label.validationStatus.id == 26 %}
+                    {% set countValidationsLbl = countValidationsLbl + 1 %}
+                {% endif %}
+            {% endfor %}
+
+            {% if countValidationsTxtp > 0 and countValidationsLbl > 0 %}
+                {{ include('property/_validation.html.twig') }}
+            {% else %}
+                <h6><span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span><em>This property does not yet have the minimum number of validated parts required for publication.</em></h6>
+            {% endif %}
+        </div>
         <ul class="nav nav-tabs" id="main-tabs">
             <li class="active"><a data-toggle="tab" href="#summary">Summary</a></li>
             <li><a data-toggle="tab" href="#identification">Identification</a></li>
