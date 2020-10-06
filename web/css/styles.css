@@ -216,6 +216,10 @@ BODY Styling
     margin-top: 20px;
 }
 
+ul.dropdown-versions li{
+    text-align: center;
+}
+
 .cd-container {
     /* this class is used to give a max-width to the element it is applied to, and center it horizontally when it reaches that max-width */
     width: 90%;

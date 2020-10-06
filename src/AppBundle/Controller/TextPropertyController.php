@@ -131,6 +131,13 @@ class TextPropertyController extends Controller
             ]);
         }
 
+        //If validation status is in validation request or is validation, we can't allow edition of the entity and we rended the show template
+        if (!is_null($textProperty->getValidationStatus()) && ($textProperty->getValidationStatus()->getId() === 26 || $textProperty->getValidationStatus()->getId() === 28)) {
+            return $this->render('textProperty/show.html.twig', [
+                'textProperty' => $textProperty
+            ]);
+        }
+
         return $this->render('textProperty/edit.html.twig', [
             'textPropertyForm' => $form->createView(),
             'associatedObject' => $object,

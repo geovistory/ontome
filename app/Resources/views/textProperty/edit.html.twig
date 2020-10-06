@@ -137,8 +137,8 @@
                             {% endif %}
                             &nbsp;<span class="caret"></span>
                         </button>
-                        <ul class="dropdown-menu" aria-labelledby="dropdown-versions">
-                            <li>
+                        <ul class="dropdown-menu dropdown-versions" aria-labelledby="dropdown-versions">
+                            <li class="label-success">
                                 <a class="select-validation-status" data-id ="26" href="{{ path('text_property_validation_status_edit', {
                                     id: textProperty.id,
                                     validationStatus: 26
@@ -148,7 +148,7 @@
                                     </span>
                                 </a>
                             </li>
-                            <li>
+                            <li class="label-warning">
                                 <a class="select-validation-status" data-id="28" href="{{ path('text_property_validation_status_edit', {
                                     id: textProperty.id,
                                     validationStatus: 28
@@ -158,7 +158,7 @@
                                     </span>
                                 </a>
                             </li>
-                            <li>
+                            <li class="label-danger">
                                 <a class="select-validation-status" data-id="27" href="{{ path('text_property_validation_status_edit', {
                                     id: textProperty.id,
                                     validationStatus: 27

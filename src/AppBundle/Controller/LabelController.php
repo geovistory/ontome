@@ -102,6 +102,13 @@ class LabelController  extends Controller
             ]);
         }
 
+        //If validation status is in validation request or is validation, we can't allow edition of the entity and we rended the show template
+        if (!is_null($label->getValidationStatus()) && ($label->getValidationStatus()->getId() === 26 || $label->getValidationStatus()->getId() === 28)) {
+            return $this->render('label/show.html.twig', [
+                'label' => $label
+            ]);
+        }
+
         return $this->render('label/edit.html.twig', [
             'labelForm' => $form->createView(),
             'associatedObject' => $object,
