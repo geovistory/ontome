@@ -18,11 +18,12 @@ class OntoNamespaceVoter extends Voter
     const EDIT = 'edit';
     const FULLEDIT = 'full_edit';
     const EDITMANAGER = 'edit_manager';
+    const PUBLISH = 'publish';
 
     protected function supports($attribute, $subject)
     {
         // if the attribute isn't one we support, return false
-        if (!in_array($attribute, array(self::EDIT, self::FULLEDIT, self::EDITMANAGER))) {
+        if (!in_array($attribute, array(self::EDIT, self::FULLEDIT, self::EDITMANAGER, self::PUBLISH))) {
             return false;
         }
 
@@ -53,6 +54,8 @@ class OntoNamespaceVoter extends Voter
                 return $this->canFullEdit($namespace, $user);
             case self::EDITMANAGER:
                 return $this->canEditManager($namespace, $user);
+            case self::PUBLISH:
+                return $this->canPublish($namespace, $user);
         }
 
         throw new \LogicException('This code should not be reached!');
@@ -103,6 +106,31 @@ class OntoNamespaceVoter extends Voter
                 return false;
             }
             else if($userProjectAssociation->getProject() === $namespace->getProjectForTopLevelNamespace() && $userProjectAssociation->getPermission() === 2){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * @param OntoNamespace $namespace
+     * @param User $user
+     * @return bool TRUE if $user and $namespace have matching namespace (thanks to the $userProjectAssociation)
+     */
+    private function canPublish(OntoNamespace $namespace, User $user)
+    {
+        foreach ($user->getUserProjectAssociations()->getIterator() as $i => $userProjectAssociation) {
+            if(!$namespace->getIsOngoing()) {
+                return false;
+            }
+            else if($userProjectAssociation->getProject() === $namespace->getProjectForTopLevelNamespace() && $userProjectAssociation->getPermission() == 1){
+                $atLeastOneClassValidated = false;
+                $atLeastOnePropertyValidated = false;
+                foreach ($namespace->getClasses()->getIterator() as $j => $class) {
+                    if ($class->getClassVersionForDisplay($namespace)->getValidationStatus()->getId() == 26) {
+                        $atLeastOneClassValidated = true;
+                    }
+                }
                 return true;
             }
         }

@@ -293,7 +293,7 @@ class LabelController  extends Controller
                 if ($statusId != 26) {
                     if (!is_null($label->getClass())){
                         $cv = $object->getClassVersionForDisplay();
-                        if (!is_null($cv->getValidationStatus()->getId())) {
+                        if (!is_null($cv->getValidationStatus())) {
                             $validationRequestStatus = $em->getRepository('AppBundle:SystemType')
                                 ->findOneBy(array('id' => 28));
                             $cv->setValidationStatus($validationRequestStatus);
@@ -303,7 +303,7 @@ class LabelController  extends Controller
                     }
                     else if (!is_null($label->getProperty())){
                         $pv = $object->getPropertyVersionForDisplay();
-                        if (!is_null($pv->getValidationStatus()->getId())) {
+                        if (!is_null($pv->getValidationStatus())) {
                             $validationRequestStatus = $em->getRepository('AppBundle:SystemType')
                                 ->findOneBy(array('id' => 28));
                             $pv->setValidationStatus($validationRequestStatus);

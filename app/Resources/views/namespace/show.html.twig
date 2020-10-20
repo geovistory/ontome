@@ -336,6 +336,7 @@
                     <tr>
                         <th>Class</th>
                         <th>Last updated</th>
+                        <th>Validation status</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -350,6 +351,25 @@
                                 </a>
                             </td>
                             <td>{{ classVersion.class.modificationTime|date('Y-m-d') }}</td>
+                            <td>
+                                {% if classVersion.validationStatus is null %}
+                                    <span class="label label-info">
+                                    Candidate
+                                </span>
+                                {% elseif classVersion.validationStatus.id == 26  %}
+                                    <span class="label label-success">
+                                    {{ classVersion.validationStatus }}
+                                </span>
+                                {% elseif classVersion.validationStatus.id == 27  %}
+                                    <span class="label label-danger">
+                                    {{ classVersion.validationStatus }}
+                                </span>
+                                {% elseif classVersion.validationStatus.id == 28  %}
+                                    <span class="label label-warning">
+                                    {{ classVersion.validationStatus }}
+                                </span>
+                                {% endif %}
+                            </td>
                         </tr>
                     {% endfor %}
                     </tbody>
@@ -367,6 +387,7 @@
                         <th></th>
                         <th>Range</th>
                         <th>Last updated</th>
+                        <th>Validation status</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -411,6 +432,25 @@
                                 {% endif %}
                             </td>
                             <td>{{ propertyVersion.modificationTime|date('Y-m-d') }}</td>
+                            <td>
+                                {% if propertyVersion.validationStatus is null %}
+                                    <span class="label label-info">
+                                    Candidate
+                                </span>
+                                {% elseif propertyVersion.validationStatus.id == 26  %}
+                                    <span class="label label-success">
+                                    {{ propertyVersion.validationStatus }}
+                                </span>
+                                {% elseif propertyVersion.validationStatus.id == 27  %}
+                                    <span class="label label-danger">
+                                    {{ propertyVersion.validationStatus }}
+                                </span>
+                                {% elseif propertyVersion.validationStatus.id == 28  %}
+                                    <span class="label label-warning">
+                                    {{ propertyVersion.validationStatus }}
+                                </span>
+                                {% endif %}
+                            </td>
                         </tr>
                     {% endfor %}
                     </tbody>

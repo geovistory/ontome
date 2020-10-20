@@ -403,7 +403,7 @@ class TextPropertyController extends Controller
                 if ($statusId != 26) {
                     if (!is_null($textProperty->getClass())){
                         $cv = $object->getClassVersionForDisplay();
-                        if (!is_null($cv->getValidationStatus()->getId())) {
+                        if (!is_null($cv->getValidationStatus())) {
                             $validationRequestStatus = $em->getRepository('AppBundle:SystemType')
                                 ->findOneBy(array('id' => 28));
                             $cv->setValidationStatus($validationRequestStatus);
@@ -413,7 +413,7 @@ class TextPropertyController extends Controller
                     }
                     else if (!is_null($textProperty->getProperty())){
                         $pv = $object->getPropertyVersionForDisplay();
-                        if (!is_null($pv->getValidationStatus()->getId())) {
+                        if (!is_null($pv->getValidationStatus())) {
                             $validationRequestStatus = $em->getRepository('AppBundle:SystemType')
                                 ->findOneBy(array('id' => 28));
                             $pv->setValidationStatus($validationRequestStatus);
