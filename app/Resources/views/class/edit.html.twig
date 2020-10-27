@@ -108,27 +108,19 @@
                                         if association.namespaceForVersion.id in namespacesId %}
 
                                         {# Initialisation #}
-                                        {% set parentClassVersion = null %}
                                         {% set isGoodNamespace = true %}
                                         {% set route = 'class_show_with_version' %}
                                         {% set route_params = {'id': association.parentClass.id,  'namespaceFromUrlId': association.parentClassNamespace.id } %}
 
-                                        {# Est ce qu'une version parentClass existe dans les namespaces sélectionnés de l'association ? #}
-                                        {% for iParentClassVersion in association.parentClass.classVersions
-                                            if iParentClassVersion.namespaceForVersion.id in association.namespaceForVersion.selectedNamespacesId %}
-                                            {% set parentClassVersion = iParentClassVersion %}
-                                        {% endfor %}
-
-                                        {# Aucune version n'a été retrouvée on prend celle par défaut et on le met en rouge  #}
-                                        {% if parentClassVersion is null %}
-                                            {% set parentClassVersion = association.parentClass.classVersions|first %}
+                                        {# Le namespace de parentClass correspond-t-il aux namespaces selectionnés ? Si non : rouge #}
+                                        {% if association.parentClassNamespace.id not in association.namespaceForVersion.selectedNamespacesId %}
                                             {% set isGoodNamespace = false %}
                                             {% set route = 'namespace_show' %}
                                             {% set route_params = {'id': association.namespaceForVersion.id,  '_fragment': 'mismatches' } %}
                                         {% endif %}
                                         <li>
                                             <a href="{{ path(route, route_params) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
-                                                {{ parentClassVersion.invertedLabel }}</a>
+                                                {{ association.parentClass.classVersionForDisplay(association.parentClassNamespace).invertedLabel }}</a>
                                         </li>
                                     {% endfor %}
                                 </ul>
@@ -153,28 +145,20 @@
                                     {% for association in classVersion.class.parentClassAssociations
                                         if association.namespaceForVersion.id in namespacesId %}
 
-                                        {# (Ré)initialisation #}
-                                        {% set childClassVersion = null %}
+                                        {# Initialisation #}
                                         {% set isGoodNamespace = true %}
                                         {% set route = 'class_show_with_version' %}
                                         {% set route_params = {'id': association.childClass.id,  'namespaceFromUrlId': association.childClassNamespace.id } %}
 
-                                        {# est ce qu'une version childClass existe dans les namespaces sélectionnés de l'association ? #}
-                                        {% for iChildClassVersion in association.childClass.classVersions
-                                            if iChildClassVersion.namespaceForVersion.id in association.namespaceForVersion.selectedNamespacesId %}
-                                            {% set childClassVersion = iChildClassVersion %}
-                                        {% endfor %}
-
-                                        {# aucune version n'a été retrouvée on prend celle par défaut et on le met en rouge #}
-                                        {% if childClassVersion is null %}
-                                            {% set childClassVersion = association.childClass.classVersions|first %}
+                                        {# Le namespace de parentClass correspond-t-il aux namespaces selectionnés ? Si non : rouge #}
+                                        {% if association.parentClassNamespace.id not in association.namespaceForVersion.selectedNamespacesId %}
                                             {% set isGoodNamespace = false %}
                                             {% set route = 'namespace_show' %}
                                             {% set route_params = {'id': association.namespaceForVersion.id,  '_fragment': 'mismatches' } %}
                                         {% endif %}
                                         <li>
                                             <a href="{{ path(route, route_params) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
-                                                {{ childClassVersion.invertedLabel }}</a>
+                                                {{ association.childClass.classVersionForDisplay(association.childClassNamespace).invertedLabel }}</a>
                                         </li>
                                     {% endfor %}
                                 </ul>
@@ -206,52 +190,35 @@
                                                 {# La classe affichée est "source", on cherche le "target" #}
 
                                                 {# Initialisation #}
-                                                {% set targetClassVersion = null %}
                                                 {% set isGoodNamespace = true %}
                                                 {% set route = 'class_show_with_version' %}
                                                 {% set route_params = {'id': relation.targetClass.id,  'namespaceFromUrlId': relation.targetNamespaceForVersion.id } %}
 
-                                                {# Est ce qu'une version targetClass existe dans les namespaces sélectionnés de l'association ? #}
-                                                {% for iTargetClassVersion in relation.targetClass.classVersions
-                                                    if iTargetClassVersion.namespaceForVersion.id in relation.namespaceForVersion.selectedNamespacesId %}
-                                                    {% set targetClassVersion = iTargetClassVersion %}
-                                                {% endfor %}
-
-                                                {# Aucune version n'a été retrouvée on prend celle par défaut et on le met en rouge #}
-                                                {% if targetClassVersion is null %}
-                                                    {% set targetClassVersion = relation.targetClass.classVersions|first %}
+                                                {# Le namespace de targetClass correspond-t-il aux namespaces selectionnés ? Si non : rouge #}
+                                                {% if relation.targetNamespaceForVersion.id not in relation.namespaceForVersion.selectedNamespacesId %}
                                                     {% set isGoodNamespace = false %}
                                                     {% set route = 'namespace_show' %}
                                                     {% set route_params = {'id': relation.namespaceForVersion.id,  '_fragment': 'mismatches' } %}
                                                 {% endif %}
-
                                                 <a href="{{ path(route, route_params) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
-                                                    {{ targetClassVersion.invertedLabel }}</a>
+                                                    {{ relation.targetClass.classVersionForDisplay(relation.targetNamespaceForVersion).invertedLabel }}</a>
                                             {% else %}
                                                 {# La classe affichée est "target", on cherche la "source" #}
 
                                                 {# Initialisation #}
-                                                {% set sourceClassVersion = null %}
                                                 {% set isGoodNamespace = true %}
                                                 {% set route = 'class_show_with_version' %}
                                                 {% set route_params = {'id': relation.sourceClass.id,  'namespaceFromUrlId': relation.sourceNamespaceForVersion.id } %}
 
-                                                {# Est ce qu'une version sourceClass existe dans les namespaces sélectionnés de l'association ? #}
-                                                {% for iSourceClassVersion in relation.sourceClass.classVersions
-                                                    if iSourceClassVersion.namespaceForVersion.id in relation.namespaceForVersion.selectedNamespacesId %}
-                                                    {% set sourceClassVersion = iSourceClassVersion %}
-                                                {% endfor %}
-
-                                                {# Aucune version n'a été retrouvée on prend celle par défaut et on le met en rouge #}
-                                                {% if sourceClassVersion is null %}
-                                                    {% set sourceClassVersion = relation.sourceClass.classVersions|first %}
+                                                {# Le namespace de sourceClass correspond-t-il aux namespaces selectionnés ? Si non : rouge #}
+                                                {% if relation.sourceNamespaceForVersion.id not in relation.namespaceForVersion.selectedNamespacesId %}
                                                     {% set isGoodNamespace = false %}
                                                     {% set route = 'namespace_show' %}
                                                     {% set route_params = {'id': relation.namespaceForVersion.id,  '_fragment': 'mismatches' } %}
                                                 {% endif %}
 
                                                 <a href="{{ path(route, route_params) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
-                                                    {{ sourceClassVersion.invertedLabel }}</a>
+                                                    {{ relation.sourceClass.classVersionForDisplay(relation.sourceNamespaceForVersion).invertedLabel }}</a>
                                             {% endif %}
                                         </li>
                                     {% endfor %}
@@ -775,6 +742,16 @@
                         {# Initialisation #}
                         {% set parentClassVersion = null %}
                         {% set isGoodNamespace = true %}
+                        {% set route = 'class_show_with_version' %}
+                        {% set route_params = {'id': association.parentClass.id,  'namespaceFromUrlId': association.parentClassNamespace.id } %}
+
+                        {# Le namespace de parentClass correspond-t-il aux namespaces selectionnés ? Si non : rouge #}
+                        {% set parentClassNamespaceId = association.parentClassNamespace.id %}
+                        {% if parentClassNamespaceId not in association.namespaceForVersion.selectedNamespacesId %}
+                            {% set isGoodNamespace = false %}
+                            {% set route = 'namespace_show' %}
+                            {% set route_params = {'id': association.namespaceForVersion.id,  '_fragment': 'mismatches' } %}
+                        {% endif %}
 
                         {# Est ce qu'une version parentClass existe dans les namespaces sélectionnés de l'association ? #}
                         {% for iParentClassVersion in association.parentClass.classVersions
@@ -782,19 +759,14 @@
                             {% set parentClassVersion = iParentClassVersion %}
                         {% endfor %}
 
-                        {# Aucune version n'a été retrouvée on prend celle par défaut et on le met en rouge  #}
+                        {# Aucune version n'a été retrouvée on prend celle par défaut  #}
                         {% if parentClassVersion is null %}
                             {% set parentClassVersion = association.parentClass.classVersions|first %}
-                            {% set isGoodNamespace = false %}
                         {% endif %}
                         <tr>
                             <td>
-                                <a href="{{ path('class_show_with_version', {
-                                    'id': association.parentClass.id,
-                                    'namespaceFromUrlId': association.parentClassNamespace.id,
-                                    '_fragment': 'class-hierarchy'
-                                }) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
-                                    {{ association.parentClass.classVersionForDisplay(association.parentClassNamespace).invertedLabel }}
+                                <a href="{{ path(route, route_params) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
+                                    {{ parentClassVersion.invertedLabel }}
                                 </a>
                             </td>
                             <td>{{ association.parentClass.classVersionForDisplay(association.parentClassNamespace).namespaceForVersion }}</td>

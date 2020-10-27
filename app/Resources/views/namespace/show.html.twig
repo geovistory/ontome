@@ -287,22 +287,31 @@
                 {% else %}
                     <p>This namespace is a root namespace. Find all its versions in the <a href="#namespace-hierarchy" onclick="window.location = '{{ path('namespace_show', {'id': namespace.id}) }}#namespace-hierarchy';window.location.reload()">Versions tab</a>.</p>
                 {% endif %}
+
                 {% if not namespace.isTopLevelNamespace %}
-                <h3>Reference namespace{% if namespace.referencedNamespaceAssociations|length > 1 %}s{% endif %} of which this namespace is an extension</h3>
-                {% if namespace.referencedNamespaceAssociations is not empty %}
-                    {% for referencedNamespaceAssociation in namespace.referencedNamespaceAssociations %}
-                        <p>
-                            <a href="{{ path('namespace_show', {
-                                'id': referencedNamespaceAssociation.referencedNamespace.id
-                            }) }}">
-                                {{ referencedNamespaceAssociation.referencedNamespace }}
-                            </a>
-                        </p>
-                    {% endfor %}
-                {% else %}
-                    <em>No reference namespace has been specified.</em>
+                    <h3 id="titleReferenceNamespace">Namespace{% if namespace.referencedNamespaceAssociations|length > 1 %}s{% endif %} to which this ongoing namespace refers</h3>
+                        <table class="table table-striped" id="reference-namespaces-table">
+                            <thead>
+                            <tr>
+                                <th>Namespace</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for referencedNamespaceAssociation in namespace.referencedNamespaceAssociations %}
+                                <tr>
+                                    <td>
+                                        <a href="{{ path('namespace_show', {
+                                            'id': referencedNamespaceAssociation.referencedNamespace.id
+                                        }) }}">
+                                            {{ referencedNamespaceAssociation.referencedNamespace }}
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
                 {% endif %}
-                {% endif %}
+
                 <h3>Labels</h3>
                 <table class="table table-striped" id="labels-table">
                     <thead>
@@ -857,6 +866,7 @@
     <script>
         $(document).ready(function() {
             $('#namespaces-table').DataTable();
+            $('#reference-namespaces-table').DataTable({"dom": "t", "searching": false, "paging": false, language: {emptyTable: "No reference namespace has been specified."}});
             $('#labels-table').DataTable();
             $('#descriptions-table').DataTable();
             $('#additional-notes-table').DataTable();

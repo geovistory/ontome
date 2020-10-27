@@ -344,16 +344,21 @@ class PropertyRepository extends EntityRepository
         // Construit la chaine ?,? pour les namespacesId dans la requête SQL
         $in  = str_repeat('?,', count($namespacesId) - 1) . '?';
 
-        $sql = "SELECT  pk_domain AS \"domainId\",
-                        identifier_domain AS \"domainIdentifier\",
-                        fk_domain_namespace AS \"domainNamespaceId\",
-                        identifier_property AS \"propertyIdentifier\",
-                        pk_range AS \"rangeId\",
-                        fk_range_namespace AS \"rangeNamespaceId\",
-                        identifier_range AS \"rangeIdentifier\"
-                FROM che.v_properties_with_domain_range
-                WHERE pk_property = ?
-                AND fk_namespace_for_version IN (".$in.");";
+        $sql = "SELECT pv.has_domain AS \"domainId\",
+                c_domain.identifier_in_namespace || ' ' || cv_domain.standard_label AS \"domainIdentifier\",
+                cv_domain.fk_namespace_for_version AS \"domainNamespaceId\",
+                pr.identifier_in_namespace || ' ' || pv.standard_label AS \"propertyIdentifier\",
+                pv.has_range AS \"rangeId\",
+                c_range.identifier_in_namespace || ' ' || cv_range.standard_label AS \"rangeIdentifier\",
+                cv_range.fk_namespace_for_version AS \"rangeNamespaceId\"
+                FROM che.property_version pv 
+                LEFT JOIN che.property pr ON pr.pk_property = pv.fk_property
+                LEFT JOIN che.class c_domain ON pv.has_domain = c_domain.pk_class
+                LEFT JOIN che.class_version cv_domain ON pv.has_domain = cv_domain.fk_class AND cv_domain.fk_namespace_for_version = pv.fk_domain_namespace
+                LEFT JOIN che.class c_range ON pv.has_range = c_range.pk_class 
+                LEFT JOIN che.class_version cv_range ON pv.has_range = cv_range.fk_class AND cv_range.fk_namespace_for_version = pv.fk_range_namespace
+                WHERE pr.pk_property = ?
+                AND pv.fk_namespace_for_version IN (".$in.");";
 
         $stmt = $conn->prepare($sql);
         $stmt->execute(array_merge(array($propertyVersion->getProperty()->getId()), $namespacesId));

@@ -471,7 +471,8 @@ class NamespaceController  extends Controller
 
         $response = array(
             'status' => $status,
-            'message' => $message
+            'message' => $message,
+            'nbchildversions' => count($referencedNamespace->getTopLevelNamespace()->getChildVersions())
         );
 
         return new JsonResponse($response);
@@ -485,7 +486,7 @@ class NamespaceController  extends Controller
      * @param OntoNamespace  $referencedNamespace    The referenced namespace to be disassociated from a namespace
      * @return JsonResponse
      */
-    public function deleteProfileNamespaceAssociationAction(OntoNamespace $namespace, OntoNamespace $referencedNamespace, Request $request)
+    public function deleteReferencedNamespaceAssociationAction(OntoNamespace $namespace, OntoNamespace $referencedNamespace, Request $request)
     {
         $this->denyAccessUnlessGranted('edit', $namespace);
 
@@ -508,5 +509,153 @@ class NamespaceController  extends Controller
 
     }
 
+    /**
+     * @Route("/namespace/{namespace}/referenced-namespace/{referencedNamespace}/new-referenced-namespace/{newReferencedNamespace}/change", name="namespace_referenced_namespace_change")
+     * @Method({ "GET"})
+     * @param OntoNamespace  $namespace    The namespace to be changed from a referenced namespace
+     * @param OntoNamespace  $referencedNamespace    The referenced namespace to be changed from a namespace
+     * @return JsonResponse
+     */
+    public function changeReferencedNamespaceAssociationAction(OntoNamespace $namespace, OntoNamespace $referencedNamespace, OntoNamespace $newReferencedNamespace, Request $request)
+    {
+        $this->denyAccessUnlessGranted('edit', $namespace);
+
+        $em = $this->getDoctrine()->getManager();
+
+        $referencedNamespaceAssociation = $em->getRepository('AppBundle:ReferencedNamespaceAssociation')
+            ->findOneBy(array('namespace' => $namespace, 'referencedNamespace' => $referencedNamespace));
+
+        $referencedNamespaceAssociation->setReferencedNamespace($newReferencedNamespace);
+
+        // Modifier les relations appartenant au namespace pointant sur l'ancien namespace reference, ils doivent maintenant pointer sur le nouveau namespace de référence
+        // A condition que l'entité cible existe dans le nouveau namespace, sinon ne pas le modifier (= Mismatch)
+
+        // Relations hierarchiques class
+        foreach ($namespace->getClassAssociations() as $classAssociation){
+            // Parent
+            if($classAssociation->getParentClassNamespace() == $referencedNamespace){
+                //Verifier si la classe parente existe dans la nouvelle référence
+                if($classAssociation->getParentClass()->getClassVersionForDisplay($newReferencedNamespace)->getNamespaceForVersion() == $newReferencedNamespace)
+                {
+                    //Elle existe, on peut modifier la classAssociation
+                    $classAssociation->setParentClassNamespace($newReferencedNamespace);
+                }
+            }
+
+            // Child
+            if($classAssociation->getChildClassNamespace() == $referencedNamespace){
+                //Verifier si la classe child existe dans la nouvelle référence
+                if($classAssociation->getChildClass()->getClassVersionForDisplay($newReferencedNamespace)->getNamespaceForVersion() == $newReferencedNamespace)
+                {
+                    //Elle existe, on peut modifier la classAssociation
+                    $classAssociation->setChildClassNamespace($newReferencedNamespace);
+                }
+            }
+        }
+
+        // Relations hierarchiques property
+        foreach ($namespace->getPropertyAssociations() as $propertyAssociation){
+            // Parent
+            if($propertyAssociation->getParentPropertyNamespace() == $referencedNamespace){
+                //Verifier si la propriété parente existe dans la nouvelle référence
+                if($propertyAssociation->getParentProperty()->getPropertyVersionForDisplay($newReferencedNamespace)->getNamespaceForVersion() == $newReferencedNamespace)
+                {
+                    //Elle existe, on peut modifier la propertyAssociation
+                    $propertyAssociation->setParentPropertyNamespace($newReferencedNamespace);
+                }
+            }
+
+            // Child
+            if($propertyAssociation->getChildPropertyNamespace() == $referencedNamespace){
+                //Verifier si la propriété child existe dans la nouvelle référence
+                if($propertyAssociation->getChildProperty()->getPropertyVersionForDisplay($newReferencedNamespace)->getNamespaceForVersion() == $newReferencedNamespace)
+                {
+                    //Elle existe, on peut modifier la propertyAssociation
+                    $propertyAssociation->setChildPropertyNamespace($newReferencedNamespace);
+                }
+            }
+        }
+
+        // Propriétés - domain
+        foreach ($namespace->getPropertyVersions() as $propertyVersion){
+            // Domain
+            if($propertyVersion->getDomainNamespace() == $referencedNamespace){
+                //Verifier si le domain existe dans la nouvelle référence
+                if($propertyVersion->getDomain()->getClassVersionForDisplay($newReferencedNamespace)->getNamespaceForVersion() == $newReferencedNamespace)
+                {
+                    //Il existe, on peut modifier la propriété
+                    $propertyVersion->setDomainNamespace($newReferencedNamespace);
+                }
+            }
+
+            // Range
+            if($propertyVersion->getRangeNamespace() == $referencedNamespace){
+                //Verifier si la range existe dans la nouvelle référence
+                if($propertyVersion->getRange()->getClassVersionForDisplay($newReferencedNamespace)->getNamespaceForVersion() == $newReferencedNamespace)
+                {
+                    //Elle existe, on peut modifier la propriété
+                    $propertyVersion->setRangeNamespace($newReferencedNamespace);
+                }
+            }
+        }
+
+        // Relations
+        foreach ($namespace->getEntityAssociations() as $relation){
+            //Source
+            if($relation->getSourceNamespaceForVersion() == $referencedNamespace){
+                //Verifier si la classe ou propriété source existe dans la nouvelle référence
+                if($relation->getSource()->getClassVersionForDisplay($newReferencedNamespace)->getNamespaceForVersion() == $newReferencedNamespace){
+                    $relation->setSourceNamespaceForVersion($newReferencedNamespace);
+                }
+            }
+
+            //Target
+            if($relation->getTargetNamespaceForVersion() == $referencedNamespace){
+                //Verifier si la classe ou propriété target existe dans la nouvelle référence
+                if($relation->getTarget()->getClassVersionForDisplay($newReferencedNamespace)->getNamespaceForVersion() == $newReferencedNamespace){
+                    $relation->setTargetNamespaceForVersion($newReferencedNamespace);
+                }
+            }
+        }
+
+        $em->flush();
+
+        $response = array();
+
+        return new JsonResponse($response);
+
+    }
+
+    /**
+     * @Route("/namespace/{namespace}/referenced-namespace/{referencedNamespace}/choices", name="get_choices_namespace_referenced")
+     * @Method({ "GET"})
+     * @param OntoNamespace  $namespace    The namespace associated from a referenced namespace
+     * @param OntoNamespace  $referencedNamespace    The referenced namespace to be checked from a namespace
+     * @return JsonResponse
+     * Cette fonction retrouve les espaces de noms qui peuvent remplacer cet espace de noms de référence
+     * Condition : Si l'espace de noms root de l'espace de noms ongoing comprend déjà une version publiée,
+     * empêcher la sélection d'une version antérieure d'un espace de noms de référence à celle de la version la plus récente de l'espace de noms publié.
+     */
+    public function getChoicesNamespaceAssociation(OntoNamespace $namespace, OntoNamespace $referencedNamespace)
+    {
+        $this->denyAccessUnlessGranted('edit', $namespace);
+
+        $em = $this->getDoctrine()->getManager();
+
+        $referencedNamespaceAssociation = $em->getRepository('AppBundle:ReferencedNamespaceAssociation')
+            ->findOneBy(array('namespace' => $namespace, 'referencedNamespace' => $referencedNamespace));
+
+        $rootNamespace = $referencedNamespace->getTopLevelNamespace();
+
+        $childVersions = array();
+        foreach($rootNamespace->getChildVersions() as $childVersion){
+            $childVersions[$childVersion->getId()] = $childVersion->getStandardLabel();
+        }
+
+        $response = array("rootNamespaceChildVersions" => $childVersions);
+
+        return new JsonResponse($response);
+
+    }
 
 }

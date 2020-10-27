@@ -917,7 +917,7 @@ class OntoNamespace
 
     /**
      * @return array
-     * Retourne un tableau des id de tous les namespaces (ce Namespace + les référéncés)
+     * Retourne un tableau des id de ces namespaces suivants : ce namespace (this) et ses namespaces référencés.
      */
     public function getSelectedNamespacesId()
     {
@@ -928,12 +928,14 @@ class OntoNamespace
         foreach($this->getReferencedNamespaceAssociations() as $referencedNamespaceAssociation){
             $arrayIds[] = $referencedNamespaceAssociation->getReferencedNamespace()->getId();
         }
-        return $arrayIds;
+
+        // array_unique évite les doublons - utile si on veut compter combien de ns différents
+        return array_unique($arrayIds);
     }
 
     /**
      * @return array
-     * Retourne un tableau des id de tous les namespaces (ce Namespace + les référéncés + toutes les versions du même root qu'eux)
+     * Retourne un tableau des id de ces namespaces suivants : tous les namespaces dans le même root que ce namespace (this) et tous les namespaces dans le même root de ses namespaces référencés.
      * Utilisé notamment pour répérer les entités qui n'existent pas dans une version mais dans une autre du même root
      */
     public function getLargeSelectedNamespacesId()
@@ -953,6 +955,8 @@ class OntoNamespace
                 $arrayIds[] = $ns->getId();
             }
         }
-        return $arrayIds;
+
+        // array_unique évite les doublons - utile si on veut compter combien de ns différents
+        return array_unique($arrayIds);
     }
 }

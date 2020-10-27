@@ -561,6 +561,7 @@
         $('#publish-btn').on('click', function() {
             bootbox.confirm({
                 message: "Once a profile is published, it's not possible to make it ongoing again. Are you sure you want to publish this profile?",
+                title: '<i class="fas fa-exclamation-triangle"></i> Warning',
                 buttons: {
                     confirm: {
                         label: 'Yes',
@@ -586,6 +587,7 @@
         $('#deprecate-btn').on('click', function() {
             bootbox.confirm({
                 message: "Once a profile is deprecated, it's not possible to publish it again. Are you sure you want to make this profile deprecated?",
+                title: '<i class="fas fa-exclamation-triangle"></i> Warning',
                 buttons: {
                     confirm: {
                         label: 'Yes',
