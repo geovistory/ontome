@@ -627,25 +627,17 @@ class NamespaceController  extends Controller
     }
 
     /**
-     * @Route("/namespace/{namespace}/referenced-namespace/{referencedNamespace}/choices", name="get_choices_namespace_referenced")
+     * @Route("/namespace/{namespace}/choices", name="get_choices_namespaces")
      * @Method({ "GET"})
-     * @param OntoNamespace  $namespace    The namespace associated from a referenced namespace
-     * @param OntoNamespace  $referencedNamespace    The referenced namespace to be checked from a namespace
+     * @param OntoNamespace  $namespace    The namespace
      * @return JsonResponse
-     * Cette fonction retrouve les espaces de noms qui peuvent remplacer cet espace de noms de référence
-     * Condition : Si l'espace de noms root de l'espace de noms ongoing comprend déjà une version publiée,
-     * empêcher la sélection d'une version antérieure d'un espace de noms de référence à celle de la version la plus récente de l'espace de noms publié.
+     * Cette fonction retrouve les espaces de noms soeurs
      */
-    public function getChoicesNamespaceAssociation(OntoNamespace $namespace, OntoNamespace $referencedNamespace)
+    public function getChoicesNamespaceAssociation(OntoNamespace $namespace)
     {
-        $this->denyAccessUnlessGranted('edit', $namespace);
-
         $em = $this->getDoctrine()->getManager();
 
-        $referencedNamespaceAssociation = $em->getRepository('AppBundle:ReferencedNamespaceAssociation')
-            ->findOneBy(array('namespace' => $namespace, 'referencedNamespace' => $referencedNamespace));
-
-        $rootNamespace = $referencedNamespace->getTopLevelNamespace();
+        $rootNamespace = $namespace->getTopLevelNamespace();
 
         $childVersions = array();
         foreach($rootNamespace->getChildVersions() as $childVersion){

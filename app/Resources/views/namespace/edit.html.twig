@@ -1308,7 +1308,7 @@
                 var namespaceID = {{ namespace.id }}
 
                 bootbox.confirm({
-                    message: "Changing the version of a reference namespace changes the association of all target entities in that namespace to the new version. Errors may occur.<br><br>Please also note if the selected version is ongoing, this can be modified at any time and you will not be able to publish your namespace as long as you have selected it.<br><br>Do you wish to proceed?",
+                    message: "Changing the version of a reference namespace changes the association of all target entities in that namespace to the new version. Errors may occur.<br><br>Please also note if the selected version is ongoing, it might be modified at any time and you will not be able to publish your namespace as long as you have selected it.<br><br>Do you wish to proceed?",
                     title: '<i class="fas fa-exclamation-triangle"></i> Warning',
                     buttons: {
                         confirm: {
@@ -1364,8 +1364,7 @@
                                 });
                             });
 
-                            var url = '{{ path("get_choices_namespace_referenced", {'namespace' : 'namespaceID','referencedNamespace': 'selectedValue'}) }}';
-                            url = url.replace("namespaceID", namespaceID);
+                            var url = '{{ path("get_choices_namespaces", {'namespace' : 'selectedValue'}) }}';
                             url = url.replace("selectedValue", selectedValue);
                             $.ajax({
                                 url: url,

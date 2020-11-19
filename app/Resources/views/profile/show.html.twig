@@ -236,7 +236,7 @@
                     <tbody>
                     {% for profileAssociation in profileAssociations
                         if profileAssociation.property is not null
-                        and profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion) is not null %}
+                        and profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion) %}
                         <tr>
                             <td class="text-right small">
                                 {% if profileAssociation.domain is not null %}

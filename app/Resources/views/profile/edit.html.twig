@@ -358,7 +358,7 @@
                 <tbody>
                 {% for profileAssociation in profileAssociations
                     if profileAssociation.property is not null
-                    and profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion) is not null %}
+                    and profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion) %}
                     <tr>
                         <td class="text-nowrap text-right small">
                             {% if profileAssociation.domain is not null %}
@@ -482,18 +482,38 @@
             {% if profile.namespaces|length == 0 %}
                 <em id="empty-namespace-list-message">There is currently no namespace used by this profile.</em>
             {% endif %}
-            <div class="container" id="used-namespaces-list">
+            <table class="table table-striped" id="used-namespaces-table">
+                <thead>
+                <tr>
+                    <th>Namespace</th>
+                    <th>Change</th>
+                    <th>Remove</th>
+                </tr>
+                </thead>
+                <tbody>
                 {% for namespace in profile.namespaces %}
-                    <div class="row">
-                        <a href="#namespaces" class="remove-namespace" data-id="{{ namespace.id }}"><span class="glyphicon glyphicon-remove text-danger" aria-hidden="true"></span></a><a href="{{ path('namespace_show', {
-                            'id': namespace.id
-                        }) }}">
-                            {{ namespace }}
-                        </a>
-                        <span class="loading-icon2" data-id="{{ namespace.id }}">&nbsp;<span class="fas fa-spinner fa-spin"></span></span>
-                    </div>
+                    <tr>
+                        <td><a href="{{ path('namespace_show', {'id': namespace.id}) }}">{{ namespace }}</a></td>
+                        <td>
+                            {% if namespace.topLevelNamespace.childVersions|length > 1 %}
+                                <a href="#namespaces" class="change-version btn btn-xs btn-primary" data-id="{{ namespace.id }}"><i class="fas fa-exchange-alt"></i> Change version</a>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% set isRemovable = true %}
+                            {% for profileAssociation in profile.profileAssociations if profileAssociation.systemType.id == 5 and profileAssociation.entityNamespaceForVersion.id == namespace.id %}
+                                {% set isRemovable = false %}
+                            {% endfor %}
+                            {% if isRemovable %}
+                                <a href="#namespaces" class="remove-namespace btn btn-xs btn-danger" data-id="{{ namespace.id }}"><i class="far fa-times-circle"></i> Remove<span class="loading-icon2" data-id="{{ namespace.id }}">&nbsp;<span class="fas fa-spinner fa-spin"></span></span></a>
+                            {% else %}
+                                <a href="#namespaces" class="not-removable btn btn-xs btn-danger" disabled="disabled" data-id="{{ namespace.id }}"><i class="far fa-times-circle"></i> Remove<span class="loading-icon2" data-id="{{ namespace.id }}">&nbsp;<span class="fas fa-spinner fa-spin"></span></span></a>
+                            {% endif %}
+                        </td>
+                    </tr>
                 {% endfor %}
-            </div>
+                </tbody>
+            </table>
             <h4>Pick a namespace to associate with the current profile</h4>
             <div class="row">
                 <div class="col-sm-6">
@@ -516,17 +536,6 @@
             {% if profile.namespaces|length == 0 %}
                 <em id="empty-namespace-list-message">There is currently no namespace used by this profile.</em>
             {% endif %}
-            <ul id="used-namespaces-list">
-                {% for namespace in profile.namespaces %}
-                    <li>
-                        <a href="{{ path('namespace_show', {
-                            'id': namespace.id
-                        }) }}">
-                            {{ namespace }}
-                        </a>
-                    </li>
-                {% endfor %}
-            </ul>
         {% endif %}
         </div>
         <div id="graph" class="tab-pane fade">
@@ -555,6 +564,19 @@
     $(document).ready(function() {
         $('.js-datepicker').datepicker({
             format: 'yyyy-mm-dd'
+        });
+
+        var usedNamespacesTable = $('#used-namespaces-table').DataTable({
+            "columnDefs": [
+                { "width": "10%", "targets": 2 },
+                { "width": "20%", "targets": 1 },
+                { "width": "70%", "targets": 0 }
+            ],
+            "autoWidth": false,
+            "dom": "t",
+            "searching": false,
+            "paging": false,
+            language: {emptyTable: "No namespace has been associated with this profile."}
         });
 
         //confirmation box for publish action
@@ -665,7 +687,7 @@
                         urlRemoveClass = urlRemoveClass.replace("profileID", profileID);
                         urlRemoveClass = urlRemoveClass.replace("classID", row.id);
                         if(row.associationType == 'selected') {
-                            return '<a data-id="' + row.id + '" data-url="' + urlRemoveClass + '" class="remove-class"><span class="glyphicon glyphicon-remove text-danger" aria-hidden="true"></span></a><span class="remove-class-loading-icon" data-id="' + row.id + '" style="display: none"><span class="fas fa-spinner fa-spin"></span></span>';
+                            return '<a data-id="' + row.id + '" data-namespace-id="'+row.namespaceForVersion+'" data-url="' + urlRemoveClass + '" class="remove-class"><span class="glyphicon glyphicon-remove text-danger" aria-hidden="true"></span></a><span class="remove-class-loading-icon" data-id="' + row.id + '" style="display: none"><span class="fas fa-spinner fa-spin"></span></span>';
                         }
                         else return '';
                     }
@@ -716,7 +738,7 @@
                         var urlSelectClass = '{{ path("profile_class_association", {'profile' : 'profileID', 'class' : 'classID'}) }}';
                         urlSelectClass = urlSelectClass.replace("profileID", profileID);
                         urlSelectClass = urlSelectClass.replace("classID", row.classId);
-                        return '<a data-id="'+row.classId+'" data-url="'+urlSelectClass+'" class="select-class"><span class="plus-icon" data-id="'+row.classId+'"><span class="fas fa-plus"></span></span><span class="select-class-loading-icon" data-id="'+row.classId+'" style="display: none"><span class="fas fa-spinner fa-spin"></span></span></a>&nbsp;' + data + ' – ' + row.identifierInNamespace;
+                        return '<a data-id="'+row.classId+'" data-namespace-id="'+row.namespaceId+'" data-url="'+urlSelectClass+'" class="select-class"><span class="plus-icon" data-id="'+row.classId+'"><span class="fas fa-plus"></span></span><span class="select-class-loading-icon" data-id="'+row.classId+'" style="display: none"><span class="fas fa-spinner fa-spin"></span></span></a>&nbsp;' + data + ' – ' + row.identifierInNamespace;
                     }
                 },
                 {
@@ -816,7 +838,7 @@
                         console.log("[API] ERROR: "+data.message);
                     }
                     if(data.status == 'Success'){
-                        selectableClassesTable.ajax.reload();
+                        window.location.reload();
                     }
                 }
             });
@@ -824,6 +846,7 @@
             urlNamespace = urlNamespace.replace('selectedValue', selectedValue);
             $("#empty-namespace-list-message").remove();
             $("#select-root-namespace option:selected").remove();
+            //TODO
             $("#used-namespaces-list").append($('<div class="row"><a href="#namespaces" class="remove-namespace" data-id="'+selectedValue+'"><span class="glyphicon glyphicon-remove text-danger" aria-hidden="true"></span></a><a href="'+urlNamespace+'">'+$(this).text()+'</a><span class="loading-icon2" data-id="'+selectedValue+'">&nbsp;<span class="fas fa-spinner fa-spin"></span></span></div>'));
             $(".loading-icon2[data-id='"+selectedValue+"']").hide(0);
             $("#chosable-namespaces-list").empty();
@@ -841,19 +864,106 @@
                 type: 'DELETE',
                 dataType: 'json',
                 success:function(data){
-                    selectableClassesTable.ajax.reload();
                 },
                 statusCode: {
                     204: function () {
-                        $(".remove-namespace[data-id='"+selectedValue+"']").parent().remove();
+                        window.location.reload();
                     }
                 }
             });
 
         });
 
+        $(document).on("click", ".not-removable", function(){
+            bootbox.alert("Classes and properties belonging to the namespace you wish to deselect are associated with your profile. Please deselect them first before proceeding.");
+        });
+
+        $(document).on("click", ".change-version", function(){
+            btn = $(this);
+            var selectedValue = $(this).data("id");
+            var profileID = {{ profile.id }}
+
+                bootbox.confirm({
+                    message: "Changing the version of a namespace selected by a profile changes the association of all entities in that namespace to the new version.<br><br>Errors may occur.<br><br>Do you wish to proceed?",
+                    title: '<i class="fas fa-exclamation-triangle"></i> Warning',
+                    buttons: {
+                        confirm: {
+                            label: 'Yes',
+                            className: 'btn-success'
+                        },
+                        cancel: {
+                            label: 'No',
+                            className: 'btn-danger'
+                        }
+                    },
+                    callback: function (result) {
+                        if(result){
+                            cell = btn.parent();
+                            btn.remove();
+                            cell.append("<select class='select-change-version' data-id='"+selectedValue+"'></select>");
+
+                            $('.select-change-version[data-id='+selectedValue+']').select2({
+                                width: '100%',
+                                sorter: function(data) {
+                                    /* Sort data using lowercase comparison */
+                                    return data.sort(function (a, b) {
+                                        a = a.text.toLowerCase();
+                                        b = b.text.toLowerCase();
+                                        if (a > b) {
+                                            return 1;
+                                        } else if (a < b) {
+                                            return -1;
+                                        }
+                                        return 0;
+                                    });
+                                },
+                                placeholder: "Select a version"
+                            });
+
+                            $('.select-change-version[data-id='+selectedValue+']').on('select2:close', function (e) {
+                                //Récupérer le NS a changer, et la nouvelle référence.
+                                var oldNsId = $(this).data('id');
+                                var newNsId = $('.select-change-version[data-id='+selectedValue+']').val();
+
+                                // Ajax here
+                                var url = '{{ path("namespace_associated_profile_change", {'profile': 'profileID', 'namespace' : 'namespaceID','associatedNamespace': 'oldNsId', 'newAssociatedNamespace': 'newNsId'}) }}';
+                                url = url.replace("profileID", profileID);
+                                url = url.replace("oldNsId", oldNsId);
+                                url = url.replace("newNsId", newNsId);
+                                $.ajax({
+                                    url: url,
+                                    type: 'GET',
+                                    dataType: 'json',
+                                    success:function(data){
+                                        window.location.reload();
+                                    }
+                                });
+                            });
+
+                            var url = '{{ path("get_choices_namespaces", {'namespace' : 'selectedValue'}) }}';
+                            url = url.replace("selectedValue", selectedValue);
+                            $.ajax({
+                                url: url,
+                                type: 'GET',
+                                dataType: 'json',
+                                success:function(data){
+                                    var childVersions = data.rootNamespaceChildVersions
+                                    for (var item in childVersions) {
+                                        if(selectedValue != item){
+                                            $('.select-change-version[data-id='+selectedValue+']').append("<option value='" + item + "'>"+childVersions[item]+"</option>");
+                                        }
+                                    }
+                                }
+                            });
+                        }
+                    }
+                });
+
+        });
+
         $(document).on("click", ".select-class", function() {
             var selectedValue = $(this).data("id");
+            var classNamespaceId = $(this).data("namespace-id");
             $(".plus-icon[data-id='"+selectedValue+"']").hide(0);
             $(".select-class-loading-icon[data-id='"+selectedValue+"']").css('display','inline');
             var url =  $(this).data("url");
@@ -865,12 +975,14 @@
                 success:function(data){
                     selectableClassesTable.ajax.reload();
                     associatedClassesTable.ajax.reload();
+                    $(".remove-namespace[data-id='"+classNamespaceId+"']").removeClass("remove-namespace").addClass("not-removable").attr("disabled", "disabled");
                 }
             });
         });
 
         $(document).on("click", ".remove-class", function() {
             var selectedValue = $(this).data("id");
+            var classNamespaceId = $(this).data("namespace-id");
             $(".remove-class[data-id='"+selectedValue+"']").hide(0);
             $(".remove-class-loading-icon[data-id='"+selectedValue+"']").css('display','inline');
             var url =  $(this).data("url");
@@ -882,6 +994,11 @@
                 success:function(data){
                     associatedClassesTable.ajax.reload();
                     selectableClassesTable.ajax.reload();
+
+                    if(data.isRemovableNamespace){
+                        // remettre le bouton Remove pour le namespace selectionné si plus d'association.
+                        $(".not-removable[data-id='"+classNamespaceId+"']").addClass("remove-namespace").removeClass("not-removable").removeAttr("disabled");
+                    }
                 }
             });
         });
