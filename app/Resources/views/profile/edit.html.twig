@@ -343,6 +343,10 @@
                     {% endif %}
                 </span>
             </h3>
+            {% set idNamespacesAssociatedInProfile = [] %}
+            {% for namespace in profile.namespaces %}
+                {% set idNamespacesAssociatedInProfile = idNamespacesAssociatedInProfile|merge([namespace.id]) %}
+            {% endfor %}
             <table class="table table-striped" id="properties-table">
                 <thead>
                 <tr>
@@ -397,12 +401,21 @@
                             {% endif %}
                         </td>
                         <td class="text-nowrap text-center">
+                            {% if profileAssociation.entityNamespaceForVersion.id in idNamespacesAssociatedInProfile %}
                             <a href="{{ path('property_show_with_version', {
                                 'id': profileAssociation.property.id,
                                 'namespaceFromUrlId': profileAssociation.entityNamespaceForVersion.id
                             }) }}">
                                 {{ profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion) }}
                             </a>
+                            {% else %}
+                            <a href="{{ path('property_show_with_version', {
+                                'id': profileAssociation.property.id,
+                                'namespaceFromUrlId': profileAssociation.entityNamespaceForVersion.id
+                            }) }}" class="text-danger">
+                                {{ profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion) }}
+                            </a> <a data-toggle="tooltip" class="text-danger" data-placement="right" title="Properties from another version of this namespace, previously selected in your profile, are not available in the selected version. They are displayed in red in your profile. Please make the necessary corrections before proceeding."><span class="fas fa-exclamation-triangle"></span></a>
+                            {% endif %}
                         </td>
                         <td class="text-nowrap small" style="padding-right: 30px;">
                             {% if profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).rangeMinQuantifier is not null
@@ -665,8 +678,13 @@
         var urlAssociatedClasses = '{{ path("associated_classes_profile_json", {'profile' : 'profileID'}) }}';
         urlAssociatedClasses = urlAssociatedClasses.replace("profileID", profileID);
 
+        {% set idNamespacesAssociatedInProfile = [] %}
+        {% for namespace in profile.namespaces %}
+        {% set idNamespacesAssociatedInProfile = idNamespacesAssociatedInProfile|merge([namespace.id]) %}
+        {% endfor %}
+
         var associatedClassesTable = $('#classes-table').DataTable({
-            order: [[ 6, "desc" ]],
+            order: [[ 0, "desc" ],[ 6, "desc" ]],
             ajax: urlAssociatedClasses,
             dataSrc: 'data',
             columns: [
@@ -699,7 +717,12 @@
                         urlClass = urlClass.replace("classID", row.id);
                         urlClass = urlClass.replace("namespaceFromUrlId", row.namespaceForVersion);
 
-                        return '<a href="' + urlClass + '">' + data + ' – ' + row.identifierInNamespace + '</a>';
+                        if([{{ idNamespacesAssociatedInProfile|join(',') }}].indexOf(row.namespaceForVersion) >= 0) {
+                            return '<a href="' + urlClass + '">' + data + ' – ' + row.identifierInNamespace + '</a>';
+                        }
+                        else{
+                            return '<a href="' + urlClass + '" class="text-danger">' + data + ' – ' + row.identifierInNamespace + '</a> <a data-toggle="tooltip" class="text-danger" data-placement="right" title="Classes from another version of this namespace, previously selected in your profile, are not available in the selected version. They are displayed in red in your profile. Please make the necessary corrections before proceeding."><span class="fas fa-exclamation-triangle"></span></a>';
+                        }
 
                     }
                 },
@@ -711,7 +734,10 @@
                             var urlSelectProperties = '{{ path("profile_properties_edit", {'profile' : 'profileID', 'class' : 'classID'}) }}';
                             urlSelectProperties = urlSelectProperties.replace("profileID", profileID);
                             urlSelectProperties = urlSelectProperties.replace("classID", row.id);
-                            return '<a href="' + urlSelectProperties + '"><span class="glyphicon glyphicon-th-list"></span></a>';
+                            if([{{ idNamespacesAssociatedInProfile|join(',') }}].indexOf(row.namespaceForVersion) >= 0){
+                                return '<a href="' + urlSelectProperties + '"><span class="glyphicon glyphicon-th-list"></span></a>';
+                            }
+                            else return '';
                         }
                         else return '';
                     }
