@@ -862,6 +862,7 @@
                         <th>Justification</th>
                         <th>Relation namespace</th>
                         <th>Edit</th>
+                        <th>Delete</th>
                         <th>Comments</th>
                         <th>Validation</th>
                     </tr>
@@ -985,7 +986,11 @@
                             <td>
                                 <a href="{{ path('property_association_edit', {'id': association.id}) }}" class="btn btn-xs btn-success"><span class="fa fa-edit"></span></a>
                             </td>
-
+                            <td>
+                                {% if is_granted('delete_associations', propertyVersion.namespaceForVersion) %}
+                                <a href="#property-hierarchy" class="btn btn-xs btn-danger btn-delete-association" data-id="{{ association.id }}" data-type="propertyAssociation"><span class="fa fa-trash-alt"></span></a>
+                                {% endif %}
+                            </td>
                             <td>
                                 <a class="btn updateViewComment" href="{{ path('property_association_show', {
                                     'id': association.id
@@ -1220,6 +1225,7 @@
                         <th>Justification</th>
                         <th>Relation namespace</th>
                         <th>Edit</th>
+                        <th>Delete</th>
                         <th>Comments</th>
                         <th>Validation</th>
                     </tr>
@@ -1291,6 +1297,11 @@
                                     }) }}" class="btn btn-xs btn-success">
                                         <span class="fa fa-edit"></span>
                                     </a>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if is_granted('delete_associations', relation.namespaceForVersion) %}
+                                <a href="#relations" class="btn btn-xs btn-danger btn-delete-association" data-id="{{ relation.id }}" data-type="entityAssociation"><span class="fa fa-trash-alt"></span></a>
                                 {% endif %}
                             </td>
                             <td>
@@ -1527,6 +1538,49 @@
                 });
             });
         } );
+        $(document).on("click", ".btn-delete-association", function(){
+            var associationId = $(this).data("id");
+            var associationType = $(this).data("type");
+            bootbox.confirm({
+                message: "You are about to delete a relation between two properties. This operation cannot be undone. Do you wish to proceed?",
+                title: '<i class="fas fa-exclamation-triangle"></i> Warning',
+                buttons: {
+                    confirm: {
+                        label: 'Yes',
+                        className: 'btn-success'
+                    },
+                    cancel: {
+                        label: 'No',
+                        className: 'btn-danger'
+                    }
+                },
+                callback: function (result) {
+                    if(result){
+                        if(associationType == "propertyAssociation")
+                        {
+                            var url = '{{ path("property_association_delete", {'id' : 'associationId'}) }}';
+                        }
+                        if(associationType == "entityAssociation")
+                        {
+                            var url = '{{ path("entity_association_delete", {'id' : 'associationId'}) }}';
+                        }
+                        url = url.replace("associationId", associationId);
+                        $.ajax({
+                            url: url,
+                            type: 'DELETE',
+                            dataType: 'json',
+                            success:function(data){
+                            },
+                            statusCode: {
+                                204: function () {
+                                    window.location.reload();
+                                }
+                            }
+                        });
+                    }
+                }
+            });
+        });
     </script>
     {% include 'comment/js-bock.html.twig'  with {'objectType': 'property-version', 'objectId' : propertyVersion.id  } %}
 

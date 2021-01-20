@@ -730,6 +730,7 @@
                         <th>Relation defined in</th>
                         <th>Justification</th>
                         <th>Edit</th>
+                        <th>Delete</th>
                         <th>Comments</th>
                         <th>Validation</th>
                     </tr>
@@ -783,6 +784,11 @@
                             </td>
                             <td>
                                 <a href="{{ path('class_association_edit', {'id': association.id}) }}" class="btn btn-xs btn-success"><span class="fa fa-edit"></span></a>
+                            </td>
+                            <td>
+                                {% if is_granted('delete_associations', association.namespaceForVersion) %}
+                                    <a href="#class-hierarchy" class="btn btn-xs btn-danger btn-delete-association" data-id="{{ association.id }}" data-type="classAssociation"><span class="fa fa-trash-alt"></span></a>
+                                {% endif %}
                             </td>
                             <td>
                                 <a class="btn updateViewComment" href="{{ path('class_association_edit', {
@@ -884,6 +890,7 @@
                         <th>Justification</th>
                         <th>Relation defined in</th>
                         <th>Edit</th>
+                        <th>Delete</th>
                         <th>Comments</th>
                         <th>Validation</th>
                     </tr>
@@ -971,6 +978,11 @@
                                 }) }}" class="btn btn-xs btn-success">
                                     <span class="fa fa-edit"></span>
                                 </a>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if is_granted('delete_associations', relation.namespaceForVersion) %}
+                                <a href="#relations" class="btn btn-xs btn-danger btn-delete-association" data-id="{{ relation.id }}" data-type="entityAssociation"><span class="fa fa-trash-alt"></span></a>
                                 {% endif %}
                             </td>
                             <td>
@@ -1391,6 +1403,48 @@
                 });
             });
         } );
+
+        $(document).on("click", ".btn-delete-association", function(){
+            var associationId = $(this).data("id");
+            var associationType = $(this).data("type");
+            bootbox.confirm({
+                message: "You are about to delete a relation between two classes. This operation cannot be undone. Do you wish to proceed?",
+                title: '<i class="fas fa-exclamation-triangle"></i> Warning',
+                buttons: {
+                    confirm: {
+                        label: 'Yes',
+                        className: 'btn-success'
+                    },
+                    cancel: {
+                        label: 'No',
+                        className: 'btn-danger'
+                    }
+                },
+                callback: function (result) {
+                    if(associationType == "classAssociation")
+                    {
+                        var url = '{{ path("class_association_delete", {'id' : 'associationId'}) }}';
+                    }
+                    if(associationType == "entityAssociation")
+                    {
+                        var url = '{{ path("entity_association_delete", {'id' : 'associationId'}) }}';
+                    }
+                    url = url.replace("associationId", associationId);
+                    $.ajax({
+                        url: url,
+                        type: 'DELETE',
+                        dataType: 'json',
+                        success:function(data){
+                        },
+                        statusCode: {
+                            204: function () {
+                                window.location.reload();
+                            }
+                        }
+                    });
+                }
+            });
+        });
     </script>
     {% include 'comment/js-bock.html.twig'  with {'objectType': 'class-version', 'objectId' : classVersion.id} %}
     <script src="https://d3js.org/d3.v4.min.js"></script>

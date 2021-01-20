@@ -18,6 +18,7 @@ use AppBundle\Form\EntityAssociationForm;
 use AppBundle\Form\EntityAssociationEditForm;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -379,5 +380,22 @@ class EntityAssociationController extends Controller
         return $this->redirectToRoute('entity_association_show', [
             'id' => $entityAssociation->getId()
         ]);
+    }
+
+    /**
+     * @Route("/entity-association/{id}/delete", name="entity_association_delete")
+     */
+    public function deleteAction(Request $request, EntityAssociation $entityAssociation)
+    {
+        $this->denyAccessUnlessGranted('delete_associations', $entityAssociation->getNamespaceForVersion());
+
+        $em = $this->getDoctrine()->getManager();
+        foreach($entityAssociation->getTextProperties() as $textProperty)
+        {
+            $em->remove($textProperty);
+        }
+        $em->remove($entityAssociation);
+        $em->flush();
+        return new JsonResponse(null, 204);
     }
 }

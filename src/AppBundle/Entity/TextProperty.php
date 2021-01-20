@@ -128,7 +128,7 @@ class TextProperty implements GroupSequenceProviderInterface
     /**
      * @ORM\ManyToMany(targetEntity="OntoNamespace",  inversedBy="TextProperty", fetch="EXTRA_LAZY")
      * @ORM\JoinTable(schema="che", name="text_property",
-     *      joinColumns={@ORM\JoinColumn(name="fk_text_property", referencedColumnName="pk_text_property")},
+     *      joinColumns={@ORM\JoinColumn(name="pk_text_property", referencedColumnName="fk_text_property")},
      *      inverseJoinColumns={@ORM\JoinColumn(name="fk_namespace_for_version", referencedColumnName="pk_namespace")}
      *      )
      */

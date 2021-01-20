@@ -16,6 +16,7 @@ use AppBundle\Form\PropertyAssociationEditForm;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use AppBundle\Form\ParentPropertyAssociationForm;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -222,6 +223,25 @@ class PropertyAssociationController extends Controller
     }
 
     /**
+     * @Route("/property-association/{id}/delete", name="property_association_delete")
+     * @param PropertyAssociation $propertyAssociation
+     * @return JsonResponse a Json 204 HTTP response
+     */
+    public function deleteAction(Request $request, PropertyAssociation $propertyAssociation)
+    {
+        $this->denyAccessUnlessGranted('delete_associations', $propertyAssociation->getNamespaceForVersion());
+
+        $em = $this->getDoctrine()->getManager();
+        foreach($propertyAssociation->getTextProperties() as $textProperty)
+        {
+            $em->remove($textProperty);
+        }
+        $em->remove($propertyAssociation);
+        $em->flush();
+        return new JsonResponse(null, 204);
+    }
+
+    /**
      * @Route("/property-association/{id}/edit-validity/{validationStatus}", name="property_association_validation_status_edit")
      * @param PropertyAssociation $propertyAssociation
      * @param SystemType $validationStatus
@@ -279,5 +299,4 @@ class PropertyAssociationController extends Controller
             'id' => $propertyAssociation->getId()
         ]);
     }
-
 }

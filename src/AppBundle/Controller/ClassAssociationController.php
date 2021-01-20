@@ -13,9 +13,11 @@ use AppBundle\Entity\OntoClass;
 use AppBundle\Entity\SystemType;
 use AppBundle\Entity\TextProperty;
 use AppBundle\Form\ClassAssociationEditForm;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use AppBundle\Form\ParentClassAssociationForm;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -249,5 +251,22 @@ class ClassAssociationController extends Controller
             'id' => $classAssociation->getId()
         ]);
     }
+    /**
+     * @Route("/class-association/{id}/delete", name="class_association_delete")
+     * @param ClassAssociation  $classAssociation
+     * @return JsonResponse a Json 204 HTTP response
+     */
+    public function deleteAction(Request $request, ClassAssociation $classAssociation)
+    {
+        $this->denyAccessUnlessGranted('delete_associations', $classAssociation->getNamespaceForVersion());
 
+        $em = $this->getDoctrine()->getManager();
+        foreach($classAssociation->getTextProperties() as $textProperty)
+        {
+            $em->remove($textProperty);
+        }
+        $em->remove($classAssociation);
+        $em->flush();
+        return new JsonResponse(null, 204);
+    }
 }

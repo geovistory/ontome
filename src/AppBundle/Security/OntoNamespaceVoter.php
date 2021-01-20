@@ -18,13 +18,14 @@ class OntoNamespaceVoter extends Voter
     const EDIT = 'edit';
     const FULLEDIT = 'full_edit';
     const EDITMANAGER = 'edit_manager';
+    const DELETEASSOCIATIONS = 'delete_associations';
     const VALIDATE = 'validate';
     const PUBLISH = 'publish';
 
     protected function supports($attribute, $subject)
     {
         // if the attribute isn't one we support, return false
-        if (!in_array($attribute, array(self::EDIT, self::FULLEDIT, self::EDITMANAGER, self::VALIDATE, self::PUBLISH))) {
+        if (!in_array($attribute, array(self::EDIT, self::FULLEDIT, self::EDITMANAGER, self::DELETEASSOCIATIONS, self::VALIDATE, self::PUBLISH))) {
             return false;
         }
 
@@ -55,6 +56,8 @@ class OntoNamespaceVoter extends Voter
                 return $this->canFullEdit($namespace, $user);
             case self::EDITMANAGER:
                 return $this->canEditManager($namespace, $user);
+            case self::DELETEASSOCIATIONS:
+                return $this->canDeleteAssociations($namespace, $user);
             case self::VALIDATE:
                 return $this->canValidate($namespace, $user);
             case self::PUBLISH:
@@ -174,4 +177,20 @@ class OntoNamespaceVoter extends Voter
         return false;
     }
 
+    /**
+     * @param OntoNamespace $namespace
+     * @param User $user
+     * @return bool TRUE if $user and $namespace have matching namespace (thanks to the $userProjectAssociation) and $user is a project manager
+     */
+    private function canDeleteAssociations(OntoNamespace $namespace, User $user)
+    {
+        foreach($user->getUserProjectAssociations()->getIterator() as $i => $userProjectAssociation) {
+            if($userProjectAssociation->getProject() === $namespace->getProjectForTopLevelNamespace() && $userProjectAssociation->getPermission() <= 2){
+                if($namespace->getIsOngoing() && count($namespace->getTopLevelNamespace()->getChildVersions()) <= 1){
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 }
