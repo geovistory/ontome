@@ -34,7 +34,7 @@ class OntoNamespace
      *     pattern="/^[a-z0-9\-]+$/",
      *     message="The characters string for this namspace's OntoME URI must contain only lower case non accent letters and dash"
      * )
-     * @ORM\Column(type="text", nullable=false, unique=true)
+     * @ORM\Column(type="text", nullable=true, unique=true)
      */
     private $namespaceURI;
 
@@ -80,6 +80,11 @@ class OntoNamespace
      * @ORM\Column(type="boolean")
      */
     private $isOngoing;
+
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    private $hasPublication;
 
     /**
      * @ORM\ManyToOne(targetEntity="Project")
@@ -401,6 +406,14 @@ class OntoNamespace
     }
 
     /**
+     * @return bool
+     */
+    public function getHasPublication()
+    {
+        return $this->hasPublication;
+    }
+
+    /**
      * @return Project
      */
     public function getProjectForTopLevelNamespace()
@@ -698,6 +711,14 @@ class OntoNamespace
     public function setIsOngoing($isOngoing)
     {
         $this->isOngoing = $isOngoing;
+    }
+
+    /**
+     * @param mixed $hasPublication
+     */
+    public function setHasPublication($hasPublication)
+    {
+        $this->hasPublication = $hasPublication;
     }
 
     /**

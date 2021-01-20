@@ -622,6 +622,7 @@
                         <th>Justification</th>
                         <th>View details</th>
                         <th>Comments</th>
+                        <th>Validation</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -659,6 +660,25 @@
                                 }) }}#comments" data-id="{{ association.id }}" data-object="class-association">
                                     <span class="badge {% if association.comments|length > 0  %}progress-bar-danger {% endif %}">{{ association.comments|length }}</span>
                                 </a>
+                            </td>
+                            <td>
+                                {% if association.validationStatus is null %}
+                                    <span class="association association-info">
+                                    Candidate
+                                </span>
+                                {% elseif association.validationStatus.id == 26  %}
+                                    <span class="association association-success">
+                                    {{ association.validationStatus }}
+                                </span>
+                                {% elseif association.validationStatus.id == 27  %}
+                                    <span class="association association-danger">
+                                    {{ association.validationStatus }}
+                                </span>
+                                {% elseif association.validationStatus.id == 28  %}
+                                    <span class="association association-warning">
+                                    {{ association.validationStatus }}
+                                </span>
+                                {% endif %}
                             </td>
                         </tr>
                     {% endfor %}

@@ -1,0 +1,200 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Publish the {{ namespace }} namespace{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.4/css/select2.min.css" rel="stylesheet" />
+{%  endblock %}
+
+{% block body %}
+
+    <div class="container">
+        <div class="row">
+            <div class="col-xs-12">
+                <h2>
+                    Publish the {{ namespace }} namespace
+                    <a href="{{ path('project_edit', {'id': app.request.get('project').id}) }}#managed-namespaces" class="pull-right btn btn-link">
+                        <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
+                    </a>
+                </h2>
+                <h4>You can change the URIs if you wish before the publication:</h4>
+                {{ form_start(namespaceForm) }}
+                {{ form_errors(namespaceForm) }}
+                <div class="
+                            form-group cool-class
+                            {% if form_errors(namespaceForm.namespaceURI)  %}
+                            has-feedback has-error
+                            {% endif %}
+                            "
+                >
+                    {{ form_label(namespaceForm.namespaceURI) }}
+                    <div class="input-group">
+                        <span class="input-group-addon">https://dataforhistory.org/{% if namespace.originalNamespaceURI is not null %}external-{% endif %}ontology/</span>
+                        {{ form_widget(namespaceForm.namespaceURI, { 'attr': {'placeholder': 'my-namespace-1-5'} }) }}
+                    </div>
+                    {{ form_errors(namespaceForm.namespaceURI) }}
+                </div>
+                {{ form_row(namespaceForm.originalNamespaceURI) }}
+                <button type="submit" class="btn btn-primary" formnovalidate>Save <span class="far fa-save"></span></button>
+                <a href="{{ path('namespace_show', {
+                    id: namespace.id,
+                    '_fragment': 'identification'
+                }) }}"
+                   class="btn btn-default"
+                   role="button">
+                    Back <i class="fas fa-arrow-left"></i>
+                </a>
+                {{ form_end(namespaceForm) }}
+                <h3>Validated and denied classes</h3>
+                <table class="table table-striped" id="classes-table">
+                    <thead>
+                    <tr>
+                        <th>Class</th>
+                        <th>Last updated</th>
+                        <th>Validation status</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for classVersion in namespace.classVersions %}
+                        <tr>
+                            <td>
+                                <a href="{{ path('class_show_with_version', {
+                                    'id': classVersion.class.id,
+                                    'namespaceFromUrlId': classVersion.namespaceForVersion.id
+                                }) }}">
+                                    {{ classVersion }}
+                                </a>
+                            </td>
+                            <td>{{ classVersion.class.modificationTime|date('Y-m-d') }}</td>
+                            <td>
+                                {% if classVersion.validationStatus is null %}
+                                    <span class="label label-info">
+                                    Candidate
+                                </span>
+                                {% elseif classVersion.validationStatus.id == 26  %}
+                                    <span class="label label-success">
+                                    {{ classVersion.validationStatus }}
+                                </span>
+                                {% elseif classVersion.validationStatus.id == 27  %}
+                                    <span class="label label-danger">
+                                    {{ classVersion.validationStatus }}
+                                </span>
+                                {% elseif classVersion.validationStatus.id == 28  %}
+                                    <span class="label label-warning">
+                                    {{ classVersion.validationStatus }}
+                                </span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                <h3>Validated and denied properties</h3>
+                <table class="table table-striped" id="properties-table">
+                    <thead>
+                    <tr>
+                        <th class="text-right">Domain</th>
+                        <th></th>
+                        <th class="text-center">Property</th>
+                        <th></th>
+                        <th>Range</th>
+                        <th>Last updated</th>
+                        <th>Validation status</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for propertyVersion in namespace.propertyVersions %}
+                        <tr>
+                            <td class="text-right small">
+                                {% if propertyVersion.domain is not null and propertyVersion.domainNamespace is not null %}
+                                    <a href="{{ path('class_show_with_version', {
+                                        'id': propertyVersion.domain.id,
+                                        'namespaceFromUrlId': propertyVersion.domainNamespace.id
+                                    }) }}">
+                                        {{ propertyVersion.domain.classVersionForDisplay(propertyVersion.domainNamespace) }}
+                                    </a>
+                                {% endif %}
+                            </td>
+                            <td class="small" style="padding-left: 30px;">
+                                {% if propertyVersion.domainMinQuantifier is not null and propertyVersion.domainMaxQuantifier is not null %}
+                                    ({% if  propertyVersion.domainMinQuantifier != -1 %}{{ propertyVersion.domainMinQuantifier }}{% else %}n{% endif %},{% if  propertyVersion.domainMaxQuantifier != -1 %}{{ propertyVersion.domainMaxQuantifier }}{% else %}n{% endif %})
+                                {% endif %}
+                            </td>
+                            <td class="text-center">
+                                <a href="{{ path('property_show_with_version', {
+                                    'id': propertyVersion.property.id,
+                                    'namespaceFromUrlId': propertyVersion.namespaceForVersion.id
+                                }) }}">
+                                    {{ propertyVersion }}
+                                </a>
+                            </td>
+                            <td class="small" style="padding-right: 30px;">
+                                {% if propertyVersion.rangeMinQuantifier is not null and propertyVersion.rangeMaxQuantifier is not null %}
+                                    ({% if  propertyVersion.rangeMinQuantifier != -1 %}{{ propertyVersion.rangeMinQuantifier }}{% else %}n{% endif %},{% if  propertyVersion.rangeMaxQuantifier != -1 %}{{ propertyVersion.rangeMaxQuantifier }}{% else %}n{% endif %})
+                                {% endif %}
+                            </td>
+                            <td class="small">
+                                {% if propertyVersion.range is not null and propertyVersion.rangeNamespace is not null %}
+                                    <a href="{{ path('class_show_with_version', {
+                                        'id': propertyVersion.range.id,
+                                        'namespaceFromUrlId': propertyVersion.rangeNamespace.id
+                                    }) }}">
+                                        {{ propertyVersion.range.classVersionForDisplay(propertyVersion.rangeNamespace) }}
+                                    </a>
+                                {% endif %}
+                            </td>
+                            <td>{{ propertyVersion.modificationTime|date('Y-m-d') }}</td>
+                            <td>
+                                {% if propertyVersion.validationStatus is null %}
+                                    <span class="label label-info">
+                                    Candidate
+                                </span>
+                                {% elseif propertyVersion.validationStatus.id == 26  %}
+                                    <span class="label label-success">
+                                    {{ propertyVersion.validationStatus }}
+                                </span>
+                                {% elseif propertyVersion.validationStatus.id == 27  %}
+                                    <span class="label label-danger">
+                                    {{ propertyVersion.validationStatus }}
+                                </span>
+                                {% elseif propertyVersion.validationStatus.id == 28  %}
+                                    <span class="label label-warning">
+                                    {{ propertyVersion.validationStatus }}
+                                </span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                <div>
+                    <h4>You are going to publish a closed and accessible version of your namespace. This operation is irreversible .Do you wish to proceed?</h4>
+                    <a href="{{ path('namespace_validate_publication', {
+                        id: namespace.id
+                    }) }}"
+                       class="btn btn-success"
+                       role="button">
+                        Validate and publish<i class="fas fa-upload"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.4/js/select2.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#classes-table').DataTable( {
+                "order": [[2, 'desc']],
+            } );
+            $('#properties-table').DataTable( {
+                "order": [[6, 'desc']],
+            } );
+        });
+    </script>
+{% endblock %}

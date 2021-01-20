@@ -405,4 +405,20 @@ class NamespaceRepository extends EntityRepository
         $namespaces = $this->createQueryBuilderNamespacesByNamespacesId($namespacesId)->execute();
         return $namespaces;
     }
+
+    /**
+     * @param OntoNamespace $namespace
+     * @return int - the new published namespace id
+     * @throws \Doctrine\DBAL\DBALException
+     */
+    public function publishNamespace(OntoNamespace $namespace){
+        $conn = $this->getEntityManager()->getConnection();
+
+        $sql = "SELECT che.publish_namespace(:namespaceId);";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->execute(array('namespaceId' => $namespace->getId()));
+
+        return $stmt->fetchColumn();
+    }
 }

@@ -16,6 +16,7 @@ use AppBundle\Entity\Project;
 use AppBundle\Entity\ReferencedNamespaceAssociation;
 use AppBundle\Entity\TextProperty;
 use AppBundle\Form\NamespaceForm;
+use AppBundle\Form\NamespacePublicationForm;
 use AppBundle\Form\NamespaceQuickAddForm;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
@@ -250,6 +251,87 @@ class NamespaceController  extends Controller
                 'rootNamespaces' => $rootNamespaces,
             ]);
         }
+    }
+
+    /**
+     * @Route("/namespace/{id}/publish", name="namespace_publication")
+     * @param OntoNamespace $namespace
+     * @return Response the rendered template
+     */
+    public function publishAction(OntoNamespace $namespace, Request $request)
+    {
+        if(is_null($namespace)) {
+            throw $this->createNotFoundException('The namespace n° '.$namespace->getId().' does not exist. Please contact an administrator.');
+        }
+
+        $this->denyAccessUnlessGranted('publish', $namespace);
+
+        $namespace->setModifier($this->getUser());
+        $namespace->setNamespaceURI(str_replace('-ongoing', '',$namespace->getNamespaceURI()));
+        $namespace->setOriginalNamespaceURI(str_replace('-ongoing', '',$namespace->getOriginalNamespaceURI()));
+
+        $em = $this->getDoctrine()->getManager();
+
+        $form = $this->createForm(NamespacePublicationForm::class, $namespace);
+
+        $form->handleRequest($request);
+        if ($form->isValid()) {
+            $namespace->setModifier($this->getUser());
+            $em->persist($namespace);
+            $em->flush();
+
+            $this->addFlash('success', 'Namespace Updated!');
+
+        }
+
+        return $this->render('namespace/publish.html.twig', array(
+            'namespaceForm' => $form->createView(),
+            'namespace' => $namespace
+        ));
+    }
+
+    /**
+     * @Route("/namespace/{id}/validate-publication", name="namespace_validate_publication")
+     * @param OntoNamespace $namespace
+     * @return Response the rendered template
+     */
+    public function validatePublicationAction(OntoNamespace $namespace, Request $request)
+    {
+        if(is_null($namespace)) {
+            throw $this->createNotFoundException('The namespace n° '.$namespace->getId().' does not exist. Please contact an administrator.');
+        }
+
+        $this->denyAccessUnlessGranted('publish', $namespace);
+
+        $namespace->setModifier($this->getUser());
+
+        $em = $this->getDoctrine()->getManager();
+
+        $newNamespaceId = $em->getRepository('AppBundle:OntoNamespace')
+            ->publishNamespace($namespace);
+
+        $newNamespace = $em->getRepository('AppBundle:OntoNamespace')->findOneBy(['id'=>$newNamespaceId]);
+
+        $newNamespaceLabel = new Label();
+        $newNamespaceLabel->setIsStandardLabelForLanguage(true);
+        $newNamespaceLabel->setCreator($this->getUser());
+        $newNamespaceLabel->setModifier($this->getUser());
+        $newNamespaceLabel->setCreationTime(new \DateTime('now'));
+        $newNamespaceLabel->setModificationTime(new \DateTime('now'));
+        $newNamespaceLabel->setLabel(str_replace(' ongoing','',$namespace->getStandardLabel()));
+
+        $newNamespace->addLabel($newNamespaceLabel);
+
+        $namespace->setNamespaceURI((str_replace('-ongoing','',$namespace->getNamespaceURI()).'-ongoing'));
+
+
+        $em->persist($namespace);
+        $em->persist($newNamespace);
+        $em->flush();
+
+        return $this->redirectToRoute('namespace_show', [
+            'id' => $newNamespaceId
+        ]);
     }
 
     /**

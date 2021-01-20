@@ -336,7 +336,9 @@
                     <tr>
                         <th>Class</th>
                         <th>Last updated</th>
+                        {% if namespace.isOngoing %}
                         <th>Validation status</th>
+                        {% endif %}
                     </tr>
                     </thead>
                     <tbody>
@@ -351,6 +353,7 @@
                                 </a>
                             </td>
                             <td>{{ classVersion.class.modificationTime|date('Y-m-d') }}</td>
+                            {% if namespace.isOngoing %}
                             <td>
                                 {% if classVersion.validationStatus is null %}
                                     <span class="label label-info">
@@ -370,6 +373,7 @@
                                 </span>
                                 {% endif %}
                             </td>
+                            {% endif %}
                         </tr>
                     {% endfor %}
                     </tbody>
@@ -387,7 +391,9 @@
                         <th></th>
                         <th>Range</th>
                         <th>Last updated</th>
+                        {% if namespace.isOngoing %}
                         <th>Validation status</th>
+                        {% endif %}
                     </tr>
                     </thead>
                     <tbody>
@@ -432,6 +438,7 @@
                                 {% endif %}
                             </td>
                             <td>{{ propertyVersion.modificationTime|date('Y-m-d') }}</td>
+                            {% if namespace.isOngoing %}
                             <td>
                                 {% if propertyVersion.validationStatus is null %}
                                     <span class="label label-info">
@@ -451,6 +458,7 @@
                                 </span>
                                 {% endif %}
                             </td>
+                            {% endif %}
                         </tr>
                     {% endfor %}
                     </tbody>

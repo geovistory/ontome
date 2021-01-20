@@ -69,10 +69,16 @@ class OntoNamespaceVoter extends Voter
     private function canFullEdit(OntoNamespace $namespace, User $user)
     {
         foreach($user->getUserProjectAssociations()->getIterator() as $i => $userProjectAssociation) {
-            if(!$namespace->getIsOngoing()) {
+            if($namespace->getIsTopLevelNamespace()) {
+                if(!$namespace->getHasPublication()) {
+                    return false;
+                }
+            }
+            else if(!$namespace->getIsOngoing()) {
                 return false;
             }
-            else if($userProjectAssociation->getProject() === $namespace->getProjectForTopLevelNamespace() && $userProjectAssociation->getPermission() <= 2){
+
+            if($userProjectAssociation->getProject() === $namespace->getProjectForTopLevelNamespace() && $userProjectAssociation->getPermission() <= 2){
                 return true;
             }
         }
@@ -127,11 +133,22 @@ class OntoNamespaceVoter extends Voter
                 $atLeastOneClassValidated = false;
                 $atLeastOnePropertyValidated = false;
                 foreach ($namespace->getClasses()->getIterator() as $j => $class) {
-                    if ($class->getClassVersionForDisplay($namespace)->getValidationStatus()->getId() == 26) {
+                    $validationStatus = $class->getClassVersionForDisplay($namespace)->getValidationStatus();
+                    if (!is_null($validationStatus) && $validationStatus->getId() == 26) {
                         $atLeastOneClassValidated = true;
                     }
                 }
-                return true;
+                if($atLeastOneClassValidated) {
+                    foreach ($namespace->getProperties()->getIterator() as $j => $property) {
+                        $validationStatus = $property->getPropertyVersionForDisplay($namespace)->getValidationStatus();
+                        if (!is_null($validationStatus) && $validationStatus->getId() == 26) {
+                            $atLeastOnePropertyValidated = true;
+                        }
+                    }
+                    if($atLeastOnePropertyValidated) {
+                        return true;
+                    }
+                }
             }
         }
         return false;

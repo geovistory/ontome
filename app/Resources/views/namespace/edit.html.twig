@@ -288,6 +288,17 @@
                 {% if namespace.isTopLevelNamespace == false %}
                     {% if namespace.isOngoing %}
                         <p>This namespace is ongoing and can be modified at any time. It is not advisable to use its classes and properties.</p>
+                        {% if is_granted('publish', namespace) %}
+                            <a href="{{ path('namespace_publication', {
+                                id: namespace.id
+                            }) }}"
+                               class="btn btn-success"
+                               role="button">
+                                Publish this namespace <i class="fas fa-upload"></i>
+                            </a>
+                        {% else %}
+                            <button disabled="disabled">Publish this namespace <i class="fas fa-upload"></i></button>
+                        {% endif %}
                     {% endif %}
                     {% if namespace.publishedAt is not null %}
                         <p>Namespace published and available since: {{ namespace.publishedAt|date('Y-m-d') }}</p>
@@ -295,47 +306,49 @@
                 {% else %}
                     <p>This namespace is a root namespace. Find all its versions in the <a href="#namespace-hierarchy" onclick="window.location = '{{ path('namespace_edit', {'id': namespace.id}) }}#namespace-hierarchy';window.location.reload()">Hierarchy tab</a>.</p>
                 {% endif %}
-                {% if not namespace.isTopLevelNamespace %}
-                <h3>Reference namespace{% if namespace.referencedNamespaceAssociations|length > 1 %}s{% endif %} of which this namespace is an extension</h3>
-                {% if namespace.referencedNamespaceAssociations is empty %}
-                    <em id="empty-namespace-list-message">No reference namespace has been specified.</em>
-                {% endif %}
-                <div class="container" id="referenced-namespaces-list">
-                    {% for referencedNamespaceAssociation in namespace.referencedNamespaceAssociations %}
-                        <div class="row">
-                            <a href="#namespaces" class="remove-namespace" data-id="{{ referencedNamespaceAssociation.referencedNamespace.id }}"><span class="glyphicon glyphicon-remove text-danger" aria-hidden="true"></span></a><a href="{{ path('namespace_show', {
-                                'id': referencedNamespaceAssociation.referencedNamespace.id
-                            }) }}">
-                                {{ referencedNamespaceAssociation.referencedNamespace }}
-                            </a>
-                            <span class="loading-icon2" data-id="{{ referencedNamespaceAssociation.referencedNamespace.id }}">&nbsp;<span class="fas fa-spinner fa-spin"></span></span>
-                        </div>
-                    {% endfor %}
-                </div>
-                <h4>Pick a namespace to be referenced by the current one.</h4>
-                <div class="row">
-                    <div class="col-sm-6">
-                        <select id="select-root-namespace">
-                            {% for rootNamespace in rootNamespaces %}
-                                <option value="{{ rootNamespace.id }}">{{ rootNamespace.standardLabel }}</option>
-                            {% endfor %}
-                        </select>
+
+                {% if not namespace.isTopLevelNamespace and namespace.isOngoing %}
+                    <h3>Reference namespace{% if namespace.referencedNamespaceAssociations|length > 1 %}s{% endif %} of which this namespace is an extension</h3>
+                    {% if namespace.referencedNamespaceAssociations is empty %}
+                        <em id="empty-namespace-list-message">No reference namespace has been specified.</em>
+                    {% endif %}
+                    <div class="container" id="referenced-namespaces-list">
+                        {% for referencedNamespaceAssociation in namespace.referencedNamespaceAssociations %}
+                            <div class="row">
+                                <a href="#namespaces" class="remove-namespace" data-id="{{ referencedNamespaceAssociation.referencedNamespace.id }}"><span class="glyphicon glyphicon-remove text-danger" aria-hidden="true"></span></a><a href="{{ path('namespace_show', {
+                                    'id': referencedNamespaceAssociation.referencedNamespace.id
+                                }) }}">
+                                    {{ referencedNamespaceAssociation.referencedNamespace }}
+                                </a>
+                                <span class="loading-icon2" data-id="{{ referencedNamespaceAssociation.referencedNamespace.id }}">&nbsp;<span class="fas fa-spinner fa-spin"></span></span>
+                            </div>
+                        {% endfor %}
                     </div>
-                    <div class="col-sm-6">
-                        <div id="loading-icon">
-                            <span class="fas fa-spinner fa-spin"></span>
+                    <h4>Pick a namespace to be referenced by the current one.</h4>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <select id="select-root-namespace">
+                                {% for rootNamespace in rootNamespaces %}
+                                    <option value="{{ rootNamespace.id }}">{{ rootNamespace.standardLabel }}</option>
+                                {% endfor %}
+                            </select>
                         </div>
-                        <ul class="list-group" id="chosable-namespaces-list">
-                        </ul>
+                        <div class="col-sm-6">
+                            <div id="loading-icon">
+                                <span class="fas fa-spinner fa-spin"></span>
+                            </div>
+                            <ul class="list-group" id="chosable-namespaces-list">
+                            </ul>
+                        </div>
                     </div>
-                </div>
-                <div class="pull-right add-div">
-                    <a href="{{ path('label_new', {'object': 'namespace', 'objectId': namespace.id })}}"
-                       class="btn btn-primary pull-right">
-                        Add <span class="fa fa-plus-circle"></span>
-                    </a>
-                </div>
+                    <div class="pull-right add-div">
+                        <a href="{{ path('label_new', {'object': 'namespace', 'objectId': namespace.id })}}"
+                           class="btn btn-primary pull-right">
+                            Add <span class="fa fa-plus-circle"></span>
+                        </a>
+                    </div>
                 {% endif %}
+
                 <h3>Labels</h3>
                 <table class="table table-striped" id="labels-table">
                     <thead>
@@ -456,7 +469,9 @@
                     <tr>
                         <th>Class</th>
                         <th>Last updated</th>
+                        {% if namespace.isOngoing %}
                         <th>Validation status</th>
+                        {% endif %}
                     </tr>
                     </thead>
                     <tbody>
@@ -471,6 +486,7 @@
                                 </a>
                             </td>
                             <td>{{ classVersion.class.modificationTime|date('Y-m-d') }}</td>
+                            {% if namespace.isOngoing %}
                             <td>
                                 {% if classVersion.validationStatus is null %}
                                     <span class="label label-info">
@@ -490,6 +506,7 @@
                                 </span>
                                 {% endif %}
                             </td>
+                            {% endif %}
                         </tr>
                     {% endfor %}
                     </tbody>
@@ -507,7 +524,9 @@
                         <th></th>
                         <th>Range</th>
                         <th>Last updated</th>
+                        {% if namespace.isOngoing %}
                         <th>Validation status</th>
+                        {% endif %}
                     </tr>
                     </thead>
                     <tbody>
@@ -551,6 +570,7 @@
                                 {% endif %}
                             </td>
                             <td>{{ propertyVersion.modificationTime|date('Y-m-d') }}</td>
+                            {% if namespace.isOngoing %}
                             <td>
                                 {% if propertyVersion.validationStatus is null %}
                                     <span class="label label-info">
@@ -570,6 +590,7 @@
                                 </span>
                                 {% endif %}
                             </td>
+                            {% endif %}
                         </tr>
                     {% endfor %}
                     </tbody>
