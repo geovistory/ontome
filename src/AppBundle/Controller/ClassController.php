@@ -184,6 +184,26 @@ class ClassController extends Controller
 
         $em = $this->getDoctrine()->getManager();
 
+        //Si le namespace n'est pas specifié dans l'url mais dans My Current Namespace, rediriger
+        // $namespacesIdFromUser : Ensemble de tous les namespaces activés par l'utilisateur
+
+        if(is_null($namespaceFromUrlId)) {
+            if (is_null($this->getUser()) || $this->getUser()->getCurrentActiveProject()->getId() == 21) {
+                $namespacesIdFromUser = $em->getRepository('AppBundle:OntoNamespace')->findPublicProjectNamespacesId();
+            } else { // Utilisateur connecté et utilisant un autre projet
+                $namespacesIdFromUser = $em->getRepository('AppBundle:OntoNamespace')->findNamespacesIdByUser($this->getUser());
+            }
+            foreach ($namespacesIdFromUser as $namespaceIdFromUser) {
+                $namespaceFromUser = $em->getRepository('AppBundle:OntoNamespace')->find($namespaceIdFromUser);
+                if ($classVersion->getNamespaceForVersion()->getTopLevelNamespace()->getId() === $namespaceFromUser->getTopLevelNamespace()->getId()) {
+                    return $this->redirectToRoute('class_show_with_version', [
+                        'id' => $class->getId(),
+                        'namespaceFromUrlId' => $namespaceIdFromUser
+                    ]);
+                }
+            }
+        }
+
         // $namespacesIdFromClassVersion : Ensemble de namespaces provenant de la classe affiché (namespaceForVersion + references)
         $namespacesIdFromClassVersion[] = $classVersion->getNamespaceForVersion()->getId();
 
