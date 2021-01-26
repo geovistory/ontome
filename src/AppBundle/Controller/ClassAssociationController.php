@@ -230,7 +230,7 @@ class ClassAssociationController extends Controller
         }
 
         //Denied access if not an authorized validator
-        $this->denyAccessUnlessGranted('validate', $classAssociation->getChildClass());
+        $this->denyAccessUnlessGranted('validate', $classAssociation->getChildClass()->getClassVersionForDisplay());
 
 
         $classAssociation->setModifier($this->getUser());

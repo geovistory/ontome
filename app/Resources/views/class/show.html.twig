@@ -663,19 +663,19 @@
                             </td>
                             <td>
                                 {% if association.validationStatus is null %}
-                                    <span class="association association-info">
+                                    <span class="label label-info">
                                     Candidate
                                 </span>
                                 {% elseif association.validationStatus.id == 26  %}
-                                    <span class="association association-success">
+                                    <span class="label label-success">
                                     {{ association.validationStatus }}
                                 </span>
                                 {% elseif association.validationStatus.id == 27  %}
-                                    <span class="association association-danger">
+                                    <span class="label label-danger">
                                     {{ association.validationStatus }}
                                 </span>
                                 {% elseif association.validationStatus.id == 28  %}
-                                    <span class="association association-warning">
+                                    <span class="label label-warning">
                                     {{ association.validationStatus }}
                                 </span>
                                 {% endif %}
@@ -750,6 +750,7 @@
                             <th>Relation defined in</th>
                             <th>View details</th>
                             <th>Comments</th>
+                            <th>Validation</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -815,6 +816,25 @@
                                     }) }}#comments" data-id="{{ relation.id }}" data-object="entity-association">
                                         <span class="badge {% if relation.comments|length > 0  %}progress-bar-danger {% endif %}">{{ relation.comments|length }}</span>
                                     </a>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if relation.validationStatus is null %}
+                                    <span class="label label-info">
+                                    Candidate
+                                </span>
+                                {% elseif relation.validationStatus.id == 26  %}
+                                    <span class="label label-success">
+                                    {{ relation.validationStatus }}
+                                </span>
+                                {% elseif relation.validationStatus.id == 27  %}
+                                    <span class="label label-danger">
+                                    {{ relation.validationStatus }}
+                                </span>
+                                {% elseif relation.validationStatus.id == 28  %}
+                                    <span class="label label-warning">
+                                    {{ relation.validationStatus }}
+                                </span>
                                 {% endif %}
                             </td>
                         </tr>

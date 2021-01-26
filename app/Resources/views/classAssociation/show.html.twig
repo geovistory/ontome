@@ -12,8 +12,8 @@
         <h2 class="class-name">
             {{ classAssociation }}
             <a href="{{ path('class_show_with_version', {
-                'id': classAssociation.parentClass.id,
-                'namespaceFromUrlId': classAssociation.parentClassNamespace.id,
+                'id': classAssociation.childClass.id,
+                'namespaceFromUrlId': classAssociation.childClassNamespace.id,
                 '_fragment': 'class-hierarchy'
             }) }}" class="pull-right btn btn-link">
                 <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
