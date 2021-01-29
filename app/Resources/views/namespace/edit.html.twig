@@ -33,6 +33,7 @@
             {% if not namespace.isTopLevelNamespace %}
             <li><a data-toggle="tab" href="#classes">Classes</a></li>
             <li><a data-toggle="tab" href="#properties">Properties</a></li>
+            <li><a data-toggle="tab" href="#relations">Relations</a></li>
             <li><a data-toggle="tab" href="#graph">Graph</a></li>
             {% endif %}
             <li><a data-toggle="tab" href="#comments" class="updateViewComment" data-id="{{ namespace.id }}" data-object="namespace">Comments</a></li>
@@ -813,6 +814,116 @@
                     </tbody>
                 </table>
             </div>
+            <div id="relations" class="tab-pane fade">
+                <h3>Relations</h3>
+                <h4>Filter by</h4>
+                <div class="form-group">
+                    <div class="btn-group" id="btns-choose-entity-relations">
+                        <button type="button" class="btn btn-default" value="ClassesRelation">Classes relations</button>
+                        <button type="button" class="btn btn-default" value="PropertiesRelation">Properties relations</button>
+                        <button type="button" class="btn btn-primary" value="">Both</button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="btn-group" id="btns-choose-type-relations">
+                        <button type="button" class="btn btn-default" value="HierarchyAssociation">Hierarchy</button>
+                        <button type="button" class="btn btn-default" value="OtherRelation">Other relations</button>
+                        <button type="button" class="btn btn-primary" value="">Both</button>
+                    </div>
+                </div>
+                <table class="table table-striped" id="relations-table">
+                    <thead>
+                    <tr>
+                        <th>Source</th>
+                        <th>Relation</th>
+                        <th>Target</th>
+                        <th>Last updated</th>
+                        <th>Type</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for classAssociation in namespace.classAssociations %}
+                        <tr>
+                            <td>{{ classAssociation.childClass.classVersionForDisplay(classAssociation.childClassNamespace) }}</td>
+                            <td>
+                                <a href="{{ path('class_show_with_version', {
+                                    'id': classAssociation.childClass.id,
+                                    'namespaceFromUrlId': classAssociation.childClassNamespace.id,
+                                    '_fragment':'class-hierarchy'
+                                }) }}">
+                                    rdfs:subClassOf
+                                </a>
+                            </td>
+                            <td>{{ classAssociation.parentClass.classVersionForDisplay(classAssociation.parentClassNamespace) }}</td>
+                            <td>{{ classAssociation.modificationTime|date('Y-m-d') }}</td>
+                            <td>ClassesRelation-HierarchyAssociation</td>
+                        </tr>
+                    {% endfor %}
+                    {% for propertyAssociation in namespace.propertyAssociations %}
+                        <tr>
+                            <td>{{ propertyAssociation.childProperty.propertyVersionForDisplay(propertyAssociation.childPropertyNamespace) }}</td>
+                            <td>
+                                <a href="{{ path('property_show_with_version', {
+                                    'id': propertyAssociation.childProperty.id,
+                                    'namespaceFromUrlId': propertyAssociation.childPropertyNamespace.id,
+                                    '_fragment':'property-hierarchy'
+                                }) }}">
+                                    rdfs:subPropertyOf
+                                </a>
+                            </td>
+                            <td>{{ propertyAssociation.parentProperty.propertyVersionForDisplay(propertyAssociation.parentPropertyNamespace) }}</td>
+                            <td>{{ propertyAssociation.modificationTime|date('Y-m-d') }}</td>
+                            <td>PropertiesRelation-HierarchyAssociation</td>
+                        </tr>
+                    {% endfor %}
+                    {% for entityAssociation in namespace.entityAssociations %}
+                        <tr>
+                            <td>
+                                {% if entityAssociation.sourceClass is not null %}
+                                    {{ entityAssociation.sourceClass.classVersionForDisplay(entityAssociation.sourceNamespaceForVersion) }}
+                                {% elseif entityAssociation.sourceProperty is not null %}
+                                    {{ entityAssociation.sourceProperty.propertyVersionForDisplay(entityAssociation.sourceNamespaceForVersion) }}
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if entityAssociation.sourceClass is not null %}
+                                    <a href="{{ path('class_show_with_version', {
+                                        'id': entityAssociation.sourceClass.id,
+                                        'namespaceFromUrlId': entityAssociation.sourceNamespaceForVersion.id,
+                                        '_fragment':'relations'
+                                    }) }}">
+                                        {{ entityAssociation.systemType.standardLabel }}
+                                    </a>
+                                {% elseif entityAssociation.sourceProperty is not null %}
+                                    <a href="{{ path('property_show_with_version', {
+                                        'id': entityAssociation.sourceProperty.id,
+                                        'namespaceFromUrlId': entityAssociation.sourceNamespaceForVersion.id,
+                                        '_fragment':'relations'
+                                    }) }}">
+                                        {{ entityAssociation.systemType.standardLabel }}
+                                    </a>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if entityAssociation.targetClass is not null %}
+                                    {{ entityAssociation.targetClass.classVersionForDisplay(entityAssociation.targetNamespaceForVersion) }}
+                                {% elseif entityAssociation.targetProperty is not null %}
+                                    {{ entityAssociation.targetProperty.propertyVersionForDisplay(entityAssociation.targetNamespaceForVersion) }}
+                                {% endif %}
+                            </td>
+                            <td>{{ entityAssociation.modificationTime|date('Y-m-d') }}</td>
+                            <td>
+                                {% if entityAssociation.sourceClass is not null %}
+                                    ClassesRelation-OtherRelation
+                                {% elseif entityAssociation.sourceProperty is not null %}
+                                    PropertiesRelation-OtherRelation
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
             <div id="graph" class="tab-pane fade">
                 <h3>Graph</h3>
                 <p class="text-warning"><span class="fa fa-exclamation-circle"></span> Please note this is an experimental feature. <strong>Click on the full screen button if the graph is not displayed</strong></p>
@@ -1133,6 +1244,21 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.4/js/select2.min.js"></script>
 
     <script>
+        //Custom filtering function which will search data in column five, hidden in table "Relations"
+        //Pour filtrer les relations Class To Class, Property To Property, etc...
+        $.fn.dataTable.ext.search.push(
+            function( settings, data, dataIndex ) {
+                // Don't filter on anything other than "relations-table"
+                if ( settings.nTable.id !== 'relations-table' ) {
+                    return true;
+                }
+                var filterEntityRelations = $("#btns-choose-entity-relations .btn-primary").val();
+                var filterTypeRelations = $("#btns-choose-type-relations .btn-primary").val();
+                var filterRelations = filterEntityRelations+"-"+filterTypeRelations;
+                var strForFilter = data[4]; // use data for comparaison
+                return strForFilter.includes(filterRelations);
+            }
+        );
         $(document).ready(function() {
             $('#namespaces-table').DataTable();
             $('#labels-table').DataTable();
@@ -1152,6 +1278,12 @@
             $('#additional-notes-table').DataTable();
             $('#properties-table').DataTable();
             $('#classes-table').DataTable();
+            var tableRelations = $('#relations-table').DataTable({
+                "columnDefs": [
+                    { "visible": false, "targets": 4 }
+                ],
+                "autoWidth": false
+            });
             $('#mismatches-table').DataTable();
             $('#child-namespaces-table').DataTable({
                 "order": [[0, 'desc']],
@@ -1399,6 +1531,20 @@
                         204: function () {}
                     }
                 });
+            });
+
+            $('#btns-choose-entity-relations .btn').on('click', function () {
+                $('#btns-choose-entity-relations .btn').removeClass("btn-primary");
+                $('#btns-choose-entity-relations .btn').addClass("btn-default");
+                $(this).addClass("btn-primary");
+                tableRelations.draw();
+            });
+
+            $('#btns-choose-type-relations .btn').on('click', function () {
+                $('#btns-choose-type-relations .btn').removeClass("btn-primary");
+                $('#btns-choose-type-relations .btn').addClass("btn-default");
+                $(this).addClass("btn-primary");
+                tableRelations.draw();
             });
 
             $(document).on('keyup', '#namespace_form_uriGenerator', function() {
