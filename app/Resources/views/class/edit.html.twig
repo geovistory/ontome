@@ -1025,7 +1025,7 @@
                 </table>
             </div>
             <div id="properties" class="tab-pane fade">
-                {% if is_granted('edit', classVersion) %}
+                {% if is_granted('edit_associations', classVersion.namespaceForVersion) %}
                     <div class="pull-right add-div">
                         <a href="{{ path('property_new', {'type': 'outgoing','class': classVersion.class.id}) }}" class="btn btn-primary pull-right">Add <span class="fa fa-plus-circle"></span></a>
                     </div>
@@ -1129,7 +1129,7 @@
                     {% endfor %}
                     </tbody>
                 </table>
-                {% if is_granted('edit', classVersion) %}
+                {% if is_granted('edit_associations', classVersion.namespaceForVersion) %}
                     <div class="pull-right add-div">
                         <a href="{{ path('property_new', {'type': 'ingoing','class': classVersion.class.id}) }}" class="btn btn-primary pull-right">Add <span class="fa fa-plus-circle"></span></a>
                     </div>

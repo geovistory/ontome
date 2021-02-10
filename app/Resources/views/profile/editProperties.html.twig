@@ -501,6 +501,7 @@
         });
 
         $(document).on("click", ".select-subclass-range", function() {
+            $("a[data-toggle='tooltip']").tooltip('hide');
             var selectedValue = $(this).data("id");
             var currentClassLabel = $(".outgoing-property-range-switch[data-id='"+selectedValue+"']").text();
             $(".outgoing-property-range-switch[data-id='"+selectedValue+"']").hide(0);
@@ -513,6 +514,7 @@
         });
 
         $(document).on("click", ".select-subclass-range-inherited", function() {
+            $("a[data-toggle='tooltip']").tooltip('hide');
             var selectedValue = $(this).data("id");
             var currentClassLabel = $(".outgoing-inherited-property-range-switch[data-id='"+selectedValue+"']").text();
             $(".outgoing-inherited-property-range-switch[data-id='"+selectedValue+"']").hide(0);
@@ -525,6 +527,7 @@
         });
 
         $(document).on("click", ".select-subclass-domain", function() {
+            $("a[data-toggle='tooltip']").tooltip('hide');
             var selectedValue = $(this).data("id");
             var currentClassLabel = $(".incoming-property-domain-switch[data-id='"+selectedValue+"']").text();
             $(".incoming-property-domain-switch[data-id='"+selectedValue+"']").hide(0);
@@ -537,6 +540,7 @@
         });
 
         $(document).on("click", ".select-subclass-domain-inherited", function() {
+            $("a[data-toggle='tooltip']").tooltip('hide');
             var selectedValue = $(this).data("id");
             var currentClassLabel = $(".incoming-inherited-property-domain-switch[data-id='"+selectedValue+"']").text();
             $(".incoming-inherited-property-domain-switch[data-id='"+selectedValue+"']").hide(0);

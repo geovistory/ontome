@@ -1209,7 +1209,7 @@
                 </table>
             </div>
             <div id="relations" class="tab-pane fade">
-                {% if is_granted('edit', propertyVersion) %}
+                {% if is_granted('edit_associations', propertyVersion.namespaceForVersion) %}
                     <div class="pull-right add-div">
                         <a href="{{ path('new_entity_association_form', {
                             'object': 'property',

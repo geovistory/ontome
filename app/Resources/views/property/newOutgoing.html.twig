@@ -30,7 +30,7 @@
                 </div>
                 <h2>
                     Add new property for the domain {{ app.request.get('class').classVersionForDisplay() }}
-                    <a href="{{ path('class_edit', {'id': app.request.get('class').id}) }}#properties" class="pull-right btn btn-link">
+                    <a href="{{ path('class_show', {'id': app.request.get('class').id}) }}#properties" class="pull-right btn btn-link">
                         <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
                     </a>
                 </h2>

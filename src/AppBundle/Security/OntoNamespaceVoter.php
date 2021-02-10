@@ -18,6 +18,7 @@ class OntoNamespaceVoter extends Voter
     const EDIT = 'edit';
     const FULLEDIT = 'full_edit';
     const EDITMANAGER = 'edit_manager';
+    const EDITASSOCIATIONS = 'edit_associations';
     const DELETEASSOCIATIONS = 'delete_associations';
     const VALIDATE = 'validate';
     const PUBLISH = 'publish';
@@ -25,7 +26,7 @@ class OntoNamespaceVoter extends Voter
     protected function supports($attribute, $subject)
     {
         // if the attribute isn't one we support, return false
-        if (!in_array($attribute, array(self::EDIT, self::FULLEDIT, self::EDITMANAGER, self::DELETEASSOCIATIONS, self::VALIDATE, self::PUBLISH))) {
+        if (!in_array($attribute, array(self::EDIT, self::FULLEDIT, self::EDITMANAGER, self::EDITASSOCIATIONS, self::DELETEASSOCIATIONS, self::VALIDATE, self::PUBLISH))) {
             return false;
         }
 
@@ -56,6 +57,8 @@ class OntoNamespaceVoter extends Voter
                 return $this->canFullEdit($namespace, $user);
             case self::EDITMANAGER:
                 return $this->canEditManager($namespace, $user);
+            case self::EDITASSOCIATIONS:
+                return $this->canEditAssociations($namespace, $user);
             case self::DELETEASSOCIATIONS:
                 return $this->canDeleteAssociations($namespace, $user);
             case self::VALIDATE:
@@ -174,6 +177,46 @@ class OntoNamespaceVoter extends Voter
                 return true;
             }
         }
+        return false;
+    }
+
+    /**
+     * @param OntoNamespace $namespace Entity namespace (ex ClassVersion.namespace). This is not the active project namespace.
+     * @param User $user
+     * @return bool TRUE if $user and $namespace have matching namespace (thanks to the $userProjectAssociation) and $user is a project manager
+     */
+    private function canEditAssociations(OntoNamespace $namespace, User $user)
+    {
+        // Condition 1 : ce namespace est référencé par le namespace du projet actif ?
+        // Condition 2 : le namespace du projet actif est ongoing
+        // Condition 3 : l'utilisateur peut gérer ce namespace ongoing
+
+        //Récupérer le namespace actif du projet actif
+        // Ongoing > Le plus récent > Le premier.
+        $activeNamespace = $user->getCurrentActiveProject()->getManagedNamespaces()[0];
+        foreach($user->getCurrentActiveProject()->getManagedNamespaces() as $managedNamespace){
+            if($managedNamespace->getIsOngoing()){
+                $activeNamespace=$managedNamespace;
+            }
+            elseif($activeNamespace->getIsOngoing() &&
+                $activeNamespace->getPublishedAt()<$managedNamespace->getPublishedAt()){
+                $activeNamespace=$managedNamespace;
+            }
+        }
+
+        foreach($user->getUserProjectAssociations()->getIterator() as $i => $userProjectAssociation) {
+            if($userProjectAssociation->getProject() === $activeNamespace->getProjectForTopLevelNamespace() && $userProjectAssociation->getPermission() <= 2){
+                if(($activeNamespace->getIsOngoing() && $namespace === $activeNamespace)){
+                    return true;
+                }
+                foreach ($activeNamespace->getReferencedNamespaceAssociations() as $referencedNamespaceAssociation){
+                    if($referencedNamespaceAssociation->getReferencedNamespace() == $namespace){
+                        return true;
+                    }
+                }
+            }
+        }
+
         return false;
     }
 

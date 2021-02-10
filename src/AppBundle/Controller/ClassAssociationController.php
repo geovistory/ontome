@@ -33,7 +33,7 @@ class ClassAssociationController extends Controller
     {
         $classAssociation = new ClassAssociation();
 
-        $this->denyAccessUnlessGranted('edit', $childClass->getClassVersionForDisplay());
+        $this->denyAccessUnlessGranted('edit_associations', $childClass->getClassVersionForDisplay()->getNamespaceForVersion());
 
         $em = $this->getDoctrine()->getManager();
         $systemTypeJustification = $em->getRepository('AppBundle:SystemType')->find(15); //systemType 15 = justification

@@ -55,12 +55,14 @@ class EntityAssociationController extends Controller
             $namespaceForEntityVersion = $source->getPropertyVersionForDisplay()->getNamespaceForVersion();
         }
 
+        $objectNamespaceId = null;
         if($source instanceof OntoClass){
-            $this->denyAccessUnlessGranted('edit', $source->getClassVersionForDisplay());
+            $objectNamespaceId = $source->getClassVersionForDisplay()->getNamespaceForVersion();
         }
         elseif($source instanceof Property){
-            $this->denyAccessUnlessGranted('edit', $source->getPropertyVersionForDisplay());
+            $objectNamespaceId = $source->getPropertyVersionForDisplay()->getNamespaceForVersion();
         }
+        $this->denyAccessUnlessGranted('edit_associations', $objectNamespaceId);
 
         $systemTypeJustification = $em->getRepository('AppBundle:SystemType')->find(15); //systemType 15 = justification
         $systemTypeExample = $em->getRepository('AppBundle:SystemType')->find(7); //systemType 1 = example
@@ -143,8 +145,9 @@ class EntityAssociationController extends Controller
 
             $this->addFlash('success', 'Relation created !');
 
-            return $this->redirectToRoute($object.'_edit', [
+            return $this->redirectToRoute($object.'_show_with_version', [
                 'id' => $objectId,
+                'namespaceFromUrlID' => $objectNamespaceId,
                 '_fragment' => 'relations'
             ]);
         }

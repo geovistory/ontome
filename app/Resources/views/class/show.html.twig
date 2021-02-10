@@ -689,6 +689,11 @@
                 </table>
             </div>
             <div id="class-hierarchy" class="tab-pane fade">
+                {% if is_granted('edit_associations', classVersion.namespaceForVersion) %}
+                    <div class="pull-right add-div">
+                        <a href="{{ path('new_parent_class_form', {'childClass': classVersion.class.id}) }}" class="btn btn-primary pull-right">Add <span class="fa fa-plus-circle"></span></a>
+                    </div>
+                {% endif %}
                 <h3>Parent classes
                     {% set tooltipClass = "rdfs:subclassOf the class below" %}
                     {% if classVersion.class.childClassAssociations|length > 1  %}
@@ -836,6 +841,13 @@
                 </table>
             </div>
             <div id="relations" class="tab-pane fade">
+                {% if is_granted('edit_associations', classVersion.namespaceForVersion) %}
+                <div class="pull-right add-div">
+                    <a href="{{ path('new_entity_association_form', {'object': 'class', 'objectId': classVersion.class.id}) }}" class="btn btn-primary pull-right">
+                        Add <span class="fa fa-plus-circle"></span>
+                    </a>
+                </div>
+                {% endif %}
                 <h3>Related classes</h3>
                 <table class="table table-striped" id="relations-table">
                     <thead>
@@ -963,6 +975,11 @@
                 </table>
             </div>
             <div id="properties" class="tab-pane fade">
+                {% if is_granted('edit_associations', classVersion.namespaceForVersion) %}
+                    <div class="pull-right add-div">
+                        <a href="{{ path('property_new', {'type': 'outgoing','class': classVersion.class.id}) }}" class="btn btn-primary pull-right">Add <span class="fa fa-plus-circle"></span></a>
+                    </div>
+                {% endif %}
                 <h3>Outgoing properties (this class is domain)</h3>
                 <table class="table table-striped" id="outgoing-properties-table">
                     <thead>
@@ -1052,6 +1069,11 @@
                     {% endfor %}
                     </tbody>
                 </table>
+                {% if is_granted('edit_associations', classVersion.namespaceForVersion) %}
+                    <div class="pull-right add-div">
+                        <a href="{{ path('property_new', {'type': 'ingoing','class': classVersion.class.id}) }}" class="btn btn-primary pull-right">Add <span class="fa fa-plus-circle"></span></a>
+                    </div>
+                {% endif %}
                 <h3>Incoming properties (this class is range)</h3>
                 <table class="table table-striped" id="ingoing-properties-table">
                     <thead>

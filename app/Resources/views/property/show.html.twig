@@ -767,6 +767,11 @@
                 </table>
             </div>
             <div id="property-hierarchy" class="tab-pane fade">
+                {% if is_granted('edit_associations', propertyVersion.namespaceForVersion) %}
+                <div class="pull-right add-div">
+                    <a href="{{ path('new_parent_property_form', {'childProperty': propertyVersion.property.id}) }}" class="btn btn-primary pull-right">Add <span class="fa fa-plus-circle"></span></a>
+                </div>
+                {% endif %}
                 <h3>Parent properties
                     {% set tooltipProperty = "rdfs:subpropertyOf the property below" %}
                     {% if propertyVersion.property.childPropertyAssociations|length > 1  %}
@@ -1131,6 +1136,13 @@
                 </table>
             </div>
             <div id="relations" class="tab-pane fade">
+                {% if is_granted('edit_associations', propertyVersion.namespaceForVersion) %}
+                    <div class="pull-right add-div">
+                        <a href="{{ path('new_entity_association_form', {
+                            'object': 'property',
+                            'objectId': propertyVersion.property.id}) }}" class="btn btn-primary pull-right">Add <span class="fa fa-plus-circle"></span></a>
+                    </div>
+                {% endif %}
                 <h3>Related properties</h3>
                 <table class="table table-striped" id="relations-table">
                     <thead>

@@ -67,7 +67,7 @@ class PropertyController extends Controller
         //get the right version of the class
         $classVersion = $class->getClassVersionForDisplay();
 
-        $this->denyAccessUnlessGranted('edit', $classVersion);
+        $this->denyAccessUnlessGranted('edit_associations', $classVersion->getNamespaceForVersion());
 
         if($type !== 'ingoing' && $type !== 'outgoing') throw $this->createNotFoundException('The requested property type "'.$type.'" does not exist!');
 
