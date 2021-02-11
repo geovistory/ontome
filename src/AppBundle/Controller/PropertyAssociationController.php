@@ -10,12 +10,16 @@ namespace AppBundle\Controller;
 
 use AppBundle\Entity\PropertyAssociation;
 use AppBundle\Entity\Property;
+use AppBundle\Entity\SystemType;
 use AppBundle\Entity\TextProperty;
 use AppBundle\Form\PropertyAssociationEditForm;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use AppBundle\Form\ParentPropertyAssociationForm;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 class PropertyAssociationController extends Controller
 {
@@ -217,5 +221,63 @@ class PropertyAssociationController extends Controller
         ));
     }
 
+    /**
+     * @Route("/property-association/{id}/edit-validity/{validationStatus}", name="property_association_validation_status_edit")
+     * @param PropertyAssociation $propertyAssociation
+     * @param SystemType $validationStatus
+     * @param Request $request
+     * @throws \Exception in case of unsuccessful validation
+     * @return RedirectResponse|Response
+     */
+    public function editValidationStatusAction(PropertyAssociation $propertyAssociation, SystemType $validationStatus, Request $request)
+    {
+        // On doit avoir une version de l'association sinon on lance une exception.
+        if(is_null($propertyAssociation)){
+            throw $this->createNotFoundException('The property association n°'.$propertyAssociation->getId().' does not exist. Please contact an administrator.');
+        }
+
+        //Denied access if not an authorized validator
+        $this->denyAccessUnlessGranted('validate', $propertyAssociation->getChildProperty()->getPropertyVersionForDisplay());
+
+
+        $propertyAssociation->setModifier($this->getUser());
+
+        $newValidationStatus = new SystemType();
+
+        try{
+            $em = $this->getDoctrine()->getManager();
+            $newValidationStatus = $em->getRepository('AppBundle:SystemType')
+                ->findOneBy(array('id' => $validationStatus->getId()));
+        } catch (\Exception $e) {
+            throw new BadRequestHttpException('The provided status does not exist.');
+        }
+
+        if (!is_null($newValidationStatus)) {
+            $statusId = intval($newValidationStatus->getId());
+            if (in_array($statusId, [26,27,28], true)) {
+                $propertyAssociation->setValidationStatus($newValidationStatus);
+                $propertyAssociation->setModifier($this->getUser());
+                $propertyAssociation->setModificationTime(new \DateTime('now'));
+
+                $em->persist($propertyAssociation);
+
+                $em->flush();
+
+                if ($statusId == 27){
+                    return $this->redirectToRoute('property_association_edit', [
+                        'id' => $propertyAssociation->getId()
+                    ]);
+                }
+                else return $this->redirectToRoute('property_association_show', [
+                    'id' => $propertyAssociation->getId()
+                ]);
+
+            }
+        }
+
+        return $this->redirectToRoute('property_association_show', [
+            'id' => $propertyAssociation->getId()
+        ]);
+    }
 
 }

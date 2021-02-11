@@ -335,7 +335,9 @@
                         <th>Namespace</th>
                         <th>View details</th>
                         <th>Comments</th>
-                        <th>Validation</th>
+                        {% if classVersion.namespaceForVersion.isOngoing %}
+                            <th>Validation</th>
+                        {% endif %}
                     </tr>
                     </thead>
                     <tbody>
@@ -364,25 +366,27 @@
                                     <span class="badge {% if textProperty.comments|length > 0  %}progress-bar-danger {% endif %}">{{ textProperty.comments|length }}</span>
                                 </a>
                             </td>
-                            <td>
-                                {% if textProperty.validationStatus is null %}
-                                    <span class="label label-info">
-                                    Candidate
-                                </span>
-                                {% elseif textProperty.validationStatus.id == 26  %}
-                                    <span class="label label-success">
-                                    {{ textProperty.validationStatus }}
-                                </span>
-                                {% elseif textProperty.validationStatus.id == 27  %}
-                                    <span class="label label-danger">
-                                    {{ textProperty.validationStatus }}
-                                </span>
-                                {% elseif textProperty.validationStatus.id == 28  %}
-                                    <span class="label label-warning">
-                                    {{ textProperty.validationStatus }}
-                                </span>
-                                {% endif %}
-                            </td>
+                            {% if classVersion.namespaceForVersion.isOngoing %}
+                                <td>
+                                    {% if textProperty.validationStatus is null %}
+                                        <span class="label label-info">
+                                        Candidate
+                                    </span>
+                                    {% elseif textProperty.validationStatus.id == 26  %}
+                                        <span class="label label-success">
+                                        {{ textProperty.validationStatus }}
+                                    </span>
+                                    {% elseif textProperty.validationStatus.id == 27  %}
+                                        <span class="label label-danger">
+                                        {{ textProperty.validationStatus }}
+                                    </span>
+                                    {% elseif textProperty.validationStatus.id == 28  %}
+                                        <span class="label label-warning">
+                                        {{ textProperty.validationStatus }}
+                                    </span>
+                                    {% endif %}
+                                </td>
+                            {% endif %}
                         </tr>
                     {% endfor %}
                     </tbody>
@@ -398,7 +402,9 @@
                         <th>Namespace</th>
                         <th>View details</th>
                         <th>Comments</th>
-                        <th>Validation</th>
+                        {% if classVersion.namespaceForVersion.isOngoing %}
+                            <th>Validation</th>
+                        {% endif %}
                     </tr>
                     </thead>
                     <tbody>
@@ -427,25 +433,27 @@
                                     <span class="badge {% if textProperty.comments|length > 0  %}progress-bar-danger {% endif %}">{{ textProperty.comments|length }}</span>
                                 </a>
                             </td>
-                            <td>
-                                {% if textProperty.validationStatus is null %}
-                                    <span class="label label-info">
-                                    Candidate
-                                </span>
-                                {% elseif textProperty.validationStatus.id == 26  %}
-                                    <span class="label label-success">
-                                    {{ textProperty.validationStatus }}
-                                </span>
-                                {% elseif textProperty.validationStatus.id == 27  %}
-                                    <span class="label label-danger">
-                                    {{ textProperty.validationStatus }}
-                                </span>
-                                {% elseif textProperty.validationStatus.id == 28  %}
-                                    <span class="label label-warning">
-                                    {{ textProperty.validationStatus }}
-                                </span>
-                                {% endif %}
-                            </td>
+                            {% if classVersion.namespaceForVersion.isOngoing %}
+                                <td>
+                                    {% if textProperty.validationStatus is null %}
+                                        <span class="label label-info">
+                                        Candidate
+                                    </span>
+                                    {% elseif textProperty.validationStatus.id == 26  %}
+                                        <span class="label label-success">
+                                        {{ textProperty.validationStatus }}
+                                    </span>
+                                    {% elseif textProperty.validationStatus.id == 27  %}
+                                        <span class="label label-danger">
+                                        {{ textProperty.validationStatus }}
+                                    </span>
+                                    {% elseif textProperty.validationStatus.id == 28  %}
+                                        <span class="label label-warning">
+                                        {{ textProperty.validationStatus }}
+                                    </span>
+                                    {% endif %}
+                                </td>
+                            {% endif %}
                         </tr>
                     {% endfor %}
                     </tbody>
@@ -460,7 +468,9 @@
                         <th>Namespace</th>
                         <th>View details</th>
                         <th>Comments</th>
-                        <th>Validation</th>
+                        {% if classVersion.namespaceForVersion.isOngoing %}
+                            <th>Validation</th>
+                        {% endif %}
                     </tr>
                     </thead>
                     <tbody>
@@ -489,25 +499,27 @@
                                     <span class="badge {% if textProperty.comments|length > 0  %}progress-bar-danger {% endif %}">{{ textProperty.comments|length }}</span>
                                 </a>
                             </td>
-                            <td>
-                                {% if textProperty.validationStatus is null %}
-                                    <span class="label label-info">
-                                    Candidate
-                                </span>
-                                {% elseif textProperty.validationStatus.id == 26  %}
-                                    <span class="label label-success">
-                                    {{ textProperty.validationStatus }}
-                                </span>
-                                {% elseif textProperty.validationStatus.id == 27  %}
-                                    <span class="label label-danger">
-                                    {{ textProperty.validationStatus }}
-                                </span>
-                                {% elseif textProperty.validationStatus.id == 28  %}
-                                    <span class="label label-warning">
-                                    {{ textProperty.validationStatus }}
-                                </span>
-                                {% endif %}
-                            </td>
+                            {% if classVersion.namespaceForVersion.isOngoing %}
+                                <td>
+                                    {% if textProperty.validationStatus is null %}
+                                        <span class="label label-info">
+                                        Candidate
+                                    </span>
+                                    {% elseif textProperty.validationStatus.id == 26  %}
+                                        <span class="label label-success">
+                                        {{ textProperty.validationStatus }}
+                                    </span>
+                                    {% elseif textProperty.validationStatus.id == 27  %}
+                                        <span class="label label-danger">
+                                        {{ textProperty.validationStatus }}
+                                    </span>
+                                    {% elseif textProperty.validationStatus.id == 28  %}
+                                        <span class="label label-warning">
+                                        {{ textProperty.validationStatus }}
+                                    </span>
+                                    {% endif %}
+                                </td>
+                            {% endif %}
                         </tr>
                     {% endfor %}
                     </tbody>
@@ -524,7 +536,9 @@
                         <th>Last updated</th>
                         <th>View details</th>
                         <th>Comments</th>
-                        <th>Validation</th>
+                        {% if classVersion.namespaceForVersion.isOngoing %}
+                            <th>Validation</th>
+                        {% endif %}
                     </tr>
                     </thead>
                     <tbody>
@@ -552,25 +566,27 @@
                                     <span class="badge {% if label.comments|length > 0  %}progress-bar-danger {% endif %}">{{ label.comments|length }}</span>
                                 </a>
                             </td>
-                            <td>
-                                {% if label.validationStatus is null %}
-                                    <span class="label label-info">
-                                    Candidate
-                                </span>
-                                {% elseif label.validationStatus.id == 26  %}
-                                    <span class="label label-success">
-                                    {{ label.validationStatus }}
-                                </span>
-                                {% elseif label.validationStatus.id == 27  %}
-                                    <span class="label label-danger">
-                                    {{ label.validationStatus }}
-                                </span>
-                                {% elseif label.validationStatus.id == 28  %}
-                                    <span class="label label-warning">
-                                    {{ label.validationStatus }}
-                                </span>
-                                {% endif %}
-                            </td>
+                            {% if classVersion.namespaceForVersion.isOngoing %}
+                                <td>
+                                    {% if label.validationStatus is null %}
+                                        <span class="label label-info">
+                                        Candidate
+                                    </span>
+                                    {% elseif label.validationStatus.id == 26  %}
+                                        <span class="label label-success">
+                                        {{ label.validationStatus }}
+                                    </span>
+                                    {% elseif label.validationStatus.id == 27  %}
+                                        <span class="label label-danger">
+                                        {{ label.validationStatus }}
+                                    </span>
+                                    {% elseif label.validationStatus.id == 28  %}
+                                        <span class="label label-warning">
+                                        {{ label.validationStatus }}
+                                    </span>
+                                    {% endif %}
+                                </td>
+                            {% endif %}
                         </tr>
                     {% endfor %}
                     </tbody>
@@ -622,7 +638,9 @@
                         <th>Justification</th>
                         <th>View details</th>
                         <th>Comments</th>
-                        <th>Validation</th>
+                        {% if classVersion.namespaceForVersion.isOngoing %}
+                            <th>Validation</th>
+                        {% endif %}
                     </tr>
                     </thead>
                     <tbody>
@@ -661,25 +679,27 @@
                                     <span class="badge {% if association.comments|length > 0  %}progress-bar-danger {% endif %}">{{ association.comments|length }}</span>
                                 </a>
                             </td>
-                            <td>
-                                {% if association.validationStatus is null %}
-                                    <span class="label label-info">
-                                    Candidate
-                                </span>
-                                {% elseif association.validationStatus.id == 26  %}
-                                    <span class="label label-success">
-                                    {{ association.validationStatus }}
-                                </span>
-                                {% elseif association.validationStatus.id == 27  %}
-                                    <span class="label label-danger">
-                                    {{ association.validationStatus }}
-                                </span>
-                                {% elseif association.validationStatus.id == 28  %}
-                                    <span class="label label-warning">
-                                    {{ association.validationStatus }}
-                                </span>
-                                {% endif %}
-                            </td>
+                            {% if classVersion.namespaceForVersion.isOngoing %}
+                                <td>
+                                    {% if association.validationStatus is null %}
+                                        <span class="label label-info">
+                                        Candidate
+                                    </span>
+                                    {% elseif association.validationStatus.id == 26  %}
+                                        <span class="label label-success">
+                                        {{ association.validationStatus }}
+                                    </span>
+                                    {% elseif association.validationStatus.id == 27  %}
+                                        <span class="label label-danger">
+                                        {{ association.validationStatus }}
+                                    </span>
+                                    {% elseif association.validationStatus.id == 28  %}
+                                        <span class="label label-warning">
+                                        {{ association.validationStatus }}
+                                    </span>
+                                    {% endif %}
+                                </td>
+                            {% endif %}
                         </tr>
                     {% endfor %}
                     </tbody>
@@ -750,7 +770,9 @@
                             <th>Relation defined in</th>
                             <th>View details</th>
                             <th>Comments</th>
-                            <th>Validation</th>
+                            {% if classVersion.namespaceForVersion.isOngoing %}
+                                <th>Validation</th>
+                            {% endif %}
                         </tr>
                     </thead>
                     <tbody>
@@ -818,25 +840,27 @@
                                     </a>
                                 {% endif %}
                             </td>
-                            <td>
-                                {% if relation.validationStatus is null %}
-                                    <span class="label label-info">
-                                    Candidate
-                                </span>
-                                {% elseif relation.validationStatus.id == 26  %}
-                                    <span class="label label-success">
-                                    {{ relation.validationStatus }}
-                                </span>
-                                {% elseif relation.validationStatus.id == 27  %}
-                                    <span class="label label-danger">
-                                    {{ relation.validationStatus }}
-                                </span>
-                                {% elseif relation.validationStatus.id == 28  %}
-                                    <span class="label label-warning">
-                                    {{ relation.validationStatus }}
-                                </span>
-                                {% endif %}
-                            </td>
+                            {% if classVersion.namespaceForVersion.isOngoing %}
+                                <td>
+                                    {% if relation.validationStatus is null %}
+                                        <span class="label label-info">
+                                        Candidate
+                                    </span>
+                                    {% elseif relation.validationStatus.id == 26  %}
+                                        <span class="label label-success">
+                                        {{ relation.validationStatus }}
+                                    </span>
+                                    {% elseif relation.validationStatus.id == 27  %}
+                                        <span class="label label-danger">
+                                        {{ relation.validationStatus }}
+                                    </span>
+                                    {% elseif relation.validationStatus.id == 28  %}
+                                        <span class="label label-warning">
+                                        {{ relation.validationStatus }}
+                                    </span>
+                                    {% endif %}
+                                </td>
+                            {% endif %}
                         </tr>
                     {% endfor %}
                     </tbody>

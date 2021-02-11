@@ -63,6 +63,13 @@ class PropertyAssociation
     private $namespaceForVersion;
 
     /**
+     * @ORM\ManyToOne(targetEntity="SystemType")
+     * @ORM\JoinColumn(name="validation_status", referencedColumnName="pk_system_type")
+     * @Assert\Type(type="AppBundle\Entity\SystemType")
+     */
+    private $validationStatus;
+
+    /**
      * @ORM\Column(type="text")
      */
     private $notes;
@@ -127,6 +134,14 @@ class PropertyAssociation
     public function getNamespaceForVersion()
     {
         return $this->namespaceForVersion;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getValidationStatus()
+    {
+        return $this->validationStatus;
     }
 
     /**
@@ -240,6 +255,14 @@ class PropertyAssociation
     public function setNamespaceForVersion($namespaceForVersion)
     {
         $this->namespaceForVersion = $namespaceForVersion;
+    }
+
+    /**
+     * @param mixed $validationStatus
+     */
+    public function setValidationStatus($validationStatus)
+    {
+        $this->validationStatus = $validationStatus;
     }
 
     /**
