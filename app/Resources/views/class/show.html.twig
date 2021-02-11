@@ -689,7 +689,7 @@
                 </table>
             </div>
             <div id="class-hierarchy" class="tab-pane fade">
-                {% if is_granted('edit_associations', classVersion.namespaceForVersion) %}
+                {% if is_granted('add_associations', classVersion.namespaceForVersion) %}
                     <div class="pull-right add-div">
                         <a href="{{ path('new_parent_class_form', {'childClass': classVersion.class.id}) }}" class="btn btn-primary pull-right">Add <span class="fa fa-plus-circle"></span></a>
                     </div>
@@ -711,6 +711,8 @@
                         <th>Relation defined in</th>
                         <th>Justification</th>
                         <th>View details</th>
+                        <th>Edit</th>
+                        <th>Delete</th>
                         <th>Comments</th>
                         {% if classVersion.namespaceForVersion.isOngoing %}
                             <th>Validation</th>
@@ -752,6 +754,16 @@
                             </td>
                             <td>
                                 <a href="{{ path('class_association_show', {'id': association.id}) }}"><span class="fa fa-info-circle"></span></a>
+                            </td>
+                            <td>
+                                {% if is_granted('edit', association) %}
+                                <a href="{{ path('class_association_edit', {'id': association.id}) }}" class="btn btn-xs btn-success"><span class="fa fa-edit"></span></a>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if is_granted('delete', association) %}
+                                    <a href="#class-hierarchy" class="btn btn-xs btn-danger btn-delete-association" data-id="{{ association.id }}" data-type="classAssociation"><span class="fa fa-trash-alt"></span></a>
+                                {% endif %}
                             </td>
                             <td>
                                 <a class="btn updateViewComment" href="{{ path('class_association_show', {
@@ -841,7 +853,7 @@
                 </table>
             </div>
             <div id="relations" class="tab-pane fade">
-                {% if is_granted('edit_associations', classVersion.namespaceForVersion) %}
+                {% if is_granted('add_associations', classVersion.namespaceForVersion) %}
                 <div class="pull-right add-div">
                     <a href="{{ path('new_entity_association_form', {'object': 'class', 'objectId': classVersion.class.id}) }}" class="btn btn-primary pull-right">
                         Add <span class="fa fa-plus-circle"></span>
@@ -857,6 +869,8 @@
                             <th>Justification</th>
                             <th>Relation defined in</th>
                             <th>View details</th>
+                            <th>Edit</th>
+                            <th>Delete</th>
                             <th>Comments</th>
                             {% if classVersion.namespaceForVersion.isOngoing %}
                                 <th>Validation</th>
@@ -934,6 +948,28 @@
                                 {% endif %}
                             </td>
                             <td>
+                                {% if is_granted('edit', relation) %}
+                                    {% if classVersion.class.id == relation.sourceClass.id %}
+                                        <a href="{{ path('entity_association_edit', {
+                                            'id': relation.id
+                                        }) }}" class="btn btn-xs btn-success">
+                                            <span class="fa fa-edit"></span>
+                                        </a>
+                                    {% else %}
+                                        <a href="{{ path('entity_association_inverse_edit', {
+                                            'id': relation.id
+                                        }) }}" class="btn btn-xs btn-success">
+                                            <span class="fa fa-edit"></span>
+                                        </a>
+                                    {% endif %}
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if is_granted('delete', relation) %}
+                                    <a href="#relations" class="btn btn-xs btn-danger btn-delete-association" data-id="{{ relation.id }}" data-type="entityAssociation"><span class="fa fa-trash-alt"></span></a>
+                                {% endif %}
+                            </td>
+                            <td>
                                 {% if classVersion.class.id == relation.sourceClass.id %}
                                     <a class="btn updateViewComment" href="{{ path('entity_association_show', {
                                         'id': relation.id
@@ -975,7 +1011,7 @@
                 </table>
             </div>
             <div id="properties" class="tab-pane fade">
-                {% if is_granted('edit_associations', classVersion.namespaceForVersion) %}
+                {% if is_granted('add_associations', classVersion.namespaceForVersion) %}
                     <div class="pull-right add-div">
                         <a href="{{ path('property_new', {'type': 'outgoing','class': classVersion.class.id}) }}" class="btn btn-primary pull-right">Add <span class="fa fa-plus-circle"></span></a>
                     </div>
@@ -1069,7 +1105,7 @@
                     {% endfor %}
                     </tbody>
                 </table>
-                {% if is_granted('edit_associations', classVersion.namespaceForVersion) %}
+                {% if is_granted('add_associations', classVersion.namespaceForVersion) %}
                     <div class="pull-right add-div">
                         <a href="{{ path('property_new', {'type': 'ingoing','class': classVersion.class.id}) }}" class="btn btn-primary pull-right">Add <span class="fa fa-plus-circle"></span></a>
                     </div>
@@ -1318,6 +1354,48 @@
                         204: function () {}
                     }
                 });
+            });
+        });
+
+        $(document).on("click", ".btn-delete-association", function(){
+            var associationId = $(this).data("id");
+            var associationType = $(this).data("type");
+            bootbox.confirm({
+                message: "You are about to delete a relation between two classes. This operation cannot be undone. Do you wish to proceed?",
+                title: '<i class="fas fa-exclamation-triangle"></i> Warning',
+                buttons: {
+                    confirm: {
+                        label: 'Yes',
+                        className: 'btn-success'
+                    },
+                    cancel: {
+                        label: 'No',
+                        className: 'btn-danger'
+                    }
+                },
+                callback: function (result) {
+                    if(associationType == "classAssociation")
+                    {
+                        var url = '{{ path("class_association_delete", {'id' : 'associationId'}) }}';
+                    }
+                    if(associationType == "entityAssociation")
+                    {
+                        var url = '{{ path("entity_association_delete", {'id' : 'associationId'}) }}';
+                    }
+                    url = url.replace("associationId", associationId);
+                    $.ajax({
+                        url: url,
+                        type: 'DELETE',
+                        dataType: 'json',
+                        success:function(data){
+                        },
+                        statusCode: {
+                            204: function () {
+                                window.location.reload();
+                            }
+                        }
+                    });
+                }
             });
         });
     </script>

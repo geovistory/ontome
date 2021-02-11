@@ -62,7 +62,7 @@ class EntityAssociationController extends Controller
         elseif($source instanceof Property){
             $objectNamespaceId = $source->getPropertyVersionForDisplay()->getNamespaceForVersion();
         }
-        $this->denyAccessUnlessGranted('edit_associations', $objectNamespaceId);
+        $this->denyAccessUnlessGranted('add_associations', $objectNamespaceId);
 
         $systemTypeJustification = $em->getRepository('AppBundle:SystemType')->find(15); //systemType 15 = justification
         $systemTypeExample = $em->getRepository('AppBundle:SystemType')->find(7); //systemType 1 = example
@@ -224,7 +224,7 @@ class EntityAssociationController extends Controller
             $namespaceForEntityVersion = $firstEntity->getPropertyVersionForDisplay()->getNamespaceForVersion();
         }
 
-        $this->denyAccessUnlessGranted('edit', $firstEntity);
+        $this->denyAccessUnlessGranted('edit', $entityAssociation);
 
         // FILTRAGE
         $namespacesId[] = $namespaceForEntityVersion->getId();
@@ -300,13 +300,13 @@ class EntityAssociationController extends Controller
             $this->addFlash('success', 'Relation edited !');
 
             if(!$inverse){
-                return $this->redirectToRoute($entityAssociation->getSourceObjectType().'_edit', [
+                return $this->redirectToRoute($entityAssociation->getSourceObjectType().'_show', [
                     'id' => $entityAssociation->getSource()->getId(),
                     '_fragment' => 'relations'
                 ]);
             }
             else{
-                return $this->redirectToRoute($entityAssociation->getTargetObjectType().'_edit', [
+                return $this->redirectToRoute($entityAssociation->getTargetObjectType().'_show', [
                     'id' => $entityAssociation->getTarget()->getId(),
                     '_fragment' => 'relations'
                 ]);
@@ -390,7 +390,7 @@ class EntityAssociationController extends Controller
      */
     public function deleteAction(Request $request, EntityAssociation $entityAssociation)
     {
-        $this->denyAccessUnlessGranted('delete_associations', $entityAssociation->getNamespaceForVersion());
+        $this->denyAccessUnlessGranted('delete', $entityAssociation);
 
         $em = $this->getDoctrine()->getManager();
         foreach($entityAssociation->getTextProperties() as $textProperty)

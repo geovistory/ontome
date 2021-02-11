@@ -18,7 +18,7 @@ class OntoNamespaceVoter extends Voter
     const EDIT = 'edit';
     const FULLEDIT = 'full_edit';
     const EDITMANAGER = 'edit_manager';
-    const EDITASSOCIATIONS = 'edit_associations';
+    const ADDASSOCIATIONS = 'add_associations';
     const DELETEASSOCIATIONS = 'delete_associations';
     const VALIDATE = 'validate';
     const PUBLISH = 'publish';
@@ -26,7 +26,7 @@ class OntoNamespaceVoter extends Voter
     protected function supports($attribute, $subject)
     {
         // if the attribute isn't one we support, return false
-        if (!in_array($attribute, array(self::EDIT, self::FULLEDIT, self::EDITMANAGER, self::EDITASSOCIATIONS, self::DELETEASSOCIATIONS, self::VALIDATE, self::PUBLISH))) {
+        if (!in_array($attribute, array(self::EDIT, self::FULLEDIT, self::ADDASSOCIATIONS, self::DELETEASSOCIATIONS, self::VALIDATE, self::PUBLISH))) {
             return false;
         }
 
@@ -57,8 +57,8 @@ class OntoNamespaceVoter extends Voter
                 return $this->canFullEdit($namespace, $user);
             case self::EDITMANAGER:
                 return $this->canEditManager($namespace, $user);
-            case self::EDITASSOCIATIONS:
-                return $this->canEditAssociations($namespace, $user);
+            case self::ADDASSOCIATIONS:
+                return $this->canAddAssociations($namespace, $user);
             case self::DELETEASSOCIATIONS:
                 return $this->canDeleteAssociations($namespace, $user);
             case self::VALIDATE:
@@ -185,7 +185,7 @@ class OntoNamespaceVoter extends Voter
      * @param User $user
      * @return bool TRUE if $user and $namespace have matching namespace (thanks to the $userProjectAssociation) and $user is a project manager
      */
-    private function canEditAssociations(OntoNamespace $namespace, User $user)
+    private function canAddAssociations(OntoNamespace $namespace, User $user)
     {
         // Condition 1 : ce namespace est référencé par le namespace du projet actif ?
         // Condition 2 : le namespace du projet actif est ongoing
@@ -217,23 +217,6 @@ class OntoNamespaceVoter extends Voter
             }
         }
 
-        return false;
-    }
-
-    /**
-     * @param OntoNamespace $namespace
-     * @param User $user
-     * @return bool TRUE if $user and $namespace have matching namespace (thanks to the $userProjectAssociation) and $user is a project manager
-     */
-    private function canDeleteAssociations(OntoNamespace $namespace, User $user)
-    {
-        foreach($user->getUserProjectAssociations()->getIterator() as $i => $userProjectAssociation) {
-            if($userProjectAssociation->getProject() === $namespace->getProjectForTopLevelNamespace() && $userProjectAssociation->getPermission() <= 2){
-                if($namespace->getIsOngoing() && count($namespace->getTopLevelNamespace()->getChildVersions()) <= 1){
-                    return true;
-                }
-            }
-        }
         return false;
     }
 }

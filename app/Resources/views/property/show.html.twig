@@ -767,7 +767,7 @@
                 </table>
             </div>
             <div id="property-hierarchy" class="tab-pane fade">
-                {% if is_granted('edit_associations', propertyVersion.namespaceForVersion) %}
+                {% if is_granted('add_associations', propertyVersion.namespaceForVersion) %}
                 <div class="pull-right add-div">
                     <a href="{{ path('new_parent_property_form', {'childProperty': propertyVersion.property.id}) }}" class="btn btn-primary pull-right">Add <span class="fa fa-plus-circle"></span></a>
                 </div>
@@ -792,6 +792,8 @@
                         <th>Justification</th>
                         <th>Relation namespace</th>
                         <th>View details</th>
+                        <th>Edit</th>
+                        <th>Delete</th>
                         <th>Comments</th>
                         {% if propertyVersion.namespaceForVersion.isOngoing %}
                             <th>Validation</th>
@@ -911,13 +913,20 @@
                                     {% endfor %}
                                 {% endif %}
                             </td>
-
                             <td>{{ association.namespaceForVersion }}</td>
-
                             <td>
                                 <a href="{{ path('property_association_show', {'id': association.id}) }}"><span class="fa fa-info-circle"></span></a>
                             </td>
-
+                            <td>
+                                {% if is_granted('edit', association) %}
+                                    <a href="{{ path('property_association_edit', {'id': association.id}) }}" class="btn btn-xs btn-success"><span class="fa fa-edit"></span></a>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if is_granted('delete', association) %}
+                                    <a href="#property-hierarchy" class="btn btn-xs btn-danger btn-delete-association" data-id="{{ association.id }}" data-type="propertyAssociation"><span class="fa fa-trash-alt"></span></a>
+                                {% endif %}
+                            </td>
                             <td>
                                 <a class="btn updateViewComment" href="{{ path('property_association_show', {
                                     'id': association.id
@@ -1136,7 +1145,7 @@
                 </table>
             </div>
             <div id="relations" class="tab-pane fade">
-                {% if is_granted('edit_associations', propertyVersion.namespaceForVersion) %}
+                {% if is_granted('add_associations', propertyVersion.namespaceForVersion) %}
                     <div class="pull-right add-div">
                         <a href="{{ path('new_entity_association_form', {
                             'object': 'property',
@@ -1152,6 +1161,8 @@
                         <th>Justification</th>
                         <th>Relation namespace</th>
                         <th>View details</th>
+                        <th>Edit</th>
+                        <th>Delete</th>
                         <th>Comments</th>
                         {% if propertyVersion.namespaceForVersion.isOngoing %}
                             <th>Validation</th>
@@ -1225,6 +1236,28 @@
                                     }) }}">
                                         <span class="fa fa-info-circle"></span>
                                     </a>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if is_granted('edit', relation) %}
+                                    {% if propertyVersion.property.id == relation.sourceProperty.id %}
+                                        <a href="{{ path('entity_association_edit', {
+                                            'id': relation.id
+                                        }) }}" class="btn btn-xs btn-success">
+                                            <span class="fa fa-edit"></span>
+                                        </a>
+                                    {% else %}
+                                        <a href="{{ path('entity_association_inverse_edit', {
+                                            'id': relation.id
+                                        }) }}" class="btn btn-xs btn-success">
+                                            <span class="fa fa-edit"></span>
+                                        </a>
+                                    {% endif %}
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if is_granted('delete', relation) %}
+                                    <a href="#relations" class="btn btn-xs btn-danger btn-delete-association" data-id="{{ relation.id }}" data-type="entityAssociation"><span class="fa fa-trash-alt"></span></a>
                                 {% endif %}
                             </td>
                             <td>
@@ -1409,6 +1442,49 @@
                 });
             });
         } );
+        $(document).on("click", ".btn-delete-association", function(){
+            var associationId = $(this).data("id");
+            var associationType = $(this).data("type");
+            bootbox.confirm({
+                message: "You are about to delete a relation between two properties. This operation cannot be undone. Do you wish to proceed?",
+                title: '<i class="fas fa-exclamation-triangle"></i> Warning',
+                buttons: {
+                    confirm: {
+                        label: 'Yes',
+                        className: 'btn-success'
+                    },
+                    cancel: {
+                        label: 'No',
+                        className: 'btn-danger'
+                    }
+                },
+                callback: function (result) {
+                    if(result){
+                        if(associationType == "propertyAssociation")
+                        {
+                            var url = '{{ path("property_association_delete", {'id' : 'associationId'}) }}';
+                        }
+                        if(associationType == "entityAssociation")
+                        {
+                            var url = '{{ path("entity_association_delete", {'id' : 'associationId'}) }}';
+                        }
+                        url = url.replace("associationId", associationId);
+                        $.ajax({
+                            url: url,
+                            type: 'DELETE',
+                            dataType: 'json',
+                            success:function(data){
+                            },
+                            statusCode: {
+                                204: function () {
+                                    window.location.reload();
+                                }
+                            }
+                        });
+                    }
+                }
+            });
+        });
     </script>
     {% include 'comment/js-bock.html.twig'  with {'objectType': 'property-version', 'objectId' : propertyVersion.id  } %}
 

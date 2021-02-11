@@ -32,7 +32,7 @@ class PropertyAssociationController extends Controller
     {
         $propertyAssociation = new PropertyAssociation();
 
-        $this->denyAccessUnlessGranted('edit', $childProperty->getPropertyVersionForDisplay());
+        $this->denyAccessUnlessGranted('add_associations', $childProperty->getPropertyVersionForDisplay()->getNamespaceForVersion());
 
 
         $em = $this->getDoctrine()->getManager();
@@ -162,7 +162,7 @@ class PropertyAssociationController extends Controller
             throw $this->createNotFoundException('The property n°'.$propertyAssociation->getChildProperty()->getId().' has no version. Please contact an administrator.');
         }
 
-        $this->denyAccessUnlessGranted('edit', $childPropertyVersion);
+        $this->denyAccessUnlessGranted('edit', $propertyAssociation);
 
         $em = $this->getDoctrine()->getManager();
 
@@ -207,8 +207,10 @@ class PropertyAssociationController extends Controller
             $em->persist($propertyAssociation);
             $em->flush();
 
-            return $this->redirectToRoute('property_association_edit', [
-                'id' => $propertyAssociation->getId()
+            return $this->redirectToRoute('property_show_with_version', [
+                'id' => $propertyAssociation->getChildProperty()->getId(),
+                'namespaceFromUrlId' => $propertyAssociation->getChildProperty()->getPropertyVersionForDisplay()->getNamespaceForVersion(),
+                '_fragment' => 'property-hierarchy'
             ]);
 
         }
@@ -229,7 +231,7 @@ class PropertyAssociationController extends Controller
      */
     public function deleteAction(Request $request, PropertyAssociation $propertyAssociation)
     {
-        $this->denyAccessUnlessGranted('delete_associations', $propertyAssociation->getNamespaceForVersion());
+        $this->denyAccessUnlessGranted('delete', $propertyAssociation);
 
         $em = $this->getDoctrine()->getManager();
         foreach($propertyAssociation->getTextProperties() as $textProperty)

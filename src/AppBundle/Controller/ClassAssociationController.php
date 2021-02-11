@@ -33,7 +33,7 @@ class ClassAssociationController extends Controller
     {
         $classAssociation = new ClassAssociation();
 
-        $this->denyAccessUnlessGranted('edit_associations', $childClass->getClassVersionForDisplay()->getNamespaceForVersion());
+        $this->denyAccessUnlessGranted('add_associations', $childClass->getClassVersionForDisplay()->getNamespaceForVersion());
 
         $em = $this->getDoctrine()->getManager();
         $systemTypeJustification = $em->getRepository('AppBundle:SystemType')->find(15); //systemType 15 = justification
@@ -152,7 +152,7 @@ class ClassAssociationController extends Controller
             throw $this->createNotFoundException('The class n°'.$classAssociation->getChildClass()->getId().' has no version. Please contact an administrator.');
         }
 
-        $this->denyAccessUnlessGranted('edit', $childClassVersion);
+        $this->denyAccessUnlessGranted('edit', $classAssociation);
 
         $em = $this->getDoctrine()->getManager();
 
@@ -180,8 +180,9 @@ class ClassAssociationController extends Controller
             $em->persist($classAssociation);
             $em->flush();
 
-            return $this->redirectToRoute('class_edit', [
+            return $this->redirectToRoute('class_show_with_version', [
                 'id' => $classAssociation->getChildClass()->getId(),
+                'namespaceFromUrlId' => $classAssociation->getChildClass()->getClassVersionForDisplay()->getNamespaceForVersion(),
                 '_fragment' => 'class-hierarchy'
             ]);
         }
@@ -258,7 +259,7 @@ class ClassAssociationController extends Controller
      */
     public function deleteAction(Request $request, ClassAssociation $classAssociation)
     {
-        $this->denyAccessUnlessGranted('delete_associations', $classAssociation->getNamespaceForVersion());
+        $this->denyAccessUnlessGranted('delete', $classAssociation);
 
         $em = $this->getDoctrine()->getManager();
         foreach($classAssociation->getTextProperties() as $textProperty)

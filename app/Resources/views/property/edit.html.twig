@@ -839,9 +839,11 @@
                 </table>
             </div>
             <div id="property-hierarchy" class="tab-pane fade">
-                <div class="pull-right add-div">
-                    <a href="{{ path('new_parent_property_form', {'childProperty': propertyVersion.property.id}) }}" class="btn btn-primary pull-right">Add <span class="fa fa-plus-circle"></span></a>
-                </div>
+                {% if is_granted('add_associations', propertyVersion.namespaceForVersion) %}
+                    <div class="pull-right add-div">
+                        <a href="{{ path('new_parent_property_form', {'childProperty': propertyVersion.property.id}) }}" class="btn btn-primary pull-right">Add <span class="fa fa-plus-circle"></span></a>
+                    </div>
+                {% endif %}
                 <h3>Parent properties
                     {% set tooltipProperty = "rdfs:subpropertyOf the property below" %}
                     {% if propertyVersion.property.childPropertyAssociations|length > 1  %}
@@ -861,6 +863,7 @@
                         <th>Range</th>
                         <th>Justification</th>
                         <th>Relation namespace</th>
+                        <th>View details</th>
                         <th>Edit</th>
                         <th>Delete</th>
                         <th>Comments</th>
@@ -982,12 +985,16 @@
                             </td>
 
                             <td>{{ association.namespaceForVersion }}</td>
-
                             <td>
-                                <a href="{{ path('property_association_edit', {'id': association.id}) }}" class="btn btn-xs btn-success"><span class="fa fa-edit"></span></a>
+                                <a href="{{ path('property_association_show', {'id': association.id}) }}"><span class="fa fa-info-circle"></span></a>
                             </td>
                             <td>
-                                {% if is_granted('delete_associations', propertyVersion.namespaceForVersion) %}
+                                {% if is_granted('edit', association) %}
+                                <a href="{{ path('property_association_edit', {'id': association.id}) }}" class="btn btn-xs btn-success"><span class="fa fa-edit"></span></a>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if is_granted('delete', association) %}
                                 <a href="#property-hierarchy" class="btn btn-xs btn-danger btn-delete-association" data-id="{{ association.id }}" data-type="propertyAssociation"><span class="fa fa-trash-alt"></span></a>
                                 {% endif %}
                             </td>
@@ -1209,7 +1216,7 @@
                 </table>
             </div>
             <div id="relations" class="tab-pane fade">
-                {% if is_granted('edit_associations', propertyVersion.namespaceForVersion) %}
+                {% if is_granted('add_associations', propertyVersion.namespaceForVersion) %}
                     <div class="pull-right add-div">
                         <a href="{{ path('new_entity_association_form', {
                             'object': 'property',
@@ -1224,6 +1231,7 @@
                         <th>Property</th>
                         <th>Justification</th>
                         <th>Relation namespace</th>
+                        <th>View details</th>
                         <th>Edit</th>
                         <th>Delete</th>
                         <th>Comments</th>
@@ -1286,21 +1294,38 @@
                             <td>{{ relation.namespaceForVersion.topLevelNamespace }}</td>
                             <td>
                                 {% if propertyVersion.property.id == relation.sourceProperty.id %}
-                                    <a href="{{ path('entity_association_edit', {
+                                    <a href="{{ path('entity_association_show', {
                                         'id': relation.id
-                                    }) }}" class="btn btn-xs btn-success">
-                                        <span class="fa fa-edit"></span>
+                                    }) }}">
+                                        <span class="fa fa-info-circle"></span>
                                     </a>
                                 {% else %}
-                                    <a href="{{ path('entity_association_inverse_edit', {
+                                    <a href="{{ path('entity_association_inverse_show', {
                                         'id': relation.id
-                                    }) }}" class="btn btn-xs btn-success">
-                                        <span class="fa fa-edit"></span>
+                                    }) }}">
+                                        <span class="fa fa-info-circle"></span>
                                     </a>
                                 {% endif %}
                             </td>
                             <td>
-                                {% if is_granted('delete_associations', relation.namespaceForVersion) %}
+                                {% if is_granted('edit', relation) %}
+                                    {% if propertyVersion.property.id == relation.sourceProperty.id %}
+                                        <a href="{{ path('entity_association_edit', {
+                                            'id': relation.id
+                                        }) }}" class="btn btn-xs btn-success">
+                                            <span class="fa fa-edit"></span>
+                                        </a>
+                                    {% else %}
+                                        <a href="{{ path('entity_association_inverse_edit', {
+                                            'id': relation.id
+                                        }) }}" class="btn btn-xs btn-success">
+                                            <span class="fa fa-edit"></span>
+                                        </a>
+                                    {% endif %}
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if is_granted('delete', relation) %}
                                 <a href="#relations" class="btn btn-xs btn-danger btn-delete-association" data-id="{{ relation.id }}" data-type="entityAssociation"><span class="fa fa-trash-alt"></span></a>
                                 {% endif %}
                             </td>

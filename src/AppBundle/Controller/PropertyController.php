@@ -67,7 +67,7 @@ class PropertyController extends Controller
         //get the right version of the class
         $classVersion = $class->getClassVersionForDisplay();
 
-        $this->denyAccessUnlessGranted('edit_associations', $classVersion->getNamespaceForVersion());
+        $this->denyAccessUnlessGranted('add_associations', $classVersion->getNamespaceForVersion());
 
         if($type !== 'ingoing' && $type !== 'outgoing') throw $this->createNotFoundException('The requested property type "'.$type.'" does not exist!');
 
@@ -77,7 +77,7 @@ class PropertyController extends Controller
 
         $propertyVersion = new PropertyVersion();
         $propertyVersion->setProperty($property);
-        $propertyVersion->setNamespaceForVersion($classVersion->getNamespaceForVersion());
+        $propertyVersion->setNamespaceForVersion($this->getUser()->getCurrentOngoingNamespace());
         $propertyVersion->setCreator($this->getUser());
         $propertyVersion->setModifier($this->getUser());
         $propertyVersion->setCreationTime(new \DateTime('now'));

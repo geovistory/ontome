@@ -972,7 +972,6 @@
                 <table class="table table-striped" id="mismatches-table">
                     <thead>
                     <tr>
-                        <th>Show</th>
                         <th>Type of relation</th>
                         <th>Entity</th>
                         <th>Namespace</th>
@@ -996,11 +995,8 @@
                                     'id': classAssociation.childClass.id,
                                     'namespaceFromUrlId': classAssociation.childClassNamespace.id,
                                     '_fragment': 'class-hierarchy'
-                                }) }}">
-                                    <span class="glyphicon glyphicon-eye-open"></span>
-                                </a>
+                                }) }}">hierarchy (rdfs:subclassOf)</a>
                             </td>
-                            <td>hierarchy (rdfs:subclassOf)</td>
                             <td>{{ classAssociation.parentClass.classVersionForDisplay(classAssociation.parentClassNamespace) }}</td>
                             <td>{{ classAssociation.parentClassNamespace }}</td>
                             <td>{{ errorType }}</td>
@@ -1021,11 +1017,8 @@
                                     'id': classAssociation.parentClass.id,
                                     'namespaceFromUrlId': classAssociation.parentClassNamespace.id,
                                     '_fragment': 'class-hierarchy'
-                                }) }}">
-                                    <span class="glyphicon glyphicon-eye-open"></span>
-                                </a>
+                                }) }}">hierarchy (rdfs:subclassOf)</a>
                             </td>
-                            <td>hierarchy (rdfs:subclassOf)</td>
                             <td>{{ classAssociation.childClass.classVersionForDisplay(classAssociation.childClassNamespace) }}</td>
                             <td>{{ classAssociation.childClassNamespace }}</td>
                             <td>{{ errorType }}</td>
@@ -1046,11 +1039,8 @@
                                     'id': propertyAssociation.childProperty.id,
                                     'namespaceFromUrlId': propertyAssociation.childPropertyNamespace.id,
                                     '_fragment': 'property-hierarchy'
-                                }) }}">
-                                    <span class="glyphicon glyphicon-eye-open"></span>
-                                </a>
+                                }) }}">hierarchy (rdfs:subpropertyOf)</a>
                             </td>
-                            <td>hierarchy (rdfs:subpropertyOf)</td>
                             <td>{{ propertyAssociation.parentProperty.propertyVersionForDisplay(propertyAssociation.parentPropertyNamespace) }}</td>
                             <td>{{ propertyAssociation.parentPropertyNamespace }}</td>
                             <td>{{ errorType }}</td>
@@ -1071,11 +1061,8 @@
                                     'id': propertyAssociation.parentProperty.id,
                                     'namespaceFromUrlId': propertyAssociation.parentPropertyNamespace.id,
                                     '_fragment': 'property-hierarchy'
-                                }) }}">
-                                    <span class="glyphicon glyphicon-eye-open"></span>
-                                </a>
+                                }) }}">hierarchy (rdfs:subpropertyOf)</a>
                             </td>
-                            <td>hierarchy (rdfs:subpropertyOf)</td>
                             <td>{{ propertyAssociation.childProperty.propertyVersionForDisplay(propertyAssociation.childPropertyNamespace) }}</td>
                             <td>{{ propertyAssociation.childPropertyNamespace }}</td>
                             <td>{{ errorType }}</td>
@@ -1097,11 +1084,8 @@
                                     'id': property.id,
                                     'namespaceFromUrlId': namespace.id,
                                     '_fragment': 'identification'
-                                }) }}">
-                                    <span class="glyphicon glyphicon-eye-open"></span>
-                                </a>
+                                }) }}">domain class (rdfs:domain)</a>
                             </td>
-                            <td>domain class (rdfs:domain)</td>
                             <td>{{ property.propertyVersionForDisplay(namespace).domain.classVersionForDisplay(property.propertyVersionForDisplay(namespace).domainNamespace) }}</td>
                             <td>{{ property.propertyVersionForDisplay(namespace).domainNamespace }}</td>
                             <td>{{ errorType }}</td>
@@ -1123,11 +1107,8 @@
                                     'id': property.id,
                                     'namespaceFromUrlId': namespace.id,
                                     '_fragment': 'identification'
-                                }) }}">
-                                    <span class="glyphicon glyphicon-eye-open"></span>
-                                </a>
+                                }) }}">range class (rdfs:range)</a>
                             </td>
-                            <td>range class (rdfs:range)</td>
                             <td>{{ property.propertyVersionForDisplay(namespace).range.classVersionForDisplay(property.propertyVersionForDisplay(namespace).rangeNamespace) }}</td>
                             <td>{{ property.propertyVersionForDisplay(namespace).rangeNamespace }}</td>
                             <td>{{ errorType }}</td>
@@ -1149,11 +1130,8 @@
                                         'id': entityAssociation.targetClass.id,
                                         'namespaceFromUrlId': entityAssociation.targetNamespaceForVersion.id,
                                         '_fragment': 'relations'
-                                    }) }}">
-                                        <span class="glyphicon glyphicon-eye-open"></span>
-                                    </a>
+                                    }) }}">{{ entityAssociation.systemType }}</a>
                                 </td>
-                                <td>{{ entityAssociation.systemType }}</td>
                                 <td>{{ entityAssociation.sourceClass.classVersionForDisplay(entityAssociation.sourceNamespaceForVersion) }}</td>
                                 <td>{{ entityAssociation.sourceNamespaceForVersion }}</td>
                                 <td>{{ errorType }}</td>
@@ -1171,11 +1149,8 @@
                                         'id': entityAssociation.targetProperty.id,
                                         'namespaceFromUrlId': entityAssociation.targetNamespaceForVersion.id,
                                         '_fragment': 'relations'
-                                    }) }}">
-                                        <span class="glyphicon glyphicon-eye-open"></span>
-                                    </a>
+                                    }) }}">{{ entityAssociation.systemType }}</a>
                                 </td>
-                                <td>{{ entityAssociation.systemType }}</td>
                                 <td>{{ entityAssociation.sourceProperty.propertyVersionForDisplay(entityAssociation.sourceNamespaceForVersion) }}</td>
                                 <td>{{ entityAssociation.sourceNamespaceForVersion }}</td>
                                 <td>{{ errorType }}</td>
@@ -1198,11 +1173,8 @@
                                         'id': entityAssociation.sourceClass.id,
                                         'namespaceFromUrlId': entityAssociation.sourceNamespaceForVersion.id,
                                         '_fragment': 'relations'
-                                    }) }}">
-                                        <span class="glyphicon glyphicon-eye-open"></span>
-                                    </a>
+                                    }) }}">{{ entityAssociation.systemType }}</a>
                                 </td>
-                                <td>{{ entityAssociation.systemType }}</td>
                                 <td>{{ entityAssociation.targetClass.classVersionForDisplay(entityAssociation.targetNamespaceForVersion) }}</td>
                                 <td>{{ entityAssociation.targetNamespaceForVersion }}</td>
                                 <td>{{ errorType }}</td>
@@ -1220,11 +1192,8 @@
                                         'id': entityAssociation.sourceProperty.id,
                                         'namespaceFromUrlId': entityAssociation.sourceNamespaceForVersion.id,
                                         '_fragment': 'relations'
-                                    }) }}">
-                                        <span class="glyphicon glyphicon-eye-open"></span>
-                                    </a>
+                                    }) }}">{{ entityAssociation.systemType }}</a>
                                 </td>
-                                <td>{{ entityAssociation.systemType }}</td>
                                 <td>{{ entityAssociation.targetProperty.propertyVersionForDisplay(entityAssociation.targetNamespaceForVersion) }}</td>
                                 <td>{{ entityAssociation.targetNamespaceForVersion }}</td>
                                 <td>{{ errorType }}</td>
