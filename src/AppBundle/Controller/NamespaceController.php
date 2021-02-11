@@ -321,6 +321,7 @@ class NamespaceController  extends Controller
         $newNamespaceLabel->setLabel(str_replace(' ongoing','',$namespace->getStandardLabel()));
 
         $newNamespace->addLabel($newNamespaceLabel);
+        $newNamespace->setStandardLabel($newNamespaceLabel->getLabel());
 
         $namespace->setNamespaceURI((str_replace('-ongoing','',$namespace->getNamespaceURI()).'-ongoing'));
 

@@ -658,6 +658,14 @@ class OntoNamespace
     }
 
     /**
+     * @param mixed $standardLabel
+     */
+    public function setStandardLabel($standardLabel)
+    {
+        $this->standardLabel = $standardLabel;
+    }
+
+    /**
      * @param mixed $originalNamespaceURI
      */
     public function setOriginalNamespaceURI($originalNamespaceURI)
