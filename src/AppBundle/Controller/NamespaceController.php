@@ -135,7 +135,7 @@ class NamespaceController  extends Controller
             $ongoingNamespace->setModificationTime(new \DateTime('now'));
 
             $ongoingNamespaceLabel->setIsStandardLabelForLanguage(true);
-            $ongoingNamespaceLabel->setLabel($namespaceLabel->getLabel().' ongoing');
+            $ongoingNamespaceLabel->setLabel($namespaceLabel->getLabel());
             $ongoingNamespaceLabel->setLanguageIsoCode($namespaceLabel->getLanguageIsoCode());
             $ongoingNamespaceLabel->setCreator($this->getUser());
             $ongoingNamespaceLabel->setModifier($this->getUser());
