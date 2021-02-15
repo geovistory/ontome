@@ -112,16 +112,18 @@ class NamespaceController  extends Controller
             $namespace->setModifier($this->getUser());
             $namespace->setCreationTime(new \DateTime('now'));
             $namespace->setModificationTime(new \DateTime('now'));
-
-            $labelForURI = strtolower(preg_replace("/[^A-Za-z0-9\-]/", '-', $namespaceLabel->getLabel()));
-            //$labelForURI = strtolower(str_replace(' ', '-', $namespaceLabel->getLabel()));
-
-            $namespace->setNamespaceURI($labelForURI);
             $namespace->setIsTopLevelNamespace(true);
             $namespace->setIsOngoing(false);
 
+            //just in case, we set the domain to ontome.net for non external namespaces
+            if (!$namespace->getIsExternalNamespace) {
+                $u = parse_url($namespace->getNamespaceURI());
+                $uri = 'https://ontome.net'.$u['path'];
+                $namespace->setNamespaceURI($uri);
+            }
 
-            $ongoingNamespace->setNamespaceURI($labelForURI.'-ongoing');
+
+            $ongoingNamespace->setNamespaceURI($namespace->getNamespaceURI().'-ongoing');
             $ongoingNamespace->setIsTopLevelNamespace(false);
             $ongoingNamespace->setIsOngoing(true);
             $ongoingNamespace->setTopLevelNamespace($namespace);

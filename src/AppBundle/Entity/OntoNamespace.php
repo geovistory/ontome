@@ -29,14 +29,16 @@ class OntoNamespace
     private $id;
 
     /**
+     * @Assert\Url()
      * @Assert\NotBlank()
-     * @Assert\Regex(
-     *     pattern="/^[a-z0-9\-]+$/",
-     *     message="The characters string for this namspace's OntoME URI must contain only lower case non accent letters and dash"
-     * )
      * @ORM\Column(type="text", nullable=true, unique=true)
      */
     private $namespaceURI;
+
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    private $isExternalNamespace;
 
     /**
      * @Assert\Url()
@@ -151,7 +153,8 @@ class OntoNamespace
     private $labels;
 
     /**
-     * @Assert\NotBlank()
+     * @Assert\Valid()
+     * @Assert\NotNull()
      * @ORM\OneToMany(targetEntity="AppBundle\Entity\TextProperty", mappedBy="namespace", cascade={"persist"})
      * @ORM\OrderBy({"languageIsoCode" = "ASC"})
      */
@@ -395,6 +398,14 @@ class OntoNamespace
     public function getIsTopLevelNamespace()
     {
         return $this->isTopLevelNamespace;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getIsExternalNamespace()
+    {
+        return $this->isExternalNamespace;
     }
 
     /**
@@ -655,6 +666,14 @@ class OntoNamespace
     public function setNamespaceURI($namespaceURI)
     {
         $this->namespaceURI = $namespaceURI;
+    }
+
+    /**
+     * @param mixed $isExternalNamespace
+     */
+    public function setIsExternalNamespace($isExternalNamespace)
+    {
+        $this->isExternalNamespace = $isExternalNamespace;
     }
 
     /**
