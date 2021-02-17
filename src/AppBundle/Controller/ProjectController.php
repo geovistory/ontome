@@ -318,11 +318,16 @@ class ProjectController  extends Controller
         $this->denyAccessUnlessGranted('edit_manager', $userProjectAssociation->getProject());
         try {
             $em = $this->getDoctrine()->getManager();
+            $entityUserProjectsAssociations = $em->getRepository('AppBundle:EntityUserProjectAssociation')
+                ->findBy(array('userProjectAssociation' => $userProjectAssociation->getId()));
+            foreach ($entityUserProjectsAssociations as $eupa){
+                $em->remove($eupa);
+            }
             $em->remove($userProjectAssociation);
             $em->flush();
         }
         catch (\Exception $e) {
-            return new JsonResponse(null, 400, 'content-type:application/problem+json');
+            return new JsonResponse($e->getMessage(), 400, array('content-type:application/problem+json'));
         }
         return new JsonResponse(null, 204);
 

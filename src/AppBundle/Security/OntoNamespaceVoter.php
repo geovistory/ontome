@@ -204,6 +204,10 @@ class OntoNamespaceVoter extends Voter
             }
         }
 
+        if(is_null($activeNamespace)){
+            return false;
+        }
+
         foreach($user->getUserProjectAssociations()->getIterator() as $i => $userProjectAssociation) {
             if($userProjectAssociation->getProject() === $activeNamespace->getProjectForTopLevelNamespace() && $userProjectAssociation->getPermission() <= 2){
                 if(($activeNamespace->getIsOngoing() && $namespace === $activeNamespace)){

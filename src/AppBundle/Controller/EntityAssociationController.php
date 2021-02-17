@@ -79,10 +79,10 @@ class EntityAssociationController extends Controller
         $entityAssociation->addTextProperty($justification);
 
         // Filtrage
-        $namespacesId[] = $namespaceForEntityVersion->getId();
+        $namespacesId[] = $this->getUser()->getCurrentOngoingNamespace()->getId();
 
         // Sans oublier les namespaces références si indisponibles
-        foreach($namespaceForEntityVersion->getReferencedNamespaceAssociations() as $referencedNamespacesAssociation){
+        foreach($this->getUser()->getCurrentOngoingNamespace()->getReferencedNamespaceAssociations() as $referencedNamespacesAssociation){
             if(!in_array($referencedNamespacesAssociation->getReferencedNamespace()->getId(), $namespacesId)){
                 $namespacesId[] = $referencedNamespacesAssociation->getReferencedNamespace()->getId();
             }
@@ -227,10 +227,10 @@ class EntityAssociationController extends Controller
         $this->denyAccessUnlessGranted('edit', $entityAssociation);
 
         // FILTRAGE
-        $namespacesId[] = $namespaceForEntityVersion->getId();
+        $namespacesId[] = $this->getUser()->getCurrentOngoingNamespace()->getId();
 
         // Sans oublier les namespaces références si indisponibles
-        foreach($namespaceForEntityVersion->getReferencedNamespaceAssociations() as $referencedNamespacesAssociation){
+        foreach($this->getUser()->getCurrentOngoingNamespace()->getReferencedNamespaceAssociations() as $referencedNamespacesAssociation){
             if(!in_array($referencedNamespacesAssociation->getReferencedNamespace()->getId(), $namespacesId)){
                 $namespacesId[] = $referencedNamespacesAssociation->getReferencedNamespace()->getId();
             }

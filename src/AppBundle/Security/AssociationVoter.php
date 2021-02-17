@@ -64,8 +64,9 @@ class AssociationVoter extends Voter
      */
     private function canEdit($association, User $user)
     {
+        if(is_null($user->getCurrentOngoingNamespace())){return false;}
         foreach($user->getUserProjectAssociations()->getIterator() as $i => $userProjectAssociation) {
-            if($userProjectAssociation->getProject() === $association->getNamespaceForVersion()->getProjectForTopLevelNamespace() && $userProjectAssociation->getPermission() <= 2){
+            if($userProjectAssociation->getProject() === $association->getNamespaceForVersion()->getProjectForTopLevelNamespace() && $userProjectAssociation->getPermission() <= 2 && $user->getCurrentOngoingNamespace()->getProjectForTopLevelNamespace() === $association->getNamespaceForVersion()->getProjectForTopLevelNamespace()){
                 return true;
             }
         }
@@ -79,8 +80,9 @@ class AssociationVoter extends Voter
      */
     private function canDelete($association, User $user)
     {
+        if(is_null($user->getCurrentOngoingNamespace())){return false;}
         foreach($user->getUserProjectAssociations()->getIterator() as $i => $userProjectAssociation) {
-            if($userProjectAssociation->getProject() === $association->getNamespaceForVersion()->getProjectForTopLevelNamespace() && $userProjectAssociation->getPermission() <= 2){
+            if($userProjectAssociation->getProject() === $association->getNamespaceForVersion()->getProjectForTopLevelNamespace() && $userProjectAssociation->getPermission() <= 2 && $user->getCurrentOngoingNamespace()->getProjectForTopLevelNamespace() === $association->getNamespaceForVersion()->getProjectForTopLevelNamespace()){
                 if($association->getNamespaceForVersion()->getIsOngoing() && count($association->getNamespaceForVersion()->getTopLevelNamespace()->getChildVersions()) <= 1){
                     return true;
                 }

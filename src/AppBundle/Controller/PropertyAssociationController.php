@@ -52,11 +52,12 @@ class PropertyAssociationController extends Controller
         $propertyAssociation->setChildProperty($childProperty);
 
         // FILTRAGE
-        $namespaceForChildPropertyVersion = $childProperty->getPropertyVersionForDisplay()->getNamespaceForVersion();
-        $namespacesId[] = $namespaceForChildPropertyVersion->getId();
+        //$namespaceForChildPropertyVersion = $childProperty->getPropertyVersionForDisplay()->getNamespaceForVersion();
+        //$namespacesId[] = $namespaceForChildPropertyVersion->getId();
+        $namespacesId[] = $this->getUser()->getCurrentOngoingNamespace()->getId();
 
         // Sans oublier les namespaces références si indisponibles
-        foreach($namespaceForChildPropertyVersion->getReferencedNamespaceAssociations() as $referencedNamespacesAssociation){
+        foreach($this->getUser()->getCurrentOngoingNamespace()->getReferencedNamespaceAssociations() as $referencedNamespacesAssociation){
             if(!in_array($referencedNamespacesAssociation->getReferencedNamespace()->getId(), $namespacesId)){
                 $namespacesId[] = $referencedNamespacesAssociation->getReferencedNamespace()->getId();
             }

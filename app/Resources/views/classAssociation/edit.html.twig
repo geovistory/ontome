@@ -12,7 +12,7 @@
     <div class="container">
         <h2 class="class-name">
             {{ classAssociation }}
-            <a href="{{ path('class_edit', {
+            <a href="{{ path('class_show', {
                 'id': classAssociation.childClass.id,
                 '_fragment': 'class-hierarchy'
             }) }}" class="pull-right btn btn-link">

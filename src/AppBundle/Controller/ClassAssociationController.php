@@ -53,7 +53,8 @@ class ClassAssociationController extends Controller
 
         // Filtrage
         // On n'utilise pas les espaces de noms additionnels.
-        $namespacesId = $childClass->getClassVersionForDisplay()->getNamespaceForVersion()->getSelectedNamespacesId();
+        //$namespacesId = $childClass->getClassVersionForDisplay()->getNamespaceForVersion()->getSelectedNamespacesId();
+        $namespacesId = $this->getUser()->getCurrentOngoingNamespace()->getSelectedNamespacesId();
 
         $arrayClassesVersion = $em->getRepository('AppBundle:OntoClassVersion')
             ->findIdAndStandardLabelOfClassesVersionByNamespacesId($namespacesId);
@@ -158,7 +159,8 @@ class ClassAssociationController extends Controller
 
         // Filtrage
         // On n'utilise pas les espaces de noms additionnels.
-        $namespacesId = $childClassVersion->getNamespaceForVersion()->getSelectedNamespacesId();
+        //$namespacesId = $childClassVersion->getNamespaceForVersion()->getSelectedNamespacesId();
+        $namespacesId = $this->getUser()->getCurrentOngoingNamespace()->getSelectedNamespacesId();
 
         $arrayClassesVersion = $em->getRepository('AppBundle:OntoClassVersion')
             ->findIdAndStandardLabelOfClassesVersionByNamespacesId($namespacesId);

@@ -16,7 +16,7 @@
                 {% elseif entityAssociation.sourceObjectType == "property" %}
                     {{ entityAssociation.source.propertyVersionForDisplay() }}: {{ entityAssociation.systemType.standardLabel }}
                  {% endif %}
-                <a href="{{ path(entityAssociation.sourceObjectType~'_edit', {
+                <a href="{{ path(entityAssociation.sourceObjectType~'_show', {
                     id: entityAssociation.source.id,
                     '_fragment': "relations"
                 }) }}" class="pull-right btn btn-link">
