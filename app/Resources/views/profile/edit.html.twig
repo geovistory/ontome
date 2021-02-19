@@ -27,6 +27,16 @@
         <div id="summary" class="tab-pane fade in active">
             <h3>{{ profile.standardLabel }}</h3>
             <div class="container">
+                {% if not is_granted('publish', profile) %}
+                    <div class="row">
+                        <div class="col-lg-2">
+                            <p class="text-danger"><i class="fas fa-exclamation-triangle"></i> Warning:</p>
+                        </div>
+                        <div class="col-lg-10">
+                            <p class="text-danger">This profile comprises classes and/or properties of a namespace whose version is not the selected one. They are displayed in red in your profile. Please make the necessary corrections before proceeding.</p>
+                        </div>
+                    </div>
+                {% endif %}
                 <div class="row">
                     <div class="col-lg-2">
                         <p>Description:</p>
@@ -143,13 +153,17 @@
         </div>
         <div id="identification" class="tab-pane fade">
             <h3>Identification</h3>
-
+            {% if not is_granted('publish', profile) %}
+                <div class="alert alert-danger">
+                    <p><i class="fas fa-exclamation-triangle"></i>&nbsp;This profile comprises classes and/or properties of a namespace whose version is not the selected one. They are displayed in red in your profile. Please make the necessary corrections before proceeding.</p>
+                </div>
+            {% endif %}
             <div class="object-identification-edit-form">
                 {% if profile.isOngoing and is_granted('full_edit', profile.projectOfBelonging) %}
                     {{ form_start(profileIdentificationForm) }}
                     {{ form_errors(profileIdentificationForm) }}
                     {{ form_row(profileIdentificationForm.projectOfBelonging) }}
-                    {{ form_row(profileIdentificationForm.isForcedPublication) }}
+                    {{ form_row(profileIdentificationForm.isForcedPublication, { 'attr':{'disabled':'disabled'} }) }}
                     <p><button type="submit" class="btn btn-primary" formnovalidate>Save <span class="far fa-save"></span></button>
                     <button type="button" class="btn btn-default" onclick="window.location.reload();">Cancel&nbsp;<i class="fas fa-undo-alt"></i></button></p>
                     {{ form_end(profileIdentificationForm) }}
@@ -163,9 +177,13 @@
                 </div>
                     {% if is_granted('full_edit', profile.projectOfBelonging) %}
                     <p>
+                        {% if is_granted('publish', profile) %}
                         <a class="btn btn-success" role="button" id="publish-btn">
                             Publish <i class="fas fa-check"></i>
                         </a>
+                        {% else %}
+                        <button type="button" class="btn btn-success" disabled="disabled">Publish <i class="fas fa-check"></i></button>
+                        {% endif %}
                     </p>
                     {% endif %}
                 {% elseif profile.wasClosedAt is not null and profile.endDate is null %}
@@ -504,9 +522,22 @@
                 </tr>
                 </thead>
                 <tbody>
+                {% set idNamespacesAssociatedInProfile = [] %}
+                {% for namespace in profile.namespaces %}
+                    {% set idNamespacesAssociatedInProfile = idNamespacesAssociatedInProfile|merge([namespace.id]) %}
+                {% endfor %}
                 {% for namespace in profile.namespaces %}
                     <tr>
-                        <td><a href="{{ path('namespace_show', {'id': namespace.id}) }}">{{ namespace }}</a></td>
+                        <td>
+                            <a href="{{ path('namespace_show', {'id': namespace.id}) }}">{{ namespace }}</a>
+                            {% for profileAssociation in profile.profileAssociations
+                                if (profileAssociation.class is not null or profileAssociation.property is not null)
+                                and profileAssociation.entityNamespaceForVersion.topLevelNamespace.id == namespace.topLevelNamespace.id
+                                and profileAssociation.entityNamespaceForVersion not in profile.namespaces%}
+                                {% if loop.first %}
+                                    <br><span class="text-danger"><i class="fas fa-exclamation-triangle"></i> Classes and/or properties from another version of this namespace, previously selected in your profile, are not available in the selected version. They are displayed in red in your profile. Please make the necessary corrections before proceeding.</span>
+                                {% endif %}
+                            {% endfor %}</td>
                         <td>
                             {% if namespace.topLevelNamespace.childVersions|length > 1 %}
                                 <a href="#namespaces" class="change-version btn btn-xs btn-primary" data-id="{{ namespace.id }}"><i class="fas fa-exchange-alt"></i> Change version</a>

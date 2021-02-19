@@ -34,6 +34,16 @@
             <div id="summary" class="tab-pane fade in active">
                 <h3>{{ profile.standardLabel }}</h3>
                 <div class="container">
+                    {% if not is_granted('publish', profile) %}
+                            <div class="row">
+                                <div class="col-lg-2">
+                                    <p class="text-danger"><i class="fas fa-exclamation-triangle"></i> Warning:</p>
+                                </div>
+                                <div class="col-lg-10">
+                                    <p class="text-danger">This profile comprises classes and/or properties of a namespace whose version is not the selected one. They are displayed in red in your profile. Please make the necessary corrections before proceeding.</p>
+                                </div>
+                            </div>
+                    {% endif %}
                     <div class="row">
                         <div class="col-lg-2">
                             <p>Description:</p>

@@ -233,7 +233,9 @@ class ProfileController  extends Controller
      * @return Response the rendered template
      */
     public function publishAction(Profile $profile, Request $request)
-    {
+        {
+        $this->denyAccessUnlessGranted('publish', $profile);
+
         if(is_null($profile)) {
             throw $this->createNotFoundException('The profile n° '.$profile->getId().' does not exist. Please contact an administrator.');
         }
@@ -426,7 +428,22 @@ class ProfileController  extends Controller
             foreach ($profile->getProfileAssociations() as $profileAssociation){
                 if($profileAssociation->getEntityNamespaceForVersion() == $associatedNamespace
                     and in_array($profileAssociation->getSystemType()->getId(),array(5,6))){
-                    $profileAssociation->setEntityNamespaceForVersion($newAssociatedNamespace);
+
+                    if(!is_null($profileAssociation->getClass())){
+                        foreach ($profileAssociation->getClass()->getClassVersions() as $classVersion){
+                            if($classVersion->getNamespaceForVersion() == $newAssociatedNamespace){
+                                $profileAssociation->setEntityNamespaceForVersion($newAssociatedNamespace);
+                            }
+                        }
+                    }
+
+                    if(!is_null($profileAssociation->getProperty())){
+                        foreach ($profileAssociation->getProperty()->getPropertyVersions() as $propertyVersion){
+                            if($propertyVersion->getNamespaceForVersion() == $newAssociatedNamespace){
+                                $profileAssociation->setEntityNamespaceForVersion($newAssociatedNamespace);
+                            }
+                        }
+                    }
                 }
             }
 
@@ -1098,6 +1115,4 @@ class ProfileController  extends Controller
         ]);
 
     }
-
-
 }
