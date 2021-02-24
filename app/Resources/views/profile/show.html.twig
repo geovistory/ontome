@@ -34,7 +34,7 @@
             <div id="summary" class="tab-pane fade in active">
                 <h3>{{ profile.standardLabel }}</h3>
                 <div class="container">
-                    {% if not is_granted('publish', profile) %}
+                    {% if not profile.isPublishable %}
                             <div class="row">
                                 <div class="col-lg-2">
                                     <p class="text-danger"><i class="fas fa-exclamation-triangle"></i> Warning:</p>

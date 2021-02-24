@@ -27,7 +27,7 @@
         <div id="summary" class="tab-pane fade in active">
             <h3>{{ profile.standardLabel }}</h3>
             <div class="container">
-                {% if not is_granted('publish', profile) %}
+                {% if not profile.isPublishable %}
                     <div class="row">
                         <div class="col-lg-2">
                             <p class="text-danger"><i class="fas fa-exclamation-triangle"></i> Warning:</p>
@@ -153,7 +153,7 @@
         </div>
         <div id="identification" class="tab-pane fade">
             <h3>Identification</h3>
-            {% if not is_granted('publish', profile) %}
+            {% if not profile.isPublishable %}
                 <div class="alert alert-danger">
                     <p><i class="fas fa-exclamation-triangle"></i>&nbsp;This profile comprises classes and/or properties of a namespace whose version is not the selected one. They are displayed in red in your profile. Please make the necessary corrections before proceeding.</p>
                 </div>
@@ -177,7 +177,7 @@
                 </div>
                     {% if is_granted('full_edit', profile.projectOfBelonging) %}
                     <p>
-                        {% if is_granted('publish', profile) %}
+                        {% if profile.isPublishable %}
                         <a class="btn btn-success" role="button" id="publish-btn">
                             Publish <i class="fas fa-check"></i>
                         </a>

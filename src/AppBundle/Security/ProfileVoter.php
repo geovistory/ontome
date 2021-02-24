@@ -17,12 +17,11 @@ class ProfileVoter extends Voter
 {
     const EDIT = 'edit';
     const DUPLICATE = 'duplicate';
-    const PUBLISH = 'publish';
 
     protected function supports($attribute, $subject)
     {
         // if the attribute isn't one we support, return false
-        if (!in_array($attribute, array(self::EDIT, self::DUPLICATE, self::PUBLISH))) {
+        if (!in_array($attribute, array(self::EDIT, self::DUPLICATE))) {
             return false;
         }
 
@@ -51,8 +50,6 @@ class ProfileVoter extends Voter
                 return $this->canEdit($profile, $user);
             case self::DUPLICATE:
                 return $this->canDuplicate($profile, $user);
-            case self::PUBLISH:
-                return $this->canPublish($profile, $user);
         }
 
         throw new \LogicException('This code should not be reached!');
@@ -105,21 +102,5 @@ class ProfileVoter extends Voter
         }
 
         return $canDuplicate;
-    }
-
-    /**
-     * @param Profile $profile
-     * @param User $user
-     * @return bool TRUE if $user is the creator of $profile and the profile can be published
-     */
-    private function canPublish(Profile $profile, User $user){
-
-        foreach ($profile->getProfileAssociations() as $profileAssociation){
-            if($profileAssociation->getSystemType()->getId() == 5
-                and !$profile->getNamespaces()->contains($profileAssociation->getEntityNamespaceForVersion())){
-                    return false;
-            }
-        }
-        return true;
     }
 }

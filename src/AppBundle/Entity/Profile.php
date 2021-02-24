@@ -570,4 +570,14 @@ class Profile
     {
         return $this->standardLabel;
     }
+
+    public function isPublishable(){
+        foreach ($this->getProfileAssociations() as $profileAssociation){
+            if($profileAssociation->getSystemType()->getId() == 5
+                and !$this->getNamespaces()->contains($profileAssociation->getEntityNamespaceForVersion())){
+                return false;
+            }
+        }
+        return true;
+    }
 }
