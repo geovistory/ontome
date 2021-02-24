@@ -2,15 +2,12 @@
 
 namespace AppBundle\Form;
 
-use AppBundle\Entity\Label;
 use AppBundle\Form\DataTransformer\UserToNumberTransformer;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
-use Symfony\Component\Form\Extension\Core\Type\TextareaType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\UrlType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
@@ -40,8 +37,14 @@ class NamespaceForm extends AbstractType
         }
 
         $builder
-            ->add('namespaceURI', TextType::class, ['label' => 'OntoME URI'])
-            ->add('originalNamespaceURI', TextType::class, ['label' => 'Original URI'])
+            ->add('isExternalNamespace', CheckboxType::class, [
+                'required' => true,
+                'label' => 'External namespace',
+            ])
+            ->add('namespaceURI', UrlType::class, array(
+                'label' => 'Namespace URI',
+                'default_protocol' => 'http'
+            ))
             ->add('creator', HiddenType::class)
             ->add('modifier', HiddenType::class);
         $builder->get('creator')

@@ -191,11 +191,13 @@
             </div>
             <div id="identification" class="tab-pane fade">
                 <h3>Identification</h3>
-                {% if namespace.originalNamespaceURI is null %}
-                <p>OntoME URI: https://dataforhistory.org/ontology/{{ namespace.namespaceURI }}</p>
-                {% else %}
-                <p>Original URI: {{ namespace.originalNamespaceUri|default('<i>No original URI yet.</i>')|raw }}</p>
-                {% endif %}
+                <p>
+                    {% if namespace.topLevelNamespace.isExternalNamespace %}
+                        URI: <strong><a>{{ namespace.namespaceURI }}</a></strong>
+                    {% else %}
+                        Internal URI: <strong><a>{{ namespace.topLevelNamespace.namespaceURI }}</a></strong>
+                    {% endif %}
+                </p>
                 {% if namespace.projectForTopLevelNamespace is not null %}
                 <p>
                     Project of belonging: <a href="{{ path('project_show', {

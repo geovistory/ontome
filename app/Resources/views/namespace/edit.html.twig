@@ -243,24 +243,13 @@
             <div id="identification" class="tab-pane fade">
                 <h3>Identification</h3>
                 <div class="object-identification-edit-form">
-                    {% if is_granted('full_edit', namespace) %}
+                    {% if is_granted('full_edit', namespace) and (not namespace.isOngoing or namespace.topLevelNamespace.isExternalNamespace) %}
                         {{ form_start(namespaceForm) }}
                             {{ form_errors(namespaceForm) }}
-                            <div class="
-                                        form-group cool-class
-                                        {% if form_errors(namespaceForm.namespaceURI)  %}
-                                        has-feedback has-error
-                                        {% endif %}
-                                        "
-                            >
-                                {{ form_label(namespaceForm.namespaceURI) }}
-                                <div class="input-group">
-                                    <span class="input-group-addon">https://dataforhistory.org/{% if namespace.originalNamespaceURI is not null %}external-{% endif %}ontology/</span>
-                                    {{ form_widget(namespaceForm.namespaceURI, { 'attr': {'placeholder': 'my-namespace-1-5'} }) }}
-                                </div>
-                                {{ form_errors(namespaceForm.namespaceURI) }}
-                            </div>
-                            {{ form_row(namespaceForm.originalNamespaceURI) }}
+                            {{ form_start(namespaceForm) }}
+                            {{ form_row(namespaceForm.isExternalNamespace) }}
+                            {{ form_row(namespaceForm.namespaceURI) }}
+                            {{ form_errors(namespaceForm) }}
                             <button type="submit" class="btn btn-primary" formnovalidate>Save <span class="far fa-save"></span></button>
                             <a href="{{ path('namespace_show', {
                                 id: namespace.id,
@@ -272,8 +261,11 @@
                             </a>
                         {{ form_end(namespaceForm) }}
                     {% else %}
-                        <p>OntoME URI: {{ namespace.namespaceURI }}</p>
-                        <p>Original URI: {{ namespace.originalNamespaceUri|default('<i>No original URI yet.</i>')|raw }}</p>
+                        {% if namespace.topLevelNamespace.isExternalNamespace %}
+                            URI: <strong><a>{{ namespace.namespaceURI }}</a></strong>
+                        {% else %}
+                            Internal URI: <strong><a>{{ namespace.topLevelNamespace.namespaceURI }}</a></strong>
+                        {% endif %}
                     {% endif %}
                 </div>
                 {% if namespace.projectForTopLevelNamespace is not null %}
@@ -783,6 +775,31 @@
                     }
                 });
             });
+
+            //disable URI field if it's not an external URI
+            if (!$('#namespace_form_isExternalNamespace').prop('checked')) {
+                $('#namespace_form_namespaceURI').prop('readOnly', true);
+            }
+            $(document).on('change', '#namespace_form_isExternalNamespace', function() {
+                var $input = $(this);
+                var currentURI = '{{ namespace.namespaceUri }}';
+                var standardLabel = '{{ namespace.standardLabel }}';
+                if ($input.prop('checked')) {
+                    $('#namespace_form_namespaceURI').val(currentURI);
+                    $('#namespace_form_namespaceURI').prop('readOnly', false);
+                }
+                else {
+                    $('#namespace_form_namespaceURI').prop('readOnly', true);
+                    $('#namespace_form_namespaceURI').val('https://ontome.net/ns/' + standardLabel.replace(/[\s-]+/g, '-').toLowerCase().replace(/[^0-9a-z\-]/g, ''));
+                }
+            });
+
+            var isParentExternalNamespace = {{ namespace.topLevelNamespace.isExternalNamespace }};
+            if (isParentExternalNamespace) {
+                $('#namespace_form_isExternalNamespace').prop('checked', true);
+                $('#namespace_form_isExternalNamespace').prop('readOnly', true);
+                $('#namespace_form_namespaceURI').prop('readOnly', false);
+            }
 
         } );
     </script>

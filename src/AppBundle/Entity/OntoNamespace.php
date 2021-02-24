@@ -29,7 +29,7 @@ class OntoNamespace
     private $id;
 
     /**
-     * @Assert\Url()
+     * @Assert\Url(message="Please enter a valid URI")
      * @Assert\NotBlank()
      * @ORM\Column(type="text", nullable=true, unique=true)
      */
@@ -880,7 +880,7 @@ class OntoNamespace
     public function __toString()
     {
         $s = $this->getStandardLabel();
-        if(empty($s)) $s = 'https://dataforhistory.org/'.$this->namespaceURI;
+        if(empty($s)) $s = $this->namespaceURI;
         return (string) $s;
     }
 
@@ -890,10 +890,10 @@ class OntoNamespace
     public function getDisplayURI()
     {
         $s ='';
-        if(!empty($this->originalNamespaceURI)){
-            $s = $this->originalNamespaceURI;
+        if(!empty($this->namespaceURI)){
+            $s = $this->namespaceURI;
         }
-        else $s = 'https://ontome.dataforhistory.org/'.$this->namespaceURI;
+        else $s =$this->getTopLevelNamespace()->getNamespaceURI();
         return $s;
     }
 

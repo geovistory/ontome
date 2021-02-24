@@ -70,7 +70,7 @@ class OntoNamespaceVoter extends Voter
     {
         foreach($user->getUserProjectAssociations()->getIterator() as $i => $userProjectAssociation) {
             if($namespace->getIsTopLevelNamespace()) {
-                if(!$namespace->getHasPublication()) {
+                if($namespace->getHasPublication()) {
                     return false;
                 }
             }

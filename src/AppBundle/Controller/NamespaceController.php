@@ -116,14 +116,15 @@ class NamespaceController  extends Controller
             $namespace->setIsOngoing(false);
 
             //just in case, we set the domain to ontome.net for non external namespaces
-            if (!$namespace->getIsExternalNamespace) {
+            if (!$namespace->getIsExternalNamespace() && strpos($namespace->getNamespaceURI(), 'https://ontome.net/ns') !== 0 ) {
                 $u = parse_url($namespace->getNamespaceURI());
-                $uri = 'https://ontome.net'.$u['path'];
+                $uri = 'https://ontome.net/ns'.$u['path']; //if the user tries to change the domain, we force it to be ontome.net
                 $namespace->setNamespaceURI($uri);
             }
 
 
-            $ongoingNamespace->setNamespaceURI($namespace->getNamespaceURI().'-ongoing');
+            $ongoingNamespace->setNamespaceURI($namespace->getNamespaceURI());
+            $ongoingNamespace->setIsExternalNamespace($namespace->getIsExternalNamespace());
             $ongoingNamespace->setIsTopLevelNamespace(false);
             $ongoingNamespace->setIsOngoing(true);
             $ongoingNamespace->setTopLevelNamespace($namespace);
@@ -229,11 +230,28 @@ class NamespaceController  extends Controller
             $form = $this->createForm(NamespaceForm::class, $namespace);
 
             $form->handleRequest($request);
-            if ($form->isValid()) {
+            if ($form->isSubmitted() && $form->isValid()) {
+                if (!$namespace->getIsExternalNamespace() && strpos($namespace->getNamespaceURI(), 'https://ontome.net/ns') !== 0 ) {
+                    $u = parse_url($namespace->getNamespaceURI());
+                    $uri = 'https://ontome.net/ns'.$u['path']; //if the user tries to change the domain, we force it to be ontome.net
+                    $namespace->setNamespaceURI($uri);
+                }
                 $namespace->setModifier($this->getUser());
                 $em->persist($namespace);
-                $em->flush();
 
+                //update URI and isExternalNamespace values for child namespaces
+
+                if ($namespace->getIsTopLevelNamespace()) {
+                    foreach ($namespace->getChildVersions() as $childNamespace) {
+                        if (!$namespace->getIsExternalNamespace()) {
+                            $childNamespace->setNamespaceURI(null);
+                        }
+                        $childNamespace->setIsExternalNamespace($namespace->getIsExternalNamespace());
+                        $em->persist($namespace);
+                    }
+                }
+
+                $em->flush();
                 $this->addFlash('success', 'Namespace Updated!');
 
                 return $this->redirectToRoute('namespace_edit', [
@@ -320,13 +338,11 @@ class NamespaceController  extends Controller
         $newNamespaceLabel->setModifier($this->getUser());
         $newNamespaceLabel->setCreationTime(new \DateTime('now'));
         $newNamespaceLabel->setModificationTime(new \DateTime('now'));
-        $newNamespaceLabel->setLabel(str_replace(' ongoing','',$namespace->getStandardLabel()));
+        $newNamespaceLabel->setLabel(str_replace(' ongoing','', $namespace->getStandardLabel()));
 
         $newNamespace->addLabel($newNamespaceLabel);
         $newNamespace->setStandardLabel($newNamespaceLabel->getLabel());
-
-        $namespace->setNamespaceURI((str_replace('-ongoing','',$namespace->getNamespaceURI()).'-ongoing'));
-
+        $newNamespace->setIsExternalNamespace($namespace->getIsExternalNamespace());
 
         $em->persist($namespace);
         $em->persist($newNamespace);
