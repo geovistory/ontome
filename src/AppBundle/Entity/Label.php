@@ -262,6 +262,8 @@ class Label
             $object = $this->property;
         elseif (!is_null($this->namespace))
             $object = $this->namespace;
+        elseif (!is_null($this->project))
+            $object = $this->project;
         return $object;
     }
 

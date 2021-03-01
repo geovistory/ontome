@@ -163,7 +163,11 @@
                     {{ form_start(profileIdentificationForm) }}
                     {{ form_errors(profileIdentificationForm) }}
                     {{ form_row(profileIdentificationForm.projectOfBelonging) }}
-                    {{ form_row(profileIdentificationForm.isForcedPublication, { 'attr':{'disabled':'disabled'} }) }}
+                    {% if profile.isPublishable %}
+                        {{ form_row(profileIdentificationForm.isForcedPublication) }}
+                    {% else %}
+                        {{ form_row(profileIdentificationForm.isForcedPublication, { 'attr':{'disabled':'disabled'} }) }}
+                    {% endif %}
                     <p><button type="submit" class="btn btn-primary" formnovalidate>Save <span class="far fa-save"></span></button>
                     <button type="button" class="btn btn-default" onclick="window.location.reload();">Cancel&nbsp;<i class="fas fa-undo-alt"></i></button></p>
                     {{ form_end(profileIdentificationForm) }}

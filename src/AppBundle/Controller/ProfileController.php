@@ -234,7 +234,9 @@ class ProfileController  extends Controller
      */
     public function publishAction(Profile $profile, Request $request)
         {
-        $this->denyAccessUnlessGranted('publish', $profile);
+        if(!$profile->getIsPublishable()){
+            throw $this->createAccessDeniedException('The profile n° '.$profile->getId().' can\'t be published. Please verify your profile.');
+        }
 
         if(is_null($profile)) {
             throw $this->createNotFoundException('The profile n° '.$profile->getId().' does not exist. Please contact an administrator.');
