@@ -87,18 +87,24 @@ class ClassRepository extends EntityRepository
                     t_ascendants_classes.DEPTH,
                     che.get_root_namespace(nsp.pk_namespace) AS \"rootNamespaceId\",
                     (SELECT label FROM che.get_namespace_labels(che.get_root_namespace(nsp.pk_namespace)) WHERE language_iso_code = 'en') AS \"rootNamespaceLabel\",
-                    nsp.pk_namespace AS \"classNamespaceId\",
-                    nsp.standard_label AS \"classNamespaceLabel\",
+                    nsp_ascendant.pk_namespace AS \"classNamespaceId\",
+                    nsp_ascendant.standard_label AS \"classNamespaceLabel\",
                     t_ascendants_classes.fk_namespace_for_version
                 FROM t_ascendants_classes,
-                che.namespace nsp
+                che.namespace nsp,
+                che.namespace nsp_ascendant,
+                che.is_subclass_of subcl
                 WHERE depth > 1
                 AND t_ascendants_classes.fk_namespace_for_version = nsp.pk_namespace 
+                AND t_ascendants_classes.pk_is_subclass_of = subcl.pk_is_subclass_of 
+                AND subcl.fk_parent_class_namespace = nsp_ascendant.pk_namespace 
                 GROUP BY t_ascendants_classes.pk_parent,
                 t_ascendants_classes.parent_identifier,
                 t_ascendants_classes.depth,
                 nsp.pk_namespace,
-		        t_ascendants_classes.fk_namespace_for_version
+                nsp_ascendant.pk_namespace,
+		        t_ascendants_classes.fk_namespace_for_version,
+		        t_ascendants_classes.pk_is_subclass_of
                 ORDER BY depth DESC;";
 
         $conn = $this->getEntityManager()->getConnection();
