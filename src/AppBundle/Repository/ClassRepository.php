@@ -80,6 +80,7 @@ class ClassRepository extends EntityRepository
                         pk_is_subclass_of,
                         fk_namespace_for_version
                         FROM che.ascendant_class_hierarchy(?)
+                        WHERE fk_namespace_for_version IN (".$in.")
                 )
                 SELECT t_ascendants_classes.pk_parent AS id,
                     t_ascendants_classes.parent_identifier AS identifier,
@@ -92,7 +93,7 @@ class ClassRepository extends EntityRepository
                 FROM t_ascendants_classes,
                 che.namespace nsp
                 WHERE depth > 1
-                AND nsp.pk_namespace IN (".$in.")
+                AND t_ascendants_classes.fk_namespace_for_version = nsp.pk_namespace 
                 GROUP BY t_ascendants_classes.pk_parent,
                 t_ascendants_classes.parent_identifier,
                 t_ascendants_classes.depth,
@@ -102,7 +103,7 @@ class ClassRepository extends EntityRepository
 
         $conn = $this->getEntityManager()->getConnection();
         $stmt = $conn->prepare($sql);
-        $stmt->execute(array_merge(array($classVersion->getClass()->getId()), $namespacesId));
+        $stmt->execute(array_merge($namespacesId, array($classVersion->getClass()->getId())));
 
         return $stmt->fetchAll();
     }
