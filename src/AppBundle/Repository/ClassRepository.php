@@ -71,7 +71,6 @@ class ClassRepository extends EntityRepository
     public function findAncestorsByClassVersionAndNamespacesId(OntoClassVersion $classVersion, array $namespacesId){
         // Construit la chaine ?,? pour les namespacesId dans la requête SQL
         $in  = str_repeat('?,', count($namespacesId) - 1) . '?';
-
         $sql = "WITH t_ascendants_classes AS(
 	                SELECT pk_parent,
                         parent_identifier,
@@ -98,6 +97,7 @@ class ClassRepository extends EntityRepository
                 AND t_ascendants_classes.fk_namespace_for_version = nsp.pk_namespace 
                 AND t_ascendants_classes.pk_is_subclass_of = subcl.pk_is_subclass_of 
                 AND subcl.fk_parent_class_namespace = nsp_ascendant.pk_namespace 
+                AND subcl.fk_parent_class_namespace IN (".$in.")
                 GROUP BY t_ascendants_classes.pk_parent,
                 t_ascendants_classes.parent_identifier,
                 t_ascendants_classes.depth,
@@ -109,7 +109,7 @@ class ClassRepository extends EntityRepository
 
         $conn = $this->getEntityManager()->getConnection();
         $stmt = $conn->prepare($sql);
-        $stmt->execute(array_merge($namespacesId, array($classVersion->getClass()->getId())));
+        $stmt->execute(array_merge(array($classVersion->getClass()->getId()), $namespacesId, $namespacesId));
 
         return $stmt->fetchAll();
     }
