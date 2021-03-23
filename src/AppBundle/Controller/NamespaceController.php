@@ -227,6 +227,9 @@ class NamespaceController  extends Controller
 
         if($this->isGranted('full_edit', $namespace)) {
 
+            $ongoingNamespaceHasChanged = $em->getRepository('AppBundle:OntoNamespace')
+                ->checkNamespaceChange($namespace);
+
             $form = $this->createForm(NamespaceForm::class, $namespace);
 
             $form->handleRequest($request);
@@ -262,6 +265,7 @@ class NamespaceController  extends Controller
                 'namespaceForm' => $form->createView(),
                 'namespace' => $namespace,
                 'rootNamespaces' => $rootNamespaces,
+                'hasChanged' => $ongoingNamespaceHasChanged,
             ]);
         }
         else {
@@ -269,6 +273,7 @@ class NamespaceController  extends Controller
                 'namespaceForm' => null,
                 'namespace' => $namespace,
                 'rootNamespaces' => $rootNamespaces,
+                'hasChanged' => null,
             ]);
         }
     }

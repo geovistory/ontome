@@ -37,7 +37,12 @@
 
                 {{ form_start(namespaceForm) }}
                 {{ form_row(namespaceForm.labels) }}
-                {{ form_row(namespaceForm.isExternalNamespace) }}
+                {{ form_row(namespaceForm.isExternalNamespace, {
+                    help: 'Only tick this checkbox if your namespace already has its URI outside OntoME. Otherwise leave it unchecked.'
+                }) }}
+                {{ form_row(namespaceForm.uriGenerator, {
+                    help: 'Fill this field to generate automaticaly the namespace URI. Eg. "my namespace" generates "https://ontome.net/ns/my-namespace".'
+                }) }}
                 {{ form_row(namespaceForm.namespaceURI) }}
                 {{ form_errors(namespaceForm) }}
 
@@ -120,11 +125,26 @@
                 $('#namespace_quick_add_form_namespaceURI').prop('readOnly', true);
             }
 
-            $(document).on('keyup', '#namespace_quick_add_form_labels_0_label', function() {
-                var labelForURI = this.value;
-                labelForURI = labelForURI.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-                labelForURI = labelForURI.replace(/[\s-]+/g, '-').toLowerCase().replace(/[^0-9a-z\-]/g, '');
-                $('#namespace_quick_add_form_namespaceURI').val('https://ontome.net/ns/' + labelForURI);
+            //if label is identical to uri generator value, it can update du URI
+            if ($('#namespace_quick_add_form_labels_0_label').val() == $('#namespace_quick_add_form_uriGenerator').val()) {
+                $(document).on('keyup', '#namespace_quick_add_form_labels_0_label', function() {
+                    if (this.value == $('#namespace_quick_add_form_uriGenerator').val() || $('#namespace_quick_add_form_uriGenerator').val() == '' ) {
+                        var stringForURI = this.value;
+                        stringForURI = stringForURI.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+                        stringForURI = stringForURI.replace(/[\s-]+/g, '-').toLowerCase().replace(/[^0-9a-z\-]/g, '');
+                        $('#namespace_quick_add_form_namespaceURI').val('https://ontome.net/ns/' + stringForURI);
+                    }
+
+
+                });
+            }
+
+
+            $(document).on('keyup', '#namespace_quick_add_form_uriGenerator', function() {
+                var stringForURI = this.value;
+                stringForURI = stringForURI.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+                stringForURI = stringForURI.replace(/[\s-]+/g, '-').toLowerCase().replace(/[^0-9a-z\-]/g, '');
+                $('#namespace_quick_add_form_namespaceURI').val('https://ontome.net/ns/' + stringForURI);
             });
 
             //disable URI field if it's not an externel URI
@@ -132,14 +152,17 @@
                 var $input = $(this);
                 if ($input.prop('checked')) {
                     $('#namespace_quick_add_form_namespaceURI').val('');
+                    $('#namespace_quick_add_form_uriGenerator').val('');
+                    $('#namespace_quick_add_form_uriGenerator').parent().hide();
                     $('#namespace_quick_add_form_namespaceURI').prop('readOnly', false);
                 }
                 else {
+                    $('#namespace_quick_add_form_uriGenerator').parent().show();
                     $('#namespace_quick_add_form_namespaceURI').prop('readOnly', true);
-                    var labelForURI = $('#namespace_quick_add_form_labels_0_label').val();
-                    labelForURI = labelForURI.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-                    labelForURI = labelForURI.replace(/[\s-]+/g, '-').toLowerCase().replace(/[^0-9a-z\-]/g, '');
-                    $('#namespace_quick_add_form_namespaceURI').val('https://ontome.net/ns/' + labelForURI);
+                    var stringForURI = $('#namespace_quick_add_form_uriGenerator').val();
+                    stringForURI = stringForURI.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+                    stringForURI = stringForURI.replace(/[\s-]+/g, '-').toLowerCase().replace(/[^0-9a-z\-]/g, '');
+                    $('#namespace_quick_add_form_namespaceURI').val('https://ontome.net/ns/' + stringForURI);
                 }
             });
 

@@ -264,6 +264,9 @@ class LabelController  extends Controller
         else if(!is_null($label->getProperty())){
             $this->denyAccessUnlessGranted('validate', $object->getPropertyVersionForDisplay());
         }
+        else if(!is_null($label->getNamespace())){
+            $this->denyAccessUnlessGranted('validate', $object);
+        }
         else{
             throw new AccessDeniedHttpException('The validation of this resource is forbidden.');
         }

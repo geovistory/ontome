@@ -7,6 +7,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\UrlType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -40,10 +41,17 @@ class NamespaceForm extends AbstractType
             ->add('isExternalNamespace', CheckboxType::class, [
                 'required' => true,
                 'label' => 'External namespace',
+                'attr' => ['autocomplete' => 'off']
             ])
+            ->add('uriGenerator', TextType::class, array(
+                'label' => 'OntoME URI generator',
+                'mapped' => false,
+                'attr' => ['autocomplete' => 'off']
+            ))
             ->add('namespaceURI', UrlType::class, array(
                 'label' => 'Namespace URI',
-                'default_protocol' => 'http'
+                'default_protocol' => 'http',
+                'attr' => ['autocomplete' => 'off']
             ))
             ->add('creator', HiddenType::class)
             ->add('modifier', HiddenType::class);

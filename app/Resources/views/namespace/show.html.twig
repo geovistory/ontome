@@ -31,7 +31,7 @@
             <li class="active"><a data-toggle="tab" href="#summary">Summary</a></li>
             <li><a data-toggle="tab" href="#identification">Identification</a></li>
             <li><a data-toggle="tab" href="#definition">Definition</a></li>
-            <li><a data-toggle="tab" href="#namespace-hierarchy">Hierarchy</a></li>
+            <li><a data-toggle="tab" href="#namespace-hierarchy">Versions</a></li>
             {% if not namespace.isTopLevelNamespace %}
             <li><a data-toggle="tab" href="#classes">Classes</a></li>
             <li><a data-toggle="tab" href="#properties">Properties</a></li>
@@ -215,7 +215,7 @@
                         <p>Namespace published and available since: {{ namespace.publishedAt|date('Y-m-d') }}</p>
                     {% endif %}
                 {% else %}
-                    <p>This namespace is a root namespace. Find all its versions in the <a href="#namespace-hierarchy" onclick="window.location = '{{ path('namespace_show', {'id': namespace.id}) }}#namespace-hierarchy';window.location.reload()">Hierarchy tab</a>.</p>
+                    <p>This namespace is a root namespace. Find all its versions in the <a href="#namespace-hierarchy" onclick="window.location = '{{ path('namespace_show', {'id': namespace.id}) }}#namespace-hierarchy';window.location.reload()">Versions tab</a>.</p>
                 {% endif %}
                 {% if not namespace.isTopLevelNamespace %}
                 <h3>Reference namespace{% if namespace.referencedNamespaceAssociations|length > 1 %}s{% endif %} of which this namespace is an extension</h3>
@@ -261,7 +261,7 @@
                 <p>* : Standard label for this language</p>
             </div>
             <div id="namespace-hierarchy" class="tab-pane fade">
-                <h3>Hierarchy</h3>
+                <h3>Versions</h3>
                 {% if namespace.isTopLevelNamespace %}
                     <p>{{ namespace.standardLabel }} is a <b>root namespace</b>.</p>
                 <h3>Versions of this namespace</h3>

@@ -75,10 +75,10 @@
                         <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
                     </a>
                 {% elseif textProperty.namespace is not null %}
-                    {{ textProperty.systemType.standardLabel|lower }} for the namespace {{ textProperty.namespace }}
+                    {{ textProperty.systemType.standardLabel }} for the namespace {{ textProperty.namespace }}
                     <a href="{{ path('namespace_edit', {
                         id: textProperty.namespace.id
-                    }) }}#definition"
+                    }) }}#{{ textProperty.systemType.id == 31 ? 'identification' : 'definition' }}"
                        class="pull-right btn btn-link"
                        role="button">
                         <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
@@ -115,7 +115,10 @@
                     </a>
                 {% endif %}
 
-                {% if textProperty.class is not null and is_granted('validate', textProperty.class.classVersionForDisplay(textProperty.namespaceForVersion)) or textProperty.property is not null and is_granted('validate', textProperty.property.propertyVersionForDisplay(textProperty.namespaceForVersion))  %}
+                {% if textProperty.class is not null and is_granted('validate', textProperty.class.classVersionForDisplay(textProperty.namespaceForVersion))
+                    or textProperty.property is not null and is_granted('validate', textProperty.property.propertyVersionForDisplay(textProperty.namespaceForVersion))
+                    or textProperty.namespace is not null and is_granted('validate', textProperty.namespace)
+                %}
                     <div class="dropdown inline-block">
                         <button class="btn btn-default dropdown-toggle" type="button" id="dropdown-validation" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
                             {% if textProperty.validationStatus is null %}
@@ -232,7 +235,15 @@
                                role="button">
                                 Back <i class="fas fa-arrow-left"></i>
                             </a>
-                        {% elseif textProperty.namespace is not null %}
+                        {% elseif textProperty.namespace is not null and textProperty.systemType.id == 31 %}
+                            <a href="{{ path('namespace_edit', {
+                                id: textProperty.namespace.id
+                            }) }}#identification"
+                               class="btn btn-default"
+                               role="button">
+                                Back <i class="fas fa-arrow-left"></i>
+                            </a>
+                        {% elseif textProperty.namespace is not null  %}
                             <a href="{{ path('namespace_edit', {
                                 id: textProperty.namespace.id
                             }) }}#definition"

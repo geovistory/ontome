@@ -16,7 +16,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * Class OntoNamespace
  * @ORM\Entity(repositoryClass="AppBundle\Repository\NamespaceRepository")
- * @UniqueEntity("namespaceURI", message="A namespace with the same URI already exists. Please chose another label for your project.")
+ * @UniqueEntity("namespaceURI", message="A namespace with the same URI already exists. Please chose another one for your namespace.")
  * @ORM\Table(schema="che", name="namespace")
  */
 class OntoNamespace

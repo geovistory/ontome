@@ -24,11 +24,12 @@
                 </span>
             {% endif %}
         </h2>
+
         <ul class="nav nav-tabs">
             <li class="active"><a data-toggle="tab" href="#summary">Summary</a></li>
             <li><a data-toggle="tab" href="#identification">Identification</a></li>
             <li><a data-toggle="tab" href="#definition">Definition</a></li>
-            <li><a data-toggle="tab" href="#namespace-hierarchy">Hierarchy</a></li>
+            <li><a data-toggle="tab" href="#namespace-hierarchy">Versions</a></li>
             {% if not namespace.isTopLevelNamespace %}
             <li><a data-toggle="tab" href="#classes">Classes</a></li>
             <li><a data-toggle="tab" href="#properties">Properties</a></li>
@@ -131,6 +132,7 @@
                         <th>Language</th>
                         <th>Edit</th>
                         <th>Comments</th>
+                        <th>Validation</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -157,27 +159,47 @@
                                     <span class="badge {% if textProperty.comments|length > 0  %}progress-bar-danger {% endif %}">{{ textProperty.comments|length }}</span>
                                 </a>
                             </td>
+                            <td>
+                                {% if textProperty.validationStatus is null %}
+                                    <span class="label label-info">
+                                        Candidate
+                                    </span>
+                                {% elseif textProperty.validationStatus.id == 26  %}
+                                    <span class="label label-success">
+                                        {{ textProperty.validationStatus }}
+                                    {% set countValidationsTxtp = countValidationsTxtp + 1 %}
+                                    </span>
+                                {% elseif textProperty.validationStatus.id == 27  %}
+                                    <span class="label label-danger">
+                                        {{ textProperty.validationStatus }}
+                                    </span>
+                                {% elseif textProperty.validationStatus.id == 28  %}
+                                    <span class="label label-warning">
+                                        {{ textProperty.validationStatus }}
+                                    </span>
+                                {% endif %}
+                            </td>
                         </tr>
                     {% endfor %}
                     </tbody>
                 </table>
                 {% if not namespace.isTopLevelNamespace %}
-                    {% set txtPcontributors, break = null, false %}
+                    {% set txtpContributors, break = null, false %}
                     {% for textProperty in namespace.textProperties if textProperty.systemType.id == 2 %}
                         {% if not break %}
                             {% if textProperty.languageIsoCode == 'en' %}
                                 {% set break = true %}
-                                {% set txtPcontributors = textProperty %}
+                                {% set txtpContributors = textProperty %}
                             {% else %}
-                                {% if txtPcontributors == null %}
-                                    {% set txtPcontributors = textProperty %}
+                                {% if txtpContributors == null %}
+                                    {% set txtpContributors = textProperty %}
                                 {% endif %}
                             {% endif %}
                         {% endif %}
                     {% endfor %}
                     <h3>Contributors
-                        {% if txtPcontributors is not null %}
-                        <a href="{{ path('text_property_edit', {'id': txtPcontributors.id}) }}" class="btn btn-xs btn-success">
+                        {% if txtpContributors is not null %}
+                        <a href="{{ path('text_property_edit', {'id': txtpContributors.id}) }}" class="btn btn-xs btn-success">
                             <span class="fa fa-edit"></span>
                         </a>
                         {% else %}
@@ -188,8 +210,26 @@
                         {% endif %}
                     </h3>
 
-                    {% if txtPcontributors is not null %}
-                        {{ txtPcontributors.textProperty|raw }}
+                    {% if txtpContributors is not null %}
+                        {{ txtpContributors.textProperty|raw }}
+                        {% if txtpContributors.validationStatus is null %}
+                            <span class="label label-info">
+                                Candidate
+                            </span>
+                        {% elseif txtpContributors.validationStatus.id == 26  %}
+                            <span class="label label-success">
+                                {{ txtpContributors.validationStatus }}
+                                {% set countValidationsContributors = countValidationsContributors + 1 %}
+                            </span>
+                        {% elseif txtpContributors.validationStatus.id == 27  %}
+                            <span class="label label-danger">
+                                {{ txtpContributors.validationStatus }}
+                            </span>
+                        {% elseif txtpContributors.validationStatus.id == 28  %}
+                            <span class="label label-warning">
+                                {{ txtpContributors.validationStatus }}
+                            </span>
+                        {% endif %}
                     {% else %}
                         <p><i>No contributors yet.</i></p>
                     {% endif %}
@@ -247,10 +287,21 @@
                         {{ form_start(namespaceForm) }}
                             {{ form_errors(namespaceForm) }}
                             {{ form_start(namespaceForm) }}
-                            {{ form_row(namespaceForm.isExternalNamespace) }}
+                            {{ form_row(namespaceForm.isExternalNamespace, {
+                                help: 'Only tick this checkbox if your namespace already has its URI outside OntoME. Otherwise leave it unchecked.'
+                            }) }}
+                            {{ form_row(namespaceForm.uriGenerator, {
+                                help: 'Fill this field to generate automaticaly the namespace URI. Eg. "my namespace" generates "https://ontome.net/ns/my-namespace".'
+                            }) }}
                             {{ form_row(namespaceForm.namespaceURI) }}
                             {{ form_errors(namespaceForm) }}
                             <button type="submit" class="btn btn-primary" formnovalidate>Save <span class="far fa-save"></span></button>
+                            <a href="#"
+                               onclick="window.location.reload()"
+                               class="btn btn-default"
+                               role="button">
+                                Reset <i class="fas fa-undo"></i>
+                            </a>
                             <a href="{{ path('namespace_show', {
                                 id: namespace.id,
                                 '_fragment': 'identification'
@@ -280,23 +331,102 @@
                 {% if namespace.isTopLevelNamespace == false %}
                     {% if namespace.isOngoing %}
                         <p>This namespace is ongoing and can be modified at any time. It is not advisable to use its classes and properties.</p>
-                        {% if is_granted('publish', namespace) %}
-                            <a href="{{ path('namespace_publication', {
-                                id: namespace.id
-                            }) }}"
-                               class="btn btn-success"
-                               role="button">
-                                Publish this namespace <i class="fas fa-upload"></i>
-                            </a>
+                        {% set txtpVersion, break = null, false %}
+                        {% for textProperty in namespace.textProperties if textProperty.systemType.id == 31 %}
+                            {% if not break %}
+                                {% if textProperty.languageIsoCode == 'en' %}
+                                    {% set break = true %}
+                                    {% set txtpVersion = textProperty %}
+                                {% else %}
+                                    {% if txtpVersion == null %}
+                                        {% set txtpVersion = textProperty %}
+                                    {% endif %}
+                                {% endif %}
+                            {% endif %}
+                        {% endfor %}
+                        <h3>Version info
+                            {% if txtpVersion is not null %}
+                                <a href="{{ path('text_property_edit', {'id': txtpVersion.id}) }}" class="btn btn-xs btn-success">
+                                    <span class="fa fa-edit"></span>
+                                </a>
+                            {% else %}
+                                <a href="{{ path('text_property_new', {'type': 'owl:versionInfo', 'object': 'namespace', 'objectId': namespace.id })}}"
+                                   class="btn btn-primary btn-xs">
+                                    New <span class="fa fa-plus-circle"></span>
+                                </a>
+                            {% endif %}
+                        </h3>
+
+                        {% if txtpVersion is not null %}
+                            {{ txtpVersion.textProperty|raw }}
+                            <p>
+                            {% if txtpVersion.validationStatus is null %}
+                                <span class="label label-info">
+                                Candidate
+                            </span>
+                            {% elseif txtpVersion.validationStatus.id == 26  %}
+                                <span class="label label-success">
+                                {{ txtpVersion.validationStatus }}
+                                    {% set countValidationsVersion = countValidationsVersion + 1 %}
+                            </span>
+                            {% elseif txtpVersion.validationStatus.id == 27  %}
+                                <span class="label label-danger">
+                                {{ txtpVersion.validationStatus }}
+                            </span>
+                            {% elseif txtpVersion.validationStatus.id == 28  %}
+                                <span class="label label-warning">
+                                {{ txtpVersion.validationStatus }}
+                            </span>
+                            {% endif %}
+                            </p>
                         {% else %}
-                            <button disabled="disabled">Publish this namespace <i class="fas fa-upload"></i></button>
+                            <p><i>No version set yet.</i></p>
+                        {% endif %}
+                        {% set countValidationsTxtp = 0 %}
+                        {% set countValidationsLbl = 0 %}
+                        {% set countValidationsContributors = 0 %}
+
+                        {% for textProperty in namespace.textProperties if textProperty.systemType.id == 16 %}
+                            {% if textProperty.validationStatus.id == 26 %}
+                                {% set countValidationsTxtp = countValidationsTxtp + 1 %}
+                            {% endif %}
+                        {% endfor %}
+
+                        {% for textProperty in namespace.textProperties if textProperty.systemType.id == 2 %}
+                            {% if textProperty.validationStatus.id == 26 %}
+                                {% set countValidationsContributors = countValidationsContributors + 1 %}
+                            {% endif %}
+                        {% endfor %}
+
+                        {% for label in namespace.labels %}
+                            {% if label.validationStatus.id == 26 %}
+                                {% set countValidationsLbl = countValidationsLbl + 1 %}
+                            {% endif %}
+                        {% endfor %}
+                        {% if hasChanged %}
+                            {% if is_granted('publish', namespace)  and countValidationsTxtp > 0 and countValidationsLbl > 0 and countValidationsContributors > 0 %}
+                                <p>
+                                    <a href="{{ path('namespace_publication', {
+                                                    id: namespace.id
+                                                }) }}"
+                                       class="btn btn-success"
+                                       role="button">
+                                        Publish this namespace <i class="fas fa-upload"></i>
+                                    </a>
+                                </p>
+                            {% else %}
+                                <p><button disabled="disabled">Publish this namespace <i class="fas fa-upload"></i></button></p>
+                            {% endif %}
+                        {% else %}
+                            <p>You cannot publish this namespace for the momement because it is identical to the last publicated version.</p>
                         {% endif %}
                     {% endif %}
+
                     {% if namespace.publishedAt is not null %}
                         <p>Namespace published and available since: {{ namespace.publishedAt|date('Y-m-d') }}</p>
                     {% endif %}
                 {% else %}
-                    <p>This namespace is a root namespace. Find all its versions in the <a href="#namespace-hierarchy" onclick="window.location = '{{ path('namespace_edit', {'id': namespace.id}) }}#namespace-hierarchy';window.location.reload()">Hierarchy tab</a>.</p>
+                    <p>This namespace is a root namespace. Find all its versions in the <a href="#namespace-hierarchy" onclick="window.location = '{{ path('namespace_edit', {'id': namespace.id}) }}#namespace-hierarchy';window.location.reload()">Versions tab</a>.</p>
                 {% endif %}
 
                 {% if not namespace.isTopLevelNamespace and namespace.isOngoing %}
@@ -350,6 +480,7 @@
                         <th>Last updated</th>
                         <th>Edit</th>
                         <th>Comments</th>
+                        <th>Validation</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -379,6 +510,26 @@
                                     <span class="badge {% if label.comments|length > 0  %}progress-bar-danger {% endif %}">{{ label.comments|length }}</span>
                                 </a>
                             </td>
+                            <td>
+                                {% if label.validationStatus is null %}
+                                    <span class="label label-info">
+                                        Candidate
+                                    </span>
+                                {% elseif label.validationStatus.id == 26  %}
+                                    <span class="label label-success">
+                                        {{ label.validationStatus }}
+                                        {% set countValidationsLbl = countValidationsLbl + 1 %}
+                                    </span>
+                                {% elseif label.validationStatus.id == 27  %}
+                                    <span class="label label-danger">
+                                        {{ label.validationStatus }}
+                                    </span>
+                                {% elseif label.validationStatus.id == 28  %}
+                                    <span class="label label-warning">
+                                        {{ label.validationStatus }}
+                                    </span>
+                                {% endif %}
+                            </td>
                         </tr>
                     {% endfor %}
                     </tbody>
@@ -386,7 +537,7 @@
                 <p>* : Standard label for this language</p>
             </div>
             <div id="namespace-hierarchy" class="tab-pane fade">
-                <h3>Hierarchy</h3>
+                <h3>Versions</h3>
                 {% if namespace.isTopLevelNamespace %}
                     <p>{{ namespace.standardLabel }} is a <b>root namespace</b>.</p>
                 <h3>Versions of this namespace</h3>
@@ -776,28 +927,50 @@
                 });
             });
 
+            $(document).on('keyup', '#namespace_form_uriGenerator', function() {
+                var stringForURI = this.value;
+                stringForURI = stringForURI.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+                stringForURI = stringForURI.replace(/[\s-]+/g, '-').toLowerCase().replace(/[^0-9a-z\-]/g, '');
+                $('#namespace_form_namespaceURI').val('https://ontome.net/ns/' + stringForURI);
+            });
+
             //disable URI field if it's not an external URI
-            if (!$('#namespace_form_isExternalNamespace').prop('checked')) {
-                $('#namespace_form_namespaceURI').prop('readOnly', true);
-            }
             $(document).on('change', '#namespace_form_isExternalNamespace', function() {
                 var $input = $(this);
                 var currentURI = '{{ namespace.namespaceUri }}';
                 var standardLabel = '{{ namespace.standardLabel }}';
                 if ($input.prop('checked')) {
-                    $('#namespace_form_namespaceURI').val(currentURI);
+                    if (currentURI.includes('https://ontome.net/ns/')) {
+                        $('#namespace_form_namespaceURI').val('');
+                    }
+                    else $('#namespace_form_namespaceURI').val(currentURI);
+
+                    $('#namespace_form_uriGenerator').val('');
+                    $('#namespace_form_uriGenerator').parent().hide();
                     $('#namespace_form_namespaceURI').prop('readOnly', false);
                 }
                 else {
+                    $('#namespace_form_uriGenerator').parent().show();
                     $('#namespace_form_namespaceURI').prop('readOnly', true);
-                    $('#namespace_form_namespaceURI').val('https://ontome.net/ns/' + standardLabel.replace(/[\s-]+/g, '-').toLowerCase().replace(/[^0-9a-z\-]/g, ''));
+                    var stringForURI = $('#namespace_form_uriGenerator').val();
+                    if (stringForURI == '') {
+                        stringForURI = standardLabel;
+                    }
+                    if (stringForURI != '') {
+                        stringForURI = stringForURI.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+                        stringForURI = stringForURI.replace(/[\s-]+/g, '-').toLowerCase().replace(/[^0-9a-z\-]/g, '');
+                        $('#namespace_form_namespaceURI').val('https://ontome.net/ns/' + stringForURI);
+                    }
+                    else if (currentURI != '') {
+                        $('#namespace_form_namespaceURI').val(currentURI);
+                    }
                 }
             });
 
-            var isParentExternalNamespace = {{ namespace.topLevelNamespace.isExternalNamespace }};
-            if (isParentExternalNamespace) {
+            var isParentExternalNamespace = '{{ namespace.topLevelNamespace.isExternalNamespace }}';
+            if (isParentExternalNamespace == '1') {
                 $('#namespace_form_isExternalNamespace').prop('checked', true);
-                $('#namespace_form_isExternalNamespace').prop('readOnly', true);
+                $('#namespace_form_uriGenerator').parent().hide();
                 $('#namespace_form_namespaceURI').prop('readOnly', false);
             }
 

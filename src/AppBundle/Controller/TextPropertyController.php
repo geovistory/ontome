@@ -224,7 +224,11 @@ class TextPropertyController extends Controller
             $textProperty->setNamespace($associatedEntity);
             $associatedObject = $associatedEntity;
             $redirectToRoute = 'namespace_edit';
-            $redirectToRouteFragment = 'definition';
+
+            if ($type === 'owl:versionInfo') {
+                $redirectToRouteFragment = 'identification';
+            }
+            else $redirectToRouteFragment = 'definition';
         }
         else if($object === 'entity-association') {
             $associatedEntity = $em->getRepository('AppBundle:EntityAssociation')->find($objectId);
@@ -259,7 +263,10 @@ class TextPropertyController extends Controller
             $systemType = $em->getRepository('AppBundle:SystemType')->find(16); //systemType 16 = description
         }
         else if($type === 'dct:contributor') {
-            $systemType = $em->getRepository('AppBundle:SystemType')->find(2); //systemType 16 = description
+            $systemType = $em->getRepository('AppBundle:SystemType')->find(2); //systemType 2 = dc:contributors
+        }
+        else if($type === 'owl:versionInfo') {
+            $systemType = $em->getRepository('AppBundle:SystemType')->find(31); //systemType 31 = owl:versionInfo
         }
         else throw $this->createNotFoundException('The requested text property type "'.$type.'" does not exist!');
 
@@ -365,6 +372,9 @@ class TextPropertyController extends Controller
         }
         else if(!is_null($textProperty->getProperty())){
             $this->denyAccessUnlessGranted('validate', $object->getPropertyVersionForDisplay());
+        }
+        else if(!is_null($textProperty->getNamespace())){
+            $this->denyAccessUnlessGranted('validate', $object);
         }
         else if(!is_null($textProperty->getEntityAssociation())){
             if($object->getSource() instanceof OntoClass){

@@ -28,3 +28,13 @@
         <span class="glyphicon glyphicon-remove form-control-feedback" aria-hidden="true"></span>
     {% endif %}
 {%- endblock form_widget_simple %}
+
+{% block checkbox_row -%}
+    <div class="form-group{% if not valid %} has-error{% endif %}">
+        {{- form_widget(form) -}}
+        {% if help|default %}
+            <span class="help-block" id="help-block-{{ id }}">{{ help }}</span>
+        {% endif %}
+        {{- form_errors(form) -}}
+    </div>
+{%- endblock checkbox_row %}

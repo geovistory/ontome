@@ -34,8 +34,10 @@ class NamespacePublicationForm extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('namespaceURI', TextType::class, ['label' => 'OntoME URI'])
-            ->add('originalNamespaceURI', TextType::class, ['label' => 'Original URI'])
+            ->add('label', TextType::class, array(
+                'label' => 'Label',
+                'mapped' => false
+            ))
             ->add('creator', HiddenType::class)
             ->add('modifier', HiddenType::class);
         $builder->get('creator')

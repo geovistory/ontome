@@ -32,6 +32,10 @@ class NamespaceQuickAddForm extends AbstractType
                 'label' => 'Namespace URI',
                 'default_protocol' => 'http'
             ))
+            ->add('uriGenerator', TextType::class, array(
+                'label' => 'OntoME URI generator',
+                'mapped' => false
+            ))
             ->add('labels', CollectionType::class, array(
                 'label' => 'Enter a label and select a language',
                 'entry_type' => LabelType::class,
