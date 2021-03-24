@@ -114,7 +114,7 @@ class TextPropertyController extends Controller
 
         $textProperty->setModifier($this->getUser());
 
-        $form = $this->createForm(TextPropertyForm::class, $textProperty);
+        $form = $this->createForm(TextPropertyForm::class, $textProperty, array('systemType' => $textProperty->getSystemType()->getId()));
 
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {

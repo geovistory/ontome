@@ -88,32 +88,60 @@
                     </div>
                     {% endif %}
                     {% if not namespace.isTopLevelNamespace %}
-                    <div class="row">
-                        <div class="col-lg-2">
-                            <p>Contributors:</p>
-                        </div>
-                        <div class="col-lg-10">
-                            {% set contributors, break = null, false %}
-                            {% for textProperty in namespace.textProperties if textProperty.systemType.id == 2 %}
-                                {% if not break %}
-                                    {% if textProperty.languageIsoCode == 'en' %}
-                                        {% set break = true %}
-                                        {% set contributors = textProperty.textProperty %}
-                                    {% else %}
-                                        {% if contributors == null %}
+                        <div class="row">
+                            <div class="col-lg-2">
+                                <p>Contributors:</p>
+                            </div>
+                            <div class="col-lg-10">
+                                {% set contributors, break = null, false %}
+                                {% for textProperty in namespace.textProperties if textProperty.systemType.id == 2 %}
+                                    {% if not break %}
+                                        {% if textProperty.languageIsoCode == 'en' %}
+                                            {% set break = true %}
                                             {% set contributors = textProperty.textProperty %}
+                                        {% else %}
+                                            {% if contributors == null %}
+                                                {% set contributors = textProperty.textProperty %}
+                                            {% endif %}
                                         {% endif %}
                                     {% endif %}
-                                {% endif %}
-                            {% endfor %}
+                                {% endfor %}
 
-                            {% if contributors is not null %}
-                                {{ contributors|raw }}
-                            {% else %}
-                                <p><i>No contributors yet.</i></p>
-                            {% endif %}
+                                {% if contributors is not null %}
+                                    {{ contributors|raw }}
+                                {% else %}
+                                    <p><i>No contributors yet.</i></p>
+                                {% endif %}
+                            </div>
                         </div>
-                    </div>
+                        {% if not namespace.isOngoing %}
+                            <div class="row">
+                                <div class="col-lg-2">
+                                    <p>Version:</p>
+                                </div>
+                                <div class="col-lg-10">
+                                    {% set versionInfo, break = null, false %}
+                                    {% for textProperty in namespace.textProperties if textProperty.systemType.id == 31 %}
+                                        {% if not break %}
+                                            {% if textProperty.languageIsoCode == 'en' %}
+                                                {% set break = true %}
+                                                {% set versionInfo = textProperty.textProperty %}
+                                            {% else %}
+                                                {% if versionInfo == null %}
+                                                    {% set versionInfo = textProperty.textProperty %}
+                                                {% endif %}
+                                            {% endif %}
+                                        {% endif %}
+                                    {% endfor %}
+
+                                    {% if versionInfo is not null %}
+                                        {{ versionInfo|raw }}
+                                    {% else %}
+                                        <p><i>No version set yet.</i></p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endif %}
                     {% endif %}
                 </div>
             </div>
@@ -210,6 +238,13 @@
                 {% if namespace.isTopLevelNamespace == false %}
                     {% if namespace.isOngoing %}
                         <p>This namespace is ongoing and can be modified at any time. It is not advisable to use its classes and properties.</p>
+                    {% else %}
+                        <h4>Version info</h4>
+                        {% if txtpVersion is not null %}
+                            {{ txtpVersion.textProperty|raw }}
+                        {% else %}
+                            <p><i>No version set yet.</i></p>
+                        {% endif %}
                     {% endif %}
                     {% if namespace.publishedAt is not null %}
                         <p>Namespace published and available since: {{ namespace.publishedAt|date('Y-m-d') }}</p>

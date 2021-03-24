@@ -181,8 +181,10 @@
                             <dl class="object-details-list">
                                 <dt>Text</dt>
                                 <dd class="well">{{ textProperty.textProperty|raw}}</dd>
-                                <dt>Language</dt>
-                                <dd>{{ textProperty.languageIsoCode}}</dd>
+                                {% if textProperty.systemType.id != 31 %}
+                                    <dt>Language</dt>
+                                    <dd>{{ textProperty.languageIsoCode}}</dd>
+                                {% endif %}
                             </dl>
                         </div>
                     </div>

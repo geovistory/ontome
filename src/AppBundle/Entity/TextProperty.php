@@ -305,7 +305,7 @@ class TextProperty implements GroupSequenceProviderInterface
     }
 
     /**
-     * @return mixed
+     * @return SystemType
      */
     public function getSystemType()
     {
