@@ -239,6 +239,19 @@
                     {% if namespace.isOngoing %}
                         <p>This namespace is ongoing and can be modified at any time. It is not advisable to use its classes and properties.</p>
                     {% else %}
+                        {% set txtpVersion, break = null, false %}
+                        {% for textProperty in namespace.textProperties if textProperty.systemType.id == 31 %}
+                            {% if not break %}
+                                {% if textProperty.languageIsoCode == 'en' %}
+                                    {% set break = true %}
+                                    {% set txtpVersion = textProperty %}
+                                {% else %}
+                                    {% if txtpVersion == null %}
+                                        {% set txtpVersion = textProperty %}
+                                    {% endif %}
+                                {% endif %}
+                            {% endif %}
+                        {% endfor %}
                         <h4>Version info</h4>
                         {% if txtpVersion is not null %}
                             {{ txtpVersion.textProperty|raw }}

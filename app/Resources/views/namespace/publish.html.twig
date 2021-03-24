@@ -20,6 +20,20 @@
                 </div>
                 <p><strong>Label: {{ namespace.standardLabel }}</strong></p>
                 <p><strong>URI: <a>{{ namespace.displayURI }}</a></strong></p>
+                {% set txtpVersion, break = null, false %}
+                {% for textProperty in namespace.textProperties if textProperty.systemType.id == 31 %}
+                    {% if not break %}
+                        {% if textProperty.languageIsoCode == 'en' %}
+                            {% set break = true %}
+                            {% set txtpVersion = textProperty %}
+                        {% else %}
+                            {% if txtpVersion == null %}
+                                {% set txtpVersion = textProperty %}
+                            {% endif %}
+                        {% endif %}
+                    {% endif %}
+                {% endfor %}
+                <p><strong>Version info: <a>{{ txtpVersion.textProperty|raw }}</a></strong></p>
                 <p>
                     <a href="{{ path('namespace_edit', {
                         id: namespace.id,

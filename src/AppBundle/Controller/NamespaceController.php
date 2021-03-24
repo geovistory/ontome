@@ -291,26 +291,7 @@ class NamespaceController  extends Controller
 
         $this->denyAccessUnlessGranted('publish', $namespace);
 
-        $namespace->setModifier($this->getUser());
-        $namespace->setNamespaceURI(str_replace('-ongoing', '',$namespace->getNamespaceURI()));
-        $namespace->setOriginalNamespaceURI(str_replace('-ongoing', '',$namespace->getOriginalNamespaceURI()));
-
-        $em = $this->getDoctrine()->getManager();
-
-        $form = $this->createForm(NamespacePublicationForm::class, $namespace);
-
-        $form->handleRequest($request);
-        if ($form->isValid()) {
-            $namespace->setModifier($this->getUser());
-            $em->persist($namespace);
-            $em->flush();
-
-            $this->addFlash('success', 'Namespace Updated!');
-
-        }
-
         return $this->render('namespace/publish.html.twig', array(
-            'namespaceForm' => $form->createView(),
             'namespace' => $namespace
         ));
     }
@@ -329,6 +310,9 @@ class NamespaceController  extends Controller
         $this->denyAccessUnlessGranted('publish', $namespace);
 
         $namespace->setModifier($this->getUser());
+        if ($namespace->getTopLevelNamespace()->getIsExternalNamespace()) {
+            $namespace->setNamespaceURI(str_replace('-ongoing', '',$namespace->getNamespaceURI()));
+        }
 
         $em = $this->getDoctrine()->getManager();
 
