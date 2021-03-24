@@ -69,6 +69,13 @@ class EntityAssociation
     private $systemType;
 
     /**
+     * @ORM\ManyToOne(targetEntity="SystemType")
+     * @ORM\JoinColumn(name="validation_status", referencedColumnName="pk_system_type")
+     * @Assert\Type(type="AppBundle\Entity\SystemType")
+     */
+    private $validationStatus;
+
+    /**
      * @ORM\Column(type="boolean", name="directed")
      */
     private $directed;
@@ -178,6 +185,14 @@ class EntityAssociation
     public function getSystemType()
     {
         return $this->systemType;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getValidationStatus()
+    {
+        return $this->validationStatus;
     }
 
     /**
@@ -372,6 +387,14 @@ class EntityAssociation
     public function setSystemType($systemType)
     {
         $this->systemType = $systemType;
+    }
+
+    /**
+     * @param mixed $validationStatus
+     */
+    public function setValidationStatus($validationStatus)
+    {
+        $this->validationStatus = $validationStatus;
     }
 
     /**

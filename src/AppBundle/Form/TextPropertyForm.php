@@ -9,6 +9,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
@@ -39,21 +40,39 @@ class TextPropertyForm extends AbstractType
 
         $labelTextProperty = $options['labelTextProperty'];
 
+        //if the systemType of the textProperty is 31 (owl:versionInfo), we only need an input text field with of 10 characters long
+        if ($options['systemType'] === 31) {
+            $builder
+                ->add('textProperty', TextType::class, array(
+                    'attr' => array(
+                        'size' => '10',
+                        'maxlength' => '10'
+                    ),
+                    'label' => $labelTextProperty
+                ))
+                ->add('languageIsoCode', HiddenType::class, array(
+                    'data' => 'en'
+                ));
+        }
+        else {
+            $builder
+                ->add('textProperty', TextareaType::class, array(
+                    'attr' => array('class' => 'tinymce'),
+                    'label' => $labelTextProperty
+                ))
+                ->add('languageIsoCode', ChoiceType::class, array(
+                    'choices'  => array(
+                        'English' => 'en',
+                        'French' => 'fr',
+                        'German' => 'de',
+                        'Italian' => 'it',
+                        'Spanish' => 'es'
+                    ),
+                    'label' => 'Language'
+                ));
+        }
+
         $builder
-            ->add('textProperty', TextareaType::class, array(
-                'attr' => array('class' => 'tinymce'),
-                'label' => $labelTextProperty
-            ))
-            ->add('languageIsoCode', ChoiceType::class, array(
-                'choices'  => array(
-                    'English' => 'en',
-                    'French' => 'fr',
-                    'German' => 'de',
-                    'Italian' => 'it',
-                    'Spanish' => 'es'
-                ),
-                'label' => 'Language'
-            ))
             ->add('creator', HiddenType::class)
             ->add('modifier', HiddenType::class);
         $builder->get('creator')
@@ -67,7 +86,8 @@ class TextPropertyForm extends AbstractType
     {
         $resolver->setDefaults(array(
             'data_class' => TextProperty::class,
-            'labelTextProperty' => false
+            'labelTextProperty' => false,
+            'systemType' => 0
         ));
     }
 

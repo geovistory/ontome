@@ -63,6 +63,13 @@ class ClassAssociation
     private $namespaceForVersion;
 
     /**
+     * @ORM\ManyToOne(targetEntity="SystemType")
+     * @ORM\JoinColumn(name="validation_status", referencedColumnName="pk_system_type")
+     * @Assert\Type(type="AppBundle\Entity\SystemType")
+     */
+    private $validationStatus;
+
+    /**
      * @ORM\Column(type="text")
      */
     private $notes;
@@ -144,6 +151,14 @@ class ClassAssociation
     public function getParentClass()
     {
         return $this->parentClass;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getValidationStatus()
+    {
+        return $this->validationStatus;
     }
 
     /**
@@ -272,6 +287,14 @@ class ClassAssociation
     public function setParentClass($parentClass)
     {
         $this->parentClass = $parentClass;
+    }
+
+    /**
+     * @param mixed $validationStatus
+     */
+    public function setValidationStatus($validationStatus)
+    {
+        $this->validationStatus = $validationStatus;
     }
 
     /**

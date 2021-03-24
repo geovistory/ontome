@@ -18,11 +18,13 @@ class OntoNamespaceVoter extends Voter
     const EDIT = 'edit';
     const FULLEDIT = 'full_edit';
     const EDITMANAGER = 'edit_manager';
+    const VALIDATE = 'validate';
+    const PUBLISH = 'publish';
 
     protected function supports($attribute, $subject)
     {
         // if the attribute isn't one we support, return false
-        if (!in_array($attribute, array(self::EDIT, self::FULLEDIT, self::EDITMANAGER))) {
+        if (!in_array($attribute, array(self::EDIT, self::FULLEDIT, self::EDITMANAGER, self::VALIDATE, self::PUBLISH))) {
             return false;
         }
 
@@ -53,6 +55,10 @@ class OntoNamespaceVoter extends Voter
                 return $this->canFullEdit($namespace, $user);
             case self::EDITMANAGER:
                 return $this->canEditManager($namespace, $user);
+            case self::VALIDATE:
+                return $this->canValidate($namespace, $user);
+            case self::PUBLISH:
+                return $this->canPublish($namespace, $user);
         }
 
         throw new \LogicException('This code should not be reached!');
@@ -65,11 +71,16 @@ class OntoNamespaceVoter extends Voter
      */
     private function canFullEdit(OntoNamespace $namespace, User $user)
     {
-        foreach($user->getUserProjectAssociations()->getIterator() as $i => $userProjectAssociation) {
-            if(!$namespace->getIsOngoing()) {
+        if($namespace->getIsTopLevelNamespace()) {
+            if($namespace->getHasPublication()) {
                 return false;
             }
-            else if($userProjectAssociation->getProject() === $namespace->getProjectForTopLevelNamespace() && $userProjectAssociation->getPermission() <= 2){
+        }
+        else if(!$namespace->getIsOngoing()) {
+            return false;
+        }
+        foreach($user->getUserProjectAssociations()->getIterator() as $i => $userProjectAssociation) {
+            if($userProjectAssociation->getProject() === $namespace->getProjectForTopLevelNamespace() && $userProjectAssociation->getPermission() <= 2){
                 return true;
             }
         }
@@ -98,11 +109,65 @@ class OntoNamespaceVoter extends Voter
      */
     private function canEditManager(OntoNamespace $namespace, User $user)
     {
+        if(!$namespace->getIsOngoing()) {
+            return false;
+        }
         foreach($user->getUserProjectAssociations()->getIterator() as $i => $userProjectAssociation) {
-            if(!$namespace->getIsOngoing()) {
-                return false;
+            if($userProjectAssociation->getProject() === $namespace->getProjectForTopLevelNamespace() && $userProjectAssociation->getPermission() <= 2){
+                return true;
             }
-            else if($userProjectAssociation->getProject() === $namespace->getProjectForTopLevelNamespace() && $userProjectAssociation->getPermission() === 2){
+        }
+        return false;
+    }
+
+    /**
+     * @param OntoNamespace $namespace
+     * @param User $user
+     * @return bool TRUE if $user and $namespace have matching namespace (thanks to the $userProjectAssociation)
+     */
+    private function canPublish(OntoNamespace $namespace, User $user)
+    {
+        if(!$namespace->getIsOngoing()) {
+            return false;
+        }
+        foreach ($user->getUserProjectAssociations()->getIterator() as $i => $userProjectAssociation) {
+            if($userProjectAssociation->getProject() === $namespace->getProjectForTopLevelNamespace() && $userProjectAssociation->getPermission() == 1){
+                $atLeastOneClassValidated = false;
+                $atLeastOnePropertyValidated = false;
+                foreach ($namespace->getClasses()->getIterator() as $j => $class) {
+                    $validationStatus = $class->getClassVersionForDisplay($namespace)->getValidationStatus();
+                    if (!is_null($validationStatus) && $validationStatus->getId() == 26) {
+                        $atLeastOneClassValidated = true;
+                    }
+                }
+                if($atLeastOneClassValidated) {
+                    foreach ($namespace->getProperties()->getIterator() as $j => $property) {
+                        $validationStatus = $property->getPropertyVersionForDisplay($namespace)->getValidationStatus();
+                        if (!is_null($validationStatus) && $validationStatus->getId() == 26) {
+                            $atLeastOnePropertyValidated = true;
+                        }
+                    }
+                    if($atLeastOnePropertyValidated) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * @param OntoNamespace $namespace
+     * @param User $user
+     * @return bool TRUE if $user is a manager and if the namespace is ongoing
+     */
+    private function canValidate(OntoNamespace $namespace, User $user)
+    {
+        if(!$namespace->getIsOngoing()) {
+            return false;
+        }
+        foreach($user->getUserProjectAssociations()->getIterator() as $i => $userProjectAssociation) {
+            if($userProjectAssociation->getProject() === $namespace->getProjectForTopLevelNamespace() && $userProjectAssociation->getPermission() <= 2){
                 return true;
             }
         }

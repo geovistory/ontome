@@ -87,6 +87,13 @@ class TextProperty implements GroupSequenceProviderInterface
     private $systemType;
 
     /**
+     * @ORM\ManyToOne(targetEntity="SystemType")
+     * @ORM\JoinColumn(name="validation_status", referencedColumnName="pk_system_type")
+     * @Assert\Type(type="AppBundle\Entity\SystemType")
+     */
+    private $validationStatus;
+
+    /**
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Profile", inversedBy="textProperties")
      * @ORM\JoinColumn(name="fk_profile", referencedColumnName="pk_profile")
      * @Assert\Type(type="AppBundle\Entity\Profile")
@@ -201,7 +208,7 @@ class TextProperty implements GroupSequenceProviderInterface
     }
 
     /**
-     * @return mixed
+     * @return OntoClass
      */
     public function getClass()
     {
@@ -298,11 +305,19 @@ class TextProperty implements GroupSequenceProviderInterface
     }
 
     /**
-     * @return mixed
+     * @return SystemType
      */
     public function getSystemType()
     {
         return $this->systemType;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getValidationStatus()
+    {
+        return $this->validationStatus;
     }
 
     /**
@@ -415,6 +430,14 @@ class TextProperty implements GroupSequenceProviderInterface
     public function setSystemType($systemType)
     {
         $this->systemType = $systemType;
+    }
+
+    /**
+     * @param mixed $validationStatus
+     */
+    public function setValidationStatus($validationStatus)
+    {
+        $this->validationStatus = $validationStatus;
     }
 
     /**

@@ -31,7 +31,7 @@
             <li class="active"><a data-toggle="tab" href="#summary">Summary</a></li>
             <li><a data-toggle="tab" href="#identification">Identification</a></li>
             <li><a data-toggle="tab" href="#definition">Definition</a></li>
-            <li><a data-toggle="tab" href="#namespace-hierarchy">Hierarchy</a></li>
+            <li><a data-toggle="tab" href="#namespace-hierarchy">Versions</a></li>
             {% if not namespace.isTopLevelNamespace %}
             <li><a data-toggle="tab" href="#classes">Classes</a></li>
             <li><a data-toggle="tab" href="#properties">Properties</a></li>
@@ -88,32 +88,60 @@
                     </div>
                     {% endif %}
                     {% if not namespace.isTopLevelNamespace %}
-                    <div class="row">
-                        <div class="col-lg-2">
-                            <p>Contributors:</p>
-                        </div>
-                        <div class="col-lg-10">
-                            {% set contributors, break = null, false %}
-                            {% for textProperty in namespace.textProperties if textProperty.systemType.id == 2 %}
-                                {% if not break %}
-                                    {% if textProperty.languageIsoCode == 'en' %}
-                                        {% set break = true %}
-                                        {% set contributors = textProperty.textProperty %}
-                                    {% else %}
-                                        {% if contributors == null %}
+                        <div class="row">
+                            <div class="col-lg-2">
+                                <p>Contributors:</p>
+                            </div>
+                            <div class="col-lg-10">
+                                {% set contributors, break = null, false %}
+                                {% for textProperty in namespace.textProperties if textProperty.systemType.id == 2 %}
+                                    {% if not break %}
+                                        {% if textProperty.languageIsoCode == 'en' %}
+                                            {% set break = true %}
                                             {% set contributors = textProperty.textProperty %}
+                                        {% else %}
+                                            {% if contributors == null %}
+                                                {% set contributors = textProperty.textProperty %}
+                                            {% endif %}
                                         {% endif %}
                                     {% endif %}
-                                {% endif %}
-                            {% endfor %}
+                                {% endfor %}
 
-                            {% if contributors is not null %}
-                                {{ contributors|raw }}
-                            {% else %}
-                                <p><i>No contributors yet.</i></p>
-                            {% endif %}
+                                {% if contributors is not null %}
+                                    {{ contributors|raw }}
+                                {% else %}
+                                    <p><i>No contributors yet.</i></p>
+                                {% endif %}
+                            </div>
                         </div>
-                    </div>
+                        {% if not namespace.isOngoing %}
+                            <div class="row">
+                                <div class="col-lg-2">
+                                    <p>Version:</p>
+                                </div>
+                                <div class="col-lg-10">
+                                    {% set versionInfo, break = null, false %}
+                                    {% for textProperty in namespace.textProperties if textProperty.systemType.id == 31 %}
+                                        {% if not break %}
+                                            {% if textProperty.languageIsoCode == 'en' %}
+                                                {% set break = true %}
+                                                {% set versionInfo = textProperty.textProperty %}
+                                            {% else %}
+                                                {% if versionInfo == null %}
+                                                    {% set versionInfo = textProperty.textProperty %}
+                                                {% endif %}
+                                            {% endif %}
+                                        {% endif %}
+                                    {% endfor %}
+
+                                    {% if versionInfo is not null %}
+                                        {{ versionInfo|raw }}
+                                    {% else %}
+                                        <p><i>No version set yet.</i></p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endif %}
                     {% endif %}
                 </div>
             </div>
@@ -191,11 +219,13 @@
             </div>
             <div id="identification" class="tab-pane fade">
                 <h3>Identification</h3>
-                {% if namespace.originalNamespaceURI is null %}
-                <p>OntoME URI: https://dataforhistory.org/ontology/{{ namespace.namespaceURI }}</p>
-                {% else %}
-                <p>Original URI: {{ namespace.originalNamespaceUri|default('<i>No original URI yet.</i>')|raw }}</p>
-                {% endif %}
+                <p>
+                    {% if namespace.topLevelNamespace.isExternalNamespace %}
+                        URI: <strong><a>{{ namespace.namespaceURI }}</a></strong>
+                    {% else %}
+                        Internal URI: <strong><a>{{ namespace.topLevelNamespace.namespaceURI }}</a></strong>
+                    {% endif %}
+                </p>
                 {% if namespace.projectForTopLevelNamespace is not null %}
                 <p>
                     Project of belonging: <a href="{{ path('project_show', {
@@ -208,12 +238,32 @@
                 {% if namespace.isTopLevelNamespace == false %}
                     {% if namespace.isOngoing %}
                         <p>This namespace is ongoing and can be modified at any time. It is not advisable to use its classes and properties.</p>
+                    {% else %}
+                        {% set txtpVersion, break = null, false %}
+                        {% for textProperty in namespace.textProperties if textProperty.systemType.id == 31 %}
+                            {% if not break %}
+                                {% if textProperty.languageIsoCode == 'en' %}
+                                    {% set break = true %}
+                                    {% set txtpVersion = textProperty %}
+                                {% else %}
+                                    {% if txtpVersion == null %}
+                                        {% set txtpVersion = textProperty %}
+                                    {% endif %}
+                                {% endif %}
+                            {% endif %}
+                        {% endfor %}
+                        <h4>Version info</h4>
+                        {% if txtpVersion is not null %}
+                            {{ txtpVersion.textProperty|raw }}
+                        {% else %}
+                            <p><i>No version set yet.</i></p>
+                        {% endif %}
                     {% endif %}
                     {% if namespace.publishedAt is not null %}
                         <p>Namespace published and available since: {{ namespace.publishedAt|date('Y-m-d') }}</p>
                     {% endif %}
                 {% else %}
-                    <p>This namespace is a root namespace. Find all its versions in the <a href="#namespace-hierarchy" onclick="window.location = '{{ path('namespace_show', {'id': namespace.id}) }}#namespace-hierarchy';window.location.reload()">Hierarchy tab</a>.</p>
+                    <p>This namespace is a root namespace. Find all its versions in the <a href="#namespace-hierarchy" onclick="window.location = '{{ path('namespace_show', {'id': namespace.id}) }}#namespace-hierarchy';window.location.reload()">Versions tab</a>.</p>
                 {% endif %}
                 {% if not namespace.isTopLevelNamespace %}
                 <h3>Reference namespace{% if namespace.referencedNamespaceAssociations|length > 1 %}s{% endif %} of which this namespace is an extension</h3>
@@ -259,7 +309,7 @@
                 <p>* : Standard label for this language</p>
             </div>
             <div id="namespace-hierarchy" class="tab-pane fade">
-                <h3>Hierarchy</h3>
+                <h3>Versions</h3>
                 {% if namespace.isTopLevelNamespace %}
                     <p>{{ namespace.standardLabel }} is a <b>root namespace</b>.</p>
                 <h3>Versions of this namespace</h3>
@@ -336,6 +386,9 @@
                     <tr>
                         <th>Class</th>
                         <th>Last updated</th>
+                        {% if namespace.isOngoing %}
+                        <th>Validation status</th>
+                        {% endif %}
                     </tr>
                     </thead>
                     <tbody>
@@ -350,6 +403,27 @@
                                 </a>
                             </td>
                             <td>{{ classVersion.class.modificationTime|date('Y-m-d') }}</td>
+                            {% if namespace.isOngoing %}
+                            <td>
+                                {% if classVersion.validationStatus is null %}
+                                    <span class="label label-info">
+                                    Candidate
+                                </span>
+                                {% elseif classVersion.validationStatus.id == 26  %}
+                                    <span class="label label-success">
+                                    {{ classVersion.validationStatus }}
+                                </span>
+                                {% elseif classVersion.validationStatus.id == 27  %}
+                                    <span class="label label-danger">
+                                    {{ classVersion.validationStatus }}
+                                </span>
+                                {% elseif classVersion.validationStatus.id == 28  %}
+                                    <span class="label label-warning">
+                                    {{ classVersion.validationStatus }}
+                                </span>
+                                {% endif %}
+                            </td>
+                            {% endif %}
                         </tr>
                     {% endfor %}
                     </tbody>
@@ -367,6 +441,9 @@
                         <th></th>
                         <th>Range</th>
                         <th>Last updated</th>
+                        {% if namespace.isOngoing %}
+                        <th>Validation status</th>
+                        {% endif %}
                     </tr>
                     </thead>
                     <tbody>
@@ -411,6 +488,27 @@
                                 {% endif %}
                             </td>
                             <td>{{ propertyVersion.modificationTime|date('Y-m-d') }}</td>
+                            {% if namespace.isOngoing %}
+                            <td>
+                                {% if propertyVersion.validationStatus is null %}
+                                    <span class="label label-info">
+                                    Candidate
+                                </span>
+                                {% elseif propertyVersion.validationStatus.id == 26  %}
+                                    <span class="label label-success">
+                                    {{ propertyVersion.validationStatus }}
+                                </span>
+                                {% elseif propertyVersion.validationStatus.id == 27  %}
+                                    <span class="label label-danger">
+                                    {{ propertyVersion.validationStatus }}
+                                </span>
+                                {% elseif propertyVersion.validationStatus.id == 28  %}
+                                    <span class="label label-warning">
+                                    {{ propertyVersion.validationStatus }}
+                                </span>
+                                {% endif %}
+                            </td>
+                            {% endif %}
                         </tr>
                     {% endfor %}
                     </tbody>

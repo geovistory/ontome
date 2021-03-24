@@ -1,0 +1,78 @@
+<h4>
+    <span>Validation status:&nbsp;</span>
+    {% if is_granted('validate', propertyVersion)  %}
+    <div class="dropdown inline-block">
+        <button class="btn btn-default dropdown-toggle" type="button" id="dropdown-validation" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+            {% if propertyVersion.validationStatus is null %}
+            <span class="label label-info">
+                Candidate
+            </span>
+            {% elseif propertyVersion.validationStatus.id == 26  %}
+            <span class="label label-success">
+                {{ propertyVersion.validationStatus }}
+            </span>
+            {% elseif propertyVersion.validationStatus.id == 27  %}
+            <span class="label label-danger">
+                {{ propertyVersion.validationStatus }}
+            </span>
+            {% elseif propertyVersion.validationStatus.id == 28  %}
+            <span class="label label-warning">
+                {{ propertyVersion.validationStatus }}
+            </span>
+            {% endif %}
+            &nbsp;<span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu dropdown-versions" aria-labelledby="dropdown-versions">
+            <li class="label-success">
+                <a class="select-validation-status" data-id ="26" 
+                   href="{{ path('property_version_validation_status_edit', {
+                                id: propertyVersion.id,
+                                validationStatus: 26
+                        }) }}">
+                    <span class="label label-success">
+                        Validated
+                    </span>
+                </a>
+            </li>
+            <li class="label-warning">
+                <a class="select-validation-status" data-id="28" 
+                   href="{{ path('property_version_validation_status_edit', {
+                        id: propertyVersion.id,
+                        validationStatus: 28
+                    }) }}">
+                    <span class="label label-warning">
+                        Validation request
+                    </span>
+                </a>
+            </li>
+            <li class="label-danger">
+                <a class="select-validation-status" data-id="27" 
+                   href="{{ path('property_version_validation_status_edit', {
+                        id: propertyVersion.id,
+                        validationStatus: 27
+                    }) }}">
+                    <span class="label label-danger">
+                        Denied (see comment)
+                    </span>
+                </a>
+            </li>
+        </ul>
+    </div>
+    {% elseif propertyVersion.validationStatus is null %}
+    <span class="label label-info">
+        Candidate
+    </span>
+    {% elseif propertyVersion.validationStatus.id == 26  %}
+    <span class="label label-success">
+        {{ propertyVersion.validationStatus }}
+    </span>
+    {% elseif propertyVersion.validationStatus.id == 27  %}
+    <span class="label label-danger">
+        {{ propertyVersion.validationStatus }}
+    </span>
+    {% elseif propertyVersion.validationStatus.id == 28  %}
+    <span class="label label-warning">
+        {{ propertyVersion.validationStatus }}
+    </span>
+    {% endif %}
+</h4>

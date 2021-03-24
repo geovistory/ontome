@@ -15,7 +15,7 @@
         </tr>
         </thead>
         <tbody>
-        {% for namespace in namespaces %}
+        {% for namespace in namespaces  if namespace.isTopLevelNamespace %}
             <tr>
                 <td>
                     <a href="{{ path('namespace_show', {

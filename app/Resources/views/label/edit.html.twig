@@ -51,6 +51,65 @@
                             <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
                         </a>
                     {% endif %}
+                    {% if label.class is not null and is_granted('validate', label.class.classVersionForDisplay(label.namespaceForVersion))
+                        or label.property is not null and is_granted('validate', label.property.propertyVersionForDisplay(label.namespaceForVersion))
+                        or label.namespace is not null and is_granted('validate', label.namespace)
+                    %}
+                        <div class="dropdown inline-block">
+                            <button class="btn btn-default dropdown-toggle" type="button" id="dropdown-validation" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                                {% if label.validationStatus is null %}
+                                    <span class="label label-info">
+                                    Candidate
+                                </span>
+                                {% elseif label.validationStatus.id == 26  %}
+                                    <span class="label label-success">
+                                    {{ label.validationStatus }}
+                                </span>
+                                {% elseif label.validationStatus.id == 27  %}
+                                    <span class="label label-danger">
+                                    {{ label.validationStatus }}
+                                </span>
+                                {% elseif label.validationStatus.id == 28  %}
+                                    <span class="label label-warning">
+                                    {{ label.validationStatus }}
+                                </span>
+                                {% endif %}
+                                &nbsp;<span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-versions" aria-labelledby="dropdown-versions">
+                                <li class="label-success">
+                                    <a class="select-validation-status" data-id ="26" href="{{ path('label_validation_status_edit', {
+                                        id: label.id,
+                                        validationStatus: 26
+                                    }) }}">
+                                    <span class="label label-success">
+                                        Validated
+                                    </span>
+                                    </a>
+                                </li>
+                                <li class="label-warning">
+                                    <a class="select-validation-status" data-id="28" href="{{ path('label_validation_status_edit', {
+                                        id: label.id,
+                                        validationStatus: 28
+                                    }) }}">
+                                    <span class="label label-warning">
+                                        Validation request
+                                    </span>
+                                    </a>
+                                </li>
+                                <li class="label-danger">
+                                    <a class="select-validation-status" data-id="27" href="{{ path('label_validation_status_edit', {
+                                        id: label.id,
+                                        validationStatus: 27
+                                    }) }}">
+                                    <span class="label label-danger">
+                                        Denied (see comment)
+                                    </span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    {% endif %}
                 </h2>
                 <ul class="nav nav-tabs" id="main-tabs">
                     <li class="active"><a data-toggle="tab" href="#label">Label</a></li>

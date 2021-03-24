@@ -9,14 +9,13 @@
 namespace AppBundle\Repository;
 
 
-use AppBundle\Entity\OntoClass;
 use AppBundle\Entity\OntoNamespace;
 use AppBundle\Entity\Profile;
 use AppBundle\Entity\Project;
 use AppBundle\Entity\User;
-use AppBundle\Entity\UserProjectAssociation;
+use Doctrine\Common\Collections\Criteria;
+use Doctrine\DBAL\DBALException;
 use Doctrine\ORM\EntityRepository;
-use Doctrine\ORM\Query\ResultSetMapping;
 use Doctrine\ORM\Query\ResultSetMappingBuilder;
 use Doctrine\ORM\QueryBuilder;
 
@@ -324,7 +323,7 @@ class NamespaceRepository extends EntityRepository
 
     /**
      * @return array - An array with namespace keys
-     * @throws \Doctrine\DBAL\DBALException
+     * @throws DBALException
      */
     public function findPublicProjectNamespacesId(){
         $conn = $this->getEntityManager()->getConnection();
@@ -355,7 +354,7 @@ class NamespaceRepository extends EntityRepository
     /**
      * @param User $user
      * @return array - An array with namespace keys
-     * @throws \Doctrine\DBAL\DBALException
+     * @throws DBALException
      */
     public function findNamespacesIdByUser(User $user){
         $conn = $this->getEntityManager()->getConnection();
@@ -404,5 +403,106 @@ class NamespaceRepository extends EntityRepository
     public function findNamespacesByNamespacesId(array $namespacesId){
         $namespaces = $this->createQueryBuilderNamespacesByNamespacesId($namespacesId)->execute();
         return $namespaces;
+    }
+
+    /**
+     * @param OntoNamespace $namespace
+     * @return int - the new published namespace id
+     * @throws DBALException
+     */
+    public function publishNamespace(OntoNamespace $namespace){
+        $conn = $this->getEntityManager()->getConnection();
+
+        $sql = "SELECT che.publish_namespace(:namespaceId);";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->execute(array('namespaceId' => $namespace->getId()));
+
+        return $stmt->fetchColumn();
+    }
+
+    /**
+     * @param OntoNamespace $namespace
+     * @return bool true if the ongoing namespace is different from the latest namespace with same root or if there is no other version
+     * @throws DBALException
+     */
+    public function checkNamespaceChange(OntoNamespace $namespace){
+        $change = false;
+        $criteria = Criteria::create()
+            ->orderBy(array('id' => Criteria::DESC));
+        if (count($namespace->getTopLevelNamespace()->getChildVersions()) <= 1 ) {
+            $change = true;
+        }
+        else {
+            $latestNamespace = $namespace->getTopLevelNamespace()->getChildVersions()->matching($criteria)->first();
+
+
+            $conn = $this->getEntityManager()->getConnection();
+            $sqlOngoing = "SELECT encode(
+                                digest(
+                                       (SELECT array_agg(nsa)::text[] 
+                                        FROM (SELECT row(R.*)::text AS nsa 
+                                              FROM (
+                                                    SELECT cls.fk_class, standard_label, clslb.label, clslb.language_iso_code, clstp.text_property, clstp.language_iso_code, subcl.is_parent_class, ea.fk_target_class
+                                                    FROM che.class_version cls
+                                                    JOIN che.label clslb ON cls.fk_class = clslb.fk_class AND clslb.fk_namespace_for_version = cls.fk_namespace_for_version
+                                                    JOIN che.text_property clstp ON cls.fk_class = clstp.fk_class AND clstp.fk_namespace_for_version = cls.fk_namespace_for_version
+                                                    LEFT JOIN che.is_subclass_of subcl ON cls.fk_class = subcl.is_child_class AND subcl.fk_namespace_for_version = cls.fk_namespace_for_version
+                                                    LEFT JOIN che.entity_association ea ON cls.fk_class = ea.fk_source_class AND ea.fk_namespace_for_version = cls.fk_namespace_for_version
+                                                    WHERE cls.fk_namespace_for_version = :namespaceId AND cls.validation_status = 26
+                                                    UNION
+                                                    SELECT prp.fk_property, standard_label, prplb.label, prplb.language_iso_code, prptp.text_property, prptp.language_iso_code, subcl.is_parent_property, ea.fk_target_property
+                                                    FROM che.property_version prp
+                                                    JOIN che.label prplb ON prp.fk_property = prplb.fk_property AND prplb.fk_namespace_for_version = prp.fk_namespace_for_version
+                                                    JOIN che.text_property prptp ON prp.fk_property = prptp.fk_property AND prptp.fk_namespace_for_version = prp.fk_namespace_for_version
+                                                    LEFT JOIN che.is_subproperty_of subcl ON prp.fk_property = subcl.is_child_property AND subcl.fk_namespace_for_version = prp.fk_namespace_for_version
+                                                    LEFT JOIN che.entity_association ea ON prp.fk_property = ea.fk_source_property AND ea.fk_namespace_for_version = prp.fk_namespace_for_version
+                                                    WHERE prp.fk_namespace_for_version = :namespaceId AND prp.validation_status = 26
+                                              )R
+                                             )alias
+                                       )::text
+                                , 'sha256')
+                               , 'hex');";
+            $stmt = $conn->prepare($sqlOngoing);
+            $stmt->execute(array('namespaceId' => $namespace->getId()));
+
+            $hashOngoing = $stmt->fetchColumn();
+
+            $sqlLatest = "SELECT encode(
+                                digest(
+                                       (SELECT array_agg(nsa)::text[] 
+                                        FROM (SELECT row(R.*)::text AS nsa 
+                                              FROM (
+                                                    SELECT cls.fk_class, standard_label, clslb.label, clslb.language_iso_code, clstp.text_property, clstp.language_iso_code, subcl.is_parent_class, ea.fk_target_class
+                                                    FROM che.class_version cls
+                                                    JOIN che.label clslb ON cls.fk_class = clslb.fk_class AND clslb.fk_namespace_for_version = cls.fk_namespace_for_version
+                                                    JOIN che.text_property clstp ON cls.fk_class = clstp.fk_class AND clstp.fk_namespace_for_version = cls.fk_namespace_for_version
+                                                    LEFT JOIN che.is_subclass_of subcl ON cls.fk_class = subcl.is_child_class AND subcl.fk_namespace_for_version = cls.fk_namespace_for_version
+                                                    LEFT JOIN che.entity_association ea ON cls.fk_class = ea.fk_source_class AND ea.fk_namespace_for_version = cls.fk_namespace_for_version
+                                                    WHERE cls.fk_namespace_for_version = :namespaceId
+                                                    UNION
+                                                    SELECT prp.fk_property, standard_label, prplb.label, prplb.language_iso_code, prptp.text_property, prptp.language_iso_code, subcl.is_parent_property, ea.fk_target_property
+                                                    FROM che.property_version prp
+                                                    JOIN che.label prplb ON prp.fk_property = prplb.fk_property AND prplb.fk_namespace_for_version = prp.fk_namespace_for_version
+                                                    JOIN che.text_property prptp ON prp.fk_property = prptp.fk_property AND prptp.fk_namespace_for_version = prp.fk_namespace_for_version
+                                                    LEFT JOIN che.is_subproperty_of subcl ON prp.fk_property = subcl.is_child_property AND subcl.fk_namespace_for_version = prp.fk_namespace_for_version
+                                                    LEFT JOIN che.entity_association ea ON prp.fk_property = ea.fk_source_property AND ea.fk_namespace_for_version = prp.fk_namespace_for_version
+                                                    WHERE prp.fk_namespace_for_version = :namespaceId
+                                              )R
+                                             )alias
+                                       )::text
+                                , 'sha256')
+                               , 'hex');";
+            $stmt = $conn->prepare($sqlLatest);
+            $stmt->execute(array('namespaceId' => $latestNamespace->getId()));
+
+            $hashLatest = $stmt->fetchColumn();
+
+            if ($hashOngoing != $hashLatest) {
+                $change = true;
+            }
+        }
+
+        return $change;
     }
 }

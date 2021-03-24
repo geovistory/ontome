@@ -91,6 +91,85 @@
                     </a>
                     {% endif %}
                 </h2>
+                <h4>
+                    {% if textProperty.class is not null and is_granted('validate', textProperty.class.classVersionForDisplay(textProperty.namespaceForVersion))
+                        or textProperty.property is not null and is_granted('validate', textProperty.property.propertyVersionForDisplay(textProperty.namespaceForVersion))
+                        or textProperty.namespace is not null and is_granted('validate', textProperty.namespace)
+                    %}
+                        <div class="dropdown inline-block">
+                            <button class="btn btn-default dropdown-toggle" type="button" id="dropdown-validation" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                                {% if textProperty.validationStatus is null %}
+                                    <span class="label label-info">
+                                    Candidate
+                                </span>
+                                {% elseif textProperty.validationStatus.id == 26  %}
+                                    <span class="label label-success">
+                                    {{ textProperty.validationStatus }}
+                                </span>
+                                {% elseif textProperty.validationStatus.id == 27  %}
+                                    <span class="label label-danger">
+                                    {{ textProperty.validationStatus }}
+                                </span>
+                                {% elseif textProperty.validationStatus.id == 28  %}
+                                    <span class="label label-warning">
+                                    {{ textProperty.validationStatus }}
+                                </span>
+                                {% endif %}
+                                &nbsp;<span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-versions" aria-labelledby="dropdown-versions">
+                                <li class="label-success">
+                                    <a class="select-validation-status" data-id ="26" href="{{ path('text_property_validation_status_edit', {
+                                        id: textProperty.id,
+                                        validationStatus: 26
+                                    }) }}">
+                                    <span class="label label-success">
+                                        Validated
+                                    </span>
+                                    </a>
+                                </li>
+                                <li class="label-warning">
+                                    <a class="select-validation-status" data-id="28" href="{{ path('text_property_validation_status_edit', {
+                                        id: textProperty.id,
+                                        validationStatus: 28
+                                    }) }}">
+                                    <span class="label label-warning">
+                                        Validation request
+                                    </span>
+                                    </a>
+                                </li>
+                                <li class="label-danger">
+                                    <a class="select-validation-status" data-id="27" href="{{ path('text_property_validation_status_edit', {
+                                        id: textProperty.id,
+                                        validationStatus: 27
+                                    }) }}">
+                                    <span class="label label-danger">
+                                        Denied (see comment)
+                                    </span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    {% elseif textProperty.class is not null or textProperty.property is not null%}
+                        {% if textProperty.validationStatus is null %}
+                            <span class="label label-info">
+                                    Candidate
+                                </span>
+                        {% elseif textProperty.validationStatus.id == 26  %}
+                            <span class="label label-success">
+                                    {{ textProperty.validationStatus }}
+                                </span>
+                        {% elseif textProperty.validationStatus.id == 27  %}
+                            <span class="label label-danger">
+                                    {{ textProperty.validationStatus }}
+                                </span>
+                        {% elseif textProperty.validationStatus.id == 28  %}
+                            <span class="label label-warning">
+                                    {{ textProperty.validationStatus }}
+                                </span>
+                        {% endif %}
+                    {% endif %}
+                </h4>
                 <ul class="nav nav-tabs" id="main-tabs">
                     <li class="active"><a data-toggle="tab" href="#text-property">{{ textProperty.systemType }}</a></li>
                     <li><a data-toggle="tab" href="#comments">Comments</a></li>
@@ -102,8 +181,10 @@
                             <dl class="object-details-list">
                                 <dt>Text</dt>
                                 <dd class="well">{{ textProperty.textProperty|raw}}</dd>
-                                <dt>Language</dt>
-                                <dd>{{ textProperty.languageIsoCode}}</dd>
+                                {% if textProperty.systemType.id != 31 %}
+                                    <dt>Language</dt>
+                                    <dd>{{ textProperty.languageIsoCode}}</dd>
+                                {% endif %}
                             </dl>
                         </div>
                     </div>

@@ -10,12 +10,16 @@ namespace AppBundle\Controller;
 
 use AppBundle\Entity\ClassAssociation;
 use AppBundle\Entity\OntoClass;
+use AppBundle\Entity\SystemType;
 use AppBundle\Entity\TextProperty;
 use AppBundle\Form\ClassAssociationEditForm;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use AppBundle\Form\ParentClassAssociationForm;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 class ClassAssociationController extends Controller
 {
@@ -210,5 +214,63 @@ class ClassAssociationController extends Controller
         ));
     }
 
+    /**
+     * @Route("/class-association/{id}/edit-validity/{validationStatus}", name="class_association_validation_status_edit")
+     * @param ClassAssociation $classAssociation
+     * @param SystemType $validationStatus
+     * @param Request $request
+     * @throws \Exception in case of unsuccessful validation
+     * @return RedirectResponse|Response
+     */
+    public function editValidationStatusAction(ClassAssociation $classAssociation, SystemType $validationStatus, Request $request)
+    {
+        // On doit avoir une version de l'association sinon on lance une exception.
+        if(is_null($classAssociation)){
+            throw $this->createNotFoundException('The class association n°'.$classAssociation->getId().' does not exist. Please contact an administrator.');
+        }
+
+        //Denied access if not an authorized validator
+        $this->denyAccessUnlessGranted('validate', $classAssociation->getChildClass()->getClassVersionForDisplay());
+
+
+        $classAssociation->setModifier($this->getUser());
+
+        $newValidationStatus = new SystemType();
+
+        try{
+            $em = $this->getDoctrine()->getManager();
+            $newValidationStatus = $em->getRepository('AppBundle:SystemType')
+                ->findOneBy(array('id' => $validationStatus->getId()));
+        } catch (\Exception $e) {
+            throw new BadRequestHttpException('The provided status does not exist.');
+        }
+
+        if (!is_null($newValidationStatus)) {
+            $statusId = intval($newValidationStatus->getId());
+            if (in_array($statusId, [26,27,28], true)) {
+                $classAssociation->setValidationStatus($newValidationStatus);
+                $classAssociation->setModifier($this->getUser());
+                $classAssociation->setModificationTime(new \DateTime('now'));
+
+                $em->persist($classAssociation);
+
+                $em->flush();
+
+                if ($statusId == 27){
+                    return $this->redirectToRoute('class_association_edit', [
+                        'id' => $classAssociation->getId()
+                    ]);
+                }
+                else return $this->redirectToRoute('class_association_show', [
+                    'id' => $classAssociation->getId()
+                ]);
+
+            }
+        }
+
+        return $this->redirectToRoute('class_association_show', [
+            'id' => $classAssociation->getId()
+        ]);
+    }
 
 }

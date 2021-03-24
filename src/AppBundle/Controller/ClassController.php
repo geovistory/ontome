@@ -14,6 +14,7 @@ use AppBundle\Entity\OntoClass;
 use AppBundle\Entity\OntoClassVersion;
 use AppBundle\Entity\OntoNamespace;
 use AppBundle\Entity\Project;
+use AppBundle\Entity\SystemType;
 use AppBundle\Entity\TextProperty;
 use AppBundle\Form\ClassEditIdentifierForm;
 use AppBundle\Form\ClassQuickAddForm;
@@ -21,6 +22,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -54,7 +56,7 @@ class ClassController extends Controller
      * @Route("class/new/{namespace}", name="class_new")
      * @param Request $request
      * @param OntoNamespace $namespace
-     * @return \Symfony\Component\HttpFoundation\RedirectResponse|Response
+     * @return RedirectResponse|Response
      * @throws \Exception
      */
     public function newAction(Request $request, OntoNamespace $namespace)
@@ -303,6 +305,21 @@ class ClassController extends Controller
         $this->get('logger')
             ->info('Showing class: '.$class->getIdentifierInNamespace());
 
+        //If validation status is in validation request or is validation, we can't allow edition of the entity and we rended the show template
+        if (!is_null($classVersion->getValidationStatus()) && ($classVersion->getValidationStatus()->getId() === 26 || $classVersion->getValidationStatus()->getId() === 28)) {
+            return $this->render('class/show.html.twig', [
+                'classVersion' => $classVersion,
+                'ancestors' => $ancestors,
+                'descendants' => $descendants,
+                'relations' => $relations,
+                'outgoingProperties' => $outgoingProperties,
+                'outgoingInheritedProperties' => $outgoingInheritedProperties,
+                'ingoingProperties' => $ingoingProperties,
+                'ingoingInheritedProperties' => $ingoingInheritedProperties,
+                'namespacesId' => $namespacesId
+            ]);
+        }
+
 
         return $this->render('class/edit.html.twig', array(
             'classVersion' => $classVersion,
@@ -316,6 +333,65 @@ class ClassController extends Controller
             'namespacesId' => $namespacesId,
             'classIdentifierForm' => $formIdentifier->createView()
         ));
+    }
+
+    /**
+     * @Route("/class-version/{id}/edit-validity/{validationStatus}", name="class_version_validation_status_edit")
+     * @param OntoClassVersion $classVersion
+     * @param SystemType $validationStatus
+     * @param Request $request
+     * @throws \Exception in case of unsuccessful validation
+     * @return RedirectResponse|Response
+     */
+    public function editValidationStatusAction(OntoClassVersion $classVersion, SystemType $validationStatus, Request $request)
+    {
+        // On doit avoir une version de la classe sinon on lance une exception.
+        if(is_null($classVersion)){
+            throw $this->createNotFoundException('The class version n°'.$classVersion->getId().' does not exist. Please contact an administrator.');
+        }
+
+        //Denied access if not an authorized validator
+        $this->denyAccessUnlessGranted('validate', $classVersion);
+
+
+        $classVersion->setModifier($this->getUser());
+
+        $newValidationStatus = new SystemType();
+
+        try{
+            $em = $this->getDoctrine()->getManager();
+            $newValidationStatus = $em->getRepository('AppBundle:SystemType')
+                ->findOneBy(array('id' => $validationStatus->getId()));
+        } catch (\Exception $e) {
+            throw new BadRequestHttpException('The provided status does not exist.');
+        }
+
+        if (!is_null($newValidationStatus)) {
+            $statusId = intval($newValidationStatus->getId());
+            if (in_array($statusId, [26,27,28], true)) {
+                $classVersion->setValidationStatus($newValidationStatus);
+                $classVersion->setModifier($this->getUser());
+                $classVersion->setModificationTime(new \DateTime('now'));
+
+                $em->persist($classVersion);
+
+                $em->flush();
+
+                if ($statusId == 27){
+                    return $this->redirectToRoute('class_edit', [
+                        'id' => $classVersion->getClass()->getId()
+                    ]);
+                }
+                else return $this->redirectToRoute('class_show', [
+                    'id' => $classVersion->getClass()->getId()
+                ]);
+
+            }
+        }
+
+        return $this->redirectToRoute('class_show', [
+            'id' => $classVersion->getClass()->getId()
+        ]);
     }
 
     /**

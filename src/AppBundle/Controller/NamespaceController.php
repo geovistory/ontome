@@ -16,6 +16,7 @@ use AppBundle\Entity\Project;
 use AppBundle\Entity\ReferencedNamespaceAssociation;
 use AppBundle\Entity\TextProperty;
 use AppBundle\Form\NamespaceForm;
+use AppBundle\Form\NamespacePublicationForm;
 use AppBundle\Form\NamespaceQuickAddForm;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
@@ -111,16 +112,19 @@ class NamespaceController  extends Controller
             $namespace->setModifier($this->getUser());
             $namespace->setCreationTime(new \DateTime('now'));
             $namespace->setModificationTime(new \DateTime('now'));
-
-            $labelForURI = strtolower(preg_replace("/[^A-Za-z0-9\-]/", '-', $namespaceLabel->getLabel()));
-            //$labelForURI = strtolower(str_replace(' ', '-', $namespaceLabel->getLabel()));
-
-            $namespace->setNamespaceURI($labelForURI);
             $namespace->setIsTopLevelNamespace(true);
             $namespace->setIsOngoing(false);
 
+            //just in case, we set the domain to ontome.net for non external namespaces
+            if (!$namespace->getIsExternalNamespace() && strpos($namespace->getNamespaceURI(), 'https://ontome.net/ns') !== 0 ) {
+                $u = parse_url($namespace->getNamespaceURI());
+                $uri = 'https://ontome.net/ns'.$u['path']; //if the user tries to change the domain, we force it to be ontome.net
+                $namespace->setNamespaceURI($uri);
+            }
 
-            $ongoingNamespace->setNamespaceURI($labelForURI.'-ongoing');
+
+            $ongoingNamespace->setNamespaceURI($namespace->getNamespaceURI());
+            $ongoingNamespace->setIsExternalNamespace($namespace->getIsExternalNamespace());
             $ongoingNamespace->setIsTopLevelNamespace(false);
             $ongoingNamespace->setIsOngoing(true);
             $ongoingNamespace->setTopLevelNamespace($namespace);
@@ -132,7 +136,7 @@ class NamespaceController  extends Controller
             $ongoingNamespace->setModificationTime(new \DateTime('now'));
 
             $ongoingNamespaceLabel->setIsStandardLabelForLanguage(true);
-            $ongoingNamespaceLabel->setLabel($namespaceLabel->getLabel().' ongoing');
+            $ongoingNamespaceLabel->setLabel($namespaceLabel->getLabel());
             $ongoingNamespaceLabel->setLanguageIsoCode($namespaceLabel->getLanguageIsoCode());
             $ongoingNamespaceLabel->setCreator($this->getUser());
             $ongoingNamespaceLabel->setModifier($this->getUser());
@@ -223,14 +227,34 @@ class NamespaceController  extends Controller
 
         if($this->isGranted('full_edit', $namespace)) {
 
+            $ongoingNamespaceHasChanged = $em->getRepository('AppBundle:OntoNamespace')
+                ->checkNamespaceChange($namespace);
+
             $form = $this->createForm(NamespaceForm::class, $namespace);
 
             $form->handleRequest($request);
-            if ($form->isValid()) {
+            if ($form->isSubmitted() && $form->isValid()) {
+                if (!$namespace->getIsExternalNamespace() && strpos($namespace->getNamespaceURI(), 'https://ontome.net/ns') !== 0 ) {
+                    $u = parse_url($namespace->getNamespaceURI());
+                    $uri = 'https://ontome.net/ns'.$u['path']; //if the user tries to change the domain, we force it to be ontome.net
+                    $namespace->setNamespaceURI($uri);
+                }
                 $namespace->setModifier($this->getUser());
                 $em->persist($namespace);
-                $em->flush();
 
+                //update URI and isExternalNamespace values for child namespaces
+
+                if ($namespace->getIsTopLevelNamespace()) {
+                    foreach ($namespace->getChildVersions() as $childNamespace) {
+                        if (!$namespace->getIsExternalNamespace()) {
+                            $childNamespace->setNamespaceURI(null);
+                        }
+                        $childNamespace->setIsExternalNamespace($namespace->getIsExternalNamespace());
+                        $em->persist($namespace);
+                    }
+                }
+
+                $em->flush();
                 $this->addFlash('success', 'Namespace Updated!');
 
                 return $this->redirectToRoute('namespace_edit', [
@@ -241,6 +265,7 @@ class NamespaceController  extends Controller
                 'namespaceForm' => $form->createView(),
                 'namespace' => $namespace,
                 'rootNamespaces' => $rootNamespaces,
+                'hasChanged' => $ongoingNamespaceHasChanged,
             ]);
         }
         else {
@@ -248,8 +273,73 @@ class NamespaceController  extends Controller
                 'namespaceForm' => null,
                 'namespace' => $namespace,
                 'rootNamespaces' => $rootNamespaces,
+                'hasChanged' => null,
             ]);
         }
+    }
+
+    /**
+     * @Route("/namespace/{id}/publish", name="namespace_publication")
+     * @param OntoNamespace $namespace
+     * @return Response the rendered template
+     */
+    public function publishAction(OntoNamespace $namespace, Request $request)
+    {
+        if(is_null($namespace)) {
+            throw $this->createNotFoundException('The namespace n° '.$namespace->getId().' does not exist. Please contact an administrator.');
+        }
+
+        $this->denyAccessUnlessGranted('publish', $namespace);
+
+        return $this->render('namespace/publish.html.twig', array(
+            'namespace' => $namespace
+        ));
+    }
+
+    /**
+     * @Route("/namespace/{id}/validate-publication", name="namespace_validate_publication")
+     * @param OntoNamespace $namespace
+     * @return Response the rendered template
+     */
+    public function validatePublicationAction(OntoNamespace $namespace, Request $request)
+    {
+        if(is_null($namespace)) {
+            throw $this->createNotFoundException('The namespace n° '.$namespace->getId().' does not exist. Please contact an administrator.');
+        }
+
+        $this->denyAccessUnlessGranted('publish', $namespace);
+
+        $namespace->setModifier($this->getUser());
+        if ($namespace->getTopLevelNamespace()->getIsExternalNamespace()) {
+            $namespace->setNamespaceURI(str_replace('-ongoing', '',$namespace->getNamespaceURI()));
+        }
+
+        $em = $this->getDoctrine()->getManager();
+
+        $newNamespaceId = $em->getRepository('AppBundle:OntoNamespace')
+            ->publishNamespace($namespace);
+
+        $newNamespace = $em->getRepository('AppBundle:OntoNamespace')->findOneBy(['id'=>$newNamespaceId]);
+
+        $newNamespaceLabel = new Label();
+        $newNamespaceLabel->setIsStandardLabelForLanguage(true);
+        $newNamespaceLabel->setCreator($this->getUser());
+        $newNamespaceLabel->setModifier($this->getUser());
+        $newNamespaceLabel->setCreationTime(new \DateTime('now'));
+        $newNamespaceLabel->setModificationTime(new \DateTime('now'));
+        $newNamespaceLabel->setLabel(str_replace(' ongoing','', $namespace->getStandardLabel()));
+
+        $newNamespace->addLabel($newNamespaceLabel);
+        $newNamespace->setStandardLabel($newNamespaceLabel->getLabel());
+        $newNamespace->setIsExternalNamespace($namespace->getIsExternalNamespace());
+
+        $em->persist($namespace);
+        $em->persist($newNamespace);
+        $em->flush();
+
+        return $this->redirectToRoute('namespace_show', [
+            'id' => $newNamespaceId
+        ]);
     }
 
     /**

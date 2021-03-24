@@ -12,13 +12,17 @@ namespace AppBundle\Controller;
 use AppBundle\Entity\EntityAssociation;
 use AppBundle\Entity\OntoClass;
 use AppBundle\Entity\Property;
+use AppBundle\Entity\SystemType;
 use AppBundle\Entity\TextProperty;
 use AppBundle\Form\EntityAssociationForm;
 use AppBundle\Form\EntityAssociationEditForm;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 class EntityAssociationController extends Controller
 {
@@ -311,5 +315,69 @@ class EntityAssociationController extends Controller
             'inverse' => $inverse,
             'entityAssociationForm' => $form->createView(),
         ));
+    }
+
+    /**
+     * @Route("/entity-association/{id}/edit-validity/{validationStatus}", name="entity_association_validation_status_edit")
+     * @param EntityAssociation $entityAssociation
+     * @param SystemType $validationStatus
+     * @param Request $request
+     * @throws \Exception in case of unsuccessful validation
+     * @return RedirectResponse|Response
+     */
+    public function editValidationStatusAction(EntityAssociation $entityAssociation, SystemType $validationStatus, Request $request)
+    {
+        // On doit avoir une version de l'association sinon on lance une exception.
+        if(is_null($entityAssociation)){
+            throw $this->createNotFoundException('The entity association n°'.$entityAssociation->getId().' does not exist. Please contact an administrator.');
+        }
+
+        //Denied access if not an authorized validator
+        if ($entityAssociation->getSourceObjectType() == 'class') {
+            $this->denyAccessUnlessGranted('validate', $entityAssociation->getSourceClass()->getClassVersionForDisplay());
+        }
+        else if ($entityAssociation->getSourceObjectType() == 'property') {
+            $this->denyAccessUnlessGranted('validate', $entityAssociation->getSourceProperty()->getPropertyVersionForDisplay());
+        }
+        else throw new AccessDeniedHttpException();
+
+        $entityAssociation->setModifier($this->getUser());
+
+        $newValidationStatus = new SystemType();
+
+        try{
+            $em = $this->getDoctrine()->getManager();
+            $newValidationStatus = $em->getRepository('AppBundle:SystemType')
+                ->findOneBy(array('id' => $validationStatus->getId()));
+        } catch (\Exception $e) {
+            throw new BadRequestHttpException('The provided status does not exist.');
+        }
+
+        if (!is_null($newValidationStatus)) {
+            $statusId = intval($newValidationStatus->getId());
+            if (in_array($statusId, [26,27,28], true)) {
+                $entityAssociation->setValidationStatus($newValidationStatus);
+                $entityAssociation->setModifier($this->getUser());
+                $entityAssociation->setModificationTime(new \DateTime('now'));
+
+                $em->persist($entityAssociation);
+
+                $em->flush();
+
+                if ($statusId == 27){
+                    return $this->redirectToRoute('entity_association_edit', [
+                        'id' => $entityAssociation->getId()
+                    ]);
+                }
+                else return $this->redirectToRoute('entity_association_show', [
+                    'id' => $entityAssociation->getId()
+                ]);
+
+            }
+        }
+
+        return $this->redirectToRoute('entity_association_show', [
+            'id' => $entityAssociation->getId()
+        ]);
     }
 }

@@ -45,6 +45,31 @@
                 [inherited, cf. <a href="{{ path('property_show', {'id': propertyVersion.property.propertyOfOrigin.id}) }}" target="_blank"><em>original</em></a>]
             {% endif %}
         </div>
+        <div>
+            {% set countValidationsTxtp = 0 %}
+            {% set countValidationsLbl = 0 %}
+
+            {% for textProperty in propertyVersion.property.textProperties
+                if textProperty.systemType.id == 1
+                and textProperty.namespaceForVersion.id in namespacesId %}
+                {% if textProperty.validationStatus.id == 26 %}
+                    {% set countValidationsTxtp = countValidationsTxtp + 1 %}
+                {% endif %}
+            {% endfor %}
+
+            {% for label in propertyVersion.property.labels
+                if label.namespaceForVersion.id in namespacesId %}
+                {% if label.validationStatus.id == 26 %}
+                    {% set countValidationsLbl = countValidationsLbl + 1 %}
+                {% endif %}
+            {% endfor %}
+
+            {% if countValidationsTxtp > 0 and countValidationsLbl > 0 %}
+                {{ include('property/_validation.html.twig') }}
+            {% else %}
+                <h6><span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span><em>This property does not yet have the minimum number of validated parts required for publication.</em></h6>
+            {% endif %}
+        </div>
         <ul class="nav nav-tabs" id="main-tabs">
             <li class="active"><a data-toggle="tab" href="#summary">Summary</a></li>
             <li><a data-toggle="tab" href="#identification">Identification</a></li>
@@ -310,6 +335,7 @@
                         <th>Namespace</th>
                         <th>Edit</th>
                         <th>Comments</th>
+                        <th>Validation</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -339,6 +365,25 @@
                                     <span class="badge {% if textProperty.comments|length > 0  %}progress-bar-danger {% endif %}">{{ textProperty.comments|length }}</span>
                                 </a>
                             </td>
+                            <td>
+                                {% if textProperty.validationStatus is null %}
+                                    <span class="label label-info">
+                                    Candidate
+                                </span>
+                                {% elseif textProperty.validationStatus.id == 26  %}
+                                    <span class="label label-success">
+                                    {{ textProperty.validationStatus }}
+                                </span>
+                                {% elseif textProperty.validationStatus.id == 27  %}
+                                    <span class="label label-danger">
+                                    {{ textProperty.validationStatus }}
+                                </span>
+                                {% elseif textProperty.validationStatus.id == 28  %}
+                                    <span class="label label-warning">
+                                    {{ textProperty.validationStatus }}
+                                </span>
+                                {% endif %}
+                            </td>
                         </tr>
                     {% endfor %}
                     </tbody>
@@ -359,6 +404,7 @@
                         <th>Namespace</th>
                         <th>Edit</th>
                         <th>Comments</th>
+                        <th>Validation</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -389,6 +435,25 @@
                                     <span class="badge {% if textProperty.comments|length > 0  %}progress-bar-danger {% endif %}">{{ textProperty.comments|length }}</span>
                                 </a>
                             </td>
+                            <td>
+                                {% if textProperty.validationStatus is null %}
+                                    <span class="label label-info">
+                                    Candidate
+                                </span>
+                                {% elseif textProperty.validationStatus.id == 26  %}
+                                    <span class="label label-success">
+                                    {{ textProperty.validationStatus }}
+                                </span>
+                                {% elseif textProperty.validationStatus.id == 27  %}
+                                    <span class="label label-danger">
+                                    {{ textProperty.validationStatus }}
+                                </span>
+                                {% elseif textProperty.validationStatus.id == 28  %}
+                                    <span class="label label-warning">
+                                    {{ textProperty.validationStatus }}
+                                </span>
+                                {% endif %}
+                            </td>
                         </tr>
                     {% endfor %}
                     </tbody>
@@ -409,6 +474,7 @@
                         <th>Namespace</th>
                         <th>Edit</th>
                         <th>Comments</th>
+                        <th>Validation</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -437,6 +503,25 @@
                                 }) }}#comments" data-id="{{ textProperty.id }}" data-object="text-property">
                                     <span class="badge {% if textProperty.comments|length > 0  %}progress-bar-danger {% endif %}">{{ textProperty.comments|length }}</span>
                                 </a>
+                            </td>
+                            <td>
+                                {% if textProperty.validationStatus is null %}
+                                    <span class="label label-info">
+                                    Candidate
+                                </span>
+                                {% elseif textProperty.validationStatus.id == 26  %}
+                                    <span class="label label-success">
+                                    {{ textProperty.validationStatus }}
+                                </span>
+                                {% elseif textProperty.validationStatus.id == 27  %}
+                                    <span class="label label-danger">
+                                    {{ textProperty.validationStatus }}
+                                </span>
+                                {% elseif textProperty.validationStatus.id == 28  %}
+                                    <span class="label label-warning">
+                                    {{ textProperty.validationStatus }}
+                                </span>
+                                {% endif %}
                             </td>
                         </tr>
                     {% endfor %}
@@ -534,6 +619,7 @@
                         <th>Last updated</th>
                         <th>Edit</th>
                         <th>Comments</th>
+                        <th>Validation</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -561,6 +647,25 @@
                                 }) }}#comments" data-id="{{ label.id }}" data-object="label">
                                     <span class="badge {% if label.comments|length > 0  %}progress-bar-danger {% endif %}">{{ label.comments|length }}</span>
                                 </a>
+                            </td>
+                            <td>
+                                {% if label.validationStatus is null %}
+                                    <span class="label label-info">
+                                    Candidate
+                                </span>
+                                {% elseif label.validationStatus.id == 26  %}
+                                    <span class="label label-success">
+                                    {{ label.validationStatus }}
+                                </span>
+                                {% elseif label.validationStatus.id == 27  %}
+                                    <span class="label label-danger">
+                                    {{ label.validationStatus }}
+                                </span>
+                                {% elseif label.validationStatus.id == 28  %}
+                                    <span class="label label-warning">
+                                    {{ label.validationStatus }}
+                                </span>
+                                {% endif %}
                             </td>
                         </tr>
                     {% endfor %}
@@ -621,6 +726,7 @@
                         <th>Relation namespace</th>
                         <th>Edit</th>
                         <th>Comments</th>
+                        <th>Validation</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -706,6 +812,25 @@
                                     <span class="badge {% if association.comments|length > 0  %}progress-bar-danger {% endif %}">{{ association.comments|length }}</span>
                                 </a>
                             </td>
+                            <td>
+                                {% if association.validationStatus is null %}
+                                    <span class="label label-info">
+                                    Candidate
+                                </span>
+                                {% elseif association.validationStatus.id == 26  %}
+                                    <span class="label label-success">
+                                    {{ association.validationStatus }}
+                                </span>
+                                {% elseif association.validationStatus.id == 27  %}
+                                    <span class="label label-danger">
+                                    {{ association.validationStatus }}
+                                </span>
+                                {% elseif association.validationStatus.id == 28  %}
+                                    <span class="label label-warning">
+                                    {{ association.validationStatus }}
+                                </span>
+                                {% endif %}
+                            </td>
                         </tr>
                     {% endfor %}
                     </tbody>
@@ -779,7 +904,7 @@
                     {% endfor %}
                     </tbody>
                 </table>
-                <h3>Childs and descendant properties</h3>
+                <h3>Child and descendant properties</h3>
                 <table class="table table-striped" id="descendants-table">
                     <thead>
                     <tr>
@@ -867,6 +992,7 @@
                         <th>Relation namespace</th>
                         <th>Edit</th>
                         <th>Comments</th>
+                        <th>Validation</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -932,6 +1058,25 @@
                                     }) }}#comments" data-id="{{ relation.id }}" data-object="entity-association">
                                         <span class="badge {% if relation.comments|length > 0  %}progress-bar-danger {% endif %}">{{ relation.comments|length }}</span>
                                     </a>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if relation.validationStatus is null %}
+                                    <span class="label label-info">
+                                        Candidate
+                                    </span>
+                                {% elseif relation.validationStatus.id == 26  %}
+                                    <span class="label label-success">
+                                        {{ relation.validationStatus }}
+                                    </span>
+                                {% elseif relation.validationStatus.id == 27  %}
+                                    <span class="label label-danger">
+                                        {{ relation.validationStatus }}
+                                    </span>
+                                {% elseif relation.validationStatus.id == 28  %}
+                                    <span class="label label-warning">
+                                        {{ relation.validationStatus }}
+                                    </span>
                                 {% endif %}
                             </td>
                         </tr>
@@ -1009,20 +1154,39 @@
         $(document).ready(function() {
             $('#namespaces-table').DataTable();
             $('#labels-table').DataTable();
-            $('#additional-notes-table').DataTable();
             $('#scope-notes-table').DataTable({
+                "order": [[5, 'desc']],
                 "columnDefs": [
-                    { "width": "3%", "targets": 0 },
-                    { "width": "10%", "targets": 2 },
-                    { "width": "10%", "targets": 3 }
+                    {"width": "1%", "orderable": false, "targets": 0},
+                    {"width": "50%", "targets": 1},
+                    {"width": "1%", "targets": 2},
+                    {"width": "1%", "targets": 4},
+                    {"width": "1%", "targets": 5},
+                    {"width": "1%", "targets": 6}
                 ],
                 "autoWidth": false
             });
             $('#examples-table').DataTable({
+                "order": [[5, 'desc']],
                 "columnDefs": [
-                    { "width": "3%", "targets": 0 },
-                    { "width": "10%", "targets": 2 },
-                    { "width": "10%", "targets": 3 }
+                    {"width": "1%", "orderable": false, "targets": 0},
+                    {"width": "50%", "targets": 1},
+                    {"width": "1%", "targets": 2},
+                    {"width": "1%", "targets": 4},
+                    {"width": "1%", "targets": 5},
+                    {"width": "1%", "targets": 6}
+                ],
+                "autoWidth": false
+            });
+            $('#additional-notes-table').DataTable({
+                "order": [[5, 'desc']],
+                "columnDefs": [
+                    {"width": "1%", "orderable": false, "targets": 0},
+                    {"width": "50%", "targets": 1},
+                    {"width": "1%", "targets": 2},
+                    {"width": "1%", "targets": 4},
+                    {"width": "1%", "targets": 5},
+                    {"width": "1%", "targets": 6}
                 ],
                 "autoWidth": false
             });

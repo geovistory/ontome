@@ -16,7 +16,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * Class OntoNamespace
  * @ORM\Entity(repositoryClass="AppBundle\Repository\NamespaceRepository")
- * @UniqueEntity("namespaceURI", message="A namespace with the same URI already exists. Please chose another label for your project.")
+ * @UniqueEntity("namespaceURI", message="A namespace with the same URI already exists. Please chose another one for your namespace.")
  * @ORM\Table(schema="che", name="namespace")
  */
 class OntoNamespace
@@ -29,14 +29,16 @@ class OntoNamespace
     private $id;
 
     /**
+     * @Assert\Url(message="Please enter a valid URI")
      * @Assert\NotBlank()
-     * @Assert\Regex(
-     *     pattern="/^[a-z0-9\-]+$/",
-     *     message="The characters string for this namspace's OntoME URI must contain only lower case non accent letters and dash"
-     * )
-     * @ORM\Column(type="text", nullable=false, unique=true)
+     * @ORM\Column(type="text", nullable=true, unique=true)
      */
     private $namespaceURI;
+
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    private $isExternalNamespace;
 
     /**
      * @Assert\Url()
@@ -80,6 +82,11 @@ class OntoNamespace
      * @ORM\Column(type="boolean")
      */
     private $isOngoing;
+
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    private $hasPublication;
 
     /**
      * @ORM\ManyToOne(targetEntity="Project")
@@ -146,7 +153,8 @@ class OntoNamespace
     private $labels;
 
     /**
-     * @Assert\NotBlank()
+     * @Assert\Valid()
+     * @Assert\NotNull()
      * @ORM\OneToMany(targetEntity="AppBundle\Entity\TextProperty", mappedBy="namespace", cascade={"persist"})
      * @ORM\OrderBy({"languageIsoCode" = "ASC"})
      */
@@ -393,11 +401,27 @@ class OntoNamespace
     }
 
     /**
+     * @return mixed
+     */
+    public function getIsExternalNamespace()
+    {
+        return $this->isExternalNamespace;
+    }
+
+    /**
      * @return bool
      */
     public function getIsOngoing()
     {
         return $this->isOngoing;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getHasPublication()
+    {
+        return $this->hasPublication;
     }
 
     /**
@@ -645,6 +669,22 @@ class OntoNamespace
     }
 
     /**
+     * @param mixed $isExternalNamespace
+     */
+    public function setIsExternalNamespace($isExternalNamespace)
+    {
+        $this->isExternalNamespace = $isExternalNamespace;
+    }
+
+    /**
+     * @param mixed $standardLabel
+     */
+    public function setStandardLabel($standardLabel)
+    {
+        $this->standardLabel = $standardLabel;
+    }
+
+    /**
      * @param mixed $originalNamespaceURI
      */
     public function setOriginalNamespaceURI($originalNamespaceURI)
@@ -698,6 +738,14 @@ class OntoNamespace
     public function setIsOngoing($isOngoing)
     {
         $this->isOngoing = $isOngoing;
+    }
+
+    /**
+     * @param mixed $hasPublication
+     */
+    public function setHasPublication($hasPublication)
+    {
+        $this->hasPublication = $hasPublication;
     }
 
     /**
@@ -832,7 +880,7 @@ class OntoNamespace
     public function __toString()
     {
         $s = $this->getStandardLabel();
-        if(empty($s)) $s = 'https://dataforhistory.org/'.$this->namespaceURI;
+        if(empty($s)) $s = $this->namespaceURI;
         return (string) $s;
     }
 
@@ -842,10 +890,10 @@ class OntoNamespace
     public function getDisplayURI()
     {
         $s ='';
-        if(!empty($this->originalNamespaceURI)){
-            $s = $this->originalNamespaceURI;
+        if(!empty($this->namespaceURI)){
+            $s = $this->namespaceURI;
         }
-        else $s = 'https://ontome.dataforhistory.org/'.$this->namespaceURI;
+        else $s =$this->getTopLevelNamespace()->getNamespaceURI();
         return $s;
     }
 

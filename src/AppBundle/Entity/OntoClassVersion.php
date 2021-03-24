@@ -37,6 +37,13 @@ class OntoClassVersion
     private $class;
 
     /**
+     * @ORM\ManyToOne(targetEntity="SystemType")
+     * @ORM\JoinColumn(name="validation_status", referencedColumnName="pk_system_type")
+     * @Assert\Type(type="AppBundle\Entity\SystemType")
+     */
+    private $validationStatus;
+
+    /**
      * @ORM\Column(type="text")
      */
     private $notes;
@@ -71,9 +78,6 @@ class OntoClassVersion
      */
     private $namespaceForVersion;
 
-
-    private $propertiesAsRange;
-
     public function __construct()
     {
 
@@ -103,6 +107,15 @@ class OntoClassVersion
     {
         return $this->standardLabel;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getValidationStatus()
+    {
+        return $this->validationStatus;
+    }
+
 
     /**
      * @return mixed
@@ -166,6 +179,14 @@ class OntoClassVersion
     public function setNamespaceForVersion($namespaceForVersion)
     {
         $this->namespaceForVersion = $namespaceForVersion;
+    }
+
+    /**
+     * @param mixed $validationStatus
+     */
+    public function setValidationStatus($validationStatus)
+    {
+        $this->validationStatus = $validationStatus;
     }
 
     /**
