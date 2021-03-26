@@ -25,12 +25,12 @@
                     <i class="fas fa-code"></i> OWL-RDF
                 </a>
                 {% endif %}
-                {% if (namespace.isOngoing and is_granted('edit', namespace)) or (namespace.publishedAt is not null and namespace.deprecatedAt is null) %}
+                {% if namespace.isOngoing or (namespace.publishedAt is not null and namespace.deprecatedAt is null) %}
                     <a  href="{{ path('namespace_odt', {
                         namespace: namespace.id
                     }) }}"
                         class="btn btn-primary">
-                    <i class="fas fa-file-alt"></i></i> ODT
+                    <i class="fas fa-file-alt"></i></i> DOCX
                 </a>
                 {% endif %}
             </span>

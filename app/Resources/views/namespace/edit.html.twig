@@ -12,8 +12,8 @@
     <div class="container">
         <h2 class="class-name">
             {{ namespace }}
+            <span class="pull-right">
             {% if is_granted('ROLE_USER') and not namespace.isTopLevelNamespace %}
-                <span class="pull-right">
                     <a  href="{{ path('api_classes_and_properties_by_namespace_xml', {
                         namespace: namespace.id
                     }) }}"
@@ -21,8 +21,16 @@
                         download="namespace-{{ namespace.standardLabel }}.rdf">
                         <i class="fas fa-code"></i> OWL-RDF
                     </a>
-                </span>
             {% endif %}
+            {% if namespace.isOngoing or (namespace.publishedAt is not null and namespace.deprecatedAt is null) %}
+                <a  href="{{ path('namespace_odt', {
+                    namespace: namespace.id
+                }) }}"
+                    class="btn btn-primary">
+                    <i class="fas fa-file-alt"></i></i> DOCX
+                </a>
+            {% endif %}
+            </span>
         </h2>
 
         <ul class="nav nav-tabs">
