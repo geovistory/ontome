@@ -84,8 +84,7 @@ class PropertyRepository extends EntityRepository
                      ARRAY_TO_STRING(_path,'|') ancestors,
                         pk_is_subproperty_of,
                         fk_namespace_for_version
-                  FROM che.ascendant_property_hierarchy(?)
-                    WHERE fk_namespace_for_version IN (".$in.")
+                  FROM che.ascendant_property_hierarchy(?, ARRAY[".$in."]::integer[])
                 )
                 SELECT t_ascendants_properties.pk_parent  AS id,
                        t_ascendants_properties.parent_identifier AS identifier,
@@ -258,9 +257,9 @@ class PropertyRepository extends EntityRepository
                   v.fk_domain_namespace AS \"domainNamespaceId\",
                   replace(ancestors, '|', '→') AS ancestors,
                   (SELECT label FROM che.get_namespace_labels(nsp.pk_namespace) WHERE language_iso_code = 'en') AS namespace
-                FROM che.class_outgoing_inherited_properties(?) v
+                FROM che.class_outgoing_inherited_properties(?, ARRAY[".$in."]::integer[]) v
                 INNER JOIN che.property_version pv ON pv.fk_property = v.pk_property
-                INNER JOIN che.namespace nsp ON nsp.pk_namespace = pv.fk_namespace_for_version AND  nsp.pk_namespace IN (".$in.")
+                INNER JOIN che.namespace nsp ON nsp.pk_namespace = pv.fk_namespace_for_version
                 LEFT JOIN che.associates_referenced_namespace asrefns ON v.fk_namespace_for_version = asrefns.fk_namespace
                 GROUP BY nsp.pk_namespace, v.ancestors, v.identifier_in_namespace, v.pk_parent, v.parent_identifier, v.pk_property, v.identifier_property, v.fk_namespace_for_version, v.pk_range, v.identifier_range, v.fk_domain_namespace, v.fk_range_namespace;";
 
@@ -329,12 +328,11 @@ class PropertyRepository extends EntityRepository
                   v.fk_domain_namespace AS \"domainNamespaceId\",
                   replace(ancestors, '|', '→') AS ancestors,
                   (SELECT label FROM che.get_namespace_labels(nsp.pk_namespace) WHERE language_iso_code = 'en') AS namespace
-                FROM che.class_ingoing_inherited_properties(?) v,
+                FROM che.class_ingoing_inherited_properties(?, ARRAY[".$in."]::integer[]) v,
                   che.property_version pv,
                   che.namespace nsp 
                 WHERE pv.fk_property = pk_property
-                AND nsp.pk_namespace = pv.fk_namespace_for_version
-                AND nsp.pk_namespace IN (".$in.");";
+                AND nsp.pk_namespace = pv.fk_namespace_for_version;";
 
         $conn = $this->getEntityManager()->getConnection();
         $stmt = $conn->prepare($sql);

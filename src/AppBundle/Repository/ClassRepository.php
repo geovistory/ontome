@@ -78,8 +78,7 @@ class ClassRepository extends EntityRepository
                         ARRAY_TO_STRING(_path,'|') ancestors,
                         pk_is_subclass_of,
                         fk_namespace_for_version
-                        FROM che.ascendant_class_hierarchy(?)
-                        WHERE fk_namespace_for_version IN (".$in.")
+                        FROM che.ascendant_class_hierarchy(?, ARRAY[".$in."]::integer[])
                 )
                 SELECT t_ascendants_classes.pk_parent AS id,
                     t_ascendants_classes.parent_identifier AS identifier,
