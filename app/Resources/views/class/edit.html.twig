@@ -47,14 +47,14 @@
             {% for textProperty in classVersion.class.textProperties
                 if textProperty.systemType.id == 1
                 and textProperty.namespaceForVersion.id in namespacesId %}
-                {% if textProperty.validationStatus.id == 26 %}
+                {% if textProperty.validationStatus is not null and textProperty.validationStatus.id == 26 %}
                     {% set countValidationsTxtp = countValidationsTxtp + 1 %}
                 {% endif %}
             {% endfor %}
 
             {% for label in classVersion.class.labels
                 if label.namespaceForVersion.id in namespacesId %}
-                {% if label.validationStatus.id == 26 %}
+                {% if label.validationStatus is not null and label.validationStatus.id == 26 %}
                     {% set countValidationsLbl = countValidationsLbl + 1 %}
                 {% endif %}
             {% endfor %}

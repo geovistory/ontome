@@ -165,6 +165,10 @@
                     {% endif %}
                 </div>
             </div>
+            {% set countValidationsTxtp = 0 %}
+            {% set countValidationsLbl = 0 %}
+            {% set countValidationsContributors = 0 %}
+            {% set countValidationsVersion = 0 %}
             <div id="definition" class="tab-pane fade">
                 <div class="pull-right add-div">
                     <a href="{{ path('text_property_new', {'type': 'definition', 'object': 'namespace', 'objectId': namespace.id })}}"
@@ -431,31 +435,27 @@
                         {% else %}
                             <p><i>No version set yet.</i></p>
                         {% endif %}
-                        {% set countValidationsTxtp = 0 %}
-                        {% set countValidationsLbl = 0 %}
-                        {% set countValidationsContributors = 0 %}
-                        {% set countValidationsVersion = 0 %}
 
                         {% for textProperty in namespace.textProperties if textProperty.systemType.id == 16 %}
-                            {% if textProperty.validationStatus.id == 26 %}
+                            {% if textProperty.validationStatus is not null and textProperty.validationStatus.id == 26 %}
                                 {% set countValidationsTxtp = countValidationsTxtp + 1 %}
                             {% endif %}
                         {% endfor %}
 
                         {% for textProperty in namespace.textProperties if textProperty.systemType.id == 2 %}
-                            {% if textProperty.validationStatus.id == 26 %}
+                            {% if textProperty.validationStatus is not null and textProperty.validationStatus.id == 26 %}
                                 {% set countValidationsContributors = countValidationsContributors + 1 %}
                             {% endif %}
                         {% endfor %}
 
                         {% for textProperty in namespace.textProperties if textProperty.systemType.id == 31 %}
-                            {% if textProperty.validationStatus.id == 26 %}
+                            {% if textProperty.validationStatus is not null and textProperty.validationStatus.id == 26 %}
                                 {% set countValidationsVersion = countValidationsVersion + 1 %}
                             {% endif %}
                         {% endfor %}
 
                         {% for label in namespace.labels %}
-                            {% if label.validationStatus.id == 26 %}
+                            {% if label.validationStatus is not null and label.validationStatus.id == 26 %}
                                 {% set countValidationsLbl = countValidationsLbl + 1 %}
                             {% endif %}
                         {% endfor %}
