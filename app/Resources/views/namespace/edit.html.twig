@@ -37,8 +37,8 @@
             <li><a data-toggle="tab" href="#graph">Graph</a></li>
             {% endif %}
             <li><a data-toggle="tab" href="#comments" class="updateViewComment" data-id="{{ namespace.id }}" data-object="namespace">Comments</a></li>
+            {% set hasMismatches = false %}
             {% if not namespace.isTopLevelNamespace %}
-                {% set hasMismatches = false %}
                 {% for classAssociation in namespace.classAssociations if classAssociation.parentClassNamespace.id not in namespace.selectedNamespacesId or classAssociation.childClassNamespace.id not in namespace.selectedNamespacesId %}{% set hasMismatches = true %}{% endfor %}
                 {% for propertyAssociation in namespace.propertyAssociations if propertyAssociation.parentPropertyNamespace.id not in namespace.selectedNamespacesId or propertyAssociation.childPropertyNamespace.id not in namespace.selectedNamespacesId %}{% set hasMismatches = true %}{% endfor %}
                 {% for property in namespace.properties if property.propertyVersionForDisplay(namespace).domainNamespace is not null and property.propertyVersionForDisplay(namespace).domainNamespace.id not in namespace.selectedNamespacesId or property.propertyVersionForDisplay(namespace).rangeNamespace is not null and property.propertyVersionForDisplay(namespace).rangeNamespace.id not in namespace.selectedNamespacesId %}{% set hasMismatches = true %}{% endfor %}
@@ -677,7 +677,7 @@
                 {% endif %}
             </div>
             <div id="classes" class="tab-pane fade">
-                {% if is_granted('full_edit', namespace) and namespace.id == app.user.currentOngoingNamespace.id %}
+                {% if is_granted('full_edit', namespace) and app.user.currentOngoingNamespace is not null and namespace.id == app.user.currentOngoingNamespace.id %}
                     <div class="pull-right add-div">
                         <a href="{{ path('class_new', {'namespace': namespace.id}) }}" class="btn btn-primary pull-right">Add <span class="fa fa-plus-circle"></span></a>
                     </div>
