@@ -81,7 +81,7 @@ class EntityAssociation
     private $directed;
 
     /**
-     * @ORM\ManyToOne(targetEntity="OntoNamespace", inversedBy="entityAssociationVersions")
+     * @ORM\ManyToOne(targetEntity="OntoNamespace", inversedBy="entityAssociations")
      * @ORM\JoinColumn(name="fk_namespace_for_version", referencedColumnName="pk_namespace", nullable=false)
      */
     private $namespaceForVersion;

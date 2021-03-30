@@ -36,7 +36,7 @@
                         {% endif %}
                     </ul>
                 </div>
-                {% if is_granted('edit', propertyVersion) and (propertyVersion.validationStatus.id is null or propertyVersion.validationStatus.id == 27) %}
+                {% if is_granted('edit', propertyVersion) and (propertyVersion.validationStatus is null or propertyVersion.validationStatus.id == 27) %}
                 <p class="inline-block">
                     <a href="{{ path('property_edit', {
                         id: propertyVersion.property.id
@@ -60,14 +60,14 @@
             {% for textProperty in propertyVersion.property.textProperties
                 if textProperty.systemType.id == 1
                 and textProperty.namespaceForVersion.id in namespacesId %}
-                {% if textProperty.validationStatus.id == 26 %}
+                {% if textProperty.validationStatus is not null and textProperty.validationStatus.id == 26 %}
                     {% set countValidationsTxtp = countValidationsTxtp + 1 %}
                 {% endif %}
             {% endfor %}
 
             {% for label in propertyVersion.property.labels
                 if label.namespaceForVersion.id in namespacesId %}
-                {% if label.validationStatus.id == 26 %}
+                {% if label.validationStatus is not null and label.validationStatus.id == 26 %}
                     {% set countValidationsLbl = countValidationsLbl + 1 %}
                 {% endif %}
             {% endfor %}
@@ -113,11 +113,20 @@
                             <p>Domain:</p>
                         </div>
                         <div class="col-lg-10">
-                            <p>
-                                <a href="{{ path('class_show_with_version', {
-                                    'id': domainRange.domainId,
-                                    'namespaceFromUrlId': domainRange.domainNamespaceId
-                                }) }}">{{ domainRange.domainIdentifier }}</a>
+                            <p>{# Initialisation #}
+                                {% set isGoodNamespace = true %}
+                                {% set route = 'class_show_with_version' %}
+                                {% set route_params = {'id': domainRange.domainId,  'namespaceFromUrlId': domainRange.domainNamespaceId } %}
+
+                                {# Vérification #}
+                                {% if domainRange.domainNamespaceId not in propertyVersion.namespaceForVersion.selectedNamespacesId %}
+                                    {% set isGoodNamespace = false %}
+                                    {% set route = 'namespace_show' %}
+                                    {% set route_params = {'id': propertyVersion.namespaceForVersion.id,  '_fragment': 'mismatches' } %}
+                                {% endif %}
+
+                                <a href="{{ path(route, route_params) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
+                                    {{ domainRange.domainIdentifier }}</a>
                             </p>
                         </div>
                     </div>
@@ -128,16 +137,32 @@
                             <p>Range:</p>
                         </div>
                         <div class="col-lg-10">
-                            <p>
-                                <a href="{{ path('class_show_with_version', {
-                                    'id': domainRange.rangeId,
-                                    'namespaceFromUrlId': domainRange.rangeNamespaceId
-                                }) }}">{{ domainRange.rangeIdentifier }}</a>
+                            <p>{# Initialisation #}
+                                {% set isGoodNamespace = true %}
+                                {% set route = 'class_show_with_version' %}
+                                {% set route_params = {'id': domainRange.rangeId,  'namespaceFromUrlId': domainRange.rangeNamespaceId } %}
+
+                                {# Vérification #}
+                                {% if domainRange.rangeNamespaceId not in propertyVersion.namespaceForVersion.selectedNamespacesId %}
+                                    {% set isGoodNamespace = false %}
+                                    {% set route = 'namespace_show' %}
+                                    {% set route_params = {'id': propertyVersion.namespaceForVersion.id,  '_fragment': 'mismatches' } %}
+                                {% endif %}
+
+                                <a href="{{ path(route, route_params) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
+                                    {{ domainRange.rangeIdentifier }}</a>
                             </p>
                         </div>
                     </div>
                     {% endif %}
-                    {% if propertyVersion.property.childPropertyAssociations|length > 0 %}
+
+                    {# Subproperty of #}
+                    {% set isSubpropertyOf = false %}
+                    {% for association in propertyVersion.property.childPropertyAssociations
+                        if association.namespaceForVersion.id in namespacesId %}
+                        {% set isSubpropertyOf = true %}
+                    {% endfor %}
+                    {% if isSubpropertyOf %}
                         <div class="row">
                             <div class="col-lg-2">
                                 <p>Subproperty of:</p>
@@ -147,27 +172,56 @@
                                     {% for association in propertyVersion.property.childPropertyAssociations
                                         if association.namespaceForVersion.id in namespacesId %}
                                         <li>
+                                            {# Domaine #}
                                             {% if association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).domain is not null %}
-                                            <a href="{{ path('class_show_with_version', {
-                                                'id': association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).domain.id,
-                                                'namespaceFromUrlId': association.parentPropertyNamespace.id
-                                            }) }}">
-                                                {{ association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).domain.identifierInNamespace }} {{ association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).domain.classVersionForDisplay(association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).domainNamespace).standardLabel }}
-                                            </a>
-                                            {% endif %} →
-                                            <a href="{{ path('property_show_with_version', {
-                                                'id': association.parentProperty.id,
-                                                'namespaceFromUrlId': association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).namespaceForVersion.id
-                                            }) }}">
-                                                {{ association.parentProperty.identifierInNamespace }} {{ association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).standardLabel }}
-                                            </a> →
+                                                {# Initialisation #}
+                                                {% set isGoodNamespace = true %}
+                                                {% set route = 'class_show_with_version' %}
+                                                {% set route_params = {'id': association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).domain.id,  'namespaceFromUrlId': association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).domainNamespace.id } %}
+
+                                                {# Vérification #}
+                                                {% if association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).domainNamespace.id not in association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).namespaceForVersion.selectedNamespacesId %}
+                                                    {% set isGoodNamespace = false %}
+                                                    {% set route = 'namespace_show' %}
+                                                    {% set route_params = {'id': propertyVersion.namespaceForVersion.id,  '_fragment': 'mismatches' } %}
+                                                {% endif %}
+
+                                                <a href="{{ path(route, route_params) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
+                                                    {{ association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).domain.identifierInNamespace }} {{ association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).domain.classVersionForDisplay(association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).domainNamespace).standardLabel }}</a>
+                                            {% endif %}
+                                            →
+                                            {# Propriété #}
+                                            {# Initialisation #}
+                                            {% set isGoodNamespace = true %}
+                                            {% set route = 'property_show_with_version' %}
+                                            {% set route_params = {'id': association.parentProperty.id,  'namespaceFromUrlId': association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).namespaceForVersion.id } %}
+
+                                            {# Vérification #}
+                                            {% if association.parentPropertyNamespace.id not in association.namespaceForVersion.selectedNamespacesId %}
+                                                {% set isGoodNamespace = false %}
+                                                {% set route = 'namespace_show' %}
+                                                {% set route_params = {'id': propertyVersion.namespaceForVersion.id,  '_fragment': 'mismatches' } %}
+                                            {% endif %}
+
+                                            <a href="{{ path(route, route_params) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
+                                                {{ association.parentProperty.identifierInNamespace }} {{ association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).standardLabel }}</a>
+                                            →
+                                            {# Range #}
                                             {% if association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).range is not null %}
-                                                <a href="{{ path('class_show_with_version', {
-                                                    'id': association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).range.id,
-                                                    'namespaceFromUrlId': association.parentPropertyNamespace.id
-                                                }) }}">
-                                                    {{ association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).range.identifierInNamespace }} {{ association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).range.classVersionForDisplay(association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).rangeNamespace).standardLabel }}
-                                                </a>
+                                                {# Initialisation #}
+                                                {% set isGoodNamespace = true %}
+                                                {% set route = 'class_show_with_version' %}
+                                                {% set route_params = {'id': association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).range.id,  'namespaceFromUrlId': association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).rangeNamespace.id } %}
+
+                                                {# Vérification #}
+                                                {% if association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).rangeNamespace.id not in association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).namespaceForVersion.selectedNamespacesId %}
+                                                    {% set isGoodNamespace = false %}
+                                                    {% set route = 'namespace_show' %}
+                                                    {% set route_params = {'id': propertyVersion.namespaceForVersion.id,  '_fragment': 'mismatches' } %}
+                                                {% endif %}
+
+                                                <a href="{{ path(route, route_params) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
+                                                    {{ association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).range.identifierInNamespace }} {{ association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).range.classVersionForDisplay(association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).rangeNamespace).standardLabel }}</a>
                                             {% endif %}
                                         </li>
                                     {% endfor %}
@@ -175,7 +229,13 @@
                             </div>
                         </div>
                     {% endif %}
-                    {% if propertyVersion.property.parentPropertyAssociations|length > 0 %}
+                    {# Superproperty of #}
+                    {% set isSuperpropertyOf = false %}
+                    {% for association in propertyVersion.property.parentPropertyAssociations
+                        if association.namespaceForVersion.id in namespacesId %}
+                        {% set isSuperpropertyOf = true %}
+                    {% endfor %}
+                    {% if isSuperpropertyOf %}
                         <div class="row">
                             <div class="col-lg-2">
                                 <p>Superproperty of:</p>
@@ -185,28 +245,56 @@
                                     {% for association in propertyVersion.property.parentPropertyAssociations
                                         if association.namespaceForVersion.id in namespacesId %}
                                         <li>
+                                            {# Domain #}
                                             {% if association.childProperty.propertyVersionForDisplay(association.childPropertyNamespace).domain is not null %}
-                                            <a href="{{ path('class_show_with_version', {
-                                                'id': association.childProperty.propertyVersionForDisplay(association.childPropertyNamespace).domain.id,
-                                                'namespaceFromUrlId': association.childProperty.propertyVersionForDisplay(association.childPropertyNamespace).domainNamespace.id
-                                            }) }}">
-                                                {{ association.childProperty.propertyVersionForDisplay(association.childPropertyNamespace).domain.identifierInNamespace }} {{ association.childProperty.propertyVersionForDisplay(association.childPropertyNamespace).domain.classVersionForDisplay(association.childProperty.propertyVersionForDisplay(association.childPropertyNamespace).domainNamespace).standardLabel }}
-                                            </a>
+                                                {# Initialisation #}
+                                                {% set isGoodNamespace = true %}
+                                                {% set route = 'class_show_with_version' %}
+                                                {% set route_params = {'id': association.childProperty.propertyVersionForDisplay(association.childPropertyNamespace).domain.id,  'namespaceFromUrlId': association.childProperty.propertyVersionForDisplay(association.childPropertyNamespace).domainNamespace.id } %}
+
+                                                {# Vérification #}
+                                                {% if association.childProperty.propertyVersionForDisplay(association.childPropertyNamespace).domainNamespace.id not in association.childProperty.propertyVersionForDisplay(association.childPropertyNamespace).namespaceForVersion.selectedNamespacesId %}
+                                                    {% set isGoodNamespace = false %}
+                                                    {% set route = 'namespace_show' %}
+                                                    {% set route_params = {'id': propertyVersion.namespaceForVersion.id,  '_fragment': 'mismatches' } %}
+                                                {% endif %}
+
+                                                <a href="{{ path(route, route_params) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
+                                                {{ association.childProperty.propertyVersionForDisplay(association.childPropertyNamespace).domain.identifierInNamespace }} {{ association.childProperty.propertyVersionForDisplay(association.childPropertyNamespace).domain.classVersionForDisplay(association.childProperty.propertyVersionForDisplay(association.childPropertyNamespace).domainNamespace).standardLabel }}</a>
                                             {% endif %}
                                             →
-                                            <a href="{{ path('property_show_with_version', {
-                                                'id': association.childProperty.id,
-                                                'namespaceFromUrlId': association.childPropertyNamespace.id
-                                            }) }}">
-                                                {{ association.childProperty.identifierInNamespace }} {{ association.childProperty.propertyVersionForDisplay(association.childPropertyNamespace).standardLabel }}
-                                            </a> →
+                                            {# Property #}
+                                            {# Initialisation #}
+                                            {% set isGoodNamespace = true %}
+                                            {% set route = 'property_show_with_version' %}
+                                            {% set route_params = {'id': association.childProperty.id,  'namespaceFromUrlId': association.childPropertyNamespace.id } %}
+
+                                            {# Vérification #}
+                                            {% if association.childPropertyNamespace.id not in association.namespaceForVersion.selectedNamespacesId %}
+                                                {% set isGoodNamespace = false %}
+                                                {% set route = 'namespace_show' %}
+                                                {% set route_params = {'id': propertyVersion.namespaceForVersion.id,  '_fragment': 'mismatches' } %}
+                                            {% endif %}
+
+                                            <a href="{{ path(route, route_params) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
+                                                {{ association.childProperty.identifierInNamespace }} {{ association.childProperty.propertyVersionForDisplay(association.childPropertyNamespace).standardLabel }}</a>
+                                            →
+                                            {# Range #}
                                             {% if association.childProperty.propertyVersionForDisplay(association.childPropertyNamespace).range is not null %}
-                                                <a href="{{ path('class_show_with_version', {
-                                                    'id': association.childProperty.propertyVersionForDisplay(association.childPropertyNamespace).range.id,
-                                                    'namespaceFromUrlId': association.childProperty.propertyVersionForDisplay(association.childPropertyNamespace).rangeNamespace.id
-                                                }) }}">
-                                                    {{ association.childProperty.propertyVersionForDisplay(association.childPropertyNamespace).range.identifierInNamespace }} {{ association.childProperty.propertyVersionForDisplay(association.childPropertyNamespace).range.classVersionForDisplay(association.childProperty.propertyVersionForDisplay(association.childPropertyNamespace).rangeNamespace).standardLabel }}
-                                                </a>
+                                                {# Initialisation #}
+                                                {% set isGoodNamespace = true %}
+                                                {% set route = 'class_show_with_version' %}
+                                                {% set route_params = {'id': association.childProperty.propertyVersionForDisplay(association.childPropertyNamespace).range.id,  'namespaceFromUrlId': association.childProperty.propertyVersionForDisplay(association.childPropertyNamespace).rangeNamespace.id } %}
+
+                                                {# Vérification #}
+                                                {% if association.childProperty.propertyVersionForDisplay(association.childPropertyNamespace).rangeNamespace.id not in association.childProperty.propertyVersionForDisplay(association.childPropertyNamespace).namespaceForVersion.selectedNamespacesId %}
+                                                    {% set isGoodNamespace = false %}
+                                                    {% set route = 'namespace_show' %}
+                                                    {% set route_params = {'id': propertyVersion.namespaceForVersion.id,  '_fragment': 'mismatches' } %}
+                                                {% endif %}
+
+                                                <a href="{{ path(route, route_params) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
+                                                    {{ association.childProperty.propertyVersionForDisplay(association.childPropertyNamespace).range.identifierInNamespace }} {{ association.childProperty.propertyVersionForDisplay(association.childPropertyNamespace).range.classVersionForDisplay(association.childProperty.propertyVersionForDisplay(association.childPropertyNamespace).rangeNamespace).standardLabel }}</a>
                                             {% endif %}
                                         </li>
                                     {% endfor %}
@@ -235,18 +323,41 @@
                             <ul class="list-unstyled">
                             {% set relationCount = 0 %}
                                 {% for relation in propertyVersion.property.entityAssociations
-                                    if relation.systemType.id == 18
-                                    or relation.systemType.id == 20
+                                    if relation.systemType.id in [18,20]
                                     and relation.namespaceForVersion.id in namespacesId %}
                                     {% set relationCount = relationCount + 1 %}
                                 {% if relationCount > 0 %}
                                     <li>{{ relation.systemType.standardLabel }}
                                         {% if relation.sourceProperty.id == propertyVersion.property.id %}
-                                            <a href="{{ path("property_show", {'id': relation.targetProperty.id }) }}">
+                                            {# Initialisation #}
+                                            {% set isGoodNamespace = true %}
+                                            {% set route = 'property_show_with_version' %}
+                                            {% set route_params = {'id': relation.targetProperty.id,  'namespaceFromUrlId': relation.targetNamespaceForVersion.id } %}
+
+                                            {# Vérification #}
+                                            {% if relation.targetNamespaceForVersion.id not in relation.namespaceForVersion.selectedNamespacesId %}
+                                                {% set isGoodNamespace = false %}
+                                                {% set route = 'namespace_show' %}
+                                                {% set route_params = {'id': propertyVersion.namespaceForVersion.id,  '_fragment': 'mismatches' } %}
+                                            {% endif %}
+
+                                            <a href="{{ path(route, route_params) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
                                                 {{ relation.targetProperty.propertyVersionForDisplay(relation.targetNamespaceForVersion).invertedLabel }}
                                             </a>
                                         {% else %}
-                                            <a href="{{ path("property_show", {'id': relation.sourceProperty.id }) }}">
+                                            {# Initialisation #}
+                                            {% set isGoodNamespace = true %}
+                                            {% set route = 'property_show_with_version' %}
+                                            {% set route_params = {'id': relation.sourceProperty.id,  'namespaceFromUrlId': relation.sourceNamespaceForVersion.id } %}
+
+                                            {# Vérification #}
+                                            {% if relation.sourceNamespaceForVersion.id not in relation.namespaceForVersion.selectedNamespacesId %}
+                                                {% set isGoodNamespace = false %}
+                                                {% set route = 'namespace_show' %}
+                                                {% set route_params = {'id': propertyVersion.namespaceForVersion.id,  '_fragment': 'mismatches' } %}
+                                            {% endif %}
+
+                                            <a href="{{ path(route, route_params) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
                                                 {{ relation.sourceProperty.propertyVersionForDisplay(relation.sourceNamespaceForVersion).invertedLabel }}
                                             </a>
                                         {% endif %}
@@ -521,21 +632,43 @@
                     </tbody>
                 </table>
             </div>
-
             <div id="identification" class="tab-pane fade">
                 <h3>Identifier : {{ propertyVersion.property.identifierInNamespace }}</h3>
+
                 {% if domainRange is not empty and domainRange.domainId is not null and domainRange.rangeId is not null %}
                     <h3>Domain and range</h3>
                     <p>
-                        <a href="{{ path('class_show_with_version', {
-                            'id': domainRange.domainId,
-                            'namespaceFromUrlId': domainRange.domainNamespaceId
-                        }) }}">{{ domainRange.domainIdentifier }}</a>
-                        → {{ domainRange.propertyIdentifier }} →
-                        <a href="{{ path('class_show_with_version', {
-                            'id': domainRange.rangeId,
-                            'namespaceFromUrlId': domainRange.rangeNamespaceId
-                        }) }}">{{ domainRange.rangeIdentifier }}</a>
+                        {# Initialisation #}
+                        {% set isGoodNamespace = true %}
+                        {% set route = 'class_show_with_version' %}
+                        {% set route_params = {'id': domainRange.domainId,  'namespaceFromUrlId': domainRange.domainNamespaceId } %}
+
+                        {# Vérification #}
+                        {% if domainRange.domainNamespaceId not in propertyVersion.namespaceForVersion.selectedNamespacesId %}
+                            {% set isGoodNamespace = false %}
+                            {% set route = 'namespace_show' %}
+                            {% set route_params = {'id': propertyVersion.namespaceForVersion.id,  '_fragment': 'mismatches' } %}
+                        {% endif %}
+
+                        <a href="{{ path(route, route_params) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
+                            {{ domainRange.domainIdentifier }}</a>
+                        →
+                        {{ domainRange.propertyIdentifier }}
+                        →
+                        {# Initialisation #}
+                        {% set isGoodNamespace = true %}
+                        {% set route = 'class_show_with_version' %}
+                        {% set route_params = {'id': domainRange.rangeId,  'namespaceFromUrlId': domainRange.rangeNamespaceId } %}
+
+                        {# Vérification #}
+                        {% if domainRange.rangeNamespaceId not in propertyVersion.namespaceForVersion.selectedNamespacesId %}
+                            {% set isGoodNamespace = false %}
+                            {% set route = 'namespace_show' %}
+                            {% set route_params = {'id': propertyVersion.namespaceForVersion.id,  '_fragment': 'mismatches' } %}
+                        {% endif %}
+
+                        <a href="{{ path(route, route_params) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
+                            {{ domainRange.rangeIdentifier }}</a>
                         {% if propertyVersion.quantifiers is not null %}
                             &nbsp;(Quantifiers {{ propertyVersion.quantifiers }})
                         {% endif %}
@@ -634,6 +767,11 @@
                 </table>
             </div>
             <div id="property-hierarchy" class="tab-pane fade">
+                {% if is_granted('add_associations', propertyVersion.namespaceForVersion) %}
+                <div class="pull-right add-div">
+                    <a href="{{ path('new_parent_property_form', {'childProperty': propertyVersion.property.id}) }}" class="btn btn-primary pull-right">Add <span class="fa fa-plus-circle"></span></a>
+                </div>
+                {% endif %}
                 <h3>Parent properties
                     {% set tooltipProperty = "rdfs:subpropertyOf the property below" %}
                     {% if propertyVersion.property.childPropertyAssociations|length > 1  %}
@@ -654,6 +792,8 @@
                         <th>Justification</th>
                         <th>Relation namespace</th>
                         <th>View details</th>
+                        <th>Edit</th>
+                        <th>Delete</th>
                         <th>Comments</th>
                         {% if propertyVersion.namespaceForVersion.isOngoing %}
                             <th>Validation</th>
@@ -664,65 +804,105 @@
                     {% for association in propertyVersion.property.childPropertyAssociations
                         if association.namespaceForVersion.id in namespacesId %}
                         <tr>
+                            {# Domain #}
                             <td class="text-right small">
                                 {% if association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).domain is not null %}
-                                    <a href="{{ path('class_show_with_version', {
-                                        'id': association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).domain.id,
-                                        'namespaceFromUrlId': association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).domainNamespace.id
-                                    }) }}">
+                                    {# Initialisation #}
+                                    {% set isGoodNamespace = true %}
+                                    {% set route = 'class_show_with_version' %}
+                                    {% set route_params = {'id': association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).domain.id,  'namespaceFromUrlId': association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).domainNamespace.id } %}
+
+                                    {# Vérification #}
+                                    {% if association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).domainNamespace.id not in association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).namespaceForVersion.selectedNamespacesId %}
+                                        {% set isGoodNamespace = false %}
+                                        {% set route = 'namespace_show' %}
+                                        {% set route_params = {'id': propertyVersion.namespaceForVersion.id,  '_fragment': 'mismatches' } %}
+                                    {% endif %}
+
+                                    <a href="{{ path(route, route_params) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
                                         {{ association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).domain.classVersionForDisplay(association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).domainNamespace) }}
                                     </a>
                                 {% endif %}
                             </td>
+
+                            {# Domain quantifiers #}
                             <td class="small" style="padding-left: 30px;">
                                 {% if association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).domainMinQuantifier is not null and association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).domainMaxQuantifier is not null %}
-                                    ({% if  association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).domainMinQuantifier != -1 %}
-                                        {{ association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).domainMinQuantifier }}
+                                    {% if association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).domainMinQuantifier != -1 %}
+                                        {% set minQuantifiers = association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).domainMinQuantifier %}
                                     {% else %}
-                                        n
+                                        {% set minQuantifiers = "n" %}
                                     {% endif %}
-                                    ,
+
                                     {% if  association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).domainMaxQuantifier != -1 %}
-                                        {{ association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).domainMaxQuantifier }}
+                                        {% set maxQuantifiers = association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).domainMaxQuantifier %}
                                     {% else %}
-                                        n
-                                    {% endif %})
+                                        {% set maxQuantifiers = "n" %}
+                                    {% endif %}
+
+                                    {{ "(%s,%s)"|format(minQuantifiers,maxQuantifiers) }}
                                 {% endif %}
                             </td>
+
+                            {# Property #}
                             <td class="text-center">
-                                <a href="{{ path('property_show_with_version', {
-                                    'id': association.parentProperty.id,
-                                    'namespaceFromUrlId': association.parentPropertyNamespace.id,
-                                    '_fragment': 'property-hierarchy'
-                                }) }}">
+                                {# Initialisation #}
+                                {% set isGoodNamespace = true %}
+                                {% set route = 'property_show_with_version' %}
+                                {% set route_params = {'id': association.parentProperty.id,  'namespaceFromUrlId': association.parentPropertyNamespace.id } %}
+
+                                {# Vérification #}
+                                {% if association.parentPropertyNamespace.id not in propertyVersion.namespaceForVersion.selectedNamespacesId %}
+                                    {% set isGoodNamespace = false %}
+                                    {% set route = 'namespace_show' %}
+                                    {% set route_params = {'id': propertyVersion.namespaceForVersion.id,  '_fragment': 'mismatches' } %}
+                                {% endif %}
+
+                                <a href="{{ path(route, route_params) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
                                     {{ association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).invertedLabel }}
                                 </a>
                             </td>
+
+                            {# Range quantifiers #}
                             <td class="small" style="padding-right: 30px;">
                                 {% if association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).rangeMinQuantifier is not null and association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).rangeMaxQuantifier is not null %}
-                                    ({% if  association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).rangeMinQuantifier != -1 %}
-                                    {{ association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).rangeMinQuantifier }}
-                                {% else %}
-                                    n
-                                {% endif %}
-                                    ,
-                                    {% if  association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).rangeMaxQuantifier != -1 %}
-                                        {{ association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).rangeMaxQuantifier }}
+                                    {% if association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).rangeMinQuantifier != -1 %}
+                                        {% set minQuantifiers = association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).rangeMinQuantifier %}
                                     {% else %}
-                                        n
-                                    {% endif %})
+                                        {% set minQuantifiers = "n" %}
+                                    {% endif %}
+
+                                    {% if  association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).rangeMaxQuantifier != -1 %}
+                                        {% set maxQuantifiers = association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).rangeMaxQuantifier %}
+                                    {% else %}
+                                        {% set maxQuantifiers = "n" %}
+                                    {% endif %}
+
+                                    {{ "(%s,%s)"|format(minQuantifiers,maxQuantifiers) }}
                                 {% endif %}
                             </td>
+
+                            {# Range #}
                             <td class="small">
                                 {% if association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).range is not null %}
-                                    <a href="{{ path('class_show_with_version', {
-                                        'id': association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).range.id,
-                                        'namespaceFromUrlId': association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).rangeNamespace.id
-                                    }) }}">
+                                    {# Initialisation #}
+                                    {% set isGoodNamespace = true %}
+                                    {% set route = 'class_show_with_version' %}
+                                    {% set route_params = {'id': association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).range.id,  'namespaceFromUrlId': association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).rangeNamespace.id } %}
+
+                                    {# Vérification #}
+                                    {% if association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).rangeNamespace.id not in association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).namespaceForVersion.selectedNamespacesId %}
+                                        {% set isGoodNamespace = false %}
+                                        {% set route = 'namespace_show' %}
+                                        {% set route_params = {'id': propertyVersion.namespaceForVersion.id,  '_fragment': 'mismatches' } %}
+                                    {% endif %}
+
+                                    <a href="{{ path(route, route_params) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
                                         {{ association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).range.classVersionForDisplay(association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).rangeNamespace) }}
                                     </a>
                                 {% endif %}
                             </td>
+
                             <td>
                                 {% if association.textProperties is not null %}
                                     {% for textProperty in association.textProperties if textProperty.systemType.id == 15 %}
@@ -736,6 +916,16 @@
                             <td>{{ association.namespaceForVersion }}</td>
                             <td>
                                 <a href="{{ path('property_association_show', {'id': association.id}) }}"><span class="fa fa-info-circle"></span></a>
+                            </td>
+                            <td>
+                                {% if is_granted('edit', association) %}
+                                    <a href="{{ path('property_association_edit', {'id': association.id}) }}" class="btn btn-xs btn-success"><span class="fa fa-edit"></span></a>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if is_granted('delete', association) %}
+                                    <a href="#property-hierarchy" class="btn btn-xs btn-danger btn-delete-association" data-id="{{ association.id }}" data-type="propertyAssociation"><span class="fa fa-trash-alt"></span></a>
+                                {% endif %}
                             </td>
                             <td>
                                 <a class="btn updateViewComment" href="{{ path('property_association_show', {
@@ -799,7 +989,19 @@
                             </td>
                             <td class="small" style="padding-left: 30px;">
                                 {% if ancestor.domain_instances_min_quantifier is not null and ancestor.domain_instances_max_quantifier is not null %}
-                                    ({% if  ancestor.domain_instances_min_quantifier != -1 %}{{ ancestor.domain_instances_min_quantifier }}{% else %}n{% endif %},{% if  ancestor.domain_instances_max_quantifier != -1 %}{{ ancestor.domain_instances_max_quantifier }}{% else %}n{% endif %})
+                                    {% if ancestor.domain_instances_min_quantifier != -1 %}
+                                        {% set minQuantifiers = ancestor.domain_instances_min_quantifier %}
+                                    {% else %}
+                                        {% set minQuantifiers = "n" %}
+                                    {% endif %}
+
+                                    {% if  ancestor.domain_instances_max_quantifier != -1 %}
+                                        {% set maxQuantifiers = ancestor.domain_instances_max_quantifier %}
+                                    {% else %}
+                                        {% set maxQuantifiers = "n" %}
+                                    {% endif %}
+
+                                    {{ "(%s,%s)"|format(minQuantifiers,maxQuantifiers) }}
                                 {% endif %}
                             </td>
                             <td class="text-center">
@@ -813,7 +1015,19 @@
                             </td>
                             <td class="small" style="padding-right: 30px;">
                                 {% if ancestor.range_instances_min_quantifier is not null and ancestor.range_instances_max_quantifier is not null %}
-                                    ({% if  ancestor.range_instances_min_quantifier != -1 %}{{ ancestor.range_instances_min_quantifier }}{% else %}n{% endif %},{% if  ancestor.range_instances_max_quantifier != -1 %}{{ ancestor.range_instances_max_quantifier }}{% else %}n{% endif %})
+                                    {% if  ancestor.range_instances_min_quantifier != -1 %}
+                                        {% set minQuantifiers = ancestor.range_instances_min_quantifier %}
+                                    {% else %}
+                                        {% set minQuantifiers = "n" %}
+                                    {% endif %}
+
+                                    {% if  ancestor.range_instances_max_quantifier != -1 %}
+                                        {% set maxQuantifiers = ancestor.range_instances_max_quantifier %}
+                                    {% else %}
+                                        {% set maxQuantifiers = "n" %}
+                                    {% endif %}
+
+                                    {{ "(%s,%s)"|format(minQuantifiers,maxQuantifiers) }}
                                 {% endif %}
                             </td>
                             <td class="small">
@@ -868,7 +1082,19 @@
                             </td>
                             <td class="small" style="padding-left: 30px;">
                                 {% if descendant.domain_instances_min_quantifier is not null and descendant.domain_instances_max_quantifier is not null %}
-                                    ({% if  descendant.domain_instances_min_quantifier != -1 %}{{ descendant.domain_instances_min_quantifier }}{% else %}n{% endif %},{% if  descendant.domain_instances_max_quantifier != -1 %}{{ descendant.domain_instances_max_quantifier }}{% else %}n{% endif %})
+                                    {% if descendant.domain_instances_min_quantifier != -1 %}
+                                        {% set minQuantifiers = descendant.domain_instances_min_quantifier %}
+                                    {% else %}
+                                        {% set minQuantifiers = "n" %}
+                                    {% endif %}
+
+                                    {% if  descendant.domain_instances_max_quantifier != -1 %}
+                                        {% set maxQuantifiers = descendant.domain_instances_max_quantifier %}
+                                    {% else %}
+                                        {% set maxQuantifiers = "n" %}
+                                    {% endif %}
+
+                                    {{ "(%s,%s)"|format(minQuantifiers,maxQuantifiers) }}
                                 {% endif %}
                             </td>
                             <td class="text-center">
@@ -882,7 +1108,19 @@
                             </td>
                             <td class="small" style="padding-right: 30px;">
                                 {% if descendant.range_instances_min_quantifier is not null and descendant.range_instances_max_quantifier is not null %}
-                                    ({% if  descendant.range_instances_min_quantifier != -1 %}{{ descendant.range_instances_min_quantifier }}{% else %}n{% endif %},{% if  descendant.range_instances_max_quantifier != -1 %}{{ descendant.range_instances_max_quantifier }}{% else %}n{% endif %})
+                                    {% if  descendant.range_instances_min_quantifier != -1 %}
+                                        {% set minQuantifiers = descendant.range_instances_min_quantifier %}
+                                    {% else %}
+                                        {% set minQuantifiers = "n" %}
+                                    {% endif %}
+
+                                    {% if  descendant.range_instances_max_quantifier != -1 %}
+                                        {% set maxQuantifiers = descendant.range_instances_max_quantifier %}
+                                    {% else %}
+                                        {% set maxQuantifiers = "n" %}
+                                    {% endif %}
+
+                                    {{ "(%s,%s)"|format(minQuantifiers,maxQuantifiers) }}
                                 {% endif %}
                             </td>
                             <td class="small">
@@ -907,6 +1145,13 @@
                 </table>
             </div>
             <div id="relations" class="tab-pane fade">
+                {% if is_granted('add_associations', propertyVersion.namespaceForVersion) %}
+                    <div class="pull-right add-div">
+                        <a href="{{ path('new_entity_association_form', {
+                            'object': 'property',
+                            'objectId': propertyVersion.property.id}) }}" class="btn btn-primary pull-right">Add <span class="fa fa-plus-circle"></span></a>
+                    </div>
+                {% endif %}
                 <h3>Related properties</h3>
                 <table class="table table-striped" id="relations-table">
                     <thead>
@@ -916,6 +1161,8 @@
                         <th>Justification</th>
                         <th>Relation namespace</th>
                         <th>View details</th>
+                        <th>Edit</th>
+                        <th>Delete</th>
                         <th>Comments</th>
                         {% if propertyVersion.namespaceForVersion.isOngoing %}
                             <th>Validation</th>
@@ -924,22 +1171,43 @@
                     </thead>
                     <tbody>
                     {% for relation in propertyVersion.property.entityAssociations
-                        if relation.systemType.id == 18
-                        or relation.systemType.id == 20
+                        if relation.systemType.id in [18,20]
                         and relation.namespaceForVersion.id in namespacesId %}
                         <tr>
                             <td>{{ relation.systemType }}</td>
                             {% if propertyVersion.property.id == relation.sourceProperty.id %}
-                                <td><a href="{{ path('property_show', {
-                                        'id': relation.targetProperty.id
-                                    }) }}">
+                                <td>
+                                    {# Initialisation #}
+                                    {% set isGoodNamespace = true %}
+                                    {% set route = 'property_show_with_version' %}
+                                    {% set route_params = {'id': relation.targetProperty.id,  'namespaceFromUrlId': relation.targetNamespaceForVersion.id } %}
+
+                                    {# Vérification #}
+                                    {% if relation.targetNamespaceForVersion.id not in relation.namespaceForVersion.selectedNamespacesId %}
+                                        {% set isGoodNamespace = false %}
+                                        {% set route = 'namespace_show' %}
+                                        {% set route_params = {'id': propertyVersion.namespaceForVersion.id,  '_fragment': 'mismatches' } %}
+                                    {% endif %}
+
+                                    <a href="{{ path(route, route_params) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
                                         {{ relation.targetProperty.propertyVersionForDisplay(relation.targetNamespaceForVersion).invertedLabel }}
                                     </a>
                                 </td>
                             {% else %}
-                                <td><a href="{{ path('property_show', {
-                                        'id': relation.sourceProperty.id
-                                    }) }}">
+                                <td>
+                                    {# Initialisation #}
+                                    {% set isGoodNamespace = true %}
+                                    {% set route = 'property_show_with_version' %}
+                                    {% set route_params = {'id': relation.sourceProperty.id,  'namespaceFromUrlId': relation.sourceNamespaceForVersion.id } %}
+
+                                    {# Vérification #}
+                                    {% if relation.sourceNamespaceForVersion.id not in relation.namespaceForVersion.selectedNamespacesId %}
+                                        {% set isGoodNamespace = false %}
+                                        {% set route = 'namespace_show' %}
+                                        {% set route_params = {'id': propertyVersion.namespaceForVersion.id,  '_fragment': 'mismatches' } %}
+                                    {% endif %}
+
+                                    <a href="{{ path(route, route_params) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
                                         {{ relation.sourceProperty.propertyVersionForDisplay(relation.sourceNamespaceForVersion).invertedLabel }}
                                     </a>
                                 </td>
@@ -968,6 +1236,28 @@
                                     }) }}">
                                         <span class="fa fa-info-circle"></span>
                                     </a>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if is_granted('edit', relation) %}
+                                    {% if propertyVersion.property.id == relation.sourceProperty.id %}
+                                        <a href="{{ path('entity_association_edit', {
+                                            'id': relation.id
+                                        }) }}" class="btn btn-xs btn-success">
+                                            <span class="fa fa-edit"></span>
+                                        </a>
+                                    {% else %}
+                                        <a href="{{ path('entity_association_inverse_edit', {
+                                            'id': relation.id
+                                        }) }}" class="btn btn-xs btn-success">
+                                            <span class="fa fa-edit"></span>
+                                        </a>
+                                    {% endif %}
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if is_granted('delete', relation) %}
+                                    <a href="#relations" class="btn btn-xs btn-danger btn-delete-association" data-id="{{ relation.id }}" data-type="entityAssociation"><span class="fa fa-trash-alt"></span></a>
                                 {% endif %}
                             </td>
                             <td>
@@ -1012,7 +1302,7 @@
                 </table>
             </div>
             <div id="profiles" class="tab-pane fade">
-                <h3>Profiles using this class</h3>
+                <h3>Profiles using this property</h3>
                 <table class="table table-striped" id="profiles-table">
                     <thead>
                     <tr>
@@ -1152,6 +1442,49 @@
                 });
             });
         } );
+        $(document).on("click", ".btn-delete-association", function(){
+            var associationId = $(this).data("id");
+            var associationType = $(this).data("type");
+            bootbox.confirm({
+                message: "You are about to delete a relation between two properties. This operation cannot be undone. Do you wish to proceed?",
+                title: '<i class="fas fa-exclamation-triangle"></i> Warning',
+                buttons: {
+                    confirm: {
+                        label: 'Yes',
+                        className: 'btn-success'
+                    },
+                    cancel: {
+                        label: 'No',
+                        className: 'btn-danger'
+                    }
+                },
+                callback: function (result) {
+                    if(result){
+                        if(associationType == "propertyAssociation")
+                        {
+                            var url = '{{ path("property_association_delete", {'id' : 'associationId'}) }}';
+                        }
+                        if(associationType == "entityAssociation")
+                        {
+                            var url = '{{ path("entity_association_delete", {'id' : 'associationId'}) }}';
+                        }
+                        url = url.replace("associationId", associationId);
+                        $.ajax({
+                            url: url,
+                            type: 'DELETE',
+                            dataType: 'json',
+                            success:function(data){
+                            },
+                            statusCode: {
+                                204: function () {
+                                    window.location.reload();
+                                }
+                            }
+                        });
+                    }
+                }
+            });
+        });
     </script>
     {% include 'comment/js-bock.html.twig'  with {'objectType': 'property-version', 'objectId' : propertyVersion.id  } %}
 

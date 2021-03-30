@@ -10,21 +10,33 @@ namespace AppBundle\Controller;
 
 use AppBundle\Entity\EntityUserProjectAssociation;
 use AppBundle\Entity\Label;
+use AppBundle\Entity\OntoClassVersion;
 use AppBundle\Entity\OntoNamespace;
 use AppBundle\Entity\Profile;
 use AppBundle\Entity\Project;
+use AppBundle\Entity\PropertyVersion;
 use AppBundle\Entity\ReferencedNamespaceAssociation;
 use AppBundle\Entity\TextProperty;
 use AppBundle\Form\NamespaceForm;
 use AppBundle\Form\NamespacePublicationForm;
 use AppBundle\Form\NamespaceQuickAddForm;
+use PhpOffice\PhpWord\Element\Footer;
+use PhpOffice\PhpWord\Element\TextRun;
+use PhpOffice\PhpWord\IOFactory;
+use PhpOffice\PhpWord\PhpWord;
+use PhpOffice\PhpWord\SimpleType\Jc;
+use PhpOffice\PhpWord\SimpleType\VerticalJc;
+use PhpOffice\PhpWord\Style\Language;
+use PhpOffice\PhpWord\TemplateProcessor;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Finder\Exception\AccessDeniedException;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 
 class NamespaceController  extends Controller
 {
@@ -471,7 +483,8 @@ class NamespaceController  extends Controller
 
         $response = array(
             'status' => $status,
-            'message' => $message
+            'message' => $message,
+            'nbchildversions' => count($referencedNamespace->getTopLevelNamespace()->getChildVersions())
         );
 
         return new JsonResponse($response);
@@ -483,9 +496,9 @@ class NamespaceController  extends Controller
      * @Method({ "DELETE"})
      * @param OntoNamespace  $namespace    The namespace to be disassociated from a referenced namespace
      * @param OntoNamespace  $referencedNamespace    The referenced namespace to be disassociated from a namespace
-     * @return JsonResponse a Json 204 HTTP response
+     * @return JsonResponse
      */
-    public function deleteProfileNamespaceAssociationAction(OntoNamespace $namespace, OntoNamespace $referencedNamespace, Request $request)
+    public function deleteReferencedNamespaceAssociationAction(OntoNamespace $namespace, OntoNamespace $referencedNamespace, Request $request)
     {
         $this->denyAccessUnlessGranted('edit', $namespace);
 
@@ -497,9 +510,403 @@ class NamespaceController  extends Controller
         $em->remove($referencedNamespaceAssociation);
         $em->flush();
 
-        return new JsonResponse(null, 204);
+        $rootNamespaceReselectable = $referencedNamespace->getTopLevelNamespace();
+
+        $response = array(
+            'idRoot' => $rootNamespaceReselectable->getId(),
+            'labelRoot' => $rootNamespaceReselectable->getStandardLabel()
+        );
+
+        return new JsonResponse($response);
 
     }
 
+    /**
+     * @Route("/namespace/{namespace}/referenced-namespace/{referencedNamespace}/new-referenced-namespace/{newReferencedNamespace}/change", name="namespace_referenced_namespace_change")
+     * @Method({ "GET"})
+     * @param OntoNamespace  $namespace    The namespace to be changed from a referenced namespace
+     * @param OntoNamespace  $referencedNamespace    The referenced namespace to be changed from a namespace
+     * @return JsonResponse
+     */
+    public function changeReferencedNamespaceAssociationAction(OntoNamespace $namespace, OntoNamespace $referencedNamespace, OntoNamespace $newReferencedNamespace, Request $request)
+    {
+        $this->denyAccessUnlessGranted('edit', $namespace);
+
+        $em = $this->getDoctrine()->getManager();
+
+        $referencedNamespaceAssociation = $em->getRepository('AppBundle:ReferencedNamespaceAssociation')
+            ->findOneBy(array('namespace' => $namespace, 'referencedNamespace' => $referencedNamespace));
+
+        $referencedNamespaceAssociation->setReferencedNamespace($newReferencedNamespace);
+
+        // Modifier les relations appartenant au namespace pointant sur l'ancien namespace reference, ils doivent maintenant pointer sur le nouveau namespace de référence
+        // A condition que l'entité cible existe dans le nouveau namespace, sinon ne pas le modifier (= Mismatch)
+
+        // Relations hierarchiques class
+        foreach ($namespace->getClassAssociations() as $classAssociation){
+            // Parent
+            if($classAssociation->getParentClassNamespace() == $referencedNamespace){
+                //Verifier si la classe parente existe dans la nouvelle référence
+                if($classAssociation->getParentClass()->getClassVersionForDisplay($newReferencedNamespace)->getNamespaceForVersion() == $newReferencedNamespace)
+                {
+                    //Elle existe, on peut modifier la classAssociation
+                    $classAssociation->setParentClassNamespace($newReferencedNamespace);
+                }
+            }
+
+            // Child
+            if($classAssociation->getChildClassNamespace() == $referencedNamespace){
+                //Verifier si la classe child existe dans la nouvelle référence
+                if($classAssociation->getChildClass()->getClassVersionForDisplay($newReferencedNamespace)->getNamespaceForVersion() == $newReferencedNamespace)
+                {
+                    //Elle existe, on peut modifier la classAssociation
+                    $classAssociation->setChildClassNamespace($newReferencedNamespace);
+                }
+            }
+        }
+
+        // Relations hierarchiques property
+        foreach ($namespace->getPropertyAssociations() as $propertyAssociation){
+            // Parent
+            if($propertyAssociation->getParentPropertyNamespace() == $referencedNamespace){
+                //Verifier si la propriété parente existe dans la nouvelle référence
+                if($propertyAssociation->getParentProperty()->getPropertyVersionForDisplay($newReferencedNamespace)->getNamespaceForVersion() == $newReferencedNamespace)
+                {
+                    //Elle existe, on peut modifier la propertyAssociation
+                    $propertyAssociation->setParentPropertyNamespace($newReferencedNamespace);
+                }
+            }
+
+            // Child
+            if($propertyAssociation->getChildPropertyNamespace() == $referencedNamespace){
+                //Verifier si la propriété child existe dans la nouvelle référence
+                if($propertyAssociation->getChildProperty()->getPropertyVersionForDisplay($newReferencedNamespace)->getNamespaceForVersion() == $newReferencedNamespace)
+                {
+                    //Elle existe, on peut modifier la propertyAssociation
+                    $propertyAssociation->setChildPropertyNamespace($newReferencedNamespace);
+                }
+            }
+        }
+
+        // Propriétés - domain
+        foreach ($namespace->getPropertyVersions() as $propertyVersion){
+            // Domain
+            if($propertyVersion->getDomainNamespace() == $referencedNamespace){
+                //Verifier si le domain existe dans la nouvelle référence
+                if($propertyVersion->getDomain()->getClassVersionForDisplay($newReferencedNamespace)->getNamespaceForVersion() == $newReferencedNamespace)
+                {
+                    //Il existe, on peut modifier la propriété
+                    $propertyVersion->setDomainNamespace($newReferencedNamespace);
+                }
+            }
+
+            // Range
+            if($propertyVersion->getRangeNamespace() == $referencedNamespace){
+                //Verifier si la range existe dans la nouvelle référence
+                if($propertyVersion->getRange()->getClassVersionForDisplay($newReferencedNamespace)->getNamespaceForVersion() == $newReferencedNamespace)
+                {
+                    //Elle existe, on peut modifier la propriété
+                    $propertyVersion->setRangeNamespace($newReferencedNamespace);
+                }
+            }
+        }
+
+        // Relations
+        foreach ($namespace->getEntityAssociations() as $relation){
+            //Source
+            if($relation->getSourceNamespaceForVersion() == $referencedNamespace){
+                //Verifier si la classe ou propriété source existe dans la nouvelle référence
+                if($relation->getSource()->getClassVersionForDisplay($newReferencedNamespace)->getNamespaceForVersion() == $newReferencedNamespace){
+                    $relation->setSourceNamespaceForVersion($newReferencedNamespace);
+                }
+            }
+
+            //Target
+            if($relation->getTargetNamespaceForVersion() == $referencedNamespace){
+                //Verifier si la classe ou propriété target existe dans la nouvelle référence
+                if($relation->getTarget()->getClassVersionForDisplay($newReferencedNamespace)->getNamespaceForVersion() == $newReferencedNamespace){
+                    $relation->setTargetNamespaceForVersion($newReferencedNamespace);
+                }
+            }
+        }
+
+        $em->flush();
+
+        $response = array();
+
+        return new JsonResponse($response);
+
+    }
+
+    /**
+     * @Route("/namespace/{namespace}/choices", name="get_choices_namespaces")
+     * @Method({ "GET"})
+     * @param OntoNamespace  $namespace    The namespace
+     * @return JsonResponse
+     * Cette fonction retrouve les espaces de noms soeurs
+     */
+    public function getChoicesNamespaceAssociation(OntoNamespace $namespace)
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        $rootNamespace = $namespace->getTopLevelNamespace();
+
+        $childVersions = array();
+        foreach($rootNamespace->getChildVersions() as $childVersion){
+            $childVersions[$childVersion->getId()] = $childVersion->getStandardLabel();
+        }
+
+        $response = array("rootNamespaceChildVersions" => $childVersions);
+
+        return new JsonResponse($response);
+
+    }
+
+    /**
+     * @Route("/namespace/{namespace}/odt", name="namespace_odt")
+     * @Method({ "GET"})
+     * @param OntoNamespace  $namespace    The namespace
+     * @return BinaryFileResponse
+     */
+    public function getNamespaceOdt(OntoNamespace $namespace)
+    {
+        /*$fileName = 'temp_file.odt';
+        $templateProcessor = new TemplateProcessor('../web/templates/odt_namespace.docx');
+        $templateProcessor->setValue('namespaceStandardLabel', $namespace->getStandardLabel());
+
+
+        $templateProcessor->setValue('namespaceStatut', $namespaceStatut);
+        $templateProcessor->setValue('namespaceDate', $namespaceDate->format('Y-m-d H:i:s'));
+
+
+        $templateProcessor->setValue('contributors', $contributors);
+
+        $templateProcessor->saveAs($fileName);
+        $phpWord = \PhpOffice\PhpWord\IOFactory::load($fileName); // Read the temp file
+        unlink('temp_file.odt');*/
+
+        foreach ($namespace->getTextProperties() as $textProperty){
+            if($textProperty->getSystemType()->getId() == 2 and $textProperty->getLanguageIsoCode() == "en"){
+                $textp_contributors = $textProperty;
+            }
+            if($textProperty->getSystemType()->getId() == 2 and !isset($textp_contributors)){
+                $textp_contributors = $textProperty;
+            }
+            if($textProperty->getSystemType()->getId() == 16 and $textProperty->getLanguageIsoCode() == "en"){
+                $textp_definition = $textProperty;
+            }
+            if($textProperty->getSystemType()->getId() == 16 and !isset($textp_definition)){
+                $textp_definition = $textProperty;
+            }
+        }
+
+        // Creating the new document...
+        $phpWord = new \PhpOffice\PhpWord\PhpWord();
+        $phpWord->getSettings()->setThemeFontLang(new Language(Language::EN_GB));
+
+        // STYLES
+        $paragrapheCentre = 'pCentre';
+        $phpWord->addParagraphStyle($paragrapheCentre, array('alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER));
+        $phpWord->addTitleStyle(1, array('bold' => true, 'size' => 20), array('alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER));
+        $phpWord->addTitleStyle(2, array('bold' => true, 'size' => 18));
+        $phpWord->addTitleStyle(3, array('bold' => true, 'size' => 16));
+
+        $phpWord->addFontStyle("gras", array('bold' => true));
+
+
+        // Couverture
+        $section = $phpWord->addSection(array('vAlign' => VerticalJc::CENTER));
+        $section->addTitle('Definition of '.$namespace->getStandardLabel(), 1);
+        $section->addTextBreak(20);
+        $status = "Published";
+        $namespaceStatut = "Published";
+        $namespaceDate  = $namespace->getPublishedAt();
+        if($namespace->getIsOngoing()){
+            $namespaceStatut = "Ongoing";
+            $namespaceDate = $namespace->getModificationTime();
+        }
+        if($namespace->getIsOngoing()){$status = "Ongoing";}
+        $section->addText('Editorial Status: '.$namespaceStatut, null, $paragrapheCentre);
+        $section->addTextBreak(2);
+        $section->addText(date_format($namespaceDate,"Y/m/d H:i:s"), null, $paragrapheCentre);
+        $section->addTextBreak(20);
+        if(isset($textp_contributors)){
+        $section->addText("Contributors: ".html_entity_decode(strip_tags($textp_contributors->getTextProperty())), null, $paragrapheCentre);
+        }
+
+        $footer = $section->addFooter(Footer::AUTO);
+        $textRun = $footer->addTextRun(array('alignment' => Jc::CENTER));
+        $textRun->addField('PAGE', array('format' => 'ARABIC'));
+        $textRun->addText(' of ');
+        $textRun->addField('NUMPAGES', array('format' => 'ARABIC'));
+
+        // Section suivante
+        $section = $phpWord->addSection();
+        $section->addTitle('1.1 Introduction', 2);
+        $section->addTextBreak();
+        $section->addTitle('1.1.1 Scope', 3);
+        $section->addTextBreak();
+        $section->addText(html_entity_decode(strip_tags($textp_definition->getTextProperty())));
+        $section->addTextBreak(2);
+        $section->addTitle('1.1.2 Status', 3);
+        $section->addTextBreak();
+        $section->addText($namespaceStatut." version");
+
+        // Section suivante
+        $section = $phpWord->addSection();
+        $section->addTitle('1.4 Class Declarations', 2);
+        $section->addTextBreak();
+        $section->addText('The classes are comprehensively declared in this section using the following format:');
+        $section->addTextBreak();
+        $section->addListItem('Class names are presented as headings in bold face, preceded by the class’ unique identifier;');
+        $section->addListItem('The line “Subclass of:” declares the superclass of the class from which it inherits properties;');
+        $section->addListItem('The line “Superclass of:” is a cross-reference to the subclasses of this class;');
+        $section->addListItem('The line “Scope note:” contains the textual definition of the concept the class represents;');
+        $section->addListItem('The line “Examples:” contains a bulleted list of examples of instances of this class.');
+        $section->addListItem('The line “Properties:” declares the list of the class’s properties;');
+        $section->addListItem('Each property is represented by its unique identifier, its forward name and the range class that it links to, separated by colons;');
+        $section->addListItem('Inherited properties are not represented;');
+
+        /** @var OntoClassVersion $classVersion */
+        foreach ($namespace->getClassVersions() as $classVersion) {
+            $section->addTextBreak(2);
+            $section->addTitle($classVersion->getClass()->getIdentifierInNamespace()." - ".$classVersion->getStandardLabel(), 3);
+            $associations = $classVersion->getClass()->getChildClassAssociations();
+            foreach ($associations as $association){
+                if(in_array($association->getNamespaceForVersion()->getId(), $namespace->getLargeSelectedNamespacesId())){
+                    $subclassVersion = $association->getParentClass()->getClassVersionForDisplay($association->getParentClassNamespace());
+                }
+            }
+            if(isset($subclassVersion)){
+                $section->addTextBreak();
+                $textRun = $section->addTextRun();
+                $textRun->addText('Subclass of: ', "gras");
+                $textRun->addText($subclassVersion->getStandardLabel());
+            }
+
+            $associations = $classVersion->getClass()->getParentClassAssociations();
+            $i = 0;
+            foreach ($associations as $association){
+                if($i == 0){
+                    $section->addTextBreak();
+                    $section->addText('Superclass of:', "gras");
+                    $i++;
+                }
+                if(in_array($association->getNamespaceForVersion()->getId(), $namespace->getLargeSelectedNamespacesId())){
+                    $supclassVersion = $association->getChildClass()->getClassVersionForDisplay($association->getChildClassNamespace());
+                    $section->addText($supclassVersion->getStandardLabel(), null, array('indentation' => array('left' => 800)));
+                }
+            }
+
+            foreach ($classVersion->getClass()->getTextProperties() as $textProperty){
+                if(in_array($textProperty->getNamespaceForVersion()->getId(), $namespace->getLargeSelectedNamespacesId())){
+                    if($textProperty->getSystemType()->getId() == 1 and $textProperty->getLanguageIsoCode() == "en"){
+                        $textp_scopenote = $textProperty;
+                    }
+                    if($textProperty->getSystemType()->getId() == 1 and !isset($textp_scopenote)){
+                        $textp_scopenote = $textProperty;
+                    }
+                }
+            }
+            if(isset($textp_scopenote)){
+                $section->addTextBreak();
+                $textRun = $section->addTextRun();
+                $textRun->addText('Scope note: ', "gras");
+                $textRun->addText(html_entity_decode(strip_tags($textp_scopenote->getTextProperty())));
+            }
+
+            $i = 0;
+            foreach ($classVersion->getClass()->getTextProperties() as $textProperty){
+                if(in_array($textProperty->getNamespaceForVersion()->getId(), $namespace->getLargeSelectedNamespacesId())){
+                    if($textProperty->getSystemType()->getId() == 7){
+                        if($i == 0){
+                            $section->addTextBreak();
+                            $section->addText('Examples:', "gras");
+                            $i++;
+                        }
+                        $section->addText(html_entity_decode(strip_tags($textProperty->getTextProperty())), null, array('indentation' => array('left' => 800)));
+                    }
+                }
+            }
+            if(isset($subclassVersion)){
+                $section->addTextBreak();
+                $textRun = $section->addTextRun();
+                $textRun->addText('In First Order Logic: ', "gras");
+                $textRun->addText($classVersion->getClass()->getIdentifierInNamespace().' ⊃ '.$subclassVersion->getClass()->getIdentifierInNamespace());
+            }
+
+            $i = 0;
+            $em = $this->getDoctrine()->getManager();
+            $outgoingProperties = $em->getRepository('AppBundle:property')->findOutgoingPropertiesByClassVersionAndNamespacesId($classVersion, $namespace->getLargeSelectedNamespacesId());
+            foreach($outgoingProperties as $property){
+                if($i == 0){
+                    $section->addTextBreak();
+                    $section->addText('Properties:', "gras");
+                    $i++;
+                }
+                $section->addText("PROP_LABEL_STANDARD", null, array('indentation' => array('left' => 800)));
+            }
+        }
+
+        // Section suivante
+        $section = $phpWord->addSection();
+        $section->addTitle('1.4 Property Declarations', 2);
+        $section->addTextBreak();
+        $section->addText('The properties are comprehensively declared in this section using the following format:');
+        $section->addTextBreak();
+        $section->addListItem('Property names are presented as headings in bold face, preceded by unique property identifiers;');
+        $section->addListItem('The line “Domain:” declares the class for which the property is defined;');
+        $section->addListItem('The line “Range:” declares the class to which the property points, or that provides the values for the property;');
+        $section->addListItem('The line “Superproperty of:” is a cross-reference to any subproperties the property may have;');
+        $section->addListItem('The line “Scope note:” contains the textual definition of the concept the property represents;');
+        $section->addListItem('The line “Examples:” contains a bulleted list of examples of instances of this property.');
+        $section->addTextBreak(2);
+
+        /** @var PropertyVersion $propertyVersion */
+        foreach ($namespace->getPropertyVersions() as $propertyVersion) {
+            $section->addTitle($propertyVersion->getProperty()->getIdentifierInNamespace() . " - " . $propertyVersion->getStandardLabel(), 3);
+            $section->addTextBreak();
+            $section->addTitle('Domain:', 4);
+            $section->addText("Test TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest Test");
+            $section->addTextBreak();
+            $section->addTitle('Range:', 4);
+            $section->addText("Test TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest Test");
+            $section->addTextBreak();
+            $section->addTitle('Subproperty:', 4);
+            $section->addText("Test TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest Test");
+            $section->addTextBreak();
+            $section->addTitle('Superproperty:', 4);
+            $section->addText("Test TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest Test");
+            $section->addTextBreak();
+            $section->addTitle('Scope note:', 4);
+            $section->addText("Test TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest Test");
+            $section->addTextBreak();
+            $section->addTitle('Examples:', 4);
+            $section->addText("Test TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest Test");
+            $section->addTextBreak();
+            $section->addTitle('In First Order Logic:', 4);
+            $section->addText("Test TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest Test");
+            $section->addTextBreak(2);
+        }
+
+        // Saving the document as OOXML file...
+        $objWriter = IOFactory::createWriter($phpWord, 'Word2007');
+
+        // Create a temporal file in the system
+        $fileName = 'namespace-'.$namespace->getStandardLabel().'.docx';
+        $temp_file = tempnam(sys_get_temp_dir(), $fileName);
+
+        // Write in the temporal filepath
+        $objWriter->save($temp_file);
+
+        // Send the temporal file as response (as an attachment)
+        $response = new BinaryFileResponse($temp_file);
+        $response->setContentDisposition(
+            ResponseHeaderBag::DISPOSITION_ATTACHMENT,
+            $fileName
+        );
+
+        return $response;
+    }
 
 }

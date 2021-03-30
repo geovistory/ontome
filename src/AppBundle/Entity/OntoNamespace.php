@@ -173,13 +173,13 @@ class OntoNamespace
     private $properties;
 
     /**
-     * @ORM\ManyToMany(targetEntity="ClassAssociation", mappedBy="namespaces")
+     * @ORM\OneToMany(targetEntity="ClassAssociation", mappedBy="namespaceForVersion")
      * @ORM\OrderBy({"id" = "ASC"})
      */
     private $classAssociations;
 
     /**
-     * @ORM\ManyToMany(targetEntity="EntityAssociation", mappedBy="namespaces")
+     * @ORM\OneToMany(targetEntity="EntityAssociation", mappedBy="namespaceForVersion")
      * @ORM\OrderBy({"id" = "ASC"})
      */
     private $entityAssociations;
@@ -201,7 +201,7 @@ class OntoNamespace
     }
 
     /**
-     * @ORM\ManyToMany(targetEntity="PropertyAssociation", mappedBy="namespaces")
+     * @ORM\OneToMany(targetEntity="PropertyAssociation", mappedBy="namespaceForVersion")
      * @ORM\OrderBy({"id" = "ASC"})
      */
     private $propertyAssociations;
@@ -661,6 +661,14 @@ class OntoNamespace
     }
 
     /**
+     * @return ArrayCollection|ReferencedNamespaceAssociation[]
+     */
+    public function getReferencedNamespaceAssociations()
+    {
+        return $this->referencedNamespaceAssociations;
+    }
+
+    /**
      * @param mixed $namespaceURI
      */
     public function setNamespaceURI($namespaceURI)
@@ -805,14 +813,6 @@ class OntoNamespace
     }
 
     /**
-     * @return ArrayCollection|ReferencedNamespaceAssociation[]
-     */
-    public function getReferencedNamespaceAssociations()
-    {
-        return $this->referencedNamespaceAssociations;
-    }
-
-    /**
      * @param mixed $referencedNamespaceAssociations
      */
     public function setReferencedNamespaceAssociations($referencedNamespaceAssociations)
@@ -913,5 +913,50 @@ class OntoNamespace
         else{
             return ["classCss"=>"danger", "label"=>"Deprecated"];
         }
+    }
+
+    /**
+     * @return array
+     * Retourne un tableau des id de ces namespaces suivants : ce namespace (this) et ses namespaces référencés.
+     */
+    public function getSelectedNamespacesId()
+    {
+        // L'espace de noms 4 est systématiquement référencé par tous les NS c'est purement technique.
+        $arrayIds[] = 4;
+
+        $arrayIds[] = $this->getId();
+        foreach($this->getReferencedNamespaceAssociations() as $referencedNamespaceAssociation){
+            $arrayIds[] = $referencedNamespaceAssociation->getReferencedNamespace()->getId();
+        }
+
+        // array_unique évite les doublons - utile si on veut compter combien de ns différents
+        return array_unique($arrayIds);
+    }
+
+    /**
+     * @return array
+     * Retourne un tableau des id de ces namespaces suivants : tous les namespaces dans le même root que ce namespace (this) et tous les namespaces dans le même root de ses namespaces référencés.
+     * Utilisé notamment pour répérer les entités qui n'existent pas dans une version mais dans une autre du même root
+     */
+    public function getLargeSelectedNamespacesId()
+    {
+        // L'espace de noms 4 est systématiquement référencé par tous les NS c'est purement technique.
+        $arrayIds[] = 4;
+
+        // Boucle sur le root du namespace d'origine :
+        foreach ($this->getTopLevelNamespace()->getChildVersions() as $ns)
+        {
+            $arrayIds[] = $ns->getId();
+        }
+
+        foreach($this->getReferencedNamespaceAssociations() as $referencedNamespaceAssociation){
+            foreach ($referencedNamespaceAssociation->getReferencedNamespace()->getTopLevelNamespace()->getChildVersions() as $ns)
+            {
+                $arrayIds[] = $ns->getId();
+            }
+        }
+
+        // array_unique évite les doublons - utile si on veut compter combien de ns différents
+        return array_unique($arrayIds);
     }
 }

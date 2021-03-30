@@ -67,7 +67,7 @@ class PropertyController extends Controller
         //get the right version of the class
         $classVersion = $class->getClassVersionForDisplay();
 
-        $this->denyAccessUnlessGranted('edit', $classVersion);
+        $this->denyAccessUnlessGranted('add_associations', $classVersion->getNamespaceForVersion());
 
         if($type !== 'ingoing' && $type !== 'outgoing') throw $this->createNotFoundException('The requested property type "'.$type.'" does not exist!');
 
@@ -77,7 +77,7 @@ class PropertyController extends Controller
 
         $propertyVersion = new PropertyVersion();
         $propertyVersion->setProperty($property);
-        $propertyVersion->setNamespaceForVersion($classVersion->getNamespaceForVersion());
+        $propertyVersion->setNamespaceForVersion($this->getUser()->getCurrentOngoingNamespace());
         $propertyVersion->setCreator($this->getUser());
         $propertyVersion->setModifier($this->getUser());
         $propertyVersion->setCreationTime(new \DateTime('now'));
@@ -249,25 +249,45 @@ class PropertyController extends Controller
 
         $em = $this->getDoctrine()->getManager();
 
-        // FILTRAGE : Récupérer les clés de namespaces à utiliser
-        if(is_null($this->getUser()) || $this->getUser()->getCurrentActiveProject()->getId() == 21){ // Utilisateur non connecté OU connecté et utilisant le projet public
-            $namespacesId = $em->getRepository('AppBundle:OntoNamespace')->findPublicProjectNamespacesId();
-        }
-        else{ // Utilisateur connecté et utilisant un autre projet
-            $namespacesId = $em->getRepository('AppBundle:OntoNamespace')->findNamespacesIdByUser($this->getUser());
-        }
+        //Si le namespace n'est pas specifié dans l'url mais dans My Current Namespace, rediriger
+        // $namespacesIdFromUser : Ensemble de tous les namespaces activés par l'utilisateur
 
-        // Affaiblir le filtrage en rajoutant le namespaceForVersion de la classVersion si indisponible
-        $namespaceForPropertyVersion = $propertyVersion->getNamespaceForVersion();
-        if(!in_array($namespaceForPropertyVersion->getId(), $namespacesId)){
-            $namespacesId[] = $namespaceForPropertyVersion->getId();
-        }
-        // Sans oublier les namespaces références si indisponibles
-        foreach($namespaceForPropertyVersion->getReferencedNamespaceAssociations() as $referencedNamespacesAssociation){
-            if(!in_array($referencedNamespacesAssociation->getReferencedNamespace()->getId(), $namespacesId)){
-                $namespacesId[] = $referencedNamespacesAssociation->getReferencedNamespace()->getId();
+        if(is_null($namespaceFromUrlId)) {
+            if (is_null($this->getUser()) || $this->getUser()->getCurrentActiveProject()->getId() == 21) {
+                $namespacesIdFromUser = $em->getRepository('AppBundle:OntoNamespace')->findPublicProjectNamespacesId();
+            } else { // Utilisateur connecté et utilisant un autre projet
+                $namespacesIdFromUser = $em->getRepository('AppBundle:OntoNamespace')->findNamespacesIdByUser($this->getUser());
+            }
+            foreach ($namespacesIdFromUser as $namespaceIdFromUser) {
+                $namespaceFromUser = $em->getRepository('AppBundle:OntoNamespace')->find($namespaceIdFromUser);
+                if ($propertyVersion->getNamespaceForVersion()->getTopLevelNamespace()->getId() === $namespaceFromUser->getTopLevelNamespace()->getId()) {
+                    return $this->redirectToRoute('property_show_with_version', [
+                        'id' => $property->getId(),
+                        'namespaceFromUrlId' => $namespaceIdFromUser
+                    ]);
+                }
             }
         }
+
+        // $namespacesIdFromClassVersion : Ensemble de namespaces provenant de la classe affiché (namespaceForVersion + references)
+        $namespacesIdFromPropertyVersion[] = $propertyVersion->getNamespaceForVersion()->getId();
+
+        foreach($propertyVersion->getNamespaceForVersion()->getReferencedNamespaceAssociations() as $referencedNamespacesAssociation){
+            $namespacesIdFromPropertyVersion[] = $referencedNamespacesAssociation->getReferencedNamespace()->getId();
+        }
+
+        // $namespacesIdFromUser : Ensemble de tous les namespaces activés par l'utilisateur
+        if(is_null($this->getUser()) || $this->getUser()->getCurrentActiveProject()->getId() == 21){
+            $namespacesIdFromUser = $em->getRepository('AppBundle:OntoNamespace')->findPublicProjectNamespacesId();
+        }
+        else{ // Utilisateur connecté et utilisant un autre projet
+            $namespacesIdFromUser = $em->getRepository('AppBundle:OntoNamespace')->findNamespacesIdByUser($this->getUser());
+        }
+        // sauf ceux automatiquement activés par l'entité
+        $namespacesIdFromUser = array_diff($namespacesIdFromUser, $namespacesIdFromPropertyVersion);
+
+        // $namespacesId : Tous les namespaces trouvés ci-dessus
+        $namespacesId = array_merge($namespacesIdFromPropertyVersion, $namespacesIdFromUser);
 
         $ancestors = $em->getRepository('AppBundle:Property')->findAncestorsByPropertyVersionAndNamespacesId($propertyVersion, $namespacesId);
         $descendants = $em->getRepository('AppBundle:Property')->findDescendantsByPropertyVersionAndNamespacesId($propertyVersion, $namespacesId);
@@ -282,7 +302,9 @@ class PropertyController extends Controller
             'descendants' => $descendants,
             'domainRange' => $domainRange,
             'relations' => $relations,
-            'namespacesId' => $namespacesId
+            'namespacesId' => $namespacesId,
+            'namespacesIdFromPropertyVersion' => $namespacesIdFromPropertyVersion,
+            'namespacesIdFromUser' => $namespacesIdFromUser
         ));
     }
 
@@ -307,16 +329,25 @@ class PropertyController extends Controller
 
         $em = $this->getDoctrine()->getManager();
 
-        // FILTRAGE
-        $namespaceForPropertyVersion = $propertyVersion->getNamespaceForVersion();
-        $namespacesId[] = $namespaceForPropertyVersion->getId();
+        // $namespacesIdFromClassVersion : Ensemble de namespaces provenant de la classe affiché (namespaceForVersion + references)
+        $namespacesIdFromPropertyVersion[] = $propertyVersion->getNamespaceForVersion()->getId();
 
-        // Sans oublier les namespaces références si indisponibles
-        foreach($namespaceForPropertyVersion->getReferencedNamespaceAssociations() as $referencedNamespacesAssociation){
-            if(!in_array($referencedNamespacesAssociation->getReferencedNamespace()->getId(), $namespacesId)){
-                $namespacesId[] = $referencedNamespacesAssociation->getReferencedNamespace()->getId();
-            }
+        foreach($propertyVersion->getNamespaceForVersion()->getReferencedNamespaceAssociations() as $referencedNamespacesAssociation){
+            $namespacesIdFromPropertyVersion[] = $referencedNamespacesAssociation->getReferencedNamespace()->getId();
         }
+
+        // $namespacesIdFromUser : Ensemble de tous les namespaces activés par l'utilisateur
+        if(is_null($this->getUser()) || $this->getUser()->getCurrentActiveProject()->getId() == 21){
+            $namespacesIdFromUser = $em->getRepository('AppBundle:OntoNamespace')->findPublicProjectNamespacesId();
+        }
+        else{ // Utilisateur connecté et utilisant un autre projet
+            $namespacesIdFromUser = $em->getRepository('AppBundle:OntoNamespace')->findNamespacesIdByUser($this->getUser());
+        }
+        // sauf ceux automatiquement activés par l'entité
+        $namespacesIdFromUser = array_diff($namespacesIdFromUser, $namespacesIdFromPropertyVersion);
+
+        // $namespacesId : Tous les namespaces trouvés ci-dessus
+        $namespacesId = array_merge($namespacesIdFromPropertyVersion, $namespacesIdFromUser);
 
         $ancestors = $em->getRepository('AppBundle:Property')->findAncestorsByPropertyVersionAndNamespacesId($propertyVersion, $namespacesId);
         $descendants = $em->getRepository('AppBundle:Property')->findDescendantsByPropertyVersionAndNamespacesId($propertyVersion, $namespacesId);
@@ -428,7 +459,9 @@ class PropertyController extends Controller
             'relations' => $relations,
             'propertyForm' => $form->createView(),
             'propertyIdentifierForm' => $formIdentifier->createView(),
-            'namespacesId' => $namespacesId
+            'namespacesId' => $namespacesId,
+            'namespacesIdFromPropertyVersion' => $namespacesIdFromPropertyVersion,
+            'namespacesIdFromUser' => $namespacesIdFromUser
         ));
     }
 

@@ -70,6 +70,9 @@ class PropertyRepository extends EntityRepository
      */
     public function findAncestorsByPropertyVersionAndNamespacesId(PropertyVersion $propertyVersion, array $namespacesId)
     {
+        // Construit la chaine ?,? pour les namespacesId dans la requête SQL
+        $in  = str_repeat('?,', count($namespacesId) - 1) . '?';
+
         $conn = $this->getEntityManager()
             ->getConnection();
 
@@ -81,7 +84,7 @@ class PropertyRepository extends EntityRepository
                      ARRAY_TO_STRING(_path,'|') ancestors,
                         pk_is_subproperty_of,
                         fk_namespace_for_version
-                  FROM che.ascendant_property_hierarchy(:property)
+                  FROM che.ascendant_property_hierarchy(?, ARRAY[".$in."]::integer[])
                 )
                 SELECT t_ascendants_properties.pk_parent  AS id,
                        t_ascendants_properties.parent_identifier AS identifier,
@@ -111,6 +114,7 @@ class PropertyRepository extends EntityRepository
                      che.class range JOIN che.class_version range_version ON range.pk_class = range_version.fk_class
                 WHERE p.pk_property = t_ascendants_properties.pk_parent
     AND   nsp.pk_namespace = pv.fk_namespace_for_version
+    AND pv.fk_namespace_for_version IN (".$in.")
     AND depth > 1
     AND pv.has_domain = domain.pk_class
     AND pv.has_range = range.pk_class
@@ -135,7 +139,7 @@ class PropertyRepository extends EntityRepository
                      t_ascendants_properties.fk_namespace_for_version;";
 
         $stmt = $conn->prepare($sql);
-        $stmt->execute(array('property' => $propertyVersion->getProperty()->getId()));
+        $stmt->execute(array_merge(array($propertyVersion->getProperty()->getId()), $namespacesId, $namespacesId));
 
         return $stmt->fetchAll();
     }
@@ -150,6 +154,9 @@ class PropertyRepository extends EntityRepository
      */
     public function findDescendantsByPropertyVersionAndNamespacesId(PropertyVersion $propertyVersion, array $namespacesId)
     {
+        // Construit la chaine ?,? pour les namespacesId dans la requête SQL
+        $in  = str_repeat('?,', count($namespacesId) - 1) . '?';
+
         $conn = $this->getEntityManager()
             ->getConnection();
 
@@ -173,7 +180,7 @@ class PropertyRepository extends EntityRepository
                        (SELECT label FROM che.get_namespace_labels(che.get_root_namespace(nsp.pk_namespace)) WHERE language_iso_code = 'en') AS \"rootNamespaceLabel\",
                        nsp.pk_namespace AS \"propertyNamespaceId\",
                        nsp.standard_label AS \"propertyNamespaceLabel\"
-                    FROM che.descendant_property_hierarchy(:property) t_descendants_properties,
+                    FROM che.descendant_property_hierarchy(?) t_descendants_properties,
                          che.property p JOIN che.property_version pv ON p.pk_property = pv.fk_property,
                          che.namespace nsp,
                          che.class domain_class JOIN che.class_version domain_cv ON domain_class.pk_class = domain_cv.fk_class,
@@ -181,10 +188,11 @@ class PropertyRepository extends EntityRepository
                     WHERE pv.fk_property = pk_child
                     AND   nsp.pk_namespace = pv.fk_namespace_for_version
                     AND pv.has_domain = domain_class.pk_class
-                    AND pv.has_range = range_class.pk_class;";
+                    AND pv.has_range = range_class.pk_class
+                    AND pv.fk_namespace_for_version IN (".$in.");";
 
         $stmt = $conn->prepare($sql);
-        $stmt->execute(array('property' => $propertyVersion->getProperty()->getId()));
+        $stmt->execute(array_merge(array($propertyVersion->getProperty()->getId()), $namespacesId));
 
         return $stmt->fetchAll();
     }
@@ -207,13 +215,16 @@ class PropertyRepository extends EntityRepository
                   pk_property AS \"propertyId\",
                   pk_range AS \"rangeId\",
                   v.fk_namespace_for_version AS \"propertyNamespaceId\",
+                  array_append(array_agg(asrefns.fk_referenced_namespace), v.fk_namespace_for_version) AS \"selectedNamespacesId\",
                   identifier_domain AS domain,
                   v.fk_domain_namespace AS \"domainNamespaceId\",
                   che.get_root_namespace(fk_namespace_for_version) AS \"rootNamespaceId\",
                   (SELECT label FROM che.get_namespace_labels(fk_namespace_for_version) WHERE language_iso_code = 'en') AS namespace
                 FROM che.v_properties_with_domain_range v
-                WHERE pk_domain = ?
-                AND fk_domain_namespace IN (".$in.");";
+                LEFT JOIN che.associates_referenced_namespace asrefns ON v.fk_namespace_for_version = asrefns.fk_namespace
+                WHERE v.pk_domain = ?
+                AND fk_domain_namespace IN (".$in.")
+                GROUP BY v.identifier_property, v.identifier_range, v.fk_range_namespace, v.pk_property, v.pk_range, v.fk_namespace_for_version, v.identifier_domain, v.fk_domain_namespace;";
 
         $conn = $this->getEntityManager()->getConnection();
         $stmt = $conn->prepare($sql);
@@ -239,18 +250,18 @@ class PropertyRepository extends EntityRepository
                   pk_property AS \"propertyId\",
                   identifier_property AS property,
                   v.fk_namespace_for_version AS \"propertyNamespaceId\",
+                  array_append(array_agg(asrefns.fk_referenced_namespace), v.fk_namespace_for_version) AS \"selectedNamespacesId\",
                   pk_range AS \"rangeId\",
                   identifier_range AS range,
                   v.fk_range_namespace AS \"rangeNamespaceId\",
                   v.fk_domain_namespace AS \"domainNamespaceId\",
                   replace(ancestors, '|', '→') AS ancestors,
                   (SELECT label FROM che.get_namespace_labels(nsp.pk_namespace) WHERE language_iso_code = 'en') AS namespace
-                FROM che.class_outgoing_inherited_properties(?) v,
-                  che.property_version pv,
-                  che.namespace nsp
-                WHERE pv.fk_property = pk_property
-                AND nsp.pk_namespace = pv.fk_namespace_for_version
-                AND nsp.pk_namespace IN (".$in.");";
+                FROM che.class_outgoing_inherited_properties(?, ARRAY[".$in."]::integer[]) v
+                INNER JOIN che.property_version pv ON pv.fk_property = v.pk_property
+                INNER JOIN che.namespace nsp ON nsp.pk_namespace = pv.fk_namespace_for_version
+                LEFT JOIN che.associates_referenced_namespace asrefns ON v.fk_namespace_for_version = asrefns.fk_namespace
+                GROUP BY nsp.pk_namespace, v.ancestors, v.identifier_in_namespace, v.pk_parent, v.parent_identifier, v.pk_property, v.identifier_property, v.fk_namespace_for_version, v.pk_range, v.identifier_range, v.fk_domain_namespace, v.fk_range_namespace;";
 
         $conn = $this->getEntityManager()->getConnection();
         $stmt = $conn->prepare($sql);
@@ -275,6 +286,7 @@ class PropertyRepository extends EntityRepository
                   identifier_property AS property,
                   pk_property AS \"propertyId\",
                   v.fk_namespace_for_version AS \"propertyNamespaceId\",
+                  array_append(array_agg(asrefns.fk_referenced_namespace), v.fk_namespace_for_version) AS \"selectedNamespacesId\",
                   pk_range AS \"rangeId\",
                   identifier_range AS range,
                   v.fk_range_namespace AS \"rangeNamespaceId\",
@@ -282,8 +294,10 @@ class PropertyRepository extends EntityRepository
                   che.get_root_namespace(fk_namespace_for_version) AS \"rootNamespaceId\",
                   (SELECT label FROM che.get_namespace_labels(fk_namespace_for_version) WHERE language_iso_code = 'en') AS namespace
                 FROM che.v_properties_with_domain_range v
+                LEFT JOIN che.associates_referenced_namespace asrefns ON v.fk_namespace_for_version = asrefns.fk_namespace
                 WHERE pk_range = ?
-                AND fk_range_namespace IN (".$in.");";
+                AND fk_range_namespace IN (".$in.")
+                GROUP BY v.pk_domain, v.identifier_property, v.identifier_range, v.fk_range_namespace, v.pk_property, v.pk_range, v.fk_namespace_for_version, v.identifier_domain, v.fk_domain_namespace;";
 
         $conn = $this->getEntityManager()->getConnection();
         $stmt = $conn->prepare($sql);
@@ -314,12 +328,11 @@ class PropertyRepository extends EntityRepository
                   v.fk_domain_namespace AS \"domainNamespaceId\",
                   replace(ancestors, '|', '→') AS ancestors,
                   (SELECT label FROM che.get_namespace_labels(nsp.pk_namespace) WHERE language_iso_code = 'en') AS namespace
-                FROM che.class_ingoing_inherited_properties(?) v,
+                FROM che.class_ingoing_inherited_properties(?, ARRAY[".$in."]::integer[]) v,
                   che.property_version pv,
                   che.namespace nsp 
                 WHERE pv.fk_property = pk_property
-                AND nsp.pk_namespace = pv.fk_namespace_for_version
-                AND nsp.pk_namespace IN (".$in.");";
+                AND nsp.pk_namespace = pv.fk_namespace_for_version;";
 
         $conn = $this->getEntityManager()->getConnection();
         $stmt = $conn->prepare($sql);
@@ -338,16 +351,21 @@ class PropertyRepository extends EntityRepository
         // Construit la chaine ?,? pour les namespacesId dans la requête SQL
         $in  = str_repeat('?,', count($namespacesId) - 1) . '?';
 
-        $sql = "SELECT  pk_domain AS \"domainId\",
-                        identifier_domain AS \"domainIdentifier\",
-                        fk_domain_namespace AS \"domainNamespaceId\",
-                        identifier_property AS \"propertyIdentifier\",
-                        pk_range AS \"rangeId\",
-                        fk_range_namespace AS \"rangeNamespaceId\",
-                        identifier_range AS \"rangeIdentifier\"
-                FROM che.v_properties_with_domain_range
-                WHERE pk_property = ?
-                AND fk_namespace_for_version IN (".$in.");";
+        $sql = "SELECT pv.has_domain AS \"domainId\",
+                c_domain.identifier_in_namespace || ' ' || cv_domain.standard_label AS \"domainIdentifier\",
+                cv_domain.fk_namespace_for_version AS \"domainNamespaceId\",
+                pr.identifier_in_namespace || ' ' || pv.standard_label AS \"propertyIdentifier\",
+                pv.has_range AS \"rangeId\",
+                c_range.identifier_in_namespace || ' ' || cv_range.standard_label AS \"rangeIdentifier\",
+                cv_range.fk_namespace_for_version AS \"rangeNamespaceId\"
+                FROM che.property_version pv 
+                LEFT JOIN che.property pr ON pr.pk_property = pv.fk_property
+                LEFT JOIN che.class c_domain ON pv.has_domain = c_domain.pk_class
+                LEFT JOIN che.class_version cv_domain ON pv.has_domain = cv_domain.fk_class AND cv_domain.fk_namespace_for_version = pv.fk_domain_namespace
+                LEFT JOIN che.class c_range ON pv.has_range = c_range.pk_class 
+                LEFT JOIN che.class_version cv_range ON pv.has_range = cv_range.fk_class AND cv_range.fk_namespace_for_version = pv.fk_range_namespace
+                WHERE pr.pk_property = ?
+                AND pv.fk_namespace_for_version IN (".$in.");";
 
         $stmt = $conn->prepare($sql);
         $stmt->execute(array_merge(array($propertyVersion->getProperty()->getId()), $namespacesId));

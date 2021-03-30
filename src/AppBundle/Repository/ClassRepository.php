@@ -71,7 +71,6 @@ class ClassRepository extends EntityRepository
     public function findAncestorsByClassVersionAndNamespacesId(OntoClassVersion $classVersion, array $namespacesId){
         // Construit la chaine ?,? pour les namespacesId dans la requête SQL
         $in  = str_repeat('?,', count($namespacesId) - 1) . '?';
-
         $sql = "WITH t_ascendants_classes AS(
 	                SELECT pk_parent,
                         parent_identifier,
@@ -79,30 +78,37 @@ class ClassRepository extends EntityRepository
                         ARRAY_TO_STRING(_path,'|') ancestors,
                         pk_is_subclass_of,
                         fk_namespace_for_version
-                        FROM che.ascendant_class_hierarchy(?)
+                        FROM che.ascendant_class_hierarchy(?, ARRAY[".$in."]::integer[])
                 )
                 SELECT t_ascendants_classes.pk_parent AS id,
                     t_ascendants_classes.parent_identifier AS identifier,
                     t_ascendants_classes.DEPTH,
                     che.get_root_namespace(nsp.pk_namespace) AS \"rootNamespaceId\",
                     (SELECT label FROM che.get_namespace_labels(che.get_root_namespace(nsp.pk_namespace)) WHERE language_iso_code = 'en') AS \"rootNamespaceLabel\",
-                    nsp.pk_namespace AS \"classNamespaceId\",
-                    nsp.standard_label AS \"classNamespaceLabel\",
+                    nsp_ascendant.pk_namespace AS \"classNamespaceId\",
+                    nsp_ascendant.standard_label AS \"classNamespaceLabel\",
                     t_ascendants_classes.fk_namespace_for_version
                 FROM t_ascendants_classes,
-                che.namespace nsp
+                che.namespace nsp,
+                che.namespace nsp_ascendant,
+                che.is_subclass_of subcl
                 WHERE depth > 1
-                AND nsp.pk_namespace IN (".$in.")
+                AND t_ascendants_classes.fk_namespace_for_version = nsp.pk_namespace 
+                AND t_ascendants_classes.pk_is_subclass_of = subcl.pk_is_subclass_of 
+                AND subcl.fk_parent_class_namespace = nsp_ascendant.pk_namespace 
+                AND subcl.fk_parent_class_namespace IN (".$in.")
                 GROUP BY t_ascendants_classes.pk_parent,
                 t_ascendants_classes.parent_identifier,
                 t_ascendants_classes.depth,
                 nsp.pk_namespace,
-		        t_ascendants_classes.fk_namespace_for_version
+                nsp_ascendant.pk_namespace,
+		        t_ascendants_classes.fk_namespace_for_version,
+		        t_ascendants_classes.pk_is_subclass_of
                 ORDER BY depth DESC;";
 
         $conn = $this->getEntityManager()->getConnection();
         $stmt = $conn->prepare($sql);
-        $stmt->execute(array_merge(array($classVersion->getClass()->getId()), $namespacesId));
+        $stmt->execute(array_merge(array($classVersion->getClass()->getId()), $namespacesId, $namespacesId));
 
         return $stmt->fetchAll();
     }
@@ -314,13 +320,14 @@ class ClassRepository extends EntityRepository
         $sql = "SELECT DISTINCT cls.pk_class AS \"classId\",
                         cls.identifier_in_namespace AS \"identifierInNamespace\",
                         cv.standard_label AS \"standardLabel\",
+                        cv.fk_namespace_for_version AS \"namespaceId\",
                         nsp.standard_label AS \"namespace\"
                 FROM che.class cls JOIN che.class_version cv ON cls.pk_class = cv.fk_class
                 JOIN che.associates_referenced_namespace arfnsp ON cv.fk_namespace_for_version = arfnsp.fk_referenced_namespace
                 JOIN che.namespace nsp ON cv.fk_namespace_for_version = nsp.pk_namespace
                 WHERE arfnsp.fk_profile = :profile
                 EXCEPT
-                SELECT pk_class, identifier_in_namespace, class_standard_label, namespace
+                SELECT pk_class, identifier_in_namespace, class_standard_label, fk_class_namespace_for_version, namespace
                 FROM che.get_all_classes_for_profile(:profile) WHERE profile_association_type = 'selected';";
         $stmt = $conn->prepare($sql);
         $stmt->execute(array('profile' => $profile->getId()));

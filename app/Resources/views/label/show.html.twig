@@ -6,7 +6,7 @@
             <div class="col-xs-12">
                 <h2>
                     {% if label.object is not null %}
-                        {% if label.object.identifierInNamespace is not null %}
+                        {% if label.object.identifierInNamespace is defined %}
                             {% if label.class is not null %}
                                 {{ label.object.classVersionForDisplay(label.namespaceForVersion) }}
                             {% elseif label.property is not null %}
@@ -42,7 +42,7 @@
                         {% set route = 'property_association_show' %}
                     {% endif %}
 
-                    {% if route is not null and namespaceFromUrlId is not null %}
+                    {% if route is not null and namespaceFromUrlId is defined %}
                     <a href="{{ path(route, {
                         'id':label.object.id,
                         'namespaceFromUrlId': namespaceFromUrlId,

@@ -31,10 +31,19 @@
                 <tr>
                     <td class="text-right small">
                         {% if propertyVersion.domain is not null and propertyVersion.domainNamespace is not null %}
-                            <a href="{{ path('class_show_with_version', {
-                                'id': propertyVersion.domain.id,
-                                'namespaceFromUrlId': propertyVersion.domainNamespace.id
-                            }) }}">
+                            {# Initialisation #}
+                            {% set isGoodNamespace = true %}
+                            {% set route = 'class_show_with_version' %}
+                            {% set route_params = {'id': propertyVersion.domain.id,  'namespaceFromUrlId': propertyVersion.domainNamespace.id } %}
+
+                            {# Vérification #}
+                            {% if propertyVersion.domainNamespace.id not in propertyVersion.namespaceForVersion.selectedNamespacesId %}
+                                {% set isGoodNamespace = false %}
+                                {% set route = 'namespace_show' %}
+                                {% set route_params = {'id': propertyVersion.namespaceForVersion.id,  '_fragment': 'mismatches' } %}
+                            {% endif %}
+
+                            <a href="{{ path(route, route_params) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
                                 {{ propertyVersion.domain.classVersionForDisplay(propertyVersion.domainNamespace) }}
                             </a>
                         {% endif %}
@@ -55,10 +64,19 @@
                     </td>
                     <td class="small">
                         {% if propertyVersion.range is not null and propertyVersion.rangeNamespace is not null %}
-                            <a href="{{ path('class_show_with_version', {
-                                'id': propertyVersion.range.id,
-                                'namespaceFromUrlId': propertyVersion.rangeNamespace.id
-                            }) }}">
+                            {# Initialisation #}
+                            {% set isGoodNamespace = true %}
+                            {% set route = 'class_show_with_version' %}
+                            {% set route_params = {'id': propertyVersion.range.id,  'namespaceFromUrlId': propertyVersion.rangeNamespace.id } %}
+
+                            {# Vérification #}
+                            {% if propertyVersion.rangeNamespace.id not in propertyVersion.namespaceForVersion.selectedNamespacesId %}
+                                {% set isGoodNamespace = false %}
+                                {% set route = 'namespace_show' %}
+                                {% set route_params = {'id': propertyVersion.namespaceForVersion.id,  '_fragment': 'mismatches' } %}
+                            {% endif %}
+
+                            <a href="{{ path(route, route_params) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
                                 {{ propertyVersion.range.classVersionForDisplay(propertyVersion.rangeNamespace) }}
                             </a>
                         {% endif %}

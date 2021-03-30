@@ -185,7 +185,7 @@
                         </div>
                         <div class="col-lg-6">
                             <h4>Selected from project profiles</h4>
-                            {% if userActiveProjectAssociation.project.profiles|length == 0 %}
+                            {% if userActiveProjectAssociation.project.ownedProfiles|length == 0 %}
                                 <p class="text-muted"><em>This project does not manage any profile.</em></p>
                             {% endif %}
                             {% for profile in userActiveProjectAssociation.project.ownedProfiles %}

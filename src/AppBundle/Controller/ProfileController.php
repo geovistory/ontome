@@ -233,7 +233,11 @@ class ProfileController  extends Controller
      * @return Response the rendered template
      */
     public function publishAction(Profile $profile, Request $request)
-    {
+        {
+        if(!$profile->getIsPublishable()){
+            throw $this->createAccessDeniedException('The profile n° '.$profile->getId().' can\'t be published. Please verify your profile.');
+        }
+
         if(is_null($profile)) {
             throw $this->createNotFoundException('The profile n° '.$profile->getId().' does not exist. Please contact an administrator.');
         }
@@ -325,16 +329,20 @@ class ProfileController  extends Controller
             // Créer les entity_to_user_project pour les activer par défaut
             $userProjectAssociations = $em->getRepository('AppBundle:UserProjectAssociation')->findByProject($profile->getProjectOfBelonging());
             foreach ($userProjectAssociations as $userProjectAssociation) {
-                $eupa = new EntityUserProjectAssociation();
-                $systemTypeSelected = $em->getRepository('AppBundle:SystemType')->find(25); //systemType 25 = Selected namespace for user preference
-                $eupa->setNamespace($namespace);
-                $eupa->setUserProjectAssociation($userProjectAssociation);
-                $eupa->setSystemType($systemTypeSelected);
-                $eupa->setCreator($this->getUser());
-                $eupa->setModifier($this->getUser());
-                $eupa->setCreationTime(new \DateTime('now'));
-                $eupa->setModificationTime(new \DateTime('now'));
-                $em->persist($eupa);
+                // Vérifier si l'association EUPA n'existe déjà pas (chaque EUPA doit être unique)
+                $eupas = $em->getRepository('AppBundle:EntityUserProjectAssociation')->findBy(array('userProjectAssociation' => $userProjectAssociation, 'namespace' => $namespace));
+                if(count($eupas) == 0) {
+                    $eupa = new EntityUserProjectAssociation();
+                    $systemTypeSelected = $em->getRepository('AppBundle:SystemType')->find(25); //systemType 25 = Selected namespace for user preference
+                    $eupa->setNamespace($namespace);
+                    $eupa->setUserProjectAssociation($userProjectAssociation);
+                    $eupa->setSystemType($systemTypeSelected);
+                    $eupa->setCreator($this->getUser());
+                    $eupa->setModifier($this->getUser());
+                    $eupa->setCreationTime(new \DateTime('now'));
+                    $eupa->setModificationTime(new \DateTime('now'));
+                    $em->persist($eupa);
+                }
             }
 
             $em->flush();
@@ -369,6 +377,90 @@ class ProfileController  extends Controller
         $em->flush();
 
         return new JsonResponse(null, 204);
+    }
+
+    /**
+     * @Route("/profile/{profile}/namespace/{associatedNamespace}/newNamespace/{newAssociatedNamespace}/change", name="namespace_associated_profile_change")
+     * @Method({ "GET"})
+     * @param Profile  $profile    The profile to be changed from an associated namespace
+     * @param OntoNamespace  $associatedNamespace    The associated namespace to be changed from a new associated namespace
+     * @param OntoNamespace  $newAssociatedNamespace    The new associated namespace to be changed from an associated namespace
+     * @return JsonResponse
+     */
+    public function changeReferencedNamespaceAssociationAction(Profile $profile, OntoNamespace $associatedNamespace, OntoNamespace $newAssociatedNamespace, Request $request)
+    {
+        $this->denyAccessUnlessGranted('edit', $profile);
+
+        $em = $this->getDoctrine()->getManager();
+        $profile->removeNamespace($associatedNamespace);
+
+        if($newAssociatedNamespace->getIsTopLevelNamespace()) {
+            $status = 'Error';
+            $message = 'This namespace is not valid';
+        }
+        else if ($profile->getNamespaces()->contains($newAssociatedNamespace)) {
+            $status = 'Error';
+            $message = 'This namespace is already used by this profile';
+        }
+        else {
+            $profile->addNamespace($newAssociatedNamespace);
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($profile);
+
+            // Créer les entity_to_user_project pour les activer par défaut
+            $userProjectAssociations = $em->getRepository('AppBundle:UserProjectAssociation')->findByProject($profile->getProjectOfBelonging());
+            foreach ($userProjectAssociations as $userProjectAssociation) {
+                // Vérifier si l'association EUPA n'existe déjà pas (chaque EUPA doit être unique)
+                $eupas = $em->getRepository('AppBundle:EntityUserProjectAssociation')->findBy(array('userProjectAssociation' => $userProjectAssociation, 'namespace' => $newAssociatedNamespace));
+                if(count($eupas) == 0){
+                    $eupa = new EntityUserProjectAssociation();
+                    $systemTypeSelected = $em->getRepository('AppBundle:SystemType')->find(25); //systemType 25 = Selected namespace for user preference
+                    $eupa->setNamespace($newAssociatedNamespace);
+                    $eupa->setUserProjectAssociation($userProjectAssociation);
+                    $eupa->setSystemType($systemTypeSelected);
+                    $eupa->setCreator($this->getUser());
+                    $eupa->setModifier($this->getUser());
+                    $eupa->setCreationTime(new \DateTime('now'));
+                    $eupa->setModificationTime(new \DateTime('now'));
+                    $em->persist($eupa);
+                }
+            }
+
+            // Modifier les profileAssociations class/property-associatedNamespace
+            foreach ($profile->getProfileAssociations() as $profileAssociation){
+                if($profileAssociation->getEntityNamespaceForVersion() == $associatedNamespace
+                    and in_array($profileAssociation->getSystemType()->getId(),array(5,6))){
+
+                    if(!is_null($profileAssociation->getClass())){
+                        foreach ($profileAssociation->getClass()->getClassVersions() as $classVersion){
+                            if($classVersion->getNamespaceForVersion() == $newAssociatedNamespace){
+                                $profileAssociation->setEntityNamespaceForVersion($newAssociatedNamespace);
+                            }
+                        }
+                    }
+
+                    if(!is_null($profileAssociation->getProperty())){
+                        foreach ($profileAssociation->getProperty()->getPropertyVersions() as $propertyVersion){
+                            if($propertyVersion->getNamespaceForVersion() == $newAssociatedNamespace){
+                                $profileAssociation->setEntityNamespaceForVersion($newAssociatedNamespace);
+                            }
+                        }
+                    }
+                }
+            }
+
+            $em->flush();
+            $status = 'Success';
+            $message = 'Namespace successfully associated';
+        }
+
+
+        $response = array(
+            'status' => $status,
+            'message' => $message
+        );
+
+        return new JsonResponse($response);
 
     }
 
@@ -646,7 +738,7 @@ class ProfileController  extends Controller
     {
         $this->denyAccessUnlessGranted('edit', $profile);
         $em = $this->getDoctrine()->getManager();
-
+        $classNamespace = null;
         /*$profile->removeClass($class);
         $em->persist($profile);*/
 
@@ -664,12 +756,25 @@ class ProfileController  extends Controller
             $systemType = $em->getRepository('AppBundle:SystemType')->find(6); //systemType 6 = rejected
 
             $profileAssociation->setSystemType($systemType);
+
+            $classNamespace = $profileAssociation->getEntityNamespaceForVersion();
         }
         $em->persist($profile);
         $em->flush();
 
-        return new JsonResponse(null, 204);
+        // Renvoyer une réponse si le profil n'a plus aucune association active avec ce namespace
+        // (pour réactiver le bouton remove)
+        $isRemovableNamespace = false;
+        if(!is_null($classNamespace)){
+            $profileAssociations = $em->getRepository('AppBundle:ProfileAssociation')
+                ->findBy(array('profile' => $profile->getId(), 'entityNamespaceForVersion' => $classNamespace->getId(), 'systemType' => '5'));
+            if(count($profileAssociations) == 0){
+                $isRemovableNamespace = true;
+            }
+        }
+        $response = array('isRemovableNamespace' => $isRemovableNamespace);
 
+        return new JsonResponse($response);
     }
 
     /**

@@ -48,17 +48,12 @@
                         {% endif %}
                     {% elseif textProperty.classAssociation is not null %}
                         {% set route = 'class_association_show' %}
-                        {% if textProperty.object is not null %}
-                            {% if textProperty.object.identifierInNamespace is not null %}
-                                {{ textProperty.object.standardLabel }} – {{ textProperty.object.identifierInNamespace }}: {{ textProperty.systemType.standardLabel }}
-                            {% else %}
-                                {{ textProperty.object.objectIdentification }}: {{ textProperty.systemType.standardLabel }}
-                            {% endif %}
-                        {% else %}
-                            {{ textProperty.systemType.standardLabel }}
-                        {% endif %}
+                        {% set childClass = textProperty.classAssociation.childClass %}
+                        {{ childClass.classVersionForDisplay(textProperty.classAssociation.childClassNamespace).standardLabel }} – {{ childClass.identifierInNamespace }}: {{ textProperty.systemType.standardLabel }}
                     {% elseif textProperty.propertyAssociation is not null %}
                         {% set route = 'property_association_show' %}
+                        {% set childProperty = textProperty.propertyAssociation.childProperty %}
+                        {{ childProperty.propertyVersionForDisplay(textProperty.propertyAssociation.childPropertyNamespace).standardLabel }} – {{ childClass.identifierInNamespace }}: {{ textProperty.systemType.standardLabel }}
                     {% elseif textProperty.entityAssociation is not null %}
                         {% set route = 'entity_association_show' %}
                         {% if textProperty.entityAssociation.sourceClass is not null %}
@@ -68,7 +63,7 @@
                         {% endif %}
                     {% endif %}
 
-                    {% if route is not null and namespaceFromUrlId is not null %}
+                    {% if route is not null and namespaceFromUrlId is defined %}
                     <a href="{{ path(route, {
                         'id':textProperty.object.id,
                         'namespaceFromUrlId': namespaceFromUrlId,

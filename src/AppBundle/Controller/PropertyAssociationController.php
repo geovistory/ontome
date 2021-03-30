@@ -16,6 +16,7 @@ use AppBundle\Form\PropertyAssociationEditForm;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use AppBundle\Form\ParentPropertyAssociationForm;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -31,7 +32,7 @@ class PropertyAssociationController extends Controller
     {
         $propertyAssociation = new PropertyAssociation();
 
-        $this->denyAccessUnlessGranted('edit', $childProperty->getPropertyVersionForDisplay());
+        $this->denyAccessUnlessGranted('add_associations', $childProperty->getPropertyVersionForDisplay()->getNamespaceForVersion());
 
 
         $em = $this->getDoctrine()->getManager();
@@ -51,11 +52,12 @@ class PropertyAssociationController extends Controller
         $propertyAssociation->setChildProperty($childProperty);
 
         // FILTRAGE
-        $namespaceForChildPropertyVersion = $childProperty->getPropertyVersionForDisplay()->getNamespaceForVersion();
-        $namespacesId[] = $namespaceForChildPropertyVersion->getId();
+        //$namespaceForChildPropertyVersion = $childProperty->getPropertyVersionForDisplay()->getNamespaceForVersion();
+        //$namespacesId[] = $namespaceForChildPropertyVersion->getId();
+        $namespacesId[] = $this->getUser()->getCurrentOngoingNamespace()->getId();
 
         // Sans oublier les namespaces références si indisponibles
-        foreach($namespaceForChildPropertyVersion->getReferencedNamespaceAssociations() as $referencedNamespacesAssociation){
+        foreach($this->getUser()->getCurrentOngoingNamespace()->getReferencedNamespaceAssociations() as $referencedNamespacesAssociation){
             if(!in_array($referencedNamespacesAssociation->getReferencedNamespace()->getId(), $namespacesId)){
                 $namespacesId[] = $referencedNamespacesAssociation->getReferencedNamespace()->getId();
             }
@@ -161,7 +163,7 @@ class PropertyAssociationController extends Controller
             throw $this->createNotFoundException('The property n°'.$propertyAssociation->getChildProperty()->getId().' has no version. Please contact an administrator.');
         }
 
-        $this->denyAccessUnlessGranted('edit', $childPropertyVersion);
+        $this->denyAccessUnlessGranted('edit', $propertyAssociation);
 
         $em = $this->getDoctrine()->getManager();
 
@@ -206,8 +208,10 @@ class PropertyAssociationController extends Controller
             $em->persist($propertyAssociation);
             $em->flush();
 
-            return $this->redirectToRoute('property_association_edit', [
-                'id' => $propertyAssociation->getId()
+            return $this->redirectToRoute('property_show_with_version', [
+                'id' => $propertyAssociation->getChildProperty()->getId(),
+                'namespaceFromUrlId' => $propertyAssociation->getChildProperty()->getPropertyVersionForDisplay()->getNamespaceForVersion(),
+                '_fragment' => 'property-hierarchy'
             ]);
 
         }
@@ -219,6 +223,25 @@ class PropertyAssociationController extends Controller
             'propertyAssociation' => $propertyAssociation,
             'propertyAssociationForm' => $form->createView(),
         ));
+    }
+
+    /**
+     * @Route("/property-association/{id}/delete", name="property_association_delete")
+     * @param PropertyAssociation $propertyAssociation
+     * @return JsonResponse a Json 204 HTTP response
+     */
+    public function deleteAction(Request $request, PropertyAssociation $propertyAssociation)
+    {
+        $this->denyAccessUnlessGranted('delete', $propertyAssociation);
+
+        $em = $this->getDoctrine()->getManager();
+        foreach($propertyAssociation->getTextProperties() as $textProperty)
+        {
+            $em->remove($textProperty);
+        }
+        $em->remove($propertyAssociation);
+        $em->flush();
+        return new JsonResponse(null, 204);
     }
 
     /**
@@ -279,5 +302,4 @@ class PropertyAssociationController extends Controller
             'id' => $propertyAssociation->getId()
         ]);
     }
-
 }

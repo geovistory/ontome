@@ -34,6 +34,16 @@
             <div id="summary" class="tab-pane fade in active">
                 <h3>{{ profile.standardLabel }}</h3>
                 <div class="container">
+                    {% if not profile.isPublishable %}
+                            <div class="row">
+                                <div class="col-lg-2">
+                                    <p class="text-danger"><i class="fas fa-exclamation-triangle"></i> Warning:</p>
+                                </div>
+                                <div class="col-lg-10">
+                                    <p class="text-danger">This profile comprises classes and/or properties of a namespace whose version is not the selected one. They are displayed in red in your profile. Please make the necessary corrections before proceeding.</p>
+                                </div>
+                            </div>
+                    {% endif %}
                     <div class="row">
                         <div class="col-lg-2">
                             <p>Description:</p>
@@ -236,9 +246,9 @@
                     <tbody>
                     {% for profileAssociation in profileAssociations
                         if profileAssociation.property is not null
-                        and profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion) is not null %}
+                        and profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion) %}
                         <tr>
-                            <td class="text-nowrap text-right small">
+                            <td class="text-right small">
                                 {% if profileAssociation.domain is not null %}
                                     {# Propriété héritée #}
                                     <a href="{{ path('class_show_with_version', {
@@ -274,7 +284,7 @@
                                     {% endif %})
                                 {% endif %}
                             </td>
-                            <td class="text-nowrap text-center">
+                            <td class="text-center">
                                 <a href="{{ path('property_show_with_version', {
                                     'id': profileAssociation.property.id,
                                     'namespaceFromUrlId': profileAssociation.entityNamespaceForVersion.id
@@ -299,7 +309,7 @@
                                     {% endif %})
                                 {% endif %}
                             </td>
-                            <td class="text-nowrap small">
+                            <td class="small">
                                 {% if profileAssociation.range is not null %}
                                     {# propriété héritée #}
                                     <a href="{{ path('class_show_with_version', {

@@ -37,11 +37,14 @@
                 <h2>
                     {% if object == "class" %}
                         Add new related {{ object }} for {{ source.classVersionForDisplay() }}
+                        {% set namespaceFromUrlId = source.classVersionForDisplay.namespaceForVersion.id %}
                     {% elseif object == "property" %}
                         Add new related {{ object }} for {{ source.propertyVersionForDisplay() }}
+                        {% set namespaceFromUrlId = source.propertyVersionForDisplay.namespaceForVersion.id %}
                     {% endif %}
-                    <a href="{{ path(object~'_edit', {
+                    <a href="{{ path(object~'_show_with_version', {
                         id: source.id,
+                        'namespaceFromUrlId': namespaceFromUrlId,
                         '_fragment': 'relations'
                     }) }}" class="pull-right btn btn-link">
                         <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>

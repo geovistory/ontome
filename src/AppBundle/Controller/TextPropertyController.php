@@ -51,11 +51,13 @@ class TextPropertyController extends Controller
             $object = $textProperty->getClassAssociation();
             $redirectToRoute = 'class_association_edit';
             $redirectToRouteFragment = 'justifications';
+            $this->denyAccessUnlessGranted('edit', $object);
         }
         else if(!is_null($textProperty->getPropertyAssociation())){
             $object = $textProperty->getPropertyAssociation();
             $redirectToRoute = 'property_association_edit';
             $redirectToRouteFragment = 'justifications';
+            $this->denyAccessUnlessGranted('edit', $object);
         }
         else if(!is_null($textProperty->getEntityAssociation())){
             $object = $textProperty->getEntityAssociation();
@@ -66,51 +68,39 @@ class TextPropertyController extends Controller
             }
 
             $redirectToRouteFragment = 'justifications';
+            $this->denyAccessUnlessGranted('edit', $object);
         }
         else if(!is_null($textProperty->getClass())){
             $object = $textProperty->getClass();
             $redirectToRoute = 'class_edit';
             $redirectToRouteFragment = 'definition';
+            $this->denyAccessUnlessGranted('edit', $object);
         }
         else if(!is_null($textProperty->getProperty())){
             $object = $textProperty->getProperty();
             $redirectToRoute = 'property_edit';
             $redirectToRouteFragment = 'definition';
+            $this->denyAccessUnlessGranted('edit', $object);
         }
         else if(!is_null($textProperty->getProject())){
             $object = $textProperty->getProject();
             $redirectToRoute = 'project_edit';
             $redirectToRouteFragment = 'definition';
+            $this->denyAccessUnlessGranted('edit', $object);
         }
         else if(!is_null($textProperty->getProfile())){
             $object = $textProperty->getProfile();
             $redirectToRoute = 'profile_edit';
             $redirectToRouteFragment = 'identification';
+            $this->denyAccessUnlessGranted('edit', $object);
         }
         else if(!is_null($textProperty->getNamespace())){
             $object = $textProperty->getNamespace();
             $redirectToRoute = 'namespace_edit';
             $redirectToRouteFragment = 'definition';
-        }
-        else throw $this->createNotFoundException('The related object for the text property  n° '.$textProperty->getId().' does not exist. Please contact an administrator.');
-
-        if(!is_null($textProperty->getClassAssociation())){
-            $this->denyAccessUnlessGranted('edit', $object->getChildClass()->getClassVersionForDisplay());
-        }
-        else if(!is_null($textProperty->getPropertyAssociation())){
-            $this->denyAccessUnlessGranted('edit', $object->getChildProperty()->getPropertyVersionForDisplay());
-        }
-        else if(!is_null($textProperty->getEntityAssociation())){
-            if($object->getSource() instanceof OntoClass){
-                $this->denyAccessUnlessGranted('edit', $object->getSource()->getClassVersionForDisplay());
-            }
-            elseif($object->getSource() instanceof Property){
-                $this->denyAccessUnlessGranted('edit', $object->getSource()->getPropertyVersionForDisplay());
-            }
-        }
-        else{
             $this->denyAccessUnlessGranted('edit', $object);
         }
+        else throw $this->createNotFoundException('The related object for the text property  n° '.$textProperty->getId().' does not exist. Please contact an administrator.');
 
         $textProperty->setModifier($this->getUser());
 

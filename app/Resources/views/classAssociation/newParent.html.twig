@@ -30,8 +30,9 @@
                 </div>
                 <h2>
                     Add new parent class for {{ childClass.identifierInNamespace }}
-                    <a href="{{ path('class_edit', {
+                    <a href="{{ path('class_show_with_version', {
                         'id': childClass.id,
+                        'namespaceFromUrlId': childClass.classVersionForDisplay.namespaceForVersion.id,
                         '_fragment': 'class-hierarchy'
                     }) }}" class="pull-right btn btn-link">
                         <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>

@@ -13,9 +13,11 @@ use AppBundle\Entity\OntoClass;
 use AppBundle\Entity\SystemType;
 use AppBundle\Entity\TextProperty;
 use AppBundle\Form\ClassAssociationEditForm;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use AppBundle\Form\ParentClassAssociationForm;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -31,8 +33,7 @@ class ClassAssociationController extends Controller
     {
         $classAssociation = new ClassAssociation();
 
-        $this->denyAccessUnlessGranted('edit', $childClass->getClassVersionForDisplay());
-
+        $this->denyAccessUnlessGranted('add_associations', $childClass->getClassVersionForDisplay()->getNamespaceForVersion());
 
         $em = $this->getDoctrine()->getManager();
         $systemTypeJustification = $em->getRepository('AppBundle:SystemType')->find(15); //systemType 15 = justification
@@ -50,17 +51,10 @@ class ClassAssociationController extends Controller
         $classAssociation->addTextProperty($justification);
         $classAssociation->setChildClass($childClass);
 
-        // Filtrage : ID de la version de childClass
-        $namespaceForChildClassVersion = $childClass->getClassVersionForDisplay()->getNamespaceForVersion();
-        $namespacesId[] = $namespaceForChildClassVersion->getId();
-
-        // Sans oublier les namespaces références
-        foreach($namespaceForChildClassVersion->getReferencedNamespaceAssociations() as $referencedNamespacesAssociation){
-            $namespacesId[] = $referencedNamespacesAssociation->getReferencedNamespace()->getId();
-        }
-
-        // Sans oublier OntoME internal model - active version
-        $namespacesId[] = 4;
+        // Filtrage
+        // On n'utilise pas les espaces de noms additionnels.
+        //$namespacesId = $childClass->getClassVersionForDisplay()->getNamespaceForVersion()->getSelectedNamespacesId();
+        $namespacesId = $this->getUser()->getCurrentOngoingNamespace()->getSelectedNamespacesId();
 
         $arrayClassesVersion = $em->getRepository('AppBundle:OntoClassVersion')
             ->findIdAndStandardLabelOfClassesVersionByNamespacesId($namespacesId);
@@ -140,12 +134,10 @@ class ClassAssociationController extends Controller
         $this->get('logger')
             ->info('Showing class association: '.$classAssociation->getObjectIdentification());
 
-
         return $this->render('classAssociation/show.html.twig', array(
             'class' => $classAssociation->getChildClass(),
             'classAssociation' => $classAssociation
         ));
-
     }
 
     /**
@@ -161,21 +153,14 @@ class ClassAssociationController extends Controller
             throw $this->createNotFoundException('The class n°'.$classAssociation->getChildClass()->getId().' has no version. Please contact an administrator.');
         }
 
-        $this->denyAccessUnlessGranted('edit', $childClassVersion);
+        $this->denyAccessUnlessGranted('edit', $classAssociation);
 
         $em = $this->getDoctrine()->getManager();
 
-        // Filtrage : ID de la version de childClass
-        $namespaceForChildClassVersion = $childClassVersion->getNamespaceForVersion();
-        $namespacesId[] = $namespaceForChildClassVersion->getId();
-
-        // Sans oublier les namespaces références
-        foreach($namespaceForChildClassVersion->getReferencedNamespaceAssociations() as $referencedNamespacesAssociation){
-            $namespacesId[] = $referencedNamespacesAssociation->getReferencedNamespace()->getId();
-        }
-
-        // Sans oublier OntoME internal model - active version
-        $namespacesId[] = 4;
+        // Filtrage
+        // On n'utilise pas les espaces de noms additionnels.
+        //$namespacesId = $childClassVersion->getNamespaceForVersion()->getSelectedNamespacesId();
+        $namespacesId = $this->getUser()->getCurrentOngoingNamespace()->getSelectedNamespacesId();
 
         $arrayClassesVersion = $em->getRepository('AppBundle:OntoClassVersion')
             ->findIdAndStandardLabelOfClassesVersionByNamespacesId($namespacesId);
@@ -193,19 +178,16 @@ class ClassAssociationController extends Controller
             $classAssociation->setModifier($this->getUser());
             $classAssociation->setModificationTime(new \DateTime('now'));
 
-
             $em = $this->getDoctrine()->getManager();
             $em->persist($classAssociation);
             $em->flush();
 
-            return $this->redirectToRoute('class_edit', [
+            return $this->redirectToRoute('class_show_with_version', [
                 'id' => $classAssociation->getChildClass()->getId(),
+                'namespaceFromUrlId' => $classAssociation->getChildClass()->getClassVersionForDisplay()->getNamespaceForVersion(),
                 '_fragment' => 'class-hierarchy'
             ]);
-
         }
-
-        $em = $this->getDoctrine()->getManager();
 
         return $this->render('classAssociation/edit.html.twig', array(
             'class' => $classAssociation->getChildClass(),
@@ -272,5 +254,22 @@ class ClassAssociationController extends Controller
             'id' => $classAssociation->getId()
         ]);
     }
+    /**
+     * @Route("/class-association/{id}/delete", name="class_association_delete")
+     * @param ClassAssociation  $classAssociation
+     * @return JsonResponse a Json 204 HTTP response
+     */
+    public function deleteAction(Request $request, ClassAssociation $classAssociation)
+    {
+        $this->denyAccessUnlessGranted('delete', $classAssociation);
 
+        $em = $this->getDoctrine()->getManager();
+        foreach($classAssociation->getTextProperties() as $textProperty)
+        {
+            $em->remove($textProperty);
+        }
+        $em->remove($classAssociation);
+        $em->flush();
+        return new JsonResponse(null, 204);
+    }
 }

@@ -18,6 +18,7 @@ use AppBundle\Form\EntityAssociationForm;
 use AppBundle\Form\EntityAssociationEditForm;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -54,12 +55,14 @@ class EntityAssociationController extends Controller
             $namespaceForEntityVersion = $source->getPropertyVersionForDisplay()->getNamespaceForVersion();
         }
 
+        $objectNamespaceId = null;
         if($source instanceof OntoClass){
-            $this->denyAccessUnlessGranted('edit', $source->getClassVersionForDisplay());
+            $objectNamespaceId = $source->getClassVersionForDisplay()->getNamespaceForVersion();
         }
         elseif($source instanceof Property){
-            $this->denyAccessUnlessGranted('edit', $source->getPropertyVersionForDisplay());
+            $objectNamespaceId = $source->getPropertyVersionForDisplay()->getNamespaceForVersion();
         }
+        $this->denyAccessUnlessGranted('add_associations', $objectNamespaceId);
 
         $systemTypeJustification = $em->getRepository('AppBundle:SystemType')->find(15); //systemType 15 = justification
         $systemTypeExample = $em->getRepository('AppBundle:SystemType')->find(7); //systemType 1 = example
@@ -76,10 +79,10 @@ class EntityAssociationController extends Controller
         $entityAssociation->addTextProperty($justification);
 
         // Filtrage
-        $namespacesId[] = $namespaceForEntityVersion->getId();
+        $namespacesId[] = $this->getUser()->getCurrentOngoingNamespace()->getId();
 
         // Sans oublier les namespaces références si indisponibles
-        foreach($namespaceForEntityVersion->getReferencedNamespaceAssociations() as $referencedNamespacesAssociation){
+        foreach($this->getUser()->getCurrentOngoingNamespace()->getReferencedNamespaceAssociations() as $referencedNamespacesAssociation){
             if(!in_array($referencedNamespacesAssociation->getReferencedNamespace()->getId(), $namespacesId)){
                 $namespacesId[] = $referencedNamespacesAssociation->getReferencedNamespace()->getId();
             }
@@ -142,8 +145,9 @@ class EntityAssociationController extends Controller
 
             $this->addFlash('success', 'Relation created !');
 
-            return $this->redirectToRoute($object.'_edit', [
+            return $this->redirectToRoute($object.'_show_with_version', [
                 'id' => $objectId,
+                'namespaceFromUrlID' => $objectNamespaceId,
                 '_fragment' => 'relations'
             ]);
         }
@@ -220,13 +224,13 @@ class EntityAssociationController extends Controller
             $namespaceForEntityVersion = $firstEntity->getPropertyVersionForDisplay()->getNamespaceForVersion();
         }
 
-        $this->denyAccessUnlessGranted('edit', $firstEntity);
+        $this->denyAccessUnlessGranted('edit', $entityAssociation);
 
         // FILTRAGE
-        $namespacesId[] = $namespaceForEntityVersion->getId();
+        $namespacesId[] = $this->getUser()->getCurrentOngoingNamespace()->getId();
 
         // Sans oublier les namespaces références si indisponibles
-        foreach($namespaceForEntityVersion->getReferencedNamespaceAssociations() as $referencedNamespacesAssociation){
+        foreach($this->getUser()->getCurrentOngoingNamespace()->getReferencedNamespaceAssociations() as $referencedNamespacesAssociation){
             if(!in_array($referencedNamespacesAssociation->getReferencedNamespace()->getId(), $namespacesId)){
                 $namespacesId[] = $referencedNamespacesAssociation->getReferencedNamespace()->getId();
             }
@@ -296,13 +300,13 @@ class EntityAssociationController extends Controller
             $this->addFlash('success', 'Relation edited !');
 
             if(!$inverse){
-                return $this->redirectToRoute($entityAssociation->getSourceObjectType().'_edit', [
+                return $this->redirectToRoute($entityAssociation->getSourceObjectType().'_show', [
                     'id' => $entityAssociation->getSource()->getId(),
                     '_fragment' => 'relations'
                 ]);
             }
             else{
-                return $this->redirectToRoute($entityAssociation->getTargetObjectType().'_edit', [
+                return $this->redirectToRoute($entityAssociation->getTargetObjectType().'_show', [
                     'id' => $entityAssociation->getTarget()->getId(),
                     '_fragment' => 'relations'
                 ]);
@@ -379,5 +383,22 @@ class EntityAssociationController extends Controller
         return $this->redirectToRoute('entity_association_show', [
             'id' => $entityAssociation->getId()
         ]);
+    }
+
+    /**
+     * @Route("/entity-association/{id}/delete", name="entity_association_delete")
+     */
+    public function deleteAction(Request $request, EntityAssociation $entityAssociation)
+    {
+        $this->denyAccessUnlessGranted('delete', $entityAssociation);
+
+        $em = $this->getDoctrine()->getManager();
+        foreach($entityAssociation->getTextProperties() as $textProperty)
+        {
+            $em->remove($textProperty);
+        }
+        $em->remove($entityAssociation);
+        $em->flush();
+        return new JsonResponse(null, 204);
     }
 }

@@ -12,7 +12,7 @@
     <div class="container">
         <h2 class="property-name">
             {{ propertyAssociation }}
-            <a href="{{ path('property_edit', {
+            <a href="{{ path('property_show', {
                 'id': propertyAssociation.childProperty.id,
                 '_fragment': 'property-hierarchy'
             }) }}" class="pull-right btn btn-link">
