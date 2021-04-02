@@ -22,8 +22,8 @@
                         <i class="fas fa-code"></i> OWL-RDF
                     </a>
             {% endif %}
-            {% if namespace.isOngoing or (namespace.publishedAt is not null and namespace.deprecatedAt is null) %}
-                <a  href="{{ path('namespace_odt', {
+            {% if not namespace.isTopLevelNamespace %}
+                <a  href="{{ path('namespace_document', {
                     namespace: namespace.id
                 }) }}"
                     class="btn btn-primary">

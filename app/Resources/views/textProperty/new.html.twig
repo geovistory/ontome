@@ -35,7 +35,7 @@
                     </a>
                 {% elseif textProperty.property is not null %}
                     Add a{% if textProperty.systemType.standardLabel|first|lower in ['a', 'e', 'i', 'o', 'u', 'y'] %}n{% endif %} {{ textProperty.systemType.standardLabel|lower }}
-                    for the property {{ textProperty.property }}
+                    for the property {{ textProperty.property.propertyVersionForDisplay(textProperty.namespaceForVersion) }}
                     <a href="{{ path('property_edit', {
                         id: textProperty.property.id,
                         "_fragment": "definition"
