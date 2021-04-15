@@ -919,7 +919,7 @@
                                 {# Initialisation #}
                                 {% set isGoodNamespace = true %}
                                 {% set route = 'property_show_with_version' %}
-                                {% set route_params = {'id': association.parentProperty.id,  'namespaceFromUrlId': association.parentPropertyNamespace.id } %}
+                                {% set route_params = {'id': association.parentProperty.id,  'namespaceFromUrlId': association.parentPropertyNamespace.id, '_fragment': 'class-hierarchy' } %}
 
                                 {# Vérification #}
                                 {% if association.parentPropertyNamespace.id not in propertyVersion.namespaceForVersion.selectedNamespacesId %}

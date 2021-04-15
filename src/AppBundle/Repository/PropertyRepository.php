@@ -223,7 +223,7 @@ class PropertyRepository extends EntityRepository
                 FROM che.v_properties_with_domain_range v
                 LEFT JOIN che.associates_referenced_namespace asrefns ON v.fk_namespace_for_version = asrefns.fk_namespace
                 WHERE v.pk_domain = ?
-                AND fk_domain_namespace IN (".$in.")
+                AND fk_namespace_for_version IN (".$in.")
                 GROUP BY v.identifier_property, v.identifier_range, v.fk_range_namespace, v.pk_property, v.pk_range, v.fk_namespace_for_version, v.identifier_domain, v.fk_domain_namespace;";
 
         $conn = $this->getEntityManager()->getConnection();
@@ -296,7 +296,7 @@ class PropertyRepository extends EntityRepository
                 FROM che.v_properties_with_domain_range v
                 LEFT JOIN che.associates_referenced_namespace asrefns ON v.fk_namespace_for_version = asrefns.fk_namespace
                 WHERE pk_range = ?
-                AND fk_range_namespace IN (".$in.")
+                AND fk_namespace_for_version IN (".$in.")
                 GROUP BY v.pk_domain, v.identifier_property, v.identifier_range, v.fk_range_namespace, v.pk_property, v.pk_range, v.fk_namespace_for_version, v.identifier_domain, v.fk_domain_namespace;";
 
         $conn = $this->getEntityManager()->getConnection();

@@ -10,6 +10,7 @@
     {% endblock %}
     <script defer src="https://use.fontawesome.com/releases/v5.0.13/js/all.js" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/4.8.2/tinymce.min.js"></script>
+
     <script>
         tinymce.init({
             selector:'.tinymce',
@@ -171,6 +172,7 @@
     <script src="https://cdn.datatables.net/1.10.15/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.10.15/js/dataTables.bootstrap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootbox.js/4.4.0/bootbox.min.js"></script>
+    <script src="https://cdn.datatables.net/plug-ins/1.10.24/sorting/natural.js"></script>
     <script>
         $(function() {
             // Javascript to enable link to tab
@@ -193,7 +195,9 @@
 
             // Garder le même onglet ouvert quand on clique sur les liens
             $('a.btn-edit, ul.navi a, ul.dropdown-menu a').click(function(){
-                $(this).attr('href', $(this).attr('href')+window.location.hash);
+                if(!$(this).attr('href').search('classes-tree')){
+                    $(this).attr('href', $(this).attr('href')+window.location.hash);
+                }
             });
 
             $.extend( true, $.fn.dataTable.defaults, {

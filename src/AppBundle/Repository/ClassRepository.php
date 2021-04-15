@@ -75,7 +75,9 @@ class ClassRepository extends EntityRepository
 	                SELECT pk_parent,
                         parent_identifier,
                         DEPTH,
-                        ARRAY_TO_STRING(_path,'|') ancestors,
+                        ARRAY_TO_STRING(ancestors,'|') ancestors,
+                        ARRAY_TO_STRING(pk_ancestors,'|') pk_ancestors,
+                        ARRAY_TO_STRING(pk_version_ancestors,'|') pk_version_ancestors,
                         pk_is_subclass_of,
                         fk_namespace_for_version
                         FROM che.ascendant_class_hierarchy(?, ARRAY[".$in."]::integer[])
@@ -83,6 +85,9 @@ class ClassRepository extends EntityRepository
                 SELECT t_ascendants_classes.pk_parent AS id,
                     t_ascendants_classes.parent_identifier AS identifier,
                     t_ascendants_classes.DEPTH,
+                    t_ascendants_classes.ancestors,
+                    t_ascendants_classes.pk_ancestors,
+                    t_ascendants_classes.pk_version_ancestors,
                     che.get_root_namespace(nsp.pk_namespace) AS \"rootNamespaceId\",
                     (SELECT label FROM che.get_namespace_labels(che.get_root_namespace(nsp.pk_namespace)) WHERE language_iso_code = 'en') AS \"rootNamespaceLabel\",
                     nsp_ascendant.pk_namespace AS \"classNamespaceId\",
@@ -103,7 +108,10 @@ class ClassRepository extends EntityRepository
                 nsp.pk_namespace,
                 nsp_ascendant.pk_namespace,
 		        t_ascendants_classes.fk_namespace_for_version,
-		        t_ascendants_classes.pk_is_subclass_of
+		        t_ascendants_classes.pk_is_subclass_of,
+		        t_ascendants_classes.ancestors,
+		        t_ascendants_classes.pk_ancestors,
+		        t_ascendants_classes.pk_version_ancestors
                 ORDER BY depth DESC;";
 
         $conn = $this->getEntityManager()->getConnection();
@@ -131,12 +139,15 @@ class ClassRepository extends EntityRepository
                   ( SELECT label FROM che.get_namespace_labels(che.get_root_namespace(nsp.pk_namespace)) WHERE language_iso_code = 'en') AS \"rootNamespaceLabel\",
                   nsp.pk_namespace AS \"classNamespaceId\",
                   nsp.standard_label AS \"classNamespaceLabel\",
-                  fk_namespace_for_version
-                FROM che.descendant_class_hierarchy(?) cls,
+                  fk_namespace_for_version,
+                  ARRAY_TO_STRING(descendants,'|') AS \"descendants\",
+                  ARRAY_TO_STRING(pk_descendants,'|') AS \"pk_descendants\",
+                  ARRAY_TO_STRING(pk_version_descendants,'|') AS \"pk_version_descendants\"
+                  FROM che.descendant_class_hierarchy(?) cls,
                   che.namespace nsp
                 WHERE nsp.pk_namespace = cls.fk_namespace_for_version
                 AND nsp.pk_namespace IN (".$in.")
-                GROUP BY pk_child, child_identifier, depth, nsp.pk_namespace, che.get_root_namespace(nsp.pk_namespace), fk_namespace_for_version
+                GROUP BY pk_child, child_identifier, depth, nsp.pk_namespace, che.get_root_namespace(nsp.pk_namespace), fk_namespace_for_version, descendants, pk_descendants, pk_version_descendants
                 ORDER BY depth ASC;";
 
         $conn = $this->getEntityManager()->getConnection();

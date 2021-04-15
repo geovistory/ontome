@@ -745,7 +745,7 @@
                         {% set parentClassVersion = null %}
                         {% set isGoodNamespace = true %}
                         {% set route = 'class_show_with_version' %}
-                        {% set route_params = {'id': association.parentClass.id,  'namespaceFromUrlId': association.parentClassNamespace.id } %}
+                        {% set route_params = {'id': association.parentClass.id,  'namespaceFromUrlId': association.parentClassNamespace.id, '_fragment': 'class-hierarchy' } %}
 
                         {# Le namespace de parentClass correspond-t-il aux namespaces selectionnés ? Si non : rouge #}
                         {% set parentClassNamespaceId = association.parentClassNamespace.id %}
@@ -833,6 +833,7 @@
                         <th>Class</th>
                         <th>Depth</th>
                         <th>Class namespace</th>
+                        <th>Via</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -848,6 +849,16 @@
                             </td>
                             <td>{{ ancestor.depth }}</td>
                             <td>{{ ancestor.classNamespaceLabel }}</td>
+                            <td>
+                                {% set branch_ancestors = ancestor.ancestors|split('|')[1:] %}
+                                {% set branch_pk_ancestors = ancestor.pk_ancestors|split('|')[1:] %}
+                                {% set branch_pk_version_ancestors = ancestor.pk_version_ancestors|split('|')[1:] %}
+                                {% set link_branch_ancestors = [] %}
+                                {% for branch_ancestor in  branch_ancestors %}
+                                    {% set link_branch_ancestors = link_branch_ancestors|merge(['<a href="' ~ path('class_show_with_version', {'id': branch_pk_ancestors[loop.index0], 'namespaceFromUrlId': branch_pk_version_ancestors[loop.index0], '_fragment': 'class-hierarchy'}) ~ '">' ~ branch_ancestors[loop.index0] ~ '</a>']) %}
+                                {% endfor %}
+                                {{ link_branch_ancestors|join(' - ')|raw }}
+                            </td>
                         </tr>
                     {% endfor %}
                     </tbody>
@@ -859,6 +870,7 @@
                         <th>Class</th>
                         <th>Depth</th>
                         <th>Class namespace</th>
+                        <th>Via</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -874,6 +886,16 @@
                             </td>
                             <td>{{ descendant.depth }}</td>
                             <td>{{ descendant.classNamespaceLabel }}</td>
+                            <td>
+                                {% set branch_descendants = descendant.descendants|split('|')[1:] %}
+                                {% set branch_pk_descendants = descendant.pk_descendants|split('|')[1:] %}
+                                {% set branch_pk_version_descendants = descendant.pk_version_descendants|split('|')[1:] %}
+                                {% set link_branch_descendants = [] %}
+                                {% for branch_descendant in  branch_descendants %}
+                                    {% set link_branch_descendants = link_branch_descendants|merge(['<a href="' ~ path('class_show_with_version', {'id': branch_pk_descendants[loop.index0], 'namespaceFromUrlId': branch_pk_version_descendants[loop.index0], '_fragment': 'class-hierarchy'}) ~ '">' ~ branch_descendants[loop.index0] ~ '</a>']) %}
+                                {% endfor %}
+                                {{ link_branch_descendants|join(' - ')|raw }}
+                            </td>
                         </tr>
                     {% endfor %}
                     </tbody>

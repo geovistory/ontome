@@ -12,6 +12,7 @@
     <table class="table table-striped" id="class-table">
         <thead>
         <tr>
+            <th>Identifier</th>
             <th>Class name</th>
             <th>Namespace</th>
             <th>Last updated</th>
@@ -26,11 +27,14 @@
                 {% for classVersion in class.classVersions if classVersion.namespaceForVersion.id in namespacesId %}
                 <tr>
                     <td>
+                        {{ classVersion.class.identifierInNamespace }}
+                    </td>
+                    <td>
                         <a href="{{ path('class_show_with_version', {
                             'id': class.id,
                             'namespaceFromUrlId': classVersion.namespaceForVersion.id
                         }) }}">
-                                {{ classVersion }}
+                                {{ classVersion.standardLabel }}
                         </a>
                     </td>
                     <td>
@@ -54,7 +58,12 @@
 
     <script>
         $(document).ready(function() {
-        $('#class-table').DataTable({"pageLength":50});
+        $('#class-table').DataTable({
+            "pageLength":50,
+            columnDefs: [
+                { type: 'natural-ci', targets: 0 }
+            ],
+            order: [[ 0, 'asc' ]]});
     } );
     </script>
 {% endblock %}
