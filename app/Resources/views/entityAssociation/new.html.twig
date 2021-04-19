@@ -72,6 +72,10 @@
                         <span class="fa fa-plus-circle"></span>
                         Add an example
                     </a>
+                    <a href="#" class="js-example-remove">
+                        <span class="fa fa-minus-circle"></span>
+                        Close example form
+                    </a>
 
                 </div>
 
@@ -177,11 +181,16 @@
             {% endif %}
 
             $('#relations-table').DataTable();
+
+            $('.js-example-remove').hide();
+
             if($('[for=entity_association_form_textProperties_1_textProperty]').length) {
                 //we hide the button in order to prevent the add of more than 2 text properties
                 $('.js-example-add').hide();
                 $('[for=entity_association_form_textProperties_1_textProperty]').text('Example');
+                $('.js-example-remove').show();
             }
+
             var $wrapper = $('.js-text-property-wrapper');
             $wrapper.on('click', '.js-example-add', function(e) {
                 e.preventDefault();
@@ -205,6 +214,27 @@
                 $('#entity_association_form_textProperties_1_modifier').val($('#entity_association_form_textProperties_0_creator').val());
                 $('.js-example-add').hide();
                 $('[for=entity_association_form_textProperties_1_textProperty]').text('Example');
+                tinymce.init({
+                    selector:'.tinymce'
+                });
+                $('.js-example-remove').show();
+            });
+
+            $wrapper.on('click', '.js-example-remove', function(e) {
+                e.preventDefault();
+
+                // get the new index
+                var index = $wrapper.data('index');
+
+                // decrease the index with one for the next item
+                $wrapper.data('index', index - 1);
+
+                // remove
+                $("[id^='entity_association_form_textProperties_1_']").remove();
+                $("[for^='entity_association_form_textProperties_1_']").remove();
+                tinymce.get("entity_association_form_textProperties_1_textProperty").remove();
+                $('.js-example-add').show();
+                $('.js-example-remove').hide();
             });
         } );
     </script>
