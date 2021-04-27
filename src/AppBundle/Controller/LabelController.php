@@ -297,9 +297,11 @@ class LabelController  extends Controller
                     if (!is_null($label->getClass())){
                         $cv = $object->getClassVersionForDisplay();
                         if (!is_null($cv->getValidationStatus())) {
-                            $validationRequestStatus = $em->getRepository('AppBundle:SystemType')
-                                ->findOneBy(array('id' => 28));
-                            $cv->setValidationStatus($validationRequestStatus);
+                            if ($cv->getValidationStatus()->getId() != 27) {
+                                $validationRequestStatus = $em->getRepository('AppBundle:SystemType')
+                                    ->findOneBy(array('id' => $statusId));
+                                $cv->setValidationStatus($validationRequestStatus);
+                            }
                         }
                         else $cv->setValidationStatus(null);
                         $em->persist($cv);
@@ -307,9 +309,11 @@ class LabelController  extends Controller
                     else if (!is_null($label->getProperty())){
                         $pv = $object->getPropertyVersionForDisplay();
                         if (!is_null($pv->getValidationStatus())) {
-                            $validationRequestStatus = $em->getRepository('AppBundle:SystemType')
-                                ->findOneBy(array('id' => 28));
-                            $pv->setValidationStatus($validationRequestStatus);
+                            if ($pv->getValidationStatus()->getId() != 27) {
+                                $validationRequestStatus = $em->getRepository('AppBundle:SystemType')
+                                    ->findOneBy(array('id' => $statusId));
+                                $pv->setValidationStatus($validationRequestStatus);
+                            }
                         }
                         else $pv->setValidationStatus(null);
                         $em->persist($pv);
