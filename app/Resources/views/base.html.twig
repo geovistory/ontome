@@ -7,6 +7,7 @@
         <link rel="stylesheet" href="{{ asset('vendor/bootstrap/css/bootstrap.min.css') }}"/>
         <link rel="stylesheet" href="https://cdn.datatables.net/1.10.15/css/dataTables.bootstrap.min.css">
         <link rel="stylesheet" href="{{ asset('css/styles.css') }}"/>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/css/flag-icon.min.css"/>
     {% endblock %}
     <script defer src="https://use.fontawesome.com/releases/v5.0.13/js/all.js" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/4.8.2/tinymce.min.js"></script>
@@ -25,7 +26,7 @@
     <div class="row" id="logo-main-menu-row">
         <div id="logo" class="site-branding">
             <div id="site-logo">
-                <a href="/" title="OntoME">
+                <a href="{{ url('home') }}" title="OntoME">
                     <img src="{{ asset('images/logo.png') }}" alt="OntoME">
                 </a>
             </div>
@@ -42,15 +43,6 @@
                 <div id="ontome-title-block" class="col-xs-6">
                     <h4  id="site-title">
                         <strong><em>Ontology Management Environment - beta version</em></strong>
-                    </h4>
-                </div>
-                <div id="dfhc-block" class="col-xs-6">
-                    <h4 class="text-right">
-                        <strong>
-                            <em>
-                                <a class="text-white" href="http://dataforhistory.org" target="_blank">Data for History Consortium</a>
-                            </em>
-                        </strong>
                     </h4>
                 </div>
             </div>
@@ -134,8 +126,8 @@
                     <div id="block-block-4" class="block block-block">
                         <h3>CREDITS</h3>
                         <div class="content">
-                            <p>Powered by the <a href="http://larhra.ish-lyon.cnrs.fr/pole-histoire-numerique" target="_blank">Pôle Histoire Numérique</a> -  <a href="http://larhra.ish-lyon.cnrs.fr/" target="_blank">LARHRA</a></p>
-                            <p>Release 200422</p>
+                            <p class="text-justify">OntoME is a <a href="http://larhra.ish-lyon.cnrs.fr/" target="_blank">LARHRA</a> application, developed and maintained by the <a href="http://larhra.ish-lyon.cnrs.fr/axe-de-recherche-en-histoire-numerique" target="_blank">Digital history research team</a></p>
+                            <p><a href="http://larhra.ish-lyon.cnrs.fr/" target="_blank"><img width="33%" src="{{ asset('images/larhra-bleu-blanc-full.jpg') }}" alt="LARHRA"></a></p>
                         </div>
                     </div>
                 </div>
@@ -145,7 +137,7 @@
                     <div id="block-block-5" class="block block-block">
                         <h3>CONTACT US</h3>
                         <div class="content">
-                            <p>E-mail : <a href="mailto:ontome@dataforhistory.org?subject=Contact">ontome@dataforhistory.org</a></p>
+                            <p>E-mail : <a href="mailto:contact@ontome.net?subject=Contact">contact@ontome.net</a></p>
                         </div>
                     </div>
                 </div>

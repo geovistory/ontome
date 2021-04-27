@@ -117,17 +117,17 @@
                         </div>
                     </div>
                     {% endif %}
-                    {% if namespace.referencedNamespaceAssociations is not empty %}
+                    {% if namespace.directReferencedNamespaces|length > 0 %}
                     <div class="row">
                         <div class="col-lg-2">
-                            <p>Reference namespace{% if namespace.referencedNamespaceAssociations|length > 1 %}s{% endif %}:</p>
+                            <p>Reference namespace{% if namespace.directReferencedNamespaces|length > 1 %}s{% endif %}:</p>
                         </div>
                         <div class="col-lg-10">
-                        {% for referencedNamespaceAssociation in namespace.referencedNamespaceAssociations %}
+                        {% for referencedNamespace in namespace.allReferencedNamespaces %}
                             <p><a href="{{ path('namespace_show', {
-                                    'id': referencedNamespaceAssociation.referencedNamespace.id
+                                    'id': referencedNamespace.id
                                 }) }}">
-                                    {{ referencedNamespaceAssociation.referencedNamespace }}
+                                    {{ referencedNamespace }}
                                 </a>
                             </p>
                         {% endfor %}
@@ -312,9 +312,8 @@
                 {% else %}
                     <p>This namespace is a root namespace. Find all its versions in the <a href="#namespace-hierarchy" onclick="window.location = '{{ path('namespace_show', {'id': namespace.id}) }}#namespace-hierarchy';window.location.reload()">Versions tab</a>.</p>
                 {% endif %}
-
                 {% if not namespace.isTopLevelNamespace %}
-                    <h3 id="titleReferenceNamespace">Namespace{% if namespace.referencedNamespaceAssociations|length > 1 %}s{% endif %} to which this ongoing namespace refers</h3>
+                    <h3 id="titleReferenceNamespace">Namespace{% if namespace.allReferencedNamespaces|length > 1 %}s{% endif %} to which this ongoing namespace refers</h3>
                         <table class="table table-striped" id="reference-namespaces-table">
                             <thead>
                             <tr>
@@ -322,19 +321,23 @@
                             </tr>
                             </thead>
                             <tbody>
-                            {% for referencedNamespaceAssociation in namespace.referencedNamespaceAssociations %}
+                            {% for referencedNamespace in namespace.allReferencedNamespaces %}
                                 <tr>
                                     <td>
                                         <a href="{{ path('namespace_show', {
-                                            'id': referencedNamespaceAssociation.referencedNamespace.id
+                                            'id': referencedNamespace.id
                                         }) }}">
-                                            {{ referencedNamespaceAssociation.referencedNamespace }}
+                                            {{ referencedNamespace }}
                                         </a>
+                                        {% if referencedNamespace not in namespace.directReferencedNamespaces %}*{% endif %}
                                     </td>
                                 </tr>
                             {% endfor %}
                             </tbody>
                         </table>
+                        {% if namespace.allReferencedNamespaces|length != namespace.directReferencedNamespaces|length %}
+                            <p>* <span class="small">Reference namespace of a selected namespace (automatically added)</span></p>
+                        {% endif %}
                 {% endif %}
 
                 <h3>Labels</h3>

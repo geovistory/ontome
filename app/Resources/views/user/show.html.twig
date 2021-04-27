@@ -129,18 +129,18 @@
                                 <a class="text-muted" href="{{ path('namespace_show', {'id': defaultNamespace.id}) }}">{{ defaultNamespace.standardLabel }}</a>
                                 {% endif %}
                             </div>
-                            {% if defaultNamespace.referencedNamespaceAssociations|length > 0 %}
-                                {% set break = false %}
-                                {% for referencedNamespaceAssociation in defaultNamespace.referencedNamespaceAssociations if referencedNamespaceAssociation.referencedNamespace is not null and not break %}
-                                    {% set break = true %}
-                                    <div class="small text-muted"><strong><em>Referenced :</em></strong></div>
-                                {% endfor %}
-                                {% if break %}
+                            {% if defaultNamespace.directReferencedNamespaces|length > 0 %}
+                                <div class="small text-muted"><strong><em>Referenced :</em></strong></div>
                                 <ul>
-                                {% for referencedNamespaceAssociation in defaultNamespace.referencedNamespaceAssociations if referencedNamespaceAssociation.referencedNamespace is not null %}
-                                    <li class="list-unstyled"><em><a href="{{ path('namespace_show', {'id': referencedNamespaceAssociation.referencedNamespace.id}) }}">{{ referencedNamespaceAssociation.referencedNamespace.standardLabel }}</a></em></li>
+                                {% for referencedNamespace in defaultNamespace.allReferencedNamespaces %}
+                                    <li class="list-unstyled">
+                                        <em><a href="{{ path('namespace_show', {'id': referencedNamespace.id}) }}">{{ referencedNamespace }}</a></em>
+                                        {% if referencedNamespace not in defaultNamespace.directReferencedNamespaces %}*{% endif %}
+                                    </li>
                                 {% endfor %}
                                 </ul>
+                                {% if defaultNamespace.allReferencedNamespaces|length != defaultNamespace.directReferencedNamespaces|length %}
+                                    <p>* <span class="small">Reference namespace of a selected namespace (automatically added)</span></p>
                                 {% endif %}
                             {% endif %}
                             {% endif %}
