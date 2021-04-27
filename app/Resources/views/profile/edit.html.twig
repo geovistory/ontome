@@ -278,7 +278,7 @@
                             <tr>
                                 <th></th>
                                 <th>ID</th>
-                                <th>Identifier in namespace</th>
+                                <th>Identifier</th>
                                 <th>Class</th>
                                 <th>Association type</th>
                                 <th>Namespace</th>
@@ -292,7 +292,8 @@
                         <table class="table table-striped" id="selectable-classes-table" style="width:100%">
                             <thead>
                             <tr>
-                                <th>Select</th>
+                                <th></th>
+                                <th>Identifier</th>
                                 <th>Class</th>
                                 <th>Namespace</th>
                             </tr>
@@ -374,6 +375,7 @@
                 <tr>
                     <th class="text-right">Domain</th>
                     <th></th>
+                    <th>Identifier</th>
                     <th class="text-center">Property</th>
                     <th></th>
                     <th>Range</th>
@@ -386,7 +388,7 @@
                     if profileAssociation.property is not null
                     and profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion) %}
                     <tr>
-                        <td class="text-nowrap text-right small">
+                        <td class="text-right small">
                             {% if profileAssociation.domain is not null %}
                                 {# Propriété héritée #}
                                 <a href="{{ path('class_show_with_version', {
@@ -422,13 +424,16 @@
                                 {% endif %})
                             {% endif %}
                         </td>
-                        <td class="text-nowrap text-center">
+                        <td>
+                            {{ profileAssociation.property.identifierInNamespace }}
+                        </td>
+                        <td class="text-center">
                             {% if profileAssociation.entityNamespaceForVersion.id in idNamespacesAssociatedInProfile %}
                             <a href="{{ path('property_show_with_version', {
                                 'id': profileAssociation.property.id,
                                 'namespaceFromUrlId': profileAssociation.entityNamespaceForVersion.id
                             }) }}">
-                                {{ profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion) }}
+                                {{ profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).standardLabel }}
                             </a>
                             {% else %}
                             <a href="{{ path('property_show_with_version', {
@@ -456,7 +461,7 @@
                                 {% endif %})
                             {% endif %}
                         </td>
-                        <td class="text-nowrap small">
+                        <td class="small">
                             {% if profileAssociation.range is not null %}
                                 {# propriété héritée #}
                                 <a href="{{ path('class_show_with_version', {
@@ -746,6 +751,9 @@
                     }
                 },
                 {
+                    type: 'natural-ci', targets: 2, width: '1%', className: 'text-right'
+                },
+                {
                     targets: 3,
                     render: function ( data, type, row, meta ) {
                         var urlClass = '{{ path("class_show_with_version", {'id' : 'classID', 'namespaceFromUrlId': 'namespaceFromUrlId'}) }}';
@@ -753,10 +761,10 @@
                         urlClass = urlClass.replace("namespaceFromUrlId", row.namespaceForVersion);
 
                         if([{{ idNamespacesAssociatedInProfile|join(',') }}].indexOf(row.namespaceForVersion) >= 0) {
-                            return '<a href="' + urlClass + '">' + data + ' – ' + row.identifierInNamespace + '</a>';
+                            return '<a href="' + urlClass + '">' + data + '</a>';
                         }
                         else{
-                            return '<a href="' + urlClass + '" class="text-danger">' + data + ' – ' + row.identifierInNamespace + '</a> <a data-toggle="tooltip" class="text-danger" data-placement="right" title="Classes from another version of this namespace, previously selected in your profile, are not available in the selected version. They are displayed in red in your profile. Please make the necessary corrections before proceeding."><span class="fas fa-exclamation-triangle"></span></a>';
+                            return '<a href="' + urlClass + '" class="text-danger">' + data + '</a> <a data-toggle="tooltip" class="text-danger" data-placement="right" title="Classes from another version of this namespace, previously selected in your profile, are not available in the selected version. They are displayed in red in your profile. Please make the necessary corrections before proceeding."><span class="fas fa-exclamation-triangle"></span></a>';
                         }
 
                     }
@@ -779,7 +787,7 @@
                 },
                 {
                     visible: false,
-                    targets: [1,2]
+                    targets: [1]
                 }
             ]
         });
@@ -788,23 +796,26 @@
             dataSrc: 'data',
             columns: [
                 { data: 'classId' },
+                { data: 'identifierInNamespace' },
                 { data: 'standardLabel' },
-                { data: 'namespace' },
-                { data: 'identifierInNamespace' }
+                { data: 'namespace' }
             ],
             columnDefs: [
                 {
-                    targets: 1,
+                    targets: 0,
                     render: function ( data, type, row, meta ) {
                         var urlSelectClass = '{{ path("profile_class_association", {'profile' : 'profileID', 'class' : 'classID'}) }}';
                         urlSelectClass = urlSelectClass.replace("profileID", profileID);
                         urlSelectClass = urlSelectClass.replace("classID", row.classId);
-                        return '<a data-id="'+row.classId+'" data-namespace-id="'+row.namespaceId+'" data-url="'+urlSelectClass+'" class="select-class"><span class="plus-icon" data-id="'+row.classId+'"><span class="fas fa-plus"></span></span><span class="select-class-loading-icon" data-id="'+row.classId+'" style="display: none"><span class="fas fa-spinner fa-spin"></span></span></a>&nbsp;' + data + ' – ' + row.identifierInNamespace;
+                        return '<a data-id="'+row.classId+'" data-namespace-id="'+row.namespaceId+'" data-url="'+urlSelectClass+'" class="select-class"><span class="plus-icon" data-id="'+row.classId+'"><span class="fas fa-plus"></span></span><span class="select-class-loading-icon" data-id="'+row.classId+'" style="display: none"><span class="fas fa-spinner fa-spin"></span></span></a>&nbsp;';
                     }
                 },
                 {
-                    visible: false,
-                    targets: [0,-1]
+                    targets: 1,
+
+                    type: 'natural-ci',
+                    width: '1%',
+                    className: 'text-right'
                 }
             ]
         });
@@ -1071,6 +1082,11 @@
         $('#labels-table').DataTable();
         $('#descriptions-table').DataTable();
         $('#properties-table').DataTable({
+            "autoWidth": false,
+            order: [[ 3, 'asc' ]],
+            columnDefs: [
+                { type: 'natural-ci', targets: 2, width: '1%', className: 'text-right' }
+            ],
             initComplete: function(){
                 this.api().columns([6]).every(function(){
                     var column = this;

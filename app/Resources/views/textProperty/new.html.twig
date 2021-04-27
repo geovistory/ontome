@@ -35,7 +35,7 @@
                     </a>
                 {% elseif textProperty.property is not null %}
                     Add a{% if textProperty.systemType.standardLabel|first|lower in ['a', 'e', 'i', 'o', 'u', 'y'] %}n{% endif %} {{ textProperty.systemType.standardLabel|lower }}
-                    for the property {{ textProperty.property }}
+                    for the property {{ textProperty.property.propertyVersionForDisplay(textProperty.namespaceForVersion) }}
                     <a href="{{ path('property_edit', {
                         id: textProperty.property.id,
                         "_fragment": "definition"
@@ -67,12 +67,16 @@
                         <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
                     </a>
                 {% elseif textProperty.namespace is not null %}
+                    {% set fragment = "definition" %}
+                    {% if textProperty.systemType.id == 31 %}
+                        {% set fragment = "identification" %}
+                    {% endif %}
                     Add a{% if textProperty.systemType.standardLabel|first|lower in ['a', 'e', 'i', 'o', 'u', 'y'] %}n{% endif %} {{ textProperty.systemType.standardLabel|lower }}
                     for the namespace {{ textProperty.namespace }}
                     <a href="{{ path('namespace_edit', {
                         id: textProperty.namespace.id,
-                        "_fragment": "definition"
-                    }) }}#definition"
+                        "_fragment": fragment
+                    }) }}"
                        class="pull-right btn btn-link"
                        role="button">
                         <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
@@ -152,9 +156,14 @@
                         Back <i class="fas fa-arrow-left"></i>
                     </a>
                 {% elseif textProperty.namespace is not null %}
+                    {% set fragment = "definition" %}
+                    {% if textProperty.systemType.id == 31 %}
+                        {% set fragment = "identification" %}
+                    {% endif %}
                     <a href="{{ path('namespace_edit', {
-                        id: textProperty.namespace.id
-                    }) }}#definition"
+                        id: textProperty.namespace.id,
+                        '_fragment': fragment
+                    }) }}"
                        class="btn btn-default"
                        role="button">
                         Back <i class="fas fa-arrow-left"></i>

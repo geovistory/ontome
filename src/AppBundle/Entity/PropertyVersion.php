@@ -279,7 +279,7 @@ class PropertyVersion
     }
 
     /**
-     * @return string the formatted quantifiers string
+     * @return string the formatted quantifiers string (UML)
      */
     public function getQuantifiers()
     {
@@ -307,6 +307,56 @@ class PropertyVersion
 
         return $s;
 
+    }
+
+    /**
+     * @return string the formatted quantifiers string (Merise)
+     */
+    public function getQuantifiersMerise()
+    {
+        $s = null;
+
+        if(!is_null($this->domainMinQuantifier)&&!is_null($this->domainMaxQuantifier)&&!is_null($this->rangeMinQuantifier)&&!is_null($this->rangeMaxQuantifier)){
+            if($this->domainMinQuantifier == -1)
+                $domainMinQ = 'n';
+            else $domainMinQ = $this->domainMinQuantifier;
+
+            if($this->domainMaxQuantifier == -1)
+                $domainMaxQ = 'n';
+            else $domainMaxQ = $this->domainMaxQuantifier;
+
+            if($this->rangeMinQuantifier == -1)
+                $rangeMinQ = 'n';
+            else $rangeMinQ = $this->rangeMinQuantifier;
+
+            if($this->rangeMaxQuantifier == -1)
+                $rangeMaxQ = 'n';
+            else $rangeMaxQ = $this->rangeMaxQuantifier;
+
+            $s = $rangeMinQ.','.$rangeMaxQ.':'.$domainMinQ.','.$domainMaxQ;
+        }
+
+        return $s;
+
+    }
+
+    /**
+     * @return string the formatted quantifiers string
+     */
+    public function getQuantifiersString()
+    {
+        $s = null;
+
+        if(!is_null($this->domainMinQuantifier)&&!is_null($this->domainMaxQuantifier)&&!is_null($this->rangeMinQuantifier)&&!is_null($this->rangeMaxQuantifier)){
+            if($this->domainMaxQuantifier == -1){$s = "many";}
+            if($this->domainMaxQuantifier == 1){$s = "one";}
+            $s .= ' to ';
+            if($this->rangeMaxQuantifier == -1){$s .= "many";}
+            if($this->rangeMaxQuantifier == 1){$s .= "one";}
+            if($this->rangeMinQuantifier == 1){$s .= ", necessary";}
+            if($this->domainMinQuantifier == 1){$s .= ", dependant";}
+        }
+        return $s;
     }
 
     /**

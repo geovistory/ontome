@@ -181,6 +181,7 @@
                 <table class="table table-striped" id="classes-table">
                     <thead>
                     <tr>
+                        <th>Identifier</th>
                         <th>Class</th>
                         <th>Association type</th>
                         <th>Namespace</th>
@@ -190,16 +191,12 @@
                     {% for class in classes %}
                         {# classes n'est pas un ensemble d'entités ORM, c'est un résultat d'une requête manuelle. #}
                         <tr>
+                            <td>{{ class.identifierInNamespace }}</td>
                             <td>
                                 <a href="{{ path('class_show_with_version', {
                                     'id': class.id,
                                     'namespaceFromUrlId': class.namespaceForVersion
-                                }) }}">
-                                    {% if class.identifierInNamespace != class.standardLabel and class.standardLabel is not null %}
-                                        {{ class.standardLabel }} – {{ class.identifierInNamespace }}
-                                    {% else %}
-                                        {{ class.identifierInNamespace }}
-                                    {% endif %}
+                                }) }}">{{ class.standardLabel }}
                                 </a>
                             </td>
                             <td>{{ class.associationType }}</td>
@@ -236,6 +233,7 @@
                     <tr>
                         <th class="text-right">Domain</th>
                         <th></th>
+                        <th class="text-center">Identifier</th>
                         <th class="text-center">Property</th>
                         <th></th>
                         <th>Range</th>
@@ -284,12 +282,15 @@
                                     {% endif %})
                                 {% endif %}
                             </td>
+                            <td>
+                                {{ profileAssociation.property.identifierInNamespace }}
+                            </td>
                             <td class="text-center">
                                 <a href="{{ path('property_show_with_version', {
                                     'id': profileAssociation.property.id,
                                     'namespaceFromUrlId': profileAssociation.entityNamespaceForVersion.id
                                 }) }}">
-                                    {{ profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion) }}
+                                    {{ profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).standardLabel }}
                                 </a>
                             </td>
                             <td class="text-nowrap small" style="padding-right: 30px;">
@@ -405,8 +406,18 @@
     <script>
         $(document).ready(function() {
             $('#labels-table').DataTable();
-            $('#classes-table').DataTable();
+            $('#classes-table').DataTable({
+                columnDefs: [
+                    { type: 'natural-ci', targets: 0, width: '1%', className: 'text-right' }
+                ],
+                "autoWidth": false,
+                order: [[ 1, 'asc' ]]});
             $('#properties-table').DataTable({
+                "autoWidth": false,
+                order: [[ 3, 'asc' ]],
+                columnDefs: [
+                    { type: 'natural-ci', targets: 2, width: '1%', className: 'text-right' }
+                ],
                 initComplete: function(){
                     this.api().columns([6]).every(function(){
                         var column = this;

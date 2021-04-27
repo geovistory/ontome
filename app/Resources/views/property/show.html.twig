@@ -481,6 +481,7 @@
                                     <span class="badge {% if textProperty.comments|length > 0  %}progress-bar-danger {% endif %}">{{ textProperty.comments|length }}</span>
                                 </a>
                             </td>
+                            {% if propertyVersion.namespaceForVersion.isOngoing %}
                             <td>
                                 {% if textProperty.validationStatus is null %}
                                     <span class="label label-info">
@@ -500,6 +501,7 @@
                                 </span>
                                 {% endif %}
                             </td>
+                            {% endif %}
                         </tr>
                     {% endfor %}
                     </tbody>
@@ -715,6 +717,7 @@
                                     <span class="badge {% if label.comments|length > 0  %}progress-bar-danger {% endif %}">{{ label.comments|length }}</span>
                                 </a>
                             </td>
+                            {% if propertyVersion.namespaceForVersion.isOngoing %}
                             <td>
                                 {% if label.validationStatus is null %}
                                     <span class="label label-info">
@@ -734,6 +737,7 @@
                                 </span>
                                 {% endif %}
                             </td>
+                            {% endif %}
                         </tr>
                     {% endfor %}
                     </tbody>
@@ -851,7 +855,7 @@
                                 {# Initialisation #}
                                 {% set isGoodNamespace = true %}
                                 {% set route = 'property_show_with_version' %}
-                                {% set route_params = {'id': association.parentProperty.id,  'namespaceFromUrlId': association.parentPropertyNamespace.id } %}
+                                {% set route_params = {'id': association.parentProperty.id,  'namespaceFromUrlId': association.parentPropertyNamespace.id, '_fragment': 'class-hierarchy' } %}
 
                                 {# Vérification #}
                                 {% if association.parentPropertyNamespace.id not in propertyVersion.namespaceForVersion.selectedNamespacesId %}
@@ -936,6 +940,7 @@
                                     <span class="badge {% if association.comments|length > 0  %}progress-bar-danger {% endif %}">{{ association.comments|length }}</span>
                                 </a>
                             </td>
+                            {% if propertyVersion.namespaceForVersion.isOngoing %}
                             <td>
                                 {% if association.validationStatus is null %}
                                     <span class="label label-info">
@@ -955,6 +960,7 @@
                                 </span>
                                 {% endif %}
                             </td>
+                            {% endif %}
                         </tr>
                     {% endfor %}
                     </tbody>
@@ -1371,15 +1377,8 @@
 
     <script>
         $(document).ready(function() {
-            //hide validation column for datatable when current namespace is not ongoing
-            var visible = '{{ propertyVersion.namespaceForVersion.isOngoing}}';
-
             $('#namespaces-table').DataTable();
-            $('#labels-table').DataTable({
-                "columnDefs": [
-                    {"targets": 5, "visible": visible}
-                ]
-            });
+            $('#labels-table').DataTable({});
             $('#scope-notes-table').DataTable({
                 "order": [[5, 'desc']],
                 "columnDefs": [
@@ -1387,8 +1386,7 @@
                     {"width": "50%", "targets": 1},
                     {"width": "1%", "targets": 2},
                     {"width": "1%", "targets": 4},
-                    {"width": "1%", "targets": 5},
-                    {"width": "1%", "targets": 6, "visible": visible}
+                    {"width": "1%", "targets": 5}
                 ],
                 "autoWidth": false
             });
@@ -1399,8 +1397,7 @@
                     {"width": "50%", "targets": 1},
                     {"width": "1%", "targets": 2},
                     {"width": "1%", "targets": 4},
-                    {"width": "1%", "targets": 5},
-                    {"width": "1%", "targets": 6, "visible": visible}
+                    {"width": "1%", "targets": 5}
                 ],
                 "autoWidth": false
             });
@@ -1411,8 +1408,7 @@
                     {"width": "50%", "targets": 1},
                     {"width": "1%", "targets": 2},
                     {"width": "1%", "targets": 4},
-                    {"width": "1%", "targets": 5},
-                    {"width": "1%", "targets": 6, "visible": visible}
+                    {"width": "1%", "targets": 5}
                 ],
                 "autoWidth": false
             });

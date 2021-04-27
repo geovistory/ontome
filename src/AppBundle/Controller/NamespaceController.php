@@ -663,28 +663,13 @@ class NamespaceController  extends Controller
     }
 
     /**
-     * @Route("/namespace/{namespace}/odt", name="namespace_odt")
+     * @Route("/namespace/{namespace}/document", name="namespace_document")
      * @Method({ "GET"})
      * @param OntoNamespace  $namespace    The namespace
      * @return BinaryFileResponse
      */
     public function getNamespaceOdt(OntoNamespace $namespace)
     {
-        /*$fileName = 'temp_file.odt';
-        $templateProcessor = new TemplateProcessor('../web/templates/odt_namespace.docx');
-        $templateProcessor->setValue('namespaceStandardLabel', $namespace->getStandardLabel());
-
-
-        $templateProcessor->setValue('namespaceStatut', $namespaceStatut);
-        $templateProcessor->setValue('namespaceDate', $namespaceDate->format('Y-m-d H:i:s'));
-
-
-        $templateProcessor->setValue('contributors', $contributors);
-
-        $templateProcessor->saveAs($fileName);
-        $phpWord = \PhpOffice\PhpWord\IOFactory::load($fileName); // Read the temp file
-        unlink('temp_file.odt');*/
-
         foreach ($namespace->getTextProperties() as $textProperty){
             if($textProperty->getSystemType()->getId() == 2 and $textProperty->getLanguageIsoCode() == "en"){
                 $textp_contributors = $textProperty;
@@ -731,7 +716,7 @@ class NamespaceController  extends Controller
         $section->addText(date_format($namespaceDate,"Y/m/d H:i:s"), null, $paragrapheCentre);
         $section->addTextBreak(20);
         if(isset($textp_contributors)){
-        $section->addText("Contributors: ".html_entity_decode(strip_tags($textp_contributors->getTextProperty())), null, $paragrapheCentre);
+            $section->addText("Contributors: ".html_entity_decode(strip_tags($textp_contributors->getTextProperty())), null, $paragrapheCentre);
         }
 
         $footer = $section->addFooter(Footer::AUTO);
@@ -745,8 +730,10 @@ class NamespaceController  extends Controller
         $section->addTitle('1.1 Introduction', 2);
         $section->addTextBreak();
         $section->addTitle('1.1.1 Scope', 3);
-        $section->addTextBreak();
-        $section->addText(html_entity_decode(strip_tags($textp_definition->getTextProperty())));
+        if(isset($textp_definition)){
+            $section->addTextBreak();
+            $section->addText(html_entity_decode(strip_tags($textp_definition->getTextProperty())));
+        }
         $section->addTextBreak(2);
         $section->addTitle('1.1.2 Status', 3);
         $section->addTextBreak();
@@ -774,14 +761,14 @@ class NamespaceController  extends Controller
             $associations = $classVersion->getClass()->getChildClassAssociations();
             foreach ($associations as $association){
                 if(in_array($association->getNamespaceForVersion()->getId(), $namespace->getLargeSelectedNamespacesId())){
-                    $subclassVersion = $association->getParentClass()->getClassVersionForDisplay($association->getParentClassNamespace());
+                    $parentClassVersion = $association->getParentClass()->getClassVersionForDisplay($association->getParentClassNamespace());
                 }
             }
-            if(isset($subclassVersion)){
+            if(isset($parentClassVersion)){
                 $section->addTextBreak();
                 $textRun = $section->addTextRun();
                 $textRun->addText('Subclass of: ', "gras");
-                $textRun->addText($subclassVersion->getStandardLabel());
+                $textRun->addText($parentClassVersion->getStandardLabel());
             }
 
             $associations = $classVersion->getClass()->getParentClassAssociations();
@@ -793,8 +780,8 @@ class NamespaceController  extends Controller
                     $i++;
                 }
                 if(in_array($association->getNamespaceForVersion()->getId(), $namespace->getLargeSelectedNamespacesId())){
-                    $supclassVersion = $association->getChildClass()->getClassVersionForDisplay($association->getChildClassNamespace());
-                    $section->addText($supclassVersion->getStandardLabel(), null, array('indentation' => array('left' => 800)));
+                    $childClassVersion = $association->getChildClass()->getClassVersionForDisplay($association->getChildClassNamespace());
+                    $section->addText($childClassVersion->getStandardLabel(), null, array('indentation' => array('left' => 800)));
                 }
             }
 
@@ -828,23 +815,24 @@ class NamespaceController  extends Controller
                     }
                 }
             }
-            if(isset($subclassVersion)){
+            if(isset($parentClassVersion)){
                 $section->addTextBreak();
                 $textRun = $section->addTextRun();
                 $textRun->addText('In First Order Logic: ', "gras");
-                $textRun->addText($classVersion->getClass()->getIdentifierInNamespace().' ⊃ '.$subclassVersion->getClass()->getIdentifierInNamespace());
+                $textRun->addText($classVersion->getClass()->getIdentifierInNamespace().' ⊃ '.$parentClassVersion->getClass()->getIdentifierInNamespace());
             }
 
             $i = 0;
             $em = $this->getDoctrine()->getManager();
             $outgoingProperties = $em->getRepository('AppBundle:property')->findOutgoingPropertiesByClassVersionAndNamespacesId($classVersion, $namespace->getLargeSelectedNamespacesId());
-            foreach($outgoingProperties as $property){
+            foreach($outgoingProperties as $outgoingProperty){
                 if($i == 0){
                     $section->addTextBreak();
                     $section->addText('Properties:', "gras");
                     $i++;
                 }
-                $section->addText("PROP_LABEL_STANDARD", null, array('indentation' => array('left' => 800)));
+                $propertyVersion = $em->getRepository('AppBundle:PropertyVersion')->findOneBy(array("property"=>$outgoingProperty['propertyId'], "namespaceForVersion"=>$outgoingProperty['propertyNamespaceId']));
+                $section->addText($propertyVersion->getDomain()->getIdentifierInNamespace()." ".$propertyVersion->getStandardLabel()." (".$propertyVersion->getInvertedLabel()."): ".$propertyVersion->getRange()->getIdentifierInNamespace(), null, array('indentation' => array('left' => 800)));
             }
         }
 
@@ -864,28 +852,91 @@ class NamespaceController  extends Controller
 
         /** @var PropertyVersion $propertyVersion */
         foreach ($namespace->getPropertyVersions() as $propertyVersion) {
-            $section->addTitle($propertyVersion->getProperty()->getIdentifierInNamespace() . " - " . $propertyVersion->getStandardLabel(), 3);
+            $label = $propertyVersion->getProperty()->getIdentifierInNamespace() . " - " . $propertyVersion->getStandardLabel();
+            $section->addTitle($label, 3);
             $section->addTextBreak();
-            $section->addTitle('Domain:', 4);
-            $section->addText("Test TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest Test");
+            if(!is_null($propertyVersion->getDomain())){
+                $label = $propertyVersion->getDomain()->getIdentifierInNamespace()." ".$propertyVersion->getDomain()->getClassVersionForDisplay($propertyVersion->getDomainNamespace())->getStandardLabel();
+                $textRun = $section->addTextRun();
+                $textRun->addText('Domain: ', "gras");
+                $textRun->addText($label);
+            }
+            if(!is_null($propertyVersion->getRange())){
+                $label = $propertyVersion->getRange()->getIdentifierInNamespace()." ".$propertyVersion->getRange()->getClassVersionForDisplay($propertyVersion->getRangeNamespace())->getStandardLabel();
+                $textRun = $section->addTextRun();
+                $textRun->addText('Range: ', "gras");
+                $textRun->addText($label);
+            }
+            $associations = $propertyVersion->getProperty()->getChildPropertyAssociations();
+            $parentPropertyVersion = null;
+            foreach ($associations as $association){
+                if(in_array($association->getNamespaceForVersion()->getId(), $namespace->getLargeSelectedNamespacesId())){
+                    $parentPropertyVersion = $association->getParentProperty()->getPropertyVersionForDisplay($association->getParentPropertyNamespace());
+                }
+            }
+            if(!is_null($parentPropertyVersion)){
+                $labelDomain = "";
+                $labelRange = "";
+                $label = $parentPropertyVersion->getProperty()->getIdentifierInNamespace()." ".$parentPropertyVersion->getStandardLabel();
+                if(!is_null($parentPropertyVersion->getDomain())){$labelDomain = $parentPropertyVersion->getDomain()->getIdentifierInNamespace()." ".$parentPropertyVersion->getDomain()->getClassVersionForDisplay($parentPropertyVersion->getDomainNamespace())->getStandardLabel().":";}
+                if(!is_null($parentPropertyVersion->getRange())){$labelRange = ":".$parentPropertyVersion->getRange()->getIdentifierInNamespace()." ".$parentPropertyVersion->getRange()->getClassVersionForDisplay($parentPropertyVersion->getRangeNamespace())->getStandardLabel();}
+                $label = $labelDomain.$label.$labelRange;
+                $section->addTextBreak();
+                $textRun = $section->addTextRun();
+                $textRun->addText('Subproperty of: ', "gras");
+                $textRun->addText($label);
+            }
+
+            if(!is_null($propertyVersion->getQuantifiersString())){
+                $section->addTextBreak();
+                $textRun = $section->addTextRun();
+                $textRun->addText('Quantification: ',"gras");
+                $textRun->addText($propertyVersion->getQuantifiersString());
+                $section->addText("UML: ".$propertyVersion->getQuantifiers());
+                $section->addText("Merise: ".$propertyVersion->getQuantifiersMerise());
+            }
+
+            foreach ($propertyVersion->getProperty()->getTextProperties() as $textProperty){
+                if(in_array($textProperty->getNamespaceForVersion()->getId(), $namespace->getLargeSelectedNamespacesId())){
+                    if($textProperty->getSystemType()->getId() == 1 and $textProperty->getLanguageIsoCode() == "en"){
+                        $textp_scopenote = $textProperty;
+                    }
+                    if($textProperty->getSystemType()->getId() == 1 and !isset($textp_scopenote)){
+                        $textp_scopenote = $textProperty;
+                    }
+                }
+            }
+            if(isset($textp_scopenote)){
+                $section->addTextBreak();
+                $textRun = $section->addTextRun();
+                $textRun->addText('Scope note: ', "gras");
+                $textRun->addText(html_entity_decode(strip_tags($textp_scopenote->getTextProperty())));
+            }
+
+            $i = 0;
+            foreach ($propertyVersion->getProperty()->getTextProperties() as $textProperty){
+                if(in_array($textProperty->getNamespaceForVersion()->getId(), $namespace->getLargeSelectedNamespacesId())){
+                    if($textProperty->getSystemType()->getId() == 7){
+                        if($i == 0){
+                            $section->addTextBreak();
+                            $section->addText('Examples:', "gras");
+                            $i++;
+                        }
+                        $section->addText(html_entity_decode(strip_tags($textProperty->getTextProperty())), null, array('indentation' => array('left' => 800)));
+                    }
+                }
+            }
             $section->addTextBreak();
-            $section->addTitle('Range:', 4);
-            $section->addText("Test TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest Test");
-            $section->addTextBreak();
-            $section->addTitle('Subproperty:', 4);
-            $section->addText("Test TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest Test");
-            $section->addTextBreak();
-            $section->addTitle('Superproperty:', 4);
-            $section->addText("Test TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest Test");
-            $section->addTextBreak();
-            $section->addTitle('Scope note:', 4);
-            $section->addText("Test TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest Test");
-            $section->addTextBreak();
-            $section->addTitle('Examples:', 4);
-            $section->addText("Test TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest Test");
-            $section->addTextBreak();
-            $section->addTitle('In First Order Logic:', 4);
-            $section->addText("Test TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest TestTest Test");
+            $section->addText('In First Order Logic:', "gras");
+            if(!is_null($propertyVersion->getDomain())){
+                $section->addText($propertyVersion->getProperty()->getIdentifierInNamespace().'(x,y) ⊃ '.$propertyVersion->getDomain()->getIdentifierInNamespace().'(x)', null, array('indentation' => array('left' => 800)));
+            }
+            if(!is_null($propertyVersion->getRange())){
+                $section->addText($propertyVersion->getProperty()->getIdentifierInNamespace().'(x,y) ⊃ '.$propertyVersion->getRange()->getIdentifierInNamespace().'(y)', null, array('indentation' => array('left' => 800)));
+            }
+            if(!is_null($parentPropertyVersion)){
+                $section->addText($propertyVersion->getProperty()->getIdentifierInNamespace().'(x,y) ⊃ '.$parentPropertyVersion->getProperty()->getIdentifierInNamespace().'(x,y)', null, array('indentation' => array('left' => 800)));
+            }
             $section->addTextBreak(2);
         }
 

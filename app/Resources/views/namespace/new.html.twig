@@ -58,6 +58,10 @@
                         <span class="fa fa-plus-circle"></span>
                         Add a description for the ongoing namespace (if different from the root namespace)
                     </a>
+                    <a href="#" class="js-description-ongoing-remove">
+                        <span class="fa fa-minus-circle"></span>
+                        Close description for the ongoing namespace form
+                    </a>
 
                 </div>
 
@@ -91,10 +95,13 @@
                 }
             });
 
+            $('.js-description-ongoing-remove').hide();
+
             if($('[for=namespace_quick_add_form_textProperties_1_textProperty]').length) {
                 //we hide the button in order to prevent the add of more than 2 text properties
                 $('.js-example-add').hide();
                 $('[for=namespace_quick_add_form_textProperties_1_textProperty]').text('Ongoing namespace description');
+                $('.js-description-ongoing-remove').show();
             }
             var $wrapper = $('.js-text-property-wrapper');
             $wrapper.on('click', '.js-example-add', function(e) {
@@ -119,6 +126,26 @@
                 $('#namespace_quick_add_form_textProperties_1_modifier').val($('#namespace_quick_add_form_textProperties_0_creator').val());
                 $('.js-example-add').hide();
                 $('[for=namespace_quick_add_form_textProperties_1_textProperty]').text('Ongoing namespace description');
+                tinymce.init({
+                    selector:'.tinymce'
+                });
+                $('.js-description-ongoing-remove').show();
+            });
+
+            $wrapper.on('click', '.js-description-ongoing-remove', function(e) {
+                e.preventDefault();
+
+                // get the new index
+                var index = $wrapper.data('index');
+
+                // decrease the index with one for the next item
+                $wrapper.data('index', index - 1);
+
+                $("[id^='namespace_quick_add_form_textProperties_1_']").remove();
+                $("[for^='namespace_quick_add_form_textProperties_1_']").remove();
+                tinymce.get("namespace_quick_add_form_textProperties_1_textProperty").remove();
+                $('.js-example-add').show();
+                $('.js-description-ongoing-remove').hide();
             });
 
             if (!$('#namespace_quick_add_form_isExternalNamespace').prop('checked')) {

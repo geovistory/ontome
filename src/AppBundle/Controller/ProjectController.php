@@ -106,11 +106,12 @@ class ProjectController  extends Controller
             $userProjectAssociation->setCreationTime(new \DateTime('now'));
             $userProjectAssociation->setModificationTime(new \DateTime('now'));
 
-
+            $this->getUser()->setCurrentActiveProject($project);
 
             $em = $this->getDoctrine()->getManager();
             $em->persist($project);
             $em->persist($userProjectAssociation);
+            $em->persist($this->getUser());
             $em->flush();
 
             return $this->redirectToRoute('user_show', [

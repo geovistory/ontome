@@ -11,7 +11,6 @@
                     {{ msg }}
                 </div>
             {% endfor %}
-                <div class="g-recaptcha" data-sitekey="6Lcvi34UAAAAAPt0_K-ZtNa3TSKd-2SViyFNclX5"></div>
                 {{ form_row(form.login, {
                     help: 'Recommended way: jdupont for Jacques Dupont / mhfernandez for Maria-Helena Fernandez'
                 }) }}
@@ -29,7 +28,8 @@
                 {{ form_row(form.hasValidatedPolicy, {
                     'label': 'I have read and agree to the terms and conditions of use:'
                 }) }}
-                <p><span><strong><a href="{{ asset('documents/ontome-terms-of-service-2018-12-01.pdf') }}" type="application/pdf" target="_blank">OntoME: Terms and conditions of Use</a></strong></span></p>
+                <p><span><strong><a href="{{ url('app_main_legalnotice') }}" type="application/pdf" target="_blank">OntoME: Terms and conditions of Use</a></strong></span></p>
+                <div class="g-recaptcha" data-sitekey="6Lcvi34UAAAAAPt0_K-ZtNa3TSKd-2SViyFNclX5"></div>
             <button type="submit" class="btn btn-primary" formnovalidate>Register</button>
             {{ form_end(form) }}
         </div>

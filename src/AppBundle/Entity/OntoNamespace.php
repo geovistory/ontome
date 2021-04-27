@@ -669,6 +669,42 @@ class OntoNamespace
     }
 
     /**
+     * @return ArrayCollection|OntoNamespace[] Retourne TOUS les espaces de noms référencés directs
+     */
+    public function getDirectReferencedNamespaces()
+    {
+        $referencedNamespaces = new ArrayCollection;
+        foreach ($this->referencedNamespaceAssociations as $referencedNamespaceAssociation){
+            $referencedNamespaces->add($referencedNamespaceAssociation->getReferencedNamespace());
+        }
+        return $referencedNamespaces;
+    }
+
+    /**
+     * @return ArrayCollection|OntoNamespace[] Retourne TOUS les espaces de noms référencés directs ET indirects
+     */
+    public function getAllReferencedNamespaces(ArrayCollection $allReferencedNamespaces=null){
+        if(is_null($allReferencedNamespaces)){$allReferencedNamespaces = new ArrayCollection;}
+        if($this->getDirectReferencedNamespaces()->isEmpty()){
+            return new ArrayCollection;
+        }
+        else
+        {
+            foreach ($this->getDirectReferencedNamespaces() as $directReferencedNamespace){
+                if(!$allReferencedNamespaces->contains($directReferencedNamespace)){
+                    $allReferencedNamespaces->add($directReferencedNamespace);
+                    foreach($directReferencedNamespace->getAllReferencedNamespaces($allReferencedNamespaces) as $ns){
+                        if(!$allReferencedNamespaces->contains($ns)){
+                            $allReferencedNamespaces->add($ns);
+                        }
+                    }
+                }
+            }
+            return $allReferencedNamespaces;
+        }
+    }
+
+    /**
      * @param mixed $namespaceURI
      */
     public function setNamespaceURI($namespaceURI)
