@@ -41,7 +41,7 @@
                     help: 'Only tick this checkbox if your namespace already has its URI outside OntoME. Otherwise leave it unchecked.'
                 }) }}
                 {{ form_row(namespaceForm.uriGenerator, {
-                    help: 'Fill this field to generate automaticaly the namespace URI. Eg. "my namespace" generates "https://ontome.net/ns/my-namespace".'
+                    help: 'Fill this field to generate automatically the namespace URI. Eg. "my namespace" generates "https://ontome.net/ns/my-namespace".'
                 }) }}
                 {{ form_row(namespaceForm.namespaceURI) }}
                 {{ form_errors(namespaceForm) }}
@@ -144,7 +144,12 @@
                 var stringForURI = this.value;
                 stringForURI = stringForURI.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
                 stringForURI = stringForURI.replace(/[\s-]+/g, '-').toLowerCase().replace(/[^0-9a-z\-]/g, '');
-                $('#namespace_quick_add_form_namespaceURI').val('https://ontome.net/ns/' + stringForURI);
+                if (stringForURI != '') {
+                    $('#namespace_quick_add_form_namespaceURI').val('https://ontome.net/ns/' + stringForURI);
+                }
+                else {
+                    $('#namespace_quick_add_form_namespaceURI').val('');
+                }
             });
 
             //disable URI field if it's not an externel URI

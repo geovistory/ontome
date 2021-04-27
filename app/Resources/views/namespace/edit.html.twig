@@ -352,7 +352,7 @@
                                 help: 'Only tick this checkbox if your namespace already has its URI outside OntoME. Otherwise leave it unchecked.'
                             }) }}
                             {{ form_row(namespaceForm.uriGenerator, {
-                                help: 'Fill this field to generate automaticaly the namespace URI. Eg. "my namespace" generates "https://ontome.net/ns/my-namespace".'
+                                help: 'Fill this field to generate automatically the namespace URI. Eg. "my namespace" generates "https://ontome.net/ns/my-namespace".'
                             }) }}
                             {{ form_row(namespaceForm.namespaceURI) }}
                             {{ form_errors(namespaceForm) }}
@@ -482,7 +482,7 @@
                                 <p><button disabled="disabled">Publish this namespace <i class="fas fa-upload"></i></button></p>
                             {% endif %}
                         {% else %}
-                            <p>You cannot publish this namespace for the momement because it is identical to the last publicated version.</p>
+                            <p>You cannot publish this namespace for the moment because it is identical to the last publicated version.</p>
                         {% endif %}
                     {% endif %}
 
@@ -1557,7 +1557,12 @@
                     if (stringForURI != '') {
                         stringForURI = stringForURI.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
                         stringForURI = stringForURI.replace(/[\s-]+/g, '-').toLowerCase().replace(/[^0-9a-z\-]/g, '');
-                        $('#namespace_form_namespaceURI').val('https://ontome.net/ns/' + stringForURI);
+                        if (stringForURI != '') {
+                            $('#namespace_form_namespaceURI').val('https://ontome.net/ns/' + stringForURI);
+                        }
+                        else {
+                            $('#namespace_form_namespaceURI').val('');
+                        }
                     }
                     else if (currentURI != '') {
                         $('#namespace_form_namespaceURI').val(currentURI);
