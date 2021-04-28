@@ -953,7 +953,7 @@ class OntoNamespace
 
     /**
      * @return array
-     * Retourne un tableau des id de ces namespaces suivants : ce namespace (this) et ses namespaces référencés.
+     * Retourne un tableau des id de ces namespaces suivants : ce namespace (this) et ses namespaces référencés, parents y compris.
      */
     public function getSelectedNamespacesId()
     {
@@ -961,8 +961,8 @@ class OntoNamespace
         $arrayIds[] = 4;
 
         $arrayIds[] = $this->getId();
-        foreach($this->getReferencedNamespaceAssociations() as $referencedNamespaceAssociation){
-            $arrayIds[] = $referencedNamespaceAssociation->getReferencedNamespace()->getId();
+        foreach($this->getAllReferencedNamespaces() as $referencedNamespace){
+            $arrayIds[] = $referencedNamespace->getId();
         }
 
         // array_unique évite les doublons - utile si on veut compter combien de ns différents
