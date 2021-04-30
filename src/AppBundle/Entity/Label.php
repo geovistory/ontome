@@ -97,15 +97,6 @@ class Label
     private $validationStatus;
 
     /**
-     * @ORM\ManyToMany(targetEntity="OntoNamespace",  inversedBy="Label", fetch="EXTRA_LAZY")
-     * @ORM\JoinTable(schema="che", name="label",
-     *      joinColumns={@ORM\JoinColumn(name="fk_label", referencedColumnName="pk_label")},
-     *      inverseJoinColumns={@ORM\JoinColumn(name="fk_namespace_for_version", referencedColumnName="pk_namespace")}
-     *      )
-     */
-    private $namespaces;
-
-    /**
      * @ORM\OneToMany(targetEntity="AppBundle\Entity\Comment", mappedBy="label")
      * @ORM\OrderBy({"creationTime" = "DESC"})
      */
@@ -142,7 +133,6 @@ class Label
 
     public function __construct()
     {
-        $this->namespaces = new ArrayCollection();
         $this->comments = new ArrayCollection();
     }
 
@@ -240,14 +230,6 @@ class Label
     public function getProfile()
     {
         return $this->profile;
-    }
-
-    /**
-     * @return ArrayCollection|OntoNamespace[]
-     */
-    public function getNamespaces()
-    {
-        return $this->namespaces;
     }
 
     /**
@@ -449,14 +431,6 @@ class Label
     public function setModificationTime($modificationTime)
     {
         $this->modificationTime = $modificationTime;
-    }
-
-    public function addNamespace(OntoNamespace $namespace)
-    {
-        if ($this->namespaces->contains($namespace)) {
-            return;
-        }
-        $this->namespaces[] = $namespace;
     }
 
     public function __toString()

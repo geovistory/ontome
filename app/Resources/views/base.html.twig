@@ -187,7 +187,7 @@
 
             // Garder le même onglet ouvert quand on clique sur les liens
             $('a.btn-edit, ul.navi a, ul.dropdown-menu a').click(function(){
-                if(!$(this).attr('href').search('classes-tree')){
+                if($(this).attr('href').search('classes-tree') < 0){
                     $(this).attr('href', $(this).attr('href')+window.location.hash);
                 }
             });
