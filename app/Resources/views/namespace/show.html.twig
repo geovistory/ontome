@@ -6,7 +6,7 @@
 
     <div class="container">
         <h2 class="class-name">
-            {{ namespace }}
+            {{ namespace }} {% if namespace.isTopLevelNamespace %}<span class="label label-default" style="font-size: 12px; vertical-align: middle;">Root</span>{% endif %}
             <span class="pull-right">
                 {% if is_granted('edit', namespace) %}
                     <a href="{{ path('namespace_edit', {

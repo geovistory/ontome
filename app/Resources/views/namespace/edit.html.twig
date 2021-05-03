@@ -11,7 +11,7 @@
 
     <div class="container">
         <h2 class="class-name">
-            {{ namespace }}
+            {{ namespace }} {% if namespace.isTopLevelNamespace %}<span class="label label-default" style="font-size: 12px; vertical-align: middle;">Root</span>{% endif %}
             <span class="pull-right">{% if ((not namespace.isTopLevelNamespace and not namespace.isOngoing) or (namespace.isOngoing and is_granted('edit', namespace))) %}
                     <a  href="{{ path('api_classes_and_properties_by_namespace_xml', {
                         namespace: namespace.id
