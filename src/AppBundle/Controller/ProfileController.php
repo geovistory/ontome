@@ -234,7 +234,7 @@ class ProfileController  extends Controller
      */
     public function publishAction(Profile $profile, Request $request)
         {
-        if(!$profile->getIsPublishable()){
+        if(!$profile->isPublishable()){
             throw $this->createAccessDeniedException('The profile n° '.$profile->getId().' can\'t be published. Please verify your profile.');
         }
 

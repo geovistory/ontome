@@ -48,7 +48,7 @@ class TextProperty implements GroupSequenceProviderInterface
     private $languageIsoCode;
 
     /**
-     * @ORM\ManyToOne(targetEntity="OntoNamespace", inversedBy="textPropertyVersions")
+     * @ORM\ManyToOne(targetEntity="OntoNamespace", inversedBy="textProperties")
      * @ORM\JoinColumn(name="fk_namespace_for_version", referencedColumnName="pk_namespace", nullable=false)
      */
     private $namespaceForVersion;
@@ -126,15 +126,6 @@ class TextProperty implements GroupSequenceProviderInterface
     private $propertyAssociation;
 
     /**
-     * @ORM\ManyToMany(targetEntity="OntoNamespace",  inversedBy="TextProperty", fetch="EXTRA_LAZY")
-     * @ORM\JoinTable(schema="che", name="text_property",
-     *      joinColumns={@ORM\JoinColumn(name="pk_text_property", referencedColumnName="fk_text_property")},
-     *      inverseJoinColumns={@ORM\JoinColumn(name="fk_namespace_for_version", referencedColumnName="pk_namespace")}
-     *      )
-     */
-    private $namespaces;
-
-    /**
      * @ORM\OneToMany(targetEntity="AppBundle\Entity\Comment", mappedBy="textProperty")
      * @ORM\OrderBy({"creationTime" = "DESC"})
      */
@@ -171,7 +162,6 @@ class TextProperty implements GroupSequenceProviderInterface
 
     public function __construct()
     {
-        $this->namespaces = new ArrayCollection();
         $this->comments = new ArrayCollection();
     }
 
@@ -261,14 +251,6 @@ class TextProperty implements GroupSequenceProviderInterface
     public function getPropertyAssociation()
     {
         return $this->propertyAssociation;
-    }
-
-    /**
-     * @return ArrayCollection|OntoNamespace[]
-     */
-    public function getNamespaces()
-    {
-        return $this->namespaces;
     }
 
     /**
@@ -462,14 +444,6 @@ class TextProperty implements GroupSequenceProviderInterface
     public function setPropertyAssociation($propertyAssociation)
     {
         $this->propertyAssociation = $propertyAssociation;
-    }
-
-    public function addNamespace(OntoNamespace $namespace)
-    {
-        if ($this->namespaces->contains($namespace)) {
-            return;
-        }
-        $this->namespaces[] = $namespace;
     }
 
     /**

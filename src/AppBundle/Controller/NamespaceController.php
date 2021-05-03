@@ -706,7 +706,7 @@ class NamespaceController  extends Controller
         $status = "Published";
         $namespaceStatut = "Published";
         $namespaceDate  = $namespace->getPublishedAt();
-        if($namespace->getIsOngoing()){
+        if($namespace->getIsOngoing() or is_null($namespaceDate)){
             $namespaceStatut = "Ongoing";
             $namespaceDate = $namespace->getModificationTime();
         }
@@ -811,7 +811,7 @@ class NamespaceController  extends Controller
                             $section->addText('Examples:', "gras");
                             $i++;
                         }
-                        $section->addText(html_entity_decode(strip_tags($textProperty->getTextProperty())), null, array('indentation' => array('left' => 800)));
+                        $section->addText(html_entity_decode(htmlspecialchars(strip_tags($textProperty->getTextProperty()))), null, array('indentation' => array('left' => 800)));
                     }
                 }
             }

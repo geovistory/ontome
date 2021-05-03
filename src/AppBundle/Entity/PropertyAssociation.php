@@ -116,7 +116,6 @@ class PropertyAssociation
     public function __construct()
     {
         $this->textProperties = new ArrayCollection();
-        $this->namespaces = new ArrayCollection();
         $this->comments = new ArrayCollection();
     }
 
@@ -175,14 +174,6 @@ class PropertyAssociation
     public function getTextProperties()
     {
         return $this->textProperties;
-    }
-
-    /**
-     * @return ArrayCollection|OntoNamespace[]
-     */
-    public function getNamespaces()
-    {
-        return $this->namespaces;
     }
 
     /**
@@ -282,14 +273,6 @@ class PropertyAssociation
     }
 
     /**
-     * @param mixed $namespace
-     */
-    public function setNamespaces($namespaces)
-    {
-        $this->namespaces = $namespaces;
-    }
-
-    /**
      * @param mixed $parentProperty
      */
     public function setParentProperty($parentProperty)
@@ -361,16 +344,6 @@ class PropertyAssociation
         $this->textProperties[] = $textProperty;
         // needed to update the owning side of the relationship!
         $textProperty->setPropertyAssociation($this);
-    }
-
-    public function addNamespace(OntoNamespace $namespace)
-    {
-        if ($this->namespaces->contains($namespace)) {
-            return;
-        }
-        $this->namespaces[] = $namespace;
-        // needed to update the owning side of the relationship!
-        $namespace->addPropertyAssociation($this);
     }
 
     public function __toString()

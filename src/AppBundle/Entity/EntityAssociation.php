@@ -128,7 +128,6 @@ class EntityAssociation
     public function __construct()
     {
         $this->textProperties = new ArrayCollection();
-        $this->namespaces = new ArrayCollection();
     }
 
     /**
@@ -209,14 +208,6 @@ class EntityAssociation
     public function getTextProperties()
     {
         return $this->textProperties;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getNamespaces()
-    {
-        return $this->namespaces;
     }
 
     /**
@@ -414,14 +405,6 @@ class EntityAssociation
     }
 
     /**
-     * @param mixed $namespaces
-     */
-    public function setNamespaces($namespaces)
-    {
-        $this->namespaces = $namespaces;
-    }
-
-    /**
      * @param mixed $creator
      */
     public function setCreator($creator)
@@ -477,14 +460,6 @@ class EntityAssociation
         $this->textProperties[] = $textProperty;
         // needed to update the owning side of the relationship!
         $textProperty->setEntityAssociation($this);
-    }
-
-    public function addNamespace(OntoNamespace $namespace)
-    {
-        if ($this->namespaces->contains($namespace)) {
-            return;
-        }
-        $this->namespaces[] = $namespace;
     }
 
     public function __toString()

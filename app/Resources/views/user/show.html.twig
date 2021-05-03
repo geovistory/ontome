@@ -130,18 +130,14 @@
                                 {% endif %}
                             </div>
                             {% if defaultNamespace.directReferencedNamespaces|length > 0 %}
-                                <div class="small text-muted"><strong><em>Referenced :</em></strong></div>
+                                <div class="small text-muted"><strong><em>Referenced:</em></strong></div>
                                 <ul>
                                 {% for referencedNamespace in defaultNamespace.allReferencedNamespaces %}
-                                    <li class="list-unstyled">
+                                    <li class="list-unstyled" style="border-left: 3px solid darkgrey; padding-left: 5px;">
                                         <em><a href="{{ path('namespace_show', {'id': referencedNamespace.id}) }}">{{ referencedNamespace }}</a></em>
-                                        {% if referencedNamespace not in defaultNamespace.directReferencedNamespaces %}*{% endif %}
                                     </li>
                                 {% endfor %}
                                 </ul>
-                                {% if defaultNamespace.allReferencedNamespaces|length != defaultNamespace.directReferencedNamespaces|length %}
-                                    <p>* <span class="small">Reference namespace of a selected namespace (automatically added)</span></p>
-                                {% endif %}
                             {% endif %}
                             {% endif %}
                             <h4>Additional namespaces</h4>
@@ -153,16 +149,18 @@
                                 <div class="row" style="margin-left:0px;">
                                     <a href="#" class="remove-namespace" data-id="{{ additionalNamespace.id }}"><span class="glyphicon glyphicon-remove text-danger" aria-hidden="true"></span></a>
                                     <a href="{{ path('namespace_show', {'id': additionalNamespace.id}) }}">{{ additionalNamespace.standardLabel }}</a>
-                                    {% if additionalNamespace.referencedNamespaceAssociations|length > 0 %}
+                                    {% if additionalNamespace.directReferencedNamespaces|length > 0 %}
                                         {% set break = false %}
-                                        {% for referencedNamespaceAssociation in additionalNamespace.referencedNamespaceAssociations if referencedNamespaceAssociation.referencedNamespace is not null and not break %}
+                                        {% for referencedNamespace in additionalNamespace.allReferencedNamespaces if not break %}
                                             {% set break = true %}
-                                            <div class="small text-muted"><strong><em>Referenced :</em></strong></div>
+                                            <div class="small text-muted"><strong><em>Referenced:</em></strong></div>
                                         {% endfor %}
                                         {% if break %}
                                         <ul>
-                                        {% for referencedNamespaceAssociation in additionalNamespace.referencedNamespaceAssociations if referencedNamespaceAssociation.referencedNamespace is not null %}
-                                            <li class="list-unstyled"><em><a href="{{ path('namespace_show', {'id': referencedNamespaceAssociation.referencedNamespace.id}) }}">{{ referencedNamespaceAssociation.referencedNamespace.standardLabel }}</a></em></li>
+                                        {% for referencedNamespace in additionalNamespace.allReferencedNamespaces %}
+                                            <li class="list-unstyled" style="border-left: 3px solid darkgrey; padding-left: 5px;">
+                                                <em><a href="{{ path('namespace_show', {'id': referencedNamespace.id}) }}">{{ referencedNamespace }}</a></em>
+                                            </li>
                                         {% endfor %}
                                         </ul>
                                         {% endif %}

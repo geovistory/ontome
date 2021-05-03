@@ -185,22 +185,6 @@ class OntoNamespace
     private $entityAssociations;
 
     /**
-     * @return mixed
-     */
-    public function getEntityAssociations()
-    {
-        return $this->entityAssociations;
-    }
-
-    /**
-     * @param mixed $entityAssociations
-     */
-    public function setEntityAssociations($entityAssociations)
-    {
-        $this->entityAssociations = $entityAssociations;
-    }
-
-    /**
      * @ORM\OneToMany(targetEntity="PropertyAssociation", mappedBy="namespaceForVersion")
      * @ORM\OrderBy({"id" = "ASC"})
      */
@@ -210,28 +194,10 @@ class OntoNamespace
      * @ORM\ManyToMany(targetEntity="EntityUserProjectAssociation", mappedBy="namespace")
      * @ORM\OrderBy({"id" = "ASC"})
      */
-    private $namespaceUserProjectAssociation;
-
-    /**
-     * @return mixed
-     */
-    public function getNamespaceUserProjectAssociation()
-    {
-        return $this->namespaceUserProjectAssociation;
-    }
-
-    /**
-     * @param mixed $namespaceUserProjectAssociation
-     */
-    public function setNamespaceUserProjectAssociation($namespaceUserProjectAssociation)
-    {
-        $this->namespaceUserProjectAssociation = $namespaceUserProjectAssociation;
-    }
-
-    /**
-     * @ORM\ManyToMany(targetEntity="AppBundle\Entity\Profile", mappedBy="namespaces")
-     * @ORM\OrderBy({"standardLabel" = "ASC"})
-     */
+    private $namespaceUserProjectAssociation;/**
+ * @ORM\ManyToMany(targetEntity="AppBundle\Entity\Profile", mappedBy="namespaces")
+ * @ORM\OrderBy({"standardLabel" = "ASC"})
+ */
     private $profiles;
 
     /**
@@ -257,30 +223,6 @@ class OntoNamespace
     private $referencedNamespaceAssociations;
 
     /**
-     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Comment", mappedBy="namespaceForVersion")
-     * @ORM\OrderBy({"creationTime" = "DESC"})
-     */
-    private $commentVersions;
-
-    /**
-     * @ORM\OneToMany(targetEntity="AppBundle\Entity\ClassAssociation", mappedBy="namespaceForVersion")
-     * @ORM\OrderBy({"creationTime" = "DESC"})
-     */
-    private $classAssociationVersions;
-
-    /**
-     * @ORM\OneToMany(targetEntity="AppBundle\Entity\EntityAssociation", mappedBy="namespaceForVersion")
-     * @ORM\OrderBy({"creationTime" = "DESC"})
-     */
-    private $entityAssociationVersions;
-
-    /**
-     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Label", mappedBy="namespaceForVersion")
-     * @ORM\OrderBy({"creationTime" = "DESC"})
-     */
-    private $labelVersions;
-
-    /**
      * @ORM\OneToMany(targetEntity="AppBundle\Entity\OntoClassVersion", mappedBy="namespaceForVersion")
      * @ORM\OrderBy({"creationTime" = "DESC"})
      */
@@ -292,17 +234,40 @@ class OntoNamespace
      */
     private $propertyVersions;
 
-    /**
-     * @ORM\OneToMany(targetEntity="AppBundle\Entity\PropertyAssociation", mappedBy="namespaceForVersion")
-     * @ORM\OrderBy({"creationTime" = "DESC"})
-     */
-    private $propertyAssociationVersions;
 
     /**
-     * @ORM\OneToMany(targetEntity="AppBundle\Entity\TextProperty", mappedBy="namespaceForVersion")
-     * @ORM\OrderBy({"creationTime" = "DESC"})
+     * @return mixed
      */
-    private $textPropertyVersions;
+    public function getEntityAssociations()
+    {
+        return $this->entityAssociations;
+    }
+
+    /**
+     * @param mixed $entityAssociations
+     */
+    public function setEntityAssociations($entityAssociations)
+    {
+        $this->entityAssociations = $entityAssociations;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getNamespaceUserProjectAssociation()
+    {
+        return $this->namespaceUserProjectAssociation;
+    }
+
+    /**
+     * @param mixed $namespaceUserProjectAssociation
+     */
+    public function setNamespaceUserProjectAssociation($namespaceUserProjectAssociation)
+    {
+        $this->namespaceUserProjectAssociation = $namespaceUserProjectAssociation;
+    }
+
+
 
     public function __construct()
     {
@@ -953,7 +918,7 @@ class OntoNamespace
 
     /**
      * @return array
-     * Retourne un tableau des id de ces namespaces suivants : ce namespace (this) et ses namespaces référencés.
+     * Retourne un tableau des id de ces namespaces suivants : ce namespace (this) et ses namespaces référencés, parents y compris.
      */
     public function getSelectedNamespacesId()
     {
@@ -961,8 +926,8 @@ class OntoNamespace
         $arrayIds[] = 4;
 
         $arrayIds[] = $this->getId();
-        foreach($this->getReferencedNamespaceAssociations() as $referencedNamespaceAssociation){
-            $arrayIds[] = $referencedNamespaceAssociation->getReferencedNamespace()->getId();
+        foreach($this->getAllReferencedNamespaces() as $referencedNamespace){
+            $arrayIds[] = $referencedNamespace->getId();
         }
 
         // array_unique évite les doublons - utile si on veut compter combien de ns différents
