@@ -36,6 +36,9 @@ class NamespaceQuickAddForm extends AbstractType
                 'label' => 'OntoME URI generator',
                 'mapped' => false
             ))
+            ->add('rootNamespacePrefix', TextType::class, array(
+                'label' => 'Root namespace prefix'
+            ))
             ->add('labels', CollectionType::class, array(
                 'label' => 'Enter a label and select a language',
                 'entry_type' => LabelType::class,

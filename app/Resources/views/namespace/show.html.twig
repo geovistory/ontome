@@ -281,6 +281,7 @@
                                 target="_blank">{{ namespace.projectForTopLevelNamespace }}
                             </a>
                 </p>
+                <p>Root namespace prefix: {{ namespace.rootNamespacePrefix }}</p>
                 {% endif %}
                 {% if namespace.isTopLevelNamespace == false %}
                     {% if namespace.isOngoing %}
@@ -431,6 +432,7 @@
                             {{ namespace.topLevelNamespace.standardLabel }}
                         </a>
                     </p>
+                    <p>Root namespace prefix: {{ namespace.topLevelNamespace.rootNamespacePrefix }}</p>
                 {% endif %}
             </div>
             <div id="classes" class="tab-pane fade">

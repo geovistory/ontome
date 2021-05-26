@@ -369,6 +369,7 @@
                                 help: 'Fill this field to generate automatically the namespace URI. Eg. "my namespace" generates "https://ontome.net/ns/my-namespace".'
                             }) }}
                             {{ form_row(namespaceForm.namespaceURI) }}
+                            {{ form_row(namespaceForm.rootNamespacePrefix) }}
                             {{ form_errors(namespaceForm) }}
                             <button type="submit" class="btn btn-primary" formnovalidate>Save <span class="far fa-save"></span></button>
                             <a href="#"
@@ -506,7 +507,6 @@
                 {% else %}
                     <p>This namespace is a root namespace. Find all its versions in the <a href="#namespace-hierarchy" onclick="window.location = '{{ path('namespace_edit', {'id': namespace.id}) }}#namespace-hierarchy';window.location.reload()">Versions tab</a>.</p>
                 {% endif %}
-
                 {% if not namespace.isTopLevelNamespace and namespace.isOngoing %}
                 <h3 id="titleReferenceNamespace">Namespace{% if namespace.referencedNamespaceAssociations|length > 1 %}s{% endif %} to which this ongoing namespace refers</h3>
                 <table class="table table-striped" id="reference-namespaces-table">
@@ -705,6 +705,7 @@
                             {{ namespace.topLevelNamespace.standardLabel }}
                         </a>
                     </p>
+                    <p>Root namespace prefix: {{ namespace.topLevelNamespace.rootNamespacePrefix }}</p>
                 {% endif %}
             </div>
             <div id="classes" class="tab-pane fade">

@@ -44,6 +44,7 @@
                     help: 'Fill this field to generate automatically the namespace URI. Eg. "my namespace" generates "https://ontome.net/ns/my-namespace".'
                 }) }}
                 {{ form_row(namespaceForm.namespaceURI) }}
+                {{ form_row(namespaceForm.rootNamespacePrefix) }}
                 {{ form_errors(namespaceForm) }}
 
 
