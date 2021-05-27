@@ -99,7 +99,7 @@
                     {% endif %}
                 </h3>
                 <div class="container">
-                    {% if domainRange is not null and domainRange.domainId is not null %}
+                    {% if propertyVersion.domainNamespace is not null %}
                         <div class="row">
                             <div class="col-lg-2">
                                 <p>Domain:</p>
@@ -108,22 +108,22 @@
                                 <p>{# Initialisation #}
                                     {% set isGoodNamespace = true %}
                                     {% set route = 'class_show_with_version' %}
-                                    {% set route_params = {'id': domainRange.domainId,  'namespaceFromUrlId': domainRange.domainNamespaceId } %}
+                                    {% set route_params = {'id': propertyVersion.domain.id,  'namespaceFromUrlId': propertyVersion.domainNamespace.id } %}
 
                                     {# Vérification #}
-                                    {% if domainRange.domainNamespaceId not in propertyVersion.namespaceForVersion.selectedNamespacesId %}
+                                    {% if propertyVersion.domainNamespace.id not in propertyVersion.namespaceForVersion.selectedNamespacesId %}
                                         {% set isGoodNamespace = false %}
                                         {% set route = 'namespace_show' %}
                                         {% set route_params = {'id': propertyVersion.namespaceForVersion.id,  '_fragment': 'mismatches' } %}
                                     {% endif %}
 
                                     <a href="{{ path(route, route_params) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
-                                        {{ domainRange.domainIdentifier }}</a>
+                                        {{ propertyVersion.domain.classVersionForDisplay(propertyVersion.domainNamespace).invertedLabel(true) }}</a>
                                 </p>
                             </div>
                         </div>
                     {% endif %}
-                    {% if domainRange is not null and domainRange.rangeId is not null %}
+                    {% if propertyVersion.rangeNamespace is not null %}
                         <div class="row">
                             <div class="col-lg-2">
                                 <p>Range:</p>
@@ -132,17 +132,17 @@
                                 <p>{# Initialisation #}
                                     {% set isGoodNamespace = true %}
                                     {% set route = 'class_show_with_version' %}
-                                    {% set route_params = {'id': domainRange.rangeId,  'namespaceFromUrlId': domainRange.rangeNamespaceId } %}
+                                    {% set route_params = {'id': propertyVersion.range.id,  'namespaceFromUrlId': propertyVersion.rangeNamespace.id } %}
 
                                     {# Vérification #}
-                                    {% if domainRange.rangeNamespaceId not in propertyVersion.namespaceForVersion.selectedNamespacesId %}
+                                    {% if propertyVersion.rangeNamespace.id not in propertyVersion.namespaceForVersion.selectedNamespacesId %}
                                         {% set isGoodNamespace = false %}
                                         {% set route = 'namespace_show' %}
                                         {% set route_params = {'id': propertyVersion.namespaceForVersion.id,  '_fragment': 'mismatches' } %}
                                     {% endif %}
 
                                     <a href="{{ path(route, route_params) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
-                                        {{ domainRange.rangeIdentifier }}</a>
+                                        {{ propertyVersion.range.classVersionForDisplay(propertyVersion.rangeNamespace).invertedLabel(true) }}</a>
                                 </p>
                             </div>
                         </div>
@@ -890,7 +890,7 @@
                                     {% endif %}
 
                                     <a href="{{ path(route, route_params) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
-                                        {{ association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).domain.classVersionForDisplay(association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).domainNamespace) }}
+                                        {{ association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).domain.classVersionForDisplay(association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).domainNamespace).invertedLabel(true) }}
                                     </a>
                                 {% endif %}
                             </td>
@@ -968,7 +968,7 @@
                                     {% endif %}
 
                                     <a href="{{ path(route, route_params) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
-                                        {{ association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).range.classVersionForDisplay(association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).rangeNamespace) }}
+                                        {{ association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).range.classVersionForDisplay(association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).rangeNamespace).invertedLabel(true) }}
                                     </a>
                                 {% endif %}
                             </td>
@@ -1259,7 +1259,7 @@
                                     {% endif %}
 
                                     <a href="{{ path(route, route_params) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
-                                        {{ relation.targetProperty.propertyVersionForDisplay(relation.targetNamespaceForVersion).invertedLabel }}
+                                        {{ relation.targetProperty.propertyVersionForDisplay(relation.targetNamespaceForVersion).invertedLabel(true) }}
                                     </a>
                                 </td>
                             {% else %}
@@ -1277,7 +1277,7 @@
                                     {% endif %}
 
                                     <a href="{{ path(route, route_params) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
-                                        {{ relation.sourceProperty.propertyVersionForDisplay(relation.sourceNamespaceForVersion).invertedLabel }}
+                                        {{ relation.sourceProperty.propertyVersionForDisplay(relation.sourceNamespaceForVersion).invertedLabel(true) }}
                                     </a>
                                 </td>
                             {% endif %}

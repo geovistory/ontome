@@ -136,7 +136,7 @@
                                 {% endif %}
                                 <li>
                                     <a href="{{ path(route, route_params) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
-                                        {{ association.parentClass.getClassVersionForDisplay(association.parentClassNamespace).invertedLabel }}</a>
+                                        {{ association.parentClass.getClassVersionForDisplay(association.parentClassNamespace).invertedLabel(true) }}</a>
                                 </li>
                             {% endfor %}
                             </ul>
@@ -174,7 +174,7 @@
                                 {% endif %}
                                 <li>
                                     <a href="{{ path(route, route_params) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
-                                            {{ association.childClass.classVersionForDisplay(association.childClassNamespace).invertedLabel }}</a>
+                                            {{ association.childClass.classVersionForDisplay(association.childClassNamespace).invertedLabel(true) }}</a>
                                 </li>
                             {% endfor %}
                             </ul>
@@ -217,7 +217,7 @@
                                                 {% set route_params = {'id': relation.namespaceForVersion.id,  '_fragment': 'mismatches' } %}
                                             {% endif %}
                                             <a href="{{ path(route, route_params) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
-                                                {{ relation.targetClass.classVersionForDisplay(relation.targetNamespaceForVersion).invertedLabel }}</a>
+                                                {{ relation.targetClass.classVersionForDisplay(relation.targetNamespaceForVersion).invertedLabel(true) }}</a>
                                         {% else %}
                                             {# La classe affichée est "target", on cherche la "source" #}
 
@@ -234,7 +234,7 @@
                                             {% endif %}
 
                                             <a href="{{ path(route, route_params) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
-                                                {{ relation.sourceClass.classVersionForDisplay(relation.sourceNamespaceForVersion).invertedLabel }}</a>
+                                                {{ relation.sourceClass.classVersionForDisplay(relation.sourceNamespaceForVersion).invertedLabel(true) }}</a>
                                         {% endif %}
                                     </li>
                                 {% endfor %}
