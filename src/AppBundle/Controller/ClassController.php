@@ -42,6 +42,10 @@ class ClassController extends Controller
         }
         else{ // Utilisateur connecté et utilisant un autre projet
             $namespacesId = $em->getRepository('AppBundle:OntoNamespace')->findNamespacesIdByUser($this->getUser());
+            // Compléter avec les références parents (directs/indirects)
+            foreach ($this->getUser()->getCurrentOngoingNamespace()->getAllReferencedNamespaces() as $refNs){
+                if(!in_array($refNs->getId(), $namespacesId)){$namespacesId[] = $refNs->getId();}
+            }
         }
 
         // Récupérer les classes selon le filtrage obtenu
