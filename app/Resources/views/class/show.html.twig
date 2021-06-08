@@ -135,7 +135,7 @@
                                     {% set route_params = {'id': association.namespaceForVersion.id,  '_fragment': 'mismatches' } %}
                                 {% endif %}
                                 <li>
-                                    <a href="{{ path(route, route_params) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
+                                    <a href="{{ path(route, route_params) }}" title="{{ association.parentClassNamespace }}"  {% if not isGoodNamespace %}class="text-danger"{% endif %}>
                                         {{ association.parentClass.getClassVersionForDisplay(association.parentClassNamespace).invertedLabel(true) }}</a>
                                 </li>
                             {% endfor %}
@@ -173,7 +173,7 @@
                                     {% set route_params = {'id': association.namespaceForVersion.id,  '_fragment': 'mismatches' } %}
                                 {% endif %}
                                 <li>
-                                    <a href="{{ path(route, route_params) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
+                                    <a href="{{ path(route, route_params) }}" title="{{ association.childClassNamespace }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
                                             {{ association.childClass.classVersionForDisplay(association.childClassNamespace).invertedLabel(true) }}</a>
                                 </li>
                             {% endfor %}
@@ -344,10 +344,10 @@
                                             <a href="{{ path('property_show_with_version', {
                                                 'id': outgoingProperty.propertyId,
                                                 'namespaceFromUrlId': outgoingProperty.propertyNamespaceId
-                                            }) }}">{{ outgoingProperty.property }}</a>
+                                            }) }}" title="{{ outgoingProperty.namespace }}">{{ outgoingProperty.propertyRootNamespacePrefix }}:{{ outgoingProperty.property }}</a>
                                             →
-                                            <a href="{{ path(route, route_params) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
-                                                {{ outgoingProperty.range }}</a>
+                                            <a href="{{ path(route, route_params) }}" title={{ outgoingProperty.rangeNamespace }} {% if not isGoodNamespace %}class="text-danger"{% endif %}>
+                                                {{ outgoingProperty.rangeRootNamespacePrefix }}:{{ outgoingProperty.range }}</a>
                                         </li>
                                     {% endfor %}
                                 </ul>
