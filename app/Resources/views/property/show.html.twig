@@ -1315,8 +1315,8 @@
                     <thead>
                     <tr>
                         <th>Label</th>
-                        <th>Start date</th>
-                        <th>End date</th>
+                        <th>Version</th>
+                        <th>Status</th>
                         <th>Last updated</th>
                     </tr>
                     </thead>
@@ -1330,8 +1330,18 @@
                                     {{ profile.standardLabel }}
                                 </a>
                             </td>
-                            <td>{{ profile.startDate is empty ? '' : profile.startDate|date('Y-m-d') }}</td>
-                            <td>{{ profile.endDate is empty ? '' : profile.endDate|date('Y-m-d') }}</td>
+                            <td>
+                                {{ profile.version }}
+                            </td>
+                            <td>
+                                {% if profile.isOngoing %}
+                                    Ongoing
+                                {% elseif profile.wasClosedAt is not null and profile.endDate is null %}
+                                    Published
+                                {% elseif profile.endDate is not null %}
+                                    Deprecated
+                                {% endif %}
+                            </td>
                             <td>{{ profile.modificationTime|date('Y-m-d') }}</td>
                         </tr>
                     {% endfor %}

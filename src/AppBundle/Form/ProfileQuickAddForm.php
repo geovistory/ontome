@@ -39,13 +39,13 @@ class ProfileQuickAddForm extends AbstractType
                 'by_reference' => false,
             ))
             ->add('textProperties', CollectionType::class, array(
+                'label' => 'Enter a description and select a language',
                 'entry_type' => TextPropertyType::class,
                 'entry_options' => array('label' => false),
                 'error_bubbling' => false,
                 'allow_add' => true,
                 'by_reference' => false,
             ));
-
     }
 
     public function configureOptions(OptionsResolver $resolver)

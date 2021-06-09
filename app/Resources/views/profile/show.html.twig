@@ -10,7 +10,7 @@
 
     <div class="container">
         <h2 class="profile-name">
-            {{ profile.standardLabel }}
+            {{ profile.standardLabel }}{% if profile.isRootProfile %}&nbsp;<span class="label label-default" style="font-size: 12px; vertical-align: middle">Root</span>{% endif %}
             {% if is_granted('edit', profile) %}
                 <a href="{{ path('profile_edit', {
                     id: profile.id
@@ -23,6 +23,7 @@
             <li class="active"><a data-toggle="tab" href="#summary">Summary</a></li>
             <li><a data-toggle="tab" href="#identification">Identification</a></li>
             <li><a data-toggle="tab" href="#definition">Definition</a></li>
+            <li><a data-toggle="tab" href="#versions" id="versions-tab">Versions</a></li>
             <li><a data-toggle="tab" href="#namespaces">Namespaces</a></li>
             <li><a data-toggle="tab" href="#classes">Classes</a></li>
             <li><a data-toggle="tab" href="#properties">Properties</a></li>
@@ -34,7 +35,7 @@
             <div id="summary" class="tab-pane fade in active">
                 <h3>{{ profile.standardLabel }}</h3>
                 <div class="container">
-                    {% if not profile.isPublishable %}
+                    {% if not profile.isPublishable and not profile.isRootProfile %}
                             <div class="row">
                                 <div class="col-lg-2">
                                     <p class="text-danger"><i class="fas fa-exclamation-triangle"></i> Warning:</p>
@@ -70,6 +71,30 @@
                             {% endif %}
                         </div>
                     </div>
+                    {% if not profile.isRootProfile %}
+                        <div class="row">
+                            <div class="col-lg-2">
+                                <p>Status:</p>
+                            </div>
+                            <div class="col-lg-10">
+                                {% if profile.isOngoing %}
+                                    Ongoing
+                                {% elseif profile.wasClosedAt is not null and profile.endDate is null %}
+                                    Published
+                                {% elseif profile.endDate is not null %}
+                                    Deprecated
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-2">
+                                <p>Version:</p>
+                            </div>
+                            <div class="col-lg-10">
+                                {{ profile.version }}
+                            </div>
+                        </div>
+                    {% endif %}
                 </div>
             </div>
             <div id="definition" class="tab-pane fade">
@@ -123,14 +148,19 @@
             <div id="identification" class="tab-pane fade">
                 <h3>Identification</h3>
                 <p>Project of belonging: <a href="{{ path('project_show', {'id': profile.projectOfBelonging.id}) }}">{{ profile.projectOfBelonging.standardLabel }}</a></p>
-                {% if profile.isOngoing %}
-                    <div class="alert alert-info">
-                        <p><i class="fas fa-info-circle"></i>&nbsp;This profile is ongoing</p>
-                    </div>
-                {% elseif profile.wasClosedAt is not null and profile.endDate is null %}
-                    <p>Profile published and available since: {{ profile.startDate is empty ? '' : profile.startDate|date('Y-m-d') }}</p>
-                {% elseif profile.endDate is not null %}
-                    <p>This profile was published on {{ profile.startDate is empty ? '' : profile.startDate|date('Y-m-d') }} and is <strong>deprecated</strong> and to no longer use since: {{ profile.endDate is empty ? '' : profile.endDate|date('Y-m-d') }}</p>
+                {% if not profile.isRootProfile %}
+                    {% if profile.isOngoing %}
+                        <div class="alert alert-info">
+                            <p><i class="fas fa-info-circle"></i>&nbsp;This profile is ongoing</p>
+                        </div>
+                    {% elseif profile.wasClosedAt is not null and profile.endDate is null %}
+                        <p>Profile published and available since: {{ profile.startDate is empty ? '' : profile.startDate|date('Y-m-d') }}</p>
+                    {% elseif profile.endDate is not null %}
+                        <p>This profile was published on {{ profile.startDate is empty ? '' : profile.startDate|date('Y-m-d') }} and is <strong>deprecated</strong> and to no longer use since: {{ profile.endDate is empty ? '' : profile.endDate|date('Y-m-d') }}</p>
+                    {% endif %}
+                    <p>Version: {{ profile.version }}</p>
+                {% else %}
+                    <p>This profile is a root profile. Find all its versions in the <a href="#versions" id="versions-tab-link">Versions tab</a>.</p>
                 {% endif %}
                 <h3>Labels</h3>
                 <table class="table table-striped" id="labels-table">
@@ -366,6 +396,111 @@
                     </tbody>
                 </table>
             </div>
+            <div id="versions" class="tab-pane fade">
+                <h3>Versions</h3>
+                {% if profile.isRootProfile %}
+                    <p>
+                        {{ profile.standardLabel }} is a <strong>root profile</strong>.
+                    </p>
+                    {% for ongoingProfile in profile.childProfiles if ongoingProfile.isOngoing %}
+                        <p> Ongoing version:
+                            <a href="{{ path('profile_show', {'id': ongoingProfile.id, '_fragment': 'versions'}) }}">
+                               {{ ongoingProfile }}
+                            </a>
+                        </p>
+                    {% endfor %}
+                {% else %}
+                    {% if not profile.isOngoing %}
+                        <p>
+                            {{ profile.standardLabel }} is a <strong>
+                            {% if profile.wasClosedAt is not null and profile.endDate is null %}
+                                published
+                            {% elseif profile.endDate is not null %}
+                                deprecated
+                            {% endif %}
+                            profile</strong>.
+                        </p>
+                    {% endif %}
+                    <p>
+                        Root profile:
+                        <a href="{{ path('profile_show', {'id': profile.rootProfile.id, '_fragment': 'versions'}) }}">
+                            {{ profile.rootProfile }} [Root]
+                        </a>
+                    </p>
+                    {% if not profile.isOngoing %}
+                        {% for profile in profile.rootProfile.childProfiles if profile.isOngoing %}
+                            <p>
+                                Ongoing version:
+                                <a href="{{ path('profile_show', {'id': profile.id, '_fragment': 'versions'}) }}">
+                                    {{ profile }}
+                                </a>
+                            </p>
+                        {% endfor %}
+                    {% endif %}
+                {% endif %}
+                <h3>Published versions</h3>
+                <table class="table table-striped" id="profile-versions-table">
+                    <thead>
+                    <tr>
+                        <th>Profile</th>
+                        <th>Version</th>
+                        <th>Status</th>
+                        <th>Publication date</th>
+                        <th>Current profile</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% if profile.isRootProfile %}
+                        {% for publishedProfile in profile.childProfiles if not publishedProfile.isOngoing %}
+                            <tr>
+                                <td>
+                                    <a href="{{ path('profile_show', {
+                                        'id': publishedProfile.id,
+                                        '_fragment': 'versions'
+                                    }) }}">
+                                        {{ publishedProfile.standardLabel }}
+                                    </a>
+                                </td>
+                                <td>{{ publishedProfile.version }}</td>
+                                <td>
+                                    {% if publishedProfile.wasClosedAt is not null and publishedProfile.endDate is null %}
+                                        Published
+                                    {% elseif publishedProfile.endDate is not null %}
+                                        Deprecated
+                                    {% endif %}
+                                </td>
+                                <td>{{ publishedProfile.startDate|date('Y-m-d') }}</td>
+                                <td>todo</td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        {% for publishedProfile in profile.rootProfile.childProfiles if publishedProfile.id != profile.id and not publishedProfile.isOngoing %}
+                            <tr>
+                                <td>
+                                    <a href="{{ path('profile_show', {
+                                        'id': publishedProfile.id,
+                                        '_fragment': 'versions'
+                                    }) }}">
+                                        {{ publishedProfile.standardLabel }}
+                                    </a>
+                                </td>
+                                <td>{{ publishedProfile.version }}</td>
+                                <td>
+                                    {% if publishedProfile.wasClosedAt is not null and publishedProfile.endDate is null %}
+                                        Published
+                                    {% elseif publishedProfile.endDate is not null %}
+                                        Deprecated
+                                    {% endif %}
+                                </td>
+                                <td>{{ publishedProfile.startDate|date('Y-m-d') }}</td>
+                                <td>todo</td>
+                            </tr>
+                        {% endfor %}
+                    {% endif %}
+                    </tbody>
+                </table>
+
+            </div>
             <div id="namespaces" class="tab-pane fade">
                 <h3>Namespaces used by this profile</h3>
                 {% if profile.namespaces|length == 0 %}
@@ -447,8 +582,14 @@
             if (existsSelectedInProfile) {
                 $("#properties-status-select").val('Selected in profile').change(); //default filter on this column
             }
+            $('#descriptions-table').DataTable();
             $('#additional-notes-table').DataTable();
+            $('#profile-versions-table').DataTable();
             $('#projects-table').DataTable();
+
+            $(document).on("click", "#versions-tab-link", function() {
+                $('#versions-tab').trigger('click');
+            });
 
             $("a[href='#graph']").click(
                 function(){

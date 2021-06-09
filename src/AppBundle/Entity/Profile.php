@@ -73,7 +73,6 @@ class Profile
     private $rootProfile;
 
     /**
-     * @Assert\NotNull
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Project", inversedBy="ownedProfiles")
      * @ORM\JoinColumn(name="fk_project_of_belonging", referencedColumnName="pk_project")
      */
@@ -247,15 +246,18 @@ class Profile
     }
 
     /**
-     * @return mixed
+     * @return Profile
      */
     public function getRootProfile()
     {
+        if($this->isRootProfile) {
+            return $this;
+        }
         return $this->rootProfile;
     }
 
     /**
-     * @return mixed
+     * @return int
      */
     public function getVersion()
     {
@@ -327,11 +329,17 @@ class Profile
     }
 
     /**
-     * @return mixed
+     * @return Project
      */
     public function getProjectOfBelonging()
     {
-        return $this->projectOfBelonging;
+        if ($this->isRootProfile) {
+            return $this->projectOfBelonging;
+
+        }
+        else {
+            return $this->getRootProfile()->getProjectOfBelonging();
+        }
     }
 
     /**
@@ -614,6 +622,7 @@ class Profile
     }
 
     public function isPublishable(){
+        if ($this->isRootProfile) return false;
         foreach ($this->getProfileAssociations() as $profileAssociation){
             if($profileAssociation->getSystemType()->getId() == 5
                 and !$this->getNamespaces()->contains($profileAssociation->getEntityNamespaceForVersion())){

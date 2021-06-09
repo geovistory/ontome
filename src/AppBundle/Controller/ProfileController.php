@@ -86,6 +86,9 @@ class ProfileController  extends Controller
         $systemTypeDescription = $em->getRepository('AppBundle:SystemType')->find(16); //systemType 16 = description
         $systemTypeAdditionalNote = $em->getRepository('AppBundle:SystemType')->find(12); //systemType 12 = additional note
 
+        $em = $this->getDoctrine()->getManager();
+        $systemTypeDescription = $em->getRepository('AppBundle:SystemType')->find(16); //systemType 16 = Description
+
         $description = new TextProperty();
         $description->setProfile($profile);
         $description->setSystemType($systemTypeDescription);
@@ -94,59 +97,82 @@ class ProfileController  extends Controller
         $description->setCreationTime(new \DateTime('now'));
         $description->setModificationTime(new \DateTime('now'));
 
+        $ongoingDescription = new TextProperty();
+        $ongoingDescription->setProfile($profile);
+        $ongoingDescription->setSystemType($systemTypeDescription);
+        $ongoingDescription->setCreator($this->getUser());
+        $ongoingDescription->setModifier($this->getUser());
+        $ongoingDescription->setCreationTime(new \DateTime('now'));
+        $ongoingDescription->setModificationTime(new \DateTime('now'));
+
         $profile->addTextProperty($description);
 
-        $label = new Label();
-        $label->setProfile($profile);
-        $label->setIsStandardLabelForLanguage(true);
-        $label->setCreator($this->getUser());
-        $label->setModifier($this->getUser());
-        $label->setCreationTime(new \DateTime('now'));
-        $label->setModificationTime(new \DateTime('now'));
+        $ongoingProfile = new Profile();
+        $profileLabel = new Label();
+        $ongoingProfileLabel = new Label();
 
-        $profile->setIsOngoing(true);
-        $profile->setProjectOfBelonging($project);
-        $profile->addLabel($label);
+        $now = new \DateTime();
+
         $profile->setCreator($this->getUser());
         $profile->setModifier($this->getUser());
 
-        $form = $this->createForm(ProfileQuickAddForm::class, $profile);
+        $profileLabel->setIsStandardLabelForLanguage(true);
+        $profileLabel->setCreator($this->getUser());
+        $profileLabel->setModifier($this->getUser());
+        $profileLabel->setCreationTime(new \DateTime('now'));
+        $profileLabel->setModificationTime(new \DateTime('now'));
 
+        $profile->addLabel($profileLabel);
+
+        $form = $this->createForm(ProfileQuickAddForm::class, $profile);
         // only handles data on POST
         $form->handleRequest($request);
+
         if ($form->isSubmitted() && $form->isValid()) {
+            //root profile
             $profile = $form->getData();
-            $profile->setIsOngoing(true);
+            $profile->setIsRootProfile(true);
+            $profile->setIsOngoing(false);
             $profile->setProjectOfBelonging($project);
             $profile->setCreator($this->getUser());
             $profile->setModifier($this->getUser());
             $profile->setCreationTime(new \DateTime('now'));
             $profile->setModificationTime(new \DateTime('now'));
 
+            //ongoing profile
+            $ongoingProfile->setIsRootProfile(false);
+            $ongoingProfile->setIsOngoing(true);
+            $ongoingProfile->setProjectOfBelonging($project);
+            $ongoingProfile->setVersion(1);
+            $ongoingProfile->setRootProfile($profile);
+            $ongoingProfile->setCreator($this->getUser());
+            $ongoingProfile->setModifier($this->getUser());
+            $ongoingProfile->setCreationTime(new \DateTime('now'));
+            $ongoingProfile->setModificationTime(new \DateTime('now'));
+
+            $ongoingProfileLabel->setIsStandardLabelForLanguage(true);
+            $ongoingProfileLabel->setLabel($profileLabel->getLabel().' ongoing');
+            $ongoingProfileLabel->setLanguageIsoCode($profileLabel->getLanguageIsoCode());
+            $ongoingProfileLabel->setCreator($this->getUser());
+            $ongoingProfileLabel->setModifier($this->getUser());
+            $ongoingProfileLabel->setCreationTime(new \DateTime('now'));
+            $ongoingProfileLabel->setModificationTime(new \DateTime('now'));
+            $ongoingProfile->addLabel($ongoingProfileLabel);
+
             if($profile->getTextProperties()->containsKey(1)){
                 $profile->getTextProperties()[1]->setCreationTime(new \DateTime('now'));
                 $profile->getTextProperties()[1]->setModificationTime(new \DateTime('now'));
-                $profile->getTextProperties()[1]->setSystemType($systemTypeAdditionalNote);
-                $profile->getTextProperties()[1]->setProfile($profile);
+                $profile->getTextProperties()[1]->setSystemType($systemTypeDescription);
+                $profile->getTextProperties()[1]->setProfile($ongoingProfile);
             }
-
-            // Créer les entity_to_user_project pour les activer par défaut
-            $userProjectAssociations = $em->getRepository('AppBundle:UserProjectAssociation')->findByProject($project);
-            foreach ($userProjectAssociations as $userProjectAssociation) {
-                $eupa = new EntityUserProjectAssociation();
-                $systemTypeSelected = $em->getRepository('AppBundle:SystemType')->find(25); //systemType 25 = Selected namespace for user preference
-                $eupa->setProfile($profile);
-                $eupa->setUserProjectAssociation($userProjectAssociation);
-                $eupa->setSystemType($systemTypeSelected);
-                $eupa->setCreator($this->getUser());
-                $eupa->setModifier($this->getUser());
-                $eupa->setCreationTime(new \DateTime('now'));
-                $eupa->setModificationTime(new \DateTime('now'));
-                $em->persist($eupa);
+            else {
+                $ongoingDescription = $description;
+                $ongoingProfile->addTextProperty($ongoingDescription);
             }
 
             $em = $this->getDoctrine()->getManager();
             $em->persist($profile);
+            $em->persist($ongoingProfile);
             $em->flush();
 
             return $this->redirectToRoute('profile_show', [
@@ -154,8 +180,6 @@ class ProfileController  extends Controller
             ]);
 
         }
-
-        $em = $this->getDoctrine()->getManager();
 
 
         return $this->render('profile/new.html.twig', [
@@ -177,7 +201,13 @@ class ProfileController  extends Controller
             throw $this->createNotFoundException('The profile n° '.$profile->getId().' does not exist. Please contact an administrator.');
         }
 
-        $this->denyAccessUnlessGranted('edit', $profile);
+        if($profile->getIsRootProfile()) {
+            $this->denyAccessUnlessGranted('edit', $profile);
+
+        }
+        else {
+            $this->denyAccessUnlessGranted('edit', $profile->getRootProfile());
+        }
 
         $profile->setModifier($this->getUser());
 
@@ -188,6 +218,15 @@ class ProfileController  extends Controller
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $profile->setModifier($this->getUser());
+            if (!$profile->getIsRootProfile()) {
+                $profile->setProjectOfBelonging($profile->getRootProfile()->getProjectOfBelonging());
+            }
+            else {
+                foreach ($profile->getChildProfiles() as $childProfile) {
+                    $childProfile->setProjectOfBelonging($profile->getProjectOfBelonging());
+                    $em->persist($childProfile);
+                }
+            }
             $em->persist($profile);
             $em->flush();
 
@@ -263,6 +302,45 @@ class ProfileController  extends Controller
             $em->flush();
         }
 
+        //Duplication of the published profile to create a new ongoing one
+        $newProfile = new Profile();
+
+        $newProfile->setStandardLabel($profile->getStandardLabel().' ongoing');
+        $newProfile->setIsOngoing(true);
+        $newProfile->setIsForcedPublication(false);
+        $newProfile->setVersion($profile->getVersion()+1);
+        $newProfile->setIsRootProfile(false);
+        $newProfile->setRootProfile($profile->getRootProfile());
+        $newProfile->setProjectOfBelonging($profile->getRootProfile()->getProjectOfBelonging());
+
+        $newProfile->setCreator($this->getUser());
+        $newProfile->setModifier($this->getUser());
+        $newProfile->setCreationTime(new \DateTime('now'));
+        $newProfile->setModificationTime(new \DateTime('now'));
+
+        foreach ($profile->getTextProperties() as $textProperty){
+            $newTextProperty = clone $textProperty;
+            $newProfile->addTextProperty($newTextProperty);
+        }
+
+        foreach ($profile->getLabels() as $label){
+            $newLabel = clone $label;
+            $newLabel->setLabel($profile->getStandardLabel().' ongoing');
+            $newProfile->addLabel($newLabel);
+        }
+
+        foreach ($profile->getProfileAssociations() as $profileAssociation){
+            $newProfileAssociation = clone $profileAssociation;
+            $newProfile->addProfileAssociation($newProfileAssociation);
+        }
+
+        foreach ($profile->getNamespaces() as $namespace){
+            $newProfile->addNamespace($namespace);
+        }
+
+        $em->persist($newProfile);
+        $em->flush();
+
         $this->addFlash('success', 'Profile Published!');
 
         return $this->redirectToRoute('profile_edit', [
@@ -311,7 +389,7 @@ class ProfileController  extends Controller
      */
     public function newProfileNamespaceAssociationAction(OntoNamespace $namespace, Profile $profile, Request $request)
     {
-        $this->denyAccessUnlessGranted('edit', $profile);
+        $this->denyAccessUnlessGranted('edit', $profile->getRootProfile());
 
         if($namespace->getIsTopLevelNamespace()) {
             $status = 'Error';
@@ -369,7 +447,7 @@ class ProfileController  extends Controller
      */
     public function deleteProfileNamespaceAssociationAction(OntoNamespace $namespace, Profile $profile, Request $request)
     {
-        $this->denyAccessUnlessGranted('edit', $profile);
+        $this->denyAccessUnlessGranted('edit', $profile->getRootProfile());
 
         $profile->removeNamespace($namespace);
         $em = $this->getDoctrine()->getManager();
@@ -389,7 +467,7 @@ class ProfileController  extends Controller
      */
     public function changeReferencedNamespaceAssociationAction(Profile $profile, OntoNamespace $associatedNamespace, OntoNamespace $newAssociatedNamespace, Request $request)
     {
-        $this->denyAccessUnlessGranted('edit', $profile);
+        $this->denyAccessUnlessGranted('edit', $profile->getRootProfile());
 
         $em = $this->getDoctrine()->getManager();
         $profile->removeNamespace($associatedNamespace);
@@ -526,7 +604,7 @@ class ProfileController  extends Controller
      */
     public function newProfileClassAssociationAction(OntoClass $class, Profile $profile, Request $request)
     {
-        $this->denyAccessUnlessGranted('edit', $profile);
+        $this->denyAccessUnlessGranted('edit', $profile->getRootProfile());
 
         $em = $this->getDoctrine()->getManager();
         $profileAssociation = $em->getRepository('AppBundle:ProfileAssociation')
@@ -593,7 +671,7 @@ class ProfileController  extends Controller
      */
     public function newProfilePropertyAssociationAction(Property $property, Profile $profile, Request $request)
     {
-        $this->denyAccessUnlessGranted('edit', $profile);
+        $this->denyAccessUnlessGranted('edit', $profile->getRootProfile());
 
         $em = $this->getDoctrine()->getManager();
         $profileAssociation = $em->getRepository('AppBundle:ProfileAssociation')
@@ -662,7 +740,7 @@ class ProfileController  extends Controller
      */
     public function newProfileInheritedPropertyAssociationAction(Property $property, Profile $profile, OntoClass $domain, OntoClass $range, Request $request)
     {
-        $this->denyAccessUnlessGranted('edit', $profile);
+        $this->denyAccessUnlessGranted('edit', $profile->getRootProfile());
 
         $em = $this->getDoctrine()->getManager();
         $profileAssociation = $em->getRepository('AppBundle:ProfileAssociation')
@@ -736,7 +814,7 @@ class ProfileController  extends Controller
      */
     public function deleteProfileClassAssociationAction(OntoClass $class, Profile $profile, Request $request)
     {
-        $this->denyAccessUnlessGranted('edit', $profile);
+        $this->denyAccessUnlessGranted('edit', $profile->getRootProfile());
         $em = $this->getDoctrine()->getManager();
         $classNamespace = null;
         /*$profile->removeClass($class);
@@ -786,7 +864,7 @@ class ProfileController  extends Controller
      */
     public function deleteProfilePropertyAssociationAction(Property $property, Profile $profile, Request $request)
     {
-        $this->denyAccessUnlessGranted('edit', $profile);
+        $this->denyAccessUnlessGranted('edit', $profile->getRootProfile());
         $em = $this->getDoctrine()->getManager();
 
 
@@ -815,7 +893,7 @@ class ProfileController  extends Controller
      */
     public function deleteProfileInheritedPropertyAssociationAction(Property $property, Profile $profile, OntoClass $domain, OntoClass $range, Request $request)
     {
-        $this->denyAccessUnlessGranted('edit', $profile);
+        $this->denyAccessUnlessGranted('edit', $profile->getRootProfile());
         $em = $this->getDoctrine()->getManager();
 
 
@@ -846,7 +924,7 @@ class ProfileController  extends Controller
      */
     public function editProfilePropertiesAction(OntoClass $class, Profile $profile)
     {
-        $this->denyAccessUnlessGranted('edit', $profile);
+        $this->denyAccessUnlessGranted('edit', $profile->getRootProfile());
         //TODO: mettre erreur 403 en cas d'accès à une classe non associée au profil
         return $this->render('profile/editProperties.html.twig', array(
             'class' => $class,
@@ -1080,8 +1158,10 @@ class ProfileController  extends Controller
         $newProfile->setStandardLabel($profile->getStandardLabel().' ongoing');
         $newProfile->setIsOngoing(true);
         $newProfile->setIsForcedPublication(false);
-
-        $newProfile->setProjectOfBelonging($profile->getProjectOfBelonging());
+        $newProfile->setVersion($profile->getVersion()+1);
+        $newProfile->setIsRootProfile(false);
+        $newProfile->setRootProfile($profile->getRootProfile());
+        $newProfile->setProjectOfBelonging($profile->getRootProfile()->getProjectOfBelonging());
 
         $newProfile->setCreator($this->getUser());
         $newProfile->setModifier($this->getUser());

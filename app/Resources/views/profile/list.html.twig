@@ -12,15 +12,13 @@
     <table class="table table-striped" id="profile-table">
         <thead>
         <tr>
-            <th>Profile standard label</th>
+            <th>Profile</th>
             <th>Project of belonging</th>
-            <th>Start date</th>
-            <th>End date</th>
             <th>Last updated</th>
         </tr>
         </thead>
         <tbody>
-        {% for profile in profiles %}
+        {% for profile in profiles if profile.isRootProfile %}
             <tr>
                 <td>
                     <a href="{{ path('profile_show', {
@@ -36,8 +34,6 @@
                         {{ profile.projectOfBelonging.standardLabel }}
                     </a>
                 </td>
-                <td>{{ profile.startDate is empty ? '' : profile.startDate|date('Y-m-d') }}</td>
-                <td>{{ profile.endDate is empty ? '' : profile.endDate|date('Y-m-d') }}</td>
                 <td>{{ profile.modificationTime|date('Y-m-d') }}</td>
             </tr>
         {% endfor %}
