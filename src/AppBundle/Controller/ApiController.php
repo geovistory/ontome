@@ -96,7 +96,7 @@ class ApiController extends Controller
                 'status' => $status,
                 'message' => $message
             );
-            return new JsonResponse($response,500, 'content-type:application/problem+json');
+            return new JsonResponse($response,500, array('content-type:application/problem+json'));
         }
 
         if(empty($profiles[0]['json'])) {
@@ -130,7 +130,7 @@ class ApiController extends Controller
                 'status' => $status,
                 'message' => $message
             );
-            return new JsonResponse($response,500, 'content-type:application/problem+json');
+            return new JsonResponse($response,500, array('content-type:application/problem+json'));
         }
 
         if(empty($classes[0]['json'])) {
@@ -164,7 +164,7 @@ class ApiController extends Controller
                 'status' => $status,
                 'message' => $message
             );
-            return new JsonResponse($response,500, 'content-type:application/problem+json');
+            return new JsonResponse($response,500, array('content-type:application/problem+json'));
         }
 
         if(empty($properties[0]['json'])) {
