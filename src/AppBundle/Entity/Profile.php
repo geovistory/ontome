@@ -54,16 +54,25 @@ class Profile
     /**
      * @ORM\Column(type="boolean")
      */
+    private $isRootProfile;
+
+    /**
+     * @ORM\Column(type="integer")
+     */
+    private $version;
+
+    /**
+     * @ORM\Column(type="boolean")
+     */
     private $isForcedPublication;
 
     /**
      * @ORM\ManyToOne(targetEntity="Profile",  inversedBy="childProfiles")
-     * @ORM\JoinColumn(name="fk_is_subprofile_of", referencedColumnName="pk_profile", nullable=true)
+     * @ORM\JoinColumn(name="fk_root_profile", referencedColumnName="pk_profile", nullable=true)
      */
-    private $parentProfile;
+    private $rootProfile;
 
     /**
-     * @Assert\NotNull
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Project", inversedBy="ownedProfiles")
      * @ORM\JoinColumn(name="fk_project_of_belonging", referencedColumnName="pk_project")
      */
@@ -99,7 +108,7 @@ class Profile
     private $modificationTime;
 
     /**
-     * @ORM\OneToMany(targetEntity="Profile", mappedBy="parentProfile")
+     * @ORM\OneToMany(targetEntity="Profile", mappedBy="rootProfile")
      */
     private $childProfiles;
 
@@ -231,9 +240,28 @@ class Profile
     /**
      * @return mixed
      */
-    public function getParentProfile()
+    public function getIsRootProfile()
     {
-        return $this->parentProfile;
+        return $this->isRootProfile;
+    }
+
+    /**
+     * @return Profile
+     */
+    public function getRootProfile()
+    {
+        if($this->isRootProfile) {
+            return $this;
+        }
+        return $this->rootProfile;
+    }
+
+    /**
+     * @return int
+     */
+    public function getVersion()
+    {
+        return $this->version;
     }
 
     /**
@@ -301,11 +329,17 @@ class Profile
     }
 
     /**
-     * @return mixed
+     * @return Project
      */
     public function getProjectOfBelonging()
     {
-        return $this->projectOfBelonging;
+        if ($this->isRootProfile) {
+            return $this->projectOfBelonging;
+
+        }
+        else {
+            return $this->getRootProfile()->getProjectOfBelonging();
+        }
     }
 
     /**
@@ -426,6 +460,14 @@ class Profile
     }
 
     /**
+     * @param boolean $isRootProfile
+     */
+    public function setIsRootProfile($isRootProfile)
+    {
+        $this->isRootProfile = $isRootProfile;
+    }
+
+    /**
      * @param mixed $isForcedPublication
      */
     public function setIsForcedPublication($isForcedPublication)
@@ -434,11 +476,19 @@ class Profile
     }
 
     /**
-     * @param Profile $parentProfile
+     * @param Profile $rootProfile
      */
-    public function setParentProfile($parentProfile)
+    public function setRootProfile($rootProfile)
     {
-        $this->parentProfile = $parentProfile;
+        $this->rootProfile = $rootProfile;
+    }
+
+    /**
+     * @param mixed $version
+     */
+    public function setVersion($version)
+    {
+        $this->version = $version;
     }
 
     /**
@@ -572,6 +622,7 @@ class Profile
     }
 
     public function isPublishable(){
+        if ($this->isRootProfile) return false;
         foreach ($this->getProfileAssociations() as $profileAssociation){
             if($profileAssociation->getSystemType()->getId() == 5
                 and !$this->getNamespaces()->contains($profileAssociation->getEntityNamespaceForVersion())){

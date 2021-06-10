@@ -108,7 +108,8 @@ class ProfileRepository extends EntityRepository
                 was_closed_at AS \"wasClosedAt\",
                 end_date AS \"endDate\",
                 is_forced_publication AS \"isForcedPublication\",
-                is_ongoing AS \"isOngoing\"
+                is_ongoing AS \"isOngoing\",
+                version AS \"version\"
                 FROM che.profile
                 WHERE pk_profile IN(
                   SELECT fk_profile 
@@ -131,7 +132,7 @@ class ProfileRepository extends EntityRepository
 
         $sql = "SELECT DISTINCT pk_profile AS \"profileId\", standard_label AS \"standardLabel\"
                 FROM che.profile
-                WHERE (was_closed_at IS NOT NULL OR is_forced_publication) AND end_date IS NULL
+                WHERE (was_closed_at IS NOT NULL OR is_forced_publication) AND end_date IS NULL AND NOT is_root_profile
                 EXCEPT 
                 SELECT DISTINCT pk_profile AS id, 
                 standard_label AS \"standardLabel\"
