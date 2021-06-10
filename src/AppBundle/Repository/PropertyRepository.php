@@ -212,6 +212,7 @@ class PropertyRepository extends EntityRepository
         $sql = "SELECT identifier_property AS property,
                   identifier_range AS range,
                   v.fk_range_namespace AS \"rangeNamespaceId\",
+                    che.get_root_namespace_prefix(che.get_root_namespace(v.fk_range_namespace)) AS \"rangeRootNamespacePrefix\",
                   pk_property AS \"propertyId\",
                   pk_range AS \"rangeId\",
                   v.fk_namespace_for_version AS \"propertyNamespaceId\",
@@ -219,7 +220,9 @@ class PropertyRepository extends EntityRepository
                   identifier_domain AS domain,
                   v.fk_domain_namespace AS \"domainNamespaceId\",
                   che.get_root_namespace(fk_namespace_for_version) AS \"rootNamespaceId\",
-                  (SELECT label FROM che.get_namespace_labels(fk_namespace_for_version) WHERE language_iso_code = 'en') AS namespace
+                  che.get_root_namespace_prefix(che.get_root_namespace(fk_namespace_for_version)) AS \"propertyRootNamespacePrefix\",
+                  (SELECT label FROM che.get_namespace_labels(fk_namespace_for_version) WHERE language_iso_code = 'en') AS namespace,
+                  (SELECT label FROM che.get_namespace_labels(v.fk_range_namespace) WHERE language_iso_code = 'en') AS \"rangeNamespace\"
                 FROM che.v_properties_with_domain_range v
                 LEFT JOIN che.associates_referenced_namespace asrefns ON v.fk_namespace_for_version = asrefns.fk_namespace
                 WHERE v.pk_domain = ?

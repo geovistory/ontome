@@ -145,6 +145,12 @@ class OntoNamespace
     private $modificationTime;
 
     /**
+     * @Assert\NotNull()
+     * @ORM\Column(type="text")
+     */
+    private $rootNamespacePrefix;
+
+    /**
      * @Assert\Valid()
      * @Assert\NotBlank()
      * @ORM\OneToMany(targetEntity="AppBundle\Entity\Label", mappedBy="namespace", cascade={"persist"})
@@ -283,14 +289,8 @@ class OntoNamespace
         $this->projects = new ArrayCollection();
         $this->comments = new ArrayCollection();
         $this->projectAssociations = new ArrayCollection();
-        $this->classAssociationVersions = new ArrayCollection();
-        $this->commentVersions = new ArrayCollection();
-        $this->entityAssociationVersions = new ArrayCollection();
-        $this->labelVersions = new ArrayCollection();
         $this->classVersions = new ArrayCollection();
         $this->propertyVersions = new ArrayCollection();
-        $this->propertyAssociationVersions = new ArrayCollection();
-        $this->textPropertyVersions = new ArrayCollection();
     }
 
     /**
@@ -556,38 +556,6 @@ class OntoNamespace
     /**
      * @return ArrayCollection
      */
-    public function getCommentVersions()
-    {
-        return $this->commentVersions;
-    }
-
-    /**
-     * @return ArrayCollection
-     */
-    public function getClassAssociationVersions()
-    {
-        return $this->classAssociationVersions;
-    }
-
-    /**
-     * @return ArrayCollection
-     */
-    public function getEntityAssociationVersions()
-    {
-        return $this->entityAssociationVersions;
-    }
-
-    /**
-     * @return ArrayCollection
-     */
-    public function getLabelVersions()
-    {
-        return $this->labelVersions;
-    }
-
-    /**
-     * @return ArrayCollection
-     */
     public function getClassVersions()
     {
         return $this->classVersions;
@@ -599,22 +567,6 @@ class OntoNamespace
     public function getPropertyVersions()
     {
         return $this->propertyVersions;
-    }
-
-    /**
-     * @return ArrayCollection
-     */
-    public function getPropertyAssociationVersions()
-    {
-        return $this->propertyAssociationVersions;
-    }
-
-    /**
-     * @return ArrayCollection
-     */
-    public function getTextPropertyVersions()
-    {
-        return $this->textPropertyVersions;
     }
 
     /**
@@ -667,6 +619,27 @@ class OntoNamespace
             }
             return $allReferencedNamespaces;
         }
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getRootNamespacePrefix()
+    {
+        if($this->isTopLevelNamespace){
+            return $this->rootNamespacePrefix;
+        }
+        else{
+            return false;
+        }
+    }
+
+    /**
+     * @param mixed $rootNamespacePrefix
+     */
+    public function setRootNamespacePrefix($rootNamespacePrefix)
+    {
+        $this->rootNamespacePrefix = $rootNamespacePrefix;
     }
 
     /**

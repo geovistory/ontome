@@ -6,7 +6,7 @@
 
     <div class="container">
         <h2 class="class-name">
-            {{ namespace }}
+            {{ namespace }} {% if namespace.isTopLevelNamespace %}<span class="label label-default" style="font-size: 12px; vertical-align: middle;">Root</span>{% endif %}
             <span class="pull-right">
                 {% if is_granted('edit', namespace) %}
                     <a href="{{ path('namespace_edit', {
@@ -282,6 +282,9 @@
                             </a>
                 </p>
                 {% endif %}
+                {% if namespace.isTopLevelNamespace %}
+                <p>Root namespace prefix: {{ namespace.rootNamespacePrefix }}</p>
+                {% endif %}
                 {% if namespace.isTopLevelNamespace == false %}
                     {% if namespace.isOngoing %}
                         <p>This namespace is ongoing and can be modified at any time. It is not advisable to use its classes and properties.</p>
@@ -431,6 +434,7 @@
                             {{ namespace.topLevelNamespace.standardLabel }}
                         </a>
                     </p>
+                    <p>Root namespace prefix: {{ namespace.topLevelNamespace.rootNamespacePrefix }}</p>
                 {% endif %}
             </div>
             <div id="classes" class="tab-pane fade">

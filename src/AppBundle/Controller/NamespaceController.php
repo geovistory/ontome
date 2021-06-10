@@ -246,6 +246,7 @@ class NamespaceController  extends Controller
 
             $form->handleRequest($request);
             if ($form->isSubmitted() && $form->isValid()) {
+                $em->merge($namespace);
                 if (!$namespace->getIsExternalNamespace() && strpos($namespace->getNamespaceURI(), 'https://ontome.net/ns') !== 0 ) {
                     $u = parse_url($namespace->getNamespaceURI());
                     $uri = 'https://ontome.net/ns'.$u['path']; //if the user tries to change the domain, we force it to be ontome.net

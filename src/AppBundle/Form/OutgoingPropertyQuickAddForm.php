@@ -48,9 +48,9 @@ class OutgoingPropertyQuickAddForm extends AbstractType
         $choices = array();
         foreach ($options['classesVersion'] as $cv){
             if($cv['standardLabel'] != $cv['identifierInNamespace'])
-                $choices[$cv['standardLabel']." – ".$cv['identifierInNamespace']] = $cv['id'];
+                $choices[$cv['rootNamespacePrefix'].":".$cv['standardLabel']." – ".$cv['identifierInNamespace']] = $cv['id'];
             else
-                $choices[$cv['standardLabel']] = $cv['id'];
+                $choices[$cv['rootNamespacePrefix'].":".$cv['standardLabel']] = $cv['id'];
         }
 
         $builder

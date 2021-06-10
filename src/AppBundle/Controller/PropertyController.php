@@ -48,7 +48,12 @@ class PropertyController extends Controller
             $namespacesId = $em->getRepository('AppBundle:OntoNamespace')->findNamespacesIdByUser($this->getUser());
         }
 
-        // Récupérer les classes selon le filtrage obtenu
+        // Compléter avec les références parents (directs/indirects)
+        foreach ($this->getUser()->getCurrentOngoingNamespace()->getAllReferencedNamespaces() as $refNs){
+            if(!in_array($refNs->getId(), $namespacesId)){$namespacesId[] = $refNs->getId();}
+        }
+
+        // Récupérer les propriétés selon le filtrage obtenu
         $properties = $em->getRepository('AppBundle:Property')->findPropertiesByNamespacesId($namespacesId);
 
         return $this->render('property/list.html.twig', [

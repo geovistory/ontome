@@ -512,7 +512,7 @@ class PropertyVersion
      * Autre exemple : P111 added
      * @return string
      */
-    public function getInvertedLabel()
+    public function getInvertedLabel($withRootNamespacePrefix=false)
     {
         if($this->getProperty()->getIdentifierInNamespace() === explode(' (',$this->getStandardLabel())[0]){
             $s = $this->getProperty()->getIdentifierInNamespace();
@@ -522,7 +522,13 @@ class PropertyVersion
         }
         else $s = $this->getProperty()->getIdentifierInNamespace();
 
-        return (string) $s;
+        if($withRootNamespacePrefix){
+            $rootNamespacePrefix = $this->getNamespaceForVersion()->getTopLevelNamespace()->getRootNamespacePrefix().':';
+        }
+        else{
+            $rootNamespacePrefix = '';
+        }
+        return (string) $rootNamespacePrefix.$s;
     }
 
     /**

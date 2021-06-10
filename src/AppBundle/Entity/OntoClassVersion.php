@@ -249,8 +249,7 @@ class OntoClassVersion
      * Sauf si standardLabel est vide ou standardLabel égal Identifier
      * @return string
      */
-    public function getInvertedLabel()
-    {
+    public function getInvertedLabel($withRootNamespacePrefix=false){
         if($this->getClass()->getIdentifierInNamespace() === $this->getStandardLabel()){
             $s = $this->getClass()->getIdentifierInNamespace();
         }
@@ -258,6 +257,13 @@ class OntoClassVersion
             $s = $this->getClass()->getIdentifierInNamespace().' '.$this->getStandardLabel();
         }
         else $s = $this->getClass()->getIdentifierInNamespace();
-        return (string) $s;
+
+        if($withRootNamespacePrefix){
+            $rootNamespacePrefix = $this->getNamespaceForVersion()->getTopLevelNamespace()->getRootNamespacePrefix().':';
+        }
+        else{
+            $rootNamespacePrefix = '';
+        }
+        return (string) $rootNamespacePrefix.$s;
     }
 }

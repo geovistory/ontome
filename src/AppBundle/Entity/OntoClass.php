@@ -153,13 +153,6 @@ class OntoClass
      */
     private $profileAssociations;
 
-    /**
-     * @ORM\OneToMany(targetEntity="Property", mappedBy="domain", cascade={"persist"})
-     */
-    private $propertiesAsDomain;
-
-    private $propertiesAsRange;
-
     public function __construct()
     {
         $this->namespaces = new ArrayCollection();
@@ -169,7 +162,6 @@ class OntoClass
         $this->profiles = new ArrayCollection();
         $this->parentClassAssociations = new ArrayCollection();
         $this->childClassAssociations = new ArrayCollection();
-        $this->propertiesAsDomain = new ArrayCollection();
         $this->comments = new ArrayCollection();
     }
 
@@ -361,14 +353,6 @@ class OntoClass
     }
 
     /**
-     * @return Property
-     */
-    public function getPropertiesAsDomain()
-    {
-        return $this->propertiesAsDomain;
-    }
-
-    /**
      * @return ArrayCollection|ClassAssociation[]
      */
     public function getParentClassAssociations()
@@ -423,6 +407,14 @@ class OntoClass
     public function setPropertiesAsDomain($propertiesAsDomain)
     {
         $this->propertiesAsDomain = $propertiesAsDomain;
+    }
+
+    /**
+     * @param mixed $propertiesAsRange
+     */
+    public function setPropertiesAsRange($propertiesAsRange)
+    {
+        $this->propertiesAsRange = $propertiesAsRange;
     }
 
     /**

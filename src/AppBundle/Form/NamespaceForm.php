@@ -53,6 +53,10 @@ class NamespaceForm extends AbstractType
                 'default_protocol' => 'http',
                 'attr' => ['autocomplete' => 'off']
             ))
+            ->add('rootNamespacePrefix', TextType::class, array(
+                'label' => 'Root namespace prefix',
+                'attr' => ['autocomplete' => 'off']
+            ))
             ->add('creator', HiddenType::class)
             ->add('modifier', HiddenType::class);
         $builder->get('creator')
