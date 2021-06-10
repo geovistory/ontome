@@ -49,8 +49,10 @@ class PropertyController extends Controller
         }
 
         // Compléter avec les références parents (directs/indirects)
-        foreach ($this->getUser()->getCurrentOngoingNamespace()->getAllReferencedNamespaces() as $refNs){
-            if(!in_array($refNs->getId(), $namespacesId)){$namespacesId[] = $refNs->getId();}
+        if(!is_null($this->getUser()) && !is_null($this->getUser()->getCurrentOngoingNamespace())){
+            foreach ($this->getUser()->getCurrentOngoingNamespace()->getAllReferencedNamespaces() as $refNs){
+                if(!in_array($refNs->getId(), $namespacesId)){$namespacesId[] = $refNs->getId();}
+            }
         }
 
         // Récupérer les propriétés selon le filtrage obtenu
