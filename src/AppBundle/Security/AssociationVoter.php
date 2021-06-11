@@ -83,7 +83,31 @@ class AssociationVoter extends Voter
         if(is_null($user->getCurrentOngoingNamespace())){return false;}
         foreach($user->getUserProjectAssociations()->getIterator() as $i => $userProjectAssociation) {
             if($userProjectAssociation->getProject() === $association->getNamespaceForVersion()->getProjectForTopLevelNamespace() && $userProjectAssociation->getPermission() <= 2 && $user->getCurrentOngoingNamespace()->getProjectForTopLevelNamespace() === $association->getNamespaceForVersion()->getProjectForTopLevelNamespace()){
-                if($association->getNamespaceForVersion()->getIsOngoing() && count($association->getNamespaceForVersion()->getTopLevelNamespace()->getChildVersions()) <= 1){
+                $countNs = 0;
+                foreach ($association->getNamespaceForVersion()->getTopLevelNamespace()->getChildVersions() as $namespace_version){
+                    if($association instanceof ClassAssociation){
+                        foreach ($namespace_version->getClassAssociations() as $classAssociation){
+                            if($classAssociation->getChildClass() == $association->getChildClass() && $classAssociation->getParentClass() == $association->getParentClass()){
+                                $countNs++;
+                            }
+                        }
+                    }
+                    if($association instanceof PropertyAssociation){
+                        foreach ($namespace_version->getPropertyAssociations() as $propertyAssociation){
+                            if($propertyAssociation->getChildProperty() == $association->getChildProperty() && $propertyAssociation->getParentProperty() == $association->getParentProperty()){
+                                $countNs++;
+                            }
+                        }
+                    }
+                    if($association instanceof EntityAssociation){
+                        foreach ($namespace_version->getEntityAssociations() as $entityAssociation){
+                            if($entityAssociation->getTarget() == $association->getTarget() && $entityAssociation->getSource() == $association->getSource()){
+                                $countNs++;
+                            }
+                        }
+                    }
+                }
+                if($association->getNamespaceForVersion()->getIsOngoing() && $countNs <= 1){
                     return true;
                 }
             }
