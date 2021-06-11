@@ -1467,27 +1467,29 @@
                     }
                 },
                 callback: function (result) {
-                    if(associationType == "classAssociation")
-                    {
-                        var url = '{{ path("class_association_delete", {'id' : 'associationId'}) }}';
-                    }
-                    if(associationType == "entityAssociation")
-                    {
-                        var url = '{{ path("entity_association_delete", {'id' : 'associationId'}) }}';
-                    }
-                    url = url.replace("associationId", associationId);
-                    $.ajax({
-                        url: url,
-                        type: 'DELETE',
-                        dataType: 'json',
-                        success:function(data){
-                        },
-                        statusCode: {
-                            204: function () {
-                                window.location.reload();
-                            }
+                    if(result){
+                        if(associationType == "classAssociation")
+                        {
+                            var url = '{{ path("class_association_delete", {'id' : 'associationId'}) }}';
                         }
-                    });
+                        if(associationType == "entityAssociation")
+                        {
+                            var url = '{{ path("entity_association_delete", {'id' : 'associationId'}) }}';
+                        }
+                        url = url.replace("associationId", associationId);
+                        $.ajax({
+                            url: url,
+                            type: 'DELETE',
+                            dataType: 'json',
+                            success:function(data){
+                            },
+                            statusCode: {
+                                204: function () {
+                                    window.location.reload();
+                                }
+                            }
+                        });
+                    }
                 }
             });
         });
