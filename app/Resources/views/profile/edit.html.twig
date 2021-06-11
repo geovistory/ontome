@@ -91,6 +91,12 @@
             </div>
         </div>
         <div id="definition" class="tab-pane fade">
+            <div class="pull-right add-div">
+                <a href="{{ path('text_property_new', {'type': 'definition', 'object': 'profile', 'objectId': profile.id })}}"
+                   class="btn btn-primary pull-right">
+                    Add <span class="fa fa-plus-circle"></span>
+                </a>
+            </div>
             <h3>Description</h3>
             <table class="table table-striped" id="descriptions-table">
                 <thead>
