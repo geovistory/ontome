@@ -780,8 +780,8 @@
                             <tr>
                                 <td>
                                     <a href="{{ path('class_show_with_version', {
-                                        'id': classAssociation.parentClass.id,
-                                        'namespaceFromUrlId': classAssociation.parentClassNamespace.id,
+                                        'id': classAssociation.childClass.id,
+                                        'namespaceFromUrlId': classAssociation.childClassNamespace.id,
                                         '_fragment': 'class-hierarchy'
                                     }) }}">hierarchy (rdfs:subclassOf)</a>
                                 </td>
@@ -824,8 +824,8 @@
                             <tr>
                                 <td>
                                     <a href="{{ path('property_show_with_version', {
-                                        'id': propertyAssociation.parentProperty.id,
-                                        'namespaceFromUrlId': propertyAssociation.parentPropertyNamespace.id,
+                                        'id': propertyAssociation.childProperty.id,
+                                        'namespaceFromUrlId': propertyAssociation.childPropertyNamespace.id,
                                         '_fragment': 'property-hierarchy'
                                     }) }}">hierarchy (rdfs:subpropertyOf)</a>
                                 </td>
