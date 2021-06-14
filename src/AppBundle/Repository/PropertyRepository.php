@@ -523,6 +523,11 @@ class PropertyRepository extends EntityRepository
         $conn = $this->getEntityManager()
             ->getConnection();
 
+        $in = '4';
+        foreach($profile->getNamespaces() as $prfNs){
+            $in.=','.$prfNs->getId();
+        }
+
         $sql = "SELECT DISTINCT identifier_in_namespace AS domain,
                 pk_property AS \"propertyId\",
                 identifier_property AS property,
@@ -532,7 +537,7 @@ class PropertyRepository extends EntityRepository
                     WHEN aspro.fk_system_type IS NULL THEN 999
                     ELSE aspro.fk_system_type
                     END AS fk_system_type
-                FROM che.class_outgoing_inherited_properties(:class) coip
+                FROM che.class_outgoing_inherited_properties(:class, ARRAY[".$in."]::integer[]) coip
                 JOIN che.property_version pv ON pv.fk_property = coip.pk_property
                 JOIN che.associates_referenced_namespace asrefns ON asrefns.fk_referenced_namespace = pv.fk_namespace_for_version AND asrefns.fk_profile = :profile
                 LEFT JOIN che.associates_profile aspro ON aspro.fk_property = pk_property AND aspro.fk_inheriting_domain_class = :class AND aspro.fk_inheriting_range_class = pk_range AND aspro.fk_profile = :profile
@@ -572,6 +577,11 @@ class PropertyRepository extends EntityRepository
         $conn = $this->getEntityManager()
             ->getConnection();
 
+        $in = '4';
+        foreach($profile->getNamespaces() as $prfNs){
+            $in.=','.$prfNs->getId();
+        }
+
         $sql = "SELECT  pk_domain AS \"domainId\",
                         identifier_domain AS domain,
                         identifier_property AS property,
@@ -582,7 +592,7 @@ class PropertyRepository extends EntityRepository
                             WHEN aspro.fk_system_type IS NULL THEN 999
                             ELSE aspro.fk_system_type
                             END AS fk_system_type
-                FROM che.class_ingoing_inherited_properties(:class) ciip
+                FROM che.class_ingoing_inherited_properties(:class, ARRAY[".$in."]::integer[]) ciip
                 JOIN che.property_version pv ON pv.fk_property = ciip.pk_property
                 JOIN che.associates_referenced_namespace asrefns ON asrefns.fk_referenced_namespace = pv.fk_namespace_for_version AND asrefns.fk_profile = :profile
                 JOIN che.class cls ON cls.pk_class = :class
