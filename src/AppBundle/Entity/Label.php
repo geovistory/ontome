@@ -439,6 +439,4 @@ class Label
     {
         return (string) $this->label;
     }
-
-
 }
