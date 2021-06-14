@@ -233,7 +233,7 @@ class Label
     }
 
     /**
-     * @return OntoClass|Property|OntoNamespace|null the object described by the text property
+     * @return OntoClass|Property|OntoNamespace|Project|Profile|null the object described by the text property
      */
     public function getObject()
     {
@@ -246,6 +246,8 @@ class Label
             $object = $this->namespace;
         elseif (!is_null($this->project))
             $object = $this->project;
+        elseif (!is_null($this->profile))
+            $object = $this->profile;
         return $object;
     }
 
