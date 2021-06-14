@@ -22,7 +22,7 @@
                                     <a href="{{ path('property_show_with_version', {
                                         'id': propertyVersion.property.id,
                                         'namespaceFromUrlId': otherPropertyVersion.namespaceForVersion.id
-                                        }) }}">{{ otherPropertyVersion.namespaceForVersion }}
+                                    }) }}">{{ otherPropertyVersion.namespaceForVersion }}
                                         <span class="label label-{{ otherPropertyVersion.namespaceForVersion.status.classCss }}">
                                             {{ otherPropertyVersion.namespaceForVersion.status.label }}
                                         </span>
@@ -37,13 +37,13 @@
                     </ul>
                 </div>
                 {% if is_granted('edit', propertyVersion) and (propertyVersion.validationStatus is null or propertyVersion.validationStatus.id == 27) %}
-                <p class="inline-block">
-                    <a href="{{ path('property_edit', {
-                        id: propertyVersion.property.id
-                    }) }}" class="btn btn-success btn-edit">
-                        <i class="fa fa-edit"></i>
-                    </a>
-                </p>
+                    <p class="inline-block">
+                        <a href="{{ path('property_edit', {
+                            id: propertyVersion.property.id
+                        }) }}" class="btn btn-success btn-edit">
+                            <i class="fa fa-edit"></i>
+                        </a>
+                    </p>
                 {% endif %}
             </div>
             <h2>{{ propertyVersion }}</h2>
@@ -110,52 +110,52 @@
                 </h3>
                 <div class="container">
                     {% if propertyVersion.domainNamespace is not null %}
-                    <div class="row">
-                        <div class="col-lg-2">
-                            <p>Domain:</p>
-                        </div>
-                        <div class="col-lg-10">
-                            <p>{# Initialisation #}
-                                {% set isGoodNamespace = true %}
-                                {% set route = 'class_show_with_version' %}
-                                {% set route_params = {'id': propertyVersion.domain.id,  'namespaceFromUrlId': propertyVersion.domainNamespace.id } %}
+                        <div class="row">
+                            <div class="col-lg-2">
+                                <p>Domain:</p>
+                            </div>
+                            <div class="col-lg-10">
+                                <p>{# Initialisation #}
+                                    {% set isGoodNamespace = true %}
+                                    {% set route = 'class_show_with_version' %}
+                                    {% set route_params = {'id': propertyVersion.domain.id,  'namespaceFromUrlId': propertyVersion.domainNamespace.id } %}
 
-                                {# Vérification #}
-                                {% if propertyVersion.domainNamespace.id not in propertyVersion.namespaceForVersion.selectedNamespacesId %}
-                                    {% set isGoodNamespace = false %}
-                                    {% set route = 'namespace_show' %}
-                                    {% set route_params = {'id': propertyVersion.namespaceForVersion.id,  '_fragment': 'mismatches' } %}
-                                {% endif %}
+                                    {# Vérification #}
+                                    {% if propertyVersion.domainNamespace.id not in propertyVersion.namespaceForVersion.selectedNamespacesId %}
+                                        {% set isGoodNamespace = false %}
+                                        {% set route = 'namespace_show' %}
+                                        {% set route_params = {'id': propertyVersion.namespaceForVersion.id,  '_fragment': 'mismatches' } %}
+                                    {% endif %}
 
-                                <a href="{{ path(route, route_params) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
-                                    {{ propertyVersion.domain.classVersionForDisplay(propertyVersion.domainNamespace).invertedLabel(true) }}</a>
-                            </p>
+                                    <a href="{{ path(route, route_params) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
+                                        {{ propertyVersion.domain.classVersionForDisplay(propertyVersion.domainNamespace).invertedLabel(true) }}</a>
+                                </p>
+                            </div>
                         </div>
-                    </div>
                     {% endif %}
                     {% if propertyVersion.rangeNamespace is not null %}
-                    <div class="row">
-                        <div class="col-lg-2">
-                            <p>Range:</p>
-                        </div>
-                        <div class="col-lg-10">
-                            <p>{# Initialisation #}
-                                {% set isGoodNamespace = true %}
-                                {% set route = 'class_show_with_version' %}
-                                {% set route_params = {'id': propertyVersion.range.id,  'namespaceFromUrlId': propertyVersion.rangeNamespace.id } %}
+                        <div class="row">
+                            <div class="col-lg-2">
+                                <p>Range:</p>
+                            </div>
+                            <div class="col-lg-10">
+                                <p>{# Initialisation #}
+                                    {% set isGoodNamespace = true %}
+                                    {% set route = 'class_show_with_version' %}
+                                    {% set route_params = {'id': propertyVersion.range.id,  'namespaceFromUrlId': propertyVersion.rangeNamespace.id } %}
 
-                                {# Vérification #}
-                                {% if propertyVersion.rangeNamespace.id not in propertyVersion.namespaceForVersion.selectedNamespacesId %}
-                                    {% set isGoodNamespace = false %}
-                                    {% set route = 'namespace_show' %}
-                                    {% set route_params = {'id': propertyVersion.namespaceForVersion.id,  '_fragment': 'mismatches' } %}
-                                {% endif %}
+                                    {# Vérification #}
+                                    {% if propertyVersion.rangeNamespace.id not in propertyVersion.namespaceForVersion.selectedNamespacesId %}
+                                        {% set isGoodNamespace = false %}
+                                        {% set route = 'namespace_show' %}
+                                        {% set route_params = {'id': propertyVersion.namespaceForVersion.id,  '_fragment': 'mismatches' } %}
+                                    {% endif %}
 
-                                <a href="{{ path(route, route_params) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
-                                    {{ propertyVersion.range.classVersionForDisplay(propertyVersion.rangeNamespace).invertedLabel(true) }}</a>
-                            </p>
+                                    <a href="{{ path(route, route_params) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
+                                        {{ propertyVersion.range.classVersionForDisplay(propertyVersion.rangeNamespace).invertedLabel(true) }}</a>
+                                </p>
+                            </div>
                         </div>
-                    </div>
                     {% endif %}
 
                     {# Subproperty of #}
@@ -262,7 +262,7 @@
                                                 {% endif %}
 
                                                 <a href="{{ path(route, route_params) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
-                                                {{ association.childProperty.propertyVersionForDisplay(association.childPropertyNamespace).domain.identifierInNamespace }} {{ association.childProperty.propertyVersionForDisplay(association.childPropertyNamespace).domain.classVersionForDisplay(association.childProperty.propertyVersionForDisplay(association.childPropertyNamespace).domainNamespace).standardLabel }}</a>
+                                                    {{ association.childProperty.propertyVersionForDisplay(association.childPropertyNamespace).domain.identifierInNamespace }} {{ association.childProperty.propertyVersionForDisplay(association.childPropertyNamespace).domain.classVersionForDisplay(association.childProperty.propertyVersionForDisplay(association.childPropertyNamespace).domainNamespace).standardLabel }}</a>
                                             {% endif %}
                                             →
                                             {# Property #}
@@ -317,58 +317,58 @@
                         </div>
                     </div>
                     {% if propertyVersion.property.entityAssociations|length > 0 %}
-                    <div class="row">
-                        <div class="col-lg-2">
-                            <p>Relations:</p>
-                        </div>
-                        <div class="col-lg-10">
-                            <ul class="list-unstyled">
-                            {% set relationCount = 0 %}
-                                {% for relation in propertyVersion.property.entityAssociations
-                                    if relation.systemType.id in [18,20]
-                                    and relation.namespaceForVersion.id in namespacesId %}
-                                    {% set relationCount = relationCount + 1 %}
-                                {% if relationCount > 0 %}
-                                    <li>{{ relation.systemType.standardLabel }}
-                                        {% if relation.sourceProperty.id == propertyVersion.property.id %}
-                                            {# Initialisation #}
-                                            {% set isGoodNamespace = true %}
-                                            {% set route = 'property_show_with_version' %}
-                                            {% set route_params = {'id': relation.targetProperty.id,  'namespaceFromUrlId': relation.targetNamespaceForVersion.id } %}
+                        <div class="row">
+                            <div class="col-lg-2">
+                                <p>Relations:</p>
+                            </div>
+                            <div class="col-lg-10">
+                                <ul class="list-unstyled">
+                                    {% set relationCount = 0 %}
+                                    {% for relation in propertyVersion.property.entityAssociations
+                                        if relation.systemType.id in [18,20]
+                                        and relation.namespaceForVersion.id in namespacesId %}
+                                        {% set relationCount = relationCount + 1 %}
+                                        {% if relationCount > 0 %}
+                                            <li>{{ relation.systemType.standardLabel }}
+                                                {% if relation.sourceProperty.id == propertyVersion.property.id %}
+                                                    {# Initialisation #}
+                                                    {% set isGoodNamespace = true %}
+                                                    {% set route = 'property_show_with_version' %}
+                                                    {% set route_params = {'id': relation.targetProperty.id,  'namespaceFromUrlId': relation.targetNamespaceForVersion.id } %}
 
-                                            {# Vérification #}
-                                            {% if relation.targetNamespaceForVersion.id not in relation.namespaceForVersion.selectedNamespacesId %}
-                                                {% set isGoodNamespace = false %}
-                                                {% set route = 'namespace_show' %}
-                                                {% set route_params = {'id': propertyVersion.namespaceForVersion.id,  '_fragment': 'mismatches' } %}
-                                            {% endif %}
+                                                    {# Vérification #}
+                                                    {% if relation.targetNamespaceForVersion.id not in relation.namespaceForVersion.selectedNamespacesId %}
+                                                        {% set isGoodNamespace = false %}
+                                                        {% set route = 'namespace_show' %}
+                                                        {% set route_params = {'id': propertyVersion.namespaceForVersion.id,  '_fragment': 'mismatches' } %}
+                                                    {% endif %}
 
-                                            <a href="{{ path(route, route_params) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
-                                                {{ relation.targetProperty.propertyVersionForDisplay(relation.targetNamespaceForVersion).invertedLabel }}
-                                            </a>
-                                        {% else %}
-                                            {# Initialisation #}
-                                            {% set isGoodNamespace = true %}
-                                            {% set route = 'property_show_with_version' %}
-                                            {% set route_params = {'id': relation.sourceProperty.id,  'namespaceFromUrlId': relation.sourceNamespaceForVersion.id } %}
+                                                    <a href="{{ path(route, route_params) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
+                                                        {{ relation.targetProperty.propertyVersionForDisplay(relation.targetNamespaceForVersion).invertedLabel }}
+                                                    </a>
+                                                {% else %}
+                                                    {# Initialisation #}
+                                                    {% set isGoodNamespace = true %}
+                                                    {% set route = 'property_show_with_version' %}
+                                                    {% set route_params = {'id': relation.sourceProperty.id,  'namespaceFromUrlId': relation.sourceNamespaceForVersion.id } %}
 
-                                            {# Vérification #}
-                                            {% if relation.sourceNamespaceForVersion.id not in relation.namespaceForVersion.selectedNamespacesId %}
-                                                {% set isGoodNamespace = false %}
-                                                {% set route = 'namespace_show' %}
-                                                {% set route_params = {'id': propertyVersion.namespaceForVersion.id,  '_fragment': 'mismatches' } %}
-                                            {% endif %}
+                                                    {# Vérification #}
+                                                    {% if relation.sourceNamespaceForVersion.id not in relation.namespaceForVersion.selectedNamespacesId %}
+                                                        {% set isGoodNamespace = false %}
+                                                        {% set route = 'namespace_show' %}
+                                                        {% set route_params = {'id': propertyVersion.namespaceForVersion.id,  '_fragment': 'mismatches' } %}
+                                                    {% endif %}
 
-                                            <a href="{{ path(route, route_params) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
-                                                {{ relation.sourceProperty.propertyVersionForDisplay(relation.sourceNamespaceForVersion).invertedLabel }}
-                                            </a>
+                                                    <a href="{{ path(route, route_params) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
+                                                        {{ relation.sourceProperty.propertyVersionForDisplay(relation.sourceNamespaceForVersion).invertedLabel }}
+                                                    </a>
+                                                {% endif %}
+                                            </li>
                                         {% endif %}
-                                    </li>
-                                    {% endif %}
-                                {% endfor %}
-                            </ul>
+                                    {% endfor %}
+                                </ul>
+                            </div>
                         </div>
-                    </div>
                     {% endif %}
                     <div class="row">
                         <div class="col-lg-2">
@@ -425,10 +425,10 @@
                         <div class="col-lg-10">
                             <ul class="list-unstyled">
                                 {% if propertyVersion.domain is not null %}
-                                <li>{{ propertyVersion.property.identifierInNamespace }}(x,y) ⊃ {{ propertyVersion.domain.identifierInNamespace }}(x)</li>
+                                    <li>{{ propertyVersion.property.identifierInNamespace }}(x,y) ⊃ {{ propertyVersion.domain.identifierInNamespace }}(x)</li>
                                 {% endif %}
                                 {% if propertyVersion.range is not null %}
-                                <li>{{ propertyVersion.property.identifierInNamespace }}(x,y) ⊃ {{ propertyVersion.range.identifierInNamespace }}(y)</li>
+                                    <li>{{ propertyVersion.property.identifierInNamespace }}(x,y) ⊃ {{ propertyVersion.range.identifierInNamespace }}(y)</li>
                                 {% endif %}
                                 {% for association in propertyVersion.property.childPropertyAssociations
                                     if association.namespaceForVersion.id in namespacesId %}
@@ -482,25 +482,25 @@
                                 </a>
                             </td>
                             {% if propertyVersion.namespaceForVersion.isOngoing %}
-                            <td>
-                                {% if textProperty.validationStatus is null %}
-                                    <span class="label label-info">
+                                <td>
+                                    {% if textProperty.validationStatus is null %}
+                                        <span class="label label-info">
                                     Candidate
                                 </span>
-                                {% elseif textProperty.validationStatus.id == 26  %}
-                                    <span class="label label-success">
+                                    {% elseif textProperty.validationStatus.id == 26  %}
+                                        <span class="label label-success">
                                     {{ textProperty.validationStatus }}
                                 </span>
-                                {% elseif textProperty.validationStatus.id == 27  %}
-                                    <span class="label label-danger">
+                                    {% elseif textProperty.validationStatus.id == 27  %}
+                                        <span class="label label-danger">
                                     {{ textProperty.validationStatus }}
                                 </span>
-                                {% elseif textProperty.validationStatus.id == 28  %}
-                                    <span class="label label-warning">
+                                    {% elseif textProperty.validationStatus.id == 28  %}
+                                        <span class="label label-warning">
                                     {{ textProperty.validationStatus }}
                                 </span>
-                                {% endif %}
-                            </td>
+                                    {% endif %}
+                                </td>
                             {% endif %}
                         </tr>
                     {% endfor %}
@@ -548,25 +548,27 @@
                                     <span class="badge {% if textProperty.comments|length > 0  %}progress-bar-danger {% endif %}">{{ textProperty.comments|length }}</span>
                                 </a>
                             </td>
-                            <td>
-                                {% if textProperty.validationStatus is null %}
-                                    <span class="label label-info">
+                            {% if propertyVersion.namespaceForVersion.isOngoing %}
+                                <td>
+                                    {% if textProperty.validationStatus is null %}
+                                        <span class="label label-info">
                                     Candidate
                                 </span>
-                                {% elseif textProperty.validationStatus.id == 26  %}
-                                    <span class="label label-success">
+                                    {% elseif textProperty.validationStatus.id == 26  %}
+                                        <span class="label label-success">
                                     {{ textProperty.validationStatus }}
                                 </span>
-                                {% elseif textProperty.validationStatus.id == 27  %}
-                                    <span class="label label-danger">
+                                    {% elseif textProperty.validationStatus.id == 27  %}
+                                        <span class="label label-danger">
                                     {{ textProperty.validationStatus }}
                                 </span>
-                                {% elseif textProperty.validationStatus.id == 28  %}
-                                    <span class="label label-warning">
+                                    {% elseif textProperty.validationStatus.id == 28  %}
+                                        <span class="label label-warning">
                                     {{ textProperty.validationStatus }}
                                 </span>
-                                {% endif %}
-                            </td>
+                                    {% endif %}
+                                </td>
+                            {% endif %}
                         </tr>
                     {% endfor %}
                     </tbody>
@@ -718,25 +720,25 @@
                                 </a>
                             </td>
                             {% if propertyVersion.namespaceForVersion.isOngoing %}
-                            <td>
-                                {% if label.validationStatus is null %}
-                                    <span class="label label-info">
+                                <td>
+                                    {% if label.validationStatus is null %}
+                                        <span class="label label-info">
                                     Candidate
                                 </span>
-                                {% elseif label.validationStatus.id == 26  %}
-                                    <span class="label label-success">
+                                    {% elseif label.validationStatus.id == 26  %}
+                                        <span class="label label-success">
                                     {{ label.validationStatus }}
                                 </span>
-                                {% elseif label.validationStatus.id == 27  %}
-                                    <span class="label label-danger">
+                                    {% elseif label.validationStatus.id == 27  %}
+                                        <span class="label label-danger">
                                     {{ label.validationStatus }}
                                 </span>
-                                {% elseif label.validationStatus.id == 28  %}
-                                    <span class="label label-warning">
+                                    {% elseif label.validationStatus.id == 28  %}
+                                        <span class="label label-warning">
                                     {{ label.validationStatus }}
                                 </span>
-                                {% endif %}
-                            </td>
+                                    {% endif %}
+                                </td>
                             {% endif %}
                         </tr>
                     {% endfor %}
@@ -774,9 +776,9 @@
             </div>
             <div id="property-hierarchy" class="tab-pane fade">
                 {% if is_granted('add_associations', propertyVersion.namespaceForVersion) %}
-                <div class="pull-right add-div">
-                    <a href="{{ path('new_parent_property_form', {'childProperty': propertyVersion.property.id}) }}" class="btn btn-primary pull-right">Add <span class="fa fa-plus-circle"></span></a>
-                </div>
+                    <div class="pull-right add-div">
+                        <a href="{{ path('new_parent_property_form', {'childProperty': propertyVersion.property.id}) }}" class="btn btn-primary pull-right">Add <span class="fa fa-plus-circle"></span></a>
+                    </div>
                 {% endif %}
                 <h3>Parent properties
                     {% set tooltipProperty = "rdfs:subpropertyOf the property below" %}
@@ -941,25 +943,25 @@
                                 </a>
                             </td>
                             {% if propertyVersion.namespaceForVersion.isOngoing %}
-                            <td>
-                                {% if association.validationStatus is null %}
-                                    <span class="label label-info">
+                                <td>
+                                    {% if association.validationStatus is null %}
+                                        <span class="label label-info">
                                     Candidate
                                 </span>
-                                {% elseif association.validationStatus.id == 26  %}
-                                    <span class="label label-success">
+                                    {% elseif association.validationStatus.id == 26  %}
+                                        <span class="label label-success">
                                     {{ association.validationStatus }}
                                 </span>
-                                {% elseif association.validationStatus.id == 27  %}
-                                    <span class="label label-danger">
+                                    {% elseif association.validationStatus.id == 27  %}
+                                        <span class="label label-danger">
                                     {{ association.validationStatus }}
                                 </span>
-                                {% elseif association.validationStatus.id == 28  %}
-                                    <span class="label label-warning">
+                                    {% elseif association.validationStatus.id == 28  %}
+                                        <span class="label label-warning">
                                     {{ association.validationStatus }}
                                 </span>
-                                {% endif %}
-                            </td>
+                                    {% endif %}
+                                </td>
                             {% endif %}
                         </tr>
                     {% endfor %}
@@ -1045,7 +1047,7 @@
                                         'namespaceFromUrlId': ancestor.rangeNamespaceId
                                     }) }}">
                                         {% if ancestor.rangeStandardLabel == ancestor.rangeIdentifier %}
-                                        {{ ancestor.rangeStandardLabel }}
+                                            {{ ancestor.rangeStandardLabel }}
                                         {% else %}
                                             {{ ancestor.rangeStandardLabel }} – {{ ancestor.rangeIdentifier }}
                                         {% endif %}
