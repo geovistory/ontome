@@ -166,7 +166,7 @@ class ProfileController  extends Controller
                 $profile->getTextProperties()[1]->setProfile($ongoingProfile);
             }
             else {
-                $ongoingDescription = $description;
+                $ongoingDescription->setTextProperty($description->getTextProperty());
                 $ongoingProfile->addTextProperty($ongoingDescription);
             }
 
