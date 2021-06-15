@@ -195,8 +195,10 @@
                     {{ form_errors(profileIdentificationForm) }}
                     {{ form_row(profileIdentificationForm.projectOfBelonging) }}
                     {{ form_row(profileIdentificationForm.isForcedPublication) }}
+                    {% if profile.isPublishable %}
                     <p><button type="submit" class="btn btn-primary" formnovalidate>Save <span class="far fa-save"></span></button>
                     <button type="button" class="btn btn-default" onclick="window.location.reload();">Cancel&nbsp;<i class="fas fa-undo-alt"></i></button></p>
+                    {% endif %}
                     {{ form_end(profileIdentificationForm) }}
                 {% endif %}
                 {% if not is_granted('full_edit', profile.projectOfBelonging) %}
