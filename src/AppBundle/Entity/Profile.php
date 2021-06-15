@@ -625,6 +625,7 @@ class Profile
         if ($this->isRootProfile) return false;
         foreach ($this->getProfileAssociations() as $profileAssociation){
             if($profileAssociation->getSystemType()->getId() == 5
+                // Refuser la publication s'il y a des entités qui ne sont pas dans les namespaces reférencés du profil
                 and !$this->getNamespaces()->contains($profileAssociation->getEntityNamespaceForVersion())){
                 return false;
             }
