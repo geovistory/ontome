@@ -74,6 +74,7 @@ class ProfileEditForm extends AbstractType
             }
             else {
                 $form->add('isForcedPublication', HiddenType::class);
+                $form->add('projectOfBelonging', HiddenType::class);
             }
         });
 
