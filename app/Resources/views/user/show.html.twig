@@ -259,7 +259,7 @@
                         </thead>
                         <tbody>
                             {% for upa in user.userProjectAssociations %}
-                                {% for profile in upa.project.ownedProfiles %}
+                                {% for profile in upa.project.ownedProfiles if profile.isRootProfile %}
                                     <tr>
                                         <td>
                                             <a href="{{ path('profile_show', {
