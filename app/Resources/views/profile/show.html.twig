@@ -552,7 +552,31 @@
                     { type: 'natural-ci', targets: 0, width: '1%', className: 'text-right' }
                 ],
                 "autoWidth": false,
-                order: [[ 1, 'asc' ]]});
+                order: [[ 1, 'asc' ]],
+                initComplete: function(){
+                this.api().columns([3]).every(function(){
+                    var column = this;
+                    var select = $('<br><select id="properties-namespace-select" style="width:100%;"><option value=""></option></select>')
+                        .appendTo($(column.header()))
+                        .on('change', function(){
+                            var val = $.fn.dataTable.util.escapeRegex(
+                                $(this).val()
+                            );
+
+                            column
+                                .search(val ? '^'+val+'$' : '', true, false)
+                                .draw();
+                        });
+
+                    $(select).click(function(e){
+                        e.stopPropagation();
+                    });
+
+                    column.data().unique().sort().each(function(d, j){
+                        select.append('<option value="'+d+'">'+d+'</option>')
+                    });
+                });
+            }});
             $('#properties-table').DataTable({
                 "autoWidth": false,
                 order: [[ 3, 'asc' ]],
@@ -560,9 +584,31 @@
                     { type: 'natural-ci', targets: 2, width: '1%', className: 'text-right' }
                 ],
                 initComplete: function(){
+                    this.api().columns([6]).every(function(){
+                        var column = this;
+                        var select = $('<br><select id="properties-namespace-select" style="width:100%;"><option value=""></option></select>')
+                            .appendTo($(column.header()))
+                            .on('change', function(){
+                                var val = $.fn.dataTable.util.escapeRegex(
+                                    $(this).val()
+                                );
+
+                                column
+                                    .search(val ? '^'+val+'$' : '', true, false)
+                                    .draw();
+                            });
+
+                        $(select).click(function(e){
+                            e.stopPropagation();
+                        });
+
+                        column.data().unique().sort().each(function(d, j){
+                            select.append('<option value="'+d+'">'+d+'</option>')
+                        });
+                    });
                     this.api().columns([7]).every(function(){
                         var column = this;
-                        var select = $('<select id="properties-status-select"><option value=""></option></select>')
+                        var select = $('<select id="properties-status-select" style="width:100%;"><option value=""></option></select>')
                             .appendTo($(column.header()))
                             .on('change', function(){
                                 var val = $.fn.dataTable.util.escapeRegex(

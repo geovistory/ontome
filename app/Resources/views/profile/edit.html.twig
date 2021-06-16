@@ -918,7 +918,31 @@
                     visible: false,
                     targets: [1]
                 }
-            ]
+            ],
+            initComplete: function(){
+                this.api().columns([5]).every(function(){
+                    var column = this;
+                    var select = $('<br><select id="properties-namespace-select" style="width:100%;"><option value=""></option></select>')
+                        .appendTo($(column.header()))
+                        .on('change', function(){
+                            var val = $.fn.dataTable.util.escapeRegex(
+                                $(this).val()
+                            );
+
+                            column
+                                .search(val ? '^'+val+'$' : '', true, false)
+                                .draw();
+                        });
+
+                    $(select).click(function(e){
+                        e.stopPropagation();
+                    });
+
+                    column.data().unique().sort().each(function(d, j){
+                        select.append('<option value="'+d+'">'+d+'</option>')
+                    });
+                });
+            }
         });
         var selectableClassesTable = $('#selectable-classes-table').DataTable({
             ajax: urlSelectableClasses,
@@ -946,7 +970,31 @@
                     width: '1%',
                     className: 'text-right'
                 }
-            ]
+            ],
+            initComplete: function(){
+                this.api().columns([3]).every(function(){
+                    var column = this;
+                    var select = $('<br><select id="properties-namespace-select" style="width:100%;"><option value=""></option></select>')
+                        .appendTo($(column.header()))
+                        .on('change', function(){
+                            var val = $.fn.dataTable.util.escapeRegex(
+                                $(this).val()
+                            );
+
+                            column
+                                .search(val ? '^'+val+'$' : '', true, false)
+                                .draw();
+                        });
+
+                    $(select).click(function(e){
+                        e.stopPropagation();
+                    });
+
+                    column.data().unique().sort().each(function(d, j){
+                        select.append('<option value="'+d+'">'+d+'</option>')
+                    });
+                });
+            }
         });
         $('#profile-versions-table').DataTable();
         $('#namespaces-table').DataTable();
@@ -1206,9 +1254,38 @@
                 }
             });
         });
-
         {% else %}
-        $('#classes-table').DataTable();
+        $('#classes-table').DataTable({
+            columnDefs: [
+                { type: 'natural-ci', targets: 1, width: '1%', className: 'text-right' }
+            ],
+            "autoWidth": false,
+            order: [[ 2, 'asc' ]],
+            initComplete: function(){
+                this.api().columns([5]).every(function(){
+                    var column = this;
+                    var select = $('<br><select id="properties-namespace-select" style="width:100%;"><option value=""></option></select>')
+                        .appendTo($(column.header()))
+                        .on('change', function(){
+                            var val = $.fn.dataTable.util.escapeRegex(
+                                $(this).val()
+                            );
+
+                            column
+                                .search(val ? '^'+val+'$' : '', true, false)
+                                .draw();
+                        });
+
+                    $(select).click(function(e){
+                        e.stopPropagation();
+                    });
+
+                    column.data().unique().sort().each(function(d, j){
+                        select.append('<option value="'+d+'">'+d+'</option>')
+                    });
+                });
+            }
+        });
         {% endif %}
 
         $('#labels-table').DataTable();
@@ -1220,9 +1297,31 @@
                 { type: 'natural-ci', targets: 2, width: '1%', className: 'text-right' }
             ],
             initComplete: function(){
+                this.api().columns([6]).every(function(){
+                    var column = this;
+                    var select = $('<br><select id="properties-namespace-select" style="width:100%;"><option value=""></option></select>')
+                        .appendTo($(column.header()))
+                        .on('change', function(){
+                            var val = $.fn.dataTable.util.escapeRegex(
+                                $(this).val()
+                            );
+
+                            column
+                                .search(val ? '^'+val+'$' : '', true, false)
+                                .draw();
+                        });
+
+                    $(select).click(function(e){
+                        e.stopPropagation();
+                    });
+
+                    column.data().unique().sort().each(function(d, j){
+                        select.append('<option value="'+d+'">'+d+'</option>')
+                    });
+                });
                 this.api().columns([7]).every(function(){
                     var column = this;
-                    var select = $('<select id="properties-status-select"><option value=""></option></select>')
+                    var select = $('<select id="properties-status-select" style="width:100%;"><option value=""></option></select>')
                         .appendTo($(column.header()))
                         .on('change', function(){
                             var val = $.fn.dataTable.util.escapeRegex(
