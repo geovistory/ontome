@@ -236,6 +236,17 @@
                     {% endfor %}
                     </tbody>
                 </table>
+            {% if app.user is not null %}
+                <div class="pull-right add-div">
+                    <a  href="{{ path('api_classes_and_properties_by_project_xml', {
+                        project: project.id
+                    }) }}"
+                        class="btn btn-primary"
+                        download="project-{{ project.standardLabel }}.rdf">
+                        <i class="fas fa-code"></i> OWL-RDF
+                    </a>
+                </div>
+            {% endif %}
                 <h3>
                     Profiles used by this project
                     <a data-toggle="tooltip" data-placement="right" title="These profiles are published in the API of the project">
@@ -250,6 +261,9 @@
                         <th>Status</th>
                         <th>Creation date</th>
                         <th>API</th>
+                        {% if app.user is not null %}
+                        <th>Download</th>
+                        {% endif %}
                     </tr>
                     </thead>
                     <tbody>
@@ -300,6 +314,21 @@
                                     Not published in API
                                 {% endif %}
                             </td>
+                            {% if app.user is not null %}
+                            <td>
+                                {% if (not profile.isOngoing and profile.wasClosedAt is not null and profile.endDate is null) or (profile.isForcedPublication and profile.isOngoing ) %}
+                                    <a  href="{{ path('api_classes_and_properties_by_profile_xml', {
+                                        'profile': profile.id
+                                    }) }}"
+                                        class="btn btn-primary"
+                                        download="profile-{{ profile.standardLabel }}.rdf">
+                                        <i class="fas fa-code"></i> OWL-RDF
+                                    </a>
+                                {% else %}
+                                    Not available
+                                {% endif %}
+                            </td>
+                            {% endif %}
                         </tr>
                     {% endfor %}
                     </tbody>
@@ -353,7 +382,12 @@
             $('#child-projects-table').DataTable();
             $('#managed-namespaces-table').DataTable();
             $('#owned-profiles-table').DataTable();
-            $('#associated-profiles-table').DataTable();
+            $('#associated-profiles-table').DataTable({
+                "columnDefs": [
+                    {"width": "1%", "targets": 1}
+                ],
+                "autoWidth": false
+            });
             $('#members-of-the-project-table').DataTable();
             $('#ontome-users-table').DataTable();
             $('#comments-list-table').DataTable();
