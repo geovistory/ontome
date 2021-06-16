@@ -308,7 +308,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for profile in project.ownedProfiles %}
+                    {% for profile in project.ownedProfiles if profile.isRootProfile %}
                         <tr>
                             <td>
                                 <a href="{{ path('profile_show', {
