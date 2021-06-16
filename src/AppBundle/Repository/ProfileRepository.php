@@ -11,6 +11,7 @@ namespace AppBundle\Repository;
 use AppBundle\Entity\Profile;
 use AppBundle\Entity\Project;
 use AppBundle\Entity\User;
+use Doctrine\DBAL\DBALException;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Query\ResultSetMappingBuilder;
 
@@ -144,6 +145,28 @@ class ProfileRepository extends EntityRepository
                   );";
         $stmt = $conn->prepare($sql);
         $stmt->execute(array('project' => $project->getId()));
+
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * @param $lang string the language iso code
+     * @param $profile int the ID of the profile
+     * @return array
+     * @throws DBALException
+     */
+    public function findClassesAndPropertiesByProfileIdApi($lang, $profile)
+    {
+        $conn = $this->getEntityManager()
+            ->getConnection();
+
+        $sql = "SELECT result::text FROM api.get_owl_classes_and_properties_for_profiles(:lang, :profile, 0) as result;";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->execute(array(
+            'lang' => $lang,
+            'profile' => $profile
+        ));
 
         return $stmt->fetchAll();
     }

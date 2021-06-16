@@ -201,5 +201,59 @@ class ApiController extends Controller
         return $response;
     }
 
+    /**
+     * @Route("/api/project-rdf-owl.rdf", name="api_classes_and_properties_by_project_xml")
+     * @Method("GET")
+     * @param Request $request
+     * @return Response XML formatted response of classes and properties related to this project
+     */
+    public function getClassesAndPropertiesByProject(Request $request)
+    {
+        try {
+            $lang = $request->get('lang', 'en');
+            $projectId = intval($request->get('project', 0));
+            $em = $this->getDoctrine()->getManager();
+            $xml = $em->getRepository('AppBundle:Project')
+                ->findClassesAndPropertiesByProjectIdApi($lang, $projectId);
+        } catch (\Exception $e) {
+            $xml = '<?xml version="1.0" encoding="UTF8" ?>';
+            $xml .= '<error code="500" message="Error: '.$e->getMessage().'"/>';
+            $response = new Response($xml);
+            $response->headers->set('Content-Type', 'application/rdf+xml');
+            return $response;
+        }
+
+        $response = new Response($xml[0]['result']);
+        $response->headers->set('Content-Type', 'application/rdf+xml');
+        return $response;
+    }
+
+    /**
+     * @Route("/api/project-rdf-owl.rdf", name="api_classes_and_properties_by_profile_xml")
+     * @Method("GET")
+     * @param Request $request
+     * @return Response XML formatted response of classes and properties related to this profile
+     */
+    public function getClassesAndPropertiesByProfile(Request $request)
+    {
+        try {
+            $lang = $request->get('lang', 'en');
+            $profileId = intval($request->get('profile', 0));
+            $em = $this->getDoctrine()->getManager();
+            $xml = $em->getRepository('AppBundle:Profile')
+                ->findClassesAndPropertiesByProfileIdApi($lang, $profileId);
+        } catch (\Exception $e) {
+            $xml = '<?xml version="1.0" encoding="UTF8" ?>';
+            $xml .= '<error code="500" message="Error: '.$e->getMessage().'"/>';
+            $response = new Response($xml);
+            $response->headers->set('Content-Type', 'application/rdf+xml');
+            return $response;
+        }
+
+        $response = new Response($xml[0]['result']);
+        $response->headers->set('Content-Type', 'application/rdf+xml');
+        return $response;
+    }
+
 
 }

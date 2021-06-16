@@ -324,6 +324,17 @@
                 </table>
                 <div class="row">
                     <div class="col-lg-8">
+                        {% if app.user is not null %}
+                            <div class="pull-right add-div">
+                                <a  href="{{ path('api_classes_and_properties_by_project_xml', {
+                                    project: project.id
+                                }) }}"
+                                    class="btn btn-primary"
+                                    download="project-{{ project.standardLabel }}.rdf">
+                                    <i class="fas fa-code"></i> OWL-RDF
+                                </a>
+                            </div>
+                        {% endif %}
                         <h3>
                             Profiles used by this project
                             <a data-toggle="tooltip" data-placement="right" title="These profiles are published in the API of the project">
@@ -338,6 +349,9 @@
                                 <th>Version</th>
                                 <th>Status</th>
                                 <th>API</th>
+                                {% if app.user is not null %}
+                                <th>Download</th>
+                                {% endif %}
                             </tr>
                             </thead>
                         </table>
@@ -618,6 +632,7 @@
 
             var associatedProfilesTable = $('#associated-profiles-table').DataTable({
                 order: [[ 1, "desc" ]],
+                "autoWidth": true,
                 ajax: urlAssociatedProfiles,
                 dataSrc: 'data',
                 columns: [
@@ -625,7 +640,8 @@
                     { data: 'standardLabel' },
                     { data: 'version' },
                     { data: 'isOngoing' },
-                    { data: null }
+                    { data: null },
+                    { data: null },
                 ],
                 columnDefs: [
                     {
@@ -652,8 +668,12 @@
                         }
                     },
                     {
+                        targets: 2,
+                        width: '1%',
+                    },
+                    {
                         targets: 3,
-                        width: '100%',
+                        width: '1%',
                         render: function ( data, type, row, meta ) {
                             if (row.isOngoing) {
                                return 'Ongoing';
@@ -668,7 +688,7 @@
                         }
                     },
                     {
-                        targets: -1,
+                        targets: 4,
                         width: '100%',
                         render: function ( data, type, row, meta ) {
                             if((!row.isOngoing && row.wasClosedAt != null && row.endDate == null) || (row.isForcedPublication && row.isOngoing)){
@@ -682,6 +702,21 @@
                             }
                             else{
                                 return 'Not published in API';
+                            }
+                        }
+                    },
+                    {
+                        targets: 5,
+                        width: '100%',
+                        render: function ( data, type, row, meta ) {
+                            if((!row.isOngoing && row.wasClosedAt != null && row.endDate == null) || (row.isForcedPublication && row.isOngoing)){
+                                var urlApiClassesPropertiesProfileXML = '{{ path("api_classes_and_properties_by_profile_xml", {'lang': 'en', 'available-in-profile' : 'profileID'}) }}';
+                                urlApiClassesPropertiesProfileXML = urlApiClassesPropertiesProfileXML.replace("profileID", row.id);
+
+                                return '<a href="' + urlApiClassesPropertiesProfileXML + '" class="btn btn-primary" download="profile-'+ row.standardLabel +'.rdf"><i class="fas fa-code"></i> OWL-RDF</a>';
+                            }
+                            else{
+                                return 'Not available';
                             }
                         }
                     }
