@@ -186,7 +186,7 @@
                             {% if userActiveProjectAssociation.project.ownedProfiles|length == 0 %}
                                 <p class="text-muted"><em>This project does not manage any profile.</em></p>
                             {% endif %}
-                            {% for profile in userActiveProjectAssociation.project.ownedProfiles %}
+                            {% for profile in userActiveProjectAssociation.project.ownedProfiles if not profile.isRootProfile and profile.isOngoing%}
                                 <div>
                                     {% set isActiveProfile = false %}
                                     {% if profile in activeProfiles %}

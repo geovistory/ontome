@@ -24,11 +24,13 @@
             <li><a data-toggle="tab" href="#identification">Identification</a></li>
             <li><a data-toggle="tab" href="#definition">Definition</a></li>
             <li><a data-toggle="tab" href="#versions" id="versions-tab">Versions</a></li>
+            {% if not profile.isRootProfile %}
             <li><a data-toggle="tab" href="#namespaces">Namespaces</a></li>
             <li><a data-toggle="tab" href="#classes">Classes</a></li>
             <li><a data-toggle="tab" href="#properties">Properties</a></li>
             <li><a data-toggle="tab" href="#projects">Projects</a></li>
             <li><a data-toggle="tab" href="#graph">Graph</a></li>
+            {% endif %}
         </ul>
 
         <div class="tab-content">
@@ -189,6 +191,7 @@
                 </table>
                 <p>* : Standard label for this language</p>
             </div>
+            {% if not profile.isRootProfile %}
             <div id="classes" class="tab-pane fade">
                 <h3>
                     Associated classes
@@ -396,6 +399,7 @@
                     </tbody>
                 </table>
             </div>
+            {% endif %}
             <div id="versions" class="tab-pane fade">
                 <h3>Versions</h3>
                 {% if profile.isRootProfile %}
@@ -501,6 +505,7 @@
                 </table>
 
             </div>
+            {% if not profile.isRootProfile %}
             <div id="namespaces" class="tab-pane fade">
                 <h3>Namespaces used by this profile</h3>
                 {% if profile.namespaces|length == 0 %}
@@ -529,6 +534,7 @@
                     <p>The webvowl graph cannot be displayed because no class or property has been associated with this profile.</p>
                 {% endif %}
             </div>
+            {% endif %}
         </div>
     </div>
 
@@ -554,7 +560,7 @@
                     { type: 'natural-ci', targets: 2, width: '1%', className: 'text-right' }
                 ],
                 initComplete: function(){
-                    this.api().columns([6]).every(function(){
+                    this.api().columns([7]).every(function(){
                         var column = this;
                         var select = $('<select id="properties-status-select"><option value=""></option></select>')
                             .appendTo($(column.header()))
