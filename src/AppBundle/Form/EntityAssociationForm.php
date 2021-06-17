@@ -44,9 +44,9 @@ class EntityAssociationForm extends AbstractType
         $choices = array();
         foreach ($options['entitiesVersion'] as $ev){
             if($ev['standardLabel'] != $ev['identifierInNamespace'])
-                $choices[$ev['standardLabel']." – ".$ev['identifierInNamespace']] = $ev['id'];
+                $choices[$ev['rootNamespacePrefix'].":".$ev['standardLabel']." – ".$ev['identifierInNamespace']] = $ev['id'];
             else
-                $choices[$ev['standardLabel']] = $ev['id'];
+                $choices[$ev['rootNamespacePrefix'].":".$ev['standardLabel']] = $ev['id'];
         }
 
         $builder

@@ -117,7 +117,7 @@
                                         {% set route_params = {'id': propertyVersion.namespaceForVersion.id,  '_fragment': 'mismatches' } %}
                                     {% endif %}
 
-                                    <a href="{{ path(route, route_params) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
+                                    <a href="{{ path(route, route_params) }}" title="{{ propertyVersion.domainNamespace }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
                                         {{ propertyVersion.domain.classVersionForDisplay(propertyVersion.domainNamespace).invertedLabel(true) }}</a>
                                 </p>
                             </div>
@@ -141,7 +141,7 @@
                                         {% set route_params = {'id': propertyVersion.namespaceForVersion.id,  '_fragment': 'mismatches' } %}
                                     {% endif %}
 
-                                    <a href="{{ path(route, route_params) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
+                                    <a href="{{ path(route, route_params) }}" title="{{ propertyVersion.rangeNamespace }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
                                         {{ propertyVersion.range.classVersionForDisplay(propertyVersion.rangeNamespace).invertedLabel(true) }}</a>
                                 </p>
                             </div>
@@ -178,8 +178,8 @@
                                                     {% set route_params = {'id': propertyVersion.namespaceForVersion.id,  '_fragment': 'mismatches' } %}
                                                 {% endif %}
 
-                                                <a href="{{ path(route, route_params) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
-                                                    {{ association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).domain.identifierInNamespace }} {{ association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).domain.classVersionForDisplay(association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).domainNamespace).standardLabel }}</a>
+                                                <a href="{{ path(route, route_params) }}" title="{{ association.parentPropertyNamespace }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
+                                                    {{ association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).domain.classVersionForDisplay(association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).domainNamespace).invertedLabel(true) }}</a>
                                             {% endif %}
                                             →
                                             {# Propriété #}
@@ -195,8 +195,8 @@
                                                 {% set route_params = {'id': propertyVersion.namespaceForVersion.id,  '_fragment': 'mismatches' } %}
                                             {% endif %}
 
-                                            <a href="{{ path(route, route_params) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
-                                                {{ association.parentProperty.identifierInNamespace }} {{ association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).standardLabel }}</a>
+                                            <a href="{{ path(route, route_params) }}" title="{{ association.parentPropertyNamespace }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
+                                                {{ association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).invertedLabel(true) }}</a>
                                             →
                                             {# Range #}
                                             {% if association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).range is not null %}
@@ -212,8 +212,8 @@
                                                     {% set route_params = {'id': propertyVersion.namespaceForVersion.id,  '_fragment': 'mismatches' } %}
                                                 {% endif %}
 
-                                                <a href="{{ path(route, route_params) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
-                                                    {{ association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).range.identifierInNamespace }} {{ association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).range.classVersionForDisplay(association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).rangeNamespace).standardLabel }}</a>
+                                                <a href="{{ path(route, route_params) }}" title="{{ association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).rangeNamespace }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
+                                                    {{ association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).range.classVersionForDisplay(association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).rangeNamespace).invertedLabel(true) }}</a>
                                             {% endif %}
                                         </li>
                                     {% endfor %}
@@ -251,8 +251,8 @@
                                                     {% set route_params = {'id': propertyVersion.namespaceForVersion.id,  '_fragment': 'mismatches' } %}
                                                 {% endif %}
 
-                                                <a href="{{ path(route, route_params) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
-                                                    {{ association.childProperty.propertyVersionForDisplay(association.childPropertyNamespace).domain.identifierInNamespace }} {{ association.childProperty.propertyVersionForDisplay(association.childPropertyNamespace).domain.classVersionForDisplay(association.childProperty.propertyVersionForDisplay(association.childPropertyNamespace).domainNamespace).standardLabel }}</a>
+                                                <a href="{{ path(route, route_params) }}" title="{{ association.childProperty.propertyVersionForDisplay(association.childPropertyNamespace).domainNamespace }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
+                                                    {{ association.childProperty.propertyVersionForDisplay(association.childPropertyNamespace).domain.classVersionForDisplay(association.childProperty.propertyVersionForDisplay(association.childPropertyNamespace).domainNamespace).invertedLabel(true) }}</a>
                                             {% endif %}
                                             →
                                             {# Property #}
@@ -268,8 +268,8 @@
                                                 {% set route_params = {'id': propertyVersion.namespaceForVersion.id,  '_fragment': 'mismatches' } %}
                                             {% endif %}
 
-                                            <a href="{{ path(route, route_params) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
-                                                {{ association.childProperty.identifierInNamespace }} {{ association.childProperty.propertyVersionForDisplay(association.childPropertyNamespace).standardLabel }}</a>
+                                            <a href="{{ path(route, route_params) }}" title="{{ association.childPropertyNamespace }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
+                                                {{ association.childProperty.propertyVersionForDisplay(association.childPropertyNamespace).invertedLabel(true) }}</a>
                                             →
                                             {# Range #}
                                             {% if association.childProperty.propertyVersionForDisplay(association.childPropertyNamespace).range is not null %}
@@ -285,8 +285,8 @@
                                                     {% set route_params = {'id': propertyVersion.namespaceForVersion.id,  '_fragment': 'mismatches' } %}
                                                 {% endif %}
 
-                                                <a href="{{ path(route, route_params) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
-                                                    {{ association.childProperty.propertyVersionForDisplay(association.childPropertyNamespace).range.identifierInNamespace }} {{ association.childProperty.propertyVersionForDisplay(association.childPropertyNamespace).range.classVersionForDisplay(association.childProperty.propertyVersionForDisplay(association.childPropertyNamespace).rangeNamespace).standardLabel }}</a>
+                                                <a href="{{ path(route, route_params) }}" title="{{ association.childProperty.propertyVersionForDisplay(association.childPropertyNamespace).rangeNamespace }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
+                                                    {{ association.childProperty.propertyVersionForDisplay(association.childPropertyNamespace).range.classVersionForDisplay(association.childProperty.propertyVersionForDisplay(association.childPropertyNamespace).rangeNamespace).invertedLabel(true) }}</a>
                                             {% endif %}
                                         </li>
                                     {% endfor %}
@@ -333,8 +333,8 @@
                                                         {% set route_params = {'id': propertyVersion.namespaceForVersion.id,  '_fragment': 'mismatches' } %}
                                                     {% endif %}
 
-                                                    <a href="{{ path(route, route_params) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
-                                                        {{ relation.targetProperty.propertyVersionForDisplay(relation.targetNamespaceForVersion).invertedLabel }}
+                                                    <a href="{{ path(route, route_params) }}" title="{{ relation.targetNamespaceForVersion }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
+                                                        {{ relation.targetProperty.propertyVersionForDisplay(relation.targetNamespaceForVersion).invertedLabel(true) }}
                                                     </a>
                                                 {% else %}
                                                     {# Initialisation #}
@@ -349,8 +349,8 @@
                                                         {% set route_params = {'id': propertyVersion.namespaceForVersion.id,  '_fragment': 'mismatches' } %}
                                                     {% endif %}
 
-                                                    <a href="{{ path(route, route_params) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
-                                                        {{ relation.sourceProperty.propertyVersionForDisplay(relation.sourceNamespaceForVersion).invertedLabel }}
+                                                    <a href="{{ path(route, route_params) }}" title="{{ relation.sourceNamespaceForVersion }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
+                                                        {{ relation.sourceProperty.propertyVersionForDisplay(relation.sourceNamespaceForVersion).invertedLabel(true) }}
                                                     </a>
                                                 {% endif %}
                                             </li>
