@@ -641,40 +641,40 @@
             <div id="identification" class="tab-pane fade">
                 <h3>Identifier : {{ propertyVersion.property.identifierInNamespace }}</h3>
 
-                {% if domainRange is not empty and domainRange.domainId is not null and domainRange.rangeId is not null %}
+                {% if propertyVersion.domain is not null and propertyVersion.range is not null %}
                     <h3>Domain and range</h3>
                     <p>
                         {# Initialisation #}
                         {% set isGoodNamespace = true %}
                         {% set route = 'class_show_with_version' %}
-                        {% set route_params = {'id': domainRange.domainId,  'namespaceFromUrlId': domainRange.domainNamespaceId } %}
+                        {% set route_params = {'id': propertyVersion.domain.id,  'namespaceFromUrlId': propertyVersion.domainNamespace.id } %}
 
                         {# Vérification #}
-                        {% if domainRange.domainNamespaceId not in propertyVersion.namespaceForVersion.selectedNamespacesId %}
+                        {% if propertyVersion.domainNamespace.id not in propertyVersion.namespaceForVersion.selectedNamespacesId %}
                             {% set isGoodNamespace = false %}
                             {% set route = 'namespace_show' %}
                             {% set route_params = {'id': propertyVersion.namespaceForVersion.id,  '_fragment': 'mismatches' } %}
                         {% endif %}
 
-                        <a href="{{ path(route, route_params) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
-                            {{ domainRange.domainIdentifier }}</a>
+                        <a href="{{ path(route, route_params) }}" title="{{ propertyVersion.domainNamespace }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
+                            {{ propertyVersion.domain.classVersionForDisplay(propertyVersion.domainNamespace).invertedLabel(true) }}</a>
                         →
-                        {{ domainRange.propertyIdentifier }}
+                        {{ propertyVersion.invertedLabel() }}
                         →
                         {# Initialisation #}
                         {% set isGoodNamespace = true %}
                         {% set route = 'class_show_with_version' %}
-                        {% set route_params = {'id': domainRange.rangeId,  'namespaceFromUrlId': domainRange.rangeNamespaceId } %}
+                        {% set route_params = {'id': propertyVersion.range.id,  'namespaceFromUrlId': propertyVersion.rangeNamespace.id } %}
 
                         {# Vérification #}
-                        {% if domainRange.rangeNamespaceId not in propertyVersion.namespaceForVersion.selectedNamespacesId %}
+                        {% if propertyVersion.rangeNamespace.id not in propertyVersion.namespaceForVersion.selectedNamespacesId %}
                             {% set isGoodNamespace = false %}
                             {% set route = 'namespace_show' %}
                             {% set route_params = {'id': propertyVersion.namespaceForVersion.id,  '_fragment': 'mismatches' } %}
                         {% endif %}
 
-                        <a href="{{ path(route, route_params) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
-                            {{ domainRange.rangeIdentifier }}</a>
+                        <a href="{{ path(route, route_params) }}" title="{{ propertyVersion.rangeNamespace }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
+                            {{ propertyVersion.range.classVersionForDisplay(propertyVersion.rangeNamespace).invertedLabel(true) }}</a>
                         {% if propertyVersion.quantifiers is not null %}
                             &nbsp;(Quantifiers {{ propertyVersion.quantifiers }})
                         {% endif %}
