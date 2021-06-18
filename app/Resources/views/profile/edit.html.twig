@@ -715,6 +715,17 @@
                         {% if profile.namespaces|length == 0 %}
                             <em id="empty-namespace-list-message">There is currently no namespace used by this profile.</em>
                         {% endif %}
+                        <ul id="used-namespaces-list">
+                            {% for namespace in profile.namespaces %}
+                                <li>
+                                    <a href="{{ path('namespace_show', {
+                                        'id': namespace.id
+                                    }) }}">
+                                        {{ namespace }}
+                                    </a>
+                                </li>
+                            {% endfor %}
+                        </ul>
                     {% endif %}
                 </div>
                 <div id="graph" class="tab-pane fade">
@@ -1289,7 +1300,7 @@
             $('#labels-table').DataTable();
             $('#descriptions-table').DataTable();
             $('#profile-versions-table').DataTable();
-            $('#namespaces-table').DataTable();
+            $('#used-namespaces-table').DataTable();
             $('#projects-table').DataTable();
             $('#properties-table').DataTable({
                 "autoWidth": false,
