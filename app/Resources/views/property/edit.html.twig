@@ -888,7 +888,7 @@
                                         {% set route_params = {'id': propertyVersion.namespaceForVersion.id,  '_fragment': 'mismatches' } %}
                                     {% endif %}
 
-                                    <a href="{{ path(route, route_params) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
+                                    <a href="{{ path(route, route_params) }}" title="{{ association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).domainNamespace }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
                                         {{ association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).domain.classVersionForDisplay(association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).domainNamespace).invertedLabel(true) }}
                                     </a>
                                 {% endif %}
@@ -918,7 +918,7 @@
                                 {# Initialisation #}
                                 {% set isGoodNamespace = true %}
                                 {% set route = 'property_show_with_version' %}
-                                {% set route_params = {'id': association.parentProperty.id,  'namespaceFromUrlId': association.parentPropertyNamespace.id, '_fragment': 'class-hierarchy' } %}
+                                {% set route_params = {'id': association.parentProperty.id,  'namespaceFromUrlId': association.parentPropertyNamespace.id, '_fragment': 'property-hierarchy' } %}
 
                                 {# Vérification #}
                                 {% if association.parentPropertyNamespace.id not in propertyVersion.namespaceForVersion.selectedNamespacesId %}
@@ -927,8 +927,8 @@
                                     {% set route_params = {'id': propertyVersion.namespaceForVersion.id,  '_fragment': 'mismatches' } %}
                                 {% endif %}
 
-                                <a href="{{ path(route, route_params) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
-                                    {{ association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).invertedLabel }}
+                                <a href="{{ path(route, route_params) }}" title="{{ association.parentPropertyNamespace }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
+                                    {{ association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).invertedLabel(true) }}
                                 </a>
                             </td>
 
@@ -966,7 +966,7 @@
                                         {% set route_params = {'id': propertyVersion.namespaceForVersion.id,  '_fragment': 'mismatches' } %}
                                     {% endif %}
 
-                                    <a href="{{ path(route, route_params) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
+                                    <a href="{{ path(route, route_params) }}" title="{{ association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).rangeNamespace }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
                                         {{ association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).range.classVersionForDisplay(association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).rangeNamespace).invertedLabel(true) }}
                                     </a>
                                 {% endif %}
@@ -1048,11 +1048,11 @@
                                     <a href="{{ path('class_show_with_version', {
                                         'id': ancestor.has_domain,
                                         'namespaceFromUrlId': ancestor.domainNamespaceId
-                                    }) }}">
+                                    }) }}" title="{{ ancestor.domainNamespaceLabel }}">
                                         {% if ancestor.domainStandardLabel == ancestor.domainIdentifier %}
-                                            {{ ancestor.domainStandardLabel }}
+                                            {{ ancestor.domainRootNamespacePrefix }}:{{ ancestor.domainStandardLabel }}
                                         {% else %}
-                                            {{ ancestor.domainStandardLabel }} – {{ ancestor.domainIdentifier }}
+                                            {{ ancestor.domainRootNamespacePrefix }}:{{ ancestor.domainIdentifier }} {{ ancestor.domainStandardLabel }}
                                         {% endif %}
                                     </a>
                                 {% endif %}
@@ -1105,11 +1105,11 @@
                                     <a href="{{ path('class_show_with_version', {
                                         'id': ancestor.has_range,
                                         'namespaceFromUrlId': ancestor.rangeNamespaceId
-                                    }) }}">
+                                    }) }}" title="{{ ancestor.rangeNamespaceLabel }}">
                                         {% if ancestor.rangeStandardLabel == ancestor.rangeIdentifier %}
-                                            {{ ancestor.rangeStandardLabel }}
+                                            {{ ancestor.rangeRootNamespacePrefix }}:{{ ancestor.rangeStandardLabel }}
                                         {% else %}
-                                            {{ ancestor.rangeStandardLabel }} – {{ ancestor.rangeIdentifier }}
+                                            {{ ancestor.rangeRootNamespacePrefix }}:{{ ancestor.rangeIdentifier }} {{ ancestor.rangeStandardLabel }}
                                         {% endif %}
                                     </a>
                                 {% endif %}
@@ -1141,11 +1141,11 @@
                                     <a href="{{ path('class_show_with_version', {
                                         'id': descendant.has_domain,
                                         'namespaceFromUrlId': descendant.domainNamespaceId
-                                    }) }}">
+                                    }) }}" title="{{ descendant.domainNamespaceLabel }}">
                                         {% if descendant.domainStandardLabel == descendant.domainIdentifier %}
-                                            {{ descendant.domainStandardLabel }}
+                                            {{ descendant.domainRootNamespacePrefix }}:{{ descendant.domainStandardLabel }}
                                         {% else %}
-                                            {{ descendant.domainStandardLabel }} – {{ descendant.domainIdentifier }}
+                                            {{ descendant.domainRootNamespacePrefix }}:{{ descendant.domainIdentifier }} {{ descendant.domainStandardLabel }}
                                         {% endif %}
                                     </a>
                                 {% endif %}
@@ -1198,11 +1198,11 @@
                                     <a href="{{ path('class_show_with_version', {
                                         'id': descendant.has_range,
                                         'namespaceFromUrlId': descendant.rangeNamespaceId
-                                    }) }}">
+                                    }) }}" title="{{ descendant.rangeNamespaceLabel }}">
                                         {% if descendant.rangeStandardLabel == descendant.rangeIdentifier %}
-                                            {{ descendant.rangeStandardLabel }}
+                                            {{ descendant.rangeRootNamespacePrefix }}:{{ descendant.rangeStandardLabel }}
                                         {% else %}
-                                            {{ descendant.rangeStandardLabel }} – {{ descendant.rangeIdentifier }}
+                                            {{ descendant.rangeRootNamespacePrefix }}:{{ descendant.rangeIdentifier }} {{ descendant.rangeStandardLabel }}
                                         {% endif %}
                                     </a>
                                 {% endif %}
@@ -1257,7 +1257,7 @@
                                         {% set route_params = {'id': propertyVersion.namespaceForVersion.id,  '_fragment': 'mismatches' } %}
                                     {% endif %}
 
-                                    <a href="{{ path(route, route_params) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
+                                    <a href="{{ path(route, route_params) }}" title="{{ relation.targetNamespaceForVersion }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
                                         {{ relation.targetProperty.propertyVersionForDisplay(relation.targetNamespaceForVersion).invertedLabel(true) }}
                                     </a>
                                 </td>
@@ -1275,7 +1275,7 @@
                                         {% set route_params = {'id': propertyVersion.namespaceForVersion.id,  '_fragment': 'mismatches' } %}
                                     {% endif %}
 
-                                    <a href="{{ path(route, route_params) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
+                                    <a href="{{ path(route, route_params) }}" title="{{ relation.sourceNamespaceForVersion }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
                                         {{ relation.sourceProperty.propertyVersionForDisplay(relation.sourceNamespaceForVersion).invertedLabel(true) }}
                                     </a>
                                 </td>
