@@ -403,7 +403,7 @@ class ClassRepository extends EntityRepository
         $sql = "SELECT *
                 FROM (
                     SELECT DISTINCT pk_child AS id,
-                                    child_identifier AS \"text\"
+                                    che.get_root_namespace_prefix(che.get_root_namespace(cv.fk_namespace_for_version)) || ':' || child_identifier AS \"text\"
                     FROM che.descendant_class_hierarchy (:range) cls
                     JOIN che.class_version cv ON cv.fk_class = cls.pk_child
                     JOIN che.associates_referenced_namespace asrefnsp 
@@ -412,7 +412,7 @@ class ClassRepository extends EntityRepository
                     EXCEPT 
                     
                     SELECT  aspro.fk_inheriting_range_class AS id,
-                            cls.identifier_in_namespace || ' ' || cv.standard_label AS \"text\"
+                            che.get_root_namespace_prefix(che.get_root_namespace(cv.fk_namespace_for_version)) || ':' || cls.identifier_in_namespace || ' ' || cv.standard_label AS \"text\"
                     FROM che.associates_profile aspro
                     JOIN che.class cls ON aspro.fk_inheriting_range_class = cls.pk_class
                     JOIN che.class_version cv ON cls.pk_class = cv.fk_class
@@ -460,7 +460,7 @@ class ClassRepository extends EntityRepository
         $sql = "SELECT *
                 FROM (
                     SELECT DISTINCT pk_child AS id,
-                                    child_identifier AS \"text\"
+                                    che.get_root_namespace_prefix(che.get_root_namespace(cv.fk_namespace_for_version)) || ':' || child_identifier AS \"text\"
                     FROM che.descendant_class_hierarchy (:domain) cls
                     JOIN che.class_version cv ON cv.fk_class = cls.pk_child
                     JOIN che.associates_referenced_namespace asrefnsp 
@@ -470,7 +470,7 @@ class ClassRepository extends EntityRepository
                     EXCEPT 
                     
                     SELECT  aspro.fk_inheriting_range_class AS id,
-                            cls.identifier_in_namespace || ' ' || cv.standard_label AS \"text\"
+                            che.get_root_namespace_prefix(che.get_root_namespace(cv.fk_namespace_for_version)) || ':' || cls.identifier_in_namespace || ' ' || cv.standard_label AS \"text\"
                     FROM che.associates_profile aspro
                     JOIN che.class cls 
                         ON aspro.fk_inheriting_domain_class = cls.pk_class

@@ -469,9 +469,11 @@ class PropertyRepository extends EntityRepository
 
         $sql = "SELECT DISTINCT identifier_property AS property,
                                 identifier_range AS range,
+                                che.get_root_namespace_prefix(che.get_root_namespace(pv.fk_range_namespace)) as \"rangeRootNamespacePrefix\",
                                 pk_property AS \"propertyId\",
                                 pk_range AS \"rangeId\",
                                 identifier_domain AS domain,
+                                che.get_root_namespace_prefix(che.get_root_namespace(pv.fk_domain_namespace)) as \"domainRootNamespacePrefix\",
                                 che.get_root_namespace(nsp.pk_namespace) AS \"rootNamespaceId\",
                                 (SELECT label FROM che.get_namespace_labels(nsp.pk_namespace) WHERE language_iso_code = 'en') AS namespace,
                                 CASE
@@ -503,10 +505,12 @@ class PropertyRepository extends EntityRepository
 
         $sql = "SELECT  pk_domain AS \"domainId\",
                         identifier_domain AS domain,
+                        che.get_root_namespace_prefix(che.get_root_namespace(pv.fk_domain_namespace)) as \"domainRootNamespacePrefix\",
                         identifier_property AS property,
                         pk_property AS \"propertyId\",
                         pk_range AS \"rangeId\",
                         identifier_range AS range,
+                        che.get_root_namespace_prefix(che.get_root_namespace(pv.fk_range_namespace)) as \"rangeRootNamespacePrefix\",
                         che.get_root_namespace(nsp.pk_namespace) AS \"rootNamespaceId\",
                         (SELECT label FROM che.get_namespace_labels(nsp.pk_namespace) WHERE language_iso_code = 'en') AS namespace,
                         CASE
@@ -545,6 +549,7 @@ class PropertyRepository extends EntityRepository
                 identifier_property AS property,
                 pk_range AS \"rangeId\",
                 identifier_range AS range,
+                che.get_root_namespace_prefix(che.get_root_namespace(pv.fk_range_namespace)) as \"rangeRootNamespacePrefix\",
                 CASE
                     WHEN aspro.fk_system_type IS NULL THEN 999
                     ELSE aspro.fk_system_type
@@ -561,6 +566,7 @@ class PropertyRepository extends EntityRepository
                        prop.identifier_in_namespace  || ' ' ||  pv.standard_label,
                        aspro.fk_inheriting_range_class AS \"rangeId\",
                        clsrng.identifier_in_namespace || ' ' || range_cv.standard_label AS range,
+                che.get_root_namespace_prefix(che.get_root_namespace(range_cv.fk_namespace_for_version)) as \"rangeRootNamespacePrefix\",
                        CASE
                            WHEN aspro.fk_system_type IS NULL THEN 999
                            ELSE aspro.fk_system_type
@@ -596,10 +602,12 @@ class PropertyRepository extends EntityRepository
 
         $sql = "SELECT  pk_domain AS \"domainId\",
                         identifier_domain AS domain,
+                        che.get_root_namespace_prefix(che.get_root_namespace(pv.fk_domain_namespace)) as \"domainRootNamespacePrefix\",
                         identifier_property AS property,
                         pk_property AS \"propertyId\",
                         :class AS \"rangeId\",
                         cls.identifier_in_namespace || ' ' || cv.standard_label AS range,
+                        che.get_root_namespace_prefix(che.get_root_namespace(pv.fk_range_namespace)) as \"rangeRootNamespacePrefix\",
                         CASE
                             WHEN aspro.fk_system_type IS NULL THEN 999
                             ELSE aspro.fk_system_type
@@ -615,10 +623,12 @@ class PropertyRepository extends EntityRepository
                 
                 SELECT clsdmn.pk_class AS \"domainId\",
                        clsdmn.identifier_in_namespace || ' ' || domain_cv.standard_label AS domain,
+                        che.get_root_namespace_prefix(che.get_root_namespace(domain_cv.fk_namespace_for_version)) as \"domainRootNamespacePrefix\",
                        prop.identifier_in_namespace  || ' ' ||  pv.standard_label AS property,
                        aspro.fk_property AS \"propertyId\",
                        aspro.fk_inheriting_range_class AS \"rangeId\",
                        clsrng.identifier_in_namespace || ' ' || range_cv.standard_label AS range,
+                        che.get_root_namespace_prefix(che.get_root_namespace(range_cv.fk_namespace_for_version)) as \"rangeRootNamespacePrefix\",
                        CASE
                            WHEN aspro.fk_system_type IS NULL THEN 999
                            ELSE aspro.fk_system_type

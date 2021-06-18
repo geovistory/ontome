@@ -131,9 +131,9 @@
                             urlGetDescendentClasses = urlGetDescendentClasses.replace("domainID", classID);
                             urlGetDescendentClasses = urlGetDescendentClasses.replace("rangeID", row.rangeId);
                             urlGetDescendentClasses = urlGetDescendentClasses.replace("propertyID", row.propertyId);
-                            return '<span class = "outgoing-property-range-switch" data-id="' + row.propertyId + '">' + data + '</span><span id="outgoing-property-range-select-' + row.propertyId + '" data-id="' + row.propertyId + '"></span>&nbsp;<a data-id="' + row.propertyId + '" data-url="' + urlGetDescendentClasses + '" class="select-subclass-range" data-toggle="tooltip" title="Select a child class"><i class="far fa-caret-square-down"></i></a>';
+                            return '<span class = "outgoing-property-range-switch" data-id="' + row.propertyId + '">' + row.rangeRootNamespacePrefix + ':' + data + '</span><span id="outgoing-property-range-select-' + row.propertyId + '" data-id="' + row.propertyId + '"></span>&nbsp;<a data-id="' + row.propertyId + '" data-url="' + urlGetDescendentClasses + '" class="select-subclass-range" data-toggle="tooltip" title="Select a child class"><i class="far fa-caret-square-down"></i></a>';
                         }
-                        else return data;
+                        else return row.domainRootNamespacePrefix + ':' + data;
                     }
                 }
             ]
@@ -195,9 +195,9 @@
                             urlGetDescendentClasses = urlGetDescendentClasses.replace("domainID", classID);
                             urlGetDescendentClasses = urlGetDescendentClasses.replace("rangeID", row.rangeId);
                             urlGetDescendentClasses = urlGetDescendentClasses.replace("propertyID", row.propertyId);
-                            return '<span class = "outgoing-inherited-property-range-switch" data-id="'+row.propertyId+'-'+row.rangeId+'">'+data+'</span><span id="outgoing-inherited-property-range-select-'+row.propertyId+'-'+row.rangeId+'" data-id="'+row.propertyId+'-'+row.rangeId+'"></span>&nbsp;<a data-id="'+row.propertyId+'-'+row.rangeId+'" data-url="'+urlGetDescendentClasses+'" class="select-subclass-range-inherited" data-toggle="tooltip" title="Select a child class"><i class="far fa-caret-square-down"></i></a>';
+                            return '<span class = "outgoing-inherited-property-range-switch" data-id="'+row.propertyId+'-'+row.rangeId+'">'+row.rangeRootNamespacePrefix + ':' + data+'</span><span id="outgoing-inherited-property-range-select-'+row.propertyId+'-'+row.rangeId+'" data-id="'+row.propertyId+'-'+row.rangeId+'"></span>&nbsp;<a data-id="'+row.propertyId+'-'+row.rangeId+'" data-url="'+urlGetDescendentClasses+'" class="select-subclass-range-inherited" data-toggle="tooltip" title="Select a child class"><i class="far fa-caret-square-down"></i></a>';
                         }
-                        else return data;
+                        else return row.rangeRootNamespacePrefix + ':' + data;
                     }
                 }
             ]
@@ -226,9 +226,9 @@
                             urlGetDescendentClasses = urlGetDescendentClasses.replace("domainID", row.domainId);
                             urlGetDescendentClasses = urlGetDescendentClasses.replace("rangeID", classID);
                             urlGetDescendentClasses = urlGetDescendentClasses.replace("propertyID", row.propertyId);
-                            return '<span class = "incoming-property-domain-switch" data-id="' + row.propertyId + '">' + data + '</span><span id="incoming-property-domain-select-' + row.propertyId + '" data-id="' + row.propertyId + '"></span>&nbsp;<a data-id="' + row.propertyId + '" data-url="' + urlGetDescendentClasses + '" class="select-subclass-domain" data-toggle="tooltip" title="Select a child class"><i class="far fa-caret-square-down"></i></a>';
+                            return '<span class = "incoming-property-domain-switch" data-id="' + row.propertyId + '">' + row.domainRootNamespacePrefix + ':' + data + '</span><span id="incoming-property-domain-select-' + row.propertyId + '" data-id="' + row.propertyId + '"></span>&nbsp;<a data-id="' + row.propertyId + '" data-url="' + urlGetDescendentClasses + '" class="select-subclass-domain" data-toggle="tooltip" title="Select a child class"><i class="far fa-caret-square-down"></i></a>';
                         }
-                        else return data;
+                        else return  row.domainRootNamespacePrefix + ':' + data;
                     }
                 },
                 {
@@ -286,9 +286,9 @@
                             urlGetDescendentClasses = urlGetDescendentClasses.replace("domainID", row.domainId);
                             urlGetDescendentClasses = urlGetDescendentClasses.replace("rangeID", classID);
                             urlGetDescendentClasses = urlGetDescendentClasses.replace("propertyID", row.propertyId);
-                            return '<span class = "incoming-inherited-property-domain-switch" data-id="'+row.propertyId+'-'+row.domainId+'">'+data+'</span><span id="incoming-inherited-property-domain-select-'+row.propertyId+'-'+row.domainId+'" data-id="'+row.propertyId+'-'+row.domainId+'"></span>&nbsp;<a data-id="'+row.propertyId+'-'+row.domainId+'" data-url="'+urlGetDescendentClasses+'" class="select-subclass-domain-inherited" data-toggle="tooltip" title="Select a child class"><i class="far fa-caret-square-down"></i></a>';
+                            return '<span class = "incoming-inherited-property-domain-switch" data-id="'+row.propertyId+'-'+row.domainId+'">' + row.domainRootNamespacePrefix + ':' +data+'</span><span id="incoming-inherited-property-domain-select-'+row.propertyId+'-'+row.domainId+'" data-id="'+row.propertyId+'-'+row.domainId+'"></span>&nbsp;<a data-id="'+row.propertyId+'-'+row.domainId+'" data-url="'+urlGetDescendentClasses+'" class="select-subclass-domain-inherited" data-toggle="tooltip" title="Select a child class"><i class="far fa-caret-square-down"></i></a>';
                         }
-                        else return data;
+                        else return  row.domainRootNamespacePrefix + ':' + data;
                     }
                 },
                 {
