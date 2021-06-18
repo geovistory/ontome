@@ -10,10 +10,10 @@
 
 {% block body %}
 
-<div class="container">
-    <h2 class="profile-name">
-        {{ profile.standardLabel }}{% if profile.isRootProfile %}&nbsp;<span class="label label-default" style="font-size: 12px; vertical-align: middle">Root</span>{% endif %}
-        <span class="pull-right">
+    <div class="container">
+        <h2 class="profile-name">
+            {{ profile.standardLabel }}{% if profile.isRootProfile %}&nbsp;<span class="label label-default" style="font-size: 12px; vertical-align: middle">Root</span>{% endif %}
+            <span class="pull-right">
             {% if (not profile.isOngoing and profile.wasClosedAt is not null and profile.endDate is null) or (profile.isForcedPublication and profile.isOngoing) %}
                 <a  href="{{ path('api_classes_and_properties_by_profile_xml', {
                     'profile': profile.id
@@ -24,321 +24,321 @@
                 </a>
             {% endif %}
         </span>
-    </h2>
-    <ul class="nav nav-tabs" id="main-tabs">
-        <li class="active"><a data-toggle="tab" href="#summary">Summary</a></li>
-        <li><a data-toggle="tab" href="#identification">Identification</a></li>
-        <li><a data-toggle="tab" href="#definition">Definition</a></li>
-        <li><a data-toggle="tab" href="#versions">Versions</a></li>
-        {% if not profile.isRootProfile %}
-        <li><a data-toggle="tab" href="#namespaces">Namespaces</a></li>
-        <li><a data-toggle="tab" href="#classes">Classes</a></li>
-        <li><a data-toggle="tab" href="#properties">Properties</a></li>
-        <li><a data-toggle="tab" href="#projects">Projects</a></li>
-        <li><a data-toggle="tab" href="#graph">Graph</a></li>
-        {% endif %}
-    </ul>
+        </h2>
+        <ul class="nav nav-tabs" id="main-tabs">
+            <li class="active"><a data-toggle="tab" href="#summary">Summary</a></li>
+            <li><a data-toggle="tab" href="#identification">Identification</a></li>
+            <li><a data-toggle="tab" href="#definition">Definition</a></li>
+            <li><a data-toggle="tab" href="#versions">Versions</a></li>
+            {% if not profile.isRootProfile %}
+                <li><a data-toggle="tab" href="#namespaces">Namespaces</a></li>
+                <li><a data-toggle="tab" href="#classes">Classes</a></li>
+                <li><a data-toggle="tab" href="#properties">Properties</a></li>
+                <li><a data-toggle="tab" href="#projects">Projects</a></li>
+                <li><a data-toggle="tab" href="#graph">Graph</a></li>
+            {% endif %}
+        </ul>
 
-    <div class="tab-content">
-        <div id="summary" class="tab-pane fade in active">
-            <h3>{{ profile.standardLabel }}</h3>
-            <div class="container">
-                {% if not profile.isPublishable and not profile.isRootProfile %}
+        <div class="tab-content">
+            <div id="summary" class="tab-pane fade in active">
+                <h3>{{ profile.standardLabel }}</h3>
+                <div class="container">
+                    {% if not profile.isPublishable and not profile.isRootProfile %}
+                        <div class="row">
+                            <div class="col-lg-2">
+                                <p class="text-danger"><i class="fas fa-exclamation-triangle"></i> Warning:</p>
+                            </div>
+                            <div class="col-lg-10">
+                                <p class="text-danger">This profile comprises classes and/or properties of a namespace whose version is not the selected one. They are displayed in red in your profile. Please make the necessary corrections before proceeding.</p>
+                            </div>
+                        </div>
+                    {% endif %}
                     <div class="row">
                         <div class="col-lg-2">
-                            <p class="text-danger"><i class="fas fa-exclamation-triangle"></i> Warning:</p>
+                            <p>Description:</p>
                         </div>
                         <div class="col-lg-10">
-                            <p class="text-danger">This profile comprises classes and/or properties of a namespace whose version is not the selected one. They are displayed in red in your profile. Please make the necessary corrections before proceeding.</p>
-                        </div>
-                    </div>
-                {% endif %}
-                <div class="row">
-                    <div class="col-lg-2">
-                        <p>Description:</p>
-                    </div>
-                    <div class="col-lg-10">
-                        {% set description, break = null, false %}
-                        {% for textProperty in profile.textProperties if textProperty.systemType.id == 16 %}
-                            {% if not break %}
-                                {% if textProperty.languageIsoCode == 'en' %}
-                                    {% set break = true %}
-                                    {% set description = textProperty.textProperty %}
-                                {% else %}
-                                    {% if description == null %}
+                            {% set description, break = null, false %}
+                            {% for textProperty in profile.textProperties if textProperty.systemType.id == 16 %}
+                                {% if not break %}
+                                    {% if textProperty.languageIsoCode == 'en' %}
+                                        {% set break = true %}
                                         {% set description = textProperty.textProperty %}
+                                    {% else %}
+                                        {% if description == null %}
+                                            {% set description = textProperty.textProperty %}
+                                        {% endif %}
                                     {% endif %}
                                 {% endif %}
-                            {% endif %}
-                        {% endfor %}
+                            {% endfor %}
 
-                        {% if description is not null %}
-                            {{ description|raw }}
-                        {% else %}
-                            <p><i>No description yet.</i></p>
-                        {% endif %}
-                    </div>
-                </div>
-                {% if not profile.isRootProfile %}
-                    <div class="row">
-                        <div class="col-lg-2">
-                            <p>Status:</p>
-                        </div>
-                        <div class="col-lg-10">
-                            {% if profile.isOngoing %}
-                                Ongoing
-                            {% elseif profile.wasClosedAt is not null and profile.endDate is null %}
-                                Published
-                            {% elseif profile.endDate is not null %}
-                                Deprecated
+                            {% if description is not null %}
+                                {{ description|raw }}
+                            {% else %}
+                                <p><i>No description yet.</i></p>
                             {% endif %}
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-lg-2">
-                            <p>Version:</p>
+                    {% if not profile.isRootProfile %}
+                        <div class="row">
+                            <div class="col-lg-2">
+                                <p>Status:</p>
+                            </div>
+                            <div class="col-lg-10">
+                                {% if profile.isOngoing %}
+                                    Ongoing
+                                {% elseif profile.wasClosedAt is not null and profile.endDate is null %}
+                                    Published
+                                {% elseif profile.endDate is not null %}
+                                    Deprecated
+                                {% endif %}
+                            </div>
                         </div>
-                        <div class="col-lg-10">
-                            {{ profile.version }}
+                        <div class="row">
+                            <div class="col-lg-2">
+                                <p>Version:</p>
+                            </div>
+                            <div class="col-lg-10">
+                                {{ profile.version }}
+                            </div>
                         </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div id="definition" class="tab-pane fade">
+                <div class="pull-right add-div">
+                    <a href="{{ path('text_property_new', {'type': 'definition', 'object': 'profile', 'objectId': profile.id })}}"
+                       class="btn btn-primary pull-right">
+                        Add <span class="fa fa-plus-circle"></span>
+                    </a>
+                </div>
+                <h3>Description</h3>
+                <table class="table table-striped" id="descriptions-table">
+                    <thead>
+                    <tr>
+                        <th>Show</th>
+                        <th>Description</th>
+                        <th>Language</th>
+                        <th>Edit</th>
+                        <th>Comments</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for textProperty in profile.textProperties if textProperty.systemType.id == 16 %}
+                        <tr>
+                            <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
+                            <td class="truncated-text">
+                                <span>{{ textProperty.textProperty|striptags|raw }}</span>
+                                {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
+                            </td>
+                            <td>{{ textProperty.languageIsoCode}}</td>
+                            <td>
+                                <a href="{{ path('text_property_edit', {
+                                    'id': textProperty.id
+                                }) }}"
+                                   class="btn btn-xs btn-success">
+                                    <span class="fa fa-edit"></span>
+                                </a>
+                            </td>
+                            <td>
+                                <a class="btn" href="{{ path('text_property_edit', {
+                                    'id': textProperty.id
+                                }) }}#comments">
+                                    <span class="badge {% if textProperty.comments|length > 0  %}progress-bar-danger {% endif %}">{{ textProperty.comments|length }}</span>
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                <div class="pull-right add-div">
+                    <a href="{{ path('text_property_new', {'type': 'additional-note', 'object': 'profile', 'objectId': profile.id })}}"
+                       class="btn btn-primary pull-right">
+                        Add <span class="fa fa-plus-circle"></span>
+                    </a>
+                </div>
+                <h3>Additional notes</h3>
+                <table class="table table-striped" id="additional-notes-table">
+                    <thead>
+                    <tr>
+                        <th>Show</th>
+                        <th>Notes</th>
+                        <th>Language</th>
+                        <th>Edit</th>
+                        <th>Comment</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for textProperty in profile.textProperties if textProperty.systemType.id == 12 %}
+                        <tr>
+                            <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
+                            <td class="truncated-text">
+                                <span>{{ textProperty.textProperty|striptags|raw }}</span>
+                                {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
+                            </td>
+                            <td>{{ textProperty.languageIsoCode}}</td>
+                            <td>
+                                <a href="{{ path('text_property_edit', {
+                                    'id': textProperty.id
+                                }) }}"
+                                   class="btn btn-xs btn-success">
+                                    <span class="fa fa-edit"></span>
+                                </a>
+                            </td>
+                            <td>
+                                <a class="btn" href="{{ path('text_property_edit', {
+                                    'id': textProperty.id
+                                }) }}#comments">
+                                    <span class="badge {% if textProperty.comments|length > 0  %}progress-bar-danger {% endif %}">{{ textProperty.comments|length }}</span>
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div id="identification" class="tab-pane fade">
+                <h3>Identification</h3>
+                {% if not profile.isRootProfile and not profile.isPublishable %}
+                    <div class="alert alert-danger">
+                        <p><i class="fas fa-exclamation-triangle"></i>&nbsp;This profile comprises classes and/or properties of a namespace whose version is not the selected one. They are displayed in red in your profile. Please make the necessary corrections before proceeding.</p>
                     </div>
                 {% endif %}
-            </div>
-        </div>
-        <div id="definition" class="tab-pane fade">
-            <div class="pull-right add-div">
-                <a href="{{ path('text_property_new', {'type': 'definition', 'object': 'profile', 'objectId': profile.id })}}"
-                   class="btn btn-primary pull-right">
-                    Add <span class="fa fa-plus-circle"></span>
-                </a>
-            </div>
-            <h3>Description</h3>
-            <table class="table table-striped" id="descriptions-table">
-                <thead>
-                <tr>
-                    <th>Show</th>
-                    <th>Description</th>
-                    <th>Language</th>
-                    <th>Edit</th>
-                    <th>Comments</th>
-                </tr>
-                </thead>
-                <tbody>
-                {% for textProperty in profile.textProperties if textProperty.systemType.id == 16 %}
-                    <tr>
-                        <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
-                        <td class="truncated-text">
-                            <span>{{ textProperty.textProperty|striptags|raw }}</span>
-                            {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
-                        </td>
-                        <td>{{ textProperty.languageIsoCode}}</td>
-                        <td>
-                            <a href="{{ path('text_property_edit', {
-                                'id': textProperty.id
-                            }) }}"
-                               class="btn btn-xs btn-success">
-                                <span class="fa fa-edit"></span>
-                            </a>
-                        </td>
-                        <td>
-                            <a class="btn" href="{{ path('text_property_edit', {
-                                'id': textProperty.id
-                            }) }}#comments">
-                                <span class="badge {% if textProperty.comments|length > 0  %}progress-bar-danger {% endif %}">{{ textProperty.comments|length }}</span>
-                            </a>
-                        </td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-            <div class="pull-right add-div">
-                <a href="{{ path('text_property_new', {'type': 'additional-note', 'object': 'profile', 'objectId': profile.id })}}"
-                   class="btn btn-primary pull-right">
-                    Add <span class="fa fa-plus-circle"></span>
-                </a>
-            </div>
-            <h3>Additional notes</h3>
-            <table class="table table-striped" id="additional-notes-table">
-                <thead>
-                <tr>
-                    <th>Show</th>
-                    <th>Notes</th>
-                    <th>Language</th>
-                    <th>Edit</th>
-                    <th>Comment</th>
-                </tr>
-                </thead>
-                <tbody>
-                {% for textProperty in profile.textProperties if textProperty.systemType.id == 12 %}
-                    <tr>
-                        <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
-                        <td class="truncated-text">
-                            <span>{{ textProperty.textProperty|striptags|raw }}</span>
-                            {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
-                        </td>
-                        <td>{{ textProperty.languageIsoCode}}</td>
-                        <td>
-                            <a href="{{ path('text_property_edit', {
-                                'id': textProperty.id
-                            }) }}"
-                               class="btn btn-xs btn-success">
-                                <span class="fa fa-edit"></span>
-                            </a>
-                        </td>
-                        <td>
-                            <a class="btn" href="{{ path('text_property_edit', {
-                                'id': textProperty.id
-                            }) }}#comments">
-                                <span class="badge {% if textProperty.comments|length > 0  %}progress-bar-danger {% endif %}">{{ textProperty.comments|length }}</span>
-                            </a>
-                        </td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        <div id="identification" class="tab-pane fade">
-            <h3>Identification</h3>
-            {% if not profile.isRootProfile and not profile.isPublishable %}
-                <div class="alert alert-danger">
-                    <p><i class="fas fa-exclamation-triangle"></i>&nbsp;This profile comprises classes and/or properties of a namespace whose version is not the selected one. They are displayed in red in your profile. Please make the necessary corrections before proceeding.</p>
-                </div>
-            {% endif %}
-            <div class="object-identification-edit-form">
-                {% if (profile.isRootProfile or profile.isOngoing) and is_granted('full_edit', profile.projectOfBelonging) %}
-                    {{ form_start(profileIdentificationForm) }}
-                    {{ form_errors(profileIdentificationForm) }}
-                    {{ form_row(profileIdentificationForm.projectOfBelonging) }}
-                    {{ form_row(profileIdentificationForm.isForcedPublication) }}
-                    {% if profile.isRootProfile or profile.isPublishable %}
-                    <p><button type="submit" class="btn btn-primary" formnovalidate>Save <span class="far fa-save"></span></button>
-                    <button type="button" class="btn btn-default" onclick="window.location.reload();">Cancel&nbsp;<i class="fas fa-undo-alt"></i></button></p>
-                    {% endif %}
-                    {{ form_end(profileIdentificationForm) }}
-                {% endif %}
-                {% if not is_granted('full_edit', profile.projectOfBelonging) %}
-                    <p>Project of belonging: <a href="{{ path('project_show', {'id': profile.projectOfBelonging.id}) }}">{{ profile.projectOfBelonging.standardLabel }}</a></p>
-                {% endif %}
-                {% if profile.isOngoing %}
-                <div class="alert alert-info">
-                    <p><i class="fas fa-info-circle"></i>&nbsp;This profile is ongoing</p>
-                </div>
-                    {% if is_granted('full_edit', profile.projectOfBelonging) %}
-                    <p>
-                        {% if profile.isPublishable %}
-                        <a class="btn btn-success" role="button" id="publish-btn">
-                            Publish <i class="fas fa-check"></i>
-                        </a>
-                        {% else %}
-                        <button type="button" class="btn btn-success" disabled="disabled">Publish <i class="fas fa-check"></i></button>
+                <div class="object-identification-edit-form">
+                    {% if (profile.isRootProfile or profile.isOngoing) and is_granted('full_edit', profile.projectOfBelonging) %}
+                        {{ form_start(profileIdentificationForm) }}
+                        {{ form_errors(profileIdentificationForm) }}
+                        {{ form_row(profileIdentificationForm.projectOfBelonging) }}
+                        {{ form_row(profileIdentificationForm.isForcedPublication) }}
+                        {% if profile.isRootProfile or profile.isPublishable %}
+                            <p><button type="submit" class="btn btn-primary" formnovalidate>Save <span class="far fa-save"></span></button>
+                                <button type="button" class="btn btn-default" onclick="window.location.reload();">Cancel&nbsp;<i class="fas fa-undo-alt"></i></button></p>
                         {% endif %}
-                    </p>
+                        {{ form_end(profileIdentificationForm) }}
                     {% endif %}
-                {% elseif profile.wasClosedAt is not null and profile.endDate is null %}
-                    <p>Profile published and available since: {{ profile.startDate is empty ? '' : profile.startDate|date('Y-m-d') }}</p>
-                    {% if is_granted('full_edit', profile.projectOfBelonging) %}
-                        <p>
-                            <a class="btn btn-danger" role="button" id="deprecate-btn">
-                                Deprecate <i class="fas fa-ban"></i>
-                            </a>
-                        </p>
+                    {% if not is_granted('full_edit', profile.projectOfBelonging) %}
+                        <p>Project of belonging: <a href="{{ path('project_show', {'id': profile.projectOfBelonging.id}) }}">{{ profile.projectOfBelonging.standardLabel }}</a></p>
                     {% endif %}
-                {% elseif profile.endDate is not null %}
-                    <p>This profile was published on {{ profile.startDate is empty ? '' : profile.startDate|date('Y-m-d') }} and is <strong>deprecated</strong> and to no longer use since: {{ profile.endDate is empty ? '' : profile.endDate|date('Y-m-d') }}</p>
-                {% endif %}
-            </div>
-            <div class="pull-right add-div">
-                <a href="{{ path('label_new', {'object': 'profile', 'objectId': profile.id })}}"
-                   class="btn btn-primary pull-right">
-                    Add <span class="fa fa-plus-circle"></span>
-                </a>
-            </div>
-            <h3>Labels</h3>
-            <table class="table table-striped" id="labels-table">
-                <thead>
-                <tr>
-                    <th>Label</th>
-                    <th>Language</th>
-                    <th>Last updated</th>
-                    <th>Edit</th>
-                    <th>Comments</th>
-                </tr>
-                </thead>
-                <tbody>
-                {% for label in profile.labels %}
-                    <tr>
-                        <td>
-                            <a href="{{ path('label_show', {
-                                'id': label.id
-                            }) }}">{{ label.label }}</a> {% if label.isStandardLabelForLanguage %}*{% endif %}
-                        </td>
-                        <td>{{ label.languageIsoCode}}</td>
-                        <td>{{ label.modificationTime|date('Y-m-d') }}</td>
-                        <td>
-                            <a href="{{ path('label_edit', {
-                                'id': label.id
-                            }) }}"
-                               class="btn btn-xs btn-success">
-                                <span class="fa fa-edit"></span>
-                            </a>
-                        </td>
-                        <td>
-                            <a class="btn" href="{{ path('label_edit', {
-                                'id': label.id
-                            }) }}#comments">
-                                <span class="badge {% if label.comments|length > 0  %}progress-bar-danger {% endif %}">{{ label.comments|length }}</span>
-                            </a>
-                        </td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-            <p>* : Standard label for this language</p>
-            <div class="pull-right add-div">
-                <a href="{{ path('text_property_new', {'type': 'definition', 'object': 'profile', 'objectId': profile.id })}}"
-                   class="btn btn-primary pull-right">
-                    Add <span class="fa fa-plus-circle"></span>
-                </a>
-            </div>
-        </div>
-        {% if not profile.isRootProfile %}
-        <div id="classes" class="tab-pane fade">
-            {% if profile.isOngoing %}
-                <div class="row">
-                    <div class="col-md-6">
-                        <h3>Associated classes</h3>
-                        <table class="table table-striped" id="classes-table" style="width:100%">
-                            <thead>
-                            <tr>
-                                <th></th>
-                                <th>ID</th>
-                                <th>Identifier</th>
-                                <th>Class</th>
-                                <th>Association type</th>
-                                <th>Namespace</th>
-                                <th>Pick properties</th>
-                            </tr>
-                            </thead>
-                        </table>
-                    </div>
-                    <div class="col-md-6">
-                        <h3>Selectable classes</h3>
-                        <table class="table table-striped" id="selectable-classes-table" style="width:100%">
-                            <thead>
-                            <tr>
-                                <th></th>
-                                <th>Identifier</th>
-                                <th>Class</th>
-                                <th>Namespace</th>
-                            </tr>
-                            </thead>
-                        </table>
-                    </div>
+                    {% if profile.isOngoing %}
+                        <div class="alert alert-info">
+                            <p><i class="fas fa-info-circle"></i>&nbsp;This profile is ongoing</p>
+                        </div>
+                        {% if is_granted('full_edit', profile.projectOfBelonging) %}
+                            <p>
+                                {% if profile.isPublishable %}
+                                    <a class="btn btn-success" role="button" id="publish-btn">
+                                        Publish <i class="fas fa-check"></i>
+                                    </a>
+                                {% else %}
+                                    <button type="button" class="btn btn-success" disabled="disabled">Publish <i class="fas fa-check"></i></button>
+                                {% endif %}
+                            </p>
+                        {% endif %}
+                    {% elseif profile.wasClosedAt is not null and profile.endDate is null %}
+                        <p>Profile published and available since: {{ profile.startDate is empty ? '' : profile.startDate|date('Y-m-d') }}</p>
+                        {% if is_granted('full_edit', profile.projectOfBelonging) %}
+                            <p>
+                                <a class="btn btn-danger" role="button" id="deprecate-btn">
+                                    Deprecate <i class="fas fa-ban"></i>
+                                </a>
+                            </p>
+                        {% endif %}
+                    {% elseif profile.endDate is not null %}
+                        <p>This profile was published on {{ profile.startDate is empty ? '' : profile.startDate|date('Y-m-d') }} and is <strong>deprecated</strong> and to no longer use since: {{ profile.endDate is empty ? '' : profile.endDate|date('Y-m-d') }}</p>
+                    {% endif %}
                 </div>
-            {% else %}
-                <h3>
-                    Associated classes
-                    <span class="pull-right">
+                <div class="pull-right add-div">
+                    <a href="{{ path('label_new', {'object': 'profile', 'objectId': profile.id })}}"
+                       class="btn btn-primary pull-right">
+                        Add <span class="fa fa-plus-circle"></span>
+                    </a>
+                </div>
+                <h3>Labels</h3>
+                <table class="table table-striped" id="labels-table">
+                    <thead>
+                    <tr>
+                        <th>Label</th>
+                        <th>Language</th>
+                        <th>Last updated</th>
+                        <th>Edit</th>
+                        <th>Comments</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for label in profile.labels %}
+                        <tr>
+                            <td>
+                                <a href="{{ path('label_show', {
+                                    'id': label.id
+                                }) }}">{{ label.label }}</a> {% if label.isStandardLabelForLanguage %}*{% endif %}
+                            </td>
+                            <td>{{ label.languageIsoCode}}</td>
+                            <td>{{ label.modificationTime|date('Y-m-d') }}</td>
+                            <td>
+                                <a href="{{ path('label_edit', {
+                                    'id': label.id
+                                }) }}"
+                                   class="btn btn-xs btn-success">
+                                    <span class="fa fa-edit"></span>
+                                </a>
+                            </td>
+                            <td>
+                                <a class="btn" href="{{ path('label_edit', {
+                                    'id': label.id
+                                }) }}#comments">
+                                    <span class="badge {% if label.comments|length > 0  %}progress-bar-danger {% endif %}">{{ label.comments|length }}</span>
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                <p>* : Standard label for this language</p>
+                <div class="pull-right add-div">
+                    <a href="{{ path('text_property_new', {'type': 'definition', 'object': 'profile', 'objectId': profile.id })}}"
+                       class="btn btn-primary pull-right">
+                        Add <span class="fa fa-plus-circle"></span>
+                    </a>
+                </div>
+            </div>
+            {% if not profile.isRootProfile %}
+                <div id="classes" class="tab-pane fade">
+                    {% if profile.isOngoing %}
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h3>Associated classes</h3>
+                                <table class="table table-striped" id="classes-table" style="width:100%">
+                                    <thead>
+                                    <tr>
+                                        <th></th>
+                                        <th>ID</th>
+                                        <th>Identifier</th>
+                                        <th>Class</th>
+                                        <th>Association type</th>
+                                        <th>Namespace</th>
+                                        <th>Pick properties</th>
+                                    </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                            <div class="col-md-6">
+                                <h3>Selectable classes</h3>
+                                <table class="table table-striped" id="selectable-classes-table" style="width:100%">
+                                    <thead>
+                                    <tr>
+                                        <th></th>
+                                        <th>Identifier</th>
+                                        <th>Class</th>
+                                        <th>Namespace</th>
+                                    </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                        </div>
+                    {% else %}
+                        <h3>
+                            Associated classes
+                            <span class="pull-right">
                         {% if (not profile.isOngoing and profile.wasClosedAt is not null and profile.endDate is null) or (profile.isForcedPublication and profile.isOngoing ) %}
                             <a  href="{{ path('api_classes_profile_json', {
                                 'lang': 'en',
@@ -349,45 +349,43 @@
                             </a>
                         {% endif %}
                     </span>
-                </h3>
-                <table class="table table-striped" id="classes-table">
-                    <thead>
-                    <tr>
-                        <th>Class</th>
-                        <th>Association type</th>
-                        <th>Namespace</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% for class in classes %}
-                        {# classes n'est pas un ensemble d'entités ORM, c'est un résultat d'une requête manuelle. #}
-                        <tr>
-                            <td>
-                                <a href="{{ path('class_show_with_version', {
-                                    'id': class.id,
-                                    'namespaceFromUrlId': class.namespaceForVersion
-                                }) }}">
-                                    {% if class.identifierInNamespace != class.standardLabel and class.standardLabel is not null %}
-                                        {{ class.standardLabel }} – {{ class.identifierInNamespace }}
-                                    {% else %}
-                                        {{ class.identifierInNamespace }}
-                                    {% endif %}
-                                </a>
-                            </td>
-                            <td>{{ class.associationType }}</td>
-                            <td>
-                                {{ class.namespace }}
-                            </td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-            {% endif %}
-        </div>
-        <div id="properties" class="tab-pane fade">
-            <h3>
-                Associated properties
-                <span class="pull-right">
+                        </h3>
+                        <table class="table table-striped" id="classes-table">
+                            <thead>
+                            <tr>
+                                <th>Identifier</th>
+                                <th>Class</th>
+                                <th>Association type</th>
+                                <th>Namespace</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for class in classes %}
+                                {# classes n'est pas un ensemble d'entités ORM, c'est un résultat d'une requête manuelle. #}
+                                <tr>
+                                    <td>{{ class.identifierInNamespace }}</td>
+                                    <td>
+                                        <a href="{{ path('class_show_with_version', {
+                                            'id': class.id,
+                                            'namespaceFromUrlId': class.namespaceForVersion
+                                        }) }}">
+                                            {{ class.standardLabel }}
+                                        </a>
+                                    </td>
+                                    <td>{{ class.associationType }}</td>
+                                    <td>
+                                        {{ class.namespace }}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    {% endif %}
+                </div>
+                <div id="properties" class="tab-pane fade">
+                    <h3>
+                        Associated properties
+                        <span class="pull-right">
                     {% if (not profile.isOngoing and profile.wasClosedAt is not null and profile.endDate is null)
                         or (profile.isForcedPublication and profile.isOngoing ) %}
                         <a  href="{{ path('api_properties_profile_json', {
@@ -399,438 +397,397 @@
                         </a>
                     {% endif %}
                 </span>
-            </h3>
-            {% set idNamespacesAssociatedInProfile = [] %}
-            {% for namespace in profile.namespaces %}
-                {% set idNamespacesAssociatedInProfile = idNamespacesAssociatedInProfile|merge([namespace.id]) %}
-            {% endfor %}
-            <table class="table table-striped" id="properties-table">
-                <thead>
-                <tr>
-                    <th class="text-right">Domain</th>
-                    <th></th>
-                    <th>Identifier</th>
-                    <th class="text-center">Property</th>
-                    <th></th>
-                    <th>Range</th>
-                    <th>Namespace</th>
-                    <th>Status</th>
-                </tr>
-                </thead>
-                <tbody>
-                {% for profileAssociation in profileAssociations
-                    if profileAssociation.property is not null
-                    and profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion) %}
-                    <tr>
-                        <td class="text-right small">
-                            {% if profileAssociation.domain is not null %}
-                                {# Propriété héritée #}
-                                <a href="{{ path('class_show_with_version', {
-                                    'id': profileAssociation.domain.id,
-                                    'namespaceFromUrlId': profileAssociation.domainNamespace.id
-                                }) }}">
-                                    {{ profileAssociation.domain.classVersionForDisplay(profileAssociation.domainNamespace) }}
-                                </a>
-                            {% elseif profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).domain is not null  %}
-                                {# Propriété non héritée #}
-                                <a href="{{ path('class_show_with_version', {
-                                    'id': profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).domain.id,
-                                    'namespaceFromUrlId': profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).domainNamespace.id
-                                }) }}">
-                                    {{ profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).domain.classVersionForDisplay(profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).domainNamespace) }}
-                                </a>
-                            {% endif %}
-                        </td>
-                        <td class="text-nowrap small" style="padding-left: 30px;">
-                            {% if profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).domainMinQuantifier is not null
-                                and  profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).domainMaxQuantifier is not null %}
-                                (
-                                {% if profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).domainMinQuantifier != -1 %}
-                                    {{ profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).domainMinQuantifier }}
-                                {% else %}
-                                    n
-                                {% endif %}
-                                ,
-                                {% if profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).domainMaxQuantifier != -1 %}
-                                    {{ profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).domainMaxQuantifier }}
-                                {% else %}
-                                    n
-                                {% endif %})
-                            {% endif %}
-                        </td>
-                        <td>
-                            {{ profileAssociation.property.identifierInNamespace }}
-                        </td>
-                        <td class="text-center">
-                            {% if profileAssociation.entityNamespaceForVersion.id in idNamespacesAssociatedInProfile %}
-                            <a href="{{ path('property_show_with_version', {
-                                'id': profileAssociation.property.id,
-                                'namespaceFromUrlId': profileAssociation.entityNamespaceForVersion.id
-                            }) }}">
-                                {{ profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).standardLabel }}
-                            </a>
-                            {% else %}
-                            <a href="{{ path('property_show_with_version', {
-                                'id': profileAssociation.property.id,
-                                'namespaceFromUrlId': profileAssociation.entityNamespaceForVersion.id
-                            }) }}" class="text-danger">
-                                {{ profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion) }}
-                            </a> <a data-toggle="tooltip" class="text-danger" data-placement="right" title="Properties from another version of this namespace, previously selected in your profile, are not available in the selected version. They are displayed in red in your profile. Please make the necessary corrections before proceeding."><span class="fas fa-exclamation-triangle"></span></a>
-                            {% endif %}
-                        </td>
-                        <td class="text-nowrap small" style="padding-right: 30px;">
-                            {% if profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).rangeMinQuantifier is not null
-                                and  profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).rangeMaxQuantifier is not null %}
-                                (
-                                {% if profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).rangeMinQuantifier != -1 %}
-                                    {{ profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).rangeMinQuantifier }}
-                                {% else %}
-                                    n
-                                {% endif %}
-                                ,
-                                {% if profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).rangeMaxQuantifier != -1 %}
-                                    {{ profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).rangeMaxQuantifier }}
-                                {% else %}
-                                    n
-                                {% endif %})
-                            {% endif %}
-                        </td>
-                        <td class="small">
-                            {% if profileAssociation.range is not null %}
-                                {# propriété héritée #}
-                                <a href="{{ path('class_show_with_version', {
-                                    'id': profileAssociation.range.id,
-                                    'namespaceFromUrlId': profileAssociation.rangeNamespace.id
-                                }) }}">
-                                    {{ profileAssociation.range.classVersionForDisplay(profileAssociation.rangeNamespace) }}
-                                </a>
-                            {% elseif profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).range is not null %}
-                                {# propriété non héritée #}
-                                <a href="{{ path('class_show_with_version', {
-                                    'id': profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).range.id,
-                                    'namespaceFromUrlId': profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).rangeNamespace.id
-                                }) }}">
-                                    {{ profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).range.classVersionForDisplay(profileAssociation.rangeNamespace) }}
-                                </a>
-                            {% endif %}
-                        </td>
-                        <td>
-                            {{ profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).namespaceForVersion }}
-                        </td>
-                        <td>
-                            {{ profileAssociation.systemType }}
-                        </td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        <div id="projects" class="tab-pane fade">
-            <h3>Projects using the current profile</h3>
-            <table class="table table-striped" id="projects-table">
-                <thead>
-                <tr>
-                    <th>Project identifier</th>
-                    <th>Last updated</th>
-                </tr>
-                </thead>
-                <tbody>
-                {% for project in profile.projects %}
-                <tr>
-                    <td>
-                        <a href="{{ path('project_show', {
-                                'id': project.id
-                            }) }}">
-                            {{ project.standardLabel }}
-                        </a>
-                    </td>
-                    <td>{{ project.modificationTime|date('Y-m-d') }}</td>
-                </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        {% endif %}
-        <div id="versions" class="tab-pane fade">
-            <h3>Versions</h3>
-            {% if profile.isRootProfile %}
-                <p>
-                    {{ profile.standardLabel }} is a <strong>root profile</strong>.
-                </p>
-                {% for ongoingProfile in profile.childProfiles if ongoingProfile.isOngoing %}
-                    <p> Ongoing version:
-                        <a href="{{ path('profile_edit', {'id': ongoingProfile.id, '_fragment': 'versions'}) }}">
-                            {{ ongoingProfile }}
-                        </a>
-                    </p>
-                {% endfor %}
-            {% else %}
-                {% if not profile.isOngoing %}
+                    </h3>
+                    {% set idNamespacesAssociatedInProfile = [] %}
+                    {% for namespace in profile.namespaces %}
+                        {% set idNamespacesAssociatedInProfile = idNamespacesAssociatedInProfile|merge([namespace.id]) %}
+                    {% endfor %}
+                    <table class="table table-striped" id="properties-table">
+                        <thead>
+                        <tr>
+                            <th class="text-right">Domain</th>
+                            <th></th>
+                            <th>Identifier</th>
+                            <th class="text-center">Property</th>
+                            <th></th>
+                            <th>Range</th>
+                            <th>Namespace</th>
+                            <th>Status</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for profileAssociation in profileAssociations
+                            if profileAssociation.property is not null
+                            and profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion) %}
+                            <tr>
+                                <td class="text-right small">
+                                    {% if profileAssociation.domain is not null %}
+                                        {# Propriété héritée #}
+                                        <a href="{{ path('class_show_with_version', {
+                                            'id': profileAssociation.domain.id,
+                                            'namespaceFromUrlId': profileAssociation.domainNamespace.id
+                                        }) }}">
+                                            {{ profileAssociation.domain.classVersionForDisplay(profileAssociation.domainNamespace) }}
+                                        </a>
+                                    {% elseif profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).domain is not null  %}
+                                        {# Propriété non héritée #}
+                                        <a href="{{ path('class_show_with_version', {
+                                            'id': profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).domain.id,
+                                            'namespaceFromUrlId': profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).domainNamespace.id
+                                        }) }}">
+                                            {{ profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).domain.classVersionForDisplay(profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).domainNamespace) }}
+                                        </a>
+                                    {% endif %}
+                                </td>
+                                <td class="text-nowrap small" style="padding-left: 30px;">
+                                    {% if profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).domainMinQuantifier is not null
+                                        and  profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).domainMaxQuantifier is not null %}
+                                        (
+                                        {% if profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).domainMinQuantifier != -1 %}
+                                            {{ profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).domainMinQuantifier }}
+                                        {% else %}
+                                            n
+                                        {% endif %}
+                                        ,
+                                        {% if profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).domainMaxQuantifier != -1 %}
+                                            {{ profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).domainMaxQuantifier }}
+                                        {% else %}
+                                            n
+                                        {% endif %})
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {{ profileAssociation.property.identifierInNamespace }}
+                                </td>
+                                <td class="text-center">
+                                    {% if profileAssociation.entityNamespaceForVersion.id in idNamespacesAssociatedInProfile %}
+                                        <a href="{{ path('property_show_with_version', {
+                                            'id': profileAssociation.property.id,
+                                            'namespaceFromUrlId': profileAssociation.entityNamespaceForVersion.id
+                                        }) }}">
+                                            {{ profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).standardLabel }}
+                                        </a>
+                                    {% else %}
+                                        <a href="{{ path('property_show_with_version', {
+                                            'id': profileAssociation.property.id,
+                                            'namespaceFromUrlId': profileAssociation.entityNamespaceForVersion.id
+                                        }) }}" class="text-danger">
+                                            {{ profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion) }}
+                                        </a> <a data-toggle="tooltip" class="text-danger" data-placement="right" title="Properties from another version of this namespace, previously selected in your profile, are not available in the selected version. They are displayed in red in your profile. Please make the necessary corrections before proceeding."><span class="fas fa-exclamation-triangle"></span></a>
+                                    {% endif %}
+                                </td>
+                                <td class="text-nowrap small" style="padding-right: 30px;">
+                                    {% if profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).rangeMinQuantifier is not null
+                                        and  profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).rangeMaxQuantifier is not null %}
+                                        (
+                                        {% if profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).rangeMinQuantifier != -1 %}
+                                            {{ profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).rangeMinQuantifier }}
+                                        {% else %}
+                                            n
+                                        {% endif %}
+                                        ,
+                                        {% if profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).rangeMaxQuantifier != -1 %}
+                                            {{ profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).rangeMaxQuantifier }}
+                                        {% else %}
+                                            n
+                                        {% endif %})
+                                    {% endif %}
+                                </td>
+                                <td class="small">
+                                    {% if profileAssociation.range is not null %}
+                                        {# propriété héritée #}
+                                        <a href="{{ path('class_show_with_version', {
+                                            'id': profileAssociation.range.id,
+                                            'namespaceFromUrlId': profileAssociation.rangeNamespace.id
+                                        }) }}">
+                                            {{ profileAssociation.range.classVersionForDisplay(profileAssociation.rangeNamespace) }}
+                                        </a>
+                                    {% elseif profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).range is not null %}
+                                        {# propriété non héritée #}
+                                        <a href="{{ path('class_show_with_version', {
+                                            'id': profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).range.id,
+                                            'namespaceFromUrlId': profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).rangeNamespace.id
+                                        }) }}">
+                                            {{ profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).range.classVersionForDisplay(profileAssociation.rangeNamespace) }}
+                                        </a>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {{ profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).namespaceForVersion }}
+                                </td>
+                                <td>
+                                    {{ profileAssociation.systemType }}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div id="projects" class="tab-pane fade">
+                    <h3>Projects using the current profile</h3>
+                    <table class="table table-striped" id="projects-table">
+                        <thead>
+                        <tr>
+                            <th>Project identifier</th>
+                            <th>Last updated</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for project in profile.projects %}
+                            <tr>
+                                <td>
+                                    <a href="{{ path('project_show', {
+                                        'id': project.id
+                                    }) }}">
+                                        {{ project.standardLabel }}
+                                    </a>
+                                </td>
+                                <td>{{ project.modificationTime|date('Y-m-d') }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+            <div id="versions" class="tab-pane fade">
+                <h3>Versions</h3>
+                {% if profile.isRootProfile %}
                     <p>
-                        {{ profile.standardLabel }} is a <strong>
-                            {% if profile.wasClosedAt is not null and profile.endDate is null %}
-                                published
-                            {% elseif profile.endDate is not null %}
-                                deprecated
-                            {% endif %}
-                            profile</strong>.
+                        {{ profile.standardLabel }} is a <strong>root profile</strong>.
                     </p>
-                {% endif %}
-                <p>
-                    Root profile:
-                    <a href="{{ path('profile_edit', {'id': profile.rootProfile.id, '_fragment': 'versions'}) }}">
-                        {{ profile.rootProfile }} [Root]
-                    </a>
-                </p>
-                {% if not profile.isOngoing %}
-                    {% for profile in profile.rootProfile.childProfiles if profile.isOngoing %}
-                        <p>
-                            Ongoing version:
-                            <a href="{{ path('profile_edit', {'id': profile.id, '_fragment': 'versions'}) }}">
-                                {{ profile }}
+                    {% for ongoingProfile in profile.childProfiles if ongoingProfile.isOngoing %}
+                        <p> Ongoing version:
+                            <a href="{{ path('profile_edit', {'id': ongoingProfile.id, '_fragment': 'versions'}) }}">
+                                {{ ongoingProfile }}
                             </a>
                         </p>
                     {% endfor %}
-                {% endif %}
-            {% endif %}
-            <h3>Published versions</h3>
-            <table class="table table-striped" id="profile-versions-table">
-                <thead>
-                <tr>
-                    <th>Profile</th>
-                    <th>Version</th>
-                    <th>Status</th>
-                    <th>Publication date</th>
-                    <th>Current profile</th>
-                </tr>
-                </thead>
-                <tbody>
-                {% if profile.isRootProfile %}
-                    {% for publishedProfile in profile.childProfiles if not publishedProfile.isOngoing %}
-                        <tr>
-                            <td>
-                                <a href="{{ path('profile_show', {
-                                    'id': publishedProfile.id,
-                                    '_fragment': 'versions'
-                                }) }}">
-                                    {{ publishedProfile.standardLabel }}
-                                </a>
-                            </td>
-                            <td>{{ publishedProfile.version }}</td>
-                            <td>
-                                {% if publishedProfile.wasClosedAt is not null and publishedProfile.endDate is null %}
-                                    Published
-                                {% elseif publishedProfile.endDate is not null %}
-                                    Deprecated
-                                {% endif %}
-                            </td>
-                            <td>{{ publishedProfile.startDate|date('Y-m-d') }}</td>
-                            <td>todo</td>
-                        </tr>
-                    {% endfor %}
                 {% else %}
-                    {% for publishedProfile in profile.rootProfile.childProfiles if publishedProfile.id != profile.id and not publishedProfile.isOngoing %}
-                        <tr>
-                            <td>
-                                <a href="{{ path('profile_show', {
-                                    'id': publishedProfile.id,
-                                    '_fragment': 'versions'
-                                }) }}">
-                                    {{ publishedProfile.standardLabel }}
+                    {% if not profile.isOngoing %}
+                        <p>
+                            {{ profile.standardLabel }} is a <strong>
+                                {% if profile.wasClosedAt is not null and profile.endDate is null %}
+                                    published
+                                {% elseif profile.endDate is not null %}
+                                    deprecated
+                                {% endif %}
+                                profile</strong>.
+                        </p>
+                    {% endif %}
+                    <p>
+                        Root profile:
+                        <a href="{{ path('profile_edit', {'id': profile.rootProfile.id, '_fragment': 'versions'}) }}">
+                            {{ profile.rootProfile }} [Root]
+                        </a>
+                    </p>
+                    {% if not profile.isOngoing %}
+                        {% for profile in profile.rootProfile.childProfiles if profile.isOngoing %}
+                            <p>
+                                Ongoing version:
+                                <a href="{{ path('profile_edit', {'id': profile.id, '_fragment': 'versions'}) }}">
+                                    {{ profile }}
                                 </a>
-                            </td>
-                            <td>{{ publishedProfile.version }}</td>
-                            <td>
-                                {% if publishedProfile.wasClosedAt is not null and publishedProfile.endDate is null %}
-                                    Published
-                                {% elseif publishedProfile.endDate is not null %}
-                                    Deprecated
-                                {% endif %}
-                            </td>
-                            <td>{{ publishedProfile.startDate|date('Y-m-d') }}</td>
-                            <td>todo</td>
-                        </tr>
-                    {% endfor %}
+                            </p>
+                        {% endfor %}
+                    {% endif %}
                 {% endif %}
-                </tbody>
-            </table>
-
-        </div>
-        {% if not profile.isRootProfile %}
-        <div id="namespaces" class="tab-pane fade">
-        {% if profile.isOngoing %}
-            <h3>Namespaces used by this profile</h3>
-            {% if profile.namespaces|length == 0 %}
-                <em id="empty-namespace-list-message">There is currently no namespace used by this profile.</em>
-            {% endif %}
-            <table class="table table-striped" id="used-namespaces-table">
-                <thead>
-                <tr>
-                    <th>Namespace</th>
-                    <th>Change</th>
-                    <th>Remove</th>
-                </tr>
-                </thead>
-                <tbody>
-                {% set idNamespacesAssociatedInProfile = [] %}
-                {% for namespace in profile.namespaces %}
-                    {% set idNamespacesAssociatedInProfile = idNamespacesAssociatedInProfile|merge([namespace.id]) %}
-                {% endfor %}
-                {% for namespace in profile.namespaces %}
+                <h3>Published versions</h3>
+                <table class="table table-striped" id="profile-versions-table">
+                    <thead>
                     <tr>
-                        <td>
-                            <a href="{{ path('namespace_show', {'id': namespace.id}) }}">{{ namespace }}</a>
-                            {% for profileAssociation in profile.profileAssociations
-                                if (profileAssociation.class is not null or profileAssociation.property is not null)
-                                and profileAssociation.entityNamespaceForVersion.topLevelNamespace.id == namespace.topLevelNamespace.id
-                                and profileAssociation.entityNamespaceForVersion not in profile.namespaces%}
-                                {% if loop.first %}
-                                    <br><span class="text-danger"><i class="fas fa-exclamation-triangle"></i> Classes and/or properties from another version of this namespace, previously selected in your profile, are not available in the selected version. They are displayed in red in your profile. Please make the necessary corrections before proceeding.</span>
-                                {% endif %}
-                            {% endfor %}</td>
-                        <td>
-                            {% if namespace.topLevelNamespace.childVersions|length > 1 %}
-                                <a href="#namespaces" class="change-version btn btn-xs btn-primary" data-id="{{ namespace.id }}"><i class="fas fa-exchange-alt"></i> Change version</a>
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% set isRemovable = true %}
-                            {% for profileAssociation in profile.profileAssociations if profileAssociation.systemType.id == 5 and profileAssociation.entityNamespaceForVersion.id == namespace.id %}
-                                {% set isRemovable = false %}
-                            {% endfor %}
-                            {% if isRemovable %}
-                                <a href="#namespaces" class="remove-namespace btn btn-xs btn-danger" data-id="{{ namespace.id }}"><i class="far fa-times-circle"></i> Remove<span class="loading-icon2" data-id="{{ namespace.id }}">&nbsp;<span class="fas fa-spinner fa-spin"></span></span></a>
-                            {% else %}
-                                <a href="#namespaces" class="not-removable btn btn-xs btn-danger" disabled="disabled" data-id="{{ namespace.id }}"><i class="far fa-times-circle"></i> Remove<span class="loading-icon2" data-id="{{ namespace.id }}">&nbsp;<span class="fas fa-spinner fa-spin"></span></span></a>
-                            {% endif %}
-                        </td>
+                        <th>Profile</th>
+                        <th>Version</th>
+                        <th>Status</th>
+                        <th>Publication date</th>
+                        <th>Current profile</th>
                     </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-            <h4>Pick a namespace to associate with the current profile</h4>
-            <div class="row">
-                <div class="col-sm-6">
-                    <select id="select-root-namespace">
-                    {% for rootNamespace in rootNamespaces %}
-                        <option value="{{ rootNamespace.id }}">{{ rootNamespace.standardLabel }}</option>
-                    {% endfor %}
-                    </select>
-                </div>
-                <div class="col-sm-6">
-                    <div id="loading-icon">
-                        <span class="fas fa-spinner fa-spin"></span>
-                    </div>
-                    <ul class="list-group" id="chosable-namespaces-list">
-                    </ul>
-                </div>
+                    </thead>
+                    <tbody>
+                    {% if profile.isRootProfile %}
+                        {% for publishedProfile in profile.childProfiles if not publishedProfile.isOngoing %}
+                            <tr>
+                                <td>
+                                    <a href="{{ path('profile_show', {
+                                        'id': publishedProfile.id,
+                                        '_fragment': 'versions'
+                                    }) }}">
+                                        {{ publishedProfile.standardLabel }}
+                                    </a>
+                                </td>
+                                <td>{{ publishedProfile.version }}</td>
+                                <td>
+                                    {% if publishedProfile.wasClosedAt is not null and publishedProfile.endDate is null %}
+                                        Published
+                                    {% elseif publishedProfile.endDate is not null %}
+                                        Deprecated
+                                    {% endif %}
+                                </td>
+                                <td>{{ publishedProfile.startDate|date('Y-m-d') }}</td>
+                                <td>todo</td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        {% for publishedProfile in profile.rootProfile.childProfiles if publishedProfile.id != profile.id and not publishedProfile.isOngoing %}
+                            <tr>
+                                <td>
+                                    <a href="{{ path('profile_show', {
+                                        'id': publishedProfile.id,
+                                        '_fragment': 'versions'
+                                    }) }}">
+                                        {{ publishedProfile.standardLabel }}
+                                    </a>
+                                </td>
+                                <td>{{ publishedProfile.version }}</td>
+                                <td>
+                                    {% if publishedProfile.wasClosedAt is not null and publishedProfile.endDate is null %}
+                                        Published
+                                    {% elseif publishedProfile.endDate is not null %}
+                                        Deprecated
+                                    {% endif %}
+                                </td>
+                                <td>{{ publishedProfile.startDate|date('Y-m-d') }}</td>
+                                <td>todo</td>
+                            </tr>
+                        {% endfor %}
+                    {% endif %}
+                    </tbody>
+                </table>
+
             </div>
-        {% else %}
-            <h3>Namespaces used by this profile</h3>
-            {% if profile.namespaces|length == 0 %}
-                <em id="empty-namespace-list-message">There is currently no namespace used by this profile.</em>
+            {% if not profile.isRootProfile %}
+                <div id="namespaces" class="tab-pane fade">
+                    {% if profile.isOngoing %}
+                        <h3>Namespaces used by this profile</h3>
+                        {% if profile.namespaces|length == 0 %}
+                            <em id="empty-namespace-list-message">There is currently no namespace used by this profile.</em>
+                        {% endif %}
+                        <table class="table table-striped" id="used-namespaces-table">
+                            <thead>
+                            <tr>
+                                <th>Namespace</th>
+                                <th>Change</th>
+                                <th>Remove</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% set idNamespacesAssociatedInProfile = [] %}
+                            {% for namespace in profile.namespaces %}
+                                {% set idNamespacesAssociatedInProfile = idNamespacesAssociatedInProfile|merge([namespace.id]) %}
+                            {% endfor %}
+                            {% for namespace in profile.namespaces %}
+                                <tr>
+                                    <td>
+                                        <a href="{{ path('namespace_show', {'id': namespace.id}) }}">{{ namespace }}</a>
+                                        {% for profileAssociation in profile.profileAssociations
+                                            if (profileAssociation.class is not null or profileAssociation.property is not null)
+                                            and profileAssociation.entityNamespaceForVersion.topLevelNamespace.id == namespace.topLevelNamespace.id
+                                            and profileAssociation.entityNamespaceForVersion not in profile.namespaces%}
+                                            {% if loop.first %}
+                                                <br><span class="text-danger"><i class="fas fa-exclamation-triangle"></i> Classes and/or properties from another version of this namespace, previously selected in your profile, are not available in the selected version. They are displayed in red in your profile. Please make the necessary corrections before proceeding.</span>
+                                            {% endif %}
+                                        {% endfor %}</td>
+                                    <td>
+                                        {% if namespace.topLevelNamespace.childVersions|length > 1 %}
+                                            <a href="#namespaces" class="change-version btn btn-xs btn-primary" data-id="{{ namespace.id }}"><i class="fas fa-exchange-alt"></i> Change version</a>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% set isRemovable = true %}
+                                        {% for profileAssociation in profile.profileAssociations if profileAssociation.systemType.id == 5 and profileAssociation.entityNamespaceForVersion.id == namespace.id %}
+                                            {% set isRemovable = false %}
+                                        {% endfor %}
+                                        {% if isRemovable %}
+                                            <a href="#namespaces" class="remove-namespace btn btn-xs btn-danger" data-id="{{ namespace.id }}"><i class="far fa-times-circle"></i> Remove<span class="loading-icon2" data-id="{{ namespace.id }}">&nbsp;<span class="fas fa-spinner fa-spin"></span></span></a>
+                                        {% else %}
+                                            <a href="#namespaces" class="not-removable btn btn-xs btn-danger" disabled="disabled" data-id="{{ namespace.id }}"><i class="far fa-times-circle"></i> Remove<span class="loading-icon2" data-id="{{ namespace.id }}">&nbsp;<span class="fas fa-spinner fa-spin"></span></span></a>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                        <h4>Pick a namespace to associate with the current profile</h4>
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <select id="select-root-namespace">
+                                    {% for rootNamespace in rootNamespaces %}
+                                        <option value="{{ rootNamespace.id }}">{{ rootNamespace.standardLabel }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-sm-6">
+                                <div id="loading-icon">
+                                    <span class="fas fa-spinner fa-spin"></span>
+                                </div>
+                                <ul class="list-group" id="chosable-namespaces-list">
+                                </ul>
+                            </div>
+                        </div>
+                    {% else %}
+                        <h3>Namespaces used by this profile</h3>
+                        {% if profile.namespaces|length == 0 %}
+                            <em id="empty-namespace-list-message">There is currently no namespace used by this profile.</em>
+                        {% endif %}
+                        <ul id="used-namespaces-list">
+                            {% for namespace in profile.namespaces %}
+                                <li>
+                                    <a href="{{ path('namespace_show', {
+                                        'id': namespace.id
+                                    }) }}">
+                                        {{ namespace }}
+                                    </a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+                <div id="graph" class="tab-pane fade">
+                    <h3>Graph</h3>
+                    <p class="text-warning"><span class="fa fa-exclamation-circle"></span> Please note this is an experimental feature. <strong>Click on the full screen button if the graph is not displayed</strong></p>
+                    {% if profile.classes|length > 0 and profile.properties|length > 0 %}
+                        <a href="http://visualdataweb.de/webvowl/#url={{ url('profile_json', {'id': profile.id}) }}" target="_blank" class="btn btn-primary">Full screen (WebVOWL) <span class="fa fa-desktop"></span></a><br><br>
+                        <embed src="http://visualdataweb.de/webvowl/#url={{ url('profile_json', {'id': profile.id}) }}" width="100%" height="1000px"><br><br>
+                        <a href="http://visualdataweb.de/webvowl/#url={{ url('profile_json', {'id': profile.id}) }}" target="_blank" class="btn btn-primary">Full screen (WebVOWL) <span class="fa fa-desktop"></span></a>
+                    {% else %}
+                        <p>The webvowl graph cannot be displayed because no class or property has been associated with this profile.</p>
+                    {% endif %}
+                </div>
             {% endif %}
-        {% endif %}
         </div>
-        <div id="graph" class="tab-pane fade">
-            <h3>Graph</h3>
-            <p class="text-warning"><span class="fa fa-exclamation-circle"></span> Please note this is an experimental feature. <strong>Click on the full screen button if the graph is not displayed</strong></p>
-            {% if profile.classes|length > 0 and profile.properties|length > 0 %}
-                <a href="http://visualdataweb.de/webvowl/#url={{ url('profile_json', {'id': profile.id}) }}" target="_blank" class="btn btn-primary">Full screen (WebVOWL) <span class="fa fa-desktop"></span></a><br><br>
-                <embed src="http://visualdataweb.de/webvowl/#url={{ url('profile_json', {'id': profile.id}) }}" width="100%" height="1000px"><br><br>
-                <a href="http://visualdataweb.de/webvowl/#url={{ url('profile_json', {'id': profile.id}) }}" target="_blank" class="btn btn-primary">Full screen (WebVOWL) <span class="fa fa-desktop"></span></a>
-            {% else %}
-                <p>The webvowl graph cannot be displayed because no class or property has been associated with this profile.</p>
-            {% endif %}
-        </div>
-        {% endif %}
     </div>
-</div>
 
 
 {% endblock %}
 
 {% block javascripts %}
-{{ parent() }}
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.4/js/select2.min.js"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"></script>
+    {{ parent() }}
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.4/js/select2.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"></script>
 
-<script>
-    $(document).ready(function() {
-        $('.js-datepicker').datepicker({
-            format: 'yyyy-mm-dd'
-        });
-        $('#additional-notes-table').DataTable();
-        var usedNamespacesTable = $('#used-namespaces-table').DataTable({
-            "columnDefs": [
-                { "width": "10%", "targets": 2 },
-                { "width": "20%", "targets": 1 },
-                { "width": "70%", "targets": 0 }
-            ],
-            "autoWidth": false,
-            "dom": "t",
-            "searching": false,
-            "paging": false,
-            language: {emptyTable: "No namespace has been associated with this profile."}
-        });
-
-        //confirmation box for publish action
-        $('#publish-btn').on('click', function() {
-            bootbox.confirm({
-                message: "Once a profile is published, it's not possible to make it ongoing again. Are you sure you want to publish this profile?",
-                title: '<i class="fas fa-exclamation-triangle"></i> Warning',
-                buttons: {
-                    confirm: {
-                        label: 'Yes',
-                        className: 'btn-success'
-                    },
-                    cancel: {
-                        label: 'No',
-                        className: 'btn-danger'
-                    }
-                },
-                callback: function (result) {
-                    if(result){
-                        var profileID = '{{ profile.id }}';
-                        var urlProfilePublish = '{{ path("profile_publish", {'id' : 'profileID'}) }}';
-                        urlProfilePublish = urlProfilePublish.replace("profileID", profileID);
-                        window.location = urlProfilePublish;
-                    }
-                }
+    <script>
+        $(document).ready(function() {
+            $('.js-datepicker').datepicker({
+                format: 'yyyy-mm-dd'
             });
-        });
-
-        //confirmation box for deprecate action
-        $('#deprecate-btn').on('click', function() {
-            bootbox.confirm({
-                message: "Once a profile is deprecated, it's not possible to publish it again. Are you sure you want to make this profile deprecated?",
-                title: '<i class="fas fa-exclamation-triangle"></i> Warning',
-                buttons: {
-                    confirm: {
-                        label: 'Yes',
-                        className: 'btn-success'
-                    },
-                    cancel: {
-                        label: 'No',
-                        className: 'btn-danger'
-                    }
-                },
-                callback: function (result) {
-                    if(result){
-                        var profileID = '{{ profile.id }}';
-                        var urlProfileDeprecate = '{{ path("profile_deprecate", {'id' : 'profileID'}) }}';
-                        urlProfileDeprecate = urlProfileDeprecate.replace("profileID", profileID);
-                        window.location = urlProfileDeprecate;
-                    }
-                }
+            $('#additional-notes-table').DataTable();
+            var usedNamespacesTable = $('#used-namespaces-table').DataTable({
+                "columnDefs": [
+                    { "width": "10%", "targets": 2 },
+                    { "width": "20%", "targets": 1 },
+                    { "width": "70%", "targets": 0 }
+                ],
+                "autoWidth": false,
+                "dom": "t",
+                "searching": false,
+                "paging": false,
+                language: {emptyTable: "No namespace has been associated with this profile."}
             });
-        });
 
-        //confirmation box for forced publication status
-        $('#profile_edit_form_isForcedPublication').on('change', function() {
-            if(this.checked){
+            //confirmation box for publish action
+            $('#publish-btn').on('click', function() {
                 bootbox.confirm({
-                    message: "It's not advisable to publish an ongoing profile. Are you sure you want to allow an API connection on this profile?",
+                    message: "Once a profile is published, it's not possible to make it ongoing again. Are you sure you want to publish this profile?",
+                    title: '<i class="fas fa-exclamation-triangle"></i> Warning',
                     buttons: {
                         confirm: {
                             label: 'Yes',
@@ -842,181 +799,233 @@
                         }
                     },
                     callback: function (result) {
-                        if(!result){
-                            $('#profile_edit_form_isForcedPublication').prop('checked', false);
+                        if(result){
+                            var profileID = '{{ profile.id }}';
+                            var urlProfilePublish = '{{ path("profile_publish", {'id' : 'profileID'}) }}';
+                            urlProfilePublish = urlProfilePublish.replace("profileID", profileID);
+                            window.location = urlProfilePublish;
                         }
                     }
                 });
-            }
+            });
 
-        });
-
-        {% if profile.isOngoing %}
-
-        var profileID = {{ profile.id }};
-        var urlSelectableClasses = '{{ path("selectable_classes_profile_json", {'profile' : 'profileID'}) }}';
-        urlSelectableClasses = urlSelectableClasses.replace("profileID", profileID);
-
-        var urlAssociatedClasses = '{{ path("associated_classes_profile_json", {'profile' : 'profileID'}) }}';
-        urlAssociatedClasses = urlAssociatedClasses.replace("profileID", profileID);
-
-        {% set idNamespacesAssociatedInProfile = [] %}
-        {% for namespace in profile.namespaces %}
-        {% set idNamespacesAssociatedInProfile = idNamespacesAssociatedInProfile|merge([namespace.id]) %}
-        {% endfor %}
-
-        var associatedClassesTable = $('#classes-table').DataTable({
-            order: [[ 0, "desc" ],[ 6, "desc" ]],
-            ajax: urlAssociatedClasses,
-            dataSrc: 'data',
-            columns: [
-                { data: null },
-                { data: 'id' },
-                { data: 'identifierInNamespace' },
-                { data: 'standardLabel' },
-                { data: 'associationType' },
-                { data: 'namespace' },
-                { data: null }
-            ],
-            columnDefs: [
-                {
-                    targets: 0,
-                    render: function ( data, type, row, meta ) {
-
-                        var urlRemoveClass = '{{ path("profile_class_disassociation", {'profile' : 'profileID', 'class' : 'classID'}) }}';
-                        urlRemoveClass = urlRemoveClass.replace("profileID", profileID);
-                        urlRemoveClass = urlRemoveClass.replace("classID", row.id);
-                        if(row.associationType == 'selected') {
-                            return '<a data-id="' + row.id + '" data-namespace-id="'+row.namespaceForVersion+'" data-url="' + urlRemoveClass + '" class="remove-class"><span class="glyphicon glyphicon-remove text-danger" aria-hidden="true"></span></a><span class="remove-class-loading-icon" data-id="' + row.id + '" style="display: none"><span class="fas fa-spinner fa-spin"></span></span>';
+            //confirmation box for deprecate action
+            $('#deprecate-btn').on('click', function() {
+                bootbox.confirm({
+                    message: "Once a profile is deprecated, it's not possible to publish it again. Are you sure you want to make this profile deprecated?",
+                    title: '<i class="fas fa-exclamation-triangle"></i> Warning',
+                    buttons: {
+                        confirm: {
+                            label: 'Yes',
+                            className: 'btn-success'
+                        },
+                        cancel: {
+                            label: 'No',
+                            className: 'btn-danger'
                         }
-                        else return '';
+                    },
+                    callback: function (result) {
+                        if(result){
+                            var profileID = '{{ profile.id }}';
+                            var urlProfileDeprecate = '{{ path("profile_deprecate", {'id' : 'profileID'}) }}';
+                            urlProfileDeprecate = urlProfileDeprecate.replace("profileID", profileID);
+                            window.location = urlProfileDeprecate;
+                        }
                     }
-                },
-                {
-                    type: 'natural-ci', targets: 2, width: '1%', className: 'text-right'
-                },
-                {
-                    targets: 3,
-                    render: function ( data, type, row, meta ) {
-                        var urlClass = '{{ path("class_show_with_version", {'id' : 'classID', 'namespaceFromUrlId': 'namespaceFromUrlId'}) }}';
-                        urlClass = urlClass.replace("classID", row.id);
-                        urlClass = urlClass.replace("namespaceFromUrlId", row.namespaceForVersion);
+                });
+            });
 
-                        if([{{ idNamespacesAssociatedInProfile|join(',') }}].indexOf(row.namespaceForVersion) >= 0) {
-                            return '<a href="' + urlClass + '">' + data + '</a>';
+            //confirmation box for forced publication status
+            $('#profile_edit_form_isForcedPublication').on('change', function() {
+                if(this.checked){
+                    bootbox.confirm({
+                        message: "It's not advisable to publish an ongoing profile. Are you sure you want to allow an API connection on this profile?",
+                        buttons: {
+                            confirm: {
+                                label: 'Yes',
+                                className: 'btn-success'
+                            },
+                            cancel: {
+                                label: 'No',
+                                className: 'btn-danger'
+                            }
+                        },
+                        callback: function (result) {
+                            if(!result){
+                                $('#profile_edit_form_isForcedPublication').prop('checked', false);
+                            }
                         }
-                        else{
-                            return '<a href="' + urlClass + '" class="text-danger">' + data + '</a> <a data-toggle="tooltip" class="text-danger" data-placement="right" title="Classes from another version of this namespace, previously selected in your profile, are not available in the selected version. They are displayed in red in your profile. Please make the necessary corrections before proceeding."><span class="fas fa-exclamation-triangle"></span></a>';
-                        }
+                    });
+                }
 
-                    }
-                },
-                {
-                    targets: -1,
-                    "data": null,
-                    render: function ( data, type, row, meta ) {
-                        if(row.associationType == 'selected'){
-                            var urlSelectProperties = '{{ path("profile_properties_edit", {'profile' : 'profileID', 'class' : 'classID'}) }}';
-                            urlSelectProperties = urlSelectProperties.replace("profileID", profileID);
-                            urlSelectProperties = urlSelectProperties.replace("classID", row.id);
-                            if([{{ idNamespacesAssociatedInProfile|join(',') }}].indexOf(row.namespaceForVersion) >= 0){
-                                return '<a href="' + urlSelectProperties + '"><span class="glyphicon glyphicon-th-list"></span></a>';
+            });
+
+            {% if profile.isOngoing %}
+
+            var profileID = {{ profile.id }};
+            var urlSelectableClasses = '{{ path("selectable_classes_profile_json", {'profile' : 'profileID'}) }}';
+            urlSelectableClasses = urlSelectableClasses.replace("profileID", profileID);
+
+            var urlAssociatedClasses = '{{ path("associated_classes_profile_json", {'profile' : 'profileID'}) }}';
+            urlAssociatedClasses = urlAssociatedClasses.replace("profileID", profileID);
+
+            {% set idNamespacesAssociatedInProfile = [] %}
+            {% for namespace in profile.namespaces %}
+            {% set idNamespacesAssociatedInProfile = idNamespacesAssociatedInProfile|merge([namespace.id]) %}
+            {% endfor %}
+
+            var associatedClassesTable = $('#classes-table').DataTable({
+                order: [[ 0, "desc" ],[ 6, "desc" ]],
+                ajax: urlAssociatedClasses,
+                dataSrc: 'data',
+                columns: [
+                    { data: null },
+                    { data: 'id' },
+                    { data: 'identifierInNamespace' },
+                    { data: 'standardLabel' },
+                    { data: 'associationType' },
+                    { data: 'namespace' },
+                    { data: null }
+                ],
+                columnDefs: [
+                    {
+                        targets: 0,
+                        render: function ( data, type, row, meta ) {
+
+                            var urlRemoveClass = '{{ path("profile_class_disassociation", {'profile' : 'profileID', 'class' : 'classID'}) }}';
+                            urlRemoveClass = urlRemoveClass.replace("profileID", profileID);
+                            urlRemoveClass = urlRemoveClass.replace("classID", row.id);
+                            if(row.associationType == 'selected') {
+                                return '<a data-id="' + row.id + '" data-namespace-id="'+row.namespaceForVersion+'" data-url="' + urlRemoveClass + '" class="remove-class"><span class="glyphicon glyphicon-remove text-danger" aria-hidden="true"></span></a><span class="remove-class-loading-icon" data-id="' + row.id + '" style="display: none"><span class="fas fa-spinner fa-spin"></span></span>';
                             }
                             else return '';
                         }
-                        else return '';
-                    }
-                },
-                {
-                    visible: false,
-                    targets: [1]
-                }
-            ],
-            initComplete: function(){
-                this.api().columns([5]).every(function(){
-                    var column = this;
-                    var select = $('<br><select id="properties-namespace-select" style="width:100%;"><option value=""></option></select>')
-                        .appendTo($(column.header()))
-                        .on('change', function(){
-                            var val = $.fn.dataTable.util.escapeRegex(
-                                $(this).val()
-                            );
+                    },
+                    {
+                        type: 'natural-ci', targets: 2, width: '1%', className: 'text-right'
+                    },
+                    {
+                        targets: 3,
+                        render: function ( data, type, row, meta ) {
+                            var urlClass = '{{ path("class_show_with_version", {'id' : 'classID', 'namespaceFromUrlId': 'namespaceFromUrlId'}) }}';
+                            urlClass = urlClass.replace("classID", row.id);
+                            urlClass = urlClass.replace("namespaceFromUrlId", row.namespaceForVersion);
 
-                            column
-                                .search(val ? '^'+val+'$' : '', true, false)
-                                .draw();
+                            if([{{ idNamespacesAssociatedInProfile|join(',') }}].indexOf(row.namespaceForVersion) >= 0) {
+                                return '<a href="' + urlClass + '">' + data + '</a>';
+                            }
+                            else{
+                                return '<a href="' + urlClass + '" class="text-danger">' + data + '</a> <a data-toggle="tooltip" class="text-danger" data-placement="right" title="Classes from another version of this namespace, previously selected in your profile, are not available in the selected version. They are displayed in red in your profile. Please make the necessary corrections before proceeding."><span class="fas fa-exclamation-triangle"></span></a>';
+                            }
+
+                        }
+                    },
+                    {
+                        targets: -1,
+                        "data": null,
+                        render: function ( data, type, row, meta ) {
+                            if(row.associationType == 'selected'){
+                                var urlSelectProperties = '{{ path("profile_properties_edit", {'profile' : 'profileID', 'class' : 'classID'}) }}';
+                                urlSelectProperties = urlSelectProperties.replace("profileID", profileID);
+                                urlSelectProperties = urlSelectProperties.replace("classID", row.id);
+                                if([{{ idNamespacesAssociatedInProfile|join(',') }}].indexOf(row.namespaceForVersion) >= 0){
+                                    return '<a href="' + urlSelectProperties + '"><span class="glyphicon glyphicon-th-list"></span></a>';
+                                }
+                                else return '';
+                            }
+                            else return '';
+                        }
+                    },
+                    {
+                        visible: false,
+                        targets: [1]
+                    }
+                ],
+                initComplete: function(){
+                    this.api().columns([5]).every(function(){
+                        var column = this;
+                        var select = $('<br><select id="properties-namespace-select" style="width:100%;"><option value=""></option></select>')
+                            .appendTo($(column.header()))
+                            .on('change', function(){
+                                var val = $.fn.dataTable.util.escapeRegex(
+                                    $(this).val()
+                                );
+
+                                column
+                                    .search(val ? '^'+val+'$' : '', true, false)
+                                    .draw();
+                            });
+
+                        $(select).click(function(e){
+                            e.stopPropagation();
                         });
 
-                    $(select).click(function(e){
-                        e.stopPropagation();
+                        column.data().unique().sort().each(function(d, j){
+                            select.append('<option value="'+d+'">'+d+'</option>')
+                        });
                     });
-
-                    column.data().unique().sort().each(function(d, j){
-                        select.append('<option value="'+d+'">'+d+'</option>')
-                    });
-                });
-            }
-        });
-        var selectableClassesTable = $('#selectable-classes-table').DataTable({
-            ajax: urlSelectableClasses,
-            dataSrc: 'data',
-            columns: [
-                { data: 'classId' },
-                { data: 'identifierInNamespace' },
-                { data: 'standardLabel' },
-                { data: 'namespace' }
-            ],
-            columnDefs: [
-                {
-                    targets: 0,
-                    render: function ( data, type, row, meta ) {
-                        var urlSelectClass = '{{ path("profile_class_association", {'profile' : 'profileID', 'class' : 'classID'}) }}';
-                        urlSelectClass = urlSelectClass.replace("profileID", profileID);
-                        urlSelectClass = urlSelectClass.replace("classID", row.classId);
-                        return '<a data-id="'+row.classId+'" data-namespace-id="'+row.namespaceId+'" data-url="'+urlSelectClass+'" class="select-class"><span class="plus-icon" data-id="'+row.classId+'"><span class="fas fa-plus"></span></span><span class="select-class-loading-icon" data-id="'+row.classId+'" style="display: none"><span class="fas fa-spinner fa-spin"></span></span></a>&nbsp;';
-                    }
-                },
-                {
-                    targets: 1,
-
-                    type: 'natural-ci',
-                    width: '1%',
-                    className: 'text-right'
                 }
-            ],
-            initComplete: function(){
-                this.api().columns([3]).every(function(){
-                    var column = this;
-                    var select = $('<br><select id="properties-namespace-select" style="width:100%;"><option value=""></option></select>')
-                        .appendTo($(column.header()))
-                        .on('change', function(){
-                            var val = $.fn.dataTable.util.escapeRegex(
-                                $(this).val()
-                            );
+            });
+            var selectableClassesTable = $('#selectable-classes-table').DataTable({
+                ajax: urlSelectableClasses,
+                dataSrc: 'data',
+                columns: [
+                    { data: 'classId' },
+                    { data: 'identifierInNamespace' },
+                    { data: 'standardLabel' },
+                    { data: 'namespace' }
+                ],
+                columnDefs: [
+                    {
+                        targets: 0,
+                        render: function ( data, type, row, meta ) {
+                            var urlSelectClass = '{{ path("profile_class_association", {'profile' : 'profileID', 'class' : 'classID'}) }}';
+                            urlSelectClass = urlSelectClass.replace("profileID", profileID);
+                            urlSelectClass = urlSelectClass.replace("classID", row.classId);
+                            return '<a data-id="'+row.classId+'" data-namespace-id="'+row.namespaceId+'" data-url="'+urlSelectClass+'" class="select-class"><span class="plus-icon" data-id="'+row.classId+'"><span class="fas fa-plus"></span></span><span class="select-class-loading-icon" data-id="'+row.classId+'" style="display: none"><span class="fas fa-spinner fa-spin"></span></span></a>&nbsp;';
+                        }
+                    },
+                    {
+                        targets: 1,
 
-                            column
-                                .search(val ? '^'+val+'$' : '', true, false)
-                                .draw();
+                        type: 'natural-ci',
+                        width: '1%',
+                        className: 'text-right'
+                    }
+                ],
+                initComplete: function(){
+                    this.api().columns([3]).every(function(){
+                        var column = this;
+                        var select = $('<br><select id="properties-namespace-select" style="width:100%;"><option value=""></option></select>')
+                            .appendTo($(column.header()))
+                            .on('change', function(){
+                                var val = $.fn.dataTable.util.escapeRegex(
+                                    $(this).val()
+                                );
+
+                                column
+                                    .search(val ? '^'+val+'$' : '', true, false)
+                                    .draw();
+                            });
+
+                        $(select).click(function(e){
+                            e.stopPropagation();
                         });
 
-                    $(select).click(function(e){
-                        e.stopPropagation();
+                        column.data().unique().sort().each(function(d, j){
+                            select.append('<option value="'+d+'">'+d+'</option>')
+                        });
                     });
+                }
+            });
+            $('#profile-versions-table').DataTable();
+            $('#namespaces-table').DataTable();
+            $('#projects-table').DataTable();
 
-                    column.data().unique().sort().each(function(d, j){
-                        select.append('<option value="'+d+'">'+d+'</option>')
-                    });
-                });
-            }
-        });
-        $('#profile-versions-table').DataTable();
-        $('#namespaces-table').DataTable();
-        $('#projects-table').DataTable();
+            $('#loading-icon').hide(0);
+            $('.loading-icon2').hide(0);
 
-        $('#loading-icon').hide(0);
-        $('.loading-icon2').hide(0);
-
-        {% if profile.isRootProfile %}
+            {% if profile.isRootProfile %}
             $('#profile_edit_form_projectOfBelonging').select2({
                 width: '100%',
                 sorter: function (data) {
@@ -1033,342 +1042,345 @@
                     });
                 }
             });
-        {% endif %}
+            {% endif %}
 
-        $('#select-root-namespace').select2({
-            width: '100%',
-            sorter: function(data) {
-                /* Sort data using lowercase comparison */
-                return data.sort(function (a, b) {
-                    a = a.text.toLowerCase();
-                    b = b.text.toLowerCase();
-                    if (a > b) {
-                        return 1;
-                    } else if (a < b) {
-                        return -1;
-                    }
-                    return 0;
-                });
-            }
-        });
-
-        $('#select-root-namespace').on('select2:select', function (e) {
-            $('#loading-icon').show(0);
-            $('#chosable-namespaces-list').empty();
-            var selectedValue = e.params.data.id;
-            var url = '{{ path("namespaces_by_root_id_list_json", {'id': 'selectedValue'}) }}';
-            url = url.replace("selectedValue", selectedValue);
-            $.ajax({
-                url: url,
-                type: 'GET',
-                dataType: 'json',
-                success:function(data){
-                    $('#loading-icon').hide(0);
-
-                    // handling the response data from the controller
-                    if(data.status == 'Error'){
-                        console.log("[API] ERROR: "+data.message);
-                    }
-                    if(data.status == 'Success'){
-                        $.each(data.namespaces, function(key, val){
-                            $("#chosable-namespaces-list").append($("<a class=\"list-group-item pickable-namespace\" id="+val.id+">"+val.standardLabel+"</a>"));
-                        });
-                    }
-                }
-            });
-        });
-
-        $(document).on("mouseenter touchstart", ".pickable-namespace", function() {
-            $(this).prepend($("<span><i class=\"fas fa-plus\"></i>&nbsp;</span>"));
-        });
-
-        $(document).on("mouseleave touchend", ".pickable-namespace", function() {
-            $(this).find(":first-child").remove();
-        });
-
-        $(document).on("click", ".pickable-namespace", function() {
-            var selectedValue = $(this).attr("id");
-            var profileID = {{ profile.id }}
-            var url = '{{ path("profile_namespace_association", {'profile' : 'profileID','namespace': 'selectedValue'}) }}';
-            url = url.replace("profileID", profileID);
-            url = url.replace("selectedValue", selectedValue);
-            $.ajax({
-                url: url,
-                type: 'POST',
-                dataType: 'json',
-                success:function(data){
-
-                    // handling the response data from the controller
-                    if(data.status == 'Error'){
-                        console.log("[API] ERROR: "+data.message);
-                    }
-                    if(data.status == 'Success'){
-                        window.location.reload();
-                    }
-                }
-            });
-            var urlNamespace = '{{ path('namespace_show', {'id' : 'selectedValue'}) }}';
-            urlNamespace = urlNamespace.replace('selectedValue', selectedValue);
-            $("#empty-namespace-list-message").remove();
-            $("#select-root-namespace option:selected").remove();
-            //TODO
-            $("#used-namespaces-list").append($('<div class="row"><a href="#namespaces" class="remove-namespace" data-id="'+selectedValue+'"><span class="glyphicon glyphicon-remove text-danger" aria-hidden="true"></span></a><a href="'+urlNamespace+'">'+$(this).text()+'</a><span class="loading-icon2" data-id="'+selectedValue+'">&nbsp;<span class="fas fa-spinner fa-spin"></span></span></div>'));
-            $(".loading-icon2[data-id='"+selectedValue+"']").hide(0);
-            $("#chosable-namespaces-list").empty();
-        });
-
-        $(document).on("click", ".remove-namespace", function() {
-            var selectedValue = $(this).data("id");
-            var profileID = {{ profile.id }}
-            $(".loading-icon2[data-id='"+selectedValue+"']").show(0);
-            var url = '{{ path("profile_namespace_disassociation", {'profile' : 'profileID','namespace': 'selectedValue'}) }}';
-            url = url.replace("profileID", profileID);
-            url = url.replace("selectedValue", selectedValue);
-            $.ajax({
-                url: url,
-                type: 'DELETE',
-                dataType: 'json',
-                success:function(data){
-                },
-                statusCode: {
-                    204: function () {
-                        window.location.reload();
-                    }
-                }
-            });
-
-        });
-
-        $(document).on("click", ".not-removable", function(){
-            bootbox.alert("Classes and properties belonging to the namespace you wish to deselect are associated with your profile. Please deselect them first before proceeding.");
-        });
-
-        $(document).on("click", ".change-version", function(){
-            btn = $(this);
-            var selectedValue = $(this).data("id");
-            var profileID = {{ profile.id }}
-
-                bootbox.confirm({
-                    message: "Changing the version of a namespace selected by a profile changes the association of all entities in that namespace to the new version.<br><br>Errors may occur.<br><br>Do you wish to proceed?",
-                    title: '<i class="fas fa-exclamation-triangle"></i> Warning',
-                    buttons: {
-                        confirm: {
-                            label: 'Yes',
-                            className: 'btn-success'
-                        },
-                        cancel: {
-                            label: 'No',
-                            className: 'btn-danger'
+            $('#select-root-namespace').select2({
+                width: '100%',
+                sorter: function(data) {
+                    /* Sort data using lowercase comparison */
+                    return data.sort(function (a, b) {
+                        a = a.text.toLowerCase();
+                        b = b.text.toLowerCase();
+                        if (a > b) {
+                            return 1;
+                        } else if (a < b) {
+                            return -1;
                         }
-                    },
-                    callback: function (result) {
-                        if(result){
-                            cell = btn.parent();
-                            btn.remove();
-                            cell.append("<select class='select-change-version' data-id='"+selectedValue+"'></select>");
+                        return 0;
+                    });
+                }
+            });
 
-                            $('.select-change-version[data-id='+selectedValue+']').select2({
-                                width: '100%',
-                                sorter: function(data) {
-                                    /* Sort data using lowercase comparison */
-                                    return data.sort(function (a, b) {
-                                        a = a.text.toLowerCase();
-                                        b = b.text.toLowerCase();
-                                        if (a > b) {
-                                            return 1;
-                                        } else if (a < b) {
-                                            return -1;
-                                        }
-                                        return 0;
-                                    });
-                                },
-                                placeholder: "Select a version"
+            $('#select-root-namespace').on('select2:select', function (e) {
+                $('#loading-icon').show(0);
+                $('#chosable-namespaces-list').empty();
+                var selectedValue = e.params.data.id;
+                var url = '{{ path("namespaces_by_root_id_list_json", {'id': 'selectedValue'}) }}';
+                url = url.replace("selectedValue", selectedValue);
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    dataType: 'json',
+                    success:function(data){
+                        $('#loading-icon').hide(0);
+
+                        // handling the response data from the controller
+                        if(data.status == 'Error'){
+                            console.log("[API] ERROR: "+data.message);
+                        }
+                        if(data.status == 'Success'){
+                            $.each(data.namespaces, function(key, val){
+                                $("#chosable-namespaces-list").append($("<a class=\"list-group-item pickable-namespace\" id="+val.id+">"+val.standardLabel+"</a>"));
                             });
+                        }
+                    }
+                });
+            });
 
-                            $('.select-change-version[data-id='+selectedValue+']').on('select2:close', function (e) {
-                                //Récupérer le NS a changer, et la nouvelle référence.
-                                var oldNsId = $(this).data('id');
-                                var newNsId = $('.select-change-version[data-id='+selectedValue+']').val();
+            $(document).on("mouseenter touchstart", ".pickable-namespace", function() {
+                $(this).prepend($("<span><i class=\"fas fa-plus\"></i>&nbsp;</span>"));
+            });
 
-                                // Ajax here
-                                var url = '{{ path("namespace_associated_profile_change", {'profile': 'profileID', 'namespace' : 'namespaceID','associatedNamespace': 'oldNsId', 'newAssociatedNamespace': 'newNsId'}) }}';
-                                url = url.replace("profileID", profileID);
-                                url = url.replace("oldNsId", oldNsId);
-                                url = url.replace("newNsId", newNsId);
+            $(document).on("mouseleave touchend", ".pickable-namespace", function() {
+                $(this).find(":first-child").remove();
+            });
+
+            $(document).on("click", ".pickable-namespace", function() {
+                var selectedValue = $(this).attr("id");
+                var profileID = {{ profile.id }}
+                var url = '{{ path("profile_namespace_association", {'profile' : 'profileID','namespace': 'selectedValue'}) }}';
+                url = url.replace("profileID", profileID);
+                url = url.replace("selectedValue", selectedValue);
+                $.ajax({
+                    url: url,
+                    type: 'POST',
+                    dataType: 'json',
+                    success:function(data){
+
+                        // handling the response data from the controller
+                        if(data.status == 'Error'){
+                            console.log("[API] ERROR: "+data.message);
+                        }
+                        if(data.status == 'Success'){
+                            window.location.reload();
+                        }
+                    }
+                });
+                var urlNamespace = '{{ path('namespace_show', {'id' : 'selectedValue'}) }}';
+                urlNamespace = urlNamespace.replace('selectedValue', selectedValue);
+                $("#empty-namespace-list-message").remove();
+                $("#select-root-namespace option:selected").remove();
+                //TODO
+                $("#used-namespaces-list").append($('<div class="row"><a href="#namespaces" class="remove-namespace" data-id="'+selectedValue+'"><span class="glyphicon glyphicon-remove text-danger" aria-hidden="true"></span></a><a href="'+urlNamespace+'">'+$(this).text()+'</a><span class="loading-icon2" data-id="'+selectedValue+'">&nbsp;<span class="fas fa-spinner fa-spin"></span></span></div>'));
+                $(".loading-icon2[data-id='"+selectedValue+"']").hide(0);
+                $("#chosable-namespaces-list").empty();
+            });
+
+            $(document).on("click", ".remove-namespace", function() {
+                var selectedValue = $(this).data("id");
+                var profileID = {{ profile.id }}
+                    $(".loading-icon2[data-id='"+selectedValue+"']").show(0);
+                var url = '{{ path("profile_namespace_disassociation", {'profile' : 'profileID','namespace': 'selectedValue'}) }}';
+                url = url.replace("profileID", profileID);
+                url = url.replace("selectedValue", selectedValue);
+                $.ajax({
+                    url: url,
+                    type: 'DELETE',
+                    dataType: 'json',
+                    success:function(data){
+                    },
+                    statusCode: {
+                        204: function () {
+                            window.location.reload();
+                        }
+                    }
+                });
+
+            });
+
+            $(document).on("click", ".not-removable", function(){
+                bootbox.alert("Classes and properties belonging to the namespace you wish to deselect are associated with your profile. Please deselect them first before proceeding.");
+            });
+
+            $(document).on("click", ".change-version", function(){
+                btn = $(this);
+                var selectedValue = $(this).data("id");
+                var profileID = {{ profile.id }}
+
+                    bootbox.confirm({
+                        message: "Changing the version of a namespace selected by a profile changes the association of all entities in that namespace to the new version.<br><br>Errors may occur.<br><br>Do you wish to proceed?",
+                        title: '<i class="fas fa-exclamation-triangle"></i> Warning',
+                        buttons: {
+                            confirm: {
+                                label: 'Yes',
+                                className: 'btn-success'
+                            },
+                            cancel: {
+                                label: 'No',
+                                className: 'btn-danger'
+                            }
+                        },
+                        callback: function (result) {
+                            if(result){
+                                cell = btn.parent();
+                                btn.remove();
+                                cell.append("<select class='select-change-version' data-id='"+selectedValue+"'></select>");
+
+                                $('.select-change-version[data-id='+selectedValue+']').select2({
+                                    width: '100%',
+                                    sorter: function(data) {
+                                        /* Sort data using lowercase comparison */
+                                        return data.sort(function (a, b) {
+                                            a = a.text.toLowerCase();
+                                            b = b.text.toLowerCase();
+                                            if (a > b) {
+                                                return 1;
+                                            } else if (a < b) {
+                                                return -1;
+                                            }
+                                            return 0;
+                                        });
+                                    },
+                                    placeholder: "Select a version"
+                                });
+
+                                $('.select-change-version[data-id='+selectedValue+']').on('select2:close', function (e) {
+                                    //Récupérer le NS a changer, et la nouvelle référence.
+                                    var oldNsId = $(this).data('id');
+                                    var newNsId = $('.select-change-version[data-id='+selectedValue+']').val();
+
+                                    // Ajax here
+                                    var url = '{{ path("namespace_associated_profile_change", {'profile': 'profileID', 'namespace' : 'namespaceID','associatedNamespace': 'oldNsId', 'newAssociatedNamespace': 'newNsId'}) }}';
+                                    url = url.replace("profileID", profileID);
+                                    url = url.replace("oldNsId", oldNsId);
+                                    url = url.replace("newNsId", newNsId);
+                                    $.ajax({
+                                        url: url,
+                                        type: 'GET',
+                                        dataType: 'json',
+                                        success:function(data){
+                                            window.location.reload();
+                                        }
+                                    });
+                                });
+
+                                var url = '{{ path("get_choices_namespaces", {'namespace' : 'selectedValue'}) }}';
+                                url = url.replace("selectedValue", selectedValue);
                                 $.ajax({
                                     url: url,
                                     type: 'GET',
                                     dataType: 'json',
                                     success:function(data){
-                                        window.location.reload();
-                                    }
-                                });
-                            });
-
-                            var url = '{{ path("get_choices_namespaces", {'namespace' : 'selectedValue'}) }}';
-                            url = url.replace("selectedValue", selectedValue);
-                            $.ajax({
-                                url: url,
-                                type: 'GET',
-                                dataType: 'json',
-                                success:function(data){
-                                    var childVersions = data.rootNamespaceChildVersions
-                                    for (var item in childVersions) {
-                                        if(selectedValue != item){
-                                            $('.select-change-version[data-id='+selectedValue+']').append("<option value='" + item + "'>"+childVersions[item]+"</option>");
+                                        var childVersions = data.rootNamespaceChildVersions
+                                        for (var item in childVersions) {
+                                            if(selectedValue != item){
+                                                $('.select-change-version[data-id='+selectedValue+']').append("<option value='" + item + "'>"+childVersions[item]+"</option>");
+                                            }
                                         }
                                     }
-                                }
-                            });
+                                });
+                            }
+                        }
+                    });
+
+            });
+
+            $(document).on("click", ".select-class", function() {
+                var selectedValue = $(this).data("id");
+                var classNamespaceId = $(this).data("namespace-id");
+                $(".plus-icon[data-id='"+selectedValue+"']").hide(0);
+                $(".select-class-loading-icon[data-id='"+selectedValue+"']").css('display','inline');
+                var url =  $(this).data("url");
+                console.log(url);
+                $.ajax({
+                    url: url ,
+                    type: 'POST',
+                    dataType: 'json',
+                    success:function(data){
+                        selectableClassesTable.ajax.reload();
+                        associatedClassesTable.ajax.reload();
+                        $(".remove-namespace[data-id='"+classNamespaceId+"']").removeClass("remove-namespace").addClass("not-removable").attr("disabled", "disabled");
+                    }
+                });
+            });
+
+            $(document).on("click", ".remove-class", function() {
+                var selectedValue = $(this).data("id");
+                var classNamespaceId = $(this).data("namespace-id");
+                $(".remove-class[data-id='"+selectedValue+"']").hide(0);
+                $(".remove-class-loading-icon[data-id='"+selectedValue+"']").css('display','inline');
+                var url =  $(this).data("url");
+                console.log(url);
+                $.ajax({
+                    url: url ,
+                    type: 'POST',
+                    dataType: 'json',
+                    success:function(data){
+                        associatedClassesTable.ajax.reload();
+                        selectableClassesTable.ajax.reload();
+
+                        if(data.isRemovableNamespace){
+                            // remettre le bouton Remove pour le namespace selectionné si plus d'association.
+                            $(".not-removable[data-id='"+classNamespaceId+"']").addClass("remove-namespace").removeClass("not-removable").removeAttr("disabled");
                         }
                     }
                 });
+            });
+            {% else %}
+            $('#classes-table').DataTable({
+                columnDefs: [
+                    { type: 'natural-ci', targets: 0, width: '1%', className: 'text-right' }
+                ],
+                "autoWidth": false,
+                order: [[ 2, 'asc' ]],
+                initComplete: function(){
+                    this.api().columns([3]).every(function(){
+                        var column = this;
+                        var select = $('<br><select id="properties-namespace-select" style="width:100%;"><option value=""></option></select>')
+                            .appendTo($(column.header()))
+                            .on('change', function(){
+                                var val = $.fn.dataTable.util.escapeRegex(
+                                    $(this).val()
+                                );
 
-        });
+                                column
+                                    .search(val ? '^'+val+'$' : '', true, false)
+                                    .draw();
+                            });
 
-        $(document).on("click", ".select-class", function() {
-            var selectedValue = $(this).data("id");
-            var classNamespaceId = $(this).data("namespace-id");
-            $(".plus-icon[data-id='"+selectedValue+"']").hide(0);
-            $(".select-class-loading-icon[data-id='"+selectedValue+"']").css('display','inline');
-            var url =  $(this).data("url");
-            console.log(url);
-            $.ajax({
-                url: url ,
-                type: 'POST',
-                dataType: 'json',
-                success:function(data){
-                    selectableClassesTable.ajax.reload();
-                    associatedClassesTable.ajax.reload();
-                    $(".remove-namespace[data-id='"+classNamespaceId+"']").removeClass("remove-namespace").addClass("not-removable").attr("disabled", "disabled");
+                        $(select).click(function(e){
+                            e.stopPropagation();
+                        });
+
+                        column.data().unique().sort().each(function(d, j){
+                            select.append('<option value="'+d+'">'+d+'</option>')
+                        });
+                    });
                 }
             });
-        });
+            {% endif %}
 
-        $(document).on("click", ".remove-class", function() {
-            var selectedValue = $(this).data("id");
-            var classNamespaceId = $(this).data("namespace-id");
-            $(".remove-class[data-id='"+selectedValue+"']").hide(0);
-            $(".remove-class-loading-icon[data-id='"+selectedValue+"']").css('display','inline');
-            var url =  $(this).data("url");
-            console.log(url);
-            $.ajax({
-                url: url ,
-                type: 'POST',
-                dataType: 'json',
-                success:function(data){
-                    associatedClassesTable.ajax.reload();
-                    selectableClassesTable.ajax.reload();
+            $('#labels-table').DataTable();
+            $('#descriptions-table').DataTable();
+            $('#profile-versions-table').DataTable();
+            $('#used-namespaces-table').DataTable();
+            $('#projects-table').DataTable();
+            $('#properties-table').DataTable({
+                "autoWidth": false,
+                order: [[ 3, 'asc' ]],
+                columnDefs: [
+                    { type: 'natural-ci', targets: 2, width: '1%', className: 'text-right' }
+                ],
+                initComplete: function(){
+                    this.api().columns([6]).every(function(){
+                        var column = this;
+                        var select = $('<br><select id="properties-namespace-select" style="width:100%;"><option value=""></option></select>')
+                            .appendTo($(column.header()))
+                            .on('change', function(){
+                                var val = $.fn.dataTable.util.escapeRegex(
+                                    $(this).val()
+                                );
 
-                    if(data.isRemovableNamespace){
-                        // remettre le bouton Remove pour le namespace selectionné si plus d'association.
-                        $(".not-removable[data-id='"+classNamespaceId+"']").addClass("remove-namespace").removeClass("not-removable").removeAttr("disabled");
-                    }
+                                column
+                                    .search(val ? '^'+val+'$' : '', true, false)
+                                    .draw();
+                            });
+
+                        $(select).click(function(e){
+                            e.stopPropagation();
+                        });
+
+                        column.data().unique().sort().each(function(d, j){
+                            select.append('<option value="'+d+'">'+d+'</option>')
+                        });
+                    });
+                    this.api().columns([7]).every(function(){
+                        var column = this;
+                        var select = $('<select id="properties-status-select" style="width:100%;"><option value=""></option></select>')
+                            .appendTo($(column.header()))
+                            .on('change', function(){
+                                var val = $.fn.dataTable.util.escapeRegex(
+                                    $(this).val()
+                                );
+
+                                column
+                                    .search(val ? '^'+val+'$' : '', true, false)
+                                    .draw();
+                            });
+
+                        $(select).click(function(e){
+                            e.stopPropagation();
+                        });
+
+                        column.data().unique().sort().each(function(d, j){
+                            select.append('<option value="'+d+'">'+d+'</option>')
+                        });
+                    });
                 }
             });
-        });
-        {% else %}
-        $('#classes-table').DataTable({
-            columnDefs: [
-                { type: 'natural-ci', targets: 1, width: '1%', className: 'text-right' }
-            ],
-            "autoWidth": false,
-            order: [[ 2, 'asc' ]],
-            initComplete: function(){
-                this.api().columns([5]).every(function(){
-                    var column = this;
-                    var select = $('<br><select id="properties-namespace-select" style="width:100%;"><option value=""></option></select>')
-                        .appendTo($(column.header()))
-                        .on('change', function(){
-                            var val = $.fn.dataTable.util.escapeRegex(
-                                $(this).val()
-                            );
-
-                            column
-                                .search(val ? '^'+val+'$' : '', true, false)
-                                .draw();
-                        });
-
-                    $(select).click(function(e){
-                        e.stopPropagation();
-                    });
-
-                    column.data().unique().sort().each(function(d, j){
-                        select.append('<option value="'+d+'">'+d+'</option>')
-                    });
-                });
+            var existsSelectedInProfile = $("#properties-status-select option[value='Selected in profile']").length !== 0; //détermine si cette valeur est dans le select
+            if (existsSelectedInProfile) {
+                $("#properties-status-select").val('Selected in profile').change(); //default filter on this column
             }
-        });
-        {% endif %}
 
-        $('#labels-table').DataTable();
-        $('#descriptions-table').DataTable();
-        $('#properties-table').DataTable({
-            "autoWidth": false,
-            order: [[ 3, 'asc' ]],
-            columnDefs: [
-                { type: 'natural-ci', targets: 2, width: '1%', className: 'text-right' }
-            ],
-            initComplete: function(){
-                this.api().columns([6]).every(function(){
-                    var column = this;
-                    var select = $('<br><select id="properties-namespace-select" style="width:100%;"><option value=""></option></select>')
-                        .appendTo($(column.header()))
-                        .on('change', function(){
-                            var val = $.fn.dataTable.util.escapeRegex(
-                                $(this).val()
-                            );
-
-                            column
-                                .search(val ? '^'+val+'$' : '', true, false)
-                                .draw();
-                        });
-
-                    $(select).click(function(e){
-                        e.stopPropagation();
-                    });
-
-                    column.data().unique().sort().each(function(d, j){
-                        select.append('<option value="'+d+'">'+d+'</option>')
+            $("a[href='#graph']").click(
+                function(){
+                    $(document).ready(function(){
+                        window.location.reload();
                     });
                 });
-                this.api().columns([7]).every(function(){
-                    var column = this;
-                    var select = $('<select id="properties-status-select" style="width:100%;"><option value=""></option></select>')
-                        .appendTo($(column.header()))
-                        .on('change', function(){
-                            var val = $.fn.dataTable.util.escapeRegex(
-                                $(this).val()
-                            );
-
-                            column
-                                .search(val ? '^'+val+'$' : '', true, false)
-                                .draw();
-                        });
-
-                    $(select).click(function(e){
-                        e.stopPropagation();
-                    });
-
-                    column.data().unique().sort().each(function(d, j){
-                        select.append('<option value="'+d+'">'+d+'</option>')
-                    });
-                });
-            }
-        });
-        var existsSelectedInProfile = $("#properties-status-select option[value='Selected in profile']").length !== 0; //détermine si cette valeur est dans le select
-        if (existsSelectedInProfile) {
-            $("#properties-status-select").val('Selected in profile').change(); //default filter on this column
-        }
-
-        $("a[href='#graph']").click(
-            function(){
-                $(document).ready(function(){
-                    window.location.reload();
-                });
-            });
-    } );
-</script>
+        } );
+    </script>
 
 
 {% endblock %}
