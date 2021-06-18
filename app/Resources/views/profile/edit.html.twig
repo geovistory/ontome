@@ -11,7 +11,20 @@
 {% block body %}
 
 <div class="container">
-    <h2 class="profile-name">{{ profile.standardLabel }}{% if profile.isRootProfile %}&nbsp;<span class="label label-default" style="font-size: 12px; vertical-align: middle">Root</span>{% endif %}</h2>
+    <h2 class="profile-name">
+        {{ profile.standardLabel }}{% if profile.isRootProfile %}&nbsp;<span class="label label-default" style="font-size: 12px; vertical-align: middle">Root</span>{% endif %}
+        <span class="pull-right">
+            {% if (not profile.isOngoing and profile.wasClosedAt is not null and profile.endDate is null) or (profile.isForcedPublication and profile.isOngoing) %}
+                <a  href="{{ path('api_classes_and_properties_by_profile_xml', {
+                    'profile': profile.id
+                }) }}"
+                    class="btn btn-primary"
+                    download="profile-{{ profile.standardLabel }}.rdf">
+                    <i class="fas fa-code"></i> OWL-RDF
+                </a>
+            {% endif %}
+        </span>
+    </h2>
     <ul class="nav nav-tabs" id="main-tabs">
         <li class="active"><a data-toggle="tab" href="#summary">Summary</a></li>
         <li><a data-toggle="tab" href="#identification">Identification</a></li>
