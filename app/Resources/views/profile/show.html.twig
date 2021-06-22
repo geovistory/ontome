@@ -19,7 +19,7 @@
                         <i class="fa fa-edit"></i>
                     </a>
                 {% endif %}
-                {% if (not profile.isOngoing and profile.wasClosedAt is not null and profile.endDate is null) or (profile.isForcedPublication and profile.isOngoing) %}
+                {% if app.user is not null and ((not profile.isOngoing and profile.wasClosedAt is not null and profile.endDate is null) or (profile.isForcedPublication and profile.isOngoing)) %}
                     <a  href="{{ path('api_classes_and_properties_by_profile_xml', {
                         'profile': profile.id
                     }) }}"

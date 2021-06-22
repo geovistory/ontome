@@ -229,7 +229,7 @@ class ApiController extends Controller
     }
 
     /**
-     * @Route("/api/project-rdf-owl.rdf", name="api_classes_and_properties_by_profile_xml")
+     * @Route("/api/project-rdf-owl", name="api_classes_and_properties_by_profile_xml")
      * @Method("GET")
      * @param Request $request
      * @return Response XML formatted response of classes and properties related to this profile
