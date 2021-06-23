@@ -64,6 +64,7 @@
                         <tr>
                             <th>Project name</th>
                             <th>Master project</th>
+                            <th>Role</th>
                             <th>Last updated</th>
                             <th>Action</th>
                         </tr>
@@ -88,6 +89,15 @@
                                         </a>
                                     {% else %}
                                         <span class="text-muted">(Master)</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if userProjectAssociation.permission == 1 %}
+                                        <span class="label label-danger">Administrator</span>
+                                    {% elseif userProjectAssociation.permission == 2 %}
+                                        <span class="label label-warning">Manager</span>
+                                    {% elseif userProjectAssociation.permission == 3 %}
+                                        <span class="label label-success">Member</span>
                                     {% endif %}
                                 </td>
                                 <td>{{ userProjectAssociation.project.modificationTime|date('Y-m-d') }}</td>
