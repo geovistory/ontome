@@ -1066,7 +1066,7 @@ class UserController extends Controller
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, array(
-            "secret"=>"6Lcvi34UAAAAAERZMen2aVy-9j20JRhkF3n60UBH","response"=>$recaptcha));
+            "secret"=>"6Lf77VMbAAAAAJYqEse3tKhFOZRBjlgmLV1zKA4Z","response"=>$recaptcha));
         $response = curl_exec($ch);
         curl_close($ch);
         $data = json_decode($response);
