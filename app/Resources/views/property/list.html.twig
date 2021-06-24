@@ -8,6 +8,9 @@
 {%  endblock %}
 
 {% block body %}
+    <p class="pull-right">
+        <button type="button" class="btn btn-default"  id="btn-show-all-properties">Show all properties</button>
+    </p>
     <h3>Properties</h3>
     <table class="table table-striped" id="property-table">
         <thead>
@@ -20,6 +23,7 @@
                 <th>Range</th>
                 <th>Namespace</th>
                 <th>Last updated</th>
+                <th>id_namespace</th>
             </tr>
         </thead>
         <tbody>
@@ -28,7 +32,7 @@
             {% for property in properties %}
                 {# Une version par root est activé pour filtrage, donc pas possible d'avoir 2 propriétés identiques affichées #}
                 {# Donc l'utilisation de la boucle est justifiée par la condition if, et qui ne retournera qu'une propriété #}
-                {% for propertyVersion in property.propertyVersions if propertyVersion.namespaceForVersion.id in namespacesId %}
+                {% for propertyVersion in property.propertyVersions if propertyVersion.namespaceForVersion.id in allNamespacesId %}
                 <tr>
                     <td class="text-right small">
                         {% if propertyVersion.domain is not null and propertyVersion.domainNamespace is not null %}
@@ -95,6 +99,9 @@
                             {{ propertyVersion.creationTime|date('Y-m-d') }}
                         {% endif %}
                     </td>
+                    <td>
+                        {{ propertyVersion.namespaceForVersion.id }}
+                    </td>
                 </tr>
                 {% endfor %}
             {% endfor %}
@@ -105,15 +112,50 @@
     {{ parent() }}
 
     <script>
+        // Filtrer la table selon le bouton show/hide
+        $.fn.dataTable.ext.search.push(
+            function( settings, data, dataIndex ) {
+                // Don't filter on anything other than "class-table"
+                if ( settings.nTable.id !== 'property-table' ) {
+                    return true;
+                }
+                var propertyNamespacesForVersion = data[8]; // use data for comparaison
+                var vnamespacesId = [{{ ('"' ~ namespacesId|join('","') ~ '"')|raw }}];
+
+                if($('#btn-show-all-properties').hasClass('btn-primary')) {
+                    return true;
+                }
+                else{
+                    return vnamespacesId.includes(propertyNamespacesForVersion);
+                }
+            }
+        );
         $(document).ready(function() {
-            $('#property-table').DataTable({
+            var tableProperties = $('#property-table').DataTable({
                 "order": [[2, 'asc']],
                 "pageLength":50,
                 "columnDefs": [
                     { type: 'natural-ci', targets: 2, className: 'text-right' },
                     { "orderable": false, "targets": 1 },
-                    { "orderable": false, "targets": 4 }]
+                    { "orderable": false, "targets": 4 },
+                    { "visible": false, "targets": 8 }]
             });
+
+            $('#btn-show-all-properties').click(function (){
+                    if($('#btn-show-all-properties').hasClass('btn-primary')){
+                        $('#btn-show-all-properties').removeClass('btn-primary');
+                        $('#btn-show-all-properties').addClass('btn-default');
+                        $('#btn-show-all-properties').html("Show all properties");
+                        tableProperties.draw();
+                    }
+                    else{
+                        $('#btn-show-all-properties').removeClass('btn-default');
+                        $('#btn-show-all-properties').addClass('btn-primary');
+                        $('#btn-show-all-properties').html("Hide others properties");
+                        tableProperties.draw();
+                    }
+                }
+            );
         });
     </script>
 {% endblock %}

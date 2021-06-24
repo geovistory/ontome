@@ -8,6 +8,9 @@
 {%  endblock %}
 
 {% block body %}
+    <p class="pull-right">
+        <button type="button" class="btn btn-default"  id="btn-show-all-classes">Show all classes</button>
+    </p>
     <h3>Classes</h3>
     <table class="table table-striped" id="class-table">
         <thead>
@@ -16,6 +19,7 @@
             <th>Class name</th>
             <th>Namespace</th>
             <th>Last updated</th>
+            <th>id_namespace</th>
         </tr>
         </thead>
         <tbody>
@@ -24,7 +28,7 @@
             {% for class in classes %}
                 {# Une version par root est activé pour filtrage, donc pas possible d'avoir 2 classes identiques affichées #}
                 {# Donc l'utilisation de la boucle est justifiée par la condition if, et qui ne retournera qu'une classe #}
-                {% for classVersion in class.classVersions if classVersion.namespaceForVersion.id in namespacesId %}
+                {% for classVersion in class.classVersions if classVersion.namespaceForVersion.id in allNamespacesId %}
                 <tr>
                     <td>
                         {{ classVersion.class.identifierInNamespace }}
@@ -47,6 +51,7 @@
                             {{ classVersion.creationTime|date('Y-m-d') }}
                         {% endif %}
                     </td>
+                    <td>{{ classVersion.namespaceForVersion.id }}</td>
                 </tr>
                 {% endfor %}
             {% endfor %}
@@ -57,13 +62,52 @@
     {{ parent() }}
 
     <script>
+        // Filtrer la table selon le bouton show/hide
+        $.fn.dataTable.ext.search.push(
+            function( settings, data, dataIndex ) {
+                // Don't filter on anything other than "class-table"
+                if ( settings.nTable.id !== 'class-table' ) {
+                    return true;
+                }
+                var classNamespacesForVersion = data[4]; // use data for comparaison
+                var vnamespacesId = [{{ ('"' ~ namespacesId|join('","') ~ '"')|raw }}];
+
+                if($('#btn-show-all-classes').hasClass('btn-primary')) {
+                    return true;
+                }
+                else{
+                    return vnamespacesId.includes(classNamespacesForVersion);
+                }
+            }
+        );
+
         $(document).ready(function() {
-        $('#class-table').DataTable({
+        var tableClasses = $('#class-table').DataTable({
             "pageLength":50,
             columnDefs: [
-                { type: 'natural-ci', targets: 0, className: 'text-right' }
+                { type: 'natural-ci', targets: 0, className: 'text-right' },
+
+                { "visible": false, "targets": 4 }
             ],
             order: [[ 1, 'asc' ]]});
+
+        $('#btn-show-all-classes').click(function (){
+                if($('#btn-show-all-classes').hasClass('btn-primary')){
+                    $('#btn-show-all-classes').removeClass('btn-primary');
+                    $('#btn-show-all-classes').addClass('btn-default');
+                    $('#btn-show-all-classes').html("Show all classes");
+                    tableClasses.draw();
+                }
+                else{
+                    $('#btn-show-all-classes').removeClass('btn-default');
+                    $('#btn-show-all-classes').addClass('btn-primary');
+                    $('#btn-show-all-classes').html("Hide others classes");
+                    tableClasses.draw();
+                }
+            }
+        );
     } );
+
+
     </script>
 {% endblock %}
