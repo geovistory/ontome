@@ -131,10 +131,10 @@ class PropertyController extends Controller
         $namespaceForPropertyVersion = $propertyVersion->getNamespaceForVersion();
         $namespacesId[] = $namespaceForPropertyVersion->getId();
 
-        // Sans oublier les namespaces références si indisponibles
-        foreach($namespaceForPropertyVersion->getReferencedNamespaceAssociations() as $referencedNamespacesAssociation){
-            if(!in_array($referencedNamespacesAssociation->getReferencedNamespace()->getId(), $namespacesId)){
-                $namespacesId[] = $referencedNamespacesAssociation->getReferencedNamespace()->getId();
+        // Sans oublier les namespaces références si indisponible
+        foreach($propertyVersion->getNamespaceForVersion()->getAllReferencedNamespaces() as $referencedNamespace){
+            if(!in_array($referencedNamespace->getId(), $namespacesId)){
+                $namespacesId[] = $referencedNamespace->getId();
             }
         }
 
@@ -280,8 +280,8 @@ class PropertyController extends Controller
         // $namespacesIdFromClassVersion : Ensemble de namespaces provenant de la classe affiché (namespaceForVersion + references)
         $namespacesIdFromPropertyVersion[] = $propertyVersion->getNamespaceForVersion()->getId();
 
-        foreach($propertyVersion->getNamespaceForVersion()->getReferencedNamespaceAssociations() as $referencedNamespacesAssociation){
-            $namespacesIdFromPropertyVersion[] = $referencedNamespacesAssociation->getReferencedNamespace()->getId();
+        foreach($propertyVersion->getNamespaceForVersion()->getAllReferencedNamespaces() as $referencedNamespace){
+            $namespacesIdFromPropertyVersion[] = $referencedNamespace->getId();
         }
 
         // $namespacesIdFromUser : Ensemble de tous les namespaces activés par l'utilisateur
