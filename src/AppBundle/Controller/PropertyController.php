@@ -340,8 +340,9 @@ class PropertyController extends Controller
         // $namespacesIdFromClassVersion : Ensemble de namespaces provenant de la classe affiché (namespaceForVersion + references)
         $namespacesIdFromPropertyVersion[] = $propertyVersion->getNamespaceForVersion()->getId();
 
-        foreach($propertyVersion->getNamespaceForVersion()->getReferencedNamespaceAssociations() as $referencedNamespacesAssociation){
-            $namespacesIdFromPropertyVersion[] = $referencedNamespacesAssociation->getReferencedNamespace()->getId();
+        //foreach($propertyVersion->getNamespaceForVersion()->getReferencedNamespaceAssociations() as $referencedNamespacesAssociation){
+        foreach($propertyVersion->getNamespaceForVersion()->getAllReferencedNamespaces() as $referencedNamespace){
+            $namespacesIdFromPropertyVersion[] = $referencedNamespace->getId();
         }
 
         // $namespacesIdFromUser : Ensemble de tous les namespaces activés par l'utilisateur
@@ -363,7 +364,7 @@ class PropertyController extends Controller
         $relations = $em->getRepository('AppBundle:Property')->findRelationsByPropertyVersionAndNamespacesId($propertyVersion, $namespacesId);
 
         $arrayClassesVersion = $em->getRepository('AppBundle:OntoClassVersion')
-            ->findIdAndStandardLabelOfClassesVersionByNamespacesId($namespacesId);
+            ->findIdAndStandardLabelOfClassesVersionByNamespacesId($namespacesIdFromPropertyVersion);
 
         $propertyVersion->setCreator($this->getUser());
         $propertyVersion->setModifier($this->getUser());
