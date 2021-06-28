@@ -120,7 +120,8 @@ class PropertyController extends Controller
 
         $property->addPropertyVersion($propertyVersion);
 
-        $property->setIsManualIdentifier(is_null($classVersion->getNamespaceForVersion()->getTopLevelNamespace()->getPropertyPrefix()));
+        //$property->setIsManualIdentifier(is_null($classVersion->getNamespaceForVersion()->getTopLevelNamespace()->getPropertyPrefix()));
+        $property->setIsManualIdentifier(is_null($this->getUser()->getCurrentOngoingNamespace()->getTopLevelNamespace()->getPropertyPrefix()));
         $property->setCreator($this->getUser());
         $property->setModifier($this->getUser());
 
