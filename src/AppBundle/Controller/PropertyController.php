@@ -393,8 +393,12 @@ class PropertyController extends Controller
         if ($form->isSubmitted() && $form->isValid()) {
             $domain = $em->getRepository("AppBundle:OntoClass")->find($form->get("domainVersion")->getData());
             $propertyVersion->setDomain($domain);
+            $domainNamespace = $em->getRepository("AppBundle:OntoClassVersion")->findClassVersionByClassAndNamespacesId($domain, $namespacesId)->getNamespaceForVersion();
+            $propertyVersion->setDomainNamespace($domainNamespace);
             $range = $em->getRepository("AppBundle:OntoClass")->find($form->get("rangeVersion")->getData());
             $propertyVersion->setRange($range);
+            $rangeNamespace = $em->getRepository("AppBundle:OntoClassVersion")->findClassVersionByClassAndNamespacesId($range, $namespacesId)->getNamespaceForVersion();
+            $propertyVersion->setRangeNamespace($rangeNamespace);
             $em = $this->getDoctrine()->getManager();
             $em->persist($propertyVersion);
             $em->flush();
