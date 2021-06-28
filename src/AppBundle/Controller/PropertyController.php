@@ -131,10 +131,10 @@ class PropertyController extends Controller
         $namespaceForPropertyVersion = $propertyVersion->getNamespaceForVersion();
         $namespacesId[] = $namespaceForPropertyVersion->getId();
 
-        // Sans oublier les namespaces références si indisponibles
-        foreach($namespaceForPropertyVersion->getReferencedNamespaceAssociations() as $referencedNamespacesAssociation){
-            if(!in_array($referencedNamespacesAssociation->getReferencedNamespace()->getId(), $namespacesId)){
-                $namespacesId[] = $referencedNamespacesAssociation->getReferencedNamespace()->getId();
+        // Sans oublier les namespaces références si indisponible
+        foreach($propertyVersion->getNamespaceForVersion()->getAllReferencedNamespaces() as $referencedNamespace){
+            if(!in_array($referencedNamespace->getId(), $namespacesId)){
+                $namespacesId[] = $referencedNamespace->getId();
             }
         }
 
@@ -280,8 +280,8 @@ class PropertyController extends Controller
         // $namespacesIdFromClassVersion : Ensemble de namespaces provenant de la classe affiché (namespaceForVersion + references)
         $namespacesIdFromPropertyVersion[] = $propertyVersion->getNamespaceForVersion()->getId();
 
-        foreach($propertyVersion->getNamespaceForVersion()->getReferencedNamespaceAssociations() as $referencedNamespacesAssociation){
-            $namespacesIdFromPropertyVersion[] = $referencedNamespacesAssociation->getReferencedNamespace()->getId();
+        foreach($propertyVersion->getNamespaceForVersion()->getAllReferencedNamespaces() as $referencedNamespace){
+            $namespacesIdFromPropertyVersion[] = $referencedNamespace->getId();
         }
 
         // $namespacesIdFromUser : Ensemble de tous les namespaces activés par l'utilisateur
@@ -340,8 +340,9 @@ class PropertyController extends Controller
         // $namespacesIdFromClassVersion : Ensemble de namespaces provenant de la classe affiché (namespaceForVersion + references)
         $namespacesIdFromPropertyVersion[] = $propertyVersion->getNamespaceForVersion()->getId();
 
-        foreach($propertyVersion->getNamespaceForVersion()->getReferencedNamespaceAssociations() as $referencedNamespacesAssociation){
-            $namespacesIdFromPropertyVersion[] = $referencedNamespacesAssociation->getReferencedNamespace()->getId();
+        //foreach($propertyVersion->getNamespaceForVersion()->getReferencedNamespaceAssociations() as $referencedNamespacesAssociation){
+        foreach($propertyVersion->getNamespaceForVersion()->getAllReferencedNamespaces() as $referencedNamespace){
+            $namespacesIdFromPropertyVersion[] = $referencedNamespace->getId();
         }
 
         // $namespacesIdFromUser : Ensemble de tous les namespaces activés par l'utilisateur
@@ -363,7 +364,7 @@ class PropertyController extends Controller
         $relations = $em->getRepository('AppBundle:Property')->findRelationsByPropertyVersionAndNamespacesId($propertyVersion, $namespacesId);
 
         $arrayClassesVersion = $em->getRepository('AppBundle:OntoClassVersion')
-            ->findIdAndStandardLabelOfClassesVersionByNamespacesId($namespacesId);
+            ->findIdAndStandardLabelOfClassesVersionByNamespacesId($namespacesIdFromPropertyVersion);
 
         $propertyVersion->setCreator($this->getUser());
         $propertyVersion->setModifier($this->getUser());
@@ -393,8 +394,12 @@ class PropertyController extends Controller
         if ($form->isSubmitted() && $form->isValid()) {
             $domain = $em->getRepository("AppBundle:OntoClass")->find($form->get("domainVersion")->getData());
             $propertyVersion->setDomain($domain);
+            $domainNamespace = $em->getRepository("AppBundle:OntoClassVersion")->findClassVersionByClassAndNamespacesId($domain, $namespacesId)->getNamespaceForVersion();
+            $propertyVersion->setDomainNamespace($domainNamespace);
             $range = $em->getRepository("AppBundle:OntoClass")->find($form->get("rangeVersion")->getData());
             $propertyVersion->setRange($range);
+            $rangeNamespace = $em->getRepository("AppBundle:OntoClassVersion")->findClassVersionByClassAndNamespacesId($range, $namespacesId)->getNamespaceForVersion();
+            $propertyVersion->setRangeNamespace($rangeNamespace);
             $em = $this->getDoctrine()->getManager();
             $em->persist($propertyVersion);
             $em->flush();
