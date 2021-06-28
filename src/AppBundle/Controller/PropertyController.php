@@ -74,7 +74,7 @@ class PropertyController extends Controller
         //get the right version of the class
         $classVersion = $class->getClassVersionForDisplay();
 
-        $this->denyAccessUnlessGranted('add_associations', $classVersion->getNamespaceForVersion());
+        $this->denyAccessUnlessGranted('add_associations', $this->getUser()->getCurrentOngoingNamespace());
 
         if($type !== 'ingoing' && $type !== 'outgoing') throw $this->createNotFoundException('The requested property type "'.$type.'" does not exist!');
 
@@ -93,7 +93,7 @@ class PropertyController extends Controller
         $scopeNote = new TextProperty();
         $scopeNote->setProperty($property);
         $scopeNote->setSystemType($systemTypeScopeNote);
-        $scopeNote->setNamespaceForVersion($classVersion->getNamespaceForVersion());
+        $scopeNote->setNamespaceForVersion($this->getUser()->getCurrentOngoingNamespace());
         $scopeNote->setCreator($this->getUser());
         $scopeNote->setModifier($this->getUser());
         $scopeNote->setCreationTime(new \DateTime('now'));
@@ -103,7 +103,7 @@ class PropertyController extends Controller
 
         $label = new Label();
         $label->setProperty($property);
-        $label->setNamespaceForVersion($classVersion->getNamespaceForVersion());
+        $label->setNamespaceForVersion($this->getUser()->getCurrentOngoingNamespace());
         $label->setIsStandardLabelForLanguage(true);
         $label->setCreator($this->getUser());
         $label->setModifier($this->getUser());
@@ -191,7 +191,7 @@ class PropertyController extends Controller
                 $property->getTextProperties()[1]->setModificationTime(new \DateTime('now'));
                 $property->getTextProperties()[1]->setSystemType($systemTypeExample);
                 //$property->getTextProperties()[1]->addNamespace($this->getUser()->getCurrentOngoingNamespace());TODO: delete this line after successful test of the SolutionD branch
-                $property->getTextProperties()[1]->setNamespaceForVersion($classVersion->getNamespaceForVersion());
+                $property->getTextProperties()[1]->setNamespaceForVersion($this->getUser()->getCurrentOngoingNamespace());
                 $property->getTextProperties()[1]->setProperty($property);
             }
 
