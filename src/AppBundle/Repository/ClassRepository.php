@@ -333,10 +333,8 @@ class ClassRepository extends EntityRepository
                         cv.standard_label AS \"standardLabel\",
                         cv.fk_namespace_for_version AS \"namespaceId\",
                         nsp.standard_label AS \"namespace\"
-                FROM che.class cls JOIN che.class_version cv ON cls.pk_class = cv.fk_class
-                JOIN che.associates_referenced_namespace arfnsp ON cv.fk_namespace_for_version = arfnsp.fk_referenced_namespace
+                FROM che.class cls JOIN che.class_version cv ON cls.pk_class = cv.fk_class AND cv.fk_namespace_for_version IN (SELECT * FROM che.get_all_references_namespaces_for_profile(:profile))
                 JOIN che.namespace nsp ON cv.fk_namespace_for_version = nsp.pk_namespace
-                WHERE arfnsp.fk_profile = :profile
                 EXCEPT
                 SELECT pk_class, identifier_in_namespace, class_standard_label, fk_class_namespace_for_version, namespace
                 FROM che.get_all_classes_for_profile(:profile) WHERE profile_association_type = 'selected';";

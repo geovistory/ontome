@@ -667,6 +667,18 @@
                         {% if profile.namespaces|length == 0 %}
                             <em id="empty-namespace-list-message">There is currently no namespace used by this profile.</em>
                         {% endif %}
+                        {% set displayOngoingWarning = false %}
+                        {% for namespace in profile.namespaces %}
+                            {% if namespace.isOngoing %}{% set displayOngoingWarning = true %}{% endif %}
+                            {% for referencedNamespace in namespace.allReferencedNamespaces  %}
+                                {% if referencedNamespace.isOngoing %}{% set displayOngoingWarning = true %}{% endif %}
+                            {% endfor %}
+                        {% endfor %}
+                        {% if displayOngoingWarning %}
+                            <div class="alert alert-warning" role="alert">
+                                <strong><i class="fas fa-exclamation-triangle"></i> Warning: </strong>Your profile includes one or more selected ongoing namespaces. An ongoing namespace can be modified at any time. It is not advisable to use its classes and properties.
+                            </div>
+                        {% endif %}
                         <table class="table table-striped" id="used-namespaces-table">
                             <thead>
                             <tr>
@@ -683,15 +695,30 @@
                             {% for namespace in profile.namespaces %}
                                 <tr>
                                     <td>
-                                        <a href="{{ path('namespace_show', {'id': namespace.id}) }}">{{ namespace }}</a>
+                                        <div><a href="{{ path('namespace_show', {'id': namespace.id}) }}">{{ namespace }}</a></div>
+                                        {% set arrayTopLevelNamespacesIds = [namespace.topLevelNamespace.id] %}
+                                        {% if namespace.directReferencedNamespaces|length > 0 %}
+                                            <div class="small text-muted"><strong><em>Referenced:</em></strong></div>
+                                            <ul>
+                                                {% for referencedNamespace in namespace.allReferencedNamespaces %}
+                                                    {% set arrayTopLevelNamespacesIds = arrayTopLevelNamespacesIds|merge([referencedNamespace.topLevelNamespace.id]) %}
+                                                    <li class="list-unstyled" style="border-left: 3px solid darkgrey; padding-left: 5px;">
+                                                        <em><a href="{{ path('namespace_show', {'id': referencedNamespace.id}) }}">{{ referencedNamespace }}</a></em>
+                                                    </li>
+                                                {% endfor %}
+                                            </ul>
+                                        {% endif %}
                                         {% for profileAssociation in profile.profileAssociations
                                             if (profileAssociation.class is not null or profileAssociation.property is not null)
-                                            and profileAssociation.entityNamespaceForVersion.topLevelNamespace.id == namespace.topLevelNamespace.id
-                                            and profileAssociation.entityNamespaceForVersion not in profile.namespaces%}
+                                            and profileAssociation.entityNamespaceForVersion.topLevelNamespace.id in arrayTopLevelNamespacesIds
+                                            and profileAssociation.entityNamespaceForVersion != namespace
+                                            and profileAssociation.entityNamespaceForVersion not in namespace.allReferencedNamespaces
+                                            and profileAssociation.systemType.id == 5 %}
                                             {% if loop.first %}
-                                                <br><span class="text-danger"><i class="fas fa-exclamation-triangle"></i> Classes and/or properties from another version of this namespace, previously selected in your profile, are not available in the selected version. They are displayed in red in your profile. Please make the necessary corrections before proceeding.</span>
+                                                <span class="text-danger"><i class="fas fa-exclamation-triangle"></i>  Classes and/or properties from another version of this namespace - or to one of its reference namespaces -, previously selected in your profile, are not available in the selected version. They are displayed in red in your profile. Please make the necessary corrections before proceeding.</span>
                                             {% endif %}
-                                        {% endfor %}</td>
+                                        {% endfor %}
+                                    </td>
                                     <td>
                                         {% if namespace.topLevelNamespace.childVersions|length > 1 %}
                                             <a href="#namespaces" class="change-version btn btn-xs btn-primary" data-id="{{ namespace.id }}"><i class="fas fa-exchange-alt"></i> Change version</a>
@@ -699,7 +726,9 @@
                                     </td>
                                     <td>
                                         {% set isRemovable = true %}
-                                        {% for profileAssociation in profile.profileAssociations if profileAssociation.systemType.id == 5 and profileAssociation.entityNamespaceForVersion.id == namespace.id %}
+                                        {% for profileAssociation in profile.profileAssociations
+                                            if profileAssociation.systemType.id == 5
+                                            and (profileAssociation.entityNamespaceForVersion == namespace or profileAssociation.entityNamespaceForVersion in namespace.allReferencedNamespaces)%}
                                             {% set isRemovable = false %}
                                         {% endfor %}
                                         {% if isRemovable %}
@@ -875,9 +904,13 @@
             var urlAssociatedClasses = '{{ path("associated_classes_profile_json", {'profile' : 'profileID'}) }}';
             urlAssociatedClasses = urlAssociatedClasses.replace("profileID", profileID);
 
+            // Pour vérifier si les entités sont bien correctement associé au profil (par rapport aux namespaces associés)
             {% set idNamespacesAssociatedInProfile = [] %}
             {% for namespace in profile.namespaces %}
             {% set idNamespacesAssociatedInProfile = idNamespacesAssociatedInProfile|merge([namespace.id]) %}
+            {% for referencedNamespace in namespace.allReferencedNamespaces if referencedNamespace.id not in idNamespacesAssociatedInProfile %}
+            {% set idNamespacesAssociatedInProfile = idNamespacesAssociatedInProfile|merge([referencedNamespace.id]) %}
+            {% endfor %}
             {% endfor %}
 
             var associatedClassesTable = $('#classes-table').DataTable({
@@ -1085,8 +1118,65 @@
                             console.log("[API] ERROR: "+data.message);
                         }
                         if(data.status == 'Success'){
+                            {# Eliminer les namespaces incompatibles #}
+                            {% set arrayNamespacesIds = [] %}
+                            {% set arrayTopLevelNamespacesIds = [] %}
+                            {% for namespace in profile.namespaces %}
+                            {% set arrayNamespacesIds = arrayNamespacesIds|merge([namespace.id]) %}
+                            {% set arrayTopLevelNamespacesIds = arrayTopLevelNamespacesIds|merge([namespace.topLevelNamespace.id]) %}
+                            {% for referencedNamespace in namespace.allReferencedNamespaces %}
+                            {% set arrayNamespacesIds = arrayNamespacesIds|merge([referencedNamespace.id]) %}
+                            {% set arrayTopLevelNamespacesIds = arrayTopLevelNamespacesIds|merge([referencedNamespace.topLevelNamespace.id]) %}
+                            {% endfor %}
+                            {% endfor %}
+                            console.log([{{ arrayTopLevelNamespacesIds|join(',') }}]);
+                            console.log([{{ arrayNamespacesIds|join(',') }}]);
                             $.each(data.namespaces, function(key, val){
-                                $("#chosable-namespaces-list").append($("<a class=\"list-group-item pickable-namespace\" id="+val.id+">"+val.standardLabel+"</a>"));
+                                var arrayNamespacesIncompatibles = [];
+                                var compatible = true;
+                                if([{{ arrayTopLevelNamespacesIds|join(',') }}].includes(parseInt(val.topLevelNamespaceId))){
+                                    if(![{{ arrayNamespacesIds|join(',') }}].includes(parseInt(val.id))){
+                                        arrayNamespacesIncompatibles.push(val.id);
+                                        compatible=false;
+                                    }
+                                }
+
+                                for(var refTopLevelId in val.referencedNamespaces) {
+                                    if([{{ arrayTopLevelNamespacesIds|join(',') }}].includes(parseInt(refTopLevelId))){
+                                        if(![{{ arrayNamespacesIds|join(',') }}].includes(parseInt(val.referencedNamespaces[refTopLevelId][0]))){
+                                            arrayNamespacesIncompatibles.push(val.referencedNamespaces[refTopLevelId][0]);
+                                            compatible=false;
+                                        }
+                                    }
+                                }
+                                console.log(arrayNamespacesIncompatibles);
+                                if(compatible){
+                                    $("#chosable-namespaces-list").append($("<a class=\"list-group-item pickable-namespace\" data-warning-ongoing=\""+val.warningOngoing+"\" id=\""+val.id+"\">"+val.standardLabel+"</a>"));
+                                }
+                                else{
+                                    var messageError = "You cannot select this namespace because one or many another versions of this references namespaces are already selected in this profile";
+                                    if(arrayNamespacesIncompatibles.includes(parseInt(val.id))){
+                                        $("#chosable-namespaces-list").append($("<a data-toggle=\"tooltip\" title=\""+messageError+"\" class=\"list-group-item list-group-item-danger\" id="+val.id+">"+val.standardLabel+" <span class=\"label label-danger\">Incompatible</span></a>"));
+                                    }
+                                    else{
+
+                                        $("#chosable-namespaces-list").append($("<a data-toggle=\"tooltip\" title=\""+messageError+"\" class=\"list-group-item list-group-item-danger\" id="+val.id+">"+val.standardLabel+"</a>"));
+                                    }
+                                }
+
+                                if(val.referencedNamespaces.length != 0){
+                                    $(".list-group-item[id='"+val.id+"']").append('<div class="small text-muted"><strong><em>Referenced:</em></strong></div>');
+                                    $(".list-group-item[id='"+val.id+"']").append('<ul></ul>');
+                                    for(var refTopLevelId in val.referencedNamespaces){
+                                        console.log(parseInt(refTopLevelId));
+                                        if(arrayNamespacesIncompatibles.includes(parseInt(val.referencedNamespaces[refTopLevelId][0]))) {
+                                            $(".list-group-item[id='" + val.id + "'] ul").append('<li class="list-unstyled" style="border-left: 3px solid darkgrey; padding-left: 5px;">' + val.referencedNamespaces[refTopLevelId][1] + ' <span class=\"label label-danger\">Incompatible</span></a></li>');
+                                        }
+                                        else{
+                                            $(".list-group-item[id='" + val.id + "'] ul").append('<li class="list-unstyled" style="border-left: 3px solid darkgrey; padding-left: 5px;">' + val.referencedNamespaces[refTopLevelId][1] + '</li>');
+                                        }
+                                    }
+                                }
                             });
                         }
                     }
@@ -1094,42 +1184,68 @@
             });
 
             $(document).on("mouseenter touchstart", ".pickable-namespace", function() {
-                $(this).prepend($("<span><i class=\"fas fa-plus\"></i>&nbsp;</span>"));
+                $(this).prepend($("<span class='spanfaplus'><i class=\"fas fa-plus\"></i>&nbsp;</span>"));
             });
 
             $(document).on("mouseleave touchend", ".pickable-namespace", function() {
-                $(this).find(":first-child").remove();
+                $(this).find(".spanfaplus:first-child").remove();
             });
 
             $(document).on("click", ".pickable-namespace", function() {
-                var selectedValue = $(this).attr("id");
-                var profileID = {{ profile.id }}
-                var url = '{{ path("profile_namespace_association", {'profile' : 'profileID','namespace': 'selectedValue'}) }}';
-                url = url.replace("profileID", profileID);
-                url = url.replace("selectedValue", selectedValue);
-                $.ajax({
-                    url: url,
-                    type: 'POST',
-                    dataType: 'json',
-                    success:function(data){
+                function pickNamespace(selectedValue){
+                    var profileID = {{ profile.id }}
+                    var url = '{{ path("profile_namespace_association", {'profile' : 'profileID','namespace': 'selectedValue'}) }}';
+                    url = url.replace("profileID", profileID);
+                    url = url.replace("selectedValue", selectedValue);
+                    $.ajax({
+                        url: url,
+                        type: 'POST',
+                        dataType: 'json',
+                        success:function(data){
 
-                        // handling the response data from the controller
-                        if(data.status == 'Error'){
-                            console.log("[API] ERROR: "+data.message);
+                            // handling the response data from the controller
+                            if(data.status == 'Error'){
+                                console.log("[API] ERROR: "+data.message);
+                            }
+                            if(data.status == 'Success'){
+                                window.location.reload();
+                            }
                         }
-                        if(data.status == 'Success'){
-                            window.location.reload();
-                        }
-                    }
-                });
-                var urlNamespace = '{{ path('namespace_show', {'id' : 'selectedValue'}) }}';
-                urlNamespace = urlNamespace.replace('selectedValue', selectedValue);
-                $("#empty-namespace-list-message").remove();
-                $("#select-root-namespace option:selected").remove();
-                //TODO
-                $("#used-namespaces-list").append($('<div class="row"><a href="#namespaces" class="remove-namespace" data-id="'+selectedValue+'"><span class="glyphicon glyphicon-remove text-danger" aria-hidden="true"></span></a><a href="'+urlNamespace+'">'+$(this).text()+'</a><span class="loading-icon2" data-id="'+selectedValue+'">&nbsp;<span class="fas fa-spinner fa-spin"></span></span></div>'));
-                $(".loading-icon2[data-id='"+selectedValue+"']").hide(0);
-                $("#chosable-namespaces-list").empty();
+                    });
+                    var urlNamespace = '{{ path('namespace_show', {'id' : 'selectedValue'}) }}';
+                    urlNamespace = urlNamespace.replace('selectedValue', selectedValue);
+                    $("#empty-namespace-list-message").remove();
+                    $("#select-root-namespace option:selected").remove();
+                    //TODO
+                    $("#used-namespaces-list").append($('<div class="row"><a href="#namespaces" class="remove-namespace" data-id="'+selectedValue+'"><span class="glyphicon glyphicon-remove text-danger" aria-hidden="true"></span></a><a href="'+urlNamespace+'">'+$(this).text()+'</a><span class="loading-icon2" data-id="'+selectedValue+'">&nbsp;<span class="fas fa-spinner fa-spin"></span></span></div>'));
+                    $(".loading-icon2[data-id='"+selectedValue+"']").hide(0);
+                    $("#chosable-namespaces-list").empty();
+                }
+
+                if($(this).data("warning-ongoing")){
+                    var selectedValue = $(this).attr("id");
+                    bootbox.confirm({
+                        message: "This namespace is ongoing and can be modified at any time.<br><br>It is not advisable to use its classes and properties.<br><br>Do you wish to proceed?",
+                        title: '<i class="fas fa-exclamation-triangle"></i> Warning',
+                        buttons: {
+                            confirm: {
+                                label: 'Yes',
+                                className: 'btn-success'
+                            },
+                            cancel: {
+                                label: 'No',
+                                className: 'btn-danger'
+                            }
+                        },
+                        callback: function (result) {
+                            if(result){
+                                pickNamespace(selectedValue);
+                            }
+                        }});
+                }
+                else{
+                    pickNamespace($(this).attr("id"));
+                }
             });
 
             $(document).on("click", ".remove-namespace", function() {
@@ -1155,7 +1271,7 @@
             });
 
             $(document).on("click", ".not-removable", function(){
-                bootbox.alert("Classes and properties belonging to the namespace you wish to deselect are associated with your profile. Please deselect them first before proceeding.");
+                bootbox.alert("Classes and properties belonging to the namespace you wish to deselect - or to one of its reference namespaces - are associated with your profile. Please deselect them first before proceeding.");
             });
 
             $(document).on("click", ".change-version", function(){

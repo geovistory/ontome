@@ -19,6 +19,7 @@ use AppBundle\Entity\Property;
 use AppBundle\Entity\TextProperty;
 use AppBundle\Form\ProfileEditForm;
 use AppBundle\Form\ProfileQuickAddForm;
+use Doctrine\Common\Collections\ArrayCollection;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -270,7 +271,7 @@ class ProfileController  extends Controller
      * @return Response the rendered template
      */
     public function publishAction(Profile $profile, Request $request)
-        {
+    {
         if(!$profile->isPublishable()){
             throw $this->createAccessDeniedException('The profile n° '.$profile->getId().' can\'t be published. Please verify your profile.');
         }
@@ -389,24 +390,57 @@ class ProfileController  extends Controller
     {
         $this->denyAccessUnlessGranted('edit', $profile->getRootProfile());
 
+        $arrayAllReferencesNamespacesForProfile = new ArrayCollection();
+        foreach($profile->getNamespaces() as $prfnamespace){
+            foreach ($prfnamespace->getAllReferencedNamespaces() as $referencedNamespace){
+                if(!$arrayAllReferencesNamespacesForProfile->contains($referencedNamespace) and $referencedNamespace != $namespace){
+                    $arrayAllReferencesNamespacesForProfile->add($referencedNamespace);
+                }
+            }
+        }
+
         if($namespace->getIsTopLevelNamespace()) {
             $status = 'Error';
             $message = 'This namespace is not valid';
         }
-        else if ($profile->getNamespaces()->contains($namespace)) {
+        else if ($profile->getNamespaces()->contains($namespace) or $arrayAllReferencesNamespacesForProfile->contains($namespace)) {
             $status = 'Error';
             $message = 'This namespace is already used by this profile';
         }
         else {
-            $profile->addNamespace($namespace);
             $em = $this->getDoctrine()->getManager();
+            $profile->addNamespace($namespace);
+            foreach ($namespace->getAllReferencedNamespaces() as $referencedNamespace){
+                if(!$arrayAllReferencesNamespacesForProfile->contains($referencedNamespace) and $referencedNamespace != $namespace){
+                    $arrayAllReferencesNamespacesForProfile->add($referencedNamespace);
+                }
+            }
+            //Si l'un de ces namespaces références est déjà associé - supprimer cette association.
+            foreach ($profile->getNamespaces() as $prfnamespace){
+                if($arrayAllReferencesNamespacesForProfile->contains($prfnamespace)){
+                    $profile->removeNamespace($prfnamespace);
+
+                    //Mettre les eupa concernés à 29
+                    $userProjectAssociations = $em->getRepository('AppBundle:UserProjectAssociation')->findByProject($profile->getProjectOfBelonging());
+                    foreach ($userProjectAssociations as $userProjectAssociation) {
+                        $eupas = $em->getRepository('AppBundle:EntityUserProjectAssociation')->findBy(array(
+                            'userProjectAssociation' => $userProjectAssociation, 'namespace' => $prfnamespace));
+                        foreach ($eupas as $eupa) {
+                            $systemTypeSelected = $em->getRepository('AppBundle:SystemType')->find(29); //systemType 29 = Unselected namespace for user preference
+                            $eupa->setSystemType($systemTypeSelected);
+                            $em->persist($eupa);
+                        }
+                    }
+                }
+            }
             $em->persist($profile);
 
             // Créer les entity_to_user_project pour les activer par défaut
             $userProjectAssociations = $em->getRepository('AppBundle:UserProjectAssociation')->findByProject($profile->getProjectOfBelonging());
             foreach ($userProjectAssociations as $userProjectAssociation) {
                 // Vérifier si l'association EUPA n'existe déjà pas (chaque EUPA doit être unique)
-                $eupas = $em->getRepository('AppBundle:EntityUserProjectAssociation')->findBy(array('userProjectAssociation' => $userProjectAssociation, 'namespace' => $namespace));
+                $eupas = $em->getRepository('AppBundle:EntityUserProjectAssociation')->findBy(array(
+                    'userProjectAssociation' => $userProjectAssociation, 'namespace' => $namespace));
                 if(count($eupas) == 0) {
                     $eupa = new EntityUserProjectAssociation();
                     $systemTypeSelected = $em->getRepository('AppBundle:SystemType')->find(25); //systemType 25 = Selected namespace for user preference

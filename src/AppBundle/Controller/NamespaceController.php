@@ -369,9 +369,22 @@ class NamespaceController  extends Controller
             $status = 'Success';
             $message = 'This namespace is valid';
             foreach ($rootNamespace->getChildVersions() as $namespace) {
+                $referencedNamespaces = array();
+                foreach ($namespace->getAllReferencedNamespaces() as $referencedNamespace){
+                    $referencedNamespaces[$referencedNamespace->getTopLevelNamespace()->getId()] = [$referencedNamespace->getId(), $referencedNamespace->getStandardLabel()];
+                }
+                $warningOngoing = false;
+                if($namespace->getIsOngoing()){$warningOngoing = true;}
+                foreach ($namespace->getAllReferencedNamespaces() as $referencedNamespace){
+                    if($referencedNamespace->getIsOngoing()){$warningOngoing = true;}
+                }
+
                 $namespaces[] = [
                     'id' => $namespace->getId(),
-                    'standardLabel' => $namespace->getStandardLabel()
+                    'standardLabel' => $namespace->getStandardLabel(),
+                    'topLevelNamespaceId' => $namespace->getTopLevelNamespace()->getId(),
+                    'warningOngoing' => $warningOngoing,
+                    'referencedNamespaces' => $referencedNamespaces
                 ];
             }
         }

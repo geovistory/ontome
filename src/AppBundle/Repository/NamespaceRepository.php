@@ -65,9 +65,9 @@ class NamespaceRepository extends EntityRepository
                        standard_label AS \"standardLabel\" 
                 FROM che.namespace
                 WHERE pk_namespace NOT IN (
-                    SELECT nsp.fk_top_level_namespace FROM che.associates_referenced_namespace ansp
-                    JOIN che.namespace nsp ON ansp.fk_referenced_namespace = nsp.pk_namespace
-                    WHERE ansp.fk_profile = :profile AND ansp.fk_referenced_namespace IS NOT NULL
+                    SELECT fk_top_level_namespace
+                    FROM che.namespace
+                    WHERE pk_namespace IN(SELECT * FROM che.get_all_references_namespaces_for_profile(:profile))
                     )
                 AND is_top_level_namespace;";
 
@@ -115,8 +115,8 @@ class NamespaceRepository extends EntityRepository
             ->andWhere('user.id = :user')
             ->setParameter('user', $user)
             ->orderBy('nsp.id','DESC');
-            //->getQuery()
-            //->execute();
+        //->getQuery()
+        //->execute();
     }
 
     // Pour le choix par défaut dans My current namepaces
@@ -128,7 +128,7 @@ class NamespaceRepository extends EntityRepository
      */
     public function findDefaultNamespaceForProject(Project $project)
     {
-         $defaultNamespace = $this->createQueryBuilder('nsp')
+        $defaultNamespace = $this->createQueryBuilder('nsp')
             ->join('nsp.projectForTopLevelNamespace','proj')
             ->andWhere('proj.id = :pk_project')
             ->andWhere('nsp.isTopLevelNamespace = false')
@@ -138,10 +138,10 @@ class NamespaceRepository extends EntityRepository
             ->getQuery()
             ->execute();
 
-         if(isset($defaultNamespace[0]))
+        if(isset($defaultNamespace[0]))
             return $defaultNamespace[0];
-         else
-             return null;
+        else
+            return null;
     }
 
     /**
