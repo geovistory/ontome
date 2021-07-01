@@ -164,6 +164,7 @@ class ProfileController  extends Controller
                 $profile->getTextProperties()[1]->setModificationTime(new \DateTime('now'));
                 $profile->getTextProperties()[1]->setSystemType($systemTypeDescription);
                 $profile->getTextProperties()[1]->setProfile($ongoingProfile);
+                $profile->getTextProperties()[1]->setLanguageIsoCode($profileLabel->getLanguageIsoCode());
             }
             else {
                 $ongoingDescription->setTextProperty($description->getTextProperty());
