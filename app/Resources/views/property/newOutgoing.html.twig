@@ -82,7 +82,10 @@
                         <span class="fa fa-plus-circle"></span>
                         Add an example
                     </a>
-
+                    <a href="#" class="js-example-remove">
+                        <span class="fa fa-minus-circle"></span>
+                        Close example form
+                    </a>
                 </div>
 
                 <button type="submit" class="btn btn-primary" formnovalidate>Save</button>
@@ -116,10 +119,12 @@
                 }
             });
 
+            $('.js-example-remove').hide();
             if($('[for=outgoing_property_quick_add_form_textProperties_1_textProperty]').length) {
                 //we hide the button in order to prevent the add of more than 2 text properties
                 $('.js-example-add').hide();
                 $('[for=outgoing_property_quick_add_form_textProperties_1_textProperty]').text('Example');
+                $('.js-example-remove').show();
             }
             var $wrapper = $('.js-text-property-wrapper');
             $wrapper.on('click', '.js-example-add', function(e) {
@@ -144,6 +149,27 @@
                 $('#outgoing_property_quick_add_form_textProperties_1_modifier').val($('#outgoing_property_quick_add_form_labels_0_creator').val());
                 $('.js-example-add').hide();
                 $('[for=outgoing_property_quick_add_form_textProperties_1_textProperty]').text('Example');
+                tinymce.init({
+                    selector:'.tinymce'
+                });
+                $('.js-example-remove').show();
+            });
+
+            $wrapper.on('click', '.js-example-remove', function(e) {
+                e.preventDefault();
+
+                // get the new index
+                var index = $wrapper.data('index');
+
+                // decrease the index with one for the next item
+                $wrapper.data('index', index - 1);
+
+                // remove
+                $("[id^='outgoing_property_quick_add_form_textProperties_1_']").remove();
+                $("[for^='outgoing_property_quick_add_form_textProperties_1_']").remove();
+                tinymce.get("outgoing_property_quick_add_form_textProperties_1_textProperty").remove();
+                $('.js-example-add').show();
+                $('.js-example-remove').hide();
             });
 
             $('#outgoing_property_quick_add_form_labels_0_label').keyup(function()
