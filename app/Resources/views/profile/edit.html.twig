@@ -199,6 +199,9 @@
             </div>
             <div id="identification" class="tab-pane fade">
                 <h3>Identification</h3>
+                {% if not profile.isRootProfile %}
+                    <p>Project of belonging: <a href="{{ path('project_show', {'id': profile.projectOfBelonging.id}) }}">{{ profile.projectOfBelonging.standardLabel }}</a></p>
+                {% endif %}
                 {% if not profile.isRootProfile and not profile.isPublishable %}
                     <div class="alert alert-danger">
                         <p><i class="fas fa-exclamation-triangle"></i>&nbsp;This profile comprises classes and/or properties of a namespace whose version is not the selected one. They are displayed in red in your profile. Please make the necessary corrections before proceeding.</p>
