@@ -27,7 +27,7 @@ class ClassAssociationController extends Controller
 {
 
     /**
-     * @Route("/parent-class-association/new/{childClass}", name="new_parent_class_form")
+     * @Route("/parent-class-association/new/{childClass}", name="new_parent_class_form", requirements={"childClass"="^[0-9]+$"})
      */
     public function newParentAction(Request $request, OntoClass $childClass)
     {
@@ -125,7 +125,7 @@ class ClassAssociationController extends Controller
     }
 
     /**
-     * @Route("/class-association/{id}", name="class_association_show")
+     * @Route("/class-association/{id}", name="class_association_show", requirements={"id"="^[0-9]+$"})
      * @param ClassAssociation $classAssociation
      * @return Response the rendered template
      */
@@ -141,7 +141,7 @@ class ClassAssociationController extends Controller
     }
 
     /**
-     * @Route("/class-association/{id}/edit", name="class_association_edit")
+     * @Route("/class-association/{id}/edit", name="class_association_edit", requirements={"id"="^[0-9]+$"})
      */
     public function editAction(Request $request, ClassAssociation $classAssociation)
     {
@@ -199,7 +199,7 @@ class ClassAssociationController extends Controller
     }
 
     /**
-     * @Route("/class-association/{id}/edit-validity/{validationStatus}", name="class_association_validation_status_edit")
+     * @Route("/class-association/{id}/edit-validity/{validationStatus}", name="class_association_validation_status_edit", requirements={"id"="^[0-9]+$", "validationStatus"="^(26|27|28){1}$"})
      * @param ClassAssociation $classAssociation
      * @param SystemType $validationStatus
      * @param Request $request
@@ -257,7 +257,7 @@ class ClassAssociationController extends Controller
         ]);
     }
     /**
-     * @Route("/class-association/{id}/delete", name="class_association_delete")
+     * @Route("/class-association/{id}/delete", name="class_association_delete", requirements={"id"="^([0-9]+)|(associationId){1}$"})
      * @param ClassAssociation  $classAssociation
      * @return JsonResponse a Json 204 HTTP response
      */

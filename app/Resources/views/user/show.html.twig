@@ -338,15 +338,19 @@
                                 {% set entitiesList = entitiesList|merge([[entity,id]]) %}
                                 <tr>
                                     <td class="text-nowrap">
-                                        {% if comment.class is not null %}
-                                            {{ comment.class.invertedLabel }}
-                                        {% elseif comment.property is not null %}
-                                            {{ comment.property.invertedLabel }}
+                                        {% if comment.class is not null and comment.class.classVersionForDisplay(comment.namespaceForVersion) is not null %}
+                                            {{ comment.class.classVersionForDisplay(comment.namespaceForVersion).invertedLabel }}
+                                        {% elseif comment.property is not null and comment.property.propertyVersionForDisplay(comment.namespaceForVersion) is not null %}
+                                            {{ comment.property.propertyVersionForDisplay(comment.namespaceForVersion).invertedLabel }}
                                         {% elseif comment.label is not null %}
-                                            {% if comment.label.object.invertedLabel is not null %}
-                                                {{ comment.label.object.invertedLabel }}
-                                            {% else %}
-                                                {{ comment.label.object.standardLabel }}
+                                            {% if comment.label.object is not null %}
+                                                {% if comment.label.object.classVersionForDisplay(comment.namespaceForVersion) is not null %}
+                                                    {{ comment.label.object.classVersionForDisplay(comment.namespaceForVersion).invertedLabel }}
+                                                {% elseif comment.label.object.propertyVersionForDisplay(comment.namespaceForVersion) is not null %}
+                                                    {{ comment.label.object.classVersionForDisplay(comment.namespaceForVersion).invertedLabel }}
+                                                {% else %}
+                                                    {{ comment.label.object.standardLabel }}
+                                                {% endif %}
                                             {% endif %}
                                         {% elseif comment.namespace is not null %}
                                             {{ comment.namespace }}

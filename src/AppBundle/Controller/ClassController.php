@@ -81,7 +81,7 @@ class ClassController extends Controller
     }
 
     /**
-     * @Route("class/new/{namespace}", name="class_new")
+     * @Route("class/new/{namespace}", name="class_new", requirements={"namespace"="^[0-9]+$"})
      * @param Request $request
      * @param OntoNamespace $namespace
      * @return RedirectResponse|Response
@@ -176,8 +176,8 @@ class ClassController extends Controller
     }
 
     /**
-     * @Route("/class/{id}", name="class_show")
-     * @Route("/class/{id}/namespace/{namespaceFromUrlId}", name="class_show_with_version")
+     * @Route("/class/{id}", name="class_show", requirements={"id"="^[0-9]+$"})
+     * @Route("/class/{id}/namespace/{namespaceFromUrlId}", name="class_show_with_version", requirements={"id"="^([0-9]+)|(classID){1}$", "namespaceFromUrlId"="^([0-9]+)|(namespaceFromUrlId){1}$"})
      * @param OntoClass $class
      * @param int|null $namespaceFromUrlId
      * @return Response the rendered template
@@ -278,7 +278,7 @@ class ClassController extends Controller
     }
 
     /**
-     * @Route("/class/{id}/edit", name="class_edit")
+     * @Route("/class/{id}/edit", name="class_edit", requirements={"id"="^[0-9]+$"})
      * @param OntoClass $class
      * @return Response the rendered template
      */
@@ -390,7 +390,7 @@ class ClassController extends Controller
     }
 
     /**
-     * @Route("/class-version/{id}/edit-validity/{validationStatus}", name="class_version_validation_status_edit")
+     * @Route("/class-version/{id}/edit-validity/{validationStatus}", name="class_version_validation_status_edit", requirements={"id"="^[0-9]+$", "validationStatus"="^26$|^27$|^28$"})
      * @param OntoClassVersion $classVersion
      * @param SystemType $validationStatus
      * @param Request $request
@@ -500,7 +500,7 @@ class ClassController extends Controller
     }
 
     /**
-     * @Route("/class/{class}/graph/json", name="class_graph_json")
+     * @Route("/class/{class}/graph/json", name="class_graph_json", requirements={"class"="^[0-9]+$"})
      * @Method("GET")
      * @param OntoClass $class
      * @return JsonResponse a Json formatted tree representation of OntoClasses
@@ -515,7 +515,7 @@ class ClassController extends Controller
     }
 
     /**
-     * @Route("/api/classes/project/{project}/json", name="classes_project_json")
+     * @Route("/api/classes/project/{project}/json", name="classes_project_json", requirements={"project"="^[0-9]+$"})
      * @Method("GET")
      * @param Project $project
      * @return JsonResponse a Json formatted list representation of OntoClasses related to a Project

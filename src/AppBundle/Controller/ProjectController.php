@@ -131,7 +131,7 @@ class ProjectController  extends Controller
     }
 
     /**
-     * @Route("/project/{id}", name="project_show")
+     * @Route("/project/{id}", name="project_show", requirements={"id"="^[0-9]+$"})
      * @param string $id
      * @return Response the rendered template
      */
@@ -145,7 +145,7 @@ class ProjectController  extends Controller
     }
 
     /**
-     * @Route("/project/{id}/edit", name="project_edit")
+     * @Route("/project/{id}/edit", name="project_edit", requirements={"id"="^[0-9]+$"})
      * @param Project $project
      * @return Response the rendered template
      */
@@ -169,7 +169,7 @@ class ProjectController  extends Controller
     }
 
     /**
-     * @Route("/selectable-members/project/{project}/json", name="selectable_members_project_json")
+     * @Route("/selectable-members/project/{project}/json", name="selectable_members_project_json", requirements={"project"="^([0-9]+)|(projectID){1}$"})
      * @Method("GET")
      * @param Project $project
      * @return JsonResponse a Json formatted list representation of Users selectable by Project
@@ -195,7 +195,7 @@ class ProjectController  extends Controller
     }
 
     /**
-     * @Route("/associated-members/project/{project}/json", name="associated_members_project_json")
+     * @Route("/associated-members/project/{project}/json", name="associated_members_project_json", requirements={"project"="^([0-9]+)|(projectID){1}$|"})
      * @Method("GET")
      * @param Project $project
      * @return JsonResponse a Json formatted list representation of Users selected by Project
@@ -221,7 +221,7 @@ class ProjectController  extends Controller
     }
 
     /**
-     * @Route("/project/{project}/user/{user}/add", name="project_user_association")
+     * @Route("/project/{project}/user/{user}/add", name="project_user_association", requirements={"project"="^([0-9]+)|(projectID){1}$", "user"="^([0-9]+)|(id){1}$"})
      * @Method({ "POST"})
      * @param User  $user    The user to be associated with a project
      * @param Project  $project    The project to be associated with a user
@@ -268,7 +268,7 @@ class ProjectController  extends Controller
     }
 
     /**
-     * @Route("/user-project-association/{id}/permission/{permission}/edit", name="project_member_permission_edit")
+     * @Route("/user-project-association/{id}/permission/{permission}/edit", name="project_member_permission_edit", requirements={"id"="^([0-9]+)|(associationId){1}$", "permission"="^([1-4])|(permissionToken){1}$"})
      * @Method({ "POST"})
      * @param UserProjectAssociation  $userProjectAssociation   The user to project association to be edited
      * @param int  $permission    The permission to
@@ -309,7 +309,7 @@ class ProjectController  extends Controller
     }
 
     /**
-     * @Route("/user-project-association/{id}/delete", name="project_member_disassociation")
+     * @Route("/user-project-association/{id}/delete", name="project_member_disassociation", requirements={"id"="^([0-9]+)|(associationId){1}$"})
      * @Method({ "POST"})
      * @param UserProjectAssociation  $userProjectAssociation   The user to project association to be deleted
      * @return JsonResponse a Json 204 HTTP response
@@ -335,7 +335,7 @@ class ProjectController  extends Controller
     }
 
     /**
-     * @Route("/selectable-profiles/project/{project}/json", name="selectable_profiles_project_json")
+     * @Route("/selectable-profiles/project/{project}/json", name="selectable_profiles_project_json", requirements={"project"="^([0-9]+)|(projectID){1}$"})
      * @Method("GET")
      * @param Project $project
      * @return JsonResponse a Json formatted list representation of Profiles selectable by Project
@@ -361,7 +361,7 @@ class ProjectController  extends Controller
     }
 
     /**
-     * @Route("/associated-profiles/project/{project}/json", name="associated_profiles_project_json")
+     * @Route("/associated-profiles/project/{project}/json", name="associated_profiles_project_json", requirements={"project"="^([0-9]+)|(projectID){1}$"})
      * @Method("GET")
      * @param Project $project
      * @return JsonResponse a Json formatted list representation of Profiles associated with Project
@@ -387,7 +387,7 @@ class ProjectController  extends Controller
     }
 
     /**
-     * @Route("/project/{project}/profile/{profile}/add", name="project_profile_association")
+     * @Route("/project/{project}/profile/{profile}/add", name="project_profile_association", requirements={"project"="^([0-9]+)|(projectID){1}$", "profile"="^([0-9]+)|(profileID){1}$"})
      * @Method({ "POST"})
      * @param Profile  $profile The profile to be associated with a project
      * @param Project  $project   The project to be associated with a profile
@@ -447,7 +447,7 @@ class ProjectController  extends Controller
     }
 
     /**
-    * @Route("/project/{project}/profile/{profile}/delete", name="project_profile_disassociation")
+    * @Route("/project/{project}/profile/{profile}/delete", name="project_profile_disassociation", requirements={"project"="^([0-9]+)|(projectID){1}$", "profile"="^([0-9]+)|(profileID){1}$"})
     * @Method({ "POST"})
     * @param Profile  $profile    The profile to be disassociated from a project
     * @param Project  $project    The project to be disassociated from a profile

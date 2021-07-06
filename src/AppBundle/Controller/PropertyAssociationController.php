@@ -13,6 +13,7 @@ use AppBundle\Entity\Property;
 use AppBundle\Entity\SystemType;
 use AppBundle\Entity\TextProperty;
 use AppBundle\Form\PropertyAssociationEditForm;
+use Doctrine\Common\Collections\ArrayCollection;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use AppBundle\Form\ParentPropertyAssociationForm;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -26,7 +27,7 @@ class PropertyAssociationController extends Controller
 {
 
     /**
-     * @Route("/parent-property-association/new/{childProperty}", name="new_parent_property_form")
+     * @Route("/parent-property-association/new/{childProperty}", name="new_parent_property_form", requirements={"childProperty"="^[0-9]+$"})
      */
     public function newParentAction(Request $request, Property $childProperty)
     {
@@ -133,7 +134,7 @@ class PropertyAssociationController extends Controller
     }
 
     /**
-     * @Route("/property-association/{id}", name="property_association_show")
+     * @Route("/property-association/{id}", name="property_association_show", requirements={"id"="^[0-9]+$"})
      * @param PropertyAssociation $propertyAssociation
      * @return Response the rendered template
      */
@@ -151,7 +152,7 @@ class PropertyAssociationController extends Controller
     }
 
     /**
-     * @Route("/property-association/{id}/edit", name="property_association_edit")
+     * @Route("/property-association/{id}/edit", name="property_association_edit", requirements={"id"="^[0-9]+$"})
      */
     public function editAction(Request $request, PropertyAssociation $propertyAssociation)
     {
@@ -169,26 +170,29 @@ class PropertyAssociationController extends Controller
 
         // FILTRAGE : Récupérer les clés de namespaces à utiliser
         if(is_null($this->getUser()) || $this->getUser()->getCurrentActiveProject()->getId() == 21){ // Utilisateur non connecté OU connecté et utilisant le projet public
-            $namespacesId = $em->getRepository('AppBundle:OntoNamespace')->findPublicProjectNamespacesId();
+            $namespacesIdFromUser = $em->getRepository('AppBundle:OntoNamespace')->findPublicProjectNamespacesId();
         }
         else{ // Utilisateur connecté et utilisant un autre projet
-            $namespacesId = $em->getRepository('AppBundle:OntoNamespace')->findNamespacesIdByUser($this->getUser());
+            $namespacesIdFromUser = $em->getRepository('AppBundle:OntoNamespace')->findNamespacesIdByUser($this->getUser());
         }
 
+        $namespacesIdFromChildProperty = array();
         // Affaiblir le filtrage en rajoutant le namespaceForVersion de la classVersion si indisponible
         $namespaceForChildPropertyVersion = $childPropertyVersion->getNamespaceForVersion();
-        if(!in_array($namespaceForChildPropertyVersion->getId(), $namespacesId)){
-            $namespacesId[] = $namespaceForChildPropertyVersion->getId();
+        if(!in_array($namespaceForChildPropertyVersion->getId(), $namespacesIdFromChildProperty)){
+            $namespacesIdFromChildProperty[] = $namespaceForChildPropertyVersion->getId();
         }
         // Sans oublier les namespaces références si indisponibles
-        foreach($namespaceForChildPropertyVersion->getReferencedNamespaceAssociations() as $referencedNamespacesAssociation){
-            if(!in_array($referencedNamespacesAssociation->getReferencedNamespace()->getId(), $namespacesId)){
-                $namespacesId[] = $referencedNamespacesAssociation->getReferencedNamespace()->getId();
+        foreach($namespaceForChildPropertyVersion->getAllReferencedNamespaces() as $referencedNamespace){
+            if(!in_array($referencedNamespace->getId(), $namespacesIdFromChildProperty)){
+                $namespacesIdFromChildProperty[] = $referencedNamespace->getId();
             }
         }
 
+        $namespacesId = array_merge($namespacesIdFromUser, $namespacesIdFromChildProperty);
+
         $arrayPropertiesVersion = $em->getRepository('AppBundle:PropertyVersion')
-            ->findIdAndStandardLabelOfPropertiesVersionByNamespacesId($namespacesId);
+            ->findIdAndStandardLabelOfPropertiesVersionByNamespacesId($namespacesIdFromChildProperty);
 
         $form = $this->createForm(PropertyAssociationEditForm::class, $propertyAssociation, array(
             'propertiesVersion' => $arrayPropertiesVersion,
@@ -198,6 +202,7 @@ class PropertyAssociationController extends Controller
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $parentProperty = $em->getRepository("AppBundle:Property")->find($form->get("parentPropertyVersion")->getData());
+            $parentPropertyVersion = $em->getRepository("AppBundle:PropertyVersion")->findPropertyVersionByPropertyAndNamespacesId($parentProperty, $namespacesId);
             $propertyAssociation->setParentProperty($parentProperty);
             $parentPropertyNamespace = $em->getRepository("AppBundle:PropertyVersion")->findPropertyVersionByPropertyAndNamespacesId($parentProperty, $namespacesId)->getNamespaceForVersion();
             $propertyAssociation->setParentPropertyNamespace($parentPropertyNamespace);
@@ -211,7 +216,7 @@ class PropertyAssociationController extends Controller
 
             return $this->redirectToRoute('property_show_with_version', [
                 'id' => $propertyAssociation->getChildProperty()->getId(),
-                'namespaceFromUrlId' => $propertyAssociation->getChildProperty()->getPropertyVersionForDisplay()->getNamespaceForVersion(),
+                'namespaceFromUrlId' => $propertyAssociation->getChildProperty()->getPropertyVersionForDisplay()->getNamespaceForVersion()->getId(),
                 '_fragment' => 'property-hierarchy'
             ]);
 
@@ -227,7 +232,7 @@ class PropertyAssociationController extends Controller
     }
 
     /**
-     * @Route("/property-association/{id}/delete", name="property_association_delete")
+     * @Route("/property-association/{id}/delete", name="property_association_delete", requirements={"id"="^([0-9]+)|(associationId){1}$"})
      * @param PropertyAssociation $propertyAssociation
      * @return JsonResponse a Json 204 HTTP response
      */
@@ -246,7 +251,7 @@ class PropertyAssociationController extends Controller
     }
 
     /**
-     * @Route("/property-association/{id}/edit-validity/{validationStatus}", name="property_association_validation_status_edit")
+     * @Route("/property-association/{id}/edit-validity/{validationStatus}", name="property_association_validation_status_edit", requirements={"id"="^[0-9]+$", "validationStatus"="^(26|27|28){1}$"})
      * @param PropertyAssociation $propertyAssociation
      * @param SystemType $validationStatus
      * @param Request $request

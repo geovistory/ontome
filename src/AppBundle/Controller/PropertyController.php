@@ -86,7 +86,7 @@ class PropertyController extends Controller
     }
 
     /**
-     * @Route("property/{type}/new/{class}", name="property_new")
+     * @Route("property/{type}/new/{class}", name="property_new", requirements={"type"="^(ingoing|outgoing){1}$", "class"="^[0-9]+$"})
      */
     public function newAction($type,Request $request, OntoClass $class)
     {
@@ -244,8 +244,8 @@ class PropertyController extends Controller
     }
 
     /**
-     * @Route("/property/{id}", name="property_show")
-     * @Route("/property/{id}/namespace/{namespaceFromUrlId}", name="property_show_with_version")
+     * @Route("/property/{id}", name="property_show", requirements={"id"="^[0-9]+$"})
+     * @Route("/property/{id}/namespace/{namespaceFromUrlId}", name="property_show_with_version", requirements={"id"="^[0-9]+$", "namespaceFromUrlId"="^[0-9]+$"})
      * @param Property $property
      * @param int|null $namespaceFromUrlId
      * @return Response the rendered template
@@ -338,7 +338,7 @@ class PropertyController extends Controller
     }
 
     /**
-     * @Route("/property/{id}/edit", name="property_edit")
+     * @Route("/property/{id}/edit", name="property_edit", requirements={"id"="^[0-9]+$"})
      * @param Property $property
      * @param Request $request
      * @return Response the rendered template
@@ -501,7 +501,7 @@ class PropertyController extends Controller
     }
 
     /**
-     * @Route("/property-version/{id}/edit-validity/{validationStatus}", name="property_version_validation_status_edit")
+     * @Route("/property-version/{id}/edit-validity/{validationStatus}", name="property_version_validation_status_edit", requirements={"id"="^[0-9]+$", "validationStatus"="^(26|27|28){1}$"})
      * @param PropertyVersion $propertyVersion
      * @param SystemType $validationStatus
      * @param Request $request
