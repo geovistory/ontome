@@ -66,6 +66,7 @@
             <li class="{{ 'namespace' in route ? 'active' }}"><a href="{{ url('app_namespace_list') }}">Namespaces</a></li>
             <li class="{{ 'project' in route or textProperty is defined and textProperty.project is not null ? 'active' }}"><a href="{{ url('app_project_list') }}">Projects</a></li>
             <li class="{{ 'profile' in route ? 'active' }}"><a href="{{ url('app_profile_list') }}">Profiles</a></li>
+            <li class="{{ 'search' in route ? 'active' }}"><a href="{{ url('app_main_search') }}"><i class="fas fa-search"></i> Search</a></li>
             {% if app.user %}
                 <li class="{{ 'user' in route ? 'active' }}"><a href="{{ path('user_show', {
                         'id': app.user.id

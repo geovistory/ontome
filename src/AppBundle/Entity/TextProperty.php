@@ -17,7 +17,7 @@ use AppBundle\Validator\Constraints\CharacterLength;
 
 /**
  * Class TextProperty
- * @ORM\Entity
+ * @ORM\Entity(repositoryClass="AppBundle\Repository\TextPropertyRepository")
  * @ORM\Table(schema="che", name="text_property")
  * @Assert\GroupSequenceProvider()
  */

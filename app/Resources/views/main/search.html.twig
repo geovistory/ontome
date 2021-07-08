@@ -1,0 +1,213 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div class="container">
+        <h3>Search: <span class="label label-default">{{ query }}</span></h3>
+        {% if whatSearch is not null %}
+        <div class="row well well-sm"><strong>Search words: </strong>
+            {% for wordSearch in whatSearch %}
+                {% for word in wordSearch %}
+                {{ word }}
+                {% endfor %}
+            {% endfor %}
+        </div>
+        {% endif %}
+        <form id="form-search" action="">
+            <div class="form-group">
+                <div class="row well well-sm">
+                    <div class="col-lg-10">
+                        <input type="text" class="form-control" id="input-search" placeholder="Search...">
+                    </div>
+                    <div class="col-lg-2">
+                        <button type="submit" id="btn-search" class="btn btn-block btn-primary"><i class="fas fa-search"></i> Search</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+        <table class="table table-striped" id="search-table">
+            <thead>
+            <tr>
+                <th style="width: 1%;">Type</th>
+                <th>Entity Type</th>
+                <th>Entity</th>
+                <th>Text</th>
+                <th>Namespace</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for line in resultatTxtp %}
+                <tr>
+                    <td class="text-nowrap">
+                        {% if line.fk_property is not null %}{% set url, id, entityType = "property_show_with_version", line.fk_property, "Property" %}{% endif %}
+                        {% if line.fk_namespace is not null %}{% set url, id, entityType = "namespace_show", line.fk_namespace, "Namespace" %}{% endif %}
+                        {% if line.fk_class is not null %}{% set url, id, entityType = "class_show_with_version", line.fk_class, "Class" %}{% endif %}
+                        {% if line.fk_project is not null %}{% set url, id, entityType = "project_show", line.fk_project, "Project" %}{% endif %}
+                        {% if line.fk_entity_association is not null %}{% set url, id, entityType = "entity_association_show", line.fk_entity_association, "Relation" %}{% endif %}
+                        {% if line.fk_profile is not null %}{% set url, id, entityType = "profile_show", line.fk_profile, "Profile" %}{% endif %}
+                        {% if line.fk_is_subclass_of is not null %}{% set url, id, entityType = "class_association_show", line.fk_is_subclass_of, "Relation" %}{% endif %}
+                        {% if line.fk_is_subproperty_of is not null %}{% set url, id, entityType = "property_association_show", line.fk_is_subproperty_of, "Relation" %}{% endif %}
+
+                        {% if line.fk_text_property_type == 1 %}{% set fragment, type = "definition", "Scope note" %}{% endif %}
+                        {% if line.fk_text_property_type == 2 %}{% set fragment, type = "definition", "Contributor" %}{% endif %}
+                        {% if line.fk_text_property_type == 3 %}{% set fragment, type = "definition", "Additional example" %}{% endif %}
+                        {% if line.fk_text_property_type == 7 %}{% set fragment, type = "definition", "Example" %}{% endif %}
+                        {% if line.fk_text_property_type == 12 %}{% set fragment, type = "definition", "Additional note" %}{% endif %}
+                        {% if line.fk_text_property_type == 15 %}{% set fragment, type = "justifications", "Justification" %}{% endif %}
+                        {% if line.fk_text_property_type == 16 %}{% set fragment, type = "definition", "Description" %}{% endif %}
+                        {% if line.fk_text_property_type == 31 %}{% set fragment, type = "definition", "owl:versionInfo" %}{% endif %}
+                        {% if line.fk_text_property_type == 32 %}{% set fragment, type = "definition", "Licence" %}{% endif %}
+
+                        {% if url is defined %}
+                        <a href="{{ path(url, {'id': id, '_fragment':fragment}) }}">{{ type }}</a>
+                        {% else %}
+                            {{ line.pk_text_property }}
+                        {% endif %}
+                    </td>
+                    <td>{{ entityType }}</td>
+                    <td>
+                        {% if url is defined and (entityType == "Class" or entityType == "Property") %}
+                            <a href="{{ path(url, {'id': id, 'namespaceFromUrlId': line.fk_namespace_for_version}) }}">
+                                {% if line.identifier_in_namespace != line.standard_label %}
+                                    {{ line.identifier_in_namespace }} - {{ line.standard_label }}
+                                {% else %}
+                                    {{ line.standard_label }}
+                                {% endif %}
+                            </a>
+                        {% elseif url is defined and (entityType == "Namespace" or entityType == "Project" or entityType == "Profile") %}
+                            <a href="{{ path(url, {'id': id}) }}">
+                                {{ line.standard_label }}
+                            </a>
+                        {% else %}
+                            <a href="{{ path(url, {'id': id}) }}">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                        {% endif %}
+                    </td>
+                    <td>{{ line.text_property|raw }}</td>
+                    <td>
+                        {% if line.fk_namespace_for_version is not null %}
+                        <a href="{{ path("namespace_show", {'id': line.fk_namespace_for_version}) }}">
+                        {{ line.ns_standard_label }}
+                        </a>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+            {% for line in resultatLbl %}
+                <tr>
+                    <td class="text-nowrap">
+                        {% if line.fk_property is not null %}{% set url, id, entityType = "property_show", line.fk_property, "Property" %}{% endif %}
+                        {% if line.fk_namespace is not null %}{% set url, id, entityType = "namespace_show", line.fk_namespace, "Namespace" %}{% endif %}
+                        {% if line.fk_class is not null %}{% set url, id, entityType = "class_show", line.fk_class, "Class" %}{% endif %}
+                        {% if line.fk_project is not null %}{% set url, id, entityType = "project_show", line.fk_project, "Project" %}{% endif %}
+                        {% if line.fk_profile is not null %}{% set url, id, entityType = "profile_show", line.fk_profile, "Profile" %}{% endif %}
+                        {% set fragment = "identification" %}
+                        {% if url is defined %}
+                        <a href="{{ path(url, {'id': id, '_fragment':fragment}) }}">Label</a>
+                        {% else %}
+                            {{ line.pk_label }}
+                        {% endif %}
+                    </td>
+                    <td>{{ entityType }}</td>
+                    <td>
+                        {% if url is defined and (entityType == "Class" or entityType == "Property") %}
+                            <a href="{{ path(url, {'id': id, 'namespaceFromUrlId': line.fk_namespace_for_version}) }}">
+                                {% if line.identifier_in_namespace != line.standard_label %}
+                                    {{ line.identifier_in_namespace }} - {{ line.standard_label }}
+                                {% else %}
+                                    {{ line.standard_label }}
+                                {% endif %}
+                            </a>
+                        {% elseif url is defined and (entityType == "Namespace" or entityType == "Project" or entityType == "Profile") %}
+                            <a href="{{ path(url, {'id': id}) }}">
+                                {{ line.standard_label }}
+                            </a>
+                        {% else %}
+                            <a href="{{ path(url, {'id': id}) }}">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                        {% endif %}
+                    </td>
+                    <td>{{ line.label|raw }}{% if line.inverse_label is not null %} ({{ line.inverse_label }}){% endif %}</td>
+
+                    <td>
+                        {% if line.fk_namespace_for_version is not null %}
+                            <a href="{{ path("namespace_show", {'id': line.fk_namespace_for_version}) }}">
+                                {{ line.ns_standard_label }}
+                            </a>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
+{% block javascripts %}
+    {{ parent() }}
+
+<script>
+    $(document).ready(function() {
+        $('#search-table').DataTable({
+            //Selecteur de colonnes
+            initComplete: function(){
+                this.api().columns([0]).every(function(){
+                    var column = this;
+                    var select = $('<br><select id="type-select" style="width:100%;"><option value=""></option></select>')
+                        .appendTo($(column.header()))
+                        .on('change', function(){
+                            var val = $.fn.dataTable.util.escapeRegex(
+                                $(this).val()
+                            );
+
+                            column
+                                .search(val ? '^'+val+'$' : '', true, false)
+                                .draw();
+                        });
+
+                    $(select).click(function(e){
+                        e.stopPropagation();
+                    });
+
+                    var temp = {}
+                    column.data().unique().each(function (d, j) {  // no need to use .sort()
+                        var sText = $('<a/>').html(d).text();
+                        temp[sText] = '<option value="' + sText + '">' + sText + '</option>';
+
+                    });
+                    Object.keys(temp).sort().forEach(function(key) {
+                        select.append( temp[key] );;
+                    });
+                });
+                this.api().columns([1]).every(function(){
+                    var column = this;
+                    var select = $('<select id="entity-type-select" style="width:100%;"><option value=""></option></select>')
+                        .appendTo($(column.header()))
+                        .on('change', function(){
+                            var val = $.fn.dataTable.util.escapeRegex(
+                                $(this).val()
+                            );
+
+                            column
+                                .search(val ? '^'+val+'$' : '', true, false)
+                                .draw();
+                        });
+
+                    $(select).click(function(e){
+                        e.stopPropagation();
+                    });
+
+                    column.data().unique().sort().each(function(d, j){
+                        select.append('<option value="'+d+'">'+d+'</option>')
+                    });
+                });
+            }
+        });
+        $('#form-search').submit(function (event){
+            var val = $('#input-search').val();
+            event.preventDefault();
+            window.location.href="{{ url('app_main_search') }}/"+val;
+        });
+    });
+</script>
+{% endblock %}
