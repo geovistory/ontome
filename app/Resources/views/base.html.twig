@@ -16,7 +16,8 @@
         tinymce.init({
             selector:'.tinymce',
             plugins : 'autolink link lists charmap print preview',
-            default_link_target: "_blank"
+            default_link_target: "_blank",
+            entity_encoding : "raw"
         });
     </script>
     <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}" />

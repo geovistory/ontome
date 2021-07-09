@@ -3,24 +3,34 @@
 {% block body %}
     <div class="container">
         <h3>Search: <span class="label label-default">{{ query }}</span></h3>
-        {% if whatSearch is not null %}
-        <div class="row well well-sm"><strong>Search words: </strong>
-            {% for wordSearch in whatSearch %}
-                {% for word in wordSearch %}
-                {{ word }}
-                {% endfor %}
-            {% endfor %}
-        </div>
-        {% endif %}
         <form id="form-search" action="">
             <div class="form-group">
                 <div class="row well well-sm">
                     <div class="col-lg-10">
-                        <input type="text" class="form-control" id="input-search" placeholder="Search...">
+                        <input type="text" class="form-control" id="input-search" placeholder="Search..." value="{{ query }}">
                     </div>
                     <div class="col-lg-2">
                         <button type="submit" id="btn-search" class="btn btn-block btn-primary"><i class="fas fa-search"></i> Search</button>
                     </div>
+                    <!--
+                    <div class="col-lg-12 text-muted">
+                        <i>Quoted word sequences are converted to phrase tests. The word “or” is understood as producing an OR operator, and a dash produces a NOT operator; other punctuation is ignored.</i>
+                    </div>
+                    -->
+                    {% if whatSearch is not null %}
+                    <div class="col-lg-12">
+                        <strong>Lexeme(s): </strong>
+                            {% for wordSearch in whatSearch %}
+                                {% for word in wordSearch %}
+                                {{ word }}
+                                {% endfor %}
+                            {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="row">
+
+
                 </div>
             </div>
         </form>
@@ -32,6 +42,7 @@
                 <th>Entity</th>
                 <th>Text</th>
                 <th>Namespace</th>
+                <th>Score</th>
             </tr>
             </thead>
             <tbody>
@@ -91,6 +102,7 @@
                         </a>
                         {% endif %}
                     </td>
+                    <td>{{ line.score }}</td>
                 </tr>
             {% endfor %}
             {% for line in resultatLbl %}
@@ -137,6 +149,7 @@
                             </a>
                         {% endif %}
                     </td>
+                    <td>{{ line.score }}</td>
                 </tr>
             {% endfor %}
             </tbody>
@@ -149,6 +162,10 @@
 <script>
     $(document).ready(function() {
         $('#search-table').DataTable({
+            order: [[5,'desc']],
+            columnDefs: [
+                { targets: [-1], visible: false }
+            ],
             //Selecteur de colonnes
             initComplete: function(){
                 this.api().columns([0]).every(function(){

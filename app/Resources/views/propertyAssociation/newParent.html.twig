@@ -160,7 +160,8 @@
                 $('.js-example-add').hide();
                 $('[for=parent_property_association_form_textProperties_1_textProperty]').text('Example');
                 tinymce.init({
-                    selector:'.tinymce'
+                    selector:'.tinymce',
+                    entity_encoding : "raw"
                 });
                 $('.js-example-remove').show();
             });
