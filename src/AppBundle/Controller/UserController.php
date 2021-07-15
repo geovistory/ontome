@@ -361,10 +361,8 @@ class UserController extends Controller
             // On retire les namespaces des profils actifs
             foreach($profilesUserProject as $profile) {
                 foreach($profile->getNamespaces() as $profilNamespace){
-                    foreach($activeNamespaces as $activeNamespace) {
-                        if($additionalNamespaces->contains($activeNamespace) && $activeNamespace == $profilNamespace) {
-                            $additionalNamespaces->removeElement($activeNamespace);
-                        }
+                    if($additionalNamespaces->contains($profilNamespace)){
+                        $additionalNamespaces->removeElement($profilNamespace);
                     }
                 }
             }
@@ -986,6 +984,13 @@ class UserController extends Controller
                             )
                         );
 
+                    if(is_null($eupa)){
+                        $eupa = new EntityUserProjectAssociation();
+                        $eupa->setNamespace($defaultNamespace);
+                        $eupa->setCreationTime(new \DateTime('now'));
+                        $eupa->setUserProjectAssociation($userCurrentActiveProjectAssociation);
+                    }
+
                     $systemTypeSelected = $em->getRepository('AppBundle:SystemType')->find(25);
                     $eupa->setSystemType($systemTypeSelected);
                     $eupa->setModificationTime(new \DateTime('now'));
@@ -1003,6 +1008,13 @@ class UserController extends Controller
                                 'userProjectAssociation' => $userCurrentActiveProjectAssociation
                             )
                         );
+
+                    if(is_null($eupa)){
+                        $eupa = new EntityUserProjectAssociation();
+                        $eupa->setNamespace($namespace);
+                        $eupa->setCreationTime(new \DateTime('now'));
+                        $eupa->setUserProjectAssociation($userCurrentActiveProjectAssociation);
+                    }
 
                     $systemTypeSelected = $em->getRepository('AppBundle:SystemType')->find(25); //systemType 25 = Selected namespace for user preference
                     $eupa->setSystemType($systemTypeSelected);
@@ -1024,6 +1036,12 @@ class UserController extends Controller
                             'userProjectAssociation' => $userCurrentActiveProjectAssociation->getId()
                         )
                     );
+                if(is_null($eupa)){
+                    $eupa = new EntityUserProjectAssociation();
+                    $eupa->setProfile($profile);
+                    $eupa->setCreationTime(new \DateTime('now'));
+                    $eupa->setUserProjectAssociation($userCurrentActiveProjectAssociation);
+                }
 
                 $systemTypeSelected = $em->getRepository('AppBundle:SystemType')->find(25);
                 $eupa->setSystemType($systemTypeSelected);
@@ -1039,6 +1057,14 @@ class UserController extends Controller
                                 'userProjectAssociation' => $userCurrentActiveProjectAssociation->getId()
                             )
                         );
+
+                    if(is_null($eupa)){
+                        $eupa = new EntityUserProjectAssociation();
+                        $eupa->setNamespace($namespace);
+                        $eupa->setCreationTime(new \DateTime('now'));
+                        $eupa->setUserProjectAssociation($userCurrentActiveProjectAssociation);
+                    }
+
                     $systemTypeSelected = $em->getRepository('AppBundle:SystemType')->find(25);
                     $eupa->setSystemType($systemTypeSelected);
                     $eupa->setModificationTime(new \DateTime('now'));
