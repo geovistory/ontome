@@ -413,6 +413,7 @@ class PropertyController extends Controller
 
         $propertyTemp = new Property();
         $propertyVersionTemp = new PropertyVersion();
+        $propertyVersionTemp->setNamespaceForVersion($propertyVersion->getNamespaceForVersion());
         $propertyVersionTemp->setProperty($propertyTemp);
 
         //$propertyTemp->addNamespace($property->getOngoingNamespace());
