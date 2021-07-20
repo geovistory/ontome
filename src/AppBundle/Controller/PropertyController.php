@@ -55,11 +55,32 @@ class PropertyController extends Controller
             }
         }
 
-        // Récupérer les propriétés selon le filtrage obtenu
-        $properties = $em->getRepository('AppBundle:Property')->findPropertiesByNamespacesId($namespacesId);
+        // Récupérer toutes les propriétés  sans le filtrage
+        // N'afficher que les classes/propriétés de la dernière version publiée d'un espace de noms ou,
+        // si l'espace n'a pas de version publiée, la version ongoing.
+        // 1- Récuperer tous les roots
+        $allRootNamespaces = $em->getRepository('AppBundle:OntoNamespace')->findBy(array("isTopLevelNamespace" => true));
+        // 2- Récupérer la bonne version (dernière publiée sinon ongoing)
+        $allNamespacesId = array();
+        foreach ($allRootNamespaces as $rootNamespace){
+            $defaultNamespace = null;
+            foreach ($rootNamespace->getChildVersions() as $childVersion){
+                if($childVersion->getIsOngoing() and !$rootNamespace->getHasPublication()){
+                    $defaultNamespace = $childVersion;
+                }
+                elseif(is_null($defaultNamespace) || $defaultNamespace->getPublishedAt() < $childVersion->getPublishedAt()){
+                    $defaultNamespace = $childVersion;
+                }
+            }
+            $allNamespacesId[] = $defaultNamespace->getId();
+        }
+
+        // Récupérer toutes les classes selon $allNamespacesId
+        $allProperties= $em->getRepository('AppBundle:Property')->findPropertiesByNamespacesId($allNamespacesId);
 
         return $this->render('property/list.html.twig', [
-            'properties' => $properties,
+            'properties' => $allProperties,
+            'allNamespacesId' => $allNamespacesId,
             'namespacesId' => $namespacesId
         ]);
     }

@@ -50,11 +50,32 @@ class ClassController extends Controller
             }
         }
 
-        // Récupérer les classes selon le filtrage obtenu
-        $classes = $em->getRepository('AppBundle:OntoClass')->findClassesByNamespacesId($namespacesId);
+        // Récupérer toutes les classes sans le filtrage
+        // N'afficher que les classes/propriétés de la dernière version publiée d'un espace de noms ou,
+        // si l'espace n'a pas de version publiée, la version ongoing.
+        // 1- Récuperer tous les roots
+        $allRootNamespaces = $em->getRepository('AppBundle:OntoNamespace')->findBy(array("isTopLevelNamespace" => true));
+        // 2- Récupérer la bonne version (dernière publiée sinon ongoing)
+        $allNamespacesId = array();
+        foreach ($allRootNamespaces as $rootNamespace){
+            $defaultNamespace = null;
+            foreach ($rootNamespace->getChildVersions() as $childVersion){
+                if($childVersion->getIsOngoing() and !$rootNamespace->getHasPublication()){
+                    $defaultNamespace = $childVersion;
+                }
+                elseif(is_null($defaultNamespace) || $defaultNamespace->getPublishedAt() < $childVersion->getPublishedAt()){
+                    $defaultNamespace = $childVersion;
+                }
+            }
+            $allNamespacesId[] = $defaultNamespace->getId();
+        }
+
+        // Récupérer toutes les classes selon $allNamespacesId
+        $allClasses = $em->getRepository('AppBundle:OntoClass')->findClassesByNamespacesId($allNamespacesId);
 
         return $this->render('class/list.html.twig', [
-            'classes' => $classes,
+            'classes' => $allClasses,
+            'allNamespacesId' => $allNamespacesId,
             'namespacesId' => $namespacesId
         ]);
     }
