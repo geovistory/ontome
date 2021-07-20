@@ -14,7 +14,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Class Label
- * @ORM\Entity
+ * @ORM\Entity(repositoryClass="AppBundle\Repository\LabelRepository")
  * @ORM\Table(schema="che", name="label")
  */
 class Label

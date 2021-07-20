@@ -128,7 +128,8 @@
                 $('.js-example-add').hide();
                 $('[for=namespace_quick_add_form_textProperties_1_textProperty]').text('Ongoing namespace description');
                 tinymce.init({
-                    selector:'.tinymce'
+                    selector:'.tinymce',
+                    entity_encoding : "raw"
                 });
                 $('.js-description-ongoing-remove').show();
             });

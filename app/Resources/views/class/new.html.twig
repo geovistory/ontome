@@ -123,7 +123,8 @@
                 $('.js-example-add').hide();
                 $('[for=class_quick_add_form_textProperties_1_textProperty]').text('Example');
                 tinymce.init({
-                    selector:'.tinymce'
+                    selector:'.tinymce',
+                    entity_encoding : "raw"
                 });
                 $('.js-example-remove').show();
 
