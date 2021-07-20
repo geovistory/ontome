@@ -2,28 +2,27 @@
 
 {% block body %}
     <div class="container">
-        <h3>Search: <span class="label label-default">{{ query }}</span></h3>
+        <h3>Search: <span style="color: #81B9BA;">{{ query }}</span></h3>
         <form id="form-search" action="">
             <div class="form-group">
                 <div class="row well well-sm">
-                    <div class="col-lg-10">
-                        <input type="text" class="form-control" id="input-search" placeholder="Search..." value="{{ query }}">
-                    </div>
-                    <div class="col-lg-2">
-                        <button type="submit" id="btn-search" class="btn btn-block btn-primary"><i class="fas fa-search"></i> Search</button>
+                    <div class="col-lg-12 input-group">
+                        <input type="text" class="form-control" id="input-search" placeholder="Search OntoME" value="{{ query }}">
+                        <span class="input-group-btn">
+                        <button type="submit" id="btn-search" class="btn btn-block btn-primary"><i class="fas fa-search"></i></button>
+                        </span>
                     </div>
                     <!--
                     <div class="col-lg-12 text-muted">
                         <i>Quoted word sequences are converted to phrase tests. The word “or” is understood as producing an OR operator, and a dash produces a NOT operator; other punctuation is ignored.</i>
                     </div>
                     -->
-                    {% if whatSearch is not null %}
+                    {% if lexemes|length >0 %}
                     <div class="col-lg-12">
+                        <br>
                         <strong>Lexeme(s): </strong>
-                            {% for wordSearch in whatSearch %}
-                                {% for word in wordSearch %}
-                                {{ word }}
-                                {% endfor %}
+                            {% for lexeme in lexemes %}
+                                {{ lexeme }}
                             {% endfor %}
                     </div>
                     {% endif %}
@@ -64,6 +63,7 @@
                         {% if line.fk_text_property_type == 7 %}{% set fragment, type = "definition", "Example" %}{% endif %}
                         {% if line.fk_text_property_type == 12 %}{% set fragment, type = "definition", "Additional note" %}{% endif %}
                         {% if line.fk_text_property_type == 15 %}{% set fragment, type = "justifications", "Justification" %}{% endif %}
+                        {% endif %}
                         {% if line.fk_text_property_type == 16 %}{% set fragment, type = "definition", "Description" %}{% endif %}
                         {% if line.fk_text_property_type == 31 %}{% set fragment, type = "definition", "owl:versionInfo" %}{% endif %}
                         {% if line.fk_text_property_type == 32 %}{% set fragment, type = "definition", "Licence" %}{% endif %}
@@ -82,6 +82,15 @@
                                     {{ line.identifier_in_namespace }} - {{ line.standard_label }}
                                 {% else %}
                                     {{ line.standard_label }}
+                                {% endif %}
+                            </a>
+                        {% elseif url is defined and (entityType == "Relation") %}
+                            {% if  %}
+                            <a href="{{ path(url_entity, {'id': id, 'namespaceFromUrlId': line.fk_namespace_for_version}) }}">
+                                {% if line.source_identifier_in_namespace != line.source_standard_label %}
+                                    {{ line.source_identifier_in_namespace }} - {{ line.source_standard_label }}
+                                {% else %}
+                                    {{ line.source_standard_label }}
                                 {% endif %}
                             </a>
                         {% elseif url is defined and (entityType == "Namespace" or entityType == "Project" or entityType == "Profile") %}
@@ -108,9 +117,9 @@
             {% for line in resultatLbl %}
                 <tr>
                     <td class="text-nowrap">
-                        {% if line.fk_property is not null %}{% set url, id, entityType = "property_show", line.fk_property, "Property" %}{% endif %}
+                        {% if line.fk_property is not null %}{% set url, id, entityType = "property_show_with_version", line.fk_property, "Property" %}{% endif %}
                         {% if line.fk_namespace is not null %}{% set url, id, entityType = "namespace_show", line.fk_namespace, "Namespace" %}{% endif %}
-                        {% if line.fk_class is not null %}{% set url, id, entityType = "class_show", line.fk_class, "Class" %}{% endif %}
+                        {% if line.fk_class is not null %}{% set url, id, entityType = "class_show_with_version", line.fk_class, "Class" %}{% endif %}
                         {% if line.fk_project is not null %}{% set url, id, entityType = "project_show", line.fk_project, "Project" %}{% endif %}
                         {% if line.fk_profile is not null %}{% set url, id, entityType = "profile_show", line.fk_profile, "Profile" %}{% endif %}
                         {% set fragment = "identification" %}
@@ -166,6 +175,10 @@
             columnDefs: [
                 { targets: [-1], visible: false }
             ],
+            "language": {
+                search: '<i class="fa fa-filter" aria-hidden="true"></i> Filter: ',
+                searchPlaceholder: ''
+            },
             //Selecteur de colonnes
             initComplete: function(){
                 this.api().columns([0]).every(function(){

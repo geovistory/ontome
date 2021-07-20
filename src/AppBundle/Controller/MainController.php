@@ -55,6 +55,13 @@ class MainController extends Controller
 
         // Retrouver les termes qui ont été réellement comparées (pour information à l'utilisateur)
         $whatSearch = $em->getRepository('AppBundle:TextProperty')->findWhatSearch($query_sanitized);
-        return $this->render('main/search.html.twig', array('query' => $query_sanitized, 'resultatTxtp' => $resultatTxtp, 'resultatLbl' => $resultatLbl, 'whatSearch' => $whatSearch));
+        $arrayLexemes = array();
+        foreach($whatSearch as $wordSearch){
+            foreach($wordSearch as $word){
+                if($word != "")
+                    $arrayLexemes[] = $word;
+            }
+        }
+        return $this->render('main/search.html.twig', array('query' => $query_sanitized, 'resultatTxtp' => $resultatTxtp, 'resultatLbl' => $resultatLbl, 'lexemes' => $arrayLexemes));
     }
 }

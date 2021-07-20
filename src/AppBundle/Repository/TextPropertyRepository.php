@@ -78,7 +78,7 @@ class TextPropertyRepository extends EntityRepository
         // Fonction retournant le résultat de plainto_tsquery pour informer l'utilisateur les termes recherchées
         $conn = $this->getEntityManager()
             ->getConnection();
-        $sql = "SELECT plainto_tsquery('english', :query);";
+        $sql = "SELECT CAST(plainto_tsquery('english', :query) AS text);";
         $stmt = $conn->prepare($sql);
         $stmt->execute(array('query' => $query));
 

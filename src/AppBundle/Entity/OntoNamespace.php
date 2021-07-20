@@ -200,10 +200,12 @@ class OntoNamespace
      * @ORM\ManyToMany(targetEntity="EntityUserProjectAssociation", mappedBy="namespace")
      * @ORM\OrderBy({"id" = "ASC"})
      */
-    private $namespaceUserProjectAssociation;/**
- * @ORM\ManyToMany(targetEntity="AppBundle\Entity\Profile", mappedBy="namespaces")
- * @ORM\OrderBy({"standardLabel" = "ASC"})
- */
+    private $namespaceUserProjectAssociation;
+
+    /**
+     * @ORM\ManyToMany(targetEntity="AppBundle\Entity\Profile", mappedBy="namespaces")
+     * @ORM\OrderBy({"standardLabel" = "ASC"})
+     */
     private $profiles;
 
     /**
