@@ -203,6 +203,11 @@
             })
         });
 
+        let searchParams = new URLSearchParams(window.location.search);
+        if(searchParams.has('popup-txtp')){
+            $('#modal-text-property-'+searchParams.get('popup-txtp')).modal('show');
+        }
+
         //add tooltip to all elements with the data-toggle="tooltip" attr
         $("body").tooltip({
             selector: '[data-toggle="tooltip"]'

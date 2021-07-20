@@ -48,9 +48,10 @@
             {% for line in resultatTxtp %}
                 <tr>
                     <td class="text-nowrap">
-                        {% if line.fk_property is not null %}{% set url, id, entityType = "property_show_with_version", line.fk_property, "Property" %}{% endif %}
+                        {% set versionId = null %}
+                        {% if line.fk_property is not null %}{% set url, id, versionId, entityType = "property_show_with_version", line.fk_property, line.fk_namespace_for_version, "Property" %}{% endif %}
                         {% if line.fk_namespace is not null %}{% set url, id, entityType = "namespace_show", line.fk_namespace, "Namespace" %}{% endif %}
-                        {% if line.fk_class is not null %}{% set url, id, entityType = "class_show_with_version", line.fk_class, "Class" %}{% endif %}
+                        {% if line.fk_class is not null %}{% set url, id, versionId, entityType = "class_show_with_version", line.fk_class, line.fk_namespace_for_version, "Class" %}{% endif %}
                         {% if line.fk_project is not null %}{% set url, id, entityType = "project_show", line.fk_project, "Project" %}{% endif %}
                         {% if line.fk_entity_association is not null %}{% set url, id, entityType = "entity_association_show", line.fk_entity_association, "Relation" %}{% endif %}
                         {% if line.fk_profile is not null %}{% set url, id, entityType = "profile_show", line.fk_profile, "Profile" %}{% endif %}
@@ -63,13 +64,14 @@
                         {% if line.fk_text_property_type == 7 %}{% set fragment, type = "definition", "Example" %}{% endif %}
                         {% if line.fk_text_property_type == 12 %}{% set fragment, type = "definition", "Additional note" %}{% endif %}
                         {% if line.fk_text_property_type == 15 %}{% set fragment, type = "justifications", "Justification" %}{% endif %}
-                        {% endif %}
                         {% if line.fk_text_property_type == 16 %}{% set fragment, type = "definition", "Description" %}{% endif %}
                         {% if line.fk_text_property_type == 31 %}{% set fragment, type = "definition", "owl:versionInfo" %}{% endif %}
                         {% if line.fk_text_property_type == 32 %}{% set fragment, type = "definition", "Licence" %}{% endif %}
 
-                        {% if url is defined %}
+                        {% if url is defined and versionId is null %}
                         <a href="{{ path(url, {'id': id, '_fragment':fragment}) }}">{{ type }}</a>
+                        {% elseif url is defined and versionId is not null %}
+                            <a href="{{ path(url, {'id': id, 'namespaceFromUrlId': versionId, '_fragment':fragment}) }}">{{ type }}</a>
                         {% else %}
                             {{ line.pk_text_property }}
                         {% endif %}
@@ -85,12 +87,18 @@
                                 {% endif %}
                             </a>
                         {% elseif url is defined and (entityType == "Relation") %}
-                            {% if  %}
-                            <a href="{{ path(url_entity, {'id': id, 'namespaceFromUrlId': line.fk_namespace_for_version}) }}">
-                                {% if line.source_identifier_in_namespace != line.source_standard_label %}
-                                    {{ line.source_identifier_in_namespace }} - {{ line.source_standard_label }}
+                            {% if line.fk_is_subclass_of is not null %}
+                                {% set fragment = "class-hierarchy" %}
+                            {% elseif line.fk_is_subproperty_of is not null %}
+                                {% set fragment = "property-hierarchy" %}
+                            {% elseif line.fk_entity_association is not null %}
+                                {% set fragment = "relations" %}
+                            {% endif %}
+                            <a href="{{ path(line.link_entity_route, {'id': line.link_entity_id, 'namespaceFromUrlId': line.link_entity_version_id, 'popup-txtp': line.pk_text_property, '_fragment':fragment}) }}">
+                                {% if line.identifier_in_namespace != line.standard_label %}
+                                    {{ line.identifier_in_namespace }} - {{ line.standard_label }}
                                 {% else %}
-                                    {{ line.source_standard_label }}
+                                    {{ line.standard_label }}
                                 {% endif %}
                             </a>
                         {% elseif url is defined and (entityType == "Namespace" or entityType == "Project" or entityType == "Profile") %}
@@ -117,14 +125,17 @@
             {% for line in resultatLbl %}
                 <tr>
                     <td class="text-nowrap">
-                        {% if line.fk_property is not null %}{% set url, id, entityType = "property_show_with_version", line.fk_property, "Property" %}{% endif %}
+                        {% if line.fk_property is not null %}{% set url, id, versionId, entityType = "property_show_with_version", line.fk_property, line.fk_namespace_for_version, "Property" %}{% endif %}
                         {% if line.fk_namespace is not null %}{% set url, id, entityType = "namespace_show", line.fk_namespace, "Namespace" %}{% endif %}
-                        {% if line.fk_class is not null %}{% set url, id, entityType = "class_show_with_version", line.fk_class, "Class" %}{% endif %}
+                        {% if line.fk_class is not null %}{% set url, id, versionId, entityType = "class_show_with_version", line.fk_class, line.fk_namespace_for_version, "Class" %}{% endif %}
                         {% if line.fk_project is not null %}{% set url, id, entityType = "project_show", line.fk_project, "Project" %}{% endif %}
                         {% if line.fk_profile is not null %}{% set url, id, entityType = "profile_show", line.fk_profile, "Profile" %}{% endif %}
                         {% set fragment = "identification" %}
-                        {% if url is defined %}
-                        <a href="{{ path(url, {'id': id, '_fragment':fragment}) }}">Label</a>
+
+                        {% if url is defined and versionId is not defined %}
+                            <a href="{{ path(url, {'id': id, '_fragment':fragment}) }}">Label</a>
+                        {% elseif url is defined and versionId is defined %}
+                            <a href="{{ path(url, {'id': id, 'namespaceFromUrlId': versionId, '_fragment':fragment}) }}">Label</a>
                         {% else %}
                             {{ line.pk_label }}
                         {% endif %}
