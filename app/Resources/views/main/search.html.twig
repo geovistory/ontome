@@ -111,12 +111,14 @@
                             </a>
                         {% endif %}
                     </td>
-                    <td>{{ line.text_property|raw }}</td>
+                    <td>
+                        <div style="margin:0; padding:0;" class="readmore-block">
+                            {{ line.text_property|raw }}
+                        </div>
+                    </td>
                     <td>
                         {% if line.fk_namespace_for_version is not null %}
-                        <a href="{{ path("namespace_show", {'id': line.fk_namespace_for_version}) }}">
-                        {{ line.ns_standard_label }}
-                        </a>
+                        <a href="{{ path("namespace_show", {'id': line.fk_namespace_for_version}) }}">{{ line.ns_standard_label }}</a>
                         {% endif %}
                     </td>
                     <td>{{ line.score }}</td>
@@ -160,13 +162,14 @@
                             </a>
                         {% endif %}
                     </td>
-                    <td>{{ line.label|raw }}{% if line.inverse_label is not null %} ({{ line.inverse_label }}){% endif %}</td>
-
+                    <td>
+                        <p style="margin:0; padding:0;" class="readmore-block">
+                            {{ line.label|raw }}{% if line.inverse_label is not null %} ({{ line.inverse_label }}){% endif %}
+                        </p>
+                    </td>
                     <td>
                         {% if line.fk_namespace_for_version is not null %}
-                            <a href="{{ path("namespace_show", {'id': line.fk_namespace_for_version}) }}">
-                                {{ line.ns_standard_label }}
-                            </a>
+                            <a href="{{ path("namespace_show", {'id': line.fk_namespace_for_version}) }}">{{ line.ns_standard_label }}</a>
                         {% endif %}
                     </td>
                     <td>{{ line.score }}</td>
@@ -181,6 +184,7 @@
 
 <script>
     $(document).ready(function() {
+
         $('#search-table').DataTable({
             order: [[5,'desc']],
             columnDefs: [
@@ -212,7 +216,7 @@
 
                     var temp = {}
                     column.data().unique().each(function (d, j) {  // no need to use .sort()
-                        var sText = $('<a/>').html(d).text();
+                        var sText = $('<a>').html(d).text();
                         temp[sText] = '<option value="' + sText + '">' + sText + '</option>';
 
                     });
@@ -220,6 +224,7 @@
                         select.append( temp[key] );;
                     });
                 });
+
                 this.api().columns([1]).every(function(){
                     var column = this;
                     var select = $('<select id="entity-type-select" style="width:100%;"><option value=""></option></select>')
@@ -242,12 +247,54 @@
                         select.append('<option value="'+d+'">'+d+'</option>')
                     });
                 });
+
+                this.api().columns([4]).every(function(){
+                    var column = this;
+                    var select = $('<br><select id="namespace-select" style="width:100%;"><option value=""></option></select>')
+                        .appendTo($(column.header()))
+                        .on('change', function(){
+                            var val = $.fn.dataTable.util.escapeRegex(
+                                $(this).val()
+                            );
+
+                            column
+                                .search(val ? '^'+val+'$' : '', true, false)
+                                .draw();
+                        });
+
+                    $(select).click(function(e){
+                        e.stopPropagation();
+                    });
+
+                    var temp = {}
+                    column.data().unique().each(function (d, j) {  // no need to use .sort()
+                        var sText = $('<a>').html(d).text();
+                        if(sText != ""){
+                            temp[sText] = '<option value="' + sText + '">' + sText + '</option>';
+                        }
+
+                    });
+                    Object.keys(temp).sort().forEach(function(key) {
+                        select.append( temp[key] );;
+                    });
+                });
             }
         });
         $('#form-search').submit(function (event){
             var val = $('#input-search').val();
             event.preventDefault();
             window.location.href="{{ url('app_main_search') }}/"+val;
+        });
+    });
+    $(".readmore-block").each(function(){
+        $(this).readall({
+            showheight:null,
+            showrows: 1, // 1 lignes
+            animationspeed: 300,
+            btnClassShowmore:'btn btn-xs btn-default',
+            btnClassShowless:'btn btn-xs btn-default',
+            btnTextShowmore:'+ Read more',
+            btnTextShowless:'- Read less',
         });
     });
 </script>
