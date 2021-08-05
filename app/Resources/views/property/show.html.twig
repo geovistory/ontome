@@ -1323,7 +1323,13 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for profile in propertyVersion.property.profiles %}
+                    {% set profilesAssociated = [] %}
+                    {% for profileAssociation in propertyVersion.property.profileAssociations
+                        if profileAssociation.systemType.id == 5
+                        and profileAssociation.profile not in profilesAssociated %}
+                        {% set profilesAssociated = [profileAssociation.profile]|merge(profilesAssociated) %}
+                    {% endfor %}
+                    {% for profile in profilesAssociated %}
                         <tr>
                             <td>
                                 <a href="{{ path('profile_show', {
