@@ -289,7 +289,7 @@ class PropertyController extends Controller
             }
             foreach ($namespacesIdFromUser as $namespaceIdFromUser) {
                 $namespaceFromUser = $em->getRepository('AppBundle:OntoNamespace')->find($namespaceIdFromUser);
-                if ($propertyVersion->getNamespaceForVersion()->getTopLevelNamespace()->getId() === $namespaceFromUser->getTopLevelNamespace()->getId()) {
+                if ($propertyVersion->getNamespaceForVersion()->getTopLevelNamespace()->getId() === $namespaceFromUser->getTopLevelNamespace()->getId() and $property->getPropertyVersionForDisplay($namespaceFromUser)) {
                     return $this->redirectToRoute('property_show_with_version', [
                         'id' => $property->getId(),
                         'namespaceFromUrlId' => $namespaceIdFromUser

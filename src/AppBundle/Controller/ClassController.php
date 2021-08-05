@@ -223,7 +223,7 @@ class ClassController extends Controller
             }
             foreach ($namespacesIdFromUser as $namespaceIdFromUser) {
                 $namespaceFromUser = $em->getRepository('AppBundle:OntoNamespace')->find($namespaceIdFromUser);
-                if ($classVersion->getNamespaceForVersion()->getTopLevelNamespace()->getId() === $namespaceFromUser->getTopLevelNamespace()->getId()) {
+                if ($classVersion->getNamespaceForVersion()->getTopLevelNamespace()->getId() === $namespaceFromUser->getTopLevelNamespace()->getId() and $class->getClassVersionForDisplay($namespaceFromUser)) {
                     return $this->redirectToRoute('class_show_with_version', [
                         'id' => $class->getId(),
                         'namespaceFromUrlId' => $namespaceIdFromUser
