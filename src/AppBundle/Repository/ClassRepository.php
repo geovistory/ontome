@@ -79,7 +79,7 @@ class ClassRepository extends EntityRepository
                         ARRAY_TO_STRING(pk_ancestors,'|') pk_ancestors,
                         ARRAY_TO_STRING(pk_version_ancestors,'|') pk_version_ancestors,
                         pk_is_subclass_of,
-                        fk_namespace_for_version
+                        fk_parent_namespace_for_version
                         FROM che.ascendant_class_hierarchy(?, ARRAY[".$in."]::integer[])
                 )
                 SELECT t_ascendants_classes.pk_parent AS id,
@@ -92,13 +92,13 @@ class ClassRepository extends EntityRepository
                     (SELECT label FROM che.get_namespace_labels(che.get_root_namespace(nsp.pk_namespace)) WHERE language_iso_code = 'en') AS \"rootNamespaceLabel\",
                     nsp_ascendant.pk_namespace AS \"classNamespaceId\",
                     nsp_ascendant.standard_label AS \"classNamespaceLabel\",
-                    t_ascendants_classes.fk_namespace_for_version
+                    t_ascendants_classes.fk_parent_namespace_for_version
                 FROM t_ascendants_classes,
                 che.namespace nsp,
                 che.namespace nsp_ascendant,
                 che.is_subclass_of subcl
                 WHERE depth > 1
-                AND t_ascendants_classes.fk_namespace_for_version = nsp.pk_namespace 
+                AND t_ascendants_classes.fk_parent_namespace_for_version = nsp.pk_namespace 
                 AND t_ascendants_classes.pk_is_subclass_of = subcl.pk_is_subclass_of 
                 AND subcl.fk_parent_class_namespace = nsp_ascendant.pk_namespace 
                 AND subcl.fk_parent_class_namespace IN (".$in.")
@@ -107,7 +107,7 @@ class ClassRepository extends EntityRepository
                 t_ascendants_classes.depth,
                 nsp.pk_namespace,
                 nsp_ascendant.pk_namespace,
-		        t_ascendants_classes.fk_namespace_for_version,
+		        t_ascendants_classes.fk_parent_namespace_for_version,
 		        t_ascendants_classes.pk_is_subclass_of,
 		        t_ascendants_classes.ancestors,
 		        t_ascendants_classes.pk_ancestors,
