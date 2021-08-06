@@ -199,7 +199,8 @@ class PropertyAssociationController extends Controller
         if ($form->isSubmitted() && $form->isValid()) {
             $parentProperty = $em->getRepository("AppBundle:Property")->find($form->get("parentPropertyVersion")->getData());
             $propertyAssociation->setParentProperty($parentProperty);
-
+            $parentPropertyNamespace = $em->getRepository("AppBundle:PropertyVersion")->findPropertyVersionByPropertyAndNamespacesId($parentProperty, $namespacesId)->getNamespaceForVersion();
+            $propertyAssociation->setParentPropertyNamespace($parentPropertyNamespace);
             $propertyAssociation = $form->getData();
             $propertyAssociation->setModifier($this->getUser());
             $propertyAssociation->setModificationTime(new \DateTime('now'));

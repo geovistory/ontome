@@ -174,6 +174,8 @@ class ClassAssociationController extends Controller
         if ($form->isSubmitted() && $form->isValid()) {
             $parentClass = $em->getRepository("AppBundle:OntoClass")->find($form->get("parentClassVersion")->getData());
             $classAssociation->setParentClass($parentClass);
+            $parentClassNamespace = $em->getRepository("AppBundle:OntoClassVersion")->findClassVersionByClassAndNamespacesId($parentClass, $namespacesId)->getNamespaceForVersion();
+            $classAssociation->setParentClassNamespace($parentClassNamespace);
             $classAssociation = $form->getData();
             $classAssociation->setModifier($this->getUser());
             $classAssociation->setModificationTime(new \DateTime('now'));
