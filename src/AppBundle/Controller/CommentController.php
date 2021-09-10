@@ -20,7 +20,9 @@ use Symfony\Component\HttpFoundation\Request;
 class CommentController extends Controller
 {
     /**
-     * @Route("/comment/{objectType}/{objectId}/json", name="comment_show_json")
+     * @Route("/comment/{objectType}/{objectId}/json",
+     *     name="comment_show_json",
+     *     requirements={"objectType"="^(class|property|class-association|property-association|entity-association|text-property|label|namespace){1}$","objectId"="^[0-9]+$"})
      * @Method("GET")
      * @param string $objectType    The object type name
      * @param int  $objectId    The id of the object
@@ -100,7 +102,7 @@ class CommentController extends Controller
     }
 
     /**
-     * @Route("/comment/new/{object}/{objectId}", name="comment_new")
+     * @Route("/comment/new/{object}/{objectId}", name="comment_new", requirements={"object"="^(class-version|property-version|class-association|property-association|entity-association|text-property|label|namespace){1}$","objectId"="^[0-9]+$"})
      * @Method({ "POST"})
      */
     public function newAction($object, $objectId, Request $request)
@@ -256,7 +258,7 @@ class CommentController extends Controller
     }
 
     /**
-     * @Route("/comment/{object}/{objectId}/viewedby/json", name="viewed_by_json")
+     * @Route("/comment/{object}/{objectId}/viewedby/json", name="viewed_by_json", requirements={"object"="^(class|property|class-association|property-association|entity-association|text-property|label|namespace|selectedObject){1}$","objectId"="^([0-9]+)|(selectedValue){1}$"})
      * @Method("GET")
      * @return JsonResponse
      */

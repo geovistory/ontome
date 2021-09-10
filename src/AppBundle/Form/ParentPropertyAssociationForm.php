@@ -43,9 +43,9 @@ class ParentPropertyAssociationForm extends AbstractType
         $choices = array();
         foreach ($options['propertiesVersion'] as $pv){
             if($pv['standardLabel'] != $pv['identifierInNamespace'])
-                $choices[$pv['identifierInNamespace']." ".$pv['standardLabel']] = $pv['id'];
+                $choices[$pv['rootNamespacePrefix'].":".$pv['identifierInNamespace']." ".$pv['standardLabel']] = $pv['id'];
             else
-                $choices[$pv['standardLabel']] = $pv['id'];
+                $choices[$pv['rootNamespacePrefix'].":".$pv['standardLabel']] = $pv['id'];
         }
 
 

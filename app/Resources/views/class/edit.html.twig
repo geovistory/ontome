@@ -119,8 +119,8 @@
                                             {% set route_params = {'id': association.namespaceForVersion.id,  '_fragment': 'mismatches' } %}
                                         {% endif %}
                                         <li>
-                                            <a href="{{ path(route, route_params) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
-                                                {{ association.parentClass.classVersionForDisplay(association.parentClassNamespace).invertedLabel }}</a>
+                                            <a href="{{ path(route, route_params) }}" title="{{ association.parentClassNamespace }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
+                                                {{ association.parentClass.classVersionForDisplay(association.parentClassNamespace).invertedLabel(true) }}</a>
                                         </li>
                                     {% endfor %}
                                 </ul>
@@ -157,8 +157,8 @@
                                             {% set route_params = {'id': association.namespaceForVersion.id,  '_fragment': 'mismatches' } %}
                                         {% endif %}
                                         <li>
-                                            <a href="{{ path(route, route_params) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
-                                                {{ association.childClass.classVersionForDisplay(association.childClassNamespace).invertedLabel }}</a>
+                                            <a href="{{ path(route, route_params) }}" title="{{ association.childClassNamespace }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
+                                                {{ association.childClass.classVersionForDisplay(association.childClassNamespace).invertedLabel(true) }}</a>
                                         </li>
                                     {% endfor %}
                                 </ul>
@@ -200,8 +200,8 @@
                                                     {% set route = 'namespace_show' %}
                                                     {% set route_params = {'id': relation.namespaceForVersion.id,  '_fragment': 'mismatches' } %}
                                                 {% endif %}
-                                                <a href="{{ path(route, route_params) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
-                                                    {{ relation.targetClass.classVersionForDisplay(relation.targetNamespaceForVersion).invertedLabel }}</a>
+                                                <a href="{{ path(route, route_params) }}" title="{{ relation.targetNamespaceForVersion }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
+                                                    {{ relation.targetClass.classVersionForDisplay(relation.targetNamespaceForVersion).invertedLabel(true) }}</a>
                                             {% else %}
                                                 {# La classe affichée est "target", on cherche la "source" #}
 
@@ -217,8 +217,8 @@
                                                     {% set route_params = {'id': relation.namespaceForVersion.id,  '_fragment': 'mismatches' } %}
                                                 {% endif %}
 
-                                                <a href="{{ path(route, route_params) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
-                                                    {{ relation.sourceClass.classVersionForDisplay(relation.sourceNamespaceForVersion).invertedLabel }}</a>
+                                                <a href="{{ path(route, route_params) }}" title="{{ relation.targetNamespaceForVersion }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
+                                                    {{ relation.sourceClass.classVersionForDisplay(relation.sourceNamespaceForVersion).invertedLabel(true) }}</a>
                                             {% endif %}
                                         </li>
                                     {% endfor %}
@@ -328,10 +328,10 @@
                                             <a href="{{ path('property_show_with_version', {
                                                 'id': outgoingProperty.propertyId,
                                                 'namespaceFromUrlId': outgoingProperty.propertyNamespaceId
-                                            }) }}">{{ outgoingProperty.property }}</a>
+                                            }) }}" title="{{ outgoingProperty.namespace }}">{{ outgoingProperty.propertyRootNamespacePrefix }}:{{ outgoingProperty.property }}</a>
                                             →
-                                            <a href="{{ path(route, route_params) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
-                                                {{ outgoingProperty.range }}</a>
+                                            <a href="{{ path(route, route_params) }}" title="{{ outgoingProperty.rangeNamespace }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
+                                                {{ outgoingProperty.rangeRootNamespacePrefix }}:{{ outgoingProperty.range }}</a>
                                         </li>
                                     {% endfor %}
                                 </ul>
@@ -362,8 +362,8 @@
                                         {% endif %}
 
                                         <li>
-                                            <a href="{{ path(route, route_params) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
-                                                {{ ingoingProperty.domain }}</a>
+                                            <a href="{{ path(route, route_params) }}" title="{{ ingoingProperty.domainNamespace }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
+                                                {{ ingoingProperty.domainRootNamespacePrefix }}:{{ ingoingProperty.domain }}</a>
                                             →
                                             <a href="{{ path('property_show_with_version', {
                                                 'id': ingoingProperty.propertyId,

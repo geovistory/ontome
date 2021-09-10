@@ -64,6 +64,7 @@
                         <tr>
                             <th>Project name</th>
                             <th>Master project</th>
+                            <th>Role</th>
                             <th>Last updated</th>
                             <th>Action</th>
                         </tr>
@@ -88,6 +89,15 @@
                                         </a>
                                     {% else %}
                                         <span class="text-muted">(Master)</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if userProjectAssociation.permission == 1 %}
+                                        <span class="label label-danger">Administrator</span>
+                                    {% elseif userProjectAssociation.permission == 2 %}
+                                        <span class="label label-warning">Manager</span>
+                                    {% elseif userProjectAssociation.permission == 3 %}
+                                        <span class="label label-success">Member</span>
                                     {% endif %}
                                 </td>
                                 <td>{{ userProjectAssociation.project.modificationTime|date('Y-m-d') }}</td>
@@ -328,15 +338,19 @@
                                 {% set entitiesList = entitiesList|merge([[entity,id]]) %}
                                 <tr>
                                     <td class="text-nowrap">
-                                        {% if comment.class is not null %}
-                                            {{ comment.class.invertedLabel }}
-                                        {% elseif comment.property is not null %}
-                                            {{ comment.property.invertedLabel }}
+                                        {% if comment.class is not null and comment.class.classVersionForDisplay(comment.namespaceForVersion) is not null %}
+                                            {{ comment.class.classVersionForDisplay(comment.namespaceForVersion).invertedLabel }}
+                                        {% elseif comment.property is not null and comment.property.propertyVersionForDisplay(comment.namespaceForVersion) is not null %}
+                                            {{ comment.property.propertyVersionForDisplay(comment.namespaceForVersion).invertedLabel }}
                                         {% elseif comment.label is not null %}
-                                            {% if comment.label.object.invertedLabel is not null %}
-                                                {{ comment.label.object.invertedLabel }}
-                                            {% else %}
-                                                {{ comment.label.object.standardLabel }}
+                                            {% if comment.label.object is not null %}
+                                                {% if comment.label.object.classVersionForDisplay(comment.namespaceForVersion) is not null %}
+                                                    {{ comment.label.object.classVersionForDisplay(comment.namespaceForVersion).invertedLabel }}
+                                                {% elseif comment.label.object.propertyVersionForDisplay(comment.namespaceForVersion) is not null %}
+                                                    {{ comment.label.object.classVersionForDisplay(comment.namespaceForVersion).invertedLabel }}
+                                                {% else %}
+                                                    {{ comment.label.object.standardLabel }}
+                                                {% endif %}
                                             {% endif %}
                                         {% elseif comment.namespace is not null %}
                                             {{ comment.namespace }}

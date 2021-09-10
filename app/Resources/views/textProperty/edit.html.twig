@@ -16,7 +16,7 @@
                     </a>
                 {% elseif textProperty.propertyAssociation is not null %}
                     {% set childProperty = textProperty.propertyAssociation.childProperty %}
-                    {{ childProperty.standardLabel }} – {{ childProperty.identifierInNamespace }}: {{ textProperty.systemType.standardLabel }}
+                    {{ childProperty.propertyVersionForDisplay(textProperty.propertyAssociation.childPropertyNamespace).standardLabel }} – {{ childProperty.identifierInNamespace }}: {{ textProperty.systemType.standardLabel }}
                     <a href="{{ path('property_association_edit', {
                         id: textProperty.propertyAssociation.id
                     }) }}"

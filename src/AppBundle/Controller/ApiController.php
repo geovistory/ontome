@@ -22,7 +22,7 @@ class ApiController extends Controller
 
 
     /**
-     * @Route("/api/classes/project/{project}/json", name="classes_project_json")
+     * @Route("/api/classes/project/{project}/json", name="classes_project_json", requirements={"project"="^[0-9]+$"})
      * @Method("GET")
      * @param Project $project
      * @return JsonResponse a Json formatted list representation of OntoClasses related to a Project
@@ -48,7 +48,7 @@ class ApiController extends Controller
     }
 
     /**
-     * @Route("/api/properties/project/{project}/json", name="properties_project_json")
+     * @Route("/api/properties/project/{project}/json", name="properties_project_json", requirements={"project"="^[0-9]+$"})
      * @Method("GET")
      * @param Project $project
      * @return JsonResponse a Json formatted list representation of Property related to a Project

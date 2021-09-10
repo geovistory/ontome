@@ -25,7 +25,7 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 class LabelController  extends Controller
 {
     /**
-     * @Route("/label/{id}", name="label_show")
+     * @Route("/label/{id}", name="label_show", requirements={"id"="^[0-9]+"})
      * @param string $id
      * @return Response the rendered template
      */
@@ -39,7 +39,7 @@ class LabelController  extends Controller
     }
 
     /**
-     * @Route("/label/{id}/edit", name="label_edit")
+     * @Route("/label/{id}/edit", name="label_edit", requirements={"id"="^[0-9]+"})
      */
     public function editAction(Label $label, Request $request)
     {
@@ -118,7 +118,7 @@ class LabelController  extends Controller
     }
 
     /**
-     * @Route("/label/new/{object}/{objectId}", name="label_new")
+     * @Route("/label/new/{object}/{objectId}", name="label_new", requirements={"object"="^(class|property|profile|project|namespace){1}$","objectId"="^[0-9]+"})
      */
     public function newAction($object, $objectId, Request $request)
     {
@@ -231,7 +231,7 @@ class LabelController  extends Controller
     }
 
     /**
-     * @Route("/label/{id}/edit-validity/{validationStatus}", name="label_validation_status_edit")
+     * @Route("/label/{id}/edit-validity/{validationStatus}", name="label_validation_status_edit", requirements={"id"="^[0-9]+$", "validationStatus"="^(26|27|28){1}$"})
      * @param Label $label
      * @param SystemType $validationStatus
      * @param Request $request

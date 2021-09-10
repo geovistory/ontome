@@ -25,7 +25,7 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 class TextPropertyController extends Controller
 {
     /**
-     * @Route("/text-property/{id}", name="text_property_show")
+     * @Route("/text-property/{id}", name="text_property_show", requirements={"id"="^[0-9]+$"})
      * @param string $id
      * @return Response the rendered template
      */
@@ -39,8 +39,8 @@ class TextPropertyController extends Controller
     }
 
     /**
-     * @Route("/text-property/{id}/edit", name="text_property_edit")
-     * @Route("/text-property/{id}/inverse/edit", name="text_property_inverse_edit")
+     * @Route("/text-property/{id}/edit", name="text_property_edit", requirements={"id"="^[0-9]+$"})
+     * @Route("/text-property/{id}/inverse/edit", name="text_property_inverse_edit", requirements={"id"="^[0-9]+$"})
      * @param TextProperty $textProperty
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
@@ -137,8 +137,10 @@ class TextPropertyController extends Controller
     }
 
     /**
-     * @Route("/text-property/{type}/new/{object}/{objectId}", name="text_property_new")
-     * @Route("/text-property/{type}/new/{object}/{objectId}/inverse", name="text_property_inverse_new")
+     * @Route("/text-property/{type}/new/{object}/{objectId}", name="text_property_new",
+     *     requirements={"type"="^(scope-note|example|justification|additional-note|definition|dct:contributor|owl:versionInfo){1}$", "object"="^(class-association|property-association|class|property|project|profile|namespace|entity-association){1}$", "objectId"="^[0-9]+$"})
+     * @Route("/text-property/{type}/new/{object}/{objectId}/inverse", name="text_property_inverse_new",
+     *     requirements={"type"="^(scope-note|example|justification|additional-note|definition|dct:contributor|owl:versionInfo){1}$", "object"="^(class-association|property-association|class|property|project|profile|namespace|entity-association){1}$", "objectId"="^[0-9]+$"})
      */
     public function newAction($type, $object, $objectId, Request $request)
     {
@@ -315,7 +317,7 @@ class TextPropertyController extends Controller
     }
 
     /**
-     * @Route("/text-property/{id}/edit-validity/{validationStatus}", name="text_property_validation_status_edit")
+     * @Route("/text-property/{id}/edit-validity/{validationStatus}", name="text_property_validation_status_edit", requirements={"id"="^[0-9]+$", "validationStatus"="^(26|27|28){1}$"})
      * @param TextProperty $textProperty
      * @param SystemType $validationStatus
      * @param Request $request

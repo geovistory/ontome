@@ -57,7 +57,7 @@ class NamespaceController  extends Controller
     }
 
     /**
-     * @Route("/namespace/new/{project}", name="namespace_new")
+     * @Route("/namespace/new/{project}", name="namespace_new", requirements={"project"="^[0-9]+$"})
      */
     public function newNamespaceAction(Project $project, Request $request)
     {
@@ -204,7 +204,7 @@ class NamespaceController  extends Controller
     }
 
     /**
-     * @Route("/namespace/{id}", name="namespace_show")
+     * @Route("/namespace/{id}", name="namespace_show", requirements={"id"="^([0-9]+$)|(selectedValue|refId){1}"})
      * @param OntoNamespace $namespace
      * @return Response the rendered template
      */
@@ -218,7 +218,7 @@ class NamespaceController  extends Controller
     }
 
     /**
-     * @Route("/namespace/{id}/edit", name="namespace_edit")
+     * @Route("/namespace/{id}/edit", name="namespace_edit", requirements={"id"="^[0-9]+$"})
      * @param string $namespace
      * @return Response the rendered template
      */
@@ -292,7 +292,7 @@ class NamespaceController  extends Controller
     }
 
     /**
-     * @Route("/namespace/{id}/publish", name="namespace_publication")
+     * @Route("/namespace/{id}/publish", name="namespace_publication", requirements={"id"="^[0-9]+$"})
      * @param OntoNamespace $namespace
      * @return Response the rendered template
      */
@@ -310,7 +310,7 @@ class NamespaceController  extends Controller
     }
 
     /**
-     * @Route("/namespace/{id}/validate-publication", name="namespace_validate_publication")
+     * @Route("/namespace/{id}/validate-publication", name="namespace_validate_publication", requirements={"id"="^[0-9]+$"})
      * @param OntoNamespace $namespace
      * @return Response the rendered template
      */
@@ -356,7 +356,7 @@ class NamespaceController  extends Controller
     }
 
     /**
-     * @Route("/namespace/root-namespace/{id}/json", name="namespaces_by_root_id_list_json")
+     * @Route("/namespace/root-namespace/{id}/json", name="namespaces_by_root_id_list_json", requirements={"id"="^([0-9]+)|(selectedValue){1}$"})
      * @Method("GET")
      * @param OntoNamespace  $rootNamespace    The root namespace
      * @return JsonResponse a Json formatted namespaces list
@@ -393,7 +393,7 @@ class NamespaceController  extends Controller
     }
 
     /**
-     * @Route("/namespace/profile/{id}/json", name="root_namespaces_list_for_profile_json")
+     * @Route("/namespace/profile/{id}/json", name="root_namespaces_list_for_profile_json", requirements={"id"="^[0-9]+$"})
      * @Method("GET")
      * @param Profile  $profile    The profile to be associated with a namespace
      * @return JsonResponse a Json formatted namespaces list
@@ -425,7 +425,7 @@ class NamespaceController  extends Controller
 
 
     /**
-     * @Route("/namespace/{id}/json", name="namespace_json", schemes={"http"})
+     * @Route("/namespace/{id}/json", name="namespace_json", schemes={"http"}, requirements={"id"="^[0-9]+"})
      * @Method("GET")
      * @param OntoNamespace $namespace
      * @return JsonResponse a Json formatted graph representation of Namespaces
@@ -440,7 +440,7 @@ class NamespaceController  extends Controller
     }
 
     /**
-     * @Route("/namespace/{namespace}/referenced-namespace/{referencedNamespace}/add", name="namespace_referenced_namespace_association")
+     * @Route("/namespace/{namespace}/referenced-namespace/{referencedNamespace}/add", name="namespace_referenced_namespace_association", requirements={"namespace"="^([0-9]+)|(namespaceID){1}$", "referencedNamespace"="^([0-9]+)|(selectedValue){1}$"})
      * @Method({ "POST"})
      * @param OntoNamespace  $namespace    The namespace to be associated with a referenced namespace
      * @param OntoNamespace  $referencedNamespace    The referenced namespace to be associated with a namespace
@@ -493,7 +493,7 @@ class NamespaceController  extends Controller
     }
 
     /**
-     * @Route("/namespace/{namespace}/referenced-namespace/{referencedNamespace}/delete", name="namespace_referenced_namespace_disassociation")
+     * @Route("/namespace/{namespace}/referenced-namespace/{referencedNamespace}/delete", name="namespace_referenced_namespace_disassociation", requirements={"namespace"="^([0-9]+)|(namespaceID){1}$", "referencedNamespace"="^([0-9]+)|(selectedValue){1}$"})
      * @Method({ "DELETE"})
      * @param OntoNamespace  $namespace    The namespace to be disassociated from a referenced namespace
      * @param OntoNamespace  $referencedNamespace    The referenced namespace to be disassociated from a namespace
@@ -523,7 +523,7 @@ class NamespaceController  extends Controller
     }
 
     /**
-     * @Route("/namespace/{namespace}/referenced-namespace/{referencedNamespace}/new-referenced-namespace/{newReferencedNamespace}/change", name="namespace_referenced_namespace_change")
+     * @Route("/namespace/{namespace}/referenced-namespace/{referencedNamespace}/new-referenced-namespace/{newReferencedNamespace}/change", name="namespace_referenced_namespace_change", requirements={"namespace"="^([0-9]+)|(namespaceID){1}$", "referencedNamespace"="^([0-9]+)|(oldRefNsId){1}$", "newReferencedNamespace"="^([0-9]+)|(newRefNsId){1}$"})
      * @Method({ "GET"})
      * @param OntoNamespace  $namespace    The namespace to be changed from a referenced namespace
      * @param OntoNamespace  $referencedNamespace    The referenced namespace to be changed from a namespace
@@ -640,7 +640,7 @@ class NamespaceController  extends Controller
     }
 
     /**
-     * @Route("/namespace/{namespace}/choices", name="get_choices_namespaces")
+     * @Route("/namespace/{namespace}/choices", name="get_choices_namespaces", requirements={"namespace"="^([0-9]+)|(selectedValue){1}$"})
      * @Method({ "GET"})
      * @param OntoNamespace  $namespace    The namespace
      * @return JsonResponse
@@ -664,7 +664,7 @@ class NamespaceController  extends Controller
     }
 
     /**
-     * @Route("/namespace/{namespace}/document", name="namespace_document")
+     * @Route("/namespace/{namespace}/document", name="namespace_document", requirements={"namespace"="^[0-9]+$"})
      * @Method({ "GET"})
      * @param OntoNamespace  $namespace    The namespace
      * @return BinaryFileResponse

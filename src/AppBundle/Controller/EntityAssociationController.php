@@ -28,7 +28,7 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 class EntityAssociationController extends Controller
 {
     /**
-     * @Route("/entity-association/new/{object}/{objectId}", name="new_entity_association_form")
+     * @Route("/entity-association/new/{object}/{objectId}", name="new_entity_association_form", requirements={"object"="^(class|property){1}$","objectId"="^[0-9]+$"})
      */
     public function newEntityAssociationAction(Request $request, $object, $objectId)
     {
@@ -160,8 +160,8 @@ class EntityAssociationController extends Controller
     }
 
     /**
-     * @Route("/entity-association/{id}", name="entity_association_show")
-     * @Route("/entity-association/{id}/inverse", name="entity_association_inverse_show")
+     * @Route("/entity-association/{id}", name="entity_association_show", requirements={"id"="^[0-9]+$"})
+     * @Route("/entity-association/{id}/inverse", name="entity_association_inverse_show", requirements={"id"="^[0-9]+$"})
      * @param EntityAssociation $entityAssociation
      * @return Response the rendered template
      */
@@ -179,8 +179,8 @@ class EntityAssociationController extends Controller
     }
 
     /**
-     * @Route("/entity-association/{id}/edit", name="entity_association_edit")
-     * @Route("/entity-association/{id}/inverse/edit", name="entity_association_inverse_edit")
+     * @Route("/entity-association/{id}/edit", name="entity_association_edit", requirements={"id"="^[0-9]+$"})
+     * @Route("/entity-association/{id}/inverse/edit", name="entity_association_inverse_edit", requirements={"id"="^[0-9]+$"})
      */
     public function editAction(Request $request, EntityAssociation $entityAssociation)
     {
@@ -322,7 +322,7 @@ class EntityAssociationController extends Controller
     }
 
     /**
-     * @Route("/entity-association/{id}/edit-validity/{validationStatus}", name="entity_association_validation_status_edit")
+     * @Route("/entity-association/{id}/edit-validity/{validationStatus}", name="entity_association_validation_status_edit", requirements={"id"="^[0-9]+$", "validationStatus"="^(26|27|28){1}$"})
      * @param EntityAssociation $entityAssociation
      * @param SystemType $validationStatus
      * @param Request $request
@@ -386,7 +386,7 @@ class EntityAssociationController extends Controller
     }
 
     /**
-     * @Route("/entity-association/{id}/delete", name="entity_association_delete")
+     * @Route("/entity-association/{id}/delete", name="entity_association_delete", requirements={"id"="^([0-9]+)|(associationId){1}$"})
      */
     public function deleteAction(Request $request, EntityAssociation $entityAssociation)
     {
