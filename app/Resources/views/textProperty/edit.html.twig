@@ -169,6 +169,9 @@
                 <div id="text-property" class="tab-pane fade in active">
                     <h3>{{ textProperty.systemType }}</h3>
                     {{ form_start(textPropertyForm) }}
+                        {% if (textProperty.class is not null or textProperty.property is not null) and textProperty.systemType.id in [33,34,35] %}
+                            {{ form_row(textPropertyForm.systemType) }}
+                        {% endif %}
                         {{ form_row(textPropertyForm.textProperty) }}
                         {{ form_row(textPropertyForm.languageIsoCode) }}
 

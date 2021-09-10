@@ -49,19 +49,21 @@ class TextPropertyController extends Controller
     {
         if(!is_null($textProperty->getClassAssociation())){
             $object = $textProperty->getClassAssociation();
+            $objectType = 'class-association';
             $redirectToRoute = 'class_association_edit';
             $redirectToRouteFragment = 'justifications';
             $this->denyAccessUnlessGranted('edit', $object);
         }
         else if(!is_null($textProperty->getPropertyAssociation())){
             $object = $textProperty->getPropertyAssociation();
+            $objectType = 'property-association';
             $redirectToRoute = 'property_association_edit';
             $redirectToRouteFragment = 'justifications';
             $this->denyAccessUnlessGranted('edit', $object);
         }
         else if(!is_null($textProperty->getEntityAssociation())){
             $object = $textProperty->getEntityAssociation();
-
+            $objectType = 'entity-association';
             $redirectToRoute = 'entity_association_edit';
             if($request->attributes->get('_route') == 'text_property_inverse_edit'){
                 $redirectToRoute = 'entity_association_inverse_edit';
@@ -72,30 +74,35 @@ class TextPropertyController extends Controller
         }
         else if(!is_null($textProperty->getClass())){
             $object = $textProperty->getClass();
+            $objectType = 'class';
             $redirectToRoute = 'class_edit';
             $redirectToRouteFragment = 'definition';
             $this->denyAccessUnlessGranted('edit', $object);
         }
         else if(!is_null($textProperty->getProperty())){
             $object = $textProperty->getProperty();
+            $objectType = 'property';
             $redirectToRoute = 'property_edit';
             $redirectToRouteFragment = 'definition';
             $this->denyAccessUnlessGranted('edit', $object);
         }
         else if(!is_null($textProperty->getProject())){
             $object = $textProperty->getProject();
+            $objectType = 'project';
             $redirectToRoute = 'project_edit';
             $redirectToRouteFragment = 'definition';
             $this->denyAccessUnlessGranted('edit', $object);
         }
         else if(!is_null($textProperty->getProfile())){
             $object = $textProperty->getProfile();
+            $objectType = 'profile';
             $redirectToRoute = 'profile_edit';
             $redirectToRouteFragment = 'identification';
             $this->denyAccessUnlessGranted('edit', $object);
         }
         else if(!is_null($textProperty->getNamespace())){
             $object = $textProperty->getNamespace();
+            $objectType = 'namespace';
             $redirectToRoute = 'namespace_edit';
             $redirectToRouteFragment = 'definition';
             $this->denyAccessUnlessGranted('edit', $object);
@@ -104,7 +111,7 @@ class TextPropertyController extends Controller
 
         $textProperty->setModifier($this->getUser());
 
-        $form = $this->createForm(TextPropertyForm::class, $textProperty, array('systemType' => $textProperty->getSystemType()->getId()));
+        $form = $this->createForm(TextPropertyForm::class, $textProperty, array('systemType' => $textProperty->getSystemType()->getId(), 'objectType' => $objectType));
 
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
@@ -248,9 +255,18 @@ class TextPropertyController extends Controller
         else if($type === 'justification') {
             $systemType = $em->getRepository('AppBundle:SystemType')->find(15); //systemType 15 = justification
         }
-        else if($type === 'additional-note') {
-            $systemType = $em->getRepository('AppBundle:SystemType')->find(12); //systemType 12 = additional-note
+        else if($type === 'internal-note') {
+            $systemType = $em->getRepository('AppBundle:SystemType')->find(33); //systemType 33 = internal note
         }
+        else if($type === 'context-note') {
+            $systemType = $em->getRepository('AppBundle:SystemType')->find(34); //systemType 34 = context note
+        }
+        else if($type === 'bibliographical-note') {
+            $systemType = $em->getRepository('AppBundle:SystemType')->find(35); //systemType 35 = bibliographical note
+        }
+        /*else if($type === 'additional-note') {
+            $systemType = $em->getRepository('AppBundle:SystemType')->find(12); //systemType 12 = additional-note
+        }*/
         else if($type === 'definition') {
             $systemType = $em->getRepository('AppBundle:SystemType')->find(16); //systemType 16 = description
         }
@@ -264,27 +280,23 @@ class TextPropertyController extends Controller
 
         $this->denyAccessUnlessGranted('edit', $associatedObject);
 
-        $textProperty->setSystemType($systemType);
-
         //ongoingNamespace associated to the textProperty for any kind of object, except Project or Profile
         if($object !== 'project' && $object !== 'profile' && $object !== 'namespace') {
             $textProperty->setNamespaceForVersion($this->getUser()->getCurrentOngoingNamespace());
         }
 
-
+        $textProperty->setSystemType($systemType);
         $textProperty->setCreator($this->getUser());
         $textProperty->setModifier($this->getUser());
         $textProperty->setCreationTime(new \DateTime('now'));
         $textProperty->setModificationTime(new \DateTime('now'));
 
-
-        $form = $this->createForm(TextPropertyForm::class, $textProperty);
+        $form = $this->createForm(TextPropertyForm::class, $textProperty, array('systemType' => $textProperty->getSystemType()->getId(), 'objectType' => $object));
 
         // only handles data on POST
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $textProperty = $form->getData();
-            $textProperty->setSystemType($systemType);
 
             //ongoingNamespace associated to the textProperty for any kind of object, except Project or Profile
             if($object !== 'project' && $object !== 'profile' && $object !== 'namespace') {

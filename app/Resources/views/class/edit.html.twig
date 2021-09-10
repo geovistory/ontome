@@ -279,6 +279,28 @@
                         </div>
                     </div>
 
+                    {# Additional notes #}
+                    {% set hasOneOrManyAdditionalNotes = false %}
+                    {% for textProperty in classVersion.class.textProperties
+                        if textProperty.namespaceForVersion.id in namespacesId
+                        and textProperty.systemType.id in [33,34,35] %}
+                        {% set hasOneOrManyAdditionalNotes = true %}
+                    {% endfor %}
+                    {% if hasOneOrManyAdditionalNotes %}
+                        <div class="row">
+                            <div class="col-lg-2">
+                                <p>Additional notes:</p>
+                            </div>
+                            <div class="col-lg-10">
+                                {% for textProperty in classVersion.class.textProperties
+                                    if textProperty.namespaceForVersion.id in namespacesId
+                                    and textProperty.systemType.id in [33,34,35] %}
+                                    {{ textProperty.textProperty|raw }}
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endif %}
+
                     {# In First Order Logic #}
                     {% set associationCount = 0 %}
                     {% for association in classVersion.class.childClassAssociations
@@ -520,7 +542,7 @@
                 </table>
 
                 <div class="pull-right add-div">
-                    <a href="{{ path('text_property_new', {'type': 'additional-note', 'object': 'class', 'objectId': classVersion.class.id })}}"
+                    <a href="{{ path('text_property_new', {'type': 'internal-note', 'object': 'class', 'objectId': classVersion.class.id })}}"
                        class="btn btn-primary pull-right">
                         Add <span class="fa fa-plus-circle"></span>
                     </a>
@@ -531,6 +553,7 @@
                     <tr>
                         <th>Show</th>
                         <th>Notes</th>
+                        <th>Type</th>
                         <th>Language</th>
                         <th>Namespace</th>
                         <th>Edit</th>
@@ -540,7 +563,9 @@
                     </thead>
                     <tbody>
                     {% for textProperty in classVersion.class.textProperties
-                        if textProperty.systemType.id == 12
+                        if textProperty.systemType.id == 33
+                        or textProperty.systemType.id == 34
+                        or textProperty.systemType.id == 35
                         and textProperty.namespaceForVersion.id in namespacesId %}
                         {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
                         <tr>
@@ -548,6 +573,7 @@
                             <td class="truncated-text">
                                 <span>{{ textProperty.textProperty|striptags|raw }}</span>
                             </td>
+                            <td>{{ textProperty.systemType}}</td>
                             <td>{{ textProperty.languageIsoCode}}</td>
                             <td>{{ textProperty.namespaceForVersion }}</td>
                             <td>

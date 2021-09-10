@@ -23,7 +23,11 @@
                         <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
                     </a>
                 {% elseif textProperty.class is not null %}
+                    {% if textProperty.systemType.id in [33,34,35] %}
+                    Add an additional note
+                    {% else %}
                     Add a{% if textProperty.systemType.standardLabel|first|lower in ['a', 'e', 'i', 'o', 'u', 'y'] %}n{% endif %} {{ textProperty.systemType.standardLabel|lower }}
+                    {% endif %}
                     for the class {{ textProperty.class.classVersionForDisplay(textProperty.namespaceForVersion) }}
                     <a href="{{ path('class_edit', {
                         id: textProperty.class.id,
@@ -34,7 +38,11 @@
                         <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
                     </a>
                 {% elseif textProperty.property is not null %}
+                {% if textProperty.systemType.id in [33,34,35] %}
+                    Add an additional note
+                    {% else %}
                     Add a{% if textProperty.systemType.standardLabel|first|lower in ['a', 'e', 'i', 'o', 'u', 'y'] %}n{% endif %} {{ textProperty.systemType.standardLabel|lower }}
+                    {% endif %}
                     for the property {{ textProperty.property.propertyVersionForDisplay(textProperty.namespaceForVersion) }}
                     <a href="{{ path('property_edit', {
                         id: textProperty.property.id,
@@ -103,6 +111,9 @@
             </h2>
 
             {{ form_start(textPropertyForm) }}
+                {% if (textProperty.class is not null or textProperty.property is not null) and textProperty.systemType.id in [33,34,35] %}
+                    {{ form_row(textPropertyForm.systemType) }}
+                {% endif %}
                 {{ form_row(textPropertyForm.textProperty) }}
                 {{ form_row(textPropertyForm.languageIsoCode) }}
 

@@ -56,6 +56,27 @@
                             {% endif %}
                         </div>
                     </div>
+
+                    {# Additional notes #}
+                    {% set hasOneOrManyAdditionalNotes = false %}
+                    {% for textProperty in project.textProperties
+                        if textProperty.systemType.id in [33,34,35] %}
+                        {% set hasOneOrManyAdditionalNotes = true %}
+                    {% endfor %}
+                    {% if hasOneOrManyAdditionalNotes %}
+                        <div class="row">
+                            <div class="col-lg-2">
+                                <p>Additional notes:</p>
+                            </div>
+                            <div class="col-lg-10">
+                                {% for textProperty in project.textProperties
+                                    if textProperty.systemType.id in [33,34,35] %}
+                                    {{ textProperty.textProperty|raw }}
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endif %}
+
                 </div>
             </div>
             <div id="definition" class="tab-pane fade">
@@ -81,7 +102,7 @@
                     {% endfor %}
                     </tbody>
                 </table>
-                <h3>Additional notes</h3>
+                <h3>Internal notes</h3>
                 <table class="table table-striped" id="additional-notes-table">
                     <thead>
                     <tr>
@@ -92,7 +113,8 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for textProperty in project.textProperties if textProperty.systemType.id == 12 %}
+                    {% for textProperty in project.textProperties
+                        if textProperty.systemType.id == 33 %}
                         {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
                         <tr>
                             <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
