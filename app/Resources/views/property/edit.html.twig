@@ -410,10 +410,18 @@
                     </div>
 
                     {# Additional notes #}
+                    {% set listSystemType = [34,35] %}
+                    {% if app.user is not null %}
+                    {% for userProjectAssociation in propertyVersion.namespaceForVersion.projectForTopLevelNamespace.userProjectAssociations
+                        if userProjectAssociation.user.id == app.user.id and userProjectAssociation.permission <= 3 %}
+                        {# Seuls les admins et managers du projet peuvent voir les internal notes #}
+                        {% set listSystemType = [33,34,35] %}
+                    {% endfor %}
+                    {% endif %}
                     {% set hasOneOrManyAdditionalNotes = false %}
                     {% for textProperty in propertyVersion.property.textProperties
                         if textProperty.namespaceForVersion.id in namespacesId
-                        and textProperty.systemType.id in [33,34,35] %}
+                        and textProperty.systemType.id in listSystemType %}
                         {% set hasOneOrManyAdditionalNotes = true %}
                     {% endfor %}
                     {% if hasOneOrManyAdditionalNotes %}
@@ -424,7 +432,7 @@
                             <div class="col-lg-10">
                                 {% for textProperty in propertyVersion.property.textProperties
                                     if textProperty.namespaceForVersion.id in namespacesId
-                                    and textProperty.systemType.id in [33,34,35] %}
+                                    and textProperty.systemType.id in listSystemType %}
                                     {{ textProperty.textProperty|raw }}
                                 {% endfor %}
                             </div>
@@ -614,10 +622,8 @@
                     </thead>
                     <tbody>
                     {% for textProperty in propertyVersion.property.textProperties
-                        if textProperty.systemType.id == 33
-                        or textProperty.systemType.id == 34
-                        or textProperty.systemType.id == 35
-                        and textProperty.namespaceForVersion.id in namespacesId %}
+                        if textProperty.namespaceForVersion.id in namespacesId
+                        and textProperty.systemType.id in listSystemType %}{# listSystemType est définie dans #summary #}
                         {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
                         <tr>
                             <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>

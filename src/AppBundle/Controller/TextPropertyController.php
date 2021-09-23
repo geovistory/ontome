@@ -145,7 +145,7 @@ class TextPropertyController extends Controller
 
     /**
      * @Route("/text-property/{type}/new/{object}/{objectId}", name="text_property_new",
-     *     requirements={"type"="^(scope-note|example|justification|additional-note|definition|dct:contributor|owl:versionInfo){1}$", "object"="^(class-association|property-association|class|property|project|profile|namespace|entity-association){1}$", "objectId"="^[0-9]+$"})
+     *     requirements={"type"="^(scope-note|example|justification|internal-note|definition|dct:contributor|owl:versionInfo){1}$", "object"="^(class-association|property-association|class|property|project|profile|namespace|entity-association){1}$", "objectId"="^[0-9]+$"})
      * @Route("/text-property/{type}/new/{object}/{objectId}/inverse", name="text_property_inverse_new",
      *     requirements={"type"="^(scope-note|example|justification|additional-note|definition|dct:contributor|owl:versionInfo){1}$", "object"="^(class-association|property-association|class|property|project|profile|namespace|entity-association){1}$", "objectId"="^[0-9]+$"})
      */
