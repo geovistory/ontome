@@ -263,6 +263,16 @@
                         <p><i>No contributors yet.</i></p>
                     {% endif %}
                 {% endif %}
+
+                {% set canSeeInternalNotes = false %}
+                {% if app.user is not null %}
+                    {% for userProjectAssociation in namespace.projectForTopLevelNamespace.userProjectAssociations
+                        if userProjectAssociation.user.id == app.user.id and userProjectAssociation.permission <= 3 %}
+                        {# Seuls les admins et managers du projet peuvent voir les internal notes #}
+                        {% set canSeeInternalNotes = true %}
+                    {% endfor %}
+                {% endif %}
+                {% if canSeeInternalNotes %}
                 <h3>Internal notes</h3>
                 <table class="table table-striped" id="additional-notes-table">
                     <thead>
@@ -289,6 +299,7 @@
                     {% endfor %}
                     </tbody>
                 </table>
+                {% endif %}
             </div>
             <div id="identification" class="tab-pane fade">
                 <h3>Identification</h3>
