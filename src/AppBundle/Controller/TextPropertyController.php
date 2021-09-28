@@ -75,14 +75,24 @@ class TextPropertyController extends Controller
         else if(!is_null($textProperty->getClass())){
             $object = $textProperty->getClass();
             $objectType = 'class';
-            $redirectToRoute = 'class_edit';
+            if($textProperty->getClass()->getClassVersionForDisplay()->getNamespaceForVersion() == $this->getUser()->getCurrentOngoingNamespace()){
+                $redirectToRoute = 'class_edit';
+            }
+            else{
+                $redirectToRoute = 'class_show';
+            }
             $redirectToRouteFragment = 'definition';
             $this->denyAccessUnlessGranted('edit', $object);
         }
         else if(!is_null($textProperty->getProperty())){
             $object = $textProperty->getProperty();
             $objectType = 'property';
-            $redirectToRoute = 'property_edit';
+            if($textProperty->getProperty()->getPropertyVersionForDisplay()->getNamespaceForVersion() == $this->getUser()->getCurrentOngoingNamespace()){
+                $redirectToRoute = 'property_edit';
+            }
+            else{
+                $redirectToRoute = 'property_show';
+            }
             $redirectToRouteFragment = 'definition';
             $this->denyAccessUnlessGranted('edit', $object);
         }
@@ -278,7 +288,28 @@ class TextPropertyController extends Controller
         }
         else throw $this->createNotFoundException('The requested text property type "'.$type.'" does not exist!');
 
-        $this->denyAccessUnlessGranted('edit', $associatedObject);
+        if(!(($object === "class" OR $object === "property") && ($type === 'internal-note' OR $type === 'context-note' OR $type === 'bibliographical-note'))){
+            $this->denyAccessUnlessGranted('edit', $associatedObject);
+        }
+        else{
+            $hasRight = false;
+            foreach($this->getUser()->getUserProjectAssociations() as $userProjectAssociation){
+                if($userProjectAssociation->getProject()->getId() == $this->getUser()->getCurrentActiveProject()->getId() && $userProjectAssociation->getPermission() <= 3){
+                    $hasRight = true;
+                }
+            }
+
+            if(is_null($this->getUser()->getCurrentOngoingNamespace()) && !$hasRight){
+                throw $this->createAccessDeniedException('Access Denied.');
+            }
+
+            if($object == "class" && $associatedObject->getNamespaceForVersion() != $this->getUser()->getCurrentOngoingNamespace()){
+                $redirectToRoute = 'class_show';
+            }
+            if($object == "property" && $associatedObject->getNamespaceForVersion() != $this->getUser()->getCurrentOngoingNamespace()){
+                $redirectToRoute = 'property_show';
+            }
+        }
 
         //ongoingNamespace associated to the textProperty for any kind of object, except Project or Profile
         if($object !== 'project' && $object !== 'profile' && $object !== 'namespace') {

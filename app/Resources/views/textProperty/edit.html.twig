@@ -193,6 +193,7 @@
                                 Back <i class="fas fa-arrow-left"></i>
                             </a>
                         {% elseif textProperty.class is not null %}
+                            {% if textProperty.class.classVersionForDisplay.namespaceForVersion == app.user.currentOngoingNamespace %}
                             <a href="{{ path('class_edit', {
                                 id: textProperty.class.id
                             }) }}#definition"
@@ -200,7 +201,17 @@
                                role="button">
                                 Back <i class="fas fa-arrow-left"></i>
                             </a>
+                            {% else %}
+                                <a href="{{ path('class_show', {
+                                    id: textProperty.class.id
+                                }) }}#definition"
+                                   class="btn btn-default"
+                                   role="button">
+                                    Back <i class="fas fa-arrow-left"></i>
+                                </a>
+                            {% endif %}
                         {% elseif textProperty.property is not null %}
+                            {% if textProperty.property.propertyVersionForDisplay.namespaceForVersion == app.user.currentOngoingNamespace %}
                             <a href="{{ path('property_edit', {
                                 id: textProperty.property.id
                             }) }}#definition"
@@ -208,6 +219,15 @@
                                role="button">
                                 Back <i class="fas fa-arrow-left"></i>
                             </a>
+                            {% else %}
+                                <a href="{{ path('property_edit', {
+                                    id: textProperty.property.id
+                                }) }}#definition"
+                                   class="btn btn-default"
+                                   role="button">
+                                    Back <i class="fas fa-arrow-left"></i>
+                                </a>
+                            {% endif %}
                         {% elseif textProperty.project is not null %}
                             <a href="{{ path('project_edit', {
                                 id: textProperty.project.id

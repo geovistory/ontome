@@ -430,8 +430,8 @@
                     {% endif %}
                     {% set hasOneOrManyAdditionalNotes = false %}
                     {% for textProperty in propertyVersion.property.textProperties
-                        if textProperty.namespaceForVersion.id in namespacesId
-                        and textProperty.systemType.id in listSystemType %}
+                        if (textProperty.namespaceForVersion.id == app.user.getCurrentOngoingNamespace.id and textProperty.systemType.id in listSystemType)
+                        or (textProperty.namespaceForVersion.id in namespacesId|filter((v,k) => k != app.user.getCurrentOngoingNamespace.id and textProperty.systemType.id in [34,35])) %}
                         {% set hasOneOrManyAdditionalNotes = true %}
                     {% endfor %}
                     {% if hasOneOrManyAdditionalNotes %}
@@ -441,8 +441,8 @@
                             </div>
                             <div class="col-lg-10">
                                 {% for textProperty in propertyVersion.property.textProperties
-                                    if textProperty.namespaceForVersion.id in namespacesId
-                                    and textProperty.systemType.id in listSystemType %}
+                                    if (textProperty.namespaceForVersion.id == app.user.getCurrentOngoingNamespace.id and textProperty.systemType.id in listSystemType)
+                                    or (textProperty.namespaceForVersion.id in namespacesId|filter((v,k) => k != app.user.getCurrentOngoingNamespace.id and textProperty.systemType.id in [34,35])) %}
                                     {{ textProperty.textProperty|raw }}
                                 {% endfor %}
                             </div>
@@ -604,6 +604,15 @@
                     {% endfor %}
                     </tbody>
                 </table>
+
+                {% if app.user.currentOngoingNamespace is not null %}
+                    <div class="pull-right add-div">
+                        <a href="{{ path('text_property_new', {'type': 'internal-note', 'object': 'property', 'objectId': propertyVersion.property.id })}}"
+                           class="btn btn-primary pull-right">
+                            Add <span class="fa fa-plus-circle"></span>
+                        </a>
+                    </div>
+                {% endif %}
                 <h3>Additional notes</h3>
                 <table class="table table-striped" id="additional-notes-table">
                     <thead>
@@ -622,8 +631,9 @@
                     </thead>
                     <tbody>
                     {% for textProperty in propertyVersion.property.textProperties
-                        if textProperty.namespaceForVersion.id in namespacesId
-                        and textProperty.systemType.id in listSystemType %} {# listSystemType est définie dans #summary #}
+                        if (textProperty.namespaceForVersion.id == app.user.getCurrentOngoingNamespace.id and textProperty.systemType.id in listSystemType)
+                        or (textProperty.namespaceForVersion.id in namespacesId|filter((v,k) => k != app.user.getCurrentOngoingNamespace.id and textProperty.systemType.id in [34,35])) %}
+                        {# listSystemType est définie dans #summary #}
                         {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
                         <tr>
                             <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
@@ -634,11 +644,20 @@
                             <td>{{ textProperty.languageIsoCode }}</td>
                             <td>{{ textProperty.namespaceForVersion}}</td>
                             <td>
-                                <a class="btn" href="{{ path('text_property_show', {
-                                    'id': textProperty.id
-                                }) }}">
-                                    <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
-                                </a>
+                                {% if textProperty.namespaceForVersion != app.user.currentOngoingNamespace %}
+                                    <a class="btn" href="{{ path('text_property_show', {
+                                        'id': textProperty.id
+                                    }) }}">
+                                        <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
+                                    </a>
+                                {% else %}
+                                    <a href="{{ path('text_property_edit', {
+                                        'id': textProperty.id
+                                    }) }}"
+                                       class="btn btn-xs btn-success">
+                                        <span class="fa fa-edit"></span>
+                                    </a>
+                                {% endif %}
                             </td>
                             <td>
                                 <a class="btn updateViewComment" href="{{ path('text_property_show', {
