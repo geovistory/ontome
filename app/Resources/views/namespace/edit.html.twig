@@ -35,6 +35,9 @@
             <li><a data-toggle="tab" href="#identification">Identification</a></li>
             <li><a data-toggle="tab" href="#definition">Definition</a></li>
             <li><a data-toggle="tab" href="#namespace-hierarchy">Versions</a></li>
+            {% if namespace.isTopLevelNamespace and namespace.projectForTopLevelNamespace.permissionForUser(app.user) == 1 %}
+            <li><a data-toggle="tab" href="#identifiers">Identifiers</a></li>
+            {% endif %}
             {% if not namespace.isTopLevelNamespace %}
             <li><a data-toggle="tab" href="#classes">Classes</a></li>
             <li><a data-toggle="tab" href="#properties">Properties</a></li>
@@ -682,7 +685,7 @@
                             <td>
                                 {% set isEnabled = false %}
                                 {% for upa in app.user.userProjectAssociations if upa.project == app.user.currentActiveProject %}
-                                    {% for eupa in upa.entityUserProjectAssociations if eupa.systemType.id == 25 %}
+                                    {% for eupa in upa.entityUserProjectAssociations if eupa.systemType.id == 25 and eupa.namespace is not null %}
                                         {% if eupa.namespace == childNamespace %}
                                             {% set isEnabled = true %}
                                         {% elseif eupa.namespace.referencedNamespaceAssociations is not empty %}
@@ -712,6 +715,32 @@
                     <p>Root namespace prefix: {{ namespace.topLevelNamespace.rootNamespacePrefix }}</p>
                 {% endif %}
             </div>
+            {% if namespace.isTopLevelNamespace and namespace.projectForTopLevelNamespace.permissionForUser(app.user) == 1 %}
+            <div id="identifiers" class="tab-pane fade">
+                <h3>Identifiers</h3>
+                <p>Automatic identifier management is {% if namespace.classPrefix is not null %}<b>enabled</b> <a href="#" class="btn btn-danger btn-sm">Disable</a>{% else %}<b>disabled</b> <a href="#" class="btn btn-primary btn-sm">Enable</a>{% endif %} </p>
+                <p></p>
+                {% if namespace.classPrefix is not null %}
+                    <table class="table-bordered table-condensed">
+                        <tr>
+                            <th></th>
+                            <th>Prefix</th>
+                            <th>Current number</th>
+                        </tr>
+                        <tr>
+                            <td><b>Class</b></td>
+                            <td class="text-center">{{ namespace.classPrefix }}</td>
+                            <td class="text-center">{{ namespace.currentClassNumber }}</td>
+                        </tr>
+                        <tr>
+                            <td><b>Property</b></td>
+                            <td class="text-center">{{ namespace.propertyPrefix }}</td>
+                            <td class="text-center">{{ namespace.currentPropertyNumber }}</td>
+                        </tr>
+                    </table>
+                {% endif %}
+            </div>
+            {% endif %}
             <div id="classes" class="tab-pane fade">
                 {% if is_granted('full_edit', namespace) and app.user.currentOngoingNamespace is not null and namespace.id == app.user.currentOngoingNamespace.id %}
                     <div class="pull-right add-div">

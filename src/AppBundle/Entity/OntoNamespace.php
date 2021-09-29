@@ -59,6 +59,16 @@ class OntoNamespace
     /**
      * @ORM\Column(type="integer")
      */
+    private $currentClassNumber;
+
+    /**
+     * @ORM\Column(type="integer")
+     */
+    private $currentPropertyNumber;
+
+    /**
+     * @ORM\Column(type="integer")
+     */
     private $importerInteger;
 
     /**
@@ -241,6 +251,38 @@ class OntoNamespace
      * @ORM\OrderBy({"creationTime" = "DESC"})
      */
     private $propertyVersions;
+
+    /**
+     * @return mixed
+     */
+    public function getCurrentClassNumber()
+    {
+        return $this->currentClassNumber;
+    }
+
+    /**
+     * @param mixed $currentClassNumber
+     */
+    public function setCurrentClassNumber($currentClassNumber)
+    {
+        $this->currentClassNumber = $currentClassNumber;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getCurrentPropertyNumber()
+    {
+        return $this->currentPropertyNumber;
+    }
+
+    /**
+     * @param mixed $currentPropertyNumber
+     */
+    public function setCurrentPropertyNumber($currentPropertyNumber)
+    {
+        $this->currentPropertyNumber = $currentPropertyNumber;
+    }
 
 
     /**

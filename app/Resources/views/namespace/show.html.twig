@@ -38,6 +38,9 @@
             <li><a data-toggle="tab" href="#identification">Identification</a></li>
             <li><a data-toggle="tab" href="#definition">Definition</a></li>
             <li><a data-toggle="tab" href="#namespace-hierarchy">Versions</a></li>
+            {% if namespace.isTopLevelNamespace and namespace.projectForTopLevelNamespace.permissionForUser(app.user) == 1 %}
+            <li><a data-toggle="tab" href="#identifiers">Identifiers</a></li>
+            {% endif %}
             {% if not namespace.isTopLevelNamespace %}
             <li><a data-toggle="tab" href="#classes">Classes</a></li>
             <li><a data-toggle="tab" href="#properties">Properties</a></li>
@@ -443,6 +446,31 @@
                     <p>Root namespace prefix: {{ namespace.topLevelNamespace.rootNamespacePrefix }}</p>
                 {% endif %}
             </div>
+            {% if namespace.isTopLevelNamespace and namespace.projectForTopLevelNamespace.permissionForUser(app.user) == 1 %}
+            <div id="identifiers" class="tab-pane fade">
+                <h3>Identifiers</h3>
+                <p id="msg-identifier-disabled-enabled">Automatic identifier management: <b></b></p>
+                <table id="table-identifiers" class="table-bordered table-condensed" style="margin-bottom: 15px;">
+                    <tr>
+                        <th></th>
+                        <th>Prefix</th>
+                        <th>Current number</th>
+                    </tr>
+                    <tr>
+                        <td><b>Class</b></td>
+                        <td class="text-center">{{ namespace.classPrefix|default('C') }}</td>
+                        <td class="text-center">{{ namespace.currentClassNumber|default(0) }}</td>
+                    </tr>
+                    <tr>
+                        <td><b>Property</b></td>
+                        <td class="text-center">{{ namespace.propertyPrefix|default('P') }}</td>
+                        <td class="text-center">{{ namespace.currentPropertyNumber|default(0) }}</td>
+                    </tr>
+                </table>
+                <p id="p-btn-identifier"><a class="btn btn-toggle-identifiers-disable-enable"></a></p>
+                <p id="msg-btns-identifier"><a class="btn btn-primary btn-identifier-save"><i class="fas fa-save"></i> Save</a> <a class="btn btn-default btn-toggle-identifiers-cancel"><i class="fas fa-ban"></i> Cancel</a></p>
+            </div>
+            {% endif %}
             <div id="classes" class="tab-pane fade">
                 <h3>Classes</h3>
                 <table class="table table-striped" id="classes-table">
@@ -1039,6 +1067,37 @@
                     {"visible": false, "targets": 0 }
                 ],
                 "autoWidth": false
+            });
+
+            $('#msg-btns-identifier').hide();
+            {% if namespace.classPrefix is not null %}
+                $('#msg-identifier-disabled-enabled b').text("Enabled");
+                $('#table-identifiers').show();
+                $('#p-btn-identifier a').addClass('btn-danger');
+                $('#p-btn-identifier a').text('Disable');
+            {% else %}
+                $('#table-identifiers').hide();
+                $('#msg-identifier-disabled-enabled b').text("Disabled");
+                $('#p-btn-identifier a').addClass('btn-primary');
+                $('#p-btn-identifier a').text('Enable');
+            {% endif %}
+
+            $('.btn-toggle-identifiers-disable-enable, .btn-toggle-identifiers-cancel').on('click', function () {
+                if($('#msg-identifier-disabled-enabled b').text() == "Disabled"){
+                    $('#msg-identifier-disabled-enabled b').text("will be Enabled if you confirm");
+                }
+                else if($('#msg-identifier-disabled-enabled b').text() == "will be Enabled if you confirm"){
+                    $('#msg-identifier-disabled-enabled b').text("Disabled");
+                }
+                else if($('#msg-identifier-disabled-enabled b').text() == "Enabled"){
+                    $('#msg-identifier-disabled-enabled b').text("will be Disabled if you confirm");
+                }
+                else if($('#msg-identifier-disabled-enabled b').text() == "will be Disabled if you confirm"){
+                    $('#msg-identifier-disabled-enabled b').text("Enabled");
+                }
+                $('#table-identifiers').toggle();
+                $('#msg-btns-identifier').toggle();
+                $('.btn-toggle-identifiers-disable-enable').toggle();
             });
 
             $('#summary a[href="#mismatches"]').click(function (e) {
