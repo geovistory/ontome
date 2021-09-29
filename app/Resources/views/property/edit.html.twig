@@ -893,8 +893,9 @@
                         <th class="text-center">Property</th>
                         <th></th>
                         <th>Range</th>
+                        <th>Property namespace</th>
                         <th>Justification</th>
-                        <th>Relation namespace</th>
+                        <th>Relation defined in</th>
                         <th>View details</th>
                         <th>Edit</th>
                         <th>Delete</th>
@@ -1003,6 +1004,10 @@
                                         {{ association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).range.classVersionForDisplay(association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).rangeNamespace).invertedLabel(true) }}
                                     </a>
                                 {% endif %}
+                            </td>
+
+                            <td>
+                                {{ propertyVersion.namespaceForVersion }}
                             </td>
 
                             <td>
@@ -1261,8 +1266,9 @@
                     <tr>
                         <th>Relation</th>
                         <th>Property</th>
+                        <th>Property namespace</th>
                         <th>Justification</th>
-                        <th>Relation namespace</th>
+                        <th>Relation defined in</th>
                         <th>View details</th>
                         <th>Edit</th>
                         <th>Delete</th>
@@ -1294,6 +1300,9 @@
                                         {{ relation.targetProperty.propertyVersionForDisplay(relation.targetNamespaceForVersion).invertedLabel(true) }}
                                     </a>
                                 </td>
+                                <td>
+                                    {{ relation.targetNamespaceForVersion }}
+                                </td>
                             {% else %}
                                 <td>
                                     {# Initialisation #}
@@ -1311,6 +1320,9 @@
                                     <a href="{{ path(route, route_params) }}" title="{{ relation.sourceNamespaceForVersion }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
                                         {{ relation.sourceProperty.propertyVersionForDisplay(relation.sourceNamespaceForVersion).invertedLabel(true) }}
                                     </a>
+                                </td>
+                                <td>
+                                    {{ relation.sourceNamespaceForVersion }}
                                 </td>
                             {% endif %}
                             <td>

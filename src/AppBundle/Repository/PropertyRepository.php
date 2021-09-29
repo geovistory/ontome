@@ -266,6 +266,7 @@ class PropertyRepository extends EntityRepository
                   identifier_range AS range,
                   v.fk_range_namespace AS \"rangeNamespaceId\",
                   v.fk_domain_namespace AS \"domainNamespaceId\",
+                  che.get_root_namespace_prefix(che.get_root_namespace(v.fk_namespace_for_version)) AS \"propertyRootNamespacePrefix\",
                   replace(ancestors, '|', '→') AS ancestors,
                   (SELECT label FROM che.get_namespace_labels(nsp.pk_namespace) WHERE language_iso_code = 'en') AS namespace
                 FROM che.class_outgoing_inherited_properties(?, ARRAY[".$in."]::integer[]) v
@@ -341,6 +342,7 @@ class PropertyRepository extends EntityRepository
                   parent_identifier AS range,
                   v.fk_range_namespace AS \"rangeNamespaceId\",
                   v.fk_domain_namespace AS \"domainNamespaceId\",
+                  che.get_root_namespace_prefix(che.get_root_namespace(v.fk_namespace_for_version)) AS \"propertyRootNamespacePrefix\",
                   replace(ancestors, '|', '→') AS ancestors,
                   (SELECT label FROM che.get_namespace_labels(nsp.pk_namespace) WHERE language_iso_code = 'en') AS namespace
                 FROM che.class_ingoing_inherited_properties(?, ARRAY[".$in."]::integer[]) v,

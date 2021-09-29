@@ -947,6 +947,7 @@
                     <tr>
                         <th>Relation</th>
                         <th>Class</th>
+                        <th>Class namespace</th>
                         <th>Justification</th>
                         <th>Relation defined in</th>
                         <th>View details</th>
@@ -962,7 +963,6 @@
                         and relation.namespaceForVersion.id in namespacesId %}
                         <tr>
                             <td>{{ relation.systemType }}</td>
-                            <td>
                                 {% if relation.sourceClass.id == classVersion.class.id %}
                                     {# La classe affichée est "source", on cherche le "target" #}
 
@@ -986,8 +986,13 @@
                                         {% set route_params = {'id': relation.namespaceForVersion.id,  '_fragment': 'mismatches' } %}
                                     {% endif %}
 
-                                    <a href="{{ path(route, route_params) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
+                                    <td>
+                                        <a href="{{ path(route, route_params) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
                                         {{ targetClassVersion.invertedLabel }}</a>
+                                    </td>
+                                    <td>
+                                        {{ relation.targetNamespaceForVersion }}
+                                    </td>
                                 {% else %}
                                     {# La classe affichée est "target", on cherche la "source" #}
 
@@ -1010,11 +1015,14 @@
                                         {% set route = 'namespace_show' %}
                                         {% set route_params = {'id': relation.namespaceForVersion.id,  '_fragment': 'mismatches' } %}
                                     {% endif %}
-
-                                    <a href="{{ path(route, route_params) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
-                                        {{ sourceClassVersion.invertedLabel }}</a>
+                                    <td>
+                                        <a href="{{ path(route, route_params) }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
+                                            {{ sourceClassVersion.invertedLabel }}</a>
+                                    </td>
+                                    <td>
+                                        {{ relation.targetNamespaceForVersion }}
+                                    </td>
                                 {% endif %}
-                            </td>
                             <td>
                                 {% if relation.textProperties is not null %}
                                     {% for textProperty in relation.textProperties if textProperty.systemType.id == 15 %}
