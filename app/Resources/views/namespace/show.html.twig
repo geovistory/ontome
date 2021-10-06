@@ -455,19 +455,30 @@
                         <th></th>
                         <th>Prefix</th>
                         <th>Current number</th>
+                        <th>Next identifier</th>
                     </tr>
                     <tr>
                         <td><b>Class</b></td>
                         <td class="text-center">{{ namespace.classPrefix|default('C') }}</td>
                         <td class="text-center">{{ namespace.currentClassNumber|default(0) }}</td>
+                        <td class="text-center">{{ namespace.classPrefix|default('C') }}{{ namespace.currentClassNumber|default(0)+1 }}</td>
                     </tr>
                     <tr>
                         <td><b>Property</b></td>
                         <td class="text-center">{{ namespace.propertyPrefix|default('P') }}</td>
                         <td class="text-center">{{ namespace.currentPropertyNumber|default(0) }}</td>
+                        <td class="text-center">{{ namespace.propertyPrefix|default('P') }}{{ namespace.currentPropertyNumber|default(0)+1 }}</td>
                     </tr>
                 </table>
-                <p id="p-btn-identifier"><a class="btn btn-toggle-identifiers-disable-enable"></a></p>
+                <p id="p-btn-identifier">
+                    {% if namespace.classPrefix is not null %}
+                    <a href="{{ path('namespace_edit', {id: namespace.id}) }}" class="btn btn-success btn-edit">
+                        <i class="fa fa-edit"></i> Edit identifiers
+                    </a>
+                    <a class="btn btn-danger btn-toggle-identifiers-disable-enable"><i class="fas fa-hand-paper"></i> Disable</a></p>
+                    {% else %}
+                    <a class="btn btn-primary btn-toggle-identifiers-disable-enable"><i class="fas fa-play"></i> Enable</a></p>
+                    {% endif %}
                 <p id="msg-btns-identifier"><a class="btn btn-primary btn-identifier-save"><i class="fas fa-save"></i> Save</a> <a class="btn btn-default btn-toggle-identifiers-cancel"><i class="fas fa-ban"></i> Cancel</a></p>
             </div>
             {% endif %}
@@ -1073,13 +1084,9 @@
             {% if namespace.classPrefix is not null %}
                 $('#msg-identifier-disabled-enabled b').text("Enabled");
                 $('#table-identifiers').show();
-                $('#p-btn-identifier a').addClass('btn-danger');
-                $('#p-btn-identifier a').text('Disable');
             {% else %}
                 $('#table-identifiers').hide();
                 $('#msg-identifier-disabled-enabled b').text("Disabled");
-                $('#p-btn-identifier a').addClass('btn-primary');
-                $('#p-btn-identifier a').text('Enable');
             {% endif %}
 
             $('.btn-toggle-identifiers-disable-enable, .btn-toggle-identifiers-cancel').on('click', function () {
@@ -1091,9 +1098,11 @@
                 }
                 else if($('#msg-identifier-disabled-enabled b').text() == "Enabled"){
                     $('#msg-identifier-disabled-enabled b').text("will be Disabled if you confirm");
+                    $('#p-btn-identifier .btn-edit').hide();
                 }
                 else if($('#msg-identifier-disabled-enabled b').text() == "will be Disabled if you confirm"){
                     $('#msg-identifier-disabled-enabled b').text("Enabled");
+                    $('#p-btn-identifier .btn-edit').show();
                 }
                 $('#table-identifiers').toggle();
                 $('#msg-btns-identifier').toggle();
@@ -1141,6 +1150,41 @@
             });
 
         } );
+
+        $(document).on("click", ".btn-identifier-save", function(){
+            btn = $(this);
+            var namespaceID = {{ namespace.id }}
+
+                var dialog = bootbox.confirm({
+                    {% if namespace.classPrefix is not null %}
+                    message: "You are going to disable the automatic identifier management of your namespace. You will have to manually enter the identifiers of your new classes and properties. Do you wish to proceed?",
+                    {% else %}
+                    message: "You are going to enable the automatic identifier management of your namespace. A bad configuration will prevent you from creating new classes and properties. Be sure to set the correct parameters before proceeding.",
+                    {% endif %}
+                    title: '<i class="fas fa-exclamation-triangle"></i> Warning',
+                    buttons: {
+                        confirm: {
+                            label: 'Save',
+                            className: 'btn-success'
+                        },
+                        cancel: {
+                            label: 'Cancel',
+                            className: 'btn-danger'
+                        }
+                    },
+                    callback: function (result) {
+                        if(result){
+                            window.location="{{ path('namespace_toggle_identifier_management', {'id': namespace.id, '_fragment': 'identifiers'}) }}";
+                        }
+                        else{
+                            $(".btn-toggle-identifiers-cancel").trigger("click");
+                        }
+                        dialog.modal('hide');
+                        return false;
+                    }
+                });
+
+        });
     </script>
     {% include 'comment/js-bock.html.twig'  with {'objectType': 'namespace', 'objectId' : namespace.id  } %}
 {% endblock %}

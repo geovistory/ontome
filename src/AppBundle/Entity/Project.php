@@ -321,7 +321,7 @@ class Project
     /**
      * @return integer
      */
-    public function getPermissionForUser(User $user)
+    public function getPermissionForUser(User $user = null)
     {
         foreach($this->getUserProjectAssociations() as $userProjectAssociation){
             if($userProjectAssociation->getUser() === $user){

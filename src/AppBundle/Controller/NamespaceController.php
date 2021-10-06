@@ -356,6 +356,48 @@ class NamespaceController  extends Controller
     }
 
     /**
+     * @Route("/namespace/{id}/toggle-automatic-identifier-management", name="namespace_toggle_identifier_management", requirements={"id"="^[0-9]+$"})
+     * @Route("/namespace/{id}/toggle-automatic-identifier-management/edit", name="namespace_toggle_identifier_management_edit", requirements={"id"="^[0-9]+$"})
+     * @param OntoNamespace $namespace
+     * @return Response the rendered template
+     */
+    public function toggleAutomaticIdentifierManagement(OntoNamespace $namespace, Request $request)
+    {
+        if(is_null($namespace)) {
+            throw $this->createNotFoundException('The namespace n° '.$namespace->getId().' does not exist. Please contact an administrator.');
+        }
+
+        if(!$namespace->getIsTopLevelNamespace()){
+            throw $this->createAccessDeniedException('The namespace n° '.$namespace->getId().' is not root and can\'t manage identifiers. Please contact an administrator.');
+        }
+
+        $this->denyAccessUnlessGranted('edit', $namespace);
+
+        if(is_null($namespace->getClassPrefix()) && is_null($namespace->getPropertyPrefix())){
+            $namespace->setClassPrefix("C");
+            $namespace->setPropertyPrefix("P");
+        }
+        else{
+            $namespace->setClassPrefix(null);
+            $namespace->setPropertyPrefix(null);
+        }
+
+        $em = $this->getDoctrine()->getManager();
+        $em->persist($namespace);
+        $em->flush();
+        if($request->attributes->get('_route') != "namespace_toggle_identifier_management_edit"){
+            return $this->redirectToRoute('namespace_show', [
+                'id' => $namespace->getId()
+            ]);
+        }
+        else{
+            return $this->redirectToRoute('namespace_edit', [
+                'id' => $namespace->getId()
+            ]);
+        }
+    }
+
+    /**
      * @Route("/namespace/root-namespace/{id}/json", name="namespaces_by_root_id_list_json", requirements={"id"="^([0-9]+)|(selectedValue){1}$"})
      * @Method("GET")
      * @param OntoNamespace  $rootNamespace    The root namespace
