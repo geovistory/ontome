@@ -17,6 +17,7 @@ use AppBundle\Entity\Project;
 use AppBundle\Entity\PropertyVersion;
 use AppBundle\Entity\ReferencedNamespaceAssociation;
 use AppBundle\Entity\TextProperty;
+use AppBundle\Form\NamespaceEditIdentifiersForm;
 use AppBundle\Form\NamespaceForm;
 use AppBundle\Form\NamespacePublicationForm;
 use AppBundle\Form\NamespaceQuickAddForm;
@@ -274,8 +275,23 @@ class NamespaceController  extends Controller
                     'id' => $namespace->getId()
                 ]);
             }
+            $formIdentifiers = $this->createForm(NamespaceEditIdentifiersForm::class, $namespace);
+            $formIdentifiers->handleRequest($request);
+            if ($formIdentifiers->isSubmitted() && $formIdentifiers->isValid()) {
+
+                $em = $this->getDoctrine()->getManager();
+                $em->persist($namespace);
+                $em->flush();
+
+                $this->addFlash('success', 'Namespace identifiers updated!');
+                return $this->redirectToRoute('namespace_edit', [
+                    'id' => $namespace->getId(),
+                    '_fragment' => 'identifiers'
+                ]);
+            }
             return $this->render('namespace/edit.html.twig', [
                 'namespaceForm' => $form->createView(),
+                'namespaceIdentifiersForm' => $formIdentifiers->createView(),
                 'namespace' => $namespace,
                 'rootNamespaces' => $rootNamespaces,
                 'hasChanged' => $ongoingNamespaceHasChanged,
@@ -357,9 +373,8 @@ class NamespaceController  extends Controller
 
     /**
      * @Route("/namespace/{id}/toggle-automatic-identifier-management", name="namespace_toggle_identifier_management", requirements={"id"="^[0-9]+$"})
-     * @Route("/namespace/{id}/toggle-automatic-identifier-management/edit", name="namespace_toggle_identifier_management_edit", requirements={"id"="^[0-9]+$"})
      * @param OntoNamespace $namespace
-     * @return Response the rendered template
+     * @return JsonResponse
      */
     public function toggleAutomaticIdentifierManagement(OntoNamespace $namespace, Request $request)
     {
@@ -385,16 +400,10 @@ class NamespaceController  extends Controller
         $em = $this->getDoctrine()->getManager();
         $em->persist($namespace);
         $em->flush();
-        if($request->attributes->get('_route') != "namespace_toggle_identifier_management_edit"){
-            return $this->redirectToRoute('namespace_show', [
-                'id' => $namespace->getId()
-            ]);
-        }
-        else{
-            return $this->redirectToRoute('namespace_edit', [
-                'id' => $namespace->getId()
-            ]);
-        }
+
+        $response = array();
+
+        return new JsonResponse($response);
     }
 
     /**

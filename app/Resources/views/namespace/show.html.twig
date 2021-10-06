@@ -449,7 +449,7 @@
             {% if namespace.isTopLevelNamespace and namespace.projectForTopLevelNamespace.permissionForUser(app.user) == 1 %}
             <div id="identifiers" class="tab-pane fade">
                 <h3>Identifiers</h3>
-                <p id="msg-identifier-disabled-enabled">Automatic identifier management: <b></b></p>
+                <p id="msg-identifier-disabled-enabled">Automatic identifier management: <b>Disabled</b></p>
                 <table id="table-identifiers" class="table-bordered table-condensed" style="margin-bottom: 15px;">
                     <tr>
                         <th></th>
@@ -471,15 +471,8 @@
                     </tr>
                 </table>
                 <p id="p-btn-identifier">
-                    {% if namespace.classPrefix is not null %}
-                    <a href="{{ path('namespace_edit', {id: namespace.id}) }}" class="btn btn-success btn-edit">
-                        <i class="fa fa-edit"></i> Edit identifiers
-                    </a>
-                    <a class="btn btn-danger btn-toggle-identifiers-disable-enable"><i class="fas fa-hand-paper"></i> Disable</a></p>
-                    {% else %}
-                    <a class="btn btn-primary btn-toggle-identifiers-disable-enable"><i class="fas fa-play"></i> Enable</a></p>
-                    {% endif %}
-                <p id="msg-btns-identifier"><a class="btn btn-primary btn-identifier-save"><i class="fas fa-save"></i> Save</a> <a class="btn btn-default btn-toggle-identifiers-cancel"><i class="fas fa-ban"></i> Cancel</a></p>
+                    <a class="btn" id="btn-toggle-identifiers-disable-enable"></a>
+                </p>
             </div>
             {% endif %}
             <div id="classes" class="tab-pane fade">
@@ -1084,30 +1077,14 @@
             {% if namespace.classPrefix is not null %}
                 $('#msg-identifier-disabled-enabled b').text("Enabled");
                 $('#table-identifiers').show();
+                $('#btn-toggle-identifiers-disable-enable').addClass("btn-danger");
+                $('#btn-toggle-identifiers-disable-enable').html('<i class="fas fa-hand-paper"></i> Disable');
             {% else %}
-                $('#table-identifiers').hide();
                 $('#msg-identifier-disabled-enabled b').text("Disabled");
+                $('#table-identifiers').hide();
+                $('#btn-toggle-identifiers-disable-enable').addClass("btn-primary");
+                $('#btn-toggle-identifiers-disable-enable').html('<i class="fas fa-play"></i> Enable');
             {% endif %}
-
-            $('.btn-toggle-identifiers-disable-enable, .btn-toggle-identifiers-cancel').on('click', function () {
-                if($('#msg-identifier-disabled-enabled b').text() == "Disabled"){
-                    $('#msg-identifier-disabled-enabled b').text("will be Enabled if you confirm");
-                }
-                else if($('#msg-identifier-disabled-enabled b').text() == "will be Enabled if you confirm"){
-                    $('#msg-identifier-disabled-enabled b').text("Disabled");
-                }
-                else if($('#msg-identifier-disabled-enabled b').text() == "Enabled"){
-                    $('#msg-identifier-disabled-enabled b').text("will be Disabled if you confirm");
-                    $('#p-btn-identifier .btn-edit').hide();
-                }
-                else if($('#msg-identifier-disabled-enabled b').text() == "will be Disabled if you confirm"){
-                    $('#msg-identifier-disabled-enabled b').text("Enabled");
-                    $('#p-btn-identifier .btn-edit').show();
-                }
-                $('#table-identifiers').toggle();
-                $('#msg-btns-identifier').toggle();
-                $('.btn-toggle-identifiers-disable-enable').toggle();
-            });
 
             $('#summary a[href="#mismatches"]').click(function (e) {
                 e.preventDefault();
@@ -1151,7 +1128,7 @@
 
         } );
 
-        $(document).on("click", ".btn-identifier-save", function(){
+        $(document).on("click", "#btn-toggle-identifiers-disable-enable", function(){
             btn = $(this);
             var namespaceID = {{ namespace.id }}
 

@@ -726,29 +726,31 @@
                             <th>Current number</th>
                             <th>Next identifier</th>
                         </tr>
+                        {{ form_start(namespaceIdentifiersForm) }}
+                        {{ form_errors(namespaceIdentifiersForm) }}
                         <tr>
                             <td><b>Class</b></td>
-                            <td class="text-center">{{ namespace.classPrefix|default('C') }}</td>
-                            <td class="text-center">{{ namespace.currentClassNumber|default(0) }}</td>
+                            <td class="text-center">{{ form_widget(namespaceIdentifiersForm.classPrefix, {'attr': {'style': 'width: 100px'}, 'value':namespace.classPrefix|default('C') }) }}</td>
+                            <td class="text-center">{{ form_widget(namespaceIdentifiersForm.currentClassNumber, {'attr': {'style': 'width: 100px'} }) }}</td>
                             <td class="text-center">{{ namespace.classPrefix|default('C') }}{{ namespace.currentClassNumber|default(0)+1 }}</td>
                         </tr>
                         <tr>
                             <td><b>Property</b></td>
-                            <td class="text-center">{{ namespace.propertyPrefix|default('P') }}</td>
-                            <td class="text-center">{{ namespace.currentPropertyNumber|default(0) }}</td>
+                            <td class="text-center">{{ form_widget(namespaceIdentifiersForm.propertyPrefix, {'attr': {'style': 'width: 100px'}, 'value':namespace.propertyPrefix|default('P') }) }}</td>
+                            <td class="text-center">{{ form_widget(namespaceIdentifiersForm.currentPropertyNumber, {'attr': {'style': 'width: 100px'} }) }}</td>
                             <td class="text-center">{{ namespace.propertyPrefix|default('P') }}{{ namespace.currentPropertyNumber|default(0)+1 }}</td>
                         </tr>
                     </table>
                     <p id="p-btn-identifier">
                         {% if namespace.classPrefix is not null %}
-                        <a href="{{ path('namespace_edit', {id: namespace.id}) }}" class="btn btn-success btn-edit">
-                            <i class="fa fa-edit"></i> Edit identifiers
-                        </a>
-                        <a class="btn btn-danger btn-toggle-identifiers-disable-enable"><i class="fas fa-hand-paper"></i> Disable</a></p>
+                        <button type="submit" class="btn btn-primary" formnovalidate><i class="fas fa-save"></i> Save identifiers</button>
+                        <a class="btn btn-danger btn-toggle-identifiers-disable-enable"><i class="fas fa-hand-paper"></i> Disable</a>
                     {% else %}
-                        <a class="btn btn-primary btn-toggle-identifiers-disable-enable"><i class="fas fa-play"></i> Enable</a></p>
+                        <a class="btn btn-primary btn-toggle-identifiers-disable-enable"><i class="fas fa-play"></i> Enable</a>
                     {% endif %}
+                    </p>
                     <p id="msg-btns-identifier"><a class="btn btn-primary btn-identifier-save"><i class="fas fa-save"></i> Save</a> <a class="btn btn-default btn-toggle-identifiers-cancel"><i class="fas fa-ban"></i> Cancel</a></p>
+                    {{ form_end(namespaceIdentifiersForm) }}
                 </div>
             {% endif %}
             <div id="classes" class="tab-pane fade">
@@ -1366,17 +1368,21 @@
             $('.btn-toggle-identifiers-disable-enable, .btn-toggle-identifiers-cancel').on('click', function () {
                 if($('#msg-identifier-disabled-enabled b').text() == "Disabled"){
                     $('#msg-identifier-disabled-enabled b').text("will be Enabled if you confirm");
+                    $('#p-btn-identifier button').show();
                 }
                 else if($('#msg-identifier-disabled-enabled b').text() == "will be Enabled if you confirm"){
                     $('#msg-identifier-disabled-enabled b').text("Disabled");
+                    $('#p-btn-identifier button').hide();
                 }
                 else if($('#msg-identifier-disabled-enabled b').text() == "Enabled"){
                     $('#msg-identifier-disabled-enabled b').text("will be Disabled if you confirm");
                     $('#p-btn-identifier .btn-edit').hide();
+                    $('#p-btn-identifier button').hide();
                 }
                 else if($('#msg-identifier-disabled-enabled b').text() == "will be Disabled if you confirm"){
                     $('#msg-identifier-disabled-enabled b').text("Enabled");
                     $('#p-btn-identifier .btn-edit').show();
+                    $('#p-btn-identifier button').show();
                 }
                 $('#table-identifiers').toggle();
                 $('#msg-btns-identifier').toggle();
@@ -1728,7 +1734,7 @@
                 },
                 callback: function (result) {
                     if(result){
-                        window.location="{{ path('namespace_toggle_identifier_management_edit', {'id': namespace.id, '_fragment': 'identifiers'}) }}";
+                        window.location="{{ path('namespace_toggle_identifier_management', {'id': namespace.id, '_fragment': 'identifiers'}) }}";
                     }
                     else{
                         $(".btn-toggle-identifiers-cancel").trigger("click");
