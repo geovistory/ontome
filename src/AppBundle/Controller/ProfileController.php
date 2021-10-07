@@ -78,16 +78,12 @@ class ProfileController  extends Controller
     public function newAction(Request $request, Project $project)
     {
         $profile = new Profile();
+        $ongoingProfile = new Profile();
 
         $this->denyAccessUnlessGranted('edit', $project);
 
-
         $em = $this->getDoctrine()->getManager();
         $systemTypeDescription = $em->getRepository('AppBundle:SystemType')->find(16); //systemType 16 = description
-        $systemTypeAdditionalNote = $em->getRepository('AppBundle:SystemType')->find(12); //systemType 12 = additional note
-
-        $em = $this->getDoctrine()->getManager();
-        $systemTypeDescription = $em->getRepository('AppBundle:SystemType')->find(16); //systemType 16 = Description
 
         $description = new TextProperty();
         $description->setProfile($profile);
@@ -107,11 +103,8 @@ class ProfileController  extends Controller
 
         $profile->addTextProperty($description);
 
-        $ongoingProfile = new Profile();
         $profileLabel = new Label();
         $ongoingProfileLabel = new Label();
-
-        $now = new \DateTime();
 
         $profile->setCreator($this->getUser());
         $profile->setModifier($this->getUser());
@@ -134,6 +127,7 @@ class ProfileController  extends Controller
             $profile->setIsRootProfile(true);
             $profile->setIsOngoing(false);
             $profile->setProjectOfBelonging($project);
+            $profile->setIsForcedPublication(false);
             $profile->setCreator($this->getUser());
             $profile->setModifier($this->getUser());
             $profile->setCreationTime(new \DateTime('now'));
@@ -143,6 +137,7 @@ class ProfileController  extends Controller
             $ongoingProfile->setIsRootProfile(false);
             $ongoingProfile->setIsOngoing(true);
             $ongoingProfile->setProjectOfBelonging($project);
+            $ongoingProfile->setIsForcedPublication(false);
             $ongoingProfile->setVersion(1);
             $ongoingProfile->setRootProfile($profile);
             $ongoingProfile->setCreator($this->getUser());
@@ -167,8 +162,7 @@ class ProfileController  extends Controller
                 $profile->getTextProperties()[1]->setLanguageIsoCode($profileLabel->getLanguageIsoCode());
             }
             else {
-                $ongoingDescription->setTextProperty($description->getTextProperty());
-                $ongoingProfile->addTextProperty($ongoingDescription);
+                $ongoingProfile->addTextProperty($profile->getTextProperties()[0]);
             }
 
             $em = $this->getDoctrine()->getManager();
@@ -219,12 +213,15 @@ class ProfileController  extends Controller
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $profile->setModifier($this->getUser());
+            $profile->setModificationTime(new \DateTime('now'));
             if (!$profile->getIsRootProfile()) {
                 $profile->setProjectOfBelonging($profile->getRootProfile()->getProjectOfBelonging());
             }
             else {
                 foreach ($profile->getChildProfiles() as $childProfile) {
                     $childProfile->setProjectOfBelonging($profile->getProjectOfBelonging());
+                    $childProfile->setModifier($this->getUser());
+                    $childProfile->setModificationTime(new \DateTime('now'));
                     $em->persist($childProfile);
                 }
             }
