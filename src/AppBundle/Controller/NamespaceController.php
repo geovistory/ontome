@@ -425,7 +425,7 @@ class NamespaceController  extends Controller
 
 
     /**
-     * @Route("/namespace/{id}/json", name="namespace_json", schemes={"http"}, requirements={"id"="^[0-9]+"})
+     * @Route("/namespace/{id}/json", name="namespace_json", schemes={"https"}, requirements={"id"="^[0-9]+"})
      * @Method("GET")
      * @param OntoNamespace $namespace
      * @return JsonResponse a Json formatted graph representation of Namespaces
