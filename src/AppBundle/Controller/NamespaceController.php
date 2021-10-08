@@ -373,6 +373,7 @@ class NamespaceController  extends Controller
 
     /**
      * @Route("/namespace/{id}/toggle-automatic-identifier-management", name="namespace_toggle_identifier_management", requirements={"id"="^[0-9]+$"})
+     * @Method("GET")
      * @param OntoNamespace $namespace
      * @return JsonResponse
      */
@@ -397,13 +398,16 @@ class NamespaceController  extends Controller
             $namespace->setPropertyPrefix(null);
         }
 
+        if(is_null($namespace->getCurrentClassNumber())){
+            $namespace->setCurrentClassNumber(0);
+            $namespace->setCurrentPropertyNumber(0);
+        }
+
         $em = $this->getDoctrine()->getManager();
         $em->persist($namespace);
         $em->flush();
 
-        $response = array();
-
-        return new JsonResponse($response);
+        return new JsonResponse("",204, array(), true);
     }
 
     /**

@@ -716,9 +716,11 @@
                 {% endif %}
             </div>
             {% if namespace.isTopLevelNamespace and namespace.projectForTopLevelNamespace.permissionForUser(app.user) == 1 %}
-                <div id="identifiers" class="tab-pane fade">
+            <div id="identifiers" class="tab-pane fade">
                     <h3>Identifiers</h3>
-                    <p id="msg-identifier-disabled-enabled">Automatic identifier management: <b></b></p>
+                    <p id="msg-identifier-disabled-enabled">Automatic identifier management: <b>Disabled</b></p>
+                    {{ form_start(namespaceIdentifiersForm) }}
+                    {{ form_errors(namespaceIdentifiersForm) }}
                     <table id="table-identifiers" class="table-bordered table-condensed" style="margin-bottom: 15px;">
                         <tr>
                             <th></th>
@@ -726,30 +728,24 @@
                             <th>Current number</th>
                             <th>Next identifier</th>
                         </tr>
-                        {{ form_start(namespaceIdentifiersForm) }}
-                        {{ form_errors(namespaceIdentifiersForm) }}
                         <tr>
                             <td><b>Class</b></td>
-                            <td class="text-center">{{ form_widget(namespaceIdentifiersForm.classPrefix, {'attr': {'style': 'width: 100px'}, 'value':namespace.classPrefix|default('C') }) }}</td>
-                            <td class="text-center">{{ form_widget(namespaceIdentifiersForm.currentClassNumber, {'attr': {'style': 'width: 100px'} }) }}</td>
-                            <td class="text-center">{{ namespace.classPrefix|default('C') }}{{ namespace.currentClassNumber|default(0)+1 }}</td>
+                            <td class="text-center">{{ form_widget(namespaceIdentifiersForm.classPrefix, {'attr': {'style': 'width: 100px'}}) }}</td>
+                            <td class="text-center">{{ form_widget(namespaceIdentifiersForm.currentClassNumber, {'attr': {'style': 'width: 100px'}, 'value': namespace.currentClassNumber|default(0) }) }}</td>
+                            <td class="text-center" id="next-class-identifier"></td>
                         </tr>
                         <tr>
                             <td><b>Property</b></td>
-                            <td class="text-center">{{ form_widget(namespaceIdentifiersForm.propertyPrefix, {'attr': {'style': 'width: 100px'}, 'value':namespace.propertyPrefix|default('P') }) }}</td>
-                            <td class="text-center">{{ form_widget(namespaceIdentifiersForm.currentPropertyNumber, {'attr': {'style': 'width: 100px'} }) }}</td>
-                            <td class="text-center">{{ namespace.propertyPrefix|default('P') }}{{ namespace.currentPropertyNumber|default(0)+1 }}</td>
+                            <td class="text-center">{{ form_widget(namespaceIdentifiersForm.propertyPrefix, {'attr': {'style': 'width: 100px'}}) }}</td>
+                            <td class="text-center">{{ form_widget(namespaceIdentifiersForm.currentPropertyNumber, {'attr': {'style': 'width: 100px'}, 'value': namespace.currentPropertyNumber|default(0) }) }}</td>
+                            <td class="text-center" id="next-property-identifier"></td>
                         </tr>
                     </table>
                     <p id="p-btn-identifier">
-                        {% if namespace.classPrefix is not null %}
                         <button type="submit" class="btn btn-primary" formnovalidate><i class="fas fa-save"></i> Save identifiers</button>
-                        <a class="btn btn-danger btn-toggle-identifiers-disable-enable"><i class="fas fa-hand-paper"></i> Disable</a>
-                    {% else %}
-                        <a class="btn btn-primary btn-toggle-identifiers-disable-enable"><i class="fas fa-play"></i> Enable</a>
-                    {% endif %}
+                        <button type="reset" class="btn btn-default"><i class="fas fa-undo-alt"></i> Reset</button>
+                        <a class="btn" id="btn-toggle-identifiers-disable-enable"></a>
                     </p>
-                    <p id="msg-btns-identifier"><a class="btn btn-primary btn-identifier-save"><i class="fas fa-save"></i> Save</a> <a class="btn btn-default btn-toggle-identifiers-cancel"><i class="fas fa-ban"></i> Cancel</a></p>
                     {{ form_end(namespaceIdentifiersForm) }}
                 </div>
             {% endif %}
@@ -1356,39 +1352,6 @@
                 "autoWidth": false
             });
 
-            $('#msg-btns-identifier').hide();
-            {% if namespace.classPrefix is not null %}
-            $('#msg-identifier-disabled-enabled b').text("Enabled");
-            $('#table-identifiers').show();
-            {% else %}
-            $('#table-identifiers').hide();
-            $('#msg-identifier-disabled-enabled b').text("Disabled");
-            {% endif %}
-
-            $('.btn-toggle-identifiers-disable-enable, .btn-toggle-identifiers-cancel').on('click', function () {
-                if($('#msg-identifier-disabled-enabled b').text() == "Disabled"){
-                    $('#msg-identifier-disabled-enabled b').text("will be Enabled if you confirm");
-                    $('#p-btn-identifier button').show();
-                }
-                else if($('#msg-identifier-disabled-enabled b').text() == "will be Enabled if you confirm"){
-                    $('#msg-identifier-disabled-enabled b').text("Disabled");
-                    $('#p-btn-identifier button').hide();
-                }
-                else if($('#msg-identifier-disabled-enabled b').text() == "Enabled"){
-                    $('#msg-identifier-disabled-enabled b').text("will be Disabled if you confirm");
-                    $('#p-btn-identifier .btn-edit').hide();
-                    $('#p-btn-identifier button').hide();
-                }
-                else if($('#msg-identifier-disabled-enabled b').text() == "will be Disabled if you confirm"){
-                    $('#msg-identifier-disabled-enabled b').text("Enabled");
-                    $('#p-btn-identifier .btn-edit').show();
-                    $('#p-btn-identifier button').show();
-                }
-                $('#table-identifiers').toggle();
-                $('#msg-btns-identifier').toggle();
-                $('.btn-toggle-identifiers-disable-enable').toggle();
-            });
-
             $('#summary a[href="#mismatches"]').click(function (e) {
                 e.preventDefault();
                 $('.nav-tabs a[href="#mismatches"]').tab('show');
@@ -1711,16 +1674,43 @@
 
         } );
 
-        $(document).on("click", ".btn-identifier-save", function(){
+        // --- ONGLET IDENTIFIERS ---
+        {% if namespace.classPrefix is not null %}
+        $('#msg-identifier-disabled-enabled b').text("Enabled");
+        $('#table-identifiers').show();
+        $('#btn-toggle-identifiers-disable-enable').addClass("btn-danger");
+        $('#btn-toggle-identifiers-disable-enable').html('<i class="fas fa-hand-paper"></i> Disable');
+        {% else %}
+        $('#msg-identifier-disabled-enabled b').text("Disabled");
+        $('#table-identifiers').hide();
+        $('#p-btn-identifier button').hide();
+        $('#btn-toggle-identifiers-disable-enable').addClass("btn-primary");
+        $('#btn-toggle-identifiers-disable-enable').html('<i class="fas fa-play"></i> Enable');
+        {% endif %}
+
+        $("#next-class-identifier").text($("#namespace_edit_identifiers_form_classPrefix").val()+(parseInt($("#namespace_edit_identifiers_form_currentClassNumber").val(), 10)+1));
+        $("#namespace_edit_identifiers_form_classPrefix, #namespace_edit_identifiers_form_currentClassNumber").on("change keyup", function() {
+            $("#next-class-identifier").text($("#namespace_edit_identifiers_form_classPrefix").val()+(parseInt($("#namespace_edit_identifiers_form_currentClassNumber").val(), 10)+1));
+        });
+
+        $("#next-property-identifier").text($("#namespace_edit_identifiers_form_propertyPrefix").val()+(parseInt($("#namespace_edit_identifiers_form_currentPropertyNumber").val(), 10)+1));
+        $("#namespace_edit_identifiers_form_propertyPrefix, #namespace_edit_identifiers_form_currentPropertyNumber").on("change keyup", function() {
+            $("#next-property-identifier").text($("#namespace_edit_identifiers_form_propertyPrefix").val()+(parseInt($("#namespace_edit_identifiers_form_currentPropertyNumber").val(), 10)+1));
+        });
+
+        $("#p-btn-identifier button[type=reset]").on("mouseup mousedown", function(){
+            setTimeout(function (){
+                $("#next-class-identifier").text($("#namespace_edit_identifiers_form_classPrefix").val()+(parseInt($("#namespace_edit_identifiers_form_currentClassNumber").val(), 10)+1));
+                $("#next-property-identifier").text($("#namespace_edit_identifiers_form_propertyPrefix").val()+(parseInt($("#namespace_edit_identifiers_form_currentPropertyNumber").val(), 10)+1));
+            });
+        });
+
+        $(document).on("click", "#btn-toggle-identifiers-disable-enable", function(){
             btn = $(this);
             var namespaceID = {{ namespace.id }}
 
             var dialog = bootbox.confirm({
-                {% if namespace.classPrefix is not null %}
-                message: "You are going to disable the automatic identifier management of your namespace. You will have to manually enter the identifiers of your new classes and properties. Do you wish to proceed?",
-                {% else %}
-                message: "You are going to enable the automatic identifier management of your namespace. A bad configuration will prevent you from creating new classes and properties. Be sure to set the correct parameters before proceeding.",
-                {% endif %}
+                message: ($('#table-identifiers').is(':visible')) ? "You are going to disable the automatic identifier management of your namespace. You will have to manually enter the identifiers of your new classes and properties. Do you wish to proceed?" : "You are going to enable the automatic identifier management of your namespace. A bad configuration will prevent you from creating new classes and properties. Be sure to set the correct parameters before proceeding.",
                 title: '<i class="fas fa-exclamation-triangle"></i> Warning',
                 buttons: {
                     confirm: {
@@ -1734,17 +1724,45 @@
                 },
                 callback: function (result) {
                     if(result){
-                        window.location="{{ path('namespace_toggle_identifier_management', {'id': namespace.id, '_fragment': 'identifiers'}) }}";
-                    }
-                    else{
-                        $(".btn-toggle-identifiers-cancel").trigger("click");
+                        var url = "{{ path('namespace_toggle_identifier_management', {'id': namespace.id, '_fragment': 'identifiers'}) }}";
+                        $.ajax({
+                            url: url,
+                            type: 'GET',
+                            dataType: 'json',
+                            statusCode: {
+                                204: function () {
+                                    if($('#table-identifiers').is(':visible')){
+                                        // La gestion était automatique, on cache
+                                        $('#msg-identifier-disabled-enabled b').text("Disabled");
+                                        $('#table-identifiers').hide();
+                                        $('#p-btn-identifier button').hide();
+                                        $('#btn-toggle-identifiers-disable-enable').removeClass("btn-danger");
+                                        $('#btn-toggle-identifiers-disable-enable').addClass("btn-primary");
+                                        $('#btn-toggle-identifiers-disable-enable').html('<i class="fas fa-play"></i> Enable');
+                                    }
+                                    else {
+                                        // La gestion n'était pas automatique, on affiche
+                                        $('#msg-identifier-disabled-enabled b').text("Enabled");
+                                        $('#table-identifiers').show();
+                                        $('#p-btn-identifier button').show();
+                                        $('#btn-toggle-identifiers-disable-enable').removeClass("btn-primary");
+                                        $('#btn-toggle-identifiers-disable-enable').addClass("btn-danger");
+                                        $('#btn-toggle-identifiers-disable-enable').html('<i class="fas fa-hand-paper"></i> Disable');
+                                        $('#namespace_edit_identifiers_form_classPrefix').val('C');
+                                        $("#next-class-identifier").text($("#namespace_edit_identifiers_form_classPrefix").val()+(parseInt($("#namespace_edit_identifiers_form_currentClassNumber").val(), 10)+1));
+                                        $('#namespace_edit_identifiers_form_propertyPrefix').val('P');
+                                        $("#next-property-identifier").text($("#namespace_edit_identifiers_form_propertyPrefix").val()+(parseInt($("#namespace_edit_identifiers_form_currentPropertyNumber").val(), 10)+1));
+                                    }
+                                }
+                            }
+                        });
                     }
                     dialog.modal('hide');
                     return false;
                 }
             });
-
         });
+        // --- FIN ONGLET IDENTIFIERS ---
     </script>
     {% include 'comment/js-bock.html.twig'  with {'objectType': 'namespace', 'objectId' : namespace.id  } %}
 {% endblock %}
