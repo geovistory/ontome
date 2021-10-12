@@ -36,16 +36,20 @@ class NamespaceEditIdentifiersForm extends AbstractType
     {
         $builder
             ->add('classPrefix', TextType::class, array(
-                'label' => false
+                'label' => false,
+                'error_bubbling' => true
             ))
             ->add('propertyPrefix', TextType::class, array(
-                'label' => false
+                'label' => false,
+                'error_bubbling' => true
             ))
             ->add('currentClassNumber', IntegerType::class, array(
-                'label' => false
+                'label' => false,
+                'error_bubbling' => true
             ))
             ->add('currentPropertyNumber', IntegerType::class, array(
-                'label' => false
+                'label' => false,
+                'error_bubbling' => true
             ))
         ;
     }

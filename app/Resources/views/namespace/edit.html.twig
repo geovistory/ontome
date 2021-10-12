@@ -730,14 +730,14 @@
                         </tr>
                         <tr>
                             <td><b>Class</b></td>
-                            <td class="text-center">{{ form_widget(namespaceIdentifiersForm.classPrefix, {'attr': {'style': 'width: 100px'}}) }}</td>
-                            <td class="text-center">{{ form_widget(namespaceIdentifiersForm.currentClassNumber, {'attr': {'style': 'width: 100px'}, 'value': namespace.currentClassNumber|default(0) }) }}</td>
+                            <td class="text-center">{{ form_row(namespaceIdentifiersForm.classPrefix, {'attr': {'style': 'width: 100px'}}) }}</td>
+                            <td class="text-center">{{ form_row(namespaceIdentifiersForm.currentClassNumber, {'attr': {'style': 'width: 100px'}, 'value': namespace.currentClassNumber|default(0) }) }}</td>
                             <td class="text-center" id="next-class-identifier"></td>
                         </tr>
                         <tr>
                             <td><b>Property</b></td>
-                            <td class="text-center">{{ form_widget(namespaceIdentifiersForm.propertyPrefix, {'attr': {'style': 'width: 100px'}}) }}</td>
-                            <td class="text-center">{{ form_widget(namespaceIdentifiersForm.currentPropertyNumber, {'attr': {'style': 'width: 100px'}, 'value': namespace.currentPropertyNumber|default(0) }) }}</td>
+                            <td class="text-center">{{ form_row(namespaceIdentifiersForm.propertyPrefix, {'attr': {'style': 'width: 100px'}}) }}</td>
+                            <td class="text-center">{{ form_row(namespaceIdentifiersForm.currentPropertyNumber, {'attr': {'style': 'width: 100px'}, 'value': namespace.currentPropertyNumber|default(0) }) }}</td>
                             <td class="text-center" id="next-property-identifier"></td>
                         </tr>
                     </table>
@@ -1670,6 +1670,9 @@
                 $('#namespace_form_isExternalNamespace').prop('checked', true);
                 $('#namespace_form_uriGenerator').parent().hide();
                 $('#namespace_form_namespaceURI').prop('readOnly', false);
+            }
+            else {
+                $('#namespace_form_namespaceURI').prop('readOnly', true);
             }
 
         } );

@@ -47,21 +47,45 @@ class OntoNamespace
     private $originalNamespaceURI;
 
     /**
+     * @Assert\NotBlank
+     * @Assert\NotNull
+     * @Assert\Length(
+     *     min = 1,
+     *     max = 6,
+     *     minMessage="Your class prefix must be at least {{ limit }} characters long",
+     *     maxMessage="Your class prefix cannot be loger than {{ limit }} characters"
+     * )
      * @ORM\Column(type="text")
      */
     private $classPrefix;
 
     /**
+     * @Assert\NotBlank
+     * @Assert\NotNull
+     * @Assert\Length(
+     *     min = 1,
+     *     max = 6,
+     *     minMessage="Your property prefix must be at least {{ limit }} characters long",
+     *     maxMessage="Your property prefix cannot be loger than {{ limit }} characters"
+     * )
      * @ORM\Column(type="text")
      */
     private $propertyPrefix;
 
     /**
+     * @Assert\GreaterThanOrEqual(
+     *     value = 0,
+     *     message="Your current class number should be greater than or equal to 0."
+     * )
      * @ORM\Column(type="integer")
      */
     private $currentClassNumber;
 
     /**
+     * @Assert\GreaterThanOrEqual(
+     *     value = 0,
+     *     message="Your current property number should be greater than or equal to 0."
+     * )
      * @ORM\Column(type="integer")
      */
     private $currentPropertyNumber;
