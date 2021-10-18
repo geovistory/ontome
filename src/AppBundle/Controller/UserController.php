@@ -556,7 +556,7 @@ class UserController extends Controller
     }
 
     /**
-     * @Route("/user/{userProjectAssociation}/namespace/{namespace}/add", name="user_project_namespace_association", requirements={"userProjectAssociation"="^([0-9]+$)|(userProjectID){1}", "namespace"="^([0-9]+)|(selectedValue){1}$"})
+     * @Route("/user/{userProjectAssociation}/namespace/{namespace}/add", name="user_project_namespace_association", requirements={"userProjectAssociation"="^([0-9]+)|(userProjectID){1}$", "namespace"="^([0-9]+)|(selectedValue){1}$"})
      * @Method({"POST"})
      * @param OntoNamespace  $namespace    The namespace to be associated with an userProjectAssociation
      * @param UserProjectAssociation  $userProjectAssociation    The userProjectAssociation to be associated with a namespace
