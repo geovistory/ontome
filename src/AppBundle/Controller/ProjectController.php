@@ -195,7 +195,7 @@ class ProjectController  extends Controller
     }
 
     /**
-     * @Route("/associated-members/project/{project}/json", name="associated_members_project_json", requirements={"project"="^([0-9]+)|(projectID){1}$|"})
+     * @Route("/associated-members/project/{project}/json", name="associated_members_project_json", requirements={"project"="^([0-9]+)|(projectID){1}$"})
      * @Method("GET")
      * @param Project $project
      * @return JsonResponse a Json formatted list representation of Users selected by Project
