@@ -698,7 +698,7 @@ class UserController extends Controller
     }
 
     /**
-     * @Route("/user/{userProjectAssociation}/profile/{profile}/add", name="user_project_profile_association", requirements={"userProjectAssociation"="^([0-9]+$)|(userProjectID){1}", "profile"="^([0-9]+)|(selectedValue){1}$"})
+     * @Route("/user/{userProjectAssociation}/profile/{profile}/add", name="user_project_profile_association", requirements={"userProjectAssociation"="^([0-9]+)|(userProjectID){1}$", "profile"="^([0-9]+)|(selectedValue){1}$"})
      * @Method({"POST"})
      * @param Profile $profile The profile to be associated with an userProjectAssociation
      * @param UserProjectAssociation  $userProjectAssociation    The userProjectAssociation to be associated with a profile

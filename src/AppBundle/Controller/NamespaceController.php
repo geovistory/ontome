@@ -204,7 +204,7 @@ class NamespaceController  extends Controller
     }
 
     /**
-     * @Route("/namespace/{id}", name="namespace_show", requirements={"id"="^([0-9]+$)|(selectedValue|refId){1}"})
+     * @Route("/namespace/{id}", name="namespace_show", requirements={"id"="^([0-9]+)|(selectedValue|refId){1}$"})
      * @param OntoNamespace $namespace
      * @return Response the rendered template
      */

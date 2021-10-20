@@ -390,7 +390,7 @@ class ClassController extends Controller
     }
 
     /**
-     * @Route("/class-version/{id}/edit-validity/{validationStatus}", name="class_version_validation_status_edit", requirements={"id"="^[0-9]+$", "validationStatus"="^26$|^27$|^28$"})
+     * @Route("/class-version/{id}/edit-validity/{validationStatus}", name="class_version_validation_status_edit", requirements={"id"="^[0-9]+$", "validationStatus"="^26|27|28$"})
      * @param OntoClassVersion $classVersion
      * @param SystemType $validationStatus
      * @param Request $request
