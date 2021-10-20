@@ -1,157 +1,157 @@
 {% extends 'base.html.twig' %}
 {% block body %}
-<div class="container">
-    <div class="row">
-        <div class="col-xs-12">
-            <h2>Edit
-                {% if textProperty.classAssociation is not null %}
-                    {% set childClass = textProperty.classAssociation.childClass %}
-                    {{ childClass.classVersionForDisplay(textProperty.classAssociation.childClassNamespace).standardLabel }} – {{ childClass.identifierInNamespace }}: {{ textProperty.systemType.standardLabel }}
-                    <a href="{{ path('class_association_edit', {
-                                id: textProperty.classAssociation.id
+    <div class="container">
+        <div class="row">
+            <div class="col-xs-12">
+                <h2>Edit
+                    {% if textProperty.classAssociation is not null %}
+                        {% set childClass = textProperty.classAssociation.childClass %}
+                        {{ childClass.classVersionForDisplay(textProperty.classAssociation.childClassNamespace).standardLabel }} – {{ childClass.identifierInNamespace }}: {{ textProperty.systemType.standardLabel }}
+                        <a href="{{ path('class_association_edit', {
+                            id: textProperty.classAssociation.id
                         }) }}"
-                       class="pull-right btn btn-link"
-                       role="button">
-                        <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
-                    </a>
-                {% elseif textProperty.propertyAssociation is not null %}
-                    {% set childProperty = textProperty.propertyAssociation.childProperty %}
-                    {{ childProperty.propertyVersionForDisplay(textProperty.propertyAssociation.childPropertyNamespace).standardLabel }} – {{ childProperty.identifierInNamespace }}: {{ textProperty.systemType.standardLabel }}
-                    <a href="{{ path('property_association_edit', {
-                        id: textProperty.propertyAssociation.id
-                    }) }}"
-                       class="pull-right btn btn-link"
-                       role="button">
-                        <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
-                    </a>
-                {% elseif textProperty.class is not null %}
-                    {{ textProperty.systemType.standardLabel|lower }} for the class {{ textProperty.class.classVersionForDisplay(textProperty.namespaceForVersion) }}
-                    <a href="{{ path('class_edit', {
-                        id: textProperty.class.id
-                    }) }}#definition"
-                       class="pull-right btn btn-link"
-                       role="button">
-                        <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
-                    </a>
-                {% elseif textProperty.property is not null %}
-                    {{ textProperty.systemType.standardLabel|lower }} for the property {{ textProperty.property.propertyVersionForDisplay(textProperty.namespaceForVersion) }}
-                    <a href="{{ path('property_edit', {
-                        id: textProperty.property.id
-                    }) }}#definition"
-                       class="pull-right btn btn-link"
-                       role="button">
-                        <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
-                    </a>
-                {% elseif textProperty.project is not null %}
-                    {{ textProperty.systemType.standardLabel|lower }} for the project {{ textProperty.project }}
-                    <a href="{{ path('project_edit', {
-                        id: textProperty.project.id
-                    }) }}#definition"
-                       class="pull-right btn btn-link"
-                       role="button">
-                        <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
-                    </a>
-                {% elseif textProperty.profile is not null %}
-                    {{ textProperty.systemType.standardLabel|lower }} for the profile {{ textProperty.profile }}
-                    <a href="{{ path('profile_edit', {
-                        id: textProperty.profile.id
-                    }) }}#definition"
-                       class="pull-right btn btn-link"
-                       role="button">
-                        <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
-                    </a>
-                {% elseif textProperty.namespace is not null %}
-                    {{ textProperty.systemType.standardLabel }} for the namespace {{ textProperty.namespace }}
-                    <a href="{{ path('namespace_edit', {
-                        id: textProperty.namespace.id
-                    }) }}#{{ textProperty.systemType.id == 31 ? 'identification' : 'definition' }}"
-                       class="pull-right btn btn-link"
-                       role="button">
-                        <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
-                    </a>
-                {% elseif textProperty.entityAssociation is not null and app.request.attributes.get('_route') == 'text_property_inverse_new' %}
-                    {% if textProperty.object is not null %}
-                        {% if textProperty.class is not null or textProperty.property is not null %}
-                            {{ textProperty.object.standardLabel }} – {{ textProperty.object.identifierInNamespace }}: {{ textProperty.systemType.standardLabel }}
-                        {% else %}
-                            {{ textProperty.object.objectIdentification }}: {{ textProperty.systemType.standardLabel }}
-                        {% endif %}
-                    {% else %}
-                        {{ textProperty.systemType.standardLabel }}
-                    {% endif %}
-                    <a href="{{ path('entity_association_inverse_edit', {
-                    id: textProperty.entityAssociation.id
-                }) }}#definition"
                            class="pull-right btn btn-link"
                            role="button">
-                    <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
-                </a>
-                {% elseif textProperty.entityAssociation is not null %}
-                {% if textProperty.entityAssociation.sourceClass is not null %}
-                    {{ textProperty.entityAssociation.sourceClass.classVersionForDisplay(textProperty.entityAssociation.sourceNamespaceForVersion) }} {{ textProperty.entityAssociation.systemType.standardLabel }} {{ textProperty.entityAssociation.targetClass.classVersionForDisplay(textProperty.entityAssociation.targetNamespaceForVersion) }} : {{ textProperty.systemType.standardLabel }}
-                {% elseif textProperty.entityAssociation.sourceProperty is not null %}
-                    {{ textProperty.entityAssociation.sourceProperty.propertyVersionForDisplay(textProperty.entityAssociation.sourceNamespaceForVersion) }} {{ textProperty.entityAssociation.systemType.standardLabel }} {{ textProperty.entityAssociation.targetProperty.propertyVersionForDisplay(textProperty.entityAssociation.targetNamespaceForVersion) }} : {{ textProperty.systemType.standardLabel }}
-                {% endif %}
-                    <a href="{{ path('entity_association_edit', {
-                        id: textProperty.entityAssociation.id
-                    }) }}#definition"
-                       class="pull-right btn btn-link"
-                       role="button">
-                        <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
-                    </a>
-                {% endif %}
+                            <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
+                        </a>
+                    {% elseif textProperty.propertyAssociation is not null %}
+                        {% set childProperty = textProperty.propertyAssociation.childProperty %}
+                        {{ childProperty.propertyVersionForDisplay(textProperty.propertyAssociation.childPropertyNamespace).standardLabel }} – {{ childProperty.identifierInNamespace }}: {{ textProperty.systemType.standardLabel }}
+                        <a href="{{ path('property_association_edit', {
+                            id: textProperty.propertyAssociation.id
+                        }) }}"
+                           class="pull-right btn btn-link"
+                           role="button">
+                            <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
+                        </a>
+                    {% elseif textProperty.class is not null %}
+                        {{ textProperty.systemType.standardLabel|lower }} for the class {{ textProperty.class.classVersionForDisplay(textProperty.namespaceForVersion) }}
+                        <a href="{{ path('class_edit', {
+                            id: textProperty.class.id
+                        }) }}#definition"
+                           class="pull-right btn btn-link"
+                           role="button">
+                            <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
+                        </a>
+                    {% elseif textProperty.property is not null %}
+                        {{ textProperty.systemType.standardLabel|lower }} for the property {{ textProperty.property.propertyVersionForDisplay(textProperty.namespaceForVersion) }}
+                        <a href="{{ path('property_edit', {
+                            id: textProperty.property.id
+                        }) }}#definition"
+                           class="pull-right btn btn-link"
+                           role="button">
+                            <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
+                        </a>
+                    {% elseif textProperty.project is not null %}
+                        {{ textProperty.systemType.standardLabel|lower }} for the project {{ textProperty.project }}
+                        <a href="{{ path('project_edit', {
+                            id: textProperty.project.id
+                        }) }}#definition"
+                           class="pull-right btn btn-link"
+                           role="button">
+                            <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
+                        </a>
+                    {% elseif textProperty.profile is not null %}
+                        {{ textProperty.systemType.standardLabel|lower }} for the profile {{ textProperty.profile }}
+                        <a href="{{ path('profile_edit', {
+                            id: textProperty.profile.id
+                        }) }}#definition"
+                           class="pull-right btn btn-link"
+                           role="button">
+                            <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
+                        </a>
+                    {% elseif textProperty.namespace is not null %}
+                        {{ textProperty.systemType.standardLabel }} for the namespace {{ textProperty.namespace }}
+                        <a href="{{ path('namespace_edit', {
+                            id: textProperty.namespace.id
+                        }) }}#{{ textProperty.systemType.id == 31 ? 'identification' : 'definition' }}"
+                           class="pull-right btn btn-link"
+                           role="button">
+                            <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
+                        </a>
+                    {% elseif textProperty.entityAssociation is not null and app.request.attributes.get('_route') == 'text_property_inverse_new' %}
+                        {% if textProperty.object is not null %}
+                            {% if textProperty.class is not null or textProperty.property is not null %}
+                                {{ textProperty.object.standardLabel }} – {{ textProperty.object.identifierInNamespace }}: {{ textProperty.systemType.standardLabel }}
+                            {% else %}
+                                {{ textProperty.object.objectIdentification }}: {{ textProperty.systemType.standardLabel }}
+                            {% endif %}
+                        {% else %}
+                            {{ textProperty.systemType.standardLabel }}
+                        {% endif %}
+                        <a href="{{ path('entity_association_inverse_edit', {
+                            id: textProperty.entityAssociation.id
+                        }) }}#definition"
+                           class="pull-right btn btn-link"
+                           role="button">
+                            <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
+                        </a>
+                    {% elseif textProperty.entityAssociation is not null %}
+                        {% if textProperty.entityAssociation.sourceClass is not null %}
+                            {{ textProperty.entityAssociation.sourceClass.classVersionForDisplay(textProperty.entityAssociation.sourceNamespaceForVersion) }} {{ textProperty.entityAssociation.systemType.standardLabel }} {{ textProperty.entityAssociation.targetClass.classVersionForDisplay(textProperty.entityAssociation.targetNamespaceForVersion) }} : {{ textProperty.systemType.standardLabel }}
+                        {% elseif textProperty.entityAssociation.sourceProperty is not null %}
+                            {{ textProperty.entityAssociation.sourceProperty.propertyVersionForDisplay(textProperty.entityAssociation.sourceNamespaceForVersion) }} {{ textProperty.entityAssociation.systemType.standardLabel }} {{ textProperty.entityAssociation.targetProperty.propertyVersionForDisplay(textProperty.entityAssociation.targetNamespaceForVersion) }} : {{ textProperty.systemType.standardLabel }}
+                        {% endif %}
+                        <a href="{{ path('entity_association_edit', {
+                            id: textProperty.entityAssociation.id
+                        }) }}#definition"
+                           class="pull-right btn btn-link"
+                           role="button">
+                            <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
+                        </a>
+                    {% endif %}
 
-                {% if textProperty.class is not null and is_granted('validate', textProperty.class.classVersionForDisplay(textProperty.namespaceForVersion))
-                    or textProperty.property is not null and is_granted('validate', textProperty.property.propertyVersionForDisplay(textProperty.namespaceForVersion))
-                    or textProperty.namespace is not null and is_granted('validate', textProperty.namespace)
-                %}
-                    <div class="dropdown inline-block">
-                        <button class="btn btn-default dropdown-toggle" type="button" id="dropdown-validation" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-                            {% if textProperty.validationStatus is null %}
-                                <span class="label label-info">
+                    {% if textProperty.class is not null and is_granted('validate', textProperty.class.classVersionForDisplay(textProperty.namespaceForVersion))
+                        or textProperty.property is not null and is_granted('validate', textProperty.property.propertyVersionForDisplay(textProperty.namespaceForVersion))
+                        or textProperty.namespace is not null and is_granted('validate', textProperty.namespace)
+                    %}
+                        <div class="dropdown inline-block">
+                            <button class="btn btn-default dropdown-toggle" type="button" id="dropdown-validation" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                                {% if textProperty.validationStatus is null %}
+                                    <span class="label label-info">
                                     Candidate
                                 </span>
-                            {% elseif textProperty.validationStatus.id == 26  %}
-                                <span class="label label-success">
+                                {% elseif textProperty.validationStatus.id == 26  %}
+                                    <span class="label label-success">
                                     {{ textProperty.validationStatus }}
                                 </span>
-                            {% elseif textProperty.validationStatus.id == 27  %}
-                                <span class="label label-danger">
+                                {% elseif textProperty.validationStatus.id == 27  %}
+                                    <span class="label label-danger">
                                     {{ textProperty.validationStatus }}
                                 </span>
-                            {% elseif textProperty.validationStatus.id == 28  %}
-                                <span class="label label-warning">
+                                {% elseif textProperty.validationStatus.id == 28  %}
+                                    <span class="label label-warning">
                                     {{ textProperty.validationStatus }}
                                 </span>
-                            {% endif %}
-                            &nbsp;<span class="caret"></span>
-                        </button>
-                        <ul class="dropdown-menu dropdown-versions" aria-labelledby="dropdown-versions">
-                            <li class="label-success">
-                                <a class="select-validation-status" data-id ="26" href="{{ path('text_property_validation_status_edit', {
-                                    id: textProperty.id,
-                                    validationStatus: 26
-                                }) }}">
+                                {% endif %}
+                                &nbsp;<span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-versions" aria-labelledby="dropdown-versions">
+                                <li class="label-success">
+                                    <a class="select-validation-status" data-id ="26" href="{{ path('text_property_validation_status_edit', {
+                                        id: textProperty.id,
+                                        validationStatus: 26
+                                    }) }}">
                                     <span class="label label-success">
                                         Validated
                                     </span>
-                                </a>
-                            </li>
-                            <li class="label-warning">
-                                <a class="select-validation-status" data-id="28" href="{{ path('text_property_validation_status_edit', {
-                                    id: textProperty.id,
-                                    validationStatus: 28
-                                }) }}">
+                                    </a>
+                                </li>
+                                <li class="label-warning">
+                                    <a class="select-validation-status" data-id="28" href="{{ path('text_property_validation_status_edit', {
+                                        id: textProperty.id,
+                                        validationStatus: 28
+                                    }) }}">
                                     <span class="label label-warning">
                                         Validation request
                                     </span>
-                                </a>
-                            </li>
-                            <li class="label-danger">
-                                <a class="select-validation-status" data-id="27" href="{{ path('text_property_validation_status_edit', {
-                                    id: textProperty.id,
-                                    validationStatus: 27
-                                }) }}">
+                                    </a>
+                                </li>
+                                <li class="label-danger">
+                                    <a class="select-validation-status" data-id="27" href="{{ path('text_property_validation_status_edit', {
+                                        id: textProperty.id,
+                                        validationStatus: 27
+                                    }) }}">
                                     <span class="label label-danger">
                                         Denied (see comment)
                                     </span>
@@ -163,7 +163,9 @@
             </h2>
             <ul class="nav nav-tabs" id="main-tabs">
                 <li class="active"><a data-toggle="tab" href="#text-property">{{ textProperty.systemType }}</a></li>
-                <li><a data-toggle="tab" href="#comments">Comments</a></li>
+                {% if textProperty.systemType.id != 31 %}
+                    <li><a data-toggle="tab" href="#comments">Comments</a></li>
+                {% endif %}
             </ul>
             <div class="tab-content">
                 <div id="text-property" class="tab-pane fade in active">
@@ -277,41 +279,45 @@
                                 Back <i class="fas fa-arrow-left"></i>
                             </a>
                         {% endif %}
-                    {{ form_end(textPropertyForm) }}
-                </div>
-                <div id="comments" class="tab-pane fade">
-                    <h3>Comments</h3>
-                    <div class="comment-box js-user-info" data-fullname="{{ app.user }}">
-                        <div class="action-box">
-                            {% if textProperty.comments is empty %}
-                                <p id="comment-not-found"><em>No comment found.</em></p>
-                            {% endif %}
-                            <ul id="comments-list" class="comments-list">
-                                {% for comment in textProperty.comments %}
-                                    <li>
-                                        <div class="comment-text">
-                                            <p><strong><a href="#">{{ comment.creator.fullName }}</a></strong></p>
-                                            <p>{{ comment.comment }}</p>
-                                            <span class="date sub-comment-text">on {{ comment.creationTime|date() }}</span>
-                                        </div>
-                                    </li>
-                                {% endfor %}
-                            </ul>
-
-                            {% if app.user %}
-                                <div class="new-comment-form" id="new-comment-form">
-                                    {{ render(controller('AppBundle:Comment:new', {'object' : 'text-property', 'objectId' : textProperty.id})) }}
-                                </div>
-                            {% endif %}
-                        </div>
+                        {{ form_end(textPropertyForm) }}
                     </div>
+                    {% if textProperty.systemType.id != 31 %}
+                        <div id="comments" class="tab-pane fade">
+                            <h3>Comments</h3>
+                            <div class="comment-box js-user-info" data-fullname="{{ app.user }}">
+                                <div class="action-box">
+                                    {% if textProperty.comments is empty %}
+                                        <p id="comment-not-found"><em>No comment found.</em></p>
+                                    {% endif %}
+                                    <ul id="comments-list" class="comments-list">
+                                        {% for comment in textProperty.comments %}
+                                            <li>
+                                                <div class="comment-text">
+                                                    <p><strong><a href="#">{{ comment.creator.fullName }}</a></strong></p>
+                                                    <p>{{ comment.comment }}</p>
+                                                    <span class="date sub-comment-text">on {{ comment.creationTime|date() }}</span>
+                                                </div>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+
+                                    {% if app.user %}
+                                        <div class="new-comment-form" id="new-comment-form">
+                                            {{ render(controller('AppBundle:Comment:new', {'object' : 'text-property', 'objectId' : textProperty.id})) }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
     </div>
-</div>
 {% endblock %}
 {% block javascripts %}
     {{ parent() }}
-    {% include 'comment/js-bock.html.twig'  with {'objectType': 'text-property', 'objectId' : textProperty.id  } %}
+    {% if textProperty.systemType.id != 31 %}
+        {% include 'comment/js-bock.html.twig'  with {'objectType': 'text-property', 'objectId' : textProperty.id  } %}
+    {% endif %}
 {% endblock %}

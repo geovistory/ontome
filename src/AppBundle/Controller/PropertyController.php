@@ -298,11 +298,16 @@ class PropertyController extends Controller
             }
         }
 
-        // $namespacesIdFromClassVersion : Ensemble de namespaces provenant de la classe affiché (namespaceForVersion + references)
-        $namespacesIdFromPropertyVersion[] = $propertyVersion->getNamespaceForVersion()->getId();
+        // $namespacesIdFromPropertyVersion : Ensemble de namespaces provenant de la propriété affiché (namespaceForVersion + references)
+        // $rootNamespacesFromPropertyVersion : Ensemble des versions racines (pour contrôle en dessous)
+        $nsId = $propertyVersion->getNamespaceForVersion()->getId();
+        $namespacesIdFromPropertyVersion[] = $nsId;
+        $rootNamespacesFromClassVersion[] = $em->getRepository('AppBundle:OntoNamespace')->findOneBy(array('id' => $nsId))->getTopLevelNamespace();
 
         foreach($propertyVersion->getNamespaceForVersion()->getAllReferencedNamespaces() as $referencedNamespace){
-            $namespacesIdFromPropertyVersion[] = $referencedNamespace->getId();
+            $nsId = $referencedNamespace->getId();
+            $namespacesIdFromPropertyVersion[] = $nsId;
+            $rootNamespacesFromClassVersion[] = $em->getRepository('AppBundle:OntoNamespace')->findOneBy(array('id' => $nsId))->getTopLevelNamespace();
         }
 
         // $namespacesIdFromUser : Ensemble de tous les namespaces activés par l'utilisateur
@@ -314,6 +319,14 @@ class PropertyController extends Controller
         }
         // sauf ceux automatiquement activés par l'entité
         $namespacesIdFromUser = array_diff($namespacesIdFromUser, $namespacesIdFromPropertyVersion);
+
+        // Enlever les id dont la version racine est déjà utilisée
+        foreach ($namespacesIdFromUser as $namespaceIdFromUser){
+            $nsRootUser = $em->getRepository('AppBundle:OntoNamespace')->findOneBy(array('id' => $namespaceIdFromUser))->getTopLevelNamespace();
+            if(in_array($nsRootUser, $rootNamespacesFromClassVersion)){
+                unset($namespacesIdFromUser[array_search($namespaceIdFromUser, $namespacesIdFromUser)]);
+            }
+        }
 
         // $namespacesId : Tous les namespaces trouvés ci-dessus
         $namespacesId = array_merge($namespacesIdFromPropertyVersion, $namespacesIdFromUser);

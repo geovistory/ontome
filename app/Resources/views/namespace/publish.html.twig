@@ -39,8 +39,8 @@
                         id: namespace.id,
                         '_fragment': 'identification'
                     }) }}"
-                      class="btn btn-warning"
-                      role="button">
+                       class="btn btn-warning"
+                       role="button">
                         Go back and edit the namespace <i class="fas fa-arrow-left"></i>
                     </a>
                 </p>
@@ -166,6 +166,147 @@
                     {% endfor %}
                     </tbody>
                 </table>
+                <h3>Validated and denied relations</h3>
+                <table class="table table-striped" id="relations-table">
+                    <thead>
+                    <tr>
+                        <th>Source</th>
+                        <th>Relation</th>
+                        <th>Target</th>
+                        <th>Last updated</th>
+                        <th>Validation status</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for classAssociation in namespace.classAssociations %}
+                        <tr>
+                            <td>{{ classAssociation.childClass.classVersionForDisplay(classAssociation.childClassNamespace) }}</td>
+                            <td>
+                                <a href="{{ path('class_show_with_version', {
+                                    'id': classAssociation.childClass.id,
+                                    'namespaceFromUrlId': classAssociation.childClassNamespace.id,
+                                    '_fragment':'class-hierarchy'
+                                }) }}">
+                                    rdfs:subClassOf
+                                </a>
+                            </td>
+                            <td>{{ classAssociation.parentClass.classVersionForDisplay(classAssociation.parentClassNamespace) }}</td>
+                            <td>{{ classAssociation.modificationTime|date('Y-m-d') }}</td>
+                            <td>
+                                {% if classAssociation.validationStatus is null %}
+                                    <span class="label label-info">
+                                    Candidate
+                                </span>
+                                {% elseif classAssociation.validationStatus.id == 26  %}
+                                    <span class="label label-success">
+                                    {{ classAssociation.validationStatus }}
+                                </span>
+                                {% elseif classAssociation.validationStatus.id == 27  %}
+                                    <span class="label label-danger">
+                                    {{ classAssociation.validationStatus }}
+                                </span>
+                                {% elseif classAssociation.validationStatus.id == 28  %}
+                                    <span class="label label-warning">
+                                    {{ classAssociation.validationStatus }}
+                                </span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    {% for propertyAssociation in namespace.propertyAssociations %}
+                        <tr>
+                            <td>{{ propertyAssociation.childProperty.propertyVersionForDisplay(propertyAssociation.childPropertyNamespace) }}</td>
+                            <td>
+                                <a href="{{ path('property_show_with_version', {
+                                    'id': propertyAssociation.childProperty.id,
+                                    'namespaceFromUrlId': propertyAssociation.childPropertyNamespace.id,
+                                    '_fragment':'property-hierarchy'
+                                }) }}">
+                                    rdfs:subPropertyOf
+                                </a>
+                            </td>
+                            <td>{{ propertyAssociation.parentProperty.propertyVersionForDisplay(propertyAssociation.parentPropertyNamespace) }}</td>
+                            <td>{{ propertyAssociation.modificationTime|date('Y-m-d') }}</td>
+                            <td>
+                                {% if propertyAssociation.validationStatus is null %}
+                                    <span class="label label-info">
+                                    Candidate
+                                </span>
+                                {% elseif propertyAssociation.validationStatus.id == 26  %}
+                                    <span class="label label-success">
+                                    {{ propertyAssociation.validationStatus }}
+                                </span>
+                                {% elseif propertyAssociation.validationStatus.id == 27  %}
+                                    <span class="label label-danger">
+                                    {{ propertyAssociation.validationStatus }}
+                                </span>
+                                {% elseif propertyAssociation.validationStatus.id == 28  %}
+                                    <span propertyAssociation="label label-warning">
+                                    {{ propertyAssociation.validationStatus }}
+                                </span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    {% for entityAssociation in namespace.entityAssociations %}
+                        <tr>
+                            <td>
+                                {% if entityAssociation.sourceClass is not null %}
+                                    {{ entityAssociation.sourceClass.classVersionForDisplay(entityAssociation.sourceNamespaceForVersion) }}
+                                {% elseif entityAssociation.sourceProperty is not null %}
+                                    {{ entityAssociation.sourceProperty.propertyVersionForDisplay(entityAssociation.sourceNamespaceForVersion) }}
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if entityAssociation.sourceClass is not null %}
+                                    <a href="{{ path('class_show_with_version', {
+                                        'id': entityAssociation.sourceClass.id,
+                                        'namespaceFromUrlId': entityAssociation.sourceNamespaceForVersion.id,
+                                        '_fragment':'relations'
+                                    }) }}">
+                                        {{ entityAssociation.systemType.standardLabel }}
+                                    </a>
+                                {% elseif entityAssociation.sourceProperty is not null %}
+                                    <a href="{{ path('property_show_with_version', {
+                                        'id': entityAssociation.sourceProperty.id,
+                                        'namespaceFromUrlId': entityAssociation.sourceNamespaceForVersion.id,
+                                        '_fragment':'relations'
+                                    }) }}">
+                                        {{ entityAssociation.systemType.standardLabel }}
+                                    </a>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if entityAssociation.targetClass is not null %}
+                                    {{ entityAssociation.targetClass.classVersionForDisplay(entityAssociation.targetNamespaceForVersion) }}
+                                {% elseif entityAssociation.targetProperty is not null %}
+                                    {{ entityAssociation.targetProperty.propertyVersionForDisplay(entityAssociation.targetNamespaceForVersion) }}
+                                {% endif %}
+                            </td>
+                            <td>{{ entityAssociation.modificationTime|date('Y-m-d') }}</td>
+                            <td>
+                                {% if entityAssociation.validationStatus is null %}
+                                    <span class="label label-info">
+                                    Candidate
+                                </span>
+                                {% elseif entityAssociation.validationStatus.id == 26  %}
+                                    <span class="label label-success">
+                                    {{ entityAssociation.validationStatus }}
+                                </span>
+                                {% elseif entityAssociation.validationStatus.id == 27  %}
+                                    <span class="label label-danger">
+                                    {{ entityAssociation.validationStatus }}
+                                </span>
+                                {% elseif entityAssociation.validationStatus.id == 28  %}
+                                    <span entityAssociation="label label-warning">
+                                    {{ entityAssociation.validationStatus }}
+                                </span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
                 <div>
                     <h4>You are going to publish a closed and accessible version of your namespace. This operation is irreversible .Do you wish to proceed?</h4>
                     <a href="{{ path('namespace_validate_publication', {
@@ -192,6 +333,9 @@
             } );
             $('#properties-table').DataTable( {
                 "order": [[6, 'desc']],
+            } );
+            $('#relations-table').DataTable( {
+                "order": [[4, 'desc']],
             } );
         });
     </script>

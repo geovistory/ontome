@@ -140,23 +140,43 @@ class OntoNamespaceVoter extends Voter
             if($userProjectAssociation->getProject() === $namespace->getProjectForTopLevelNamespace() && $userProjectAssociation->getPermission() == 1){
                 $atLeastOneClassValidated = false;
                 $atLeastOnePropertyValidated = false;
+                $atLeastOneRelationValidated = false;
                 foreach ($namespace->getClasses()->getIterator() as $j => $class) {
                     $validationStatus = $class->getClassVersionForDisplay($namespace)->getValidationStatus();
                     if (!is_null($validationStatus) && $validationStatus->getId() == 26) {
                         $atLeastOneClassValidated = true;
                     }
                 }
-                if($atLeastOneClassValidated) {
-                    foreach ($namespace->getProperties()->getIterator() as $j => $property) {
-                        $validationStatus = $property->getPropertyVersionForDisplay($namespace)->getValidationStatus();
-                        if (!is_null($validationStatus) && $validationStatus->getId() == 26) {
-                            $atLeastOnePropertyValidated = true;
-                        }
-                    }
-                    if($atLeastOnePropertyValidated) {
-                        return true;
+
+                foreach ($namespace->getProperties()->getIterator() as $j => $property) {
+                    $validationStatus = $property->getPropertyVersionForDisplay($namespace)->getValidationStatus();
+                    if (!is_null($validationStatus) && $validationStatus->getId() == 26) {
+                        $atLeastOnePropertyValidated = true;
                     }
                 }
+
+                foreach ($namespace->getClassAssociations()->getIterator() as $j => $classAssociation) {
+                    $validationStatus = $classAssociation->getValidationStatus();
+                    if (!is_null($validationStatus) && $validationStatus->getId() == 26) {
+                        $atLeastOneRelationValidated = true;
+                    }
+                }
+
+                foreach ($namespace->getPropertyAssociations()->getIterator() as $j => $propertyAssociation) {
+                    $validationStatus = $propertyAssociation->getValidationStatus();
+                    if (!is_null($validationStatus) && $validationStatus->getId() == 26) {
+                        $atLeastOneRelationValidated = true;
+                    }
+                }
+
+                foreach ($namespace->getEntityAssociations()->getIterator() as $j => $entityAssociation) {
+                    $validationStatus = $entityAssociation->getValidationStatus();
+                    if (!is_null($validationStatus) && $validationStatus->getId() == 26) {
+                        $atLeastOneRelationValidated = true;
+                    }
+                }
+
+                return $atLeastOneClassValidated or $atLeastOnePropertyValidated or $atLeastOneRelationValidated;
             }
         }
         return false;
