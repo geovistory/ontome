@@ -742,7 +742,7 @@
                         </tr>
                     </table>
                     <p id="p-btn-identifier">
-                        <button type="submit" class="btn btn-primary" formnovalidate><i class="fas fa-save"></i> Save identifiers</button>
+                        <button type="submit" class="btn btn-primary" formnovalidate><i class="fas fa-save"></i> Save</button>
                         <button type="reset" class="btn btn-default"><i class="fas fa-undo-alt"></i> Reset</button>
                         <a class="btn" id="btn-toggle-identifiers-disable-enable"></a>
                     </p>
@@ -1682,13 +1682,13 @@
         $('#msg-identifier-disabled-enabled b').text("Enabled");
         $('#table-identifiers').show();
         $('#btn-toggle-identifiers-disable-enable').addClass("btn-danger");
-        $('#btn-toggle-identifiers-disable-enable').html('<i class="fas fa-hand-paper"></i> Disable');
+        $('#btn-toggle-identifiers-disable-enable').html('<i class="fas fa-toggle-off"></i> Disable');
         {% else %}
         $('#msg-identifier-disabled-enabled b').text("Disabled");
         $('#table-identifiers').hide();
         $('#p-btn-identifier button').hide();
         $('#btn-toggle-identifiers-disable-enable').addClass("btn-primary");
-        $('#btn-toggle-identifiers-disable-enable').html('<i class="fas fa-play"></i> Enable');
+        $('#btn-toggle-identifiers-disable-enable').html('<i class="fas fa-toggle-on"></i> Enable');
         {% endif %}
 
         $("#next-class-identifier").text($("#namespace_edit_identifiers_form_classPrefix").val()+(parseInt($("#namespace_edit_identifiers_form_currentClassNumber").val(), 10)+1));
@@ -1741,7 +1741,7 @@
                                         $('#p-btn-identifier button').hide();
                                         $('#btn-toggle-identifiers-disable-enable').removeClass("btn-danger");
                                         $('#btn-toggle-identifiers-disable-enable').addClass("btn-primary");
-                                        $('#btn-toggle-identifiers-disable-enable').html('<i class="fas fa-play"></i> Enable');
+                                        $('#btn-toggle-identifiers-disable-enable').html('<i class="fas fa-toggle-on"></i> Enable');
                                     }
                                     else {
                                         // La gestion n'était pas automatique, on affiche
@@ -1750,7 +1750,7 @@
                                         $('#p-btn-identifier button').show();
                                         $('#btn-toggle-identifiers-disable-enable').removeClass("btn-primary");
                                         $('#btn-toggle-identifiers-disable-enable').addClass("btn-danger");
-                                        $('#btn-toggle-identifiers-disable-enable').html('<i class="fas fa-hand-paper"></i> Disable');
+                                        $('#btn-toggle-identifiers-disable-enable').html('<i class="fas fa-toggle-off"></i> Disable');
                                         $('#namespace_edit_identifiers_form_classPrefix').val('C');
                                         $("#next-class-identifier").text($("#namespace_edit_identifiers_form_classPrefix").val()+(parseInt($("#namespace_edit_identifiers_form_currentClassNumber").val(), 10)+1));
                                         $('#namespace_edit_identifiers_form_propertyPrefix').val('P');

@@ -459,15 +459,15 @@
                     </tr>
                     <tr>
                         <td><b>Class</b></td>
-                        <td class="text-center">{{ namespace.classPrefix|default('C') }}</td>
+                        <td class="text-center" id="td-class-prefix">{{ namespace.classPrefix|default('C') }}</td>
                         <td class="text-center">{{ namespace.currentClassNumber|default(0) }}</td>
-                        <td class="text-center">{{ namespace.classPrefix|default('C') }}{{ namespace.currentClassNumber|default(0)+1 }}</td>
+                        <td class="text-center" id="td-next-class-identifier">{{ namespace.classPrefix|default('C') }}{{ namespace.currentClassNumber|default(0)+1 }}</td>
                     </tr>
                     <tr>
                         <td><b>Property</b></td>
-                        <td class="text-center">{{ namespace.propertyPrefix|default('P') }}</td>
+                        <td class="text-center" id="td-property-prefix">{{ namespace.propertyPrefix|default('P') }}</td>
                         <td class="text-center">{{ namespace.currentPropertyNumber|default(0) }}</td>
-                        <td class="text-center">{{ namespace.propertyPrefix|default('P') }}{{ namespace.currentPropertyNumber|default(0)+1 }}</td>
+                        <td class="text-center" id="td-next-property-identifier">{{ namespace.propertyPrefix|default('P') }}{{ namespace.currentPropertyNumber|default(0)+1 }}</td>
                     </tr>
                 </table>
                 <p id="p-btn-identifier">
@@ -1120,12 +1120,12 @@
         $('#msg-identifier-disabled-enabled b').text("Enabled");
         $('#table-identifiers').show();
         $('#btn-toggle-identifiers-disable-enable').addClass("btn-danger");
-        $('#btn-toggle-identifiers-disable-enable').html('<i class="fas fa-hand-paper"></i> Disable');
+        $('#btn-toggle-identifiers-disable-enable').html('<i class="fas fa-toggle-off"></i> Disable');
         {% else %}
         $('#msg-identifier-disabled-enabled b').text("Disabled");
         $('#table-identifiers').hide();
         $('#btn-toggle-identifiers-disable-enable').addClass("btn-primary");
-        $('#btn-toggle-identifiers-disable-enable').html('<i class="fas fa-play"></i> Enable');
+        $('#btn-toggle-identifiers-disable-enable').html('<i class="fas fa-toggle-on"></i> Enable');
         {% endif %}
 
         $(document).on("click", "#btn-toggle-identifiers-disable-enable", function(){
@@ -1160,15 +1160,19 @@
                                             $('#table-identifiers').hide();
                                             $('#btn-toggle-identifiers-disable-enable').removeClass("btn-danger");
                                             $('#btn-toggle-identifiers-disable-enable').addClass("btn-primary");
-                                            $('#btn-toggle-identifiers-disable-enable').html('<i class="fas fa-play"></i> Enable');
+                                            $('#btn-toggle-identifiers-disable-enable').html('<i class="fas fa-toggle-on"></i> Enable');
                                         }
                                         else {
                                             // La gestion n'était pas automatique, on affiche
                                             $('#msg-identifier-disabled-enabled b').text("Enabled");
-                                            $('#table-identifiers').show();
+                                            $('#td-class-prefix').text("C");
+                                            $('#td-property-prefix').text("P");
+                                            $('#td-next-class-identifier').text("C" + {{ namespace.currentClassNumber+1 }});
+                                            $('#td-next-property-identifier').text("C" + {{ namespace.currentPropertyNumber+1 }});
+                                            $('#table-identifiers ').show();
                                             $('#btn-toggle-identifiers-disable-enable').removeClass("btn-primary");
                                             $('#btn-toggle-identifiers-disable-enable').addClass("btn-danger");
-                                            $('#btn-toggle-identifiers-disable-enable').html('<i class="fas fa-hand-paper"></i> Disable');
+                                            $('#btn-toggle-identifiers-disable-enable').html('<i class="fas fa-toggle-off"></i> Disable');
                                         }
                                     }
                                 }
