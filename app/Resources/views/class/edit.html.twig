@@ -1294,18 +1294,18 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for profile in classVersion.class.profiles %}
+                    {% for profileAssociation in classVersion.class.profileAssociations if profileAssociation.systemType.id == 5 %}
                         <tr>
                             <td>
                                 <a href="{{ path('profile_show', {
-                                    'id': profile.id
+                                    'id': profileAssociation.profile.id
                                 }) }}">
-                                    {{ profile.standardLabel }}
+                                    {{ profileAssociation.profile.standardLabel }}
                                 </a>
                             </td>
-                            <td>{{ profile.startDate is empty ? '' : profile.startDate|date('Y-m-d') }}</td>
-                            <td>{{ profile.endDate is empty ? '' : profile.endDate|date('Y-m-d') }}</td>
-                            <td>{{ profile.modificationTime|date('Y-m-d') }}</td>
+                            <td>{{ profileAssociation.profile.startDate is empty ? '' : profileAssociation.profile.startDate|date('Y-m-d') }}</td>
+                            <td>{{ profileAssociation.profile.endDate is empty ? '' : profileAssociation.profile.endDate|date('Y-m-d') }}</td>
+                            <td>{{ profileAssociation.profile.modificationTime|date('Y-m-d') }}</td>
                         </tr>
                     {% endfor %}
                     </tbody>
