@@ -869,3 +869,7 @@ FOOTER Styling
 .inline-block{
     display: inline-block;
 }
+
+#selectable-profiles-table_filter input[type=search]{
+    width: 70%;
+}

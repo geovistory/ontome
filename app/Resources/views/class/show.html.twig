@@ -1233,28 +1233,28 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for profile in classVersion.class.profiles %}
+                    {% for profileAssociation in classVersion.class.profileAssociations if profileAssociation.systemType.id == 5 %}
                         <tr>
                             <td>
                                 <a href="{{ path('profile_show', {
-                                    'id': profile.id
+                                    'id': profileAssociation.profile.id
                                 }) }}">
-                                    {{ profile.standardLabel }}
+                                    {{ profileAssociation.profile.standardLabel }}
                                 </a>
                             </td>
                             <td>
-                                {{ profile.version }}
+                                {{ profileAssociation.profile.version }}
                             </td>
                             <td>
-                                {% if profile.isOngoing %}
+                                {% if profileAssociation.profile.isOngoing %}
                                     Ongoing
-                                {% elseif profile.wasClosedAt is not null and profile.endDate is null %}
+                                {% elseif profileAssociation.profile.wasClosedAt is not null and profileAssociation.profile.endDate is null %}
                                     Published
-                                {% elseif profile.endDate is not null %}
+                                {% elseif profileAssociation.profile.endDate is not null %}
                                     Deprecated
                                 {% endif %}
                             </td>
-                            <td>{{ profile.modificationTime|date('Y-m-d') }}</td>
+                            <td>{{ profileAssociation.profile.modificationTime|date('Y-m-d') }}</td>
                         </tr>
                     {% endfor %}
                     </tbody>

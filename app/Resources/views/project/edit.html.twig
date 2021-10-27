@@ -341,7 +341,7 @@
                                 <span class="fas fa-info-circle"></span>
                             </a>
                         </h3>
-                        <table class="table table-striped" id="associated-profiles-table">
+                        <table class="table table-striped" id="associated-profiles-table" style="width: 100%">
                             <thead>
                             <tr>
                                 <th></th>
@@ -358,7 +358,7 @@
                     </div>
                     <div class="col-lg-4">
                         <h3>Selectable profiles</h3>
-                        <table class="table table-striped" id="selectable-profiles-table">
+                        <table class="table table-striped" id="selectable-profiles-table" style="width: 100%">
                             <thead>
                             <tr>
                                 <th></th>
@@ -646,7 +646,6 @@
                 columnDefs: [
                     {
                         targets: 0,
-                        width: 0,
                         render: function ( data, type, row, meta ) {
 
                             var urlRemoveProfile = '{{ path("project_profile_disassociation", {'project' : 'projectID', 'profile' : 'profileID'}) }}';
@@ -657,8 +656,7 @@
                     },
                     {
                         targets: 1,
-                        width: 0,
-                        className: 'text-nowrap',
+                        className: '',
                         render: function ( data, type, row, meta ) {
                             var urlProfile = '{{ path("profile_show", {'id' : 'profileID'}) }}';
                             urlProfile = urlProfile.replace("profileID", row.id);
@@ -669,11 +667,9 @@
                     },
                     {
                         targets: 2,
-                        width: '1%',
                     },
                     {
                         targets: 3,
-                        width: '1%',
                         render: function ( data, type, row, meta ) {
                             if (row.isOngoing) {
                                return 'Ongoing';
@@ -689,7 +685,6 @@
                     },
                     {
                         targets: 4,
-                        width: '100%',
                         render: function ( data, type, row, meta ) {
                             if((!row.isOngoing && row.wasClosedAt != null && row.endDate == null) || (row.isForcedPublication && row.isOngoing)){
                             var urlApiClassesProfileJson = '{{ path("api_classes_profile_json", {'lang': 'en', 'available-in-profile' : 'profileID'}) }}';
@@ -707,7 +702,6 @@
                     },
                     {
                         targets: 5,
-                        width: '100%',
                         render: function ( data, type, row, meta ) {
                             if((!row.isOngoing && row.wasClosedAt != null && row.endDate == null) || (row.isForcedPublication && row.isOngoing)){
                                 var urlApiClassesPropertiesProfileXML = '{{ path("api_classes_and_properties_by_profile_xml", {'lang': 'en', 'available-in-profile' : 'profileID'}) }}';
@@ -722,8 +716,10 @@
                     }
                 ]
             });
+
             var selectableProfilesTable = $('#selectable-profiles-table').DataTable({
                 ajax: urlSelectableProfiles,
+                "autoWidth": true,
                 dataSrc: 'data',
                 columns: [
                     { data: 'profileId' },
@@ -749,6 +745,7 @@
                     },
                 ]
             });
+            selectableProfilesTable.draw();
 
             $(document).on("click", ".select-profile", function() {
                 var selectedValue = $(this).data("id");
