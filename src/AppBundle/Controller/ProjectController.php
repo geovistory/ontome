@@ -380,7 +380,7 @@ class ProjectController  extends Controller
         }
 
         if(empty($profiles)) {
-            return new JsonResponse(null,204, array());
+            return new JsonResponse('{"data":[]}',200, array(), true);
         }
 
         return new JsonResponse($data,200, array(), true);

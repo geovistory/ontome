@@ -660,7 +660,7 @@ class ProfileController  extends Controller
     }
 
     /**
-     * @Route("/profile/{profile}/property/{property}/add", name="profile_property_association", requirements={"profile"="^[0-9]+$", "property"="^[0-9]+$"})
+     * @Route("/profile/{profile}/property/{property}/add", name="profile_property_association", requirements={"profile"="^([0-9]+)|(profileID){1}$", "property"="^([0-9]+)|(propertyID){1}$"})
      * @Method({ "POST"})
      * @param Property  $property    The property to be associated with a profile
      * @param Profile  $profile    The profile to be associated with a namespace
@@ -727,7 +727,7 @@ class ProfileController  extends Controller
     }
 
     /**
-     * @Route("/profile/{profile}/property/{property}/domain/{domain}/range/{range}/add", name="profile_inherited_property_association", requirements={"profile"="^[0-9]+$", "property"="^[0-9]+$", "domain"="^[0-9]+$", "range"="^[0-9]+$"})
+     * @Route("/profile/{profile}/property/{property}/domain/{domain}/range/{range}/add", name="profile_inherited_property_association", requirements={"profile"="^([0-9]+)|(profileID){1}$", "property"="^([0-9]+)|(propertyID){1}$", "domain"="^([0-9]+)|(domainID){1}$", "range"="^([0-9]+)|(rangeID){1}$"})
      * @Method({ "POST"})
      * @param Property  $property    The property to be associated with a profile
      * @param Profile  $profile    The profile to be associated with a property
@@ -854,7 +854,7 @@ class ProfileController  extends Controller
     }
 
     /**
-     * @Route("/profile/{profile}/property/{property}/delete", name="profile_property_disassociation", requirements={"profile"="^[0-9]+$", "property"="^[0-9]+$"})
+     * @Route("/profile/{profile}/property/{property}/delete", name="profile_property_disassociation", requirements={"profile"="^([0-9]+)|(profileID){1}$", "property"="^([0-9]+)|(propertyID){1}$"})
      * @Method({ "POST"})
      * @param Property  $property    The property to be disassociated from a profile
      * @param Profile  $profile    The profile to be disassociated from a namespace
@@ -881,7 +881,7 @@ class ProfileController  extends Controller
     }
 
     /**
-     * @Route("/profile/{profile}/property/{property}/domain/{domain}/range/{range}/delete", name="profile_inherited_property_disassociation", requirements={"profile"="^[0-9]+$", "property"="^[0-9]+$", "domain"="^[0-9]+$", "range"="^[0-9]+$"})
+     * @Route("/profile/{profile}/property/{property}/domain/{domain}/range/{range}/delete", name="profile_inherited_property_disassociation", requirements={"profile"="^([0-9]+)|(profileID){1}$", "property"="^([0-9]+)|(propertyID){1}$", "domain"="^([0-9]+)|(domainID){1}$", "range"="^([0-9]+)|(rangeID){1}$"})
      * @Method({ "POST"})
      * @param Property  $property    The property to be disassociated from a profile
      * @param Profile  $profile    The profile to be disassociated from a namespace
@@ -915,7 +915,7 @@ class ProfileController  extends Controller
     }
 
     /**
-     * @Route("/profile/{profile}/class/{class}/properties/edit", name="profile_properties_edit", requirements={"profile"="^([0-9]+)|(profileID){1}", "class"="^([0-9]+)|(classID){1}$"})
+     * @Route("/profile/{profile}/class/{class}/properties/edit", name="profile_properties_edit", requirements={"profile"="^([0-9]+)|(profileID){1}$", "class"="^([0-9]+)|(classID){1}$"})
      * @param Profile $profile
      * @param OntoClass $class
      * @return Response the rendered template
@@ -931,7 +931,7 @@ class ProfileController  extends Controller
     }
 
     /**
-     * @Route("/selectable-outgoing-properties/profile/{profile}/class/{class}/json", name="selectable_outgoing_properties_class_profile_json", requirements={"profile"="^[0-9]+$", "class"="^[0-9]+$"})
+     * @Route("/selectable-outgoing-properties/profile/{profile}/class/{class}/json", name="selectable_outgoing_properties_class_profile_json", requirements={"profile"="^([0-9]+)|(profileID){1}$", "class"="^([0-9]+)|(classID){1}$"})
      * @Method("GET")
      * @param Profile $profile
      * @param OntoClass $class
@@ -956,7 +956,7 @@ class ProfileController  extends Controller
     }
 
     /**
-     * @Route("/selectable-incoming-properties/profile/{profile}/class/{class}/json", name="selectable_incoming_properties_class_profile_json", requirements={"profile"="^[0-9]+$", "class"="^[0-9]+$"})
+     * @Route("/selectable-incoming-properties/profile/{profile}/class/{class}/json", name="selectable_incoming_properties_class_profile_json", requirements={"profile"="^([0-9]+)|(profileID){1}$", "class"="^([0-9]+)|(classID){1}$"})
      * @Method("GET")
      * @param Profile $profile
      * @param OntoClass $class
@@ -981,7 +981,7 @@ class ProfileController  extends Controller
     }
 
     /**
-     * @Route("/selectable-outgoing-inherited-properties/profile/{profile}/class/{class}/json", name="selectable_outgoing_inherited_properties_class_profile_json", requirements={"profile"="^[0-9]+$", "class"="^[0-9]+$"})
+     * @Route("/selectable-outgoing-inherited-properties/profile/{profile}/class/{class}/json", name="selectable_outgoing_inherited_properties_class_profile_json", requirements={"profile"="^([0-9]+)|(profileID){1}$", "class"="^([0-9]+)|(classID){1}$"})
      * @Method("GET")
      * @param Profile $profile
      * @param OntoClass $class
@@ -1006,7 +1006,7 @@ class ProfileController  extends Controller
     }
 
     /**
-     * @Route("/selectable-incoming-inherited-properties/profile/{profile}/class/{class}/json", name="selectable_incoming_inherited_properties_class_profile_json", requirements={"profile"="^[0-9]+$", "class"="^[0-9]+$"})
+     * @Route("/selectable-incoming-inherited-properties/profile/{profile}/class/{class}/json", name="selectable_incoming_inherited_properties_class_profile_json", requirements={"profile"="^([0-9]+)|(profileID){1}$", "class"="^([0-9]+)|(classID){1}$"})
      * @Method("GET")
      * @param Profile $profile
      * @param OntoClass $class
@@ -1031,7 +1031,7 @@ class ProfileController  extends Controller
     }
 
     /**
-     * @Route("/selectable-descendent-class/profile/{profile}/class/{class}/property/{property}/json", name="selectable_descendent_class_profile_json", requirements={"profile"="^[0-9]+$", "class"="^[0-9]+$", "property"="^[0-9]+$"})
+     * @Route("/selectable-descendent-class/profile/{profile}/class/{class}/property/{property}/json", name="selectable_descendent_class_profile_json", requirements={"profile"="^([0-9]+)|(profileID){1}$", "class"="^([0-9]+)|(classID){1}$", "property"="^([0-9]+)|(propertyID){1}$"})
      * @Method("GET")
      * @param Profile $profile
      * @param OntoClass $class
@@ -1062,7 +1062,7 @@ class ProfileController  extends Controller
     }
 
     /**
-     * @Route("/selectable-descendent-domain/profile/{profile}/domain/{domain}/range/{range}/property/{property}/json", name="selectable_descendent_domain_profile_json", requirements={"profile"="^[0-9]+$", "domain"="^[0-9]+$", "range"="^[0-9]+$", "property"="^[0-9]+$"})
+     * @Route("/selectable-descendent-domain/profile/{profile}/domain/{domain}/range/{range}/property/{property}/json", name="selectable_descendent_domain_profile_json", requirements={"profile"="^([0-9]+)|(profileID){1}$", "domain"="^([0-9]+)|(domainID){1}$", "range"="^([0-9]+)|(rangeID){1}$", "property"="^([0-9]+)|(propertyID){1}$"})
      * @Method("GET")
      * @param Profile $profile
      * @param OntoClass $domain
@@ -1094,7 +1094,7 @@ class ProfileController  extends Controller
     }
 
     /**
-     * @Route("/selectable-descendent-range/profile/{profile}/domain/{domain}/range/{range}/property/{property}/json", name="selectable_descendent_range_profile_json", requirements={"profile"="^[0-9]+$", "domain"="^[0-9]+$", "range"="^[0-9]+$", "property"="^[0-9]+$"})
+     * @Route("/selectable-descendent-range/profile/{profile}/domain/{domain}/range/{range}/property/{property}/json", name="selectable_descendent_range_profile_json", requirements={"profile"="^([0-9]+)|(profileID){1}$", "domain"="^([0-9]+)|(domainID){1}$", "range"="^([0-9]+)|(rangeID){1}$", "property"="^([0-9]+)|(propertyID){1}$"})
      * @Method("GET")
      * @param Profile $profile
      * @param OntoClass $domain
