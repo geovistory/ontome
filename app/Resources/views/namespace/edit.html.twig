@@ -518,7 +518,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for referencedNamespace in namespace.allReferencedNamespaces %}
+                    {% for referencedNamespace in namespace.directReferencedNamespaces %}
                         <tr>
                             <td>
                                 <a data-id="{{ referencedNamespace.id }}" href="{{ path('namespace_show', {
@@ -526,9 +526,17 @@
                                 }) }}">
                                     {{ referencedNamespace }}
                                 </a>
-                                {% if referencedNamespace not in namespace.directReferencedNamespaces %}*{% endif %}
+                                {% if referencedNamespace.directReferencedNamespaces|length > 0 %}
+                                    <div class="small text-muted"><strong><em>Referenced:</em></strong></div>
+                                    <ul>
+                                        {% for referencedReferencedNamespace in referencedNamespace.allReferencedNamespaces %}
+                                            <li class="list-unstyled" style="border-left: 3px solid darkgrey; padding-left: 5px;">
+                                                <em><a href="{{ path('namespace_show', {'id': referencedReferencedNamespace.id}) }}">{{ referencedReferencedNamespace }}</a></em>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
                             </td>
-                            {% if referencedNamespace in namespace.directReferencedNamespaces %}
                             <td>
                                 {% if referencedNamespace.topLevelNamespace.childVersions|length > 1 and referencedNamespace in namespace.directReferencedNamespaces %}
                                     <a href="#identification" class="change-version btn btn-xs btn-primary" data-id="{{ referencedNamespace.id }}"><i class="fas fa-exchange-alt"></i> Change version</a>
@@ -541,17 +549,13 @@
                             {% for property in namespace.properties if property.propertyVersionForDisplay(namespace).domainNamespace is not null and property.propertyVersionForDisplay(namespace).domainNamespace.id == referencedNamespace.id or property.propertyVersionForDisplay(namespace).rangeNamespace is not null and property.propertyVersionForDisplay(namespace).rangeNamespace.id == referencedNamespace.id %}{% set warningPopupDisplay = "true" %}{% endfor %}
                             {% for entityAssociation in namespace.entityAssociations if entityAssociation.sourceNamespaceForVersion.id == referencedNamespace.id or entityAssociation.targetNamespaceForVersion.id == referencedNamespace.id %}{% set warningPopupDisplay = "true" %}{% endfor %}
                             <td>
-                                    <a href="#identification" class="remove-namespace btn btn-xs btn-danger" data-id="{{ referencedNamespace.id }}" data-bool-popup="{{ warningPopupDisplay }}"><i class="far fa-times-circle"></i> Remove</a><span class="loading-icon2" data-id="{{ referencedNamespace.id }}">&nbsp;<span class="fas fa-spinner fa-spin"></span></span>
+                                <a href="#identification" class="remove-namespace btn btn-xs btn-danger" data-id="{{ referencedNamespace.id }}" data-bool-popup="{{ warningPopupDisplay }}"><i class="far fa-times-circle"></i> Remove</a><span class="loading-icon2" data-id="{{ referencedNamespace.id }}">&nbsp;<span class="fas fa-spinner fa-spin"></span></span>
                             </td>
-                            {% else %}<td></td><td></td>
-                            {% endif %}
                         </tr>
                     {% endfor %}
                     </tbody>
                 </table>
-                {% if namespace.allReferencedNamespaces|length != namespace.directReferencedNamespaces|length %}
-                    <p>* <span class="small">Reference namespace of a selected namespace (automatically added)</span></p>
-                {% endif %}
+
                 <h4>Pick a reference namespace</h4>
                 <p>Please note that if the selected version is ongoing, it might be modified at any time and you will not be able to publish your namespace as long as you have selected it.</p>
                 <div class="row">

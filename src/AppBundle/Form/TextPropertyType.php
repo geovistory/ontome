@@ -41,7 +41,7 @@ class TextPropertyType extends AbstractType
         $labelTextProperty = $options['labelTextProperty'];
 
         //if the systemType of the textProperty is 31 (owl:versionInfo), we only need an input text field with of 10 characters long
-        if ($options['systemType'] === 31) {
+        if (isset($options['systemType']) and $options['systemType'] === 31) {
             $builder
                 ->add('textProperty', TextType::class, array(
                     'attr' => array(

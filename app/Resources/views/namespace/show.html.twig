@@ -317,30 +317,36 @@
                 {% endif %}
                 {% if not namespace.isTopLevelNamespace %}
                     <h3 id="titleReferenceNamespace">Namespace{% if namespace.allReferencedNamespaces|length > 1 %}s{% endif %} to which this ongoing namespace refers</h3>
-                        <table class="table table-striped" id="reference-namespaces-table">
-                            <thead>
+                    <table class="table table-striped" id="reference-namespaces-table">
+                        <thead>
+                        <tr>
+                            <th>Namespace</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for referencedNamespace in namespace.directReferencedNamespaces %}
                             <tr>
-                                <th>Namespace</th>
+                                <td>
+                                    <a href="{{ path('namespace_show', {
+                                        'id': referencedNamespace.id
+                                    }) }}">
+                                        {{ referencedNamespace }}
+                                    </a>
+                                    {% if referencedNamespace.directReferencedNamespaces|length > 0 %}
+                                    <div class="small text-muted"><strong><em>Referenced:</em></strong></div>
+                                    <ul>
+                                        {% for referencedReferencedNamespace in referencedNamespace.allReferencedNamespaces %}
+                                        <li class="list-unstyled" style="border-left: 3px solid darkgrey; padding-left: 5px;">
+                                            <em><a href="{{ path('namespace_show', {'id': referencedReferencedNamespace.id}) }}">{{ referencedReferencedNamespace }}</a></em>
+                                        </li>
+                                        {% endfor %}
+                                    </ul>
+                                    {% endif %}
+                                </td>
                             </tr>
-                            </thead>
-                            <tbody>
-                            {% for referencedNamespace in namespace.allReferencedNamespaces %}
-                                <tr>
-                                    <td>
-                                        <a href="{{ path('namespace_show', {
-                                            'id': referencedNamespace.id
-                                        }) }}">
-                                            {{ referencedNamespace }}
-                                        </a>
-                                        {% if referencedNamespace not in namespace.directReferencedNamespaces %}*{% endif %}
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                            </tbody>
-                        </table>
-                        {% if namespace.allReferencedNamespaces|length != namespace.directReferencedNamespaces|length %}
-                            <p>* <span class="small">Reference namespace of a selected namespace (automatically added)</span></p>
-                        {% endif %}
+                        {% endfor %}
+                        </tbody>
+                    </table>
                 {% endif %}
 
                 <h3>Labels</h3>

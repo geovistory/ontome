@@ -594,7 +594,7 @@ class ProfileController  extends Controller
         }
 
         if(empty($classes)) {
-            return new JsonResponse(null,204, array());
+            return new JsonResponse('{"data":[]}',200, array(), true);
         }
 
         return new JsonResponse($data,200, array(), true);
@@ -620,7 +620,7 @@ class ProfileController  extends Controller
         }
 
         if(empty($classes)) {
-            return new JsonResponse(null,204, array());
+            return new JsonResponse('{"data":[]}',200, array(), true);
         }
 
         return new JsonResponse($data,200, array(), true);
