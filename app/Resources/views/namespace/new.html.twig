@@ -160,21 +160,24 @@
             }
 
             //if label is identical to uri generator value, it can update du URI
+            var copyLabelToUriGenerator = true;
             if ($('#namespace_quick_add_form_labels_0_label').val() == $('#namespace_quick_add_form_uriGenerator').val()) {
                 $(document).on('keyup', '#namespace_quick_add_form_labels_0_label', function() {
+                    if(copyLabelToUriGenerator){
+                        $('#namespace_quick_add_form_uriGenerator').val($('#namespace_quick_add_form_labels_0_label').val());
+                    }
                     if (this.value == $('#namespace_quick_add_form_uriGenerator').val() || $('#namespace_quick_add_form_uriGenerator').val() == '' ) {
                         var stringForURI = this.value;
                         stringForURI = stringForURI.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
                         stringForURI = stringForURI.replace(/[\s-]+/g, '-').toLowerCase().replace(/[^0-9a-z\-]/g, '');
                         $('#namespace_quick_add_form_namespaceURI').val('https://ontome.net/ns/' + stringForURI);
                     }
-
-
                 });
             }
 
 
             $(document).on('keyup', '#namespace_quick_add_form_uriGenerator', function() {
+                copyLabelToUriGenerator = false;
                 var stringForURI = this.value;
                 stringForURI = stringForURI.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
                 stringForURI = stringForURI.replace(/[\s-]+/g, '-').toLowerCase().replace(/[^0-9a-z\-]/g, '');
