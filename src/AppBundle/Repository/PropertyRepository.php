@@ -217,29 +217,38 @@ class PropertyRepository extends EntityRepository
         // Construit la chaine ?,? pour les namespacesId dans la requête SQL
         $in  = str_repeat('?,', count($namespacesId) - 1) . '?';
 
-        $sql = "SELECT identifier_property AS property,
-                  identifier_range AS range,
-                  v.fk_range_namespace AS \"rangeNamespaceId\",
-                    che.get_root_namespace_prefix(che.get_root_namespace(v.fk_range_namespace)) AS \"rangeRootNamespacePrefix\",
-                  pk_property AS \"propertyId\",
-                  pk_range AS \"rangeId\",
-                  v.fk_namespace_for_version AS \"propertyNamespaceId\",
-                  array_append(array_agg(asrefns.fk_referenced_namespace), v.fk_namespace_for_version) AS \"selectedNamespacesId\",
-                  identifier_domain AS domain,
-                  v.fk_domain_namespace AS \"domainNamespaceId\",
-                  che.get_root_namespace(fk_namespace_for_version) AS \"rootNamespaceId\",
-                  che.get_root_namespace_prefix(che.get_root_namespace(fk_namespace_for_version)) AS \"propertyRootNamespacePrefix\",
-                  (SELECT label FROM che.get_namespace_labels(fk_namespace_for_version) WHERE language_iso_code = 'en') AS namespace,
-                  (SELECT label FROM che.get_namespace_labels(v.fk_range_namespace) WHERE language_iso_code = 'en') AS \"rangeNamespace\"
-                FROM che.v_properties_with_domain_range v
-                LEFT JOIN che.associates_referenced_namespace asrefns ON v.fk_namespace_for_version = asrefns.fk_namespace
-                WHERE v.pk_domain = ?
-                AND fk_namespace_for_version IN (".$in.")
-                GROUP BY v.identifier_property, v.identifier_range, v.fk_range_namespace, v.pk_property, v.pk_range, v.fk_namespace_for_version, v.identifier_domain, v.fk_domain_namespace;";
+        $sql = "SELECT  identifier_property AS property,
+                        identifier_range AS range,
+                        v.fk_range_namespace AS \"rangeNamespaceId\",
+                        che.get_root_namespace_prefix(che.get_root_namespace(v.fk_range_namespace)) AS \"rangeRootNamespacePrefix\",
+                        pk_property AS \"propertyId\",
+                        pk_range AS \"rangeId\",
+                        v.fk_namespace_for_version AS \"propertyNamespaceId\",
+                        array_append(array_agg(asrefns.fk_referenced_namespace), v.fk_namespace_for_version) AS \"selectedNamespacesId\",
+                        identifier_domain AS domain,
+                        v.fk_domain_namespace AS \"domainNamespaceId\",
+                        che.get_root_namespace(fk_namespace_for_version) AS \"rootNamespaceId\",
+                        che.get_root_namespace_prefix(che.get_root_namespace(fk_namespace_for_version)) AS \"propertyRootNamespacePrefix\",
+                        (SELECT label FROM che.get_namespace_labels(fk_namespace_for_version) WHERE language_iso_code = 'en') AS namespace,
+                        (SELECT label FROM che.get_namespace_labels(v.fk_range_namespace) WHERE language_iso_code = 'en') AS \"rangeNamespace\"
+                FROM    che.v_properties_with_domain_range v
+                LEFT JOIN   che.associates_referenced_namespace asrefns ON v.fk_namespace_for_version = asrefns.fk_namespace
+                WHERE   v.pk_domain = ?
+                AND     fk_domain_namespace IN (".$in.")
+                AND     fk_namespace_for_version IN (".$in.")
+                GROUP BY    v.identifier_property, 
+                            v.identifier_range, 
+                            v.fk_range_namespace, 
+                            v.pk_property, 
+                            v.pk_range, 
+                            v.fk_namespace_for_version, 
+                            v.identifier_domain, 
+                            v.fk_domain_namespace;
+                ";
 
         $conn = $this->getEntityManager()->getConnection();
         $stmt = $conn->prepare($sql);
-        $stmt->execute(array_merge(array($classVersion->getClass()->getId()), $namespacesId));
+        $stmt->execute(array_merge(array($classVersion->getClass()->getId()), $namespacesId, $namespacesId));
 
         return $stmt->fetchAll();
     }
