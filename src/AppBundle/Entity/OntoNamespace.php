@@ -47,8 +47,6 @@ class OntoNamespace
     private $originalNamespaceURI;
 
     /**
-     * @Assert\NotBlank
-     * @Assert\NotNull
      * @Assert\Length(
      *     min = 1,
      *     max = 6,
@@ -60,8 +58,6 @@ class OntoNamespace
     private $classPrefix;
 
     /**
-     * @Assert\NotBlank
-     * @Assert\NotNull
      * @Assert\Length(
      *     min = 1,
      *     max = 6,
