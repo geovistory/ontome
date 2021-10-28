@@ -128,6 +128,10 @@ class NamespaceController  extends Controller
             $namespace->setIsTopLevelNamespace(true);
             $namespace->setIsOngoing(false);
 
+            // Même si pas automatique, autant remplir dès maintenant les current number
+            $namespace->setCurrentClassNumber(0);
+            $namespace->setCurrentPropertyNumber(0);
+
             //just in case, we set the domain to ontome.net for non external namespaces
             if (!$namespace->getIsExternalNamespace() && strpos($namespace->getNamespaceURI(), 'https://ontome.net/ns') !== 0 ) {
                 $u = parse_url($namespace->getNamespaceURI());

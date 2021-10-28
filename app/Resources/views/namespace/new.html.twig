@@ -45,6 +45,13 @@
                 }) }}
                 {{ form_row(namespaceForm.namespaceURI) }}
                 {{ form_row(namespaceForm.rootNamespacePrefix) }}
+                {{ form_row(namespaceForm.automaticIdentifierManagement, {
+                    help: 'Help'
+                }) }}
+                <div class="row">
+                    <div class="col-lg-6">{{ form_row(namespaceForm.classPrefix) }}</div>
+                    <div class="col-lg-6">{{ form_row(namespaceForm.propertyPrefix) }}</div>
+                </div>
                 {{ form_errors(namespaceForm) }}
 
 
@@ -200,6 +207,30 @@
                 }
             });
 
+            // enable namespace_quick_add_form_classPrefix and namespace_quick_add_form_propertyPrefix
+            // if automatic identifier management is false
+            var $input = $("#namespace_quick_add_form_automaticIdentifierManagement");
+            if ($input.prop('checked')){
+                $('#namespace_quick_add_form_classPrefix').val('C');
+                $('#namespace_quick_add_form_propertyPrefix').val('P');
+                $('#namespace_quick_add_form_classPrefix').prop('readOnly', true);
+                $('#namespace_quick_add_form_propertyPrefix').prop('readOnly', true);
+            }
+            $(document).on('change', '#namespace_quick_add_form_automaticIdentifierManagement', function() {
+                var $input = $(this);
+                if ($input.prop('checked')){
+                    $('#namespace_quick_add_form_classPrefix').val('C');
+                    $('#namespace_quick_add_form_propertyPrefix').val('P');
+                    $('#namespace_quick_add_form_classPrefix').prop('readOnly', true);
+                    $('#namespace_quick_add_form_propertyPrefix').prop('readOnly', true);
+                }
+                else{
+                    $('#namespace_quick_add_form_classPrefix').val('C');
+                    $('#namespace_quick_add_form_propertyPrefix').val('P');
+                    $('#namespace_quick_add_form_classPrefix').prop('readOnly', false);
+                    $('#namespace_quick_add_form_propertyPrefix').prop('readOnly', false);
+                }
+            });
         } );
     </script>
 {% endblock %}
