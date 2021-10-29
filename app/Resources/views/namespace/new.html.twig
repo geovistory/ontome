@@ -44,7 +44,11 @@
                     help: 'Fill this field to generate automatically the namespace URI. Eg. "my namespace" generates "https://ontome.net/ns/my-namespace".'
                 }) }}
                 {{ form_row(namespaceForm.namespaceURI) }}
-                {{ form_row(namespaceForm.rootNamespacePrefix) }}
+                <div class="row">
+                    <div class="col-lg-6">
+                    {{ form_row(namespaceForm.rootNamespacePrefix) }}
+                    </div>
+                </div>
                 {{ form_row(namespaceForm.automaticIdentifierManagement) }}
                 <div class="row">
                     <div class="col-lg-6">{{ form_row(namespaceForm.classPrefix) }}</div>
