@@ -869,6 +869,15 @@ class ProfileController  extends Controller
 
             $classNamespace = $profileAssociation->getEntityNamespaceForVersion();
         }
+
+        $profileAssociationsWithPropertiesToDeselect = $this->getProfileAssociationsWithPropertiesDeselectablesIfProfileAssociationWithThisClassWillDeselect($profile, $class);
+        if(!empty($profileAssociationsWithPropertiesToDeselect)){
+            foreach ($profileAssociationsWithPropertiesToDeselect as $profileAssociation){
+                $systemType = $em->getRepository('AppBundle:SystemType')->find(6); //systemType 6 = rejected
+                $profileAssociation->setSystemType($systemType);
+            }
+        }
+
         $em->persist($profile);
         $em->flush();
 
@@ -1172,6 +1181,79 @@ class ProfileController  extends Controller
             ->findProfileGraph($profile);
 
         return new JsonResponse($profile[0]['json'],200, array(), true);
+    }
+
+    /**
+     * @Route("/profileAssociationPropertyDeselectable/profile/{profile}/class/{class}/", name="profile_association_property_deselectable", schemes={"https"}, requirements={"profile"="^([0-9]+)|(profileID){1}$", "class"="^([0-9]+)|(classID){1}$"})
+     * @Method("GET")
+     * @param Profile $profile
+     * @param OntoClass $class
+     * @return ProfileAssociation[] l'ensemble des profileAssociations dont la propriété dont l'un uniquement de domain ou de la range est égale à $class et l'autre inferred
+     */
+    public function getProfileAssociationsWithPropertiesDeselectablesIfProfileAssociationWithThisClassWillDeselect(Profile $profile, OntoClass $class)
+    {
+        $profileAssociationsDeselectables = [];
+
+        // Trouver les classes selected du profile
+        $selectedClass = [];
+        foreach($profile->getProfileAssociations() as $profileAssociation){
+            if($profileAssociation->getSystemType()->getId() == 5 && !is_null($profileAssociation->getClass())){
+                $selectedClass[] = $profileAssociation->getClass();
+            }
+        }
+
+        foreach($profile->getProfileAssociations() as $profileAssociation){
+            if($profileAssociation->getSystemType()->getId() == 5 && !is_null($profileAssociation->getProperty())){
+                // Cas 1 : Propriété inherited : domain = class
+                if($profileAssociation->getDomain() == $class){
+                    // est ce que range est inferred
+                    if(!in_array($profileAssociation->getRange(), $selectedClass)){
+                        $profileAssociationsDeselectables[] = $profileAssociation;
+                    }
+                }
+                // Cas 2 : Propriété inherited : range = class
+                elseif($profileAssociation->getRange() == $class){
+                    // est ce que domain est inferred
+                    if(!in_array($profileAssociation->getDomain(), $selectedClass)){
+                        $profileAssociationsDeselectables[] = $profileAssociation;
+                    }
+                }
+                // Cas 3 : Propriété non inherited : property.domain = class
+                elseif($profileAssociation->getProperty()->getPropertyVersionForDisplay($profileAssociation->getDomainNamespace())->getDomain() == $class){
+                    // est ce que range est inferred
+                    if(!in_array($profileAssociation->getProperty()->getPropertyVersionForDisplay($profileAssociation->getRangeNamespace())->getRange(), $selectedClass)){
+                        $profileAssociationsDeselectables[] = $profileAssociation;
+                    }
+
+                }
+                // Cas 4 : Propriété non inherited : property.range = class
+                elseif($profileAssociation->getProperty()->getPropertyVersionForDisplay($profileAssociation->getRangeNamespace())->getRange() == $class){
+                    // est ce que range est inferred
+                    if(!in_array($profileAssociation->getProperty()->getPropertyVersionForDisplay($profileAssociation->getDomainNamespace())->getDomain(), $selectedClass)){
+                        $profileAssociationsDeselectables[] = $profileAssociation;
+                    }
+
+                }
+            }
+        }
+
+        return $profileAssociationsDeselectables;
+    }
+
+    /**
+     * @Route("/alert-class-if-deselect/profile/{profile}/class/{class}/json", name="alert_class_if_deselect_json", requirements={"profile"="^([0-9]+)|(profileID){1}$", "class"="^([0-9]+)|(classID){1}$"})
+     * @Method("POST")
+     * @param Profile $profile
+     * @param OntoClass $class
+     * @return JsonResponse
+     */
+    public function getAlertClassIfDeselect(Profile $profile, OntoClass $class)
+    {
+        $message = 'not-alert';
+        if(!empty($this->getProfileAssociationsWithPropertiesDeselectablesIfProfileAssociationWithThisClassWillDeselect($profile, $class))){
+            $message = 'alert';
+        }
+        return new JsonResponse(array('message' => $message));
     }
 
     /**
