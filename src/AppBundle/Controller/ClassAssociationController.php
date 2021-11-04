@@ -186,7 +186,7 @@ class ClassAssociationController extends Controller
 
             return $this->redirectToRoute('class_show_with_version', [
                 'id' => $classAssociation->getChildClass()->getId(),
-                'namespaceFromUrlId' => $classAssociation->getChildClass()->getClassVersionForDisplay()->getNamespaceForVersion(),
+                'namespaceFromUrlId' => $classAssociation->getChildClass()->getClassVersionForDisplay()->getNamespaceForVersion()->getId(),
                 '_fragment' => 'class-hierarchy'
             ]);
         }
