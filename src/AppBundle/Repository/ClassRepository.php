@@ -366,6 +366,16 @@ class ClassRepository extends EntityRepository
                 JOIN che.property prop ON aspro.fk_property = prop.pk_property
                 JOIN che.property_version pv ON prop.pk_property = pv.fk_property
                 JOIN che.class cls ON pv.has_range = cls.pk_class
+                WHERE aspro.fk_profile = :profile AND aspro.fk_property IS NOT NULL AND aspro.fk_system_type = 5 AND cls.pk_class = :class
+                UNION
+                SELECT DISTINCT cls.pk_class
+                FROM che.associates_profile aspro
+                JOIN che.class cls ON aspro.fk_inheriting_domain_class = cls.pk_class
+                WHERE aspro.fk_profile = :profile AND aspro.fk_property IS NOT NULL AND aspro.fk_system_type = 5 AND cls.pk_class = :class
+                UNION
+                SELECT DISTINCT cls.pk_class
+                FROM che.associates_profile aspro
+                JOIN che.class cls ON aspro.fk_inheriting_range_class = cls.pk_class
                 WHERE aspro.fk_profile = :profile AND aspro.fk_property IS NOT NULL AND aspro.fk_system_type = 5 AND cls.pk_class = :class;";
         $stmt = $conn->prepare($sql);
         $stmt->execute(array('profile' => $profile->getId(), 'class' => $class->getId()));

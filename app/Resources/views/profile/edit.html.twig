@@ -1026,6 +1026,7 @@
             var selectableClassesTable = $('#selectable-classes-table').DataTable({
                 ajax: urlSelectableClasses,
                 dataSrc: 'data',
+                order: [[ 1, 'asc' ]],
                 columns: [
                     { data: 'classId' },
                     { data: 'identifierInNamespace' },
@@ -1034,12 +1035,13 @@
                 ],
                 columnDefs: [
                     {
+                        orderable: false,
                         targets: 0,
                         render: function ( data, type, row, meta ) {
                             var urlSelectClass = '{{ path("profile_class_association", {'profile' : 'profileID', 'class' : 'classID'}) }}';
                             urlSelectClass = urlSelectClass.replace("profileID", profileID);
                             urlSelectClass = urlSelectClass.replace("classID", row.classId);
-                            return '<a data-id="'+row.classId+'" data-namespace-id="'+row.namespaceId+'" data-url="'+urlSelectClass+'" class="select-class"><span class="plus-icon" data-id="'+row.classId+'"><span class="fas fa-plus"></span></span><span class="select-class-loading-icon" data-id="'+row.classId+'" style="display: none"><span class="fas fa-spinner fa-spin"></span></span></a>&nbsp;';
+                            return '<a data-id="'+row.classId+'" data-namespace-id="'+row.namespaceId+'" data-url="'+urlSelectClass+'" class="select-class"><span class="plus-icon" data-id="'+row.classId+'"><span class="fas fa-plus"></span></span><span class="select-class-loading-icon" data-id="'+row.classId+'" style="display: none"><span class="fas fa-spinner fa-spin"></span></span></a>';
                         }
                     },
                     {
@@ -1291,7 +1293,7 @@
             $(document).on("click", ".not-removable", function(){
                 bootbox.alert({
                     title: '<i class="fas fa-exclamation-triangle"></i> Warning',
-                    message:"Classes and properties belonging to the namespace you wish to deselect - or to one of its reference namespaces - are associated with your profile. Please deselect them first before proceeding."
+                    message:"Classes and properties belonging to the namespace you wish to deselect - or to one of its reference namespaces - are associated with your profile.<br><br>Please deselect them first before proceeding."
                 });
             });
 
