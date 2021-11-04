@@ -319,7 +319,7 @@
                 <div id="classes" class="tab-pane fade">
                     {% if profile.isOngoing %}
                         <div class="row">
-                            <div class="col-md-6">
+                            <div class="col-md-7">
                                 <h3>Associated classes
                                 <span class="pull-right">
                                     {% if (not profile.isOngoing and profile.wasClosedAt is not null and profile.endDate is null)
@@ -348,7 +348,7 @@
                                     </thead>
                                 </table>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-5">
                                 <h3>Selectable classes</h3>
                                 <table class="table table-striped" id="selectable-classes-table" style="width:100%">
                                     <thead>
@@ -1046,9 +1046,8 @@
                     },
                     {
                         targets: 1,
-
-                        type: 'natural-ci',
                         width: '1%',
+                        type: 'natural-ci',
                         className: 'text-right'
                     }
                 ],
