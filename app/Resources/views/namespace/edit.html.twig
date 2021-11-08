@@ -14,19 +14,19 @@
             {{ namespace }} {% if namespace.isTopLevelNamespace %}<span class="label label-default" style="font-size: 12px; vertical-align: middle;">Root</span>{% endif %}
             <span class="pull-right">{% if ((not namespace.isTopLevelNamespace and not namespace.isOngoing) or (namespace.isOngoing and is_granted('edit', namespace))) %}
                     <a  href="{{ path('api_classes_and_properties_by_namespace_xml', {
-                        namespace: namespace.id
-                    }) }}"
+                    namespace: namespace.id
+                }) }}"
                         class="btn btn-primary"
                         download="namespace-{{ namespace.standardLabel }}.rdf">
                         <i class="fas fa-code"></i> OWL-RDF
                     </a>
-                <a  href="{{ path('namespace_document', {
-                    namespace: namespace.id
-                }) }}"
-                    class="btn btn-primary">
+                    <a  href="{{ path('namespace_document', {
+                        namespace: namespace.id
+                    }) }}"
+                        class="btn btn-primary">
                     <i class="fas fa-file-alt"></i></i> DOCX
                 </a>
-            {% endif %}
+                {% endif %}
             </span>
         </h2>
 
@@ -39,10 +39,10 @@
             <li><a data-toggle="tab" href="#identifiers">Identifiers</a></li>
             {% endif %}
             {% if not namespace.isTopLevelNamespace %}
-            <li><a data-toggle="tab" href="#classes">Classes</a></li>
-            <li><a data-toggle="tab" href="#properties">Properties</a></li>
-            <li><a data-toggle="tab" href="#relations">Relations</a></li>
-            <li><a data-toggle="tab" href="#graph">Graph</a></li>
+                <li><a data-toggle="tab" href="#classes">Classes</a></li>
+                <li><a data-toggle="tab" href="#properties">Properties</a></li>
+                <li><a data-toggle="tab" href="#relations">Relations</a></li>
+                <li><a data-toggle="tab" href="#graph">Graph</a></li>
             {% endif %}
             <li><a data-toggle="tab" href="#comments" class="updateViewComment" data-id="{{ namespace.id }}" data-object="namespace">Comments</a></li>
             {% set hasMismatches = false %}
@@ -236,7 +236,7 @@
                     </thead>
                     <tbody>
                     {% for textProperty in namespace.textProperties if textProperty.systemType.id == 16 %}
-                    {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
+                        {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
                         <tr>
                             <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
                             <td class="truncated-text">
@@ -266,7 +266,7 @@
                                 {% elseif textProperty.validationStatus.id == 26  %}
                                     <span class="label label-success">
                                         {{ textProperty.validationStatus }}
-                                    {% set countValidationsTxtp = countValidationsTxtp + 1 %}
+                                        {% set countValidationsTxtp = countValidationsTxtp + 1 %}
                                     </span>
                                 {% elseif textProperty.validationStatus.id == 27  %}
                                     <span class="label label-danger">
@@ -298,14 +298,14 @@
                     {% endfor %}
                     <h3>Contributors
                         {% if txtpContributors is not null %}
-                        <a href="{{ path('text_property_edit', {'id': txtpContributors.id}) }}" class="btn btn-xs btn-success">
-                            <span class="fa fa-edit"></span>
-                        </a>
+                            <a href="{{ path('text_property_edit', {'id': txtpContributors.id}) }}" class="btn btn-xs btn-success">
+                                <span class="fa fa-edit"></span>
+                            </a>
                         {% else %}
-                        <a href="{{ path('text_property_new', {'type': 'dct:contributor', 'object': 'namespace', 'objectId': namespace.id })}}"
-                           class="btn btn-primary btn-xs">
-                            New <span class="fa fa-plus-circle"></span>
-                        </a>
+                            <a href="{{ path('text_property_new', {'type': 'dct:contributor', 'object': 'namespace', 'objectId': namespace.id })}}"
+                               class="btn btn-primary btn-xs">
+                                New <span class="fa fa-plus-circle"></span>
+                            </a>
                         {% endif %}
                     </h3>
 
@@ -385,32 +385,32 @@
                 <div class="object-identification-edit-form">
                     {% if is_granted('full_edit', namespace) and (not namespace.isOngoing or namespace.topLevelNamespace.isExternalNamespace) %}
                         {{ form_start(namespaceForm) }}
-                            {{ form_errors(namespaceForm) }}
-                            {{ form_start(namespaceForm) }}
-                            {{ form_row(namespaceForm.isExternalNamespace, {
-                                help: 'Only tick this checkbox if your namespace already has its URI outside OntoME. Otherwise leave it unchecked.'
-                            }) }}
-                            {{ form_row(namespaceForm.uriGenerator, {
-                                help: 'Fill this field to generate automatically the namespace URI. Eg. "my namespace" generates "https://ontome.net/ns/my-namespace".'
-                            }) }}
-                            {{ form_row(namespaceForm.namespaceURI) }}
-                            {{ form_row(namespaceForm.rootNamespacePrefix) }}
-                            {{ form_errors(namespaceForm) }}
-                            <button type="submit" class="btn btn-primary" formnovalidate>Save <span class="far fa-save"></span></button>
-                            <a href="#"
-                               onclick="window.location.reload()"
-                               class="btn btn-default"
-                               role="button">
-                                Reset <i class="fas fa-undo"></i>
-                            </a>
-                            <a href="{{ path('namespace_show', {
-                                id: namespace.id,
-                                '_fragment': 'identification'
-                            }) }}"
-                               class="btn btn-default"
-                               role="button">
-                                Back <i class="fas fa-arrow-left"></i>
-                            </a>
+                        {{ form_errors(namespaceForm) }}
+                        {{ form_start(namespaceForm) }}
+                        {{ form_row(namespaceForm.isExternalNamespace, {
+                            help: 'Only tick this checkbox if your namespace already has its URI outside OntoME. Otherwise leave it unchecked.'
+                        }) }}
+                        {{ form_row(namespaceForm.uriGenerator, {
+                            help: 'Fill this field to generate automatically the namespace URI. Eg. "my namespace" generates "https://ontome.net/ns/my-namespace".'
+                        }) }}
+                        {{ form_row(namespaceForm.namespaceURI) }}
+                        {{ form_row(namespaceForm.rootNamespacePrefix) }}
+                        {{ form_errors(namespaceForm) }}
+                        <button type="submit" class="btn btn-primary" formnovalidate>Save <span class="far fa-save"></span></button>
+                        <a href="#"
+                           onclick="window.location.reload()"
+                           class="btn btn-default"
+                           role="button">
+                            Reset <i class="fas fa-undo"></i>
+                        </a>
+                        <a href="{{ path('namespace_show', {
+                            id: namespace.id,
+                            '_fragment': 'identification'
+                        }) }}"
+                           class="btn btn-default"
+                           role="button">
+                            Back <i class="fas fa-arrow-left"></i>
+                        </a>
                         {{ form_end(namespaceForm) }}
                     {% else %}
                         {% if namespace.topLevelNamespace.isExternalNamespace %}
@@ -421,13 +421,13 @@
                     {% endif %}
                 </div>
                 {% if namespace.projectForTopLevelNamespace is not null %}
-                <p>
-                    Project of belonging: <a href="{{ path('project_show', {
-                                'id': namespace.projectForTopLevelNamespace.id
-                            }) }}"
-                                target="_blank">{{ namespace.projectForTopLevelNamespace }}
-                            </a>
-                </p>
+                    <p>
+                        Project of belonging: <a href="{{ path('project_show', {
+                            'id': namespace.projectForTopLevelNamespace.id
+                        }) }}"
+                                                 target="_blank">{{ namespace.projectForTopLevelNamespace }}
+                        </a>
+                    </p>
                 {% endif %}
                 {% if namespace.isTopLevelNamespace == false %}
                     {% if namespace.isOngoing %}
@@ -461,24 +461,24 @@
                         {% if txtpVersion is not null %}
                             {{ txtpVersion.textProperty|raw }}
                             <p>
-                            {% if txtpVersion.validationStatus is null %}
-                                <span class="label label-info">
+                                {% if txtpVersion.validationStatus is null %}
+                                    <span class="label label-info">
                                 Candidate
                             </span>
-                            {% elseif txtpVersion.validationStatus.id == 26  %}
-                                <span class="label label-success">
+                                {% elseif txtpVersion.validationStatus.id == 26  %}
+                                    <span class="label label-success">
                                 {{ txtpVersion.validationStatus }}
-                                    {% set countValidationsVersion = countValidationsVersion + 1 %}
+                                        {% set countValidationsVersion = countValidationsVersion + 1 %}
                             </span>
-                            {% elseif txtpVersion.validationStatus.id == 27  %}
-                                <span class="label label-danger">
-                                {{ txtpVersion.validationStatus }}
-                            </span>
-                            {% elseif txtpVersion.validationStatus.id == 28  %}
-                                <span class="label label-warning">
+                                {% elseif txtpVersion.validationStatus.id == 27  %}
+                                    <span class="label label-danger">
                                 {{ txtpVersion.validationStatus }}
                             </span>
-                            {% endif %}
+                                {% elseif txtpVersion.validationStatus.id == 28  %}
+                                    <span class="label label-warning">
+                                {{ txtpVersion.validationStatus }}
+                            </span>
+                                {% endif %}
                             </p>
                         {% else %}
                             <p><i>No version set yet.</i></p>
@@ -511,8 +511,8 @@
                             {% if is_granted('publish', namespace)  and countValidationsTxtp > 0 and countValidationsLbl > 0 and countValidationsContributors > 0 and countValidationsVersion > 0 %}
                                 <p>
                                     <a href="{{ path('namespace_publication', {
-                                                    id: namespace.id
-                                                }) }}"
+                                        id: namespace.id
+                                    }) }}"
                                        class="btn btn-success"
                                        role="button">
                                         Publish this namespace <i class="fas fa-upload"></i>
@@ -710,12 +710,14 @@
                                     {% for eupa in upa.entityUserProjectAssociations if eupa.systemType.id == 25 and eupa.namespace is not null %}
                                         {% if eupa.namespace == childNamespace %}
                                             {% set isEnabled = true %}
-                                        {% elseif eupa.namespace.referencedNamespaceAssociations is not empty %}
-                                            {% for referencedNamespaceAssociation in eupa.namespace.referencedNamespaceAssociations %}
-                                                {% if referencedNamespaceAssociation.referencedNamespace == childNamespace %}
-                                                    {% set isEnabled = true %}
-                                                {% endif %}
-                                            {% endfor %}
+                                        {% elseif eupa.namespace is not null %}
+                                            {% if eupa.namespace.referencedNamespaceAssociations is not empty %}
+                                                {% for referencedNamespaceAssociation in eupa.namespace.referencedNamespaceAssociations %}
+                                                    {% if referencedNamespaceAssociation.referencedNamespace == childNamespace %}
+                                                        {% set isEnabled = true %}
+                                                    {% endif %}
+                                                {% endfor %}
+                                            {% endif %}
                                         {% endif %}
                                     {% endfor %}
                                 {% endfor %}
@@ -785,7 +787,7 @@
                         <th>Class</th>
                         <th>Last updated</th>
                         {% if namespace.isOngoing %}
-                        <th>Validation status</th>
+                            <th>Validation status</th>
                         {% endif %}
                     </tr>
                     </thead>
@@ -803,25 +805,25 @@
                             </td>
                             <td>{{ classVersion.class.modificationTime|date('Y-m-d') }}</td>
                             {% if namespace.isOngoing %}
-                            <td>
-                                {% if classVersion.validationStatus is null %}
-                                    <span class="label label-info">
+                                <td>
+                                    {% if classVersion.validationStatus is null %}
+                                        <span class="label label-info">
                                     Candidate
                                 </span>
-                                {% elseif classVersion.validationStatus.id == 26  %}
-                                    <span class="label label-success">
+                                    {% elseif classVersion.validationStatus.id == 26  %}
+                                        <span class="label label-success">
                                     {{ classVersion.validationStatus }}
                                 </span>
-                                {% elseif classVersion.validationStatus.id == 27  %}
-                                    <span class="label label-danger">
+                                    {% elseif classVersion.validationStatus.id == 27  %}
+                                        <span class="label label-danger">
                                     {{ classVersion.validationStatus }}
                                 </span>
-                                {% elseif classVersion.validationStatus.id == 28  %}
-                                    <span class="label label-warning">
+                                    {% elseif classVersion.validationStatus.id == 28  %}
+                                        <span class="label label-warning">
                                     {{ classVersion.validationStatus }}
                                 </span>
-                                {% endif %}
-                            </td>
+                                    {% endif %}
+                                </td>
                             {% endif %}
                         </tr>
                     {% endfor %}
@@ -842,7 +844,7 @@
                         <th>Range</th>
                         <th>Last updated</th>
                         {% if namespace.isOngoing %}
-                        <th>Validation status</th>
+                            <th>Validation status</th>
                         {% endif %}
                     </tr>
                     </thead>
@@ -889,25 +891,25 @@
                             </td>
                             <td>{{ propertyVersion.modificationTime|date('Y-m-d') }}</td>
                             {% if namespace.isOngoing %}
-                            <td>
-                                {% if propertyVersion.validationStatus is null %}
-                                    <span class="label label-info">
+                                <td>
+                                    {% if propertyVersion.validationStatus is null %}
+                                        <span class="label label-info">
                                     Candidate
                                 </span>
-                                {% elseif propertyVersion.validationStatus.id == 26  %}
-                                    <span class="label label-success">
+                                    {% elseif propertyVersion.validationStatus.id == 26  %}
+                                        <span class="label label-success">
                                     {{ propertyVersion.validationStatus }}
                                 </span>
-                                {% elseif propertyVersion.validationStatus.id == 27  %}
-                                    <span class="label label-danger">
+                                    {% elseif propertyVersion.validationStatus.id == 27  %}
+                                        <span class="label label-danger">
                                     {{ propertyVersion.validationStatus }}
                                 </span>
-                                {% elseif propertyVersion.validationStatus.id == 28  %}
-                                    <span class="label label-warning">
+                                    {% elseif propertyVersion.validationStatus.id == 28  %}
+                                        <span class="label label-warning">
                                     {{ propertyVersion.validationStatus }}
                                 </span>
-                                {% endif %}
-                            </td>
+                                    {% endif %}
+                                </td>
                             {% endif %}
                         </tr>
                     {% endfor %}
@@ -1480,7 +1482,7 @@
 
                 var namespaceID = {{ namespace.id }}
 
-                    if(boolPopup == "true"){
+                if(boolPopup == "true"){
                     bootbox.confirm({
                         message: "Classes and properties belonging to the reference namespace you wish to deselect are associated with your ongoing namespace. Be aware that the associations involved will no longer be valid.<br><br>Do you wish to proceed?",
                         title: '<i class="fas fa-exclamation-triangle"></i> Warning',
@@ -1511,21 +1513,21 @@
                             }
                         }
                     });
-                    }
-                    else{
-                        $(".loading-icon2[data-id='"+selectedValue+"']").show(0);
-                        var url = '{{ path("namespace_referenced_namespace_disassociation", {'namespace' : 'namespaceID','referencedNamespace': 'selectedValue'}) }}';
-                        url = url.replace("namespaceID", namespaceID);
-                        url = url.replace("selectedValue", selectedValue);
-                        $.ajax({
-                            url: url,
-                            type: 'DELETE',
-                            dataType: 'json',
-                            success:function(data){
-                                window.location.reload();
-                            }
-                        });
-                    }
+                }
+                else{
+                    $(".loading-icon2[data-id='"+selectedValue+"']").show(0);
+                    var url = '{{ path("namespace_referenced_namespace_disassociation", {'namespace' : 'namespaceID','referencedNamespace': 'selectedValue'}) }}';
+                    url = url.replace("namespaceID", namespaceID);
+                    url = url.replace("selectedValue", selectedValue);
+                    $.ajax({
+                        url: url,
+                        type: 'DELETE',
+                        dataType: 'json',
+                        success:function(data){
+                            window.location.reload();
+                        }
+                    });
+                }
             });
 
             $(document).on("click", ".change-version", function(){
@@ -1533,82 +1535,82 @@
                 var selectedValue = $(this).data("id");
                 var namespaceID = {{ namespace.id }}
 
-                bootbox.confirm({
-                    message: "Changing the version of a reference namespace changes the association of all target entities in that namespace to the new version. Errors may occur.<br><br>Please also note if the selected version is ongoing, it might be modified at any time and you will not be able to publish your namespace as long as you have selected it.<br><br>Do you wish to proceed?",
-                    title: '<i class="fas fa-exclamation-triangle"></i> Warning',
-                    buttons: {
-                        confirm: {
-                            label: 'Yes',
-                            className: 'btn-success'
+                    bootbox.confirm({
+                        message: "Changing the version of a reference namespace changes the association of all target entities in that namespace to the new version. Errors may occur.<br><br>Please also note if the selected version is ongoing, it might be modified at any time and you will not be able to publish your namespace as long as you have selected it.<br><br>Do you wish to proceed?",
+                        title: '<i class="fas fa-exclamation-triangle"></i> Warning',
+                        buttons: {
+                            confirm: {
+                                label: 'Yes',
+                                className: 'btn-success'
+                            },
+                            cancel: {
+                                label: 'No',
+                                className: 'btn-danger'
+                            }
                         },
-                        cancel: {
-                            label: 'No',
-                            className: 'btn-danger'
-                        }
-                    },
-                    callback: function (result) {
-                        if(result){
-                            cell = btn.parent();
-                            btn.remove();
-                            cell.append("<select class='select-change-version' data-id='"+selectedValue+"'></select>");
+                        callback: function (result) {
+                            if(result){
+                                cell = btn.parent();
+                                btn.remove();
+                                cell.append("<select class='select-change-version' data-id='"+selectedValue+"'></select>");
 
-                            $('.select-change-version[data-id='+selectedValue+']').select2({
-                                width: '100%',
-                                sorter: function(data) {
-                                    /* Sort data using lowercase comparison */
-                                    return data.sort(function (a, b) {
-                                        a = a.text.toLowerCase();
-                                        b = b.text.toLowerCase();
-                                        if (a > b) {
-                                            return 1;
-                                        } else if (a < b) {
-                                            return -1;
+                                $('.select-change-version[data-id='+selectedValue+']').select2({
+                                    width: '100%',
+                                    sorter: function(data) {
+                                        /* Sort data using lowercase comparison */
+                                        return data.sort(function (a, b) {
+                                            a = a.text.toLowerCase();
+                                            b = b.text.toLowerCase();
+                                            if (a > b) {
+                                                return 1;
+                                            } else if (a < b) {
+                                                return -1;
+                                            }
+                                            return 0;
+                                        });
+                                    },
+                                    placeholder: "Select a version"
+                                });
+
+                                $('.select-change-version[data-id='+selectedValue+']').on('select2:close', function (e) {
+                                    //Récupérer le NS a changer, et la nouvelle référence.
+                                    var oldRefNsId = $(this).data('id');
+                                    var newRefNsId = $('.select-change-version[data-id='+selectedValue+']').val();
+
+                                    // Ajax here
+                                    var url = '{{ path("namespace_referenced_namespace_change", {'namespace' : 'namespaceID','referencedNamespace': 'oldRefNsId', 'newReferencedNamespace': 'newRefNsId'}) }}';
+                                    url = url.replace("namespaceID", namespaceID);
+                                    url = url.replace("oldRefNsId", oldRefNsId);
+                                    url = url.replace("newRefNsId", newRefNsId);
+                                    $.ajax({
+                                        url: url,
+                                        type: 'GET',
+                                        dataType: 'json',
+                                        success:function(data){
+                                            window.location.reload();
                                         }
-                                        return 0;
                                     });
-                                },
-                                placeholder: "Select a version"
-                            });
+                                });
 
-                            $('.select-change-version[data-id='+selectedValue+']').on('select2:close', function (e) {
-                                //Récupérer le NS a changer, et la nouvelle référence.
-                                var oldRefNsId = $(this).data('id');
-                                var newRefNsId = $('.select-change-version[data-id='+selectedValue+']').val();
-
-                                // Ajax here
-                                var url = '{{ path("namespace_referenced_namespace_change", {'namespace' : 'namespaceID','referencedNamespace': 'oldRefNsId', 'newReferencedNamespace': 'newRefNsId'}) }}';
-                                url = url.replace("namespaceID", namespaceID);
-                                url = url.replace("oldRefNsId", oldRefNsId);
-                                url = url.replace("newRefNsId", newRefNsId);
+                                var url = '{{ path("get_choices_namespaces", {'namespace' : 'selectedValue'}) }}';
+                                url = url.replace("selectedValue", selectedValue);
                                 $.ajax({
                                     url: url,
                                     type: 'GET',
                                     dataType: 'json',
                                     success:function(data){
-                                        window.location.reload();
-                                    }
-                                });
-                            });
-
-                            var url = '{{ path("get_choices_namespaces", {'namespace' : 'selectedValue'}) }}';
-                            url = url.replace("selectedValue", selectedValue);
-                            $.ajax({
-                                url: url,
-                                type: 'GET',
-                                dataType: 'json',
-                                success:function(data){
-                                    var childVersions = data.rootNamespaceChildVersions
-                                    for (var item in childVersions) {
-                                        if(selectedValue != item){
-                                            $('.select-change-version[data-id='+selectedValue+']').append("<option value='" + item + "'>"+childVersions[item]+"</option>");
+                                        var childVersions = data.rootNamespaceChildVersions
+                                        for (var item in childVersions) {
+                                            if(selectedValue != item){
+                                                $('.select-change-version[data-id='+selectedValue+']').append("<option value='" + item + "'>"+childVersions[item]+"</option>");
+                                            }
                                         }
                                     }
-                                }
-                            });
+                                });
 
+                            }
                         }
-                    }
-                });
+                    });
             });
 
             $('a.updateViewComment').on('click', function () {

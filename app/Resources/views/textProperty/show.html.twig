@@ -64,26 +64,26 @@
                     {% endif %}
 
                     {% if route is not null and namespaceFromUrlId is defined %}
-                    <a href="{{ path(route, {
-                        'id':textProperty.object.id,
-                        'namespaceFromUrlId': namespaceFromUrlId,
-                        '_fragment': 'definition'}) }}"
-                       class="pull-right btn btn-link"
-                       role="button">
-                        <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
-                    </a>
+                        <a href="{{ path(route, {
+                            'id':textProperty.object.id,
+                            'namespaceFromUrlId': namespaceFromUrlId,
+                            '_fragment': 'definition'}) }}"
+                           class="pull-right btn btn-link"
+                           role="button">
+                            <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
+                        </a>
                     {% elseif route is not null %}
-                    <a href="{{ path(route, {'id':textProperty.object.id, '_fragment': 'definition'}) }}"
-                       class="pull-right btn btn-link"
-                       role="button">
-                        <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
-                    </a>
+                        <a href="{{ path(route, {'id':textProperty.object.id, '_fragment': 'definition'}) }}"
+                           class="pull-right btn btn-link"
+                           role="button">
+                            <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
+                        </a>
                     {% else %}
-                    <a href="{{ app.request.headers.get('referer') }}#definition"
-                       class="pull-right btn btn-link"
-                       role="button">
-                        <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
-                    </a>
+                        <a href="{{ app.request.headers.get('referer') }}#definition"
+                           class="pull-right btn btn-link"
+                           role="button">
+                            <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
+                        </a>
                     {% endif %}
                 </h2>
                 <h4>
@@ -167,7 +167,9 @@
                 </h4>
                 <ul class="nav nav-tabs" id="main-tabs">
                     <li class="active"><a data-toggle="tab" href="#text-property">{{ textProperty.systemType }}</a></li>
-                    <li><a data-toggle="tab" href="#comments">Comments</a></li>
+                    {% if textProperty.systemType.id != 31 %}
+                        <li><a data-toggle="tab" href="#comments">Comments</a></li>
+                    {% endif %}
                 </ul>
                 <div class="tab-content">
                     <div id="text-property" class="tab-pane fade in active">
@@ -183,33 +185,35 @@
                             </dl>
                         </div>
                     </div>
-                    <div id="comments" class="tab-pane fade">
-                        <h3>Comments</h3>
-                        <div class="comment-box js-user-info" data-fullname="{{ app.user }}">
-                            <div class="action-box">
-                                {% if textProperty.comments is empty %}
-                                    <p id="comment-not-found"><em>No comment found.</em></p>
-                                {% endif %}
-                                <ul id="comments-list" class="comments-list">
-                                    {% for comment in textProperty.comments %}
-                                        <li>
-                                            <div class="comment-text">
-                                                <p><strong><a href="#">{{ comment.creator.fullName }}</a></strong></p>
-                                                <p>{{ comment.comment }}</p>
-                                                <span class="date sub-comment-text">on {{ comment.creationTime|date() }}</span>
-                                            </div>
-                                        </li>
-                                    {% endfor %}
-                                </ul>
+                    {% if textProperty.systemType.id != 31 %}
+                        <div id="comments" class="tab-pane fade">
+                            <h3>Comments</h3>
+                            <div class="comment-box js-user-info" data-fullname="{{ app.user }}">
+                                <div class="action-box">
+                                    {% if textProperty.comments is empty %}
+                                        <p id="comment-not-found"><em>No comment found.</em></p>
+                                    {% endif %}
+                                    <ul id="comments-list" class="comments-list">
+                                        {% for comment in textProperty.comments %}
+                                            <li>
+                                                <div class="comment-text">
+                                                    <p><strong><a href="#">{{ comment.creator.fullName }}</a></strong></p>
+                                                    <p>{{ comment.comment }}</p>
+                                                    <span class="date sub-comment-text">on {{ comment.creationTime|date() }}</span>
+                                                </div>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
 
-                                {% if app.user %}
-                                    <div class="new-comment-form" id="new-comment-form">
-                                        {{ render(controller('AppBundle:Comment:new', {'object' : 'text-property', 'objectId' : textProperty.id})) }}
-                                    </div>
-                                {% endif %}
+                                    {% if app.user %}
+                                        <div class="new-comment-form" id="new-comment-form">
+                                            {{ render(controller('AppBundle:Comment:new', {'object' : 'text-property', 'objectId' : textProperty.id})) }}
+                                        </div>
+                                    {% endif %}
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -217,5 +221,7 @@
 {% endblock %}
 {% block javascripts %}
     {{ parent() }}
-    {% include 'comment/js-bock.html.twig'  with {'objectType': 'text-property', 'objectId' : textProperty.id  } %}
+    {% if textProperty.systemType.id != 31 %}
+        {% include 'comment/js-bock.html.twig'  with {'objectType': 'text-property', 'objectId' : textProperty.id  } %}
+    {% endif %}
 {% endblock %}
