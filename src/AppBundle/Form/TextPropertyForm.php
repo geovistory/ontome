@@ -3,6 +3,7 @@
 namespace AppBundle\Form;
 
 use AppBundle\Entity\TextProperty;
+use AppBundle\Form\DataTransformer\SystemTypeToNumberTransformer;
 use AppBundle\Form\DataTransformer\UserToNumberTransformer;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Form\AbstractType;
@@ -20,9 +21,10 @@ class TextPropertyForm extends AbstractType
     private $tokenStorage;
     private $em;
 
-    public function __construct(UserToNumberTransformer $transformer, TokenStorageInterface $tokenStorage, EntityManagerInterface $em)
+    public function __construct(UserToNumberTransformer $transformer, SystemTypeToNumberTransformer $st_transformer, TokenStorageInterface $tokenStorage, EntityManagerInterface $em)
     {
         $this->transformer = $transformer;
+        $this->st_transformer = $st_transformer;
         $this->tokenStorage = $tokenStorage;
         $this->em = $em;
     }
@@ -54,6 +56,31 @@ class TextPropertyForm extends AbstractType
                     'data' => 'en'
                 ));
         }
+        elseif(in_array($options['systemType'],[33,34,35]) and in_array($options['objectType'], ['class', 'property'])) {
+            $builder
+                ->add('systemType', ChoiceType::class, array(
+                    'choices'  => array(
+                        'Internal note' => 33,
+                        'Context note' => 34,
+                        'Bibliographical note' => 35
+                    ),
+                    'label' => 'Type of note'
+                ))
+                ->add('textProperty', TextareaType::class, array(
+                    'attr' => array('class' => 'tinymce'),
+                    'label' => $labelTextProperty
+                ))
+                ->add('languageIsoCode', ChoiceType::class, array(
+                    'choices'  => array(
+                        'English' => 'en',
+                        'French' => 'fr',
+                        'German' => 'de',
+                        'Italian' => 'it',
+                        'Spanish' => 'es'
+                    ),
+                    'label' => 'Language'
+                ));
+        }
         else {
             $builder
                 ->add('textProperty', TextareaType::class, array(
@@ -72,6 +99,11 @@ class TextPropertyForm extends AbstractType
                 ));
         }
 
+        if($builder->has('systemType')){
+            $builder->get('systemType')
+                ->addModelTransformer($this->st_transformer);
+        }
+
         $builder
             ->add('creator', HiddenType::class)
             ->add('modifier', HiddenType::class);
@@ -86,8 +118,10 @@ class TextPropertyForm extends AbstractType
     {
         $resolver->setDefaults(array(
             'data_class' => TextProperty::class,
+            "allow_extra_fields" => true,
             'labelTextProperty' => false,
-            'systemType' => 0
+            'systemType' => 0,
+            'objectType' => 'class'
         ));
     }
 

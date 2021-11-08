@@ -158,7 +158,12 @@ class CommentController extends Controller
             if (!$associatedEntity) {
                 throw $this->createNotFoundException('The text property n° '.$objectId.' does not exist');
             }
-            $namespaceForVersion = $em->getRepository('AppBundle:OntoNamespace')->find($associatedEntity->getNamespaceForVersion());
+            if(!is_null($associatedEntity->getNamespace()) and !is_null($associatedEntity->getProfile()) and !is_null($associatedEntity->getProject())){
+                $namespaceForVersion = $em->getRepository('AppBundle:OntoNamespace')->find($associatedEntity->getNamespaceForVersion());
+            }
+            else{
+                $namespaceForVersion = null;
+            }
             $comment->setTextProperty($associatedEntity);
         }
         else if($object === 'label') {

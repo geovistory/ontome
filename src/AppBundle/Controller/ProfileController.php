@@ -145,6 +145,7 @@ class ProfileController  extends Controller
             $ongoingProfile->setModifier($this->getUser());
             $ongoingProfile->setCreationTime(new \DateTime('now'));
             $ongoingProfile->setModificationTime(new \DateTime('now'));
+            $ongoingProfile->setIsForcedPublication(false);
 
             $ongoingProfileLabel->setIsStandardLabelForLanguage(true);
             $ongoingProfileLabel->setLabel($profileLabel->getLabel().' ongoing');

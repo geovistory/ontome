@@ -53,7 +53,8 @@ class ParentPropertyAssociationForm extends AbstractType
             ->add('parentPropertyVersion', ChoiceType::class, array(
                 'mapped' => false,
                 'placeholder'       => '',
-                'choices'           => $choices
+                'choices'           => $choices,
+                'label' => 'Parent property'
             ))
             ->add('parentProperty', HiddenType::class)
             ->add('childProperty', HiddenType::class)

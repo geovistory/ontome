@@ -102,6 +102,27 @@
                                 {% endif %}
                             </div>
                         </div>
+
+                        {# Additional notes #}
+                        {% set hasOneOrManyAdditionalNotes = false %}
+                        {% for textProperty in profile.textProperties
+                            if textProperty.systemType.id in [33,34,35] %}
+                            {% set hasOneOrManyAdditionalNotes = true %}
+                        {% endfor %}
+                        {% if hasOneOrManyAdditionalNotes %}
+                            <div class="row">
+                                <div class="col-lg-2">
+                                    <p>Additional notes:</p>
+                                </div>
+                                <div class="col-lg-10">
+                                    {% for textProperty in profile.textProperties
+                                        if textProperty.systemType.id in [33,34,35] %}
+                                        {{ textProperty.textProperty|raw }}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endif %}
+
                         <div class="row">
                             <div class="col-lg-2">
                                 <p>Version:</p>
@@ -160,12 +181,12 @@
                     </tbody>
                 </table>
                 <div class="pull-right add-div">
-                    <a href="{{ path('text_property_new', {'type': 'additional-note', 'object': 'profile', 'objectId': profile.id })}}"
+                    <a href="{{ path('text_property_new', {'type': 'internal-note', 'object': 'profile', 'objectId': profile.id })}}"
                        class="btn btn-primary pull-right">
                         Add <span class="fa fa-plus-circle"></span>
                     </a>
                 </div>
-                <h3>Additional notes</h3>
+                <h3>Internal notes</h3>
                 <table class="table table-striped" id="additional-notes-table">
                     <thead>
                     <tr>
@@ -177,7 +198,8 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for textProperty in profile.textProperties if textProperty.systemType.id == 12 %}
+                    {% for textProperty in profile.textProperties
+                        if textProperty.systemType.id == 33 %}
                         <tr>
                             <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
                             <td class="truncated-text">
@@ -795,7 +817,6 @@
                 </div>
                 <div id="graph" class="tab-pane fade">
                     <h3>Graph</h3>
-                    <p class="text-warning"><span class="fa fa-exclamation-circle"></span> Please note this is an experimental feature. <strong>Click on the full screen button if the graph is not displayed</strong></p>
                     {% if profile.classes|length > 0 and profile.properties|length > 0 %}
                         <a href="https://betagraph.ontome.net/#url={{ url('profile_json', {'id': profile.id}) }}" target="_blank" class="btn btn-primary">Full screen (WebVOWL) <span class="fa fa-desktop"></span></a><br><br>
                         <embed src="https://betagraph.ontome.net/#url={{ url('profile_json', {'id': profile.id}) }}" width="100%" height="1000px"><br><br>

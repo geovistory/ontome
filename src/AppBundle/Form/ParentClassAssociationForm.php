@@ -52,6 +52,7 @@ class ParentClassAssociationForm extends AbstractType
         $builder
             ->add('parentClassVersion', ChoiceType::class, array(
                 'mapped' => false,
+                'label' => 'Parent class',
                 'choices'           => $choices
             ))
             ->add('parentClass', HiddenType::class)
