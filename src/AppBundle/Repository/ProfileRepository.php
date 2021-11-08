@@ -46,7 +46,8 @@ class ProfileRepository extends EntityRepository
         $sql = "
           SELECT prf.* FROM che.profile prf
           LEFT JOIN che.associates_entity_to_user_project aseup ON aseup.fk_profile = prf.pk_profile 
-          WHERE prf.fk_project_of_belonging = :id_project
+          WHERE prf.fk_project_of_belonging = :id_project 
+            AND prf.is_root_profile = false
           AND (aseup.fk_associate_user_to_project IN(
             SELECT pk_associate_user_to_project FROM che.associate_user_to_project
 	        WHERE fk_user = :id_user AND fk_project = :id_project));
