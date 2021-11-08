@@ -319,6 +319,21 @@ class Project
     }
 
     /**
+     * @return integer
+     */
+    public function getPermissionForUser(User $user = null)
+    {
+        foreach($this->getUserProjectAssociations() as $userProjectAssociation){
+            if($userProjectAssociation->getUser() === $user){
+                return  $userProjectAssociation->getPermission();
+            }
+        }
+        return null;
+    }
+
+
+
+    /**
      * @return string a human readable identification of the object
      */
     public function getObjectIdentification()

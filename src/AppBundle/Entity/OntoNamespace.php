@@ -47,14 +47,44 @@ class OntoNamespace
     private $originalNamespaceURI;
 
     /**
+     * @Assert\Length(
+     *     min = 1,
+     *     max = 6,
+     *     minMessage="Your class prefix must be at least {{ limit }} characters long",
+     *     maxMessage="Your class prefix cannot be loger than {{ limit }} characters"
+     * )
      * @ORM\Column(type="text")
      */
     private $classPrefix;
 
     /**
+     * @Assert\Length(
+     *     min = 1,
+     *     max = 6,
+     *     minMessage="Your property prefix must be at least {{ limit }} characters long",
+     *     maxMessage="Your property prefix cannot be loger than {{ limit }} characters"
+     * )
      * @ORM\Column(type="text")
      */
     private $propertyPrefix;
+
+    /**
+     * @Assert\GreaterThanOrEqual(
+     *     value = 0,
+     *     message="Your current class number should be greater than or equal to 0."
+     * )
+     * @ORM\Column(type="integer")
+     */
+    private $currentClassNumber;
+
+    /**
+     * @Assert\GreaterThanOrEqual(
+     *     value = 0,
+     *     message="Your current property number should be greater than or equal to 0."
+     * )
+     * @ORM\Column(type="integer")
+     */
+    private $currentPropertyNumber;
 
     /**
      * @ORM\Column(type="integer")
@@ -241,6 +271,38 @@ class OntoNamespace
      * @ORM\OrderBy({"creationTime" = "DESC"})
      */
     private $propertyVersions;
+
+    /**
+     * @return mixed
+     */
+    public function getCurrentClassNumber()
+    {
+        return $this->currentClassNumber;
+    }
+
+    /**
+     * @param mixed $currentClassNumber
+     */
+    public function setCurrentClassNumber($currentClassNumber)
+    {
+        $this->currentClassNumber = $currentClassNumber;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getCurrentPropertyNumber()
+    {
+        return $this->currentPropertyNumber;
+    }
+
+    /**
+     * @param mixed $currentPropertyNumber
+     */
+    public function setCurrentPropertyNumber($currentPropertyNumber)
+    {
+        $this->currentPropertyNumber = $currentPropertyNumber;
+    }
 
 
     /**

@@ -17,6 +17,7 @@ use AppBundle\Entity\Project;
 use AppBundle\Entity\PropertyVersion;
 use AppBundle\Entity\ReferencedNamespaceAssociation;
 use AppBundle\Entity\TextProperty;
+use AppBundle\Form\NamespaceEditIdentifiersForm;
 use AppBundle\Form\NamespaceForm;
 use AppBundle\Form\NamespacePublicationForm;
 use AppBundle\Form\NamespaceQuickAddForm;
@@ -126,6 +127,10 @@ class NamespaceController  extends Controller
             $namespace->setModificationTime(new \DateTime('now'));
             $namespace->setIsTopLevelNamespace(true);
             $namespace->setIsOngoing(false);
+
+            // Même si pas automatique, autant remplir dès maintenant les current number
+            $namespace->setCurrentClassNumber(0);
+            $namespace->setCurrentPropertyNumber(0);
 
             //just in case, we set the domain to ontome.net for non external namespaces
             if (!$namespace->getIsExternalNamespace() && strpos($namespace->getNamespaceURI(), 'https://ontome.net/ns') !== 0 ) {
@@ -274,8 +279,23 @@ class NamespaceController  extends Controller
                     'id' => $namespace->getId()
                 ]);
             }
+            $formIdentifiers = $this->createForm(NamespaceEditIdentifiersForm::class, $namespace);
+            $formIdentifiers->handleRequest($request);
+            if ($formIdentifiers->isSubmitted() && $formIdentifiers->isValid()) {
+
+                $em = $this->getDoctrine()->getManager();
+                $em->persist($namespace);
+                $em->flush();
+
+                $this->addFlash('success', 'Namespace identifiers updated!');
+                return $this->redirectToRoute('namespace_edit', [
+                    'id' => $namespace->getId(),
+                    '_fragment' => 'identifiers'
+                ]);
+            }
             return $this->render('namespace/edit.html.twig', [
                 'namespaceForm' => $form->createView(),
+                'namespaceIdentifiersForm' => $formIdentifiers->createView(),
                 'namespace' => $namespace,
                 'rootNamespaces' => $rootNamespaces,
                 'hasChanged' => $ongoingNamespaceHasChanged,
@@ -353,6 +373,45 @@ class NamespaceController  extends Controller
         return $this->redirectToRoute('namespace_show', [
             'id' => $newNamespaceId
         ]);
+    }
+
+    /**
+     * @Route("/namespace/{id}/toggle-automatic-identifier-management", name="namespace_toggle_identifier_management", requirements={"id"="^[0-9]+$"})
+     * @Method("GET")
+     * @param OntoNamespace $namespace
+     * @return JsonResponse
+     */
+    public function toggleAutomaticIdentifierManagement(OntoNamespace $namespace, Request $request)
+    {
+        if(is_null($namespace)) {
+            throw $this->createNotFoundException('The namespace n° '.$namespace->getId().' does not exist. Please contact an administrator.');
+        }
+
+        if(!$namespace->getIsTopLevelNamespace()){
+            throw $this->createAccessDeniedException('The namespace n° '.$namespace->getId().' is not root and can\'t manage identifiers. Please contact an administrator.');
+        }
+
+        $this->denyAccessUnlessGranted('edit', $namespace);
+
+        if(is_null($namespace->getClassPrefix()) && is_null($namespace->getPropertyPrefix())){
+            $namespace->setClassPrefix("C");
+            $namespace->setPropertyPrefix("P");
+        }
+        else{
+            $namespace->setClassPrefix(null);
+            $namespace->setPropertyPrefix(null);
+        }
+
+        if(is_null($namespace->getCurrentClassNumber())){
+            $namespace->setCurrentClassNumber(0);
+            $namespace->setCurrentPropertyNumber(0);
+        }
+
+        $em = $this->getDoctrine()->getManager();
+        $em->persist($namespace);
+        $em->flush();
+
+        return new JsonResponse("",204, array(), true);
     }
 
     /**

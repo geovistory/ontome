@@ -16,7 +16,7 @@ use AppBundle\Entity\OntoNamespace;
 use AppBundle\Entity\Project;
 use AppBundle\Entity\SystemType;
 use AppBundle\Entity\TextProperty;
-use AppBundle\Form\ClassEditIdentifierForm;
+use AppBundle\Form\NamespaceEditIdentifiersForm;
 use AppBundle\Form\ClassQuickAddForm;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -339,7 +339,7 @@ class ClassController extends Controller
         $classTemp->setCreationTime(new \DateTime('now'));
         $classTemp->setModificationTime(new \DateTime('now'));
 
-        $formIdentifier = $this->createForm(ClassEditIdentifierForm::class, $classTemp);
+        $formIdentifier = $this->createForm(NamespaceEditIdentifiersForm::class, $classTemp);
         $formIdentifier->handleRequest($request);
         if ($formIdentifier->isSubmitted() && $formIdentifier->isValid()) {
             $class->setIdentifierInNamespace($classTemp->getIdentifierInNamespace());

@@ -47,6 +47,26 @@ class NamespaceQuickAddForm extends AbstractType
                 'allow_add' => true,
                 'by_reference' => false,
             ))
+            ->add('automaticIdentifierManagement', CheckboxType::class, [
+                'mapped' => false,
+                'required' => true,
+                'data' => true,
+                'label' => 'Automatic identifier management',
+            ])
+            ->add('classPrefix', TextType::class, array(
+                'label' => 'Class prefix',
+                'attr' => array(
+                    'size' => '6',
+                    'maxlength' => '6'
+                ),
+            ))
+            ->add('propertyPrefix', TextType::class, array(
+                'label' => 'Property prefix',
+                'attr' => array(
+                    'size' => '6',
+                    'maxlength' => '6'
+                ),
+            ))
             ->add('textProperties', CollectionType::class, array(
                 'label' => 'Enter a description and select a language',
                 'entry_type' => TextPropertyType::class,
