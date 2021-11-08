@@ -230,6 +230,16 @@
                                             <a class="text-muted" href="{{ path('namespace_show', {'id': namespace.id}) }}">{{ namespace.standardLabel }}</a>
                                         </li>
                                     {% endif %}
+                                    {% if namespace.directReferencedNamespaces|length > 0 %}
+                                        <div class="small text-muted"><strong><em>Referenced:</em></strong></div>
+                                        <ul>
+                                            {% for referencedNamespace in namespace.allReferencedNamespaces %}
+                                                <li class="list-unstyled" style="border-left: 3px solid darkgrey; padding-left: 5px;">
+                                                    <em><a href="{{ path('namespace_show', {'id': referencedNamespace.id}) }}">{{ referencedNamespace }}</a></em>
+                                                </li>
+                                            {% endfor %}
+                                        </ul>
+                                    {% endif %}
                                 {% endfor %}
                                 </ul>
                             {% endfor %}

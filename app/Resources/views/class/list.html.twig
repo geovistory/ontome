@@ -9,7 +9,7 @@
 
 {% block body %}
     <p class="pull-right">
-        <button type="button" class="btn btn-default"  id="btn-show-all-classes">Show all classes</button>
+        <button type="button" class="btn btn-default"  id="btn-show-all-namespaces">Show all namespaces</button>
     </p>
     <h3>Classes</h3>
     <table class="table table-striped" id="class-table">
@@ -72,7 +72,7 @@
                 var classNamespacesForVersion = data[4]; // use data for comparaison
                 var vnamespacesId = [{{ ('"' ~ namespacesId|join('","') ~ '"')|raw }}];
 
-                if($('#btn-show-all-classes').hasClass('btn-primary')) {
+                if($('#btn-show-all-namespaces').hasClass('btn-primary')) {
                     return true;
                 }
                 else{
@@ -91,17 +91,17 @@
             ],
             order: [[ 1, 'asc' ]]});
 
-        $('#btn-show-all-classes').click(function (){
-                if($('#btn-show-all-classes').hasClass('btn-primary')){
-                    $('#btn-show-all-classes').removeClass('btn-primary');
-                    $('#btn-show-all-classes').addClass('btn-default');
-                    $('#btn-show-all-classes').html("Show all classes");
+        $('#btn-show-all-namespaces').click(function (){
+                if($('#btn-show-all-namespaces').hasClass('btn-primary')){
+                    $('#btn-show-all-namespaces').removeClass('btn-primary');
+                    $('#btn-show-all-namespaces').addClass('btn-default');
+                    $('#btn-show-all-namespaces').html("Show all namespaces");
                     tableClasses.draw();
                 }
                 else{
-                    $('#btn-show-all-classes').removeClass('btn-default');
-                    $('#btn-show-all-classes').addClass('btn-primary');
-                    $('#btn-show-all-classes').html("Hide others classes");
+                    $('#btn-show-all-namespaces').removeClass('btn-default');
+                    $('#btn-show-all-namespaces').addClass('btn-primary');
+                    $('#btn-show-all-namespaces').html("Hide unselected namespaces");
                     tableClasses.draw();
                 }
             }

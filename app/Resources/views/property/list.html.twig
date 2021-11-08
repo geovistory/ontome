@@ -9,7 +9,7 @@
 
 {% block body %}
     <p class="pull-right">
-        <button type="button" class="btn btn-default"  id="btn-show-all-properties">Show all properties</button>
+        <button type="button" class="btn btn-default"  id="btn-show-all-namespaces">Show all namespaces</button>
     </p>
     <h3>Properties</h3>
     <table class="table table-striped" id="property-table">
@@ -122,7 +122,7 @@
                 var propertyNamespacesForVersion = data[8]; // use data for comparaison
                 var vnamespacesId = [{{ ('"' ~ namespacesId|join('","') ~ '"')|raw }}];
 
-                if($('#btn-show-all-properties').hasClass('btn-primary')) {
+                if($('#btn-show-all-namespaces').hasClass('btn-primary')) {
                     return true;
                 }
                 else{
@@ -141,17 +141,17 @@
                     { "visible": false, "targets": 8 }]
             });
 
-            $('#btn-show-all-properties').click(function (){
-                    if($('#btn-show-all-properties').hasClass('btn-primary')){
-                        $('#btn-show-all-properties').removeClass('btn-primary');
-                        $('#btn-show-all-properties').addClass('btn-default');
-                        $('#btn-show-all-properties').html("Show all properties");
+            $('#btn-show-all-namespaces').click(function (){
+                    if($('#btn-show-all-namespaces').hasClass('btn-primary')){
+                        $('#btn-show-all-namespaces').removeClass('btn-primary');
+                        $('#btn-show-all-namespaces').addClass('btn-default');
+                        $('#btn-show-all-namespaces').html("Show all namespaces");
                         tableProperties.draw();
                     }
                     else{
-                        $('#btn-show-all-properties').removeClass('btn-default');
-                        $('#btn-show-all-properties').addClass('btn-primary');
-                        $('#btn-show-all-properties').html("Hide others properties");
+                        $('#btn-show-all-namespaces').removeClass('btn-default');
+                        $('#btn-show-all-namespaces').addClass('btn-primary');
+                        $('#btn-show-all-namespaces').html("Hide unselected namespaces");
                         tableProperties.draw();
                     }
                 }

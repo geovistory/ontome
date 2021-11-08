@@ -333,10 +333,8 @@ class ClassRepository extends EntityRepository
                         cv.standard_label AS \"standardLabel\",
                         cv.fk_namespace_for_version AS \"namespaceId\",
                         nsp.standard_label AS \"namespace\"
-                FROM che.class cls JOIN che.class_version cv ON cls.pk_class = cv.fk_class
-                JOIN che.associates_referenced_namespace arfnsp ON cv.fk_namespace_for_version = arfnsp.fk_referenced_namespace
+                FROM che.class cls JOIN che.class_version cv ON cls.pk_class = cv.fk_class AND cv.fk_namespace_for_version IN (SELECT * FROM che.get_all_references_namespaces_for_profile(:profile))
                 JOIN che.namespace nsp ON cv.fk_namespace_for_version = nsp.pk_namespace
-                WHERE arfnsp.fk_profile = :profile
                 EXCEPT
                 SELECT pk_class, identifier_in_namespace, class_standard_label, fk_class_namespace_for_version, namespace
                 FROM che.get_all_classes_for_profile(:profile) WHERE profile_association_type = 'selected';";
@@ -368,6 +366,16 @@ class ClassRepository extends EntityRepository
                 JOIN che.property prop ON aspro.fk_property = prop.pk_property
                 JOIN che.property_version pv ON prop.pk_property = pv.fk_property
                 JOIN che.class cls ON pv.has_range = cls.pk_class
+                WHERE aspro.fk_profile = :profile AND aspro.fk_property IS NOT NULL AND aspro.fk_system_type = 5 AND cls.pk_class = :class
+                UNION
+                SELECT DISTINCT cls.pk_class
+                FROM che.associates_profile aspro
+                JOIN che.class cls ON aspro.fk_inheriting_domain_class = cls.pk_class
+                WHERE aspro.fk_profile = :profile AND aspro.fk_property IS NOT NULL AND aspro.fk_system_type = 5 AND cls.pk_class = :class
+                UNION
+                SELECT DISTINCT cls.pk_class
+                FROM che.associates_profile aspro
+                JOIN che.class cls ON aspro.fk_inheriting_range_class = cls.pk_class
                 WHERE aspro.fk_profile = :profile AND aspro.fk_property IS NOT NULL AND aspro.fk_system_type = 5 AND cls.pk_class = :class;";
         $stmt = $conn->prepare($sql);
         $stmt->execute(array('profile' => $profile->getId(), 'class' => $class->getId()));
