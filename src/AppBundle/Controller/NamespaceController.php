@@ -140,7 +140,7 @@ class NamespaceController  extends Controller
             }
 
 
-            $ongoingNamespace->setNamespaceURI($namespace->getNamespaceURI());
+            //$ongoingNamespace->setNamespaceURI($namespace->getNamespaceURI());
             $ongoingNamespace->setIsExternalNamespace($namespace->getIsExternalNamespace());
             $ongoingNamespace->setIsTopLevelNamespace(false);
             $ongoingNamespace->setIsOngoing(true);
