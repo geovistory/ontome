@@ -6,11 +6,25 @@
 {%  endblock %}
 
 {% block body %}
+    {% if app.user is not null %}
+        {% set userActiveProjectAssociation = app.user.userProjectAssociations|filter(v => v.project == app.user.currentActiveProject)|first %}
+        {% if userActiveProjectAssociation is not empty %}
+            {% set entityUserActiveProjectAssociations = userActiveProjectAssociation.entityUserProjectAssociations|filter(v => v.systemType.id == 25) %}
+            {% set activesNamespaces = entityUserActiveProjectAssociations|map(p => p.namespace)  %}
+        {% else %}
+            {% set activesNamespaces = [] %}
+        {% endif %}
+        {# for n in activesNamespaces %}{{ n }}{% endfor #}
+    {% endif %}
     <h3>Namespaces</h3>
     <table class="table table-striped" id="project-table">
         <thead>
         <tr>
             <th>Namespace</th>
+            {% if app.user is not null %}
+            <th>Enabled namespace(s)</th>
+            <th>Rights</th>
+            {% endif %}
             <th>Last updated</th>
         </tr>
         </thead>
@@ -24,6 +38,19 @@
                         {{ namespace }}
                     </a>
                 </td>
+                {% if app.user is not null %}
+                <td>
+                    {% if namespace.childVersions|filter(v => v in activesNamespaces)|length > 0  %}
+                        <a href="{{ path('user_show', {
+                            'id': app.user.id,
+                            '_fragment': 'my-current-namespaces'
+                        }) }}">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                    {% endif %}
+                </td>
+                <td>{% if is_granted('edit', namespace) %}<i class="fas fa-user-edit" title="You have rights on this namespace"></i>{% endif %}</td>
+                {% endif %}
                 <td>{{ namespace.modificationTime|date('Y-m-d') }}</td>
             </tr>
         {% endfor %}
