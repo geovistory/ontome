@@ -504,9 +504,6 @@
                         <td class="text-center" id="td-next-property-identifier">{{ namespace.propertyPrefix|default('P') }}{{ namespace.currentPropertyNumber|default(0)+1 }}</td>
                     </tr>
                 </table>
-                <p id="p-btn-identifier">
-                    <a class="btn" id="btn-toggle-identifiers-disable-enable"></a>
-                </p>
             </div>
             {% endif %}
             <div id="classes" class="tab-pane fade">
@@ -1152,71 +1149,10 @@
         {% if namespace.classPrefix is not null %}
         $('#msg-identifier-disabled-enabled b').text("Enabled");
         $('#table-identifiers').show();
-        $('#btn-toggle-identifiers-disable-enable').addClass("btn-danger");
-        $('#btn-toggle-identifiers-disable-enable').html('<i class="fas fa-toggle-off"></i> Disable');
         {% else %}
         $('#msg-identifier-disabled-enabled b').text("Disabled");
         $('#table-identifiers').hide();
-        $('#btn-toggle-identifiers-disable-enable').addClass("btn-primary");
-        $('#btn-toggle-identifiers-disable-enable').html('<i class="fas fa-toggle-on"></i> Enable');
         {% endif %}
-
-        $(document).on("click", "#btn-toggle-identifiers-disable-enable", function(){
-            btn = $(this);
-            var namespaceID = {{ namespace.id }}
-
-                var dialog = bootbox.confirm({
-                    message: ($('#table-identifiers').is(':visible')) ? "You are going to disable the automatic identifier management of your namespace. You will have to manually enter the identifiers of your new classes and properties. Do you wish to proceed?" : "You are going to enable the automatic identifier management of your namespace. A bad configuration will prevent you from creating new classes and properties. Be sure to set the correct parameters before proceeding.",
-                    title: '<i class="fas fa-exclamation-triangle"></i> Warning',
-                    buttons: {
-                        confirm: {
-                            label: 'Save',
-                            className: 'btn-success'
-                        },
-                        cancel: {
-                            label: 'Cancel',
-                            className: 'btn-danger'
-                        }
-                    },
-                    callback: function (result) {
-                        if(result){
-                            var url = "{{ path('namespace_toggle_identifier_management', {'id': namespace.id, '_fragment': 'identifiers'}) }}";
-                            $.ajax({
-                                url: url,
-                                type: 'GET',
-                                dataType: 'json',
-                                statusCode: {
-                                    204: function () {
-                                        if($('#table-identifiers').is(':visible')){
-                                            // La gestion était automatique, on cache
-                                            $('#msg-identifier-disabled-enabled b').text("Disabled");
-                                            $('#table-identifiers').hide();
-                                            $('#btn-toggle-identifiers-disable-enable').removeClass("btn-danger");
-                                            $('#btn-toggle-identifiers-disable-enable').addClass("btn-primary");
-                                            $('#btn-toggle-identifiers-disable-enable').html('<i class="fas fa-toggle-on"></i> Enable');
-                                        }
-                                        else {
-                                            // La gestion n'était pas automatique, on affiche
-                                            $('#msg-identifier-disabled-enabled b').text("Enabled");
-                                            $('#td-class-prefix').text("C");
-                                            $('#td-property-prefix').text("P");
-                                            $('#td-next-class-identifier').text("C" + {{ namespace.currentClassNumber+1 }});
-                                            $('#td-next-property-identifier').text("C" + {{ namespace.currentPropertyNumber+1 }});
-                                            $('#table-identifiers ').show();
-                                            $('#btn-toggle-identifiers-disable-enable').removeClass("btn-primary");
-                                            $('#btn-toggle-identifiers-disable-enable').addClass("btn-danger");
-                                            $('#btn-toggle-identifiers-disable-enable').html('<i class="fas fa-toggle-off"></i> Disable');
-                                        }
-                                    }
-                                }
-                            });
-                        }
-                        dialog.modal('hide');
-                        return false;
-                    }
-                });
-
-        });
         // --- FIN ONGLET IDENTIFIERS ---
     </script>
     {% include 'comment/js-bock.html.twig'  with {'objectType': 'namespace', 'objectId' : namespace.id  } %}
