@@ -22,15 +22,14 @@
         <tr>
             <th>Namespace</th>
             {% if app.user is not null %}
-            <th>Enabled namespace(s)</th>
-            <th>Rights</th>
+            <th>Current namespace</th>
             {% endif %}
             <th>Last updated</th>
         </tr>
         </thead>
         <tbody>
         {% for namespace in namespaces  if namespace.isTopLevelNamespace %}
-            <tr>
+            <tr{% if is_granted('edit', namespace) %} class="success"{% endif %}>
                 <td>
                     <a href="{{ path('namespace_show', {
                         'id': namespace.id
@@ -40,16 +39,13 @@
                 </td>
                 {% if app.user is not null %}
                 <td>
-                    {% if namespace.childVersions|filter(v => v in activesNamespaces)|length > 0  %}
                         <a href="{{ path('user_show', {
                             'id': app.user.id,
                             '_fragment': 'my-current-namespaces'
                         }) }}">
-                            <i class="fas fa-edit"></i>
+                            {% if namespace.childVersions|filter(v => v in activesNamespaces)|length > 0  %}Yes{% else %}No{% endif %}
                         </a>
-                    {% endif %}
                 </td>
-                <td>{% if is_granted('edit', namespace) %}<i class="fas fa-user-edit" title="You have rights on this namespace"></i>{% endif %}</td>
                 {% endif %}
                 <td>{{ namespace.modificationTime|date('Y-m-d') }}</td>
             </tr>
