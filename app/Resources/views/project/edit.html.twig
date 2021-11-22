@@ -729,7 +729,7 @@
                         targets: 5,
                         render: function ( data, type, row, meta ) {
                             if((!row.isOngoing && row.wasClosedAt != null && row.endDate == null) || (row.isForcedPublication && row.isOngoing)){
-                                var urlApiClassesPropertiesProfileXML = '{{ path("api_classes_and_properties_by_profile_xml", {'lang': 'en', 'available-in-profile' : 'profileID'}) }}';
+                                var urlApiClassesPropertiesProfileXML = '{{ path("api_classes_and_properties_by_profile_xml", {'profile' : 'profileID'}) }}';
                                 urlApiClassesPropertiesProfileXML = urlApiClassesPropertiesProfileXML.replace("profileID", row.id);
 
                                 return '<a href="' + urlApiClassesPropertiesProfileXML + '" class="btn btn-primary" download="profile-'+ row.standardLabel +'.rdf"><i class="fas fa-code"></i> OWL-RDF</a>';
