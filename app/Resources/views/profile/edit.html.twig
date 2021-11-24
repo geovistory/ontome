@@ -1469,6 +1469,9 @@
                                 callback: function (result) {
                                     if (result) {
                                         removeClass(url);
+                                        setTimeout(function () {
+                                            location.reload()
+                                        }, 100);
                                     }
                                     else{
                                         $(".remove-class[data-id='"+selectedValue+"']").show(0);
