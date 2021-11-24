@@ -282,11 +282,12 @@ class PropertyRepository extends EntityRepository
                 INNER JOIN che.property_version pv ON pv.fk_property = v.pk_property
                 INNER JOIN che.namespace nsp ON nsp.pk_namespace = pv.fk_namespace_for_version
                 LEFT JOIN che.associates_referenced_namespace asrefns ON v.fk_namespace_for_version = asrefns.fk_namespace
+                WHERE pv.fk_namespace_for_version IN (".$in.")
                 GROUP BY nsp.pk_namespace, v.ancestors, v.identifier_in_namespace, v.pk_parent, v.parent_identifier, v.pk_property, v.identifier_property, v.fk_namespace_for_version, v.pk_range, v.identifier_range, v.fk_domain_namespace, v.fk_range_namespace;";
 
         $conn = $this->getEntityManager()->getConnection();
         $stmt = $conn->prepare($sql);
-        $stmt->execute(array_merge(array($classVersion->getClass()->getId()), $namespacesId));
+        $stmt->execute(array_merge(array($classVersion->getClass()->getId()), $namespacesId, $namespacesId));
 
         return $stmt->fetchAll();
     }
@@ -358,11 +359,12 @@ class PropertyRepository extends EntityRepository
                   che.property_version pv,
                   che.namespace nsp 
                 WHERE pv.fk_property = pk_property
-                AND nsp.pk_namespace = pv.fk_namespace_for_version;";
+                AND nsp.pk_namespace = pv.fk_namespace_for_version
+                AND pv.fk_namespace_for_version IN (".$in.");";
 
         $conn = $this->getEntityManager()->getConnection();
         $stmt = $conn->prepare($sql);
-        $stmt->execute(array_merge(array($classVersion->getClass()->getId()), $namespacesId));
+        $stmt->execute(array_merge(array($classVersion->getClass()->getId()), $namespacesId, $namespacesId));
 
         return $stmt->fetchAll();
     }
