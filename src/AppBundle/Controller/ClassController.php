@@ -50,15 +50,23 @@ class ClassController extends Controller
                 }
             }
         }
+        // Récupérer l'ensemble des namespaces root déjà utilisé pour le filtrage
+        $rootNamespacesId = [];
+        foreach ($namespacesId as $namespaceId){
+            $rootNamespacesId[] = $em->getRepository('AppBundle:OntoNamespace')->find($namespaceId)->getTopLevelNamespace()->getId();
+        }
 
         // Récupérer toutes les classes sans le filtrage
-        // N'afficher que les classes/propriétés de la dernière version publiée d'un espace de noms ou,
+        // N'afficher que les classes/propriétés de la version choisie par l'utilisateur sinon dernière publiée d'un espace de noms ou,
         // si l'espace n'a pas de version publiée, la version ongoing.
         // 1- Récuperer tous les roots
         $allRootNamespaces = $em->getRepository('AppBundle:OntoNamespace')->findBy(array("isTopLevelNamespace" => true));
-        // 2- Récupérer la bonne version (dernière publiée sinon ongoing)
-        $allNamespacesId = array();
-        foreach ($allRootNamespaces as $rootNamespace){
+        // 2- Récupérer la bonne version (choisie par l'utilisateur sinon dernière publiée sinon ongoing)
+        $allNamespacesId = $namespacesId;
+
+        // Enlever ceux déjà utilisés
+        $filteredRootNamespaces = array_filter($allRootNamespaces, function($v) use ($rootNamespacesId) {return !in_array($v->getId(), $rootNamespacesId);});
+        foreach ($filteredRootNamespaces as $rootNamespace){
             $defaultNamespace = null;
             foreach ($rootNamespace->getChildVersions() as $childVersion){
                 if($childVersion->getIsOngoing() and !$rootNamespace->getHasPublication()){
