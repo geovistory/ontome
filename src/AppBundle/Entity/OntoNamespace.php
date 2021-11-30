@@ -177,6 +177,11 @@ class OntoNamespace
     /**
      * @Assert\NotNull()
      * @ORM\Column(type="text")
+     * @Assert\Regex(
+     *     pattern="/^[a-z0-9](-?[a-z0-9])*$/",
+     *     match=true,
+     *     message="Your prefix can only contain alphanumeric characters without accents and dashes"
+     * )
      */
     private $rootNamespacePrefix;
 

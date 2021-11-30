@@ -849,27 +849,15 @@ class ProfileController  extends Controller
     {
         $this->denyAccessUnlessGranted('edit', $profile->getRootProfile());
         $em = $this->getDoctrine()->getManager();
-        $classNamespace = null;
-        /*$profile->removeClass($class);
-        $em->persist($profile);*/
 
-        $inferredClassId = $em->getRepository('AppBundle:OntoClass')
-            ->findInferredClassesByProfileAndClassId($profile, $class);
+        $profileAssociation = $em->getRepository('AppBundle:ProfileAssociation')
+            ->findOneBy(array('profile' => $profile->getId(), 'class' => $class->getId()));
 
+        $systemType = $em->getRepository('AppBundle:SystemType')->find(6); //systemType 6 = rejected
 
-        if($class->getId() == $inferredClassId) {
-            $profile->removeClass($class);
-        }
-        else {
-            $profileAssociation = $em->getRepository('AppBundle:ProfileAssociation')
-                ->findOneBy(array('profile' => $profile->getId(), 'class' => $class->getId()));
+        $profileAssociation->setSystemType($systemType);
 
-            $systemType = $em->getRepository('AppBundle:SystemType')->find(6); //systemType 6 = rejected
-
-            $profileAssociation->setSystemType($systemType);
-
-            $classNamespace = $profileAssociation->getEntityNamespaceForVersion();
-        }
+        $classNamespace = $profileAssociation->getEntityNamespaceForVersion();
 
         $profileAssociationsWithPropertiesToDeselect = $this->getProfileAssociationsWithPropertiesDeselectablesIfProfileAssociationWithThisClassWillDeselect($profile, $class);
         if(!empty($profileAssociationsWithPropertiesToDeselect)){

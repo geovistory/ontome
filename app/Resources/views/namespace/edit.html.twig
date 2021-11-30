@@ -1700,6 +1700,16 @@
 
         } );
 
+        $("#namespace_form_rootNamespacePrefix").keypress(function(e)
+        {
+            var test = /^(([a-z0-9]+)(-?))*$/; //regex
+            var value = $("#namespace_form_rootNamespacePrefix").val() + String.fromCharCode(e.keyCode); //get the charcode and convert to char
+            //console.log(String.fromCharCode(e.keyCode));
+            //console.log(value);
+            //console.log(test.test(value));
+            return test.test(value);
+        });
+
         // --- ONGLET IDENTIFIERS ---
         {% if namespace.classPrefix is not null %}
         $('#msg-identifier-disabled-enabled b').text("Enabled");
