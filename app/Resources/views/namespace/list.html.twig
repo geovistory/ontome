@@ -6,17 +6,33 @@
 {%  endblock %}
 
 {% block body %}
+    {% if app.user is not null %}
+        {% set userActiveProjectAssociation = app.user.userProjectAssociations|filter(v => v.project == app.user.currentActiveProject)|first %}
+        {% if userActiveProjectAssociation is not empty %}
+            {% set entityUserActiveProjectAssociations = userActiveProjectAssociation.entityUserProjectAssociations|filter(v => v.systemType.id == 25 and v.namespace is not null) %}
+            {% set activesNamespaces = entityUserActiveProjectAssociations|map(p => p.namespace)  %}
+            {% for n in activesNamespaces %}
+                {% set activesNamespaces = activesNamespaces|merge(n.allReferencedNamespaces) %}
+            {% endfor %}
+        {% else %}
+            {% set activesNamespaces = [] %}
+        {% endif %}
+        {# for n in activesNamespaces %}{{ n }}<br>{% endfor #}
+    {% endif %}
     <h3>Namespaces</h3>
     <table class="table table-striped" id="project-table">
         <thead>
         <tr>
             <th>Namespace</th>
+            {% if app.user is not null %}
+            <th>Current namespace</th>
+            {% endif %}
             <th>Last updated</th>
         </tr>
         </thead>
         <tbody>
         {% for namespace in namespaces  if namespace.isTopLevelNamespace %}
-            <tr>
+            <tr{% if is_granted('edit', namespace) %} class="success"{% endif %}>
                 <td>
                     <a href="{{ path('namespace_show', {
                         'id': namespace.id
@@ -24,6 +40,16 @@
                         {{ namespace }}
                     </a>
                 </td>
+                {% if app.user is not null %}
+                <td>
+                        <a href="{{ path('user_show', {
+                            'id': app.user.id,
+                            '_fragment': 'my-current-namespaces'
+                        }) }}">
+                            {% if namespace.childVersions|filter(v => v in activesNamespaces)|length > 0  %}Yes{% else %}No{% endif %}
+                        </a>
+                </td>
+                {% endif %}
                 <td>{{ namespace.modificationTime|date('Y-m-d') }}</td>
             </tr>
         {% endfor %}
