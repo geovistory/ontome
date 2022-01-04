@@ -121,9 +121,7 @@
                     <tr>
                         <th>Show</th>
                         <th>Notes</th>
-                        <th>Type</th>
                         <th>Language</th>
-                        <th>Namespace</th>
                         <th>Edit</th>
                     </tr>
                     </thead>
@@ -139,7 +137,6 @@
                                 <span>{{ textProperty.textProperty|striptags|raw }}</span>
                             </td>
                             <td>{{ textProperty.languageIsoCode}}</td>
-                            <td>WIP</td>
                             <td>
                                 <a href="{{ path('text_property_edit', {
                                     'id': textProperty.id
