@@ -45,8 +45,8 @@
                         </a>
                         {% endif %}
                     {% elseif textProperty.class is not null %}
-                        {{ textProperty.systemType.standardLabel|lower }} for the class {{ textProperty.class.classVersionForDisplay(textProperty.namespaceForVersion) }}
-                        {% if is_granted('edit', textProperty.class) %}
+                        {{ textProperty.systemType.standardLabel|lower }} for the class {{ textProperty.class.classVersionForDisplay() }}
+                        {% if is_granted('edit', textProperty.class) and textProperty.namespaceForVersion == textProperty.class.classVersionForDisplay.namespaceForVersion %}
                         <a href="{{ path('class_edit', {
                             id: textProperty.class.id
                         }) }}#definition"
@@ -64,8 +64,8 @@
                         </a>
                         {% endif %}
                     {% elseif textProperty.property is not null %}
-                        {{ textProperty.systemType.standardLabel|lower }} for the property {{ textProperty.property.propertyVersionForDisplay(textProperty.namespaceForVersion) }}
-                        {% if is_granted('edit', textProperty.property) %}
+                        {{ textProperty.systemType.standardLabel|lower }} for the property {{ textProperty.property.propertyVersionForDisplay() }}
+                        {% if is_granted('edit', textProperty.property) and textProperty.namespaceForVersion == textProperty.property.propertyVersionForDisplay.namespaceForVersion %}
                         <a href="{{ path('property_edit', {
                             id: textProperty.property.id
                         }) }}#definition"
