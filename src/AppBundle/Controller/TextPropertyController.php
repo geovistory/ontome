@@ -47,19 +47,18 @@ class TextPropertyController extends Controller
      */
     public function editAction(TextProperty $textProperty, Request $request)
     {
+        $this->denyAccessUnlessGranted('edit', $textProperty);
         if(!is_null($textProperty->getClassAssociation())){
             $object = $textProperty->getClassAssociation();
             $objectType = 'class-association';
             $redirectToRoute = 'class_association_edit';
             $redirectToRouteFragment = 'justifications';
-            $this->denyAccessUnlessGranted('edit', $object);
         }
         else if(!is_null($textProperty->getPropertyAssociation())){
             $object = $textProperty->getPropertyAssociation();
             $objectType = 'property-association';
             $redirectToRoute = 'property_association_edit';
             $redirectToRouteFragment = 'justifications';
-            $this->denyAccessUnlessGranted('edit', $object);
         }
         else if(!is_null($textProperty->getEntityAssociation())){
             $object = $textProperty->getEntityAssociation();
@@ -70,52 +69,46 @@ class TextPropertyController extends Controller
             }
 
             $redirectToRouteFragment = 'justifications';
-            $this->denyAccessUnlessGranted('edit', $object);
         }
         else if(!is_null($textProperty->getClass())){
             $object = $textProperty->getClass();
             $objectType = 'class';
-            if($textProperty->getClass()->getClassVersionForDisplay()->getNamespaceForVersion() == $this->getUser()->getCurrentOngoingNamespace()){
+            if($this->isGranted('edit', $textProperty->getClass())){
                 $redirectToRoute = 'class_edit';
             }
             else{
                 $redirectToRoute = 'class_show';
             }
             $redirectToRouteFragment = 'definition';
-            $this->denyAccessUnlessGranted('edit', $object);
         }
         else if(!is_null($textProperty->getProperty())){
             $object = $textProperty->getProperty();
             $objectType = 'property';
-            if($textProperty->getProperty()->getPropertyVersionForDisplay()->getNamespaceForVersion() == $this->getUser()->getCurrentOngoingNamespace()){
+            if($this->isGranted('edit', $textProperty->getProperty())){
                 $redirectToRoute = 'property_edit';
             }
             else{
                 $redirectToRoute = 'property_show';
             }
             $redirectToRouteFragment = 'definition';
-            $this->denyAccessUnlessGranted('edit', $object);
         }
         else if(!is_null($textProperty->getProject())){
             $object = $textProperty->getProject();
             $objectType = 'project';
             $redirectToRoute = 'project_edit';
             $redirectToRouteFragment = 'definition';
-            $this->denyAccessUnlessGranted('edit', $object);
         }
         else if(!is_null($textProperty->getProfile())){
             $object = $textProperty->getProfile();
             $objectType = 'profile';
             $redirectToRoute = 'profile_edit';
             $redirectToRouteFragment = 'identification';
-            $this->denyAccessUnlessGranted('edit', $object);
         }
         else if(!is_null($textProperty->getNamespace())){
             $object = $textProperty->getNamespace();
             $objectType = 'namespace';
             $redirectToRoute = 'namespace_edit';
             $redirectToRouteFragment = 'definition';
-            $this->denyAccessUnlessGranted('edit', $object);
         }
         else throw $this->createNotFoundException('The related object for the text property  n° '.$textProperty->getId().' does not exist. Please contact an administrator.');
 
@@ -172,7 +165,12 @@ class TextPropertyController extends Controller
             }
             $textProperty->setClassAssociation($associatedEntity);
             $associatedObject = $associatedEntity->getChildClass()->getClassVersionForDisplay();
-            $redirectToRoute = 'class_association_edit';
+            if($associatedEntity->isGranted('edit')){
+                $redirectToRoute = 'class_association_edit';
+            }
+            else{
+                $redirectToRoute = 'class_association_show';
+            }
             $redirectToRouteFragment = 'justifications';
         }
         else if($object === 'property-association') {
@@ -182,7 +180,12 @@ class TextPropertyController extends Controller
             }
             $textProperty->setPropertyAssociation($associatedEntity);
             $associatedObject = $associatedEntity->getChildProperty()->getPropertyVersionForDisplay();
-            $redirectToRoute = 'property_association_edit';
+            if($this->isGranted('edit', $associatedObject)){
+                $redirectToRoute = 'property_association_edit';
+            }
+            else{
+                $redirectToRoute = 'property_association_show';
+            }
             $redirectToRouteFragment = 'justifications';
         }
         else if($object === 'class') {
@@ -192,7 +195,12 @@ class TextPropertyController extends Controller
             }
             $textProperty->setClass($associatedEntity);
             $associatedObject = $associatedEntity->getClassVersionForDisplay();
-            $redirectToRoute = 'class_edit';
+            if($this->isGranted('edit', $associatedObject)){
+                $redirectToRoute = 'class_edit';
+            }
+            else{
+                $redirectToRoute = 'class_show';
+            }
             $redirectToRouteFragment = 'definition';
         }
         else if($object === 'property') {
@@ -202,7 +210,12 @@ class TextPropertyController extends Controller
             }
             $textProperty->setProperty($associatedEntity);
             $associatedObject = $associatedEntity->getPropertyVersionForDisplay();
-            $redirectToRoute = 'property_edit';
+            if($this->isGranted('edit', $associatedObject)){
+                $redirectToRoute = 'property_edit';
+            }
+            else{
+                $redirectToRoute = 'property_show';
+            }
             $redirectToRouteFragment = 'definition';
         }
         else if($object === 'project') {
@@ -212,7 +225,12 @@ class TextPropertyController extends Controller
             }
             $textProperty->setProject($associatedEntity);
             $associatedObject = $associatedEntity;
-            $redirectToRoute = 'project_edit';
+            if($this->isGranted('edit', $associatedObject)){
+                $redirectToRoute = 'project_edit';
+            }
+            else{
+                $redirectToRoute = 'project_show';
+            }
             $redirectToRouteFragment = 'definition';
         }
         else if($object === 'profile') {
@@ -222,7 +240,12 @@ class TextPropertyController extends Controller
             }
             $textProperty->setProfile($associatedEntity);
             $associatedObject = $associatedEntity;
-            $redirectToRoute = 'profile_edit';
+            if($associatedEntity->isGranted('edit')){
+                $redirectToRoute = 'profile_edit';
+            }
+            else{
+                $redirectToRoute = 'profile_show';
+            }
             $redirectToRouteFragment = 'definition';
         }
         else if($object === 'namespace') {
@@ -232,7 +255,13 @@ class TextPropertyController extends Controller
             }
             $textProperty->setNamespace($associatedEntity);
             $associatedObject = $associatedEntity;
-            $redirectToRoute = 'namespace_edit';
+
+            if($this->isGranted('edit', $associatedObject)){
+                $redirectToRoute = 'namespace_edit';
+            }
+            else{
+                $redirectToRoute = 'namespace_show';
+            }
 
             if ($type === 'owl:versionInfo') {
                 $redirectToRouteFragment = 'identification';
@@ -246,10 +275,19 @@ class TextPropertyController extends Controller
             }
             $textProperty->setEntityAssociation($associatedEntity);
             $associatedObject = $associatedEntity->getSource();
-
-            $redirectToRoute = 'entity_association_edit';
+            if($this->isGranted('edit', $associatedObject)){
+                $redirectToRoute = 'entity_association_edit';
+            }
+            else{
+                $redirectToRoute = 'entity_association_show';
+            }
             if($request->attributes->get('_route') == 'text_property_inverse_new'){
-                $redirectToRoute = 'entity_association_inverse_edit';
+                if($this->isGranted('edit', $associatedObject)){
+                    $redirectToRoute = 'entity_association_inverse_edit';
+                }
+                else{
+                    $redirectToRoute = 'entity_association_inverse_show';
+                }
             }
 
             $redirectToRouteFragment = 'justifications';
@@ -287,29 +325,6 @@ class TextPropertyController extends Controller
             $systemType = $em->getRepository('AppBundle:SystemType')->find(31); //systemType 31 = owl:versionInfo
         }
         else throw $this->createNotFoundException('The requested text property type "'.$type.'" does not exist!');
-
-        if(!(($object === "class" OR $object === "property") && ($type === 'internal-note' OR $type === 'context-note' OR $type === 'bibliographical-note'))){
-            $this->denyAccessUnlessGranted('edit', $associatedObject);
-        }
-        else{
-            $hasRight = false;
-            foreach($this->getUser()->getUserProjectAssociations() as $userProjectAssociation){
-                if($userProjectAssociation->getProject()->getId() == $this->getUser()->getCurrentActiveProject()->getId() && $userProjectAssociation->getPermission() <= 3){
-                    $hasRight = true;
-                }
-            }
-
-            if(is_null($this->getUser()->getCurrentOngoingNamespace()) && !$hasRight){
-                throw $this->createAccessDeniedException('Access Denied.');
-            }
-
-            if($object == "class" && $associatedObject->getNamespaceForVersion() != $this->getUser()->getCurrentOngoingNamespace()){
-                $redirectToRoute = 'class_show';
-            }
-            if($object == "property" && $associatedObject->getNamespaceForVersion() != $this->getUser()->getCurrentOngoingNamespace()){
-                $redirectToRoute = 'property_show';
-            }
-        }
 
         //ongoingNamespace associated to the textProperty for any kind of object, except Project or Profile
         if($object !== 'project' && $object !== 'profile' && $object !== 'namespace') {
@@ -396,28 +411,8 @@ class TextPropertyController extends Controller
         }
         else throw $this->createNotFoundException('The related object for the text property  n° '.$textProperty->getId().' does not exist. Please contact an administrator.');
 
-        if(!is_null($textProperty->getClassAssociation())){
-            $this->denyAccessUnlessGranted('validate', $object->getChildClass()->getClassVersionForDisplay());
-        }
-        else if(!is_null($textProperty->getPropertyAssociation())){
-            $this->denyAccessUnlessGranted('validate', $object->getChildProperty()->getPropertyVersionForDisplay());
-        }
-        else if(!is_null($textProperty->getClass())){
-            $this->denyAccessUnlessGranted('validate', $object->getClassVersionForDisplay());
-        }
-        else if(!is_null($textProperty->getProperty())){
-            $this->denyAccessUnlessGranted('validate', $object->getPropertyVersionForDisplay());
-        }
-        else if(!is_null($textProperty->getNamespace())){
-            $this->denyAccessUnlessGranted('validate', $object);
-        }
-        else if(!is_null($textProperty->getEntityAssociation())){
-            if($object->getSource() instanceof OntoClass){
-                $this->denyAccessUnlessGranted('validate', $object->getSource()->getClassVersionForDisplay());
-            }
-            elseif($object->getSource() instanceof Property){
-                $this->denyAccessUnlessGranted('validate', $object->getSource()->getPropertyVersionForDisplay());
-            }
+        if(!is_null($textProperty->getNamespaceForVersion()) or !is_null($textProperty->getNamespace())){
+            $this->denyAccessUnlessGranted('validate', $textProperty);
         }
         else{
             throw new AccessDeniedHttpException('The validation of this resource is forbidden.');
@@ -446,7 +441,7 @@ class TextPropertyController extends Controller
 
                 //if the status is not validated, then unvalidate the related class or property if necessary
                 if ($statusId != 26) {
-                    if (!is_null($textProperty->getClass())){
+                    if (!is_null($textProperty->getClass()) and $textProperty->getNamespaceForVersion() == $object->getClassVersionForDisplay()->getNamespaceForVersion()){
                         $cv = $object->getClassVersionForDisplay();
                         if (!is_null($cv->getValidationStatus())) {
                             if ($cv->getValidationStatus()->getId() != 27) {
@@ -458,7 +453,7 @@ class TextPropertyController extends Controller
                         else $cv->setValidationStatus(null);
                         $em->persist($cv);
                     }
-                    else if (!is_null($textProperty->getProperty())){
+                    else if (!is_null($textProperty->getProperty()) and $textProperty->getNamespaceForVersion() == $object->getPropertyVersionForDisplay()->getNamespaceForVersion()){
                         $pv = $object->getPropertyVersionForDisplay();
                         if (!is_null($pv->getValidationStatus())) {
                             if ($pv->getValidationStatus()->getId() != 27) {

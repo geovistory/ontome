@@ -297,8 +297,7 @@
 
                     {# Internal notes #}
                     {% set internalNoteType = 33 %}
-                    {% if is_granted('edit', classVersion.class.topLevelNamespace) %}
-                        {% if classVersion.class.textProperties|filter(v => v.namespaceForVersion.id == app.user.getCurrentOngoingNamespace.id and v.systemType.id == internalNoteType)|length > 0 %}
+                        {% if classVersion.class.textProperties|filter(v => is_granted('edit', v) and v.namespaceForVersion == app.user.getCurrentOngoingNamespace|default(null) and v.systemType.id == internalNoteType)|length > 0 %}
                         <div class="row">
                             <div class="col-lg-2">
                                 <p>Internal notes:</p>
@@ -310,7 +309,6 @@
                                 {% endfor %}
                             </div>
                         </div>
-                        {% endif %}
                     {% endif %}
 
                     {# Context notes #}
@@ -604,12 +602,7 @@
                     </thead>
                     <tbody>
                     {# Additional notes #}
-                    {% set listSystemType = [34,35] %}
-                    {% if is_granted('edit', classVersion.class.topLevelNamespace) %}
-                        {% set listSystemType = [33,34,35] %}
-                    {% endif %}
-
-                    {% for textProperty in classVersion.class.textProperties|filter(v => (is_granted('edit', classVersion.class.topLevelNamespace) and app.user is not null and v.namespaceForVersion.id == app.user.getCurrentOngoingNamespace.id and v.systemType.id == 33) or (v.namespaceForVersion.id in namespacesId and v.systemType.id in [34,35])) %}
+                    {% for textProperty in classVersion.class.textProperties|filter(v => (is_granted('edit', v) and app.user is not null and v.namespaceForVersion.id == app.user.getCurrentOngoingNamespace.id and v.systemType.id == 33) or ((v.namespaceForVersion.id in namespacesId or v.namespaceForVersion == app.user.getCurrentOngoingNamespace|default(null)) and v.systemType.id in [34,35])) %}
                         {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
                         <tr>
                             <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
@@ -620,7 +613,8 @@
                             <td>{{ textProperty.languageIsoCode }}</td>
                             <td>{{ textProperty.namespaceForVersion }}</td>
                             <td>
-                                {% if app.user is not null and textProperty.namespaceForVersion != app.user.currentOngoingNamespace %}
+                                {# if app.user is not null and textProperty.namespaceForVersion != app.user.currentOngoingNamespace #}
+                                {% if not is_granted('edit', textProperty) %}
                                 <a class="btn" href="{{ path('text_property_show', {
                                     'id': textProperty.id
                                 }) }}">

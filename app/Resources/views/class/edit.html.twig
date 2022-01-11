@@ -281,8 +281,7 @@
 
                     {# Internal notes #}
                     {% set internalNoteType = 33 %}
-                    {% if is_granted('edit', classVersion.class.topLevelNamespace) %}
-                        {% if classVersion.class.textProperties|filter(v => v.namespaceForVersion.id == app.user.getCurrentOngoingNamespace.id and v.systemType.id == internalNoteType)|length > 0 %}
+                        {% if classVersion.class.textProperties|filter(v => is_granted('edit', v) and v.namespaceForVersion.id == app.user.getCurrentOngoingNamespace.id and v.systemType.id == internalNoteType)|length > 0 %}
                             <div class="row">
                                 <div class="col-lg-2">
                                     <p>Internal notes:</p>
@@ -294,7 +293,6 @@
                                     {% endfor %}
                                 </div>
                             </div>
-                        {% endif %}
                     {% endif %}
 
                     {# Context notes #}
@@ -590,7 +588,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for textProperty in classVersion.class.textProperties|filter(v => (is_granted('edit', classVersion.class.topLevelNamespace) and app.user is not null and v.namespaceForVersion.id == app.user.getCurrentOngoingNamespace.id and v.systemType.id == 33) or (v.namespaceForVersion.id in namespacesId and v.systemType.id in [34,35])) %}
+                    {% for textProperty in classVersion.class.textProperties|filter(v => (is_granted('edit', v) and app.user is not null and v.namespaceForVersion.id == app.user.getCurrentOngoingNamespace.id and v.systemType.id == 33) or ((v.namespaceForVersion.id in namespacesId or v.namespaceForVersion == app.user.getCurrentOngoingNamespace|default(null)) and v.systemType.id in [34,35])) %}
                         {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
                         <tr>
                             <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
@@ -601,12 +599,20 @@
                             <td>{{ textProperty.languageIsoCode}}</td>
                             <td>{{ textProperty.namespaceForVersion }}</td>
                             <td>
-                                <a href="{{ path('text_property_edit', {
-                                    'id': textProperty.id
-                                }) }}"
-                                   class="btn btn-xs btn-success">
-                                    <span class="fa fa-edit"></span>
-                                </a>
+                                {% if not is_granted('edit', textProperty) %}
+                                    <a class="btn" href="{{ path('text_property_show', {
+                                        'id': textProperty.id
+                                    }) }}">
+                                        <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
+                                    </a>
+                                {% else %}
+                                    <a href="{{ path('text_property_edit', {
+                                        'id': textProperty.id
+                                    }) }}"
+                                       class="btn btn-xs btn-success">
+                                        <span class="fa fa-edit"></span>
+                                    </a>
+                                {% endif %}
                             </td>
                             <td>
                                 <a class="btn updateViewComment" href="{{ path('text_property_edit', {

@@ -43,13 +43,18 @@ class ClassController extends Controller
         }
         else{ // Utilisateur connecté et utilisant un autre projet
             $namespacesId = $em->getRepository('AppBundle:OntoNamespace')->findNamespacesIdByUser($this->getUser());
-            // Compléter avec les références parents (directs/indirects)
-            if(!is_null($this->getUser()) && !is_null($this->getUser()->getCurrentOngoingNamespace())){
-                foreach ($this->getUser()->getCurrentOngoingNamespace()->getAllReferencedNamespaces() as $refNs){
-                    if(!in_array($refNs->getId(), $namespacesId)){$namespacesId[] = $refNs->getId();}
-                }
+        }
+
+        // Compléter avec les références parents (directs/indirects)
+        $refsNsId = [];
+        foreach($namespacesId as $nsId){
+            $ns = $em->getRepository('AppBundle:OntoNamespace')->find($nsId);
+            foreach ($ns->getAllReferencedNamespaces() as $refNs){
+                if(!in_array($refNs->getId(), $refsNsId)){$refsNsId[] = $refNs->getId();}
             }
         }
+        $namespacesId = array_merge($namespacesId, $refsNsId);
+
         // Récupérer l'ensemble des namespaces root déjà utilisé pour le filtrage
         $rootNamespacesId = [];
         foreach ($namespacesId as $namespaceId){

@@ -1020,7 +1020,7 @@
                 initComplete: function(){
                     this.api().columns([5]).every(function(){
                         var column = this;
-                        var select = $('<br><select id="properties-namespace-select" style="width:100%;"><option value=""></option></select>')
+                        var select = $('<br><select id="classes-namespace-select" style="width:100%;"><option value=""></option></select>')
                             .appendTo($(column.header()))
                             .on('change', function(){
                                 var val = $.fn.dataTable.util.escapeRegex(
@@ -1040,6 +1040,33 @@
                             select.append('<option value="'+d+'">'+d+'</option>')
                         });
                     });
+
+                    this.api().columns([4]).every(function(){
+                        var column = this;
+                        var select = $('<br><select id="classes-status-select" style="width:100%;"><option value=""></option></select>')
+                            .appendTo($(column.header()))
+                            .on('change', function(){
+                                var val = $.fn.dataTable.util.escapeRegex(
+                                    $(this).val()
+                                );
+
+                                column
+                                    .search(val ? '^'+val+'$' : '', true, false)
+                                    .draw();
+                            });
+
+                        $(select).click(function(e){
+                            e.stopPropagation();
+                        });
+
+                        column.data().unique().sort().each(function(d, j){
+                            select.append('<option value="'+d+'">'+d+'</option>')
+                        });
+                    });
+                    var existsClassesSelectedInProfile = $("#classes-status-select option[value='selected']").length !== 0; //détermine si cette valeur est dans le select
+                    if (existsClassesSelectedInProfile) {
+                        $("#classes-status-select").val('selected').change(); //default filter on this column
+                    }
                 }
             });
 

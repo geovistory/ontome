@@ -7,6 +7,7 @@
                     {% if textProperty.classAssociation is not null %}
                         {% set childClass = textProperty.classAssociation.childClass %}
                         {{ childClass.classVersionForDisplay(textProperty.classAssociation.childClassNamespace).standardLabel }} – {{ childClass.identifierInNamespace }}: {{ textProperty.systemType.standardLabel }}
+                        {% if is_granted('edit', textProperty.classAssociation) %}
                         <a href="{{ path('class_association_edit', {
                             id: textProperty.classAssociation.id
                         }) }}"
@@ -14,9 +15,19 @@
                            role="button">
                             <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
                         </a>
+                        {% else %}
+                        <a href="{{ path('class_association_show', {
+                            id: textProperty.classAssociation.id
+                        }) }}"
+                           class="pull-right btn btn-link"
+                           role="button">
+                            <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
+                        </a>
+                        {% endif %}
                     {% elseif textProperty.propertyAssociation is not null %}
                         {% set childProperty = textProperty.propertyAssociation.childProperty %}
                         {{ childProperty.propertyVersionForDisplay(textProperty.propertyAssociation.childPropertyNamespace).standardLabel }} – {{ childProperty.identifierInNamespace }}: {{ textProperty.systemType.standardLabel }}
+                        {% if is_granted('edit', textProperty.propertyAssociation) %}
                         <a href="{{ path('property_association_edit', {
                             id: textProperty.propertyAssociation.id
                         }) }}"
@@ -24,8 +35,18 @@
                            role="button">
                             <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
                         </a>
+                        {% else %}
+                        <a href="{{ path('property_association_show', {
+                            id: textProperty.propertyAssociation.id
+                        }) }}"
+                           class="pull-right btn btn-link"
+                           role="button">
+                            <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
+                        </a>
+                        {% endif %}
                     {% elseif textProperty.class is not null %}
-                        {{ textProperty.systemType.standardLabel|lower }} for the class {{ textProperty.class.classVersionForDisplay(textProperty.namespaceForVersion) }}
+                        {{ textProperty.systemType.standardLabel|lower }} for the class {{ textProperty.class.classVersionForDisplay() }}
+                        {% if is_granted('edit', textProperty.class) and textProperty.namespaceForVersion == textProperty.class.classVersionForDisplay.namespaceForVersion %}
                         <a href="{{ path('class_edit', {
                             id: textProperty.class.id
                         }) }}#definition"
@@ -33,8 +54,18 @@
                            role="button">
                             <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
                         </a>
+                        {% else %}
+                        <a href="{{ path('class_show', {
+                            id: textProperty.class.id
+                        }) }}#definition"
+                           class="pull-right btn btn-link"
+                           role="button">
+                            <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
+                        </a>
+                        {% endif %}
                     {% elseif textProperty.property is not null %}
-                        {{ textProperty.systemType.standardLabel|lower }} for the property {{ textProperty.property.propertyVersionForDisplay(textProperty.namespaceForVersion) }}
+                        {{ textProperty.systemType.standardLabel|lower }} for the property {{ textProperty.property.propertyVersionForDisplay() }}
+                        {% if is_granted('edit', textProperty.property) and textProperty.namespaceForVersion == textProperty.property.propertyVersionForDisplay.namespaceForVersion %}
                         <a href="{{ path('property_edit', {
                             id: textProperty.property.id
                         }) }}#definition"
@@ -42,8 +73,18 @@
                            role="button">
                             <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
                         </a>
+                        {% else %}
+                        <a href="{{ path('property_show', {
+                            id: textProperty.property.id
+                        }) }}#definition"
+                           class="pull-right btn btn-link"
+                           role="button">
+                            <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
+                        </a>
+                        {% endif %}
                     {% elseif textProperty.project is not null %}
                         {{ textProperty.systemType.standardLabel|lower }} for the project {{ textProperty.project }}
+                        {% if is_granted('edit', textProperty.project) %}
                         <a href="{{ path('project_edit', {
                             id: textProperty.project.id
                         }) }}#definition"
@@ -51,8 +92,18 @@
                            role="button">
                             <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
                         </a>
+                        {% else %}
+                        <a href="{{ path('project_show', {
+                            id: textProperty.project.id
+                        }) }}#definition"
+                           class="pull-right btn btn-link"
+                           role="button">
+                            <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
+                        </a>
+                        {% endif %}
                     {% elseif textProperty.profile is not null %}
                         {{ textProperty.systemType.standardLabel|lower }} for the profile {{ textProperty.profile }}
+                        {% if is_granted('edit', textProperty.profile) %}
                         <a href="{{ path('profile_edit', {
                             id: textProperty.profile.id
                         }) }}#definition"
@@ -60,8 +111,18 @@
                            role="button">
                             <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
                         </a>
+                        {% else %}
+                        <a href="{{ path('profile_show', {
+                            id: textProperty.profile.id
+                        }) }}#definition"
+                           class="pull-right btn btn-link"
+                           role="button">
+                            <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
+                        </a>
+                        {% endif %}
                     {% elseif textProperty.namespace is not null %}
                         {{ textProperty.systemType.standardLabel }} for the namespace {{ textProperty.namespace }}
+                        {% if is_granted('edit', textProperty.namespace) %}
                         <a href="{{ path('namespace_edit', {
                             id: textProperty.namespace.id
                         }) }}#{{ textProperty.systemType.id == 31 ? 'identification' : 'definition' }}"
@@ -69,6 +130,15 @@
                            role="button">
                             <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
                         </a>
+                        {% else %}
+                        <a href="{{ path('namespace_show', {
+                            id: textProperty.namespace.id
+                        }) }}#{{ textProperty.systemType.id == 31 ? 'identification' : 'definition' }}"
+                           class="pull-right btn btn-link"
+                           role="button">
+                            <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
+                        </a>
+                        {% endif %}
                     {% elseif textProperty.entityAssociation is not null and app.request.attributes.get('_route') == 'text_property_inverse_new' %}
                         {% if textProperty.object is not null %}
                             {% if textProperty.class is not null or textProperty.property is not null %}
@@ -79,6 +149,7 @@
                         {% else %}
                             {{ textProperty.systemType.standardLabel }}
                         {% endif %}
+                        {% if is_granted('edit', textProperty.entityAssociation) %}
                         <a href="{{ path('entity_association_inverse_edit', {
                             id: textProperty.entityAssociation.id
                         }) }}#definition"
@@ -86,12 +157,22 @@
                            role="button">
                             <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
                         </a>
+                        {% else %}
+                        <a href="{{ path('entity_association_inverse_show', {
+                            id: textProperty.entityAssociation.id
+                        }) }}#definition"
+                           class="pull-right btn btn-link"
+                           role="button">
+                            <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
+                        </a>
+                        {% endif %}
                     {% elseif textProperty.entityAssociation is not null %}
                         {% if textProperty.entityAssociation.sourceClass is not null %}
                             {{ textProperty.entityAssociation.sourceClass.classVersionForDisplay(textProperty.entityAssociation.sourceNamespaceForVersion) }} {{ textProperty.entityAssociation.systemType.standardLabel }} {{ textProperty.entityAssociation.targetClass.classVersionForDisplay(textProperty.entityAssociation.targetNamespaceForVersion) }} : {{ textProperty.systemType.standardLabel }}
                         {% elseif textProperty.entityAssociation.sourceProperty is not null %}
                             {{ textProperty.entityAssociation.sourceProperty.propertyVersionForDisplay(textProperty.entityAssociation.sourceNamespaceForVersion) }} {{ textProperty.entityAssociation.systemType.standardLabel }} {{ textProperty.entityAssociation.targetProperty.propertyVersionForDisplay(textProperty.entityAssociation.targetNamespaceForVersion) }} : {{ textProperty.systemType.standardLabel }}
                         {% endif %}
+                        {% if is_granted('edit', textProperty.entityAssociation) %}
                         <a href="{{ path('entity_association_edit', {
                             id: textProperty.entityAssociation.id
                         }) }}#definition"
@@ -99,12 +180,22 @@
                            role="button">
                             <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
                         </a>
+                        {% else %}
+                        <a href="{{ path('entity_association_show', {
+                            id: textProperty.entityAssociation.id
+                        }) }}#definition"
+                           class="pull-right btn btn-link"
+                           role="button">
+                            <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
+                        </a>
+                        {% endif %}
                     {% endif %}
 
-                    {% if textProperty.class is not null and is_granted('validate', textProperty.class.classVersionForDisplay(textProperty.namespaceForVersion))
+                    {#  if textProperty.class is not null and is_granted('validate', textProperty.class.classVersionForDisplay(textProperty.namespaceForVersion))
                         or textProperty.property is not null and is_granted('validate', textProperty.property.propertyVersionForDisplay(textProperty.namespaceForVersion))
                         or textProperty.namespace is not null and is_granted('validate', textProperty.namespace)
-                    %}
+                    #}
+                    {% if is_granted('validate', textProperty) %}
                         <div class="dropdown inline-block">
                             <button class="btn btn-default dropdown-toggle" type="button" id="dropdown-validation" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
                                 {% if textProperty.validationStatus is null %}

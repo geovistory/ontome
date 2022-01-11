@@ -629,7 +629,7 @@ class ProfileController  extends Controller
 
     /**
      * @Route("/profile/{profile}/class/{class}/add", name="profile_class_association", requirements={"profile"="^([0-9]+)|(profileID){1}$", "class"="^([0-9]+)|(classID){1}$"})
-     * @Method({ "POST"})
+     * @Method({"POST"})
      * @param OntoClass  $class    The class to be associated with a profile
      * @param Profile  $profile    The profile to be associated with a namespace
      * @throws \Exception in case of unsuccessful association
@@ -668,6 +668,11 @@ class ProfileController  extends Controller
             $namespacesId = array();
             foreach($profile->getNamespaces() as $namespace){
                 $namespacesId[] = $namespace->getId();
+                foreach($namespace->getAllReferencedNamespaces() as $referencedNamespace){
+                    if(!in_array($referencedNamespace->getId(), $namespacesId)){
+                        $namespacesId[] = $referencedNamespace->getId();
+                    }
+                }
             }
             $classVersion = $em->getRepository("AppBundle:OntoClassVersion")->findClassVersionByClassAndNamespacesId($class, $namespacesId);
             $profileAssociation->setEntityNamespaceForVersion($classVersion->getNamespaceForVersion());
@@ -735,6 +740,11 @@ class ProfileController  extends Controller
             $namespacesId = array();
             foreach($profile->getNamespaces() as $namespace){
                 $namespacesId[] = $namespace->getId();
+                foreach($namespace->getAllReferencedNamespaces() as $referencedNamespace){
+                    if(!in_array($referencedNamespace->getId(), $namespacesId)){
+                        $namespacesId[] = $referencedNamespace->getId();
+                    }
+                }
             }
             $propertyVersion = $em->getRepository("AppBundle:PropertyVersion")->findPropertyVersionByPropertyAndNamespacesId($property, $namespacesId);
             $profileAssociation->setEntityNamespaceForVersion($propertyVersion->getNamespaceForVersion());
@@ -804,6 +814,11 @@ class ProfileController  extends Controller
             $namespacesId = array();
             foreach($profile->getNamespaces() as $namespace){
                 $namespacesId[] = $namespace->getId();
+                foreach($namespace->getAllReferencedNamespaces() as $referencedNamespace){
+                    if(!in_array($referencedNamespace->getId(), $namespacesId)){
+                        $namespacesId[] = $referencedNamespace->getId();
+                    }
+                }
             }
             $propertyVersion = $em->getRepository("AppBundle:PropertyVersion")->findPropertyVersionByPropertyAndNamespacesId($property, $namespacesId);
             $profileAssociation->setEntityNamespaceForVersion($propertyVersion->getNamespaceForVersion());

@@ -409,30 +409,48 @@
                         </div>
                     </div>
 
-                    {# Additional notes #}
-                    {% set listSystemType = [34,35] %}
-                    {% if app.user is not null %}
-                    {% for userProjectAssociation in propertyVersion.namespaceForVersion.projectForTopLevelNamespace.userProjectAssociations
-                        if userProjectAssociation.user.id == app.user.id and userProjectAssociation.permission <= 3 %}
-                        {# Seuls les admins et managers du projet peuvent voir les internal notes #}
-                        {% set listSystemType = [33,34,35] %}
-                    {% endfor %}
-                    {% endif %}
-                    {% set hasOneOrManyAdditionalNotes = false %}
-                    {% for textProperty in propertyVersion.property.textProperties
-                        if textProperty.namespaceForVersion.id in namespacesId
-                        and textProperty.systemType.id in listSystemType %}
-                        {% set hasOneOrManyAdditionalNotes = true %}
-                    {% endfor %}
-                    {% if hasOneOrManyAdditionalNotes %}
+                    {# Internal notes #}
+                    {% set internalNoteType = 33 %}
+                    {% if propertyVersion.property.textProperties|filter(v => is_granted('edit', v) and v.namespaceForVersion == app.user.getCurrentOngoingNamespace|default(null) and v.systemType.id == internalNoteType)|length > 0 %}
                         <div class="row">
                             <div class="col-lg-2">
-                                <p>Additional notes:</p>
+                                <p>Internal notes:</p>
                             </div>
                             <div class="col-lg-10">
                                 {% for textProperty in propertyVersion.property.textProperties
-                                    if textProperty.namespaceForVersion.id in namespacesId
-                                    and textProperty.systemType.id in listSystemType %}
+                                    if (textProperty.namespaceForVersion.id == app.user.getCurrentOngoingNamespace.id and textProperty.systemType.id == internalNoteType) %}
+                                    {{ textProperty.textProperty|raw }}
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    {# Context notes #}
+                    {% set contextNoteType = 34 %}
+                    {% if propertyVersion.property.textProperties|filter(v => v.namespaceForVersion.id in namespacesId and v.systemType.id == contextNoteType)|length > 0 %}
+                        <div class="row">
+                            <div class="col-lg-2">
+                                <p>Context notes:</p>
+                            </div>
+                            <div class="col-lg-10">
+                                {% for textProperty in propertyVersion.property.textProperties
+                                    if (textProperty.namespaceForVersion.id in namespacesId and textProperty.systemType.id == contextNoteType) %}
+                                    {{ textProperty.textProperty|raw }}
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    {# Bibliographical notes #}
+                    {% set bibliographicalNoteType = 35 %}
+                    {% if propertyVersion.property.textProperties|filter(v => v.namespaceForVersion.id in namespacesId and v.systemType.id == bibliographicalNoteType)|length > 0 %}
+                        <div class="row">
+                            <div class="col-lg-2">
+                                <p>Bibliographical notes:</p>
+                            </div>
+                            <div class="col-lg-10">
+                                {% for textProperty in propertyVersion.property.textProperties
+                                    if (textProperty.namespaceForVersion.id in namespacesId and textProperty.systemType.id == bibliographicalNoteType) %}
                                     {{ textProperty.textProperty|raw }}
                                 {% endfor %}
                             </div>
@@ -621,9 +639,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for textProperty in propertyVersion.property.textProperties
-                        if textProperty.namespaceForVersion.id in namespacesId
-                        and textProperty.systemType.id in listSystemType %}{# listSystemType est définie dans #summary #}
+                    {% for textProperty in classVersion.class.textProperties|filter(v => (is_granted('edit', v) and app.user is not null and v.namespaceForVersion.id == app.user.getCurrentOngoingNamespace.id and v.systemType.id == 33) or ((v.namespaceForVersion.id in namespacesId or v.namespaceForVersion == app.user.getCurrentOngoingNamespace|default(null)) and v.systemType.id in [34,35])) %}
                         {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
                         <tr>
                             <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
@@ -634,12 +650,20 @@
                             <td>{{ textProperty.languageIsoCode}}</td>
                             <td>{{ textProperty.namespaceForVersion }}</td>
                             <td>
-                                <a href="{{ path('text_property_edit', {
-                                    'id': textProperty.id
-                                }) }}"
-                                   class="btn btn-xs btn-success">
-                                    <span class="fa fa-edit"></span>
-                                </a>
+                                {% if not is_granted('edit', textProperty) %}
+                                    <a class="btn" href="{{ path('text_property_show', {
+                                        'id': textProperty.id
+                                    }) }}">
+                                        <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
+                                    </a>
+                                {% else %}
+                                    <a href="{{ path('text_property_edit', {
+                                        'id': textProperty.id
+                                    }) }}"
+                                       class="btn btn-xs btn-success">
+                                        <span class="fa fa-edit"></span>
+                                    </a>
+                                {% endif %}
                             </td>
                             <td>
                                 <a class="btn updateViewComment" href="{{ path('text_property_edit', {

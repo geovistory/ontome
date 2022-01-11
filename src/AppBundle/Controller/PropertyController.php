@@ -40,7 +40,7 @@ class PropertyController extends Controller
     public function listAction(){
         $em = $this->getDoctrine()->getManager();
 
-        // FILTRAGE : Récupérer les clés de namespaces à utiliser
+        // FILTRAGE : Récupérer les namespaces
         if(is_null($this->getUser()) || $this->getUser()->getCurrentActiveProject()->getId() == 21){ // Utilisateur non connecté OU connecté et utilisant le projet public
             $namespacesId = $em->getRepository('AppBundle:OntoNamespace')->findPublicProjectNamespacesId();
         }
@@ -49,20 +49,32 @@ class PropertyController extends Controller
         }
 
         // Compléter avec les références parents (directs/indirects)
-        if(!is_null($this->getUser()) && !is_null($this->getUser()->getCurrentOngoingNamespace())){
-            foreach ($this->getUser()->getCurrentOngoingNamespace()->getAllReferencedNamespaces() as $refNs){
-                if(!in_array($refNs->getId(), $namespacesId)){$namespacesId[] = $refNs->getId();}
+        $refsNsId = [];
+        foreach($namespacesId as $nsId){
+            $ns = $em->getRepository('AppBundle:OntoNamespace')->find($nsId);
+            foreach ($ns->getAllReferencedNamespaces() as $refNs){
+                if(!in_array($refNs->getId(), $refsNsId)){$refsNsId[] = $refNs->getId();}
             }
         }
+        $namespacesId = array_merge($namespacesId, $refsNsId);
 
-        // Récupérer toutes les propriétés  sans le filtrage
-        // N'afficher que les classes/propriétés de la dernière version publiée d'un espace de noms ou,
+        // Récupérer l'ensemble des namespaces root déjà utilisé pour le filtrage
+        $rootNamespacesId = [];
+        foreach ($namespacesId as $namespaceId){
+            $rootNamespacesId[] = $em->getRepository('AppBundle:OntoNamespace')->find($namespaceId)->getTopLevelNamespace()->getId();
+        }
+
+        // Récupérer toutes les classes sans le filtrage
+        // N'afficher que les classes/propriétés de la version choisie par l'utilisateur sinon dernière publiée d'un espace de noms ou,
         // si l'espace n'a pas de version publiée, la version ongoing.
         // 1- Récuperer tous les roots
         $allRootNamespaces = $em->getRepository('AppBundle:OntoNamespace')->findBy(array("isTopLevelNamespace" => true));
-        // 2- Récupérer la bonne version (dernière publiée sinon ongoing)
-        $allNamespacesId = array();
-        foreach ($allRootNamespaces as $rootNamespace){
+        // 2- Récupérer la bonne version (choisie par l'utilisateur sinon dernière publiée sinon ongoing)
+        $allNamespacesId = $namespacesId;
+
+        // Enlever ceux déjà utilisés
+        $filteredRootNamespaces = array_filter($allRootNamespaces, function($v) use ($rootNamespacesId) {return !in_array($v->getId(), $rootNamespacesId);});
+        foreach ($filteredRootNamespaces as $rootNamespace){
             $defaultNamespace = null;
             foreach ($rootNamespace->getChildVersions() as $childVersion){
                 if($childVersion->getIsOngoing() and !$rootNamespace->getHasPublication()){
