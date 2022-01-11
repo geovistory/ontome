@@ -326,29 +326,6 @@ class TextPropertyController extends Controller
         }
         else throw $this->createNotFoundException('The requested text property type "'.$type.'" does not exist!');
 
-        /*if(!(($object === "class" OR $object === "property") && ($type === 'internal-note' OR $type === 'context-note' OR $type === 'bibliographical-note'))){
-            $this->denyAccessUnlessGranted('edit', $associatedObject);
-        }
-        else{
-            $hasRight = false;
-            foreach($this->getUser()->getUserProjectAssociations() as $userProjectAssociation){
-                if($userProjectAssociation->getProject()->getId() == $this->getUser()->getCurrentActiveProject()->getId() && $userProjectAssociation->getPermission() <= 3){
-                    $hasRight = true;
-                }
-            }
-
-            if(is_null($this->getUser()->getCurrentOngoingNamespace()) && !$hasRight){
-                throw $this->createAccessDeniedException('Access Denied.');
-            }
-
-            if($object == "class" && $associatedObject->getNamespaceForVersion() != $this->getUser()->getCurrentOngoingNamespace()){
-                $redirectToRoute = 'class_show';
-            }
-            if($object == "property" && $associatedObject->getNamespaceForVersion() != $this->getUser()->getCurrentOngoingNamespace()){
-                $redirectToRoute = 'property_show';
-            }
-        }*/
-
         //ongoingNamespace associated to the textProperty for any kind of object, except Project or Profile
         if($object !== 'project' && $object !== 'profile' && $object !== 'namespace') {
             $textProperty->setNamespaceForVersion($this->getUser()->getCurrentOngoingNamespace());
@@ -434,29 +411,6 @@ class TextPropertyController extends Controller
         }
         else throw $this->createNotFoundException('The related object for the text property  n° '.$textProperty->getId().' does not exist. Please contact an administrator.');
 
-//        if(!is_null($textProperty->getClassAssociation())){
-//            $this->denyAccessUnlessGranted('validate', $object->getChildClass()->getClassVersionForDisplay());
-//        }
-//        else if(!is_null($textProperty->getPropertyAssociation())){
-//            $this->denyAccessUnlessGranted('validate', $object->getChildProperty()->getPropertyVersionForDisplay());
-//        }
-//        else if(!is_null($textProperty->getClass())){
-//            $this->denyAccessUnlessGranted('validate', $object->getClassVersionForDisplay());
-//        }
-//        else if(!is_null($textProperty->getProperty())){
-//            $this->denyAccessUnlessGranted('validate', $object->getPropertyVersionForDisplay());
-//        }
-//        else if(!is_null($textProperty->getNamespace())){
-//            $this->denyAccessUnlessGranted('validate', $object);
-//        }
-//        else if(!is_null($textProperty->getEntityAssociation())){
-//            if($object->getSource() instanceof OntoClass){
-//                $this->denyAccessUnlessGranted('validate', $object->getSource()->getClassVersionForDisplay());
-//            }
-//            elseif($object->getSource() instanceof Property){
-//                $this->denyAccessUnlessGranted('validate', $object->getSource()->getPropertyVersionForDisplay());
-//            }
-//        }
         if(!is_null($textProperty->getNamespaceForVersion()) or !is_null($textProperty->getNamespace())){
             $this->denyAccessUnlessGranted('validate', $textProperty);
         }
