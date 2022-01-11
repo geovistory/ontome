@@ -1223,17 +1223,17 @@ class ProfileController  extends Controller
                     }
                 }
                 // Cas 3 : Propriété non inherited : property.domain = class
-                elseif($profileAssociation->getProperty()->getPropertyVersionForDisplay($profileAssociation->getDomainNamespace())->getDomain() == $class){
+                elseif($profileAssociation->getProperty()->getPropertyVersionForDisplay($profileAssociation->getEntityNamespaceForVersion())->getDomain() == $class){
                     // est ce que range est inferred
-                    if(!in_array($profileAssociation->getProperty()->getPropertyVersionForDisplay($profileAssociation->getRangeNamespace())->getRange(), $selectedClass)){
+                    if(!in_array($profileAssociation->getProperty()->getPropertyVersionForDisplay($profileAssociation->getEntityNamespaceForVersion())->getRange(), $selectedClass)){
                         $profileAssociationsDeselectables[] = $profileAssociation;
                     }
 
                 }
                 // Cas 4 : Propriété non inherited : property.range = class
-                elseif($profileAssociation->getProperty()->getPropertyVersionForDisplay($profileAssociation->getRangeNamespace())->getRange() == $class){
+                elseif($profileAssociation->getProperty()->getPropertyVersionForDisplay($profileAssociation->getEntityNamespaceForVersion())->getRange() == $class){
                     // est ce que range est inferred
-                    if(!in_array($profileAssociation->getProperty()->getPropertyVersionForDisplay($profileAssociation->getDomainNamespace())->getDomain(), $selectedClass)){
+                    if(!in_array($profileAssociation->getProperty()->getPropertyVersionForDisplay($profileAssociation->getEntityNamespaceForVersion())->getDomain(), $selectedClass)){
                         $profileAssociationsDeselectables[] = $profileAssociation;
                     }
 
