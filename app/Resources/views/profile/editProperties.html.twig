@@ -133,7 +133,7 @@
                             urlGetDescendentClasses = urlGetDescendentClasses.replace("propertyID", row.propertyId);
                             return '<span class = "outgoing-property-range-switch" data-id="' + row.propertyId + '">' + row.rangeRootNamespacePrefix + ':' + data + '</span><span id="outgoing-property-range-select-' + row.propertyId + '" data-id="' + row.propertyId + '"></span>&nbsp;<a data-id="' + row.propertyId + '" data-url="' + urlGetDescendentClasses + '" class="select-subclass-range" data-toggle="tooltip" title="Select a child class"><i class="far fa-caret-square-down"></i></a>';
                         }
-                        else return row.domainRootNamespacePrefix + ':' + data;
+                        else return row.rangeRootNamespacePrefix + ':' + data;
                     }
                 }
             ]
