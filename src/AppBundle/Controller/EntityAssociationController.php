@@ -82,9 +82,9 @@ class EntityAssociationController extends Controller
         $namespacesId[] = $this->getUser()->getCurrentOngoingNamespace()->getId();
 
         // Sans oublier les namespaces références si indisponibles
-        foreach($this->getUser()->getCurrentOngoingNamespace()->getReferencedNamespaceAssociations() as $referencedNamespacesAssociation){
-            if(!in_array($referencedNamespacesAssociation->getReferencedNamespace()->getId(), $namespacesId)){
-                $namespacesId[] = $referencedNamespacesAssociation->getReferencedNamespace()->getId();
+        foreach($this->getUser()->getCurrentOngoingNamespace()->getAllReferencedNamespaces() as $referencedNamespaces){
+            if(!in_array($referencedNamespaces->getId(), $namespacesId)){
+                $namespacesId[] = $referencedNamespaces->getId();
             }
         }
 
