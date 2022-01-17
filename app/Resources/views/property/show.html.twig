@@ -929,7 +929,7 @@
                                 {% set route_params = {'id': association.parentProperty.id,  'namespaceFromUrlId': association.parentPropertyNamespace.id, '_fragment': 'property-hierarchy' } %}
 
                                 {# Vérification #}
-                                {% if association.parentPropertyNamespace.id not in propertyVersion.namespaceForVersion.selectedNamespacesId %}
+                                {% if association.parentPropertyNamespace.id not in association.namespaceForVersion.selectedNamespacesId %}
                                     {% set isGoodNamespace = false %}
                                     {% set route = 'namespace_show' %}
                                     {% set route_params = {'id': propertyVersion.namespaceForVersion.id,  '_fragment': 'mismatches' } %}
@@ -980,7 +980,7 @@
                                 {% endif %}
                             </td>
                             <td>
-                                {{ propertyVersion.namespaceForVersion }}
+                                {{ association.parentPropertyNamespace }}
                             </td>
                             <td>
                                 {% if association.textProperties is not null %}
