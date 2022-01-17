@@ -269,13 +269,13 @@ class PropertyRepository extends EntityRepository
                   parent_identifier AS \"parentClass\",
                   pk_property AS \"propertyId\",
                   identifier_property AS property,
-                  v.fk_namespace_for_version AS \"propertyNamespaceId\",
+                  pv.fk_namespace_for_version AS \"propertyNamespaceId\",
                   array_append(array_agg(asrefns.fk_referenced_namespace), v.fk_namespace_for_version) AS \"selectedNamespacesId\",
                   pk_range AS \"rangeId\",
                   identifier_range AS range,
                   v.fk_range_namespace AS \"rangeNamespaceId\",
                   v.fk_domain_namespace AS \"domainNamespaceId\",
-                  che.get_root_namespace_prefix(che.get_root_namespace(v.fk_namespace_for_version)) AS \"propertyRootNamespacePrefix\",
+                  che.get_root_namespace_prefix(che.get_root_namespace(pv.fk_namespace_for_version)) AS \"propertyRootNamespacePrefix\",
                   replace(ancestors, '|', '→') AS ancestors,
                   (SELECT label FROM che.get_namespace_labels(nsp.pk_namespace) WHERE language_iso_code = 'en') AS namespace
                 FROM che.class_outgoing_inherited_properties(?, ARRAY[".$in."]::integer[]) v
@@ -283,7 +283,7 @@ class PropertyRepository extends EntityRepository
                 INNER JOIN che.namespace nsp ON nsp.pk_namespace = pv.fk_namespace_for_version
                 LEFT JOIN che.associates_referenced_namespace asrefns ON v.fk_namespace_for_version = asrefns.fk_namespace
                 WHERE pv.fk_namespace_for_version IN (".$in.")
-                GROUP BY nsp.pk_namespace, v.ancestors, v.identifier_in_namespace, v.pk_parent, v.parent_identifier, v.pk_property, v.identifier_property, v.fk_namespace_for_version, v.pk_range, v.identifier_range, v.fk_domain_namespace, v.fk_range_namespace;";
+                GROUP BY nsp.pk_namespace, v.ancestors, v.identifier_in_namespace, v.pk_parent, v.parent_identifier, v.pk_property, v.identifier_property, v.fk_namespace_for_version, pv.fk_namespace_for_version, v.pk_range, v.identifier_range, v.fk_domain_namespace, v.fk_range_namespace;";
 
         $conn = $this->getEntityManager()->getConnection();
         $stmt = $conn->prepare($sql);
@@ -347,12 +347,12 @@ class PropertyRepository extends EntityRepository
                   identifier_domain AS domain,
                   identifier_property AS property,
                   pk_property AS \"propertyId\",
-                  v.fk_namespace_for_version AS \"propertyNamespaceId\",
+                  pv.fk_namespace_for_version AS \"propertyNamespaceId\",
                   pk_parent AS \"rangeId\",
                   parent_identifier AS range,
                   v.fk_range_namespace AS \"rangeNamespaceId\",
                   v.fk_domain_namespace AS \"domainNamespaceId\",
-                  che.get_root_namespace_prefix(che.get_root_namespace(v.fk_namespace_for_version)) AS \"propertyRootNamespacePrefix\",
+                  che.get_root_namespace_prefix(che.get_root_namespace(pv.fk_namespace_for_version)) AS \"propertyRootNamespacePrefix\",
                   replace(ancestors, '|', '→') AS ancestors,
                   (SELECT label FROM che.get_namespace_labels(nsp.pk_namespace) WHERE language_iso_code = 'en') AS namespace
                 FROM che.class_ingoing_inherited_properties(?, ARRAY[".$in."]::integer[]) v,
