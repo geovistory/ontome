@@ -126,7 +126,7 @@ class TextPropertyVoter extends Voter
                     return false;
                 }
                 //Txtp associated with Namespace
-                if($userProjectAssociation->getProject() === $textProperty->getNamespaceForVersion()->getProjectForTopLevelNamespace() && $userProjectAssociation->getPermission() <= 2){
+                if($userProjectAssociation->getProject() === $textProperty->getNamespace()->getProjectForTopLevelNamespace() && $userProjectAssociation->getPermission() <= 2){
                     return true;
                 }
             }
