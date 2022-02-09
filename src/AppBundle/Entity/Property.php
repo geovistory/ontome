@@ -580,4 +580,21 @@ class Property
         return $collection->first();
     }
 
+    /**
+     * @return ArrayCollection|Mixed Retourne un arbre hierarchique de propriétés dans un NS donné
+     */
+    public function getHierarchicalTreeProperties($namespace, ArrayCollection $tree=null, $depth=1){
+        if(is_null($tree)){$tree = new ArrayCollection;}
+        if($this->getParentPropertyAssociations()->filter(function($v) use ($namespace){return $v->getNamespaceForVersion() == $namespace;})->isEmpty()){
+            return $tree;
+        }
+        else
+        {
+            foreach ($this->getParentPropertyAssociations()->filter(function($v) use ($namespace){return $v->getNamespaceForVersion() == $namespace;}) as $parentPropertyAssociation){
+                $tree->add(array($parentPropertyAssociation->getChildProperty(),$depth));
+                $tree = $parentPropertyAssociation->getChildProperty()->getHierarchicalTreeProperties($namespace, $tree, $depth+1);
+            }
+            return $tree;
+        }
+    }
 }
