@@ -24,6 +24,7 @@ use AppBundle\Form\NamespacePublicationForm;
 use AppBundle\Form\NamespaceQuickAddForm;
 use Doctrine\Common\Collections\ArrayCollection;
 use PhpOffice\PhpWord\Element\Footer;
+use PhpOffice\PhpWord\Element\TextBreak;
 use PhpOffice\PhpWord\Element\TextRun;
 use PhpOffice\PhpWord\IOFactory;
 use PhpOffice\PhpWord\PhpWord;
@@ -767,6 +768,7 @@ class NamespaceController  extends Controller
 
         // Creating the new document...
         $phpWord = new \PhpOffice\PhpWord\PhpWord();
+        \PhpOffice\PhpWord\Settings::setOutputEscapingEnabled(true);
         $phpWord->getSettings()->setThemeFontLang(new Language(Language::EN_GB));
         $phpWord->setDefaultFontName("Times New Roman");
 
@@ -1231,13 +1233,31 @@ class NamespaceController  extends Controller
             }
             if(isset($textp_scopenote)){
                 $section->addTextBreak();
-                $section->addText('Scope note: ', "gras");
-                $string = htmlspecialchars($textp_scopenote->getTextProperty());
-                $string = str_replace(
-                    array("&lt;p&gt;", "&lt;/p&gt;", "&lt;a&gt;",  "&lt;/a&gt;", "&lt;ul&gt;",  "&lt;/ul&gt;", "&lt;li&gt;", "&lt;/li&gt;", "&lt;i&gt;", "&lt;/i&gt;", "&lt;b&gt;", "&lt;/b&gt;", "&lt;ol&gt;", "&lt;/ol&gt;"),
-                    array("<p>", "</p>", "<a>", "</a>", "<ul>", "</ul>", "<li>", "</li>", "<i>", "</i>", "<b>", "</b>", "<ol>", "</ol>"),
-                    $string);
+                $section->addText('Scope note:', "gras");
+                //$table = $section->addTable();
+                //$table->addRow();
+                //$table->addCell(1000);
+                //$cell = $table->addCell(8000);
+                $string = $textp_scopenote->getTextProperty();
                 \PhpOffice\PhpWord\Shared\Html::addHtml($section, $string, false, false);
+
+                // Impossible de mettre l'indentation avec addHtml ou dans l'HTML, phpword ne prévoit pas ça. DONC bricolage by Alex...
+                // Récupérer le dernier élément concerné et mettre l'indentation.
+                $arrayElements = $section->getElements();
+                $lastElement = end($arrayElements);
+                if($lastElement->getFontStyle() !== null){
+                    $lastElement->getFontStyle()->getParagraph()->setIndentation(array('left' => 800));
+                }
+                elseif($lastElement->getParagraphStyle() !== null){
+                    foreach (array_reverse($arrayElements) as $element){
+                        if($element->getText() != 'Scope note:'){
+                            $lastElements[] = $element->getParagraphStyle()->setIndentation(array('left' => 800));;
+                        }
+                        else{
+                            break;
+                        }
+                    }
+                }
             }
 
             $i = 0;
@@ -1249,12 +1269,26 @@ class NamespaceController  extends Controller
                             $section->addText('Examples:', "gras");
                             $i++;
                         }
-                        $string = htmlspecialchars($textProperty->getTextProperty());
-                        $string = str_replace(
-                            array("&lt;p&gt;", "&lt;/p&gt;", "&lt;a&gt;",  "&lt;/a&gt;", "&lt;ul&gt;",  "&lt;/ul&gt;", "&lt;li&gt;", "&lt;/li&gt;", "&lt;i&gt;", "&lt;/i&gt;", "&lt;b&gt;", "&lt;/b&gt;", "&lt;ol&gt;", "&lt;/ol&gt;"),
-                            array("<p>", "</p>", "<a>", "</a>", "<ul>", "</ul>", "<li>", "</li>", "<i>", "</i>", "<b>", "</b>", "<ol>", "</ol>"),
-                            $string);
+                        $string = $textProperty->getTextProperty();
                         \PhpOffice\PhpWord\Shared\Html::addHtml($section, $string, false, false);
+
+                        // Impossible de mettre l'indentation avec addHtml ou dans l'HTML, phpword ne prévoit pas ça. DONC bricolage by Alex...
+                        // Récupérer le dernier élément concerné et mettre l'indentation.
+                        $arrayElements = $section->getElements();
+                        $lastElement = end($arrayElements);
+                        if($lastElement->getFontStyle() !== null){
+                            $lastElement->getFontStyle()->getParagraph()->setIndentation(array('left' => 800));
+                        }
+                        elseif($lastElement->getParagraphStyle() !== null){
+                            foreach (array_reverse($arrayElements) as $element){
+                                if($element->getText() != 'Examples:'){
+                                    $lastElements[] = $element->getParagraphStyle()->setIndentation(array('left' => 800));;
+                                }
+                                else{
+                                    break;
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -1360,9 +1394,27 @@ class NamespaceController  extends Controller
             }
             if(isset($textp_scopenote)){
                 $section->addTextBreak();
-                $textRun = $section->addTextRun();
-                $textRun->addText('Scope note: ', "gras");
-                $textRun->addText(htmlentities(utf8_encode(html_entity_decode(($textp_scopenote->getTextProperty()))), ENT_XML1), null, array('indentation' => array('left' => 800)));
+                $section->addText('Scope note:', "gras");
+                $string = $textp_scopenote->getTextProperty();
+                \PhpOffice\PhpWord\Shared\Html::addHtml($section, $string, false, false);
+
+                // Impossible de mettre l'indentation avec addHtml ou dans l'HTML, phpword ne prévoit pas ça. DONC bricolage by Alex...
+                // Récupérer le dernier élément concerné et mettre l'indentation.
+                $arrayElements = $section->getElements();
+                $lastElement = end($arrayElements);
+                if($lastElement->getFontStyle() !== null){
+                    $lastElement->getFontStyle()->getParagraph()->setIndentation(array('left' => 800));
+                }
+                elseif($lastElement->getParagraphStyle() !== null){
+                    foreach (array_reverse($arrayElements) as $element){
+                        if($element->getText() != 'Scope note:'){
+                            $lastElements[] = $element->getParagraphStyle()->setIndentation(array('left' => 800));;
+                        }
+                        else{
+                            break;
+                        }
+                    }
+                }
             }
 
             $i = 0;
@@ -1374,8 +1426,26 @@ class NamespaceController  extends Controller
                             $section->addText('Examples:', "gras");
                             $i++;
                         }
-                        //\PhpOffice\PhpWord\Shared\Html::addHtml($section, $textProperty->getTextProperty(), false, false);
-                        $section->addText(htmlentities(utf8_encode(html_entity_decode(($textProperty->getTextProperty()))), ENT_XML1), null, array('indentation' => array('left' => 800)));
+                        $string = $textProperty->getTextProperty();
+                        \PhpOffice\PhpWord\Shared\Html::addHtml($section, $string, false, false);
+
+                        // Impossible de mettre l'indentation avec addHtml ou dans l'HTML, phpword ne prévoit pas ça. DONC bricolage by Alex...
+                        // Récupérer le dernier élément concerné et mettre l'indentation.
+                        $arrayElements = $section->getElements();
+                        $lastElement = end($arrayElements);
+                        if($lastElement->getFontStyle() !== null){
+                            $lastElement->getFontStyle()->getParagraph()->setIndentation(array('left' => 800));
+                        }
+                        elseif($lastElement->getParagraphStyle() !== null){
+                            foreach (array_reverse($arrayElements) as $element){
+                                if($element->getText() != 'Examples:'){
+                                    $lastElements[] = $element->getParagraphStyle()->setIndentation(array('left' => 800));;
+                                }
+                                else{
+                                    break;
+                                }
+                            }
+                        }
                     }
                 }
             }
