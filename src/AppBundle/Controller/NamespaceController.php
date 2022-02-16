@@ -778,7 +778,12 @@ class NamespaceController  extends Controller
         $phpWord->addTitleStyle(3, array('bold' => true, 'size' => 16));
 
         $phpWord->addFontStyle("gras", array('bold' => true));
+        $phpWord->addFontStyle("italic11", array('italic' => true, 'size' => 11));
 
+        $fancyTableStyleName2 = 'Fancy Table 2';
+        $fancyTableStyle = array('borderSize' => 1, 'borderColor' => '000000', 'unit' => \PhpOffice\PhpWord\SimpleType\TblWidth::TWIP);
+        $fancyTableFirstRowStyle = array();
+        $phpWord->addTableStyle($fancyTableStyleName2, $fancyTableStyle, $fancyTableFirstRowStyle);
 
         // Couverture
         $section = $phpWord->addSection(array('vAlign' => VerticalJc::CENTER));
@@ -807,12 +812,17 @@ class NamespaceController  extends Controller
         //-- Licence
         $section->addText('License information: Creative Commons Licence Attribution-ShareAlike 4.0 International', null, $paragrapheCentre);
 
-
-        $footer = $section->addFooter(Footer::AUTO);
-        $textRun = $footer->addTextRun(array('alignment' => Jc::CENTER));
+        $centerTableStyleName = 'Center Table';
+        $centerTableStyle = array('alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER);
+        $centerTableStyleFirstRow = array();
+        $phpWord->addTableStyle($centerTableStyleName, $centerTableStyle, $centerTableStyleFirstRow);
+        $footer = $section->addFooter();
+        $textRun = $footer->addTextRun(array('alignment' => Jc::END));
         $textRun->addField('PAGE', array('format' => 'ARABIC'));
-        $textRun->addText(' of ');
-        $textRun->addField('NUMPAGES', array('format' => 'ARABIC'));
+        //$textRun = $footer->addTextRun(array('alignment' => Jc::CENTER));
+        //$textRun->addField('PAGE', array('format' => 'ARABIC'));
+        //$textRun->addText(' of ');
+        //$textRun->addField('NUMPAGES', array('format' => 'ARABIC'));
 
         // Blank page
         $section = $phpWord->addSection();
@@ -857,7 +867,7 @@ class NamespaceController  extends Controller
             // Soit le CIDOC CRM est un espace de réf direct ou indirect
             if($nsCRM->count() == 1 and $directNamespacesReferences->count() != 1)
             {
-                $section->addTitle($namespace->getStandardLabel().' class hierarchy, aligned with portions from the '.implode($standardLabelDirectNamespacesReferences->toArray(), ', ').'and the CIDOC-CRM class hierarchies', 2);
+                $section->addTitle($namespace->getStandardLabel().' class hierarchy, aligned with portions from the '.implode($standardLabelDirectNamespacesReferences->toArray(), ', ').' and the CIDOC CRM class hierarchies', 2);
             }
             $section->addTextBreak(2);
             $section->addText('This class hierarchy lists:');
@@ -901,42 +911,55 @@ class NamespaceController  extends Controller
             $section->addTitle($namespace->getStandardLabel().' Class hierarchy', 2);
         }
 
-        $section->addText('Table 1: Class Hierarchy');
         $section->addTextBreak();
+        $section->addText('Table 1: Class Hierarchy', 'italic11');
         $fancyTableStyleName = 'Fancy Table';
-        $fancyTableStyle = array('borderSize' => 1, 'borderColor' => '000000');
+        $fancyTableStyle = array('borderSize' => 1, 'borderColor' => 'FFFFFF');
         $fancyTableFirstRowStyle = array();
         $phpWord->addTableStyle($fancyTableStyleName, $fancyTableStyle, $fancyTableFirstRowStyle);
 
-        // Peut on construire un tableau hierarchique ? (trouver une classe ayant Thing (214) en superclasse)
-        $rootClasses = $namespace->getClassAssociations()->filter(function ($v){return $v->getParentClass()->getId() == 214;})->map(function(ClassAssociation $ca){return $ca->getChildClass();});;
-        foreach ($rootClasses as $rootClass){
-            if(!isset($nbColumn)){
-                $nbColumn = max(array_map(function($v){return $v[1];}, $rootClass->getHierarchicalTreeClasses($namespace)->toArray()))+1;
+        // Peut on construire un tableau hierarchique ? (trouver les classes qui n'ont pas de superclass dans les ns ref)
+        $nsRef = $namespace->getAllReferencedNamespaces();
+        $nsRef->add($namespace);
+        $rootClasses = $namespace->getClasses()->filter(function($v) use ($nsRef){return $v->getChildClassAssociations()->filter(function($w) use ($nsRef){return $nsRef->contains($w->getNamespaceForVersion()) and $nsRef->contains($w->getParentClassNamespace());})->count() == 0;});
+        foreach($namespace->getAllReferencedNamespaces() as $referencedNamespace){
+            $rootClassesRef = $referencedNamespace->getClasses()->filter(function ($v) use ($nsRef){return $v->getChildClassAssociations()->filter(function($w) use ($nsRef){return $nsRef->contains($w->getNamespaceForVersion()) and $nsRef->contains($w->getParentClassNamespace());})->count() == 0;});
+            foreach ($rootClassesRef as $rootClassRef){
+                $rootClasses->add($rootClassRef);
             }
-            else{
-                $calcColumn = max(array_map(function($v){return $v[1];}, $rootClass->getHierarchicalTreeClasses($namespace)->toArray()))+1;
-                if($nbColumn < $calcColumn){
-                    $nbColumn = $calcColumn;
+        }
+
+        $nbColumn = 2;
+        foreach ($rootClasses as $rootClass){
+            foreach ($rootClass->getHierarchicalTreeClasses($namespace) as $tuple){
+                if($nbColumn < $tuple[1]){
+                    $nbColumn = $tuple[1]+2;
                 }
             }
         }
+
         // tableau
         $table = $section->addTable($fancyTableStyleName);
         foreach ($rootClasses as $rootClass){
-            $classVersion = $rootClass->getClassVersionForDisplay($namespace);
+            $classVersion = $rootClass->getClassVersions()->filter(function($v) use ($nsRef){return $nsRef->contains($v->getNamespaceForVersion());})->first();
             $table->addRow();
-            $table->addCell(200, array('borderColor' => 'FFFFFF', 'valign' => 'center', 'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER))->addText($rootClass->getIdentifierInNamespace());
-            $table->addCell(2000, array('valign' => 'center', 'gridSpan' => $nbColumn))->addText($classVersion->getStandardLabel());
+            $cell = $table->addCell(1000);
+            $cell->addText($rootClass->getIdentifierInNamespace());
+            //$table->addCell(null, array('gridSpan' => $nbColumn))->addText($classVersion->getStandardLabel());
+            $cell = $table->addCell(4000);
+            $cell->getStyle()->setGridSpan($nbColumn-1);
+            $cell->addText($classVersion->getStandardLabel());
             foreach($rootClass->getHierarchicalTreeClasses($namespace) as $tuple){
                 $table->addRow();
-                $table->addCell(200, array('valign' => 'center'))->addText('    '.$tuple[0]->getIdentifierInNamespace());
+                $table->addCell(1000)->addText($tuple[0]->getIdentifierInNamespace());
                 for ($i = 0; $i <= $tuple[1]; $i++){
                     if($i < $tuple[1]) {
-                        $table->addCell(200, array('valign' => 'center'))->addText('-');
+                        $table->addCell(400)->addText('-');
                     }
                     else{
-                        $table->addCell(2000,array('valign' => 'center', 'gridSpan' => ($nbColumn-$i)))->addText($tuple[0]->getClassVersionForDisplay($namespace)->getStandardLabel());
+                        $cell = $table->addCell(4000);
+                        $cell->getStyle()->setGridSpan($nbColumn-$i-1);
+                        $cell->addText($tuple[0]->getClassVersionForDisplay($tuple[2])->getStandardLabel());
                     }
                 }
             }
@@ -966,14 +989,31 @@ class NamespaceController  extends Controller
         if($classesVersionWithNSref->count() >0){
             $section->addTextBreak();
             $section->addTitle('List of external classes used in '.$namespace->getStandardLabel(), 2);
-            $section->addText('Table 2: List of external classes grouped by model and ordered by model and then by class identifier.');
             $section->addTextBreak();
-            $table = $section->addTable($fancyTableStyleName);
+            $section->addText('Table 2: List of external classes grouped by model and ordered by model (exception: CRMbase always goes first) and then by class identifier.', 'italic11');
+
+            $table = $section->addTable($fancyTableStyleName2);
             $table->addRow();
-            $table->addCell(2000)->addText('Class identifier', array('bold' => true));
-            $table->addCell(2000)->addText('Class name', array('bold' => true));
-            $table->addCell(2000)->addText('Model', array('bold' => true));
-            $table->addCell(2000)->addText('Version', array('bold' => true));;
+            $table->addCell(2250)->addText('Class identifier', array('bold' => true));
+            $table->addCell(2250)->addText('Class name', array('bold' => true));
+            $table->addCell(2250)->addText('Model', array('bold' => true));
+            $table->addCell(2250)->addText('Version', array('bold' => true));
+
+            // Trier d'abord CRM puis les autres
+            $iterator = $classesVersionWithNSref->getIterator();
+            $iterator->uasort(function ($a,$b){
+                if($a->getNamespaceForVersion()->getTopLevelNamespace()->getId() == 7){
+                    return false;
+                }
+                elseif($b->getNamespaceForVersion()->getTopLevelNamespace()->getId() == 7){
+                    return true;
+                }
+                else{
+                    return strnatcasecmp($a->getNamespaceForVersion()->getStandardLabel(), $b->getNamespaceForVersion()->getStandardLabel());
+                }
+            });
+            $classesVersionWithNSref = new ArrayCollection(iterator_to_array($iterator));
+
             foreach ($classesVersionWithNSref as $classVersion){
                 $table->addRow();
                 $table->addCell(2000)->addText($classVersion->getClass()->getIdentifierInNamespace());
@@ -1015,7 +1055,7 @@ class NamespaceController  extends Controller
             // Soit le CIDOC CRM est un espace de réf direct ou indirect
             if($nsCRM->count() == 1 and $directNamespacesReferences->count() != 1)
             {
-                $section->addTitle($namespace->getStandardLabel().' property hierarchy, aligned with portions from the '.implode($standardLabelDirectNAmespacesReferences->toArray(), ', ').'and the CIDOC-CRM property hierarchies', 2);
+                $section->addTitle($namespace->getStandardLabel().' property hierarchy, aligned with portions from the '.implode($standardLabelDirectNAmespacesReferences->toArray(), ', ').' and the CIDOC CRM property hierarchies', 2);
             }
             $section->addTextBreak(2);
             $section->addText('This property hierarchy lists:');
@@ -1042,33 +1082,33 @@ class NamespaceController  extends Controller
         else{ //Pas de NS réferences
             $section->addTitle($namespace->getStandardLabel().' Property hierarchy', 2);
         }
-
-        $section->addText('Table 3: Property Hierarchy');
         $section->addTextBreak();
-        $fancyTableStyleName = 'Fancy Table';
-        $fancyTableStyle = array();
-        $fancyTableFirstRowStyle = array();
-        $phpWord->addTableStyle($fancyTableStyleName, $fancyTableStyle, $fancyTableFirstRowStyle);
+        $section->addText('Table 3: Property Hierarchy', 'italic11');
 
         // Peut on construire un tableau hierarchique ? (trouver les propriétés sans parents)
-        $rootProperties = $namespace->getProperties()->filter(function ($v){return $v->getChildPropertyAssociations()->count() == 0;});
+        $rootProperties = $namespace->getProperties()->filter(function ($v) use ($namespace){return $v->getChildPropertyAssociations()->filter(function($w) use ($namespace){return $w->getParentPropertyNamespace() == $namespace;})->count() == 0;});
 
         // tableau
-        $table = $section->addTable($fancyTableStyleName);
+        $table = $section->addTable($fancyTableStyleName2);
+        $table->addRow();
+        $table->addCell(2000)->addText('Property id', array('bold' => true));
+        $table->addCell(2000)->addText('Property Name', array('bold' => true));
+        $table->addCell(2000)->addText('Entity – Domain', array('bold' => true));
+        $table->addCell(2000)->addText('Entity - Range', array('bold' => true));;
         foreach ($rootProperties as $rootProperty){
             $propertyVersion = $rootProperty->getPropertyVersionForDisplay($namespace);
             $table->addRow();
             $table->addCell(1000, array('valign' => 'center', 'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER))->addText($rootProperty->getIdentifierInNamespace());
             $table->addCell(2000, array('valign' => 'center'))->addText($propertyVersion->getStandardLabel());
             if(!is_null($propertyVersion->getDomain())){
-                $table->addCell(2000, array('valign' => 'center'))->addText(html_entity_decode(strip_tags($propertyVersion->getDomain()->getClassVersionForDisplay($propertyVersion->getDomainNamespace()))));
+                $table->addCell(2000, array('valign' => 'center'))->addText(html_entity_decode(strip_tags($propertyVersion->getDomain()->getClassVersionForDisplay($propertyVersion->getDomainNamespace())->getInvertedLabel())));
             }
             else{
                 $table->addCell(2000, array('valign' => 'center'))->addText('');
             }
 
             if(!is_null($propertyVersion->getRange())) {
-                $table->addCell(2000, array('valign' => 'center'))->addText(html_entity_decode(strip_tags($propertyVersion->getRange()->getClassVersionForDisplay($propertyVersion->getRangeNamespace()))));
+                $table->addCell(2000, array('valign' => 'center'))->addText(html_entity_decode(strip_tags($propertyVersion->getRange()->getClassVersionForDisplay($propertyVersion->getRangeNamespace())->getInvertedLabel())));
             }
             else{
                 $table->addCell(2000, array('valign' => 'center'))->addText('');
@@ -1078,14 +1118,14 @@ class NamespaceController  extends Controller
                 $table->addCell(1000, array('valign' => 'center'))->addText($tuple[0]->getIdentifierInNamespace());
                 $table->addCell(2000, array('valign' => 'center'))->addText(str_repeat('-  ', $tuple[1]).$tuple[0]->getPropertyVersionForDisplay($namespace)->getStandardLabel());
                 if(!is_null($tuple[0]->getPropertyVersionForDisplay($namespace)->getDomain())) {
-                    $table->addCell(2000, array('valign' => 'center'))->addText(html_entity_decode(strip_tags($tuple[0]->getPropertyVersionForDisplay($namespace)->getDomain()->getClassVersionForDisplay($tuple[0]->getPropertyVersionForDisplay($namespace)->getDomainNamespace()))));
+                    $table->addCell(2000, array('valign' => 'center'))->addText(html_entity_decode(strip_tags($tuple[0]->getPropertyVersionForDisplay($namespace)->getDomain()->getClassVersionForDisplay($tuple[0]->getPropertyVersionForDisplay($namespace)->getDomainNamespace())->getInvertedLabel())));
                 }
                 else{
                     $table->addCell(2000, array('valign' => 'center'))->addText('');
                 }
 
                 if(!is_null($tuple[0]->getPropertyVersionForDisplay($namespace)->getDomain())) {
-                    $table->addCell(2000, array('valign' => 'center'))->addText(html_entity_decode(strip_tags($tuple[0]->getPropertyVersionForDisplay($namespace)->getRange()->getClassVersionForDisplay($tuple[0]->getPropertyVersionForDisplay($namespace)->getRangeNamespace()))));
+                    $table->addCell(2000, array('valign' => 'center'))->addText(html_entity_decode(strip_tags($tuple[0]->getPropertyVersionForDisplay($namespace)->getRange()->getClassVersionForDisplay($tuple[0]->getPropertyVersionForDisplay($namespace)->getRangeNamespace())->getInvertedLabel())));
                 }
                 else{
                     $table->addCell(2000, array('valign' => 'center'))->addText('');
@@ -1108,8 +1148,8 @@ class NamespaceController  extends Controller
         if($propertiesVersionWithNSref->count() >0){
             $section->addTextBreak();
             $section->addTitle('List of external properties used in '.$namespace->getStandardLabel(), 2);
-            $section->addText('Table 2: List of external properties grouped by model and ordered by model and then by property identifier.');
-
+            $section->addTextBreak();
+            $section->addText('Table 4: List of external properties grouped by model and ordered by model and then by property identifier.', 'italic11');
             $table = $section->addTable($fancyTableStyleName);
             foreach ($propertiesVersionWithNSref as $propertyVersion){
                 $table->addRow();
@@ -1191,15 +1231,13 @@ class NamespaceController  extends Controller
             }
             if(isset($textp_scopenote)){
                 $section->addTextBreak();
-                $textRun = $section->addTextRun();
-                $textRun->addText('Scope note: ', "gras");
-                /*if($classVersion->getClass()->getId() == 19){
-                    echo utf8_encode($textp_scopenote->getTextProperty());
-                    echo "<br>";
-                    echo $textp_scopenote->getTextProperty();
-                    die;
-                }*/
-                $textRun->addText(htmlentities(utf8_encode(html_entity_decode(($textp_scopenote->getTextProperty()))), ENT_XML1), array('indentation' => array('left' => 800)));
+                $section->addText('Scope note: ', "gras");
+                $string = htmlspecialchars($textp_scopenote->getTextProperty());
+                $string = str_replace(
+                    array("&lt;p&gt;", "&lt;/p&gt;", "&lt;a&gt;",  "&lt;/a&gt;", "&lt;ul&gt;",  "&lt;/ul&gt;", "&lt;li&gt;", "&lt;/li&gt;", "&lt;i&gt;", "&lt;/i&gt;", "&lt;b&gt;", "&lt;/b&gt;", "&lt;ol&gt;", "&lt;/ol&gt;"),
+                    array("<p>", "</p>", "<a>", "</a>", "<ul>", "</ul>", "<li>", "</li>", "<i>", "</i>", "<b>", "</b>", "<ol>", "</ol>"),
+                    $string);
+                \PhpOffice\PhpWord\Shared\Html::addHtml($section, $string, false, false);
             }
 
             $i = 0;
@@ -1211,8 +1249,12 @@ class NamespaceController  extends Controller
                             $section->addText('Examples:', "gras");
                             $i++;
                         }
-                        $section->addText(htmlentities(utf8_encode(html_entity_decode(($textProperty->getTextProperty()))), ENT_XML1), null, array('indentation' => array('left' => 800)));
-                        //\PhpOffice\PhpWord\Shared\Html::addHtml($section, strip_tags(str_replace(['""'],['"'],$textProperty->getTextProperty()), '<p><a><ul><li>'), false, false);
+                        $string = htmlspecialchars($textProperty->getTextProperty());
+                        $string = str_replace(
+                            array("&lt;p&gt;", "&lt;/p&gt;", "&lt;a&gt;",  "&lt;/a&gt;", "&lt;ul&gt;",  "&lt;/ul&gt;", "&lt;li&gt;", "&lt;/li&gt;", "&lt;i&gt;", "&lt;/i&gt;", "&lt;b&gt;", "&lt;/b&gt;", "&lt;ol&gt;", "&lt;/ol&gt;"),
+                            array("<p>", "</p>", "<a>", "</a>", "<ul>", "</ul>", "<li>", "</li>", "<i>", "</i>", "<b>", "</b>", "<ol>", "</ol>"),
+                            $string);
+                        \PhpOffice\PhpWord\Shared\Html::addHtml($section, $string, false, false);
                     }
                 }
             }
@@ -1320,7 +1362,7 @@ class NamespaceController  extends Controller
                 $section->addTextBreak();
                 $textRun = $section->addTextRun();
                 $textRun->addText('Scope note: ', "gras");
-                $textRun->addText(htmlentities(utf8_encode(html_entity_decode(($textp_scopenote->getTextProperty()))), ENT_XML1));
+                $textRun->addText(htmlentities(utf8_encode(html_entity_decode(($textp_scopenote->getTextProperty()))), ENT_XML1), null, array('indentation' => array('left' => 800)));
             }
 
             $i = 0;
@@ -1332,6 +1374,7 @@ class NamespaceController  extends Controller
                             $section->addText('Examples:', "gras");
                             $i++;
                         }
+                        //\PhpOffice\PhpWord\Shared\Html::addHtml($section, $textProperty->getTextProperty(), false, false);
                         $section->addText(htmlentities(utf8_encode(html_entity_decode(($textProperty->getTextProperty()))), ENT_XML1), null, array('indentation' => array('left' => 800)));
                     }
                 }

@@ -614,13 +614,16 @@ class OntoClass
      */
     public function getHierarchicalTreeClasses($namespace, ArrayCollection $tree=null, $depth=1){
         if(is_null($tree)){$tree = new ArrayCollection;}
-        if($this->getParentClassAssociations()->filter(function($v) use ($namespace){return $v->getNamespaceForVersion() == $namespace;})->isEmpty()){
+        $nsRef = $namespace->getAllReferencedNamespaces();
+        $nsRef->add($namespace);
+        if($this->getParentClassAssociations()->filter(function($v) use ($nsRef){return $nsRef->contains($v->getNamespaceForVersion());})->isEmpty()){
             return $tree;
         }
         else
         {
-            foreach ($this->getParentClassAssociations()->filter(function($v) use ($namespace){return $v->getNamespaceForVersion() == $namespace;}) as $parentClassAssociation){
-                $tree->add(array($parentClassAssociation->getChildClass(),$depth));
+            foreach ($this->getParentClassAssociations()->filter(function($v) use ($nsRef){return $nsRef->contains($v->getNamespaceForVersion());}) as $parentClassAssociation)
+            {
+                $tree->add(array($parentClassAssociation->getChildClass(),$depth, $parentClassAssociation->getChildClassNamespace()));
                 $tree = $parentClassAssociation->getChildClass()->getHierarchicalTreeClasses($namespace, $tree, $depth+1);
             }
             return $tree;
