@@ -1250,7 +1250,7 @@ class NamespaceController  extends Controller
                 }
                 elseif($lastElement->getParagraphStyle() !== null){
                     foreach (array_reverse($arrayElements) as $element){
-                        if($element->getText() != 'Scope note:'){
+                        if($element->getText() != 'Scope note:'){ // On remonte les éléments crées par addHtml jusqu'à l'élément crée par le dernier addText
                             $lastElements[] = $element->getParagraphStyle()->setIndentation(array('left' => 800));;
                         }
                         else{
@@ -1281,7 +1281,7 @@ class NamespaceController  extends Controller
                         }
                         elseif($lastElement->getParagraphStyle() !== null){
                             foreach (array_reverse($arrayElements) as $element){
-                                if($element->getText() != 'Examples:'){
+                                if($element->getText() != 'Examples:'){ // On remonte les éléments crées par addHtml jusqu'à l'élément crée par le dernier addText
                                     $lastElements[] = $element->getParagraphStyle()->setIndentation(array('left' => 800));;
                                 }
                                 else{
@@ -1407,7 +1407,7 @@ class NamespaceController  extends Controller
                 }
                 elseif($lastElement->getParagraphStyle() !== null){
                     foreach (array_reverse($arrayElements) as $element){
-                        if($element->getText() != 'Scope note:'){
+                        if($element->getText() != 'Scope note:'){ // On remonte les éléments crées par addHtml jusqu'à l'élément crée par le dernier addText
                             $lastElements[] = $element->getParagraphStyle()->setIndentation(array('left' => 800));;
                         }
                         else{
@@ -1430,7 +1430,7 @@ class NamespaceController  extends Controller
                         \PhpOffice\PhpWord\Shared\Html::addHtml($section, $string, false, false);
 
                         // Impossible de mettre l'indentation avec addHtml ou dans l'HTML, phpword ne prévoit pas ça. DONC bricolage by Alex...
-                        // Récupérer le dernier élément concerné et mettre l'indentation.
+                        // Récupérer les derniers éléments concernés et mettre l'indentation.
                         $arrayElements = $section->getElements();
                         $lastElement = end($arrayElements);
                         if($lastElement->getFontStyle() !== null){
@@ -1438,7 +1438,7 @@ class NamespaceController  extends Controller
                         }
                         elseif($lastElement->getParagraphStyle() !== null){
                             foreach (array_reverse($arrayElements) as $element){
-                                if($element->getText() != 'Examples:'){
+                                if($element->getText() != 'Examples:'){ // On remonte les éléments crées par addHtml jusqu'à l'élément crée par le dernier addText
                                     $lastElements[] = $element->getParagraphStyle()->setIndentation(array('left' => 800));;
                                 }
                                 else{
