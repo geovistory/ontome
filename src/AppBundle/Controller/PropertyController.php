@@ -257,7 +257,7 @@ class PropertyController extends Controller
 
     /**
      * @Route("/property/{id}", name="property_show", requirements={"id"="^([0-9]+)|(propertyID){1}$"})
-     * @Route("/property/{id}/namespace/{namespaceFromUrlId}", name="property_show_with_version", requirements={"id"="^[0-9]+$", "namespaceFromUrlId"="^[0-9]+$"})
+     * @Route("/property/{id}/namespace/{namespaceFromUrlId}", name="property_show_with_version", requirements={"id"="^([0-9]+)|(propertyID){1}$", "namespaceFromUrlId"="^([0-9]+)|(namespaceID){1}$"})
      * @param Property $property
      * @param int|null $namespaceFromUrlId
      * @return Response the rendered template

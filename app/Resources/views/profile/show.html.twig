@@ -259,9 +259,9 @@
                             <thead>
                             <tr>
                                 <th>Identifier</th>
-                                <th>Class</th>
-                                <th>Association type</th>
+                                <th>Class label</th>
                                 <th>Namespace</th>
+                                <th>Association type</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -276,10 +276,8 @@
                                         }) }}">{{ class.standardLabel }}
                                         </a>
                                     </td>
+                                    <td>{{ class.namespace }}</td>
                                     <td>{{ class.associationType }}</td>
-                                    <td>
-                                        {{ class.namespace }}
-                                    </td>
                                 </tr>
                             {% endfor %}
                             </tbody>
@@ -315,7 +313,7 @@
                                 <th></th>
                                 <th>Range</th>
                                 <th>Namespace</th>
-                                <th>Status</th>
+                                <th>Association type</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -330,7 +328,8 @@
                                                 'id': profileAssociation.domain.id,
                                                 'namespaceFromUrlId': profileAssociation.domainNamespace.id
                                             }) }}">
-                                                {{ profileAssociation.domain.classVersionForDisplay(profileAssociation.domainNamespace) }}
+                                                {% set domainClassVersion = profileAssociation.domain.classVersionForDisplay(profileAssociation.domainNamespace) %}
+                                                {{ domainClassVersion.namespaceForVersion.topLevelNamespace.rootNamespacePrefix }}:{{ domainClassVersion.class.identifierInNamespace }} {{ domainClassVersion.standardLabel }}
                                             </a>
                                         {% elseif profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).domain is not null  %}
                                             {# Propriété non héritée #}
@@ -338,7 +337,8 @@
                                                 'id': profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).domain.id,
                                                 'namespaceFromUrlId': profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).domainNamespace.id
                                             }) }}">
-                                                {{ profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).domain.classVersionForDisplay(profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).domainNamespace) }}
+                                                {% set domainClassVersion = profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).domain.classVersionForDisplay(profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).domainNamespace) %}
+                                                {{ domainClassVersion.namespaceForVersion.topLevelNamespace.rootNamespacePrefix }}:{{ domainClassVersion.class.identifierInNamespace }} {{ domainClassVersion.standardLabel }}
                                             </a>
                                         {% endif %}
                                     </td>
@@ -394,7 +394,8 @@
                                                 'id': profileAssociation.range.id,
                                                 'namespaceFromUrlId': profileAssociation.rangeNamespace.id
                                             }) }}">
-                                                {{ profileAssociation.range.classVersionForDisplay(profileAssociation.rangeNamespace) }}
+                                                {% set rangeClassVersion = profileAssociation.range.classVersionForDisplay(profileAssociation.rangeNamespace) %}
+                                                {{ rangeClassVersion.namespaceForVersion.topLevelNamespace.rootNamespacePrefix }}:{{ rangeClassVersion.class.identifierInNamespace }} {{ rangeClassVersion.standardLabel }}
                                             </a>
                                         {% elseif profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).range is not null %}
                                             {# propriété non héritée #}
@@ -402,7 +403,8 @@
                                                 'id': profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).range.id,
                                                 'namespaceFromUrlId': profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).rangeNamespace.id
                                             }) }}">
-                                                {{ profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).range.classVersionForDisplay(profileAssociation.rangeNamespace) }}
+                                                {% set rangeClassVersion = profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).range.classVersionForDisplay(profileAssociation.rangeNamespace) %}
+                                                {{ rangeClassVersion.namespaceForVersion.topLevelNamespace.rootNamespacePrefix }}:{{ rangeClassVersion.class.identifierInNamespace }} {{ rangeClassVersion.standardLabel }}
                                             </a>
                                         {% endif %}
                                     </td>
@@ -603,9 +605,9 @@
                     { type: 'natural-ci', targets: 0, width: '1%', className: 'text-right' }
                 ],
                 "autoWidth": false,
-                order: [[ 1, 'asc' ]],
+                order: [[ 0, 'asc' ]],
                 initComplete: function(){
-                    this.api().columns([3]).every(function(){
+                    this.api().columns([2]).every(function(){
                         var column = this;
                         var select = $('<br><select id="classes-namespace-select" style="width:100%;"><option value=""></option></select>')
                             .appendTo($(column.header()))
@@ -628,31 +630,42 @@
                         });
                     });
 
-                    this.api().columns([2]).every(function(){
+                    this.api().columns([3]).every(function(){
                         var column = this;
-                        var select = $('<br><select id="classes-status-select" style="width:100%;"><option value=""></option></select>')
+                        var select = $('<br><select id="classes-status-select" style="width:100%;"></select>')
                             .appendTo($(column.header()))
                             .on('change', function(){
                                 var val = $.fn.dataTable.util.escapeRegex(
                                     $(this).val()
                                 );
 
-                                column
-                                    .search(val ? '^'+val+'$' : '', true, false)
-                                    .draw();
+                                if(val == "Selected and inferred") {
+                                    column
+                                        .search(val ? '^Selected$|^Inferred$' : '', true, false)
+                                        .draw();
+                                }
+                                else{
+                                    column
+                                        .search(val ? '^'+val+'$' : '', true, false)
+                                        .draw();
+                                }
                             });
 
                         $(select).click(function(e){
                             e.stopPropagation();
                         });
 
-                        column.data().unique().sort().each(function(d, j){
-                            select.append('<option value="'+d+'">'+d+'</option>')
-                        });
+                        select.append('<option value="Selected and inferred">Selected and inferred</option>');
+                        select.append('<option value="Selected">Selected</option>');
+                        select.append('<option value="Inferred">Inferred</option>');
+                        select.append('<option value="Rejected">Rejected</option>');
+                        /*column.data().unique().sort().each(function(d, j){
+                            select.append('<option value="'+d+'">'+d+'</option>');
+                        });*/
                     });
-                    var existsClassesSelectedInProfile = $("#classes-status-select option[value='selected']").length !== 0; //détermine si cette valeur est dans le select
+                    var existsClassesSelectedInProfile = $("#classes-status-select option[value='Selected and inferred']").length !== 0; //détermine si cette valeur est dans le select
                     if (existsClassesSelectedInProfile) {
-                        $("#classes-status-select").val('selected').change(); //default filter on this column
+                        $("#classes-status-select").val('Selected and inferred').change(); //default filter on this column
                     }
                 }});
             $('#properties-table').DataTable({
@@ -686,7 +699,7 @@
                     });
                     this.api().columns([7]).every(function(){
                         var column = this;
-                        var select = $('<select id="properties-status-select" style="width:100%;"><option value=""></option></select>')
+                        var select = $('<select id="properties-status-select" style="width:100%;"></select>')
                             .appendTo($(column.header()))
                             .on('change', function(){
                                 var val = $.fn.dataTable.util.escapeRegex(
@@ -708,9 +721,9 @@
                     });
                 }
             });
-            var existsSelectedInProfile = $("#properties-status-select option[value='Selected in profile']").length !== 0; //détermine si cette valeur est dans le select
+            var existsSelectedInProfile = $("#properties-status-select option[value='Selected']").length !== 0; //détermine si cette valeur est dans le select
             if (existsSelectedInProfile) {
-                $("#properties-status-select").val('Selected in profile').change(); //default filter on this column
+                $("#properties-status-select").val('Selected').change(); //default filter on this column
             }
             $('#descriptions-table').DataTable();
             $('#additional-notes-table').DataTable();
