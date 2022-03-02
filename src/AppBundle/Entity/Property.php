@@ -591,7 +591,7 @@ class Property
         else
         {
             foreach ($this->getParentPropertyAssociations()->filter(function($v) use ($namespace){return $v->getNamespaceForVersion() == $namespace;}) as $parentPropertyAssociation){
-                $tree->add(array($parentPropertyAssociation->getChildProperty(),$depth));
+                $tree->add(array($parentPropertyAssociation->getChildProperty(),$depth, $parentPropertyAssociation->getChildPropertyNamespace()));
                 $tree = $parentPropertyAssociation->getChildProperty()->getHierarchicalTreeProperties($namespace, $tree, $depth+1);
             }
             return $tree;

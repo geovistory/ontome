@@ -616,12 +616,12 @@ class OntoClass
         if(is_null($tree)){$tree = new ArrayCollection;}
         $nsRef = $namespace->getAllReferencedNamespaces();
         $nsRef->add($namespace);
-        if($this->getParentClassAssociations()->filter(function($v) use ($nsRef){return $nsRef->contains($v->getNamespaceForVersion());})->isEmpty()){
+        if($this->getParentClassAssociations()->filter(function($v) use ($namespace){return $namespace == $v->getNamespaceForVersion();})->isEmpty()){
             return $tree;
         }
         else
         {
-            foreach ($this->getParentClassAssociations()->filter(function($v) use ($nsRef){return $nsRef->contains($v->getNamespaceForVersion());}) as $parentClassAssociation)
+            foreach ($this->getParentClassAssociations()->filter(function($v) use ($namespace){return $namespace == $v->getNamespaceForVersion();}) as $parentClassAssociation)
             {
                 $tree->add(array($parentClassAssociation->getChildClass(),$depth, $parentClassAssociation->getChildClassNamespace()));
                 $tree = $parentClassAssociation->getChildClass()->getHierarchicalTreeClasses($namespace, $tree, $depth+1);
