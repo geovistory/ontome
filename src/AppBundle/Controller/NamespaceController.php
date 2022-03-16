@@ -739,14 +739,18 @@ class NamespaceController  extends Controller
     }
 
      /**
-     * @Route("/namespace/{namespace}/document", name="namespace_document", requirements={"namespace"="^[0-9]+$"})
+      * @Route("/namespace/{namespace}/document", name="namespace_document", requirements={"namespace"="^([0-9]+)|(namespaceID){1}$"})
      * @Method({ "GET"})
      * @param OntoNamespace  $namespace    The namespace
      * @return BinaryFileResponse
      */
-    public function getNamespaceOdt(OntoNamespace $namespace)
+    public function getNamespaceOdt(OntoNamespace $namespace, Request $request)
     {
         $em = $this->getDoctrine()->getManager();
+
+        $optionCardinality = $request->get('optCardinality', 'cardinality-opt-uml'); //cardinality-opt-er est l'autre option
+        $optionTextCardinality = filter_var($request->get('optTextCardinality', true), FILTER_VALIDATE_BOOLEAN);; //false est l'autre option
+        $optionFol = filter_var($request->get('optFol', true), FILTER_VALIDATE_BOOLEAN);; //false est l'autre option
 
         foreach ($namespace->getTextProperties() as $textProperty){
             if($textProperty->getSystemType()->getId() == 2 and $textProperty->getLanguageIsoCode() == "en"){
@@ -1374,7 +1378,7 @@ class NamespaceController  extends Controller
                 }
             }
 
-            if($childAssociations->count() > 0){
+            if($childAssociations->count() > 0 && $optionFol){
                 $section->addTextBreak();
                 $textRun = $section->addTextRun();
                 $textRun->addText('In First Order Logic: ', "gras");
@@ -1455,9 +1459,15 @@ class NamespaceController  extends Controller
             if(!is_null($propertyVersion->getQuantifiersString())){
                 $section->addTextBreak();
                 $section->addText('Quantification: ',"gras");
-                $section->addText($propertyVersion->getQuantifiersString(), null, array('indentation' => array('left' => 1100)));
-                $section->addText("UML: (".$propertyVersion->getQuantifiers().')', null, array('indentation' => array('left' => 1100)));
-                $section->addText("ER: (".$propertyVersion->getQuantifiersMerise().')', null, array('indentation' => array('left' => 1100)));
+                if($optionTextCardinality){
+                    $section->addText($propertyVersion->getQuantifiersString(), null, array('indentation' => array('left' => 1100)));
+                }
+                if($optionCardinality == "cardinality-opt-uml"){
+                    $section->addText("UML: (".$propertyVersion->getQuantifiers().')', null, array('indentation' => array('left' => 1100)));
+                }
+                if($optionCardinality == "cardinality-opt-er"){
+                    $section->addText("ER: (".$propertyVersion->getQuantifiersMerise().')', null, array('indentation' => array('left' => 1100)));
+                }
             }
 
             foreach ($propertyVersion->getProperty()->getTextProperties() as $textProperty){
@@ -1527,16 +1537,18 @@ class NamespaceController  extends Controller
                     }
                 }
             }
-            $section->addTextBreak();
-            $section->addText('In First Order Logic:', "gras");
-            if(!is_null($propertyVersion->getDomain())){
-                $section->addText($propertyVersion->getProperty()->getIdentifierInNamespace().'(x,y) ⇒ '.$propertyVersion->getDomain()->getIdentifierInNamespace().'(x)', null, array('indentation' => array('left' => 1100)));
-            }
-            if(!is_null($propertyVersion->getRange())){
-                $section->addText($propertyVersion->getProperty()->getIdentifierInNamespace().'(x,y) ⇒ '.$propertyVersion->getRange()->getIdentifierInNamespace().'(y)', null, array('indentation' => array('left' => 1100)));
-            }
-            if(!is_null($parentPropertyVersion)){
-                $section->addText($propertyVersion->getProperty()->getIdentifierInNamespace().'(x,y) ⇒ '.$parentPropertyVersion->getProperty()->getIdentifierInNamespace().'(x,y)', null, array('indentation' => array('left' => 1100)));
+            if($optionFol){
+                $section->addTextBreak();
+                $section->addText('In First Order Logic:', "gras");
+                if(!is_null($propertyVersion->getDomain())){
+                    $section->addText($propertyVersion->getProperty()->getIdentifierInNamespace().'(x,y) ⇒ '.$propertyVersion->getDomain()->getIdentifierInNamespace().'(x)', null, array('indentation' => array('left' => 1100)));
+                }
+                if(!is_null($propertyVersion->getRange())){
+                    $section->addText($propertyVersion->getProperty()->getIdentifierInNamespace().'(x,y) ⇒ '.$propertyVersion->getRange()->getIdentifierInNamespace().'(y)', null, array('indentation' => array('left' => 1100)));
+                }
+                if(!is_null($parentPropertyVersion)){
+                    $section->addText($propertyVersion->getProperty()->getIdentifierInNamespace().'(x,y) ⇒ '.$parentPropertyVersion->getProperty()->getIdentifierInNamespace().'(x,y)', null, array('indentation' => array('left' => 1100)));
+                }
             }
             $section->addTextBreak(2);
         }
