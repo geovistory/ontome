@@ -29,6 +29,7 @@
                         <th>Property label</th>
                         <th></th> <!-- Cardinalité Range -->
                         <th>Range</th>
+                        <th>Namespace</th>
                         <th>Associate</th>
                     </tr>
                     </thead>
@@ -43,6 +44,7 @@
                         <th>Property label</th>
                         <th></th> <!-- Cardinalité Range -->
                         <th>Range</th>
+                        <th>Namespace</th>
                         <th>Associate</th>
                     </tr>
                     </thead>
@@ -57,6 +59,7 @@
                         <th>Property label</th>
                         <th></th> <!-- Cardinalité Range -->
                         <th>Range</th>
+                        <th>Namespace</th>
                         <th>Associate</th>
                     </tr>
                     </thead>
@@ -71,6 +74,7 @@
                         <th>Property label</th>
                         <th></th> <!-- Cardinalité Range -->
                         <th>Range</th>
+                        <th>Namespace</th>
                         <th>Associate</th>
                     </tr>
                     </thead>
@@ -104,6 +108,7 @@
                 { data: null },
                 { data: null },
                 { data: null },
+                { data: 'namespace' },
                 { data: null}
             ],
             order: [[6, 'asc'],[2, 'asc']],
@@ -202,7 +207,31 @@
                             return data;
                     }
                 }
-            ]
+            ],
+            initComplete: function(){
+                this.api().columns([6]).every(function(){
+                    var column = this;
+                    var select = $('<br><select id="outgoing-namespace-select" style="width:100%;"><option value=""></option></select>')
+                        .appendTo($(column.header()))
+                        .on('change', function(){
+                            var val = $.fn.dataTable.util.escapeRegex(
+                                $(this).val()
+                            );
+
+                            column
+                                .search(val ? '^'+val+'$' : '', true, false)
+                                .draw();
+                        });
+
+                    $(select).click(function(e){
+                        e.stopPropagation();
+                    });
+
+                    column.data().unique().sort().each(function(d, j){
+                        select.append('<option value="'+d+'">'+d+'</option>')
+                    });
+                });
+            }
         });
 
         var urlSelectableOutgoingInheritedProperties = '{{ path("selectable_outgoing_inherited_properties_class_profile_json", {'profile' : 'profileID', 'class' : 'classID'}) }}';
@@ -218,6 +247,7 @@
                 { data: null },
                 { data: null },
                 { data: 'range' },
+                { data: 'namespace' },
                 { data: 'fk_system_type' }
             ],
             order: [[6, 'asc'], [2, 'asc']],
@@ -319,7 +349,31 @@
                             return data;
                     }
                 }
-            ]
+            ],
+            initComplete: function(){
+                this.api().columns([6]).every(function(){
+                    var column = this;
+                    var select = $('<br><select id="outgoing-inherited-namespace-select" style="width:100%;"><option value=""></option></select>')
+                        .appendTo($(column.header()))
+                        .on('change', function(){
+                            var val = $.fn.dataTable.util.escapeRegex(
+                                $(this).val()
+                            );
+
+                            column
+                                .search(val ? '^'+val+'$' : '', true, false)
+                                .draw();
+                        });
+
+                    $(select).click(function(e){
+                        e.stopPropagation();
+                    });
+
+                    column.data().unique().sort().each(function(d, j){
+                        select.append('<option value="'+d+'">'+d+'</option>')
+                    });
+                });
+            }
         });
 
         var urlSelectableIncomingProperties = '{{ path("selectable_incoming_properties_class_profile_json", {'profile' : 'profileID', 'class' : 'classID'}) }}';
@@ -335,6 +389,7 @@
                 { data: null },
                 { data: null },
                 { data: null },
+                { data: 'namespace' },
                 { data: null }
             ],
             order: [[6, 'asc'], [2, 'asc']],
@@ -433,7 +488,31 @@
                             return data;
                     }
                 }
-            ]
+            ],
+            initComplete: function(){
+                this.api().columns([6]).every(function(){
+                    var column = this;
+                    var select = $('<br><select id="incoming-namespace-select" style="width:100%;"><option value=""></option></select>')
+                        .appendTo($(column.header()))
+                        .on('change', function(){
+                            var val = $.fn.dataTable.util.escapeRegex(
+                                $(this).val()
+                            );
+
+                            column
+                                .search(val ? '^'+val+'$' : '', true, false)
+                                .draw();
+                        });
+
+                    $(select).click(function(e){
+                        e.stopPropagation();
+                    });
+
+                    column.data().unique().sort().each(function(d, j){
+                        select.append('<option value="'+d+'">'+d+'</option>')
+                    });
+                });
+            }
         });
 
         var urlSelectableIncomingInheritedProperties = '{{ path("selectable_incoming_inherited_properties_class_profile_json", {'profile' : 'profileID', 'class' : 'classID'}) }}';
@@ -449,6 +528,7 @@
                 { data: null },
                 { data: null },
                 { data: null },
+                { data: 'namespace' },
                 { data: null }
             ],
             order: [[6, 'asc'],[2, 'asc']],
@@ -550,7 +630,31 @@
                             return data;
                     }
                 }
-            ]
+            ],
+            initComplete: function(){
+                this.api().columns([6]).every(function(){
+                    var column = this;
+                    var select = $('<br><select id="incoming-inherited-namespace-select" style="width:100%;"><option value=""></option></select>')
+                        .appendTo($(column.header()))
+                        .on('change', function(){
+                            var val = $.fn.dataTable.util.escapeRegex(
+                                $(this).val()
+                            );
+
+                            column
+                                .search(val ? '^'+val+'$' : '', true, false)
+                                .draw();
+                        });
+
+                    $(select).click(function(e){
+                        e.stopPropagation();
+                    });
+
+                    column.data().unique().sort().each(function(d, j){
+                        select.append('<option value="'+d+'">'+d+'</option>')
+                    });
+                });
+            }
         });
 
         function myAlertTop(type){
