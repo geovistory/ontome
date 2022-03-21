@@ -195,7 +195,7 @@
                         or textProperty.property is not null and is_granted('validate', textProperty.property.propertyVersionForDisplay(textProperty.namespaceForVersion))
                         or textProperty.namespace is not null and is_granted('validate', textProperty.namespace)
                     #}
-                    {% if is_granted('validate', textProperty) %}
+                    {% if textProperty.namespaceForVersion is not null or textProperty.namespace is not null and is_granted('validate', textProperty) %}
                         <div class="dropdown inline-block">
                             <button class="btn btn-default dropdown-toggle" type="button" id="dropdown-validation" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
                                 {% if textProperty.validationStatus is null %}

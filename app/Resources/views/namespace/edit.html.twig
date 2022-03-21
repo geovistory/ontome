@@ -231,7 +231,9 @@
                         <th>Language</th>
                         <th>Edit</th>
                         <th>Comments</th>
+                        {% if namespace.isOngoing %}
                         <th>Validation</th>
+                        {% endif %}
                     </tr>
                     </thead>
                     <tbody>
@@ -258,6 +260,7 @@
                                     <span class="badge {% if textProperty.comments|length > 0  %}progress-bar-danger {% endif %}">{{ textProperty.comments|length }}</span>
                                 </a>
                             </td>
+                            {% if namespace.isOngoing %}
                             <td>
                                 {% if textProperty.validationStatus is null %}
                                     <span class="label label-info">
@@ -278,6 +281,7 @@
                                     </span>
                                 {% endif %}
                             </td>
+                            {% endif %}
                         </tr>
                     {% endfor %}
                     </tbody>
