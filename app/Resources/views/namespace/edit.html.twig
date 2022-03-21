@@ -56,6 +56,7 @@
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                         <button type="button" data-value="{{ namespace.id }}" class="btn btn-primary btn-export"><i class="fas fa-file-alt"></i> Export docx</button>
+                        <button type="button" class="btn btn-primary btn-export-disabled" disabled="disabled"><i class="fas fa-cog fa-spin"></i> Export docx</button>
                     </div>
                 </div><!-- /.modal-content -->
             </div><!-- /.modal-dialog -->
@@ -1835,7 +1836,10 @@
         // --- FIN ONGLET IDENTIFIERS ---
 
         //-- EXPORT DOCX --
+        $('.btn-export-disabled').hide();
         $('.btn-export').on('click', function(){
+            $('.btn-export-disabled').show();
+            $('.btn-export').hide();
             var namespaceID = $(this).data("value");
             var optCardinality = $('input[name=cardinality]:checked').val();
             var optFol = $('input[id=fol]').prop('checked');
@@ -1858,6 +1862,8 @@
                     responseType: 'blob'
                 },
                 success: function (response, status, xhr) {
+                    $('.btn-export-disabled').hide();
+                    $('.btn-export').show();
                     var header = xhr.getResponseHeader('Content-Disposition');
                     var a = document.createElement('a');
                     var url = window.URL.createObjectURL(response);
