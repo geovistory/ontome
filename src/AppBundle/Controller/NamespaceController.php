@@ -135,13 +135,27 @@ class NamespaceController  extends Controller
             $namespace->setCurrentClassNumber(0);
             $namespace->setCurrentPropertyNumber(0);
 
+            // Ajout des namespaces références si choisi(s)
+            $referencesNamespaces = json_decode($form->get("referenceNamespaces")->getData());
+            foreach ($referencesNamespaces as $referenceNamespace => $labelNamespace){
+                $referencedNamespaceAssociation = new ReferencedNamespaceAssociation();
+                $referencedNamespaceAssociation->setNamespace($ongoingNamespace);
+                $referenceNamespace = $em->getRepository("AppBundle:OntoNamespace")->find(intval($referenceNamespace));
+                $referencedNamespaceAssociation->setReferencedNamespace($referenceNamespace);
+                $referencedNamespaceAssociation->setCreator($this->getUser());
+                $referencedNamespaceAssociation->setModifier($this->getUser());
+                $referencedNamespaceAssociation->setCreationTime(new \DateTime('now'));
+                $referencedNamespaceAssociation->setModificationTime(new \DateTime('now'));
+                $ongoingNamespace->addReferenceNamespaceAssociation($referencedNamespaceAssociation);
+                $em->persist($referencedNamespaceAssociation);
+            }
+
             //just in case, we set the domain to ontome.net for non external namespaces
             if (!$namespace->getIsExternalNamespace() && strpos($namespace->getNamespaceURI(), 'https://ontome.net/ns') !== 0 ) {
                 $u = parse_url($namespace->getNamespaceURI());
                 $uri = 'https://ontome.net/ns'.$u['path']; //if the user tries to change the domain, we force it to be ontome.net
                 $namespace->setNamespaceURI($uri);
             }
-
 
             //$ongoingNamespace->setNamespaceURI($namespace->getNamespaceURI());
             $ongoingNamespace->setIsExternalNamespace($namespace->getIsExternalNamespace());
@@ -202,12 +216,13 @@ class NamespaceController  extends Controller
 
         }
 
-        $em = $this->getDoctrine()->getManager();
-
+        $rootNamespaces = $em->getRepository('AppBundle:OntoNamespace')
+            ->findBy(array("isTopLevelNamespace" => true));
 
         return $this->render('namespace/new.html.twig', [
             'namespace' => $namespace,
-            'namespaceForm' => $form->createView()
+            'namespaceForm' => $form->createView(),
+            'rootNamespaces' => $rootNamespaces
         ]);
     }
 

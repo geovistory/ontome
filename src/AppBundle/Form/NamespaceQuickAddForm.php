@@ -74,6 +74,9 @@ class NamespaceQuickAddForm extends AbstractType
                 'error_bubbling' => false,
                 'allow_add' => true,
                 'by_reference' => false,
+            ))
+            ->add('referenceNamespaces', HiddenType::class, array(
+                'mapped' => false
             ));
     }
 
