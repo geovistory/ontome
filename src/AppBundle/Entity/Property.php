@@ -28,6 +28,7 @@ class Property
     private $id;
 
     /**
+     * @Assert\Type(type="alnum", message="This identifier should be alphanumeric without space")
      * @ORM\Column(type="string")
      */
     private $identifierInNamespace;
