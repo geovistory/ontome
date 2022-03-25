@@ -1529,6 +1529,12 @@
                 });
             });
 
+            $('.dataTables_paginate').click(function () {
+                $([document.documentElement, document.body]).animate({
+                    scrollTop: $(this).closest('.dataTables_wrapper').prevAll("h3").offset().top
+                }, 1000);
+            });
+
             {% if isE55Descendant and classVersion.namespaceForVersion.topLevelNamespace.projectForTopLevelNamespace.projectThesaurusAssociations is not empty %}
             $('.thesaurus-title').each(function(){
                 let classID = {{ classVersion.class.id }};

@@ -1757,6 +1757,12 @@
                 $('#namespace_form_namespaceURI').prop('readOnly', true);
             }
 
+
+            $('.dataTables_paginate').click(function () {
+                $([document.documentElement, document.body]).animate({
+                    scrollTop: $(this).closest('.dataTables_wrapper').prevAll("h3").offset().top
+                }, 1000);
+            });
         } );
 
         $("#namespace_form_rootNamespacePrefix").keypress(function(e)

@@ -20,7 +20,7 @@
         {# for n in activesNamespaces %}{{ n }}<br>{% endfor #}
     {% endif %}
     <h3>Namespaces</h3>
-    <table class="table table-striped" id="project-table">
+    <table class="table table-striped" id="namespaces-table">
         <thead>
         <tr>
             <th>Namespace</th>
@@ -61,7 +61,13 @@
 
     <script>
         $(document).ready(function() {
-            $('#project-table').DataTable({"pageLength":50});
+            $('#namespaces-table').DataTable({"pageLength":50});
+
+            $('.dataTables_paginate').click(function () {
+                $([document.documentElement, document.body]).animate({
+                    scrollTop: $(this).closest('.dataTables_wrapper').prevAll("h3").offset().top
+                }, 1000);
+            });
         } );
     </script>
 {% endblock %}

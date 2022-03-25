@@ -1635,6 +1635,13 @@
                     }
                 });
             });
+
+            $('.dataTables_paginate').click(function () {
+                $([document.documentElement, document.body]).animate({
+                    scrollTop: $(this).closest('.dataTables_wrapper').prevAll("h3").offset().top
+                }, 1000);
+            });
+
         } );
         $(document).on("click", ".btn-delete-association", function(){
             var associationId = $(this).data("id");
