@@ -158,6 +158,19 @@
                         </div>
                     {% endif %}
 
+                    <div class="row">
+                        <div class="col-lg-2">
+                            <p>Quantification:</p>
+                        </div>
+                        <div class="col-lg-10">
+                            {% if propertyVersion.quantifiers is not null %}
+                                <p>{{ propertyVersion.quantifiers }}</p>
+                            {% else %}
+                                <p><i>No quantifiers yet.</i></p>
+                            {% endif %}
+                        </div>
+                    </div>
+
                     {# Subproperty of #}
                     {% set isSubpropertyOf = false %}
                     {% for association in propertyVersion.property.childPropertyAssociations
@@ -304,18 +317,7 @@
                             </div>
                         </div>
                     {% endif %}
-                    <div class="row">
-                        <div class="col-lg-2">
-                            <p>Quantification:</p>
-                        </div>
-                        <div class="col-lg-10">
-                            {% if propertyVersion.quantifiers is not null %}
-                                <p>{{ propertyVersion.quantifiers }}</p>
-                            {% else %}
-                                <p><i>No quantifiers yet.</i></p>
-                            {% endif %}
-                        </div>
-                    </div>
+
                     {% if propertyVersion.property.entityAssociations|length > 0 %}
                         <div class="row">
                             <div class="col-lg-2">
