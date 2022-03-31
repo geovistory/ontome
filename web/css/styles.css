@@ -872,3 +872,7 @@ FOOTER Styling
 #selectable-profiles-table_filter input[type=search]{
     width: 70%;
 }
+
+.xsmall{
+    font-size: 0.8em;
+}

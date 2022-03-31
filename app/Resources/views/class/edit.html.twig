@@ -380,9 +380,9 @@
                                                 'id': outgoingProperty.propertyId,
                                                 'namespaceFromUrlId': outgoingProperty.propertyNamespaceId
                                             }) }}" title="{{ outgoingProperty.namespace }}">{{ outgoingProperty.propertyRootNamespacePrefix }}:{{ outgoingProperty.property }}</a>
-                                            →
+                                            <span class="xsmall">{{ outgoingProperty.quantifiersString }}</span> →
                                             <a href="{{ path(route, route_params) }}" title="{{ outgoingProperty.rangeNamespace }}" {% if not isGoodNamespace %}class="text-danger"{% endif %}>
-                                                {{ outgoingProperty.rangeRootNamespacePrefix }}:{{ outgoingProperty.range }}</a> {{ outgoingProperty.quantifiersString }}
+                                                {{ outgoingProperty.rangeRootNamespacePrefix }}:{{ outgoingProperty.range }}</a>
                                         </li>
                                     {% endfor %}
                                 </ul>
@@ -419,7 +419,7 @@
                                             <a href="{{ path('property_show_with_version', {
                                                 'id': ingoingProperty.propertyId,
                                                 'namespaceFromUrlId': classVersion.namespaceForVersion.id }) }}" title="{{ ingoingProperty.namespace }}">
-                                                {{ ingoingProperty.propertyRootNamespacePrefix }}:{{ ingoingProperty.property }}</a> {{ ingoingProperty.quantifiersString }}
+                                                {{ ingoingProperty.propertyRootNamespacePrefix }}:{{ ingoingProperty.property }}</a> <span class="xsmall">{{ ingoingProperty.quantifiersString }}</span>
                                         </li>
                                     {% endfor %}
                                 </ul>
