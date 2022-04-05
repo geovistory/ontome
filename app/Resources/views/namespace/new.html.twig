@@ -184,8 +184,9 @@
                 }
                 refs[selectedValue] = labelNamespace;
                 $("#namespace_quick_add_form_referenceNamespaces").val(JSON.stringify(refs));
-
-                $("#reference-namespaces-list").append($('<div class="col-lg-6"><div class="well well-sm" style="margin-left:0px;"><a href="#" class="remove-namespace" data-id="'+selectedValue+'"><span class="glyphicon glyphicon-remove text-danger" aria-hidden="true"></span></a><a href="'+urlNamespace+'">'+labelNamespace+'</a><span class="loading-icon2" data-id="'+selectedValue+'">&nbsp;<span class="fas fa-spinner fa-spin"></span></span></div><div class="col-lg-6"></div></div>'));
+                var rootNamespaceId = $("#select-root-namespace option:selected").val();
+                var rootNamespaceLabel = $("#select-root-namespace option:selected").text();
+                $("#reference-namespaces-list").append($('<div class="col-lg-6"><div class="well well-sm" style="margin-left:0px;"><a href="#delete" class="remove-namespace" data-id="'+selectedValue+'" data-root-id="'+rootNamespaceId+'" data-root-label="'+rootNamespaceLabel+'"><span class="glyphicon glyphicon-remove text-danger" aria-hidden="true"></span></a><a href="'+urlNamespace+'">'+labelNamespace+'</a><span class="loading-icon2" data-id="'+selectedValue+'">&nbsp;<span class="fas fa-spinner fa-spin"></span></span></div><div class="col-lg-6"></div></div>'));
                 $(".loading-icon2[data-id='"+selectedValue+"']").hide();
                 //$("#select-root-namespace option:selected").remove();
                 $("#chosable-namespaces-list").empty();
@@ -202,6 +203,10 @@
                 $("#namespace_quick_add_form_referenceNamespaces").val(JSON.stringify(refs));
                 $(".loading-icon2[data-id='"+selectedValue+"']").show();
                 $(".remove-namespace[data-id='"+selectedValue+"']").parent().parent().remove();
+                $("#select-root-namespace").append($('<option>', {
+                    value: $(this).data("root-id"),
+                    text: $(this).data("root-label")
+                }));
             });
 
             $('.js-description-ongoing-remove').hide();
