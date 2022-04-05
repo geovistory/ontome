@@ -38,7 +38,7 @@
                     <div class="modal-body">
                         <div class="row">
                             <div class="col-lg-6">
-                                <p>Cardinality</p>
+                                <p>Quantification</p>
                                 <p>
                                     <input type="radio" name="cardinality" id="cardinality-opt-uml" value="cardinality-opt-uml" checked> <label for="cardinality-opt-uml">UML</label><br>
                                     <input type="radio" name="cardinality" id="cardinality-opt-er" value="cardinality-opt-er"> <label for="cardinality-opt-er">ER</label><br>
@@ -48,8 +48,20 @@
                             <div class="col-lg-6">
                                 <p>In First Order Logique</p>
                                 <p>
-                                    <input type="checkbox" name="fol" id="fol" value="fol">  <label for="fol">With FOL</label><br>
+                                    <input type="checkbox" name="fol" id="fol" value="fol">  <label for="fol">With In First Order Logique</label><br>
                                 </p>
+                            </div>
+                        </div>
+                        <hr>
+                        <p class="text-muted small">Example of what will be added for exported properties in the document</p>
+                        <div class="row">
+                            <div class="col-lg-4">
+                                <p>Quantification:</p>
+                                <p id="example-fol-label">In First Order Logic:</p>
+                            </div>
+                            <div class="col-lg-8">
+                                <p id="example-cardinality">one to many (0,n:0,1)</p>
+                                <p id="example-fol">P1(x,y) ⊃ C1(x)<br>P1(x,y) ⊃ C2(y)<br>P1(x,y) ⊃ P2(x,y)</p>
                             </div>
                         </div>
                     </div>
@@ -1834,6 +1846,35 @@
             });
         });
         // --- FIN ONGLET IDENTIFIERS ---
+
+        $('#example-fol-label').hide();
+        $('#example-fol').hide();
+        $('input[id=fol]').on('click', function(){
+            if($('input[id=fol]').prop('checked')){
+                $('#example-fol-label').show();
+                $('#example-fol').show();
+            }
+            else{
+                $('#example-fol-label').hide();
+                $('#example-fol').hide();
+            }
+        });
+
+        $('input[name=cardinality], input[id=text-cardinality]').on('click', function(){
+            var strCardi = "(0,n:0,1)";
+            if($('input[name=cardinality]').val() == "cardinality-opt-uml"){
+                strCardi = "(0,n:0,1)";
+            }
+            if($('input[name=cardinality]:checked').val() == "cardinality-opt-er"){
+                strCardi = "(0,1:0,n)";
+            }
+            if($('input[id=text-cardinality]').prop('checked')){
+                strCardi = "one to many "+strCardi;
+            }
+            $('#example-cardinality').html(strCardi);
+        });
+
+
 
         //-- EXPORT DOCX --
         $('.btn-export-disabled').hide();

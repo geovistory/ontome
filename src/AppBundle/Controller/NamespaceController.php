@@ -1459,14 +1459,15 @@ class NamespaceController  extends Controller
             if(!is_null($propertyVersion->getQuantifiersString())){
                 $section->addTextBreak();
                 $section->addText('Quantification: ',"gras");
+                $trun = $section->addTextRun(array('indentation' => array('left' => 1100)));
                 if($optionTextCardinality){
-                    $section->addText($propertyVersion->getQuantifiersString(), null, array('indentation' => array('left' => 1100)));
+                    $trun->addText($propertyVersion->getQuantifiersString());
                 }
                 if($optionCardinality == "cardinality-opt-uml"){
-                    $section->addText("UML: (".$propertyVersion->getQuantifiers().')', null, array('indentation' => array('left' => 1100)));
+                    $trun->addText(" (".$propertyVersion->getQuantifiers().')');
                 }
                 if($optionCardinality == "cardinality-opt-er"){
-                    $section->addText("ER: (".$propertyVersion->getQuantifiersMerise().')', null, array('indentation' => array('left' => 1100)));
+                    $trun->addText(" (".$propertyVersion->getQuantifiersMerise().')');
                 }
             }
 
