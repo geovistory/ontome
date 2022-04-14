@@ -461,6 +461,7 @@ class PropertyVersion
     public function setNamespaceForVersion($namespaceForVersion)
     {
         $this->namespaceForVersion = $namespaceForVersion;
+        $namespaceForVersion->addPropertyVersion($this);
     }
 
     /**
@@ -477,6 +478,14 @@ class PropertyVersion
     public function setRangeNamespace($rangeNamespace)
     {
         $this->rangeNamespace = $rangeNamespace;
+    }
+
+    /**
+     * @param mixed $standardLabel
+     */
+    public function setStandardLabel($standardLabel)
+    {
+        $this->standardLabel = $standardLabel;
     }
 
     /**
