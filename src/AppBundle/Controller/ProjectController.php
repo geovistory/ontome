@@ -20,6 +20,7 @@ use AppBundle\Entity\ProjectAssociation;
 use AppBundle\Entity\Property;
 use AppBundle\Entity\PropertyAssociation;
 use AppBundle\Entity\PropertyVersion;
+use AppBundle\Entity\ReferencedNamespaceAssociation;
 use AppBundle\Entity\TextProperty;
 use AppBundle\Entity\User;
 use AppBundle\Entity\UserProjectAssociation;
@@ -227,15 +228,43 @@ class ProjectController  extends Controller
                         $em->persist($txtpVersion);
 
                         // Contributors
-                        $txtpContributors = new TextProperty();
-                        $txtpContributors->setTextProperty((string)$nodeXmlNamespace->contributors);
-                        $txtpContributors->setSystemType($systemTypeContributors);
-                        $txtpContributors->setCreator($this->getUser());
-                        $txtpContributors->setModifier($this->getUser());
-                        $txtpContributors->setCreationTime(new \DateTime('now'));
-                        $txtpContributors->setModificationTime(new \DateTime('now'));
-                        $newNamespaceVersion->addTextProperty($txtpContributors);
-                        $em->persist($txtpContributors);
+                        if(!empty((string)$nodeXmlNamespace->contributors)){
+                            $txtpContributors = new TextProperty();
+                            $txtpContributors->setTextProperty((string)$nodeXmlNamespace->contributors);
+                            $txtpContributors->setSystemType($systemTypeContributors);
+                            $txtpContributors->setCreator($this->getUser());
+                            $txtpContributors->setModifier($this->getUser());
+                            $txtpContributors->setCreationTime(new \DateTime('now'));
+                            $txtpContributors->setModificationTime(new \DateTime('now'));
+                            $newNamespaceVersion->addTextProperty($txtpContributors);
+                            $em->persist($txtpContributors);
+                        }
+
+                        // Références
+                        $idsReferences = new ArrayCollection();
+                        foreach($nodeXmlNamespace->referenceNamespace as $keyRefNs => $nodeXmlReferenceNamespace){
+                            if(!$idsReferences->contains((string)$nodeXmlReferenceNamespace)){
+                                $idsReferences->add((integer)$nodeXmlReferenceNamespace);
+                            }
+                            $referencedNamespaceAssociation = new ReferencedNamespaceAssociation();
+                            $referencedNamespaceAssociation->setNamespace($newNamespaceVersion);
+                            $referencedNamespace = $em->getRepository('AppBundle:OntoNamespace')->findOneBy(array("id" => (integer)$nodeXmlReferenceNamespace));
+                            if(is_null($referencedNamespace)){
+                                echo "Le namespace de référence ".(integer)$nodeXmlReferenceNamespace." n'a pas été trouvé.";
+                                die;
+                            }
+                            if($referencedNamespace->getIsTopLevelNamespace()){
+                                echo "Le namespace  ".(integer)$nodeXmlReferenceNamespace." est root et ne peut etre utilisé comme reference.";
+                                die;
+                            }
+                            $referencedNamespaceAssociation->setReferencedNamespace($referencedNamespace);
+                            $newNamespaceVersion->addReferencedNamespaceAssociation($referencedNamespaceAssociation);
+                            $referencedNamespaceAssociation->setCreator($this->getUser());
+                            $referencedNamespaceAssociation->setModifier($this->getUser());
+                            $referencedNamespaceAssociation->setCreationTime(new \DateTime('now'));
+                            $referencedNamespaceAssociation->setModificationTime(new \DateTime('now'));
+                            $em->persist($referencedNamespaceAssociation);
+                        }
 
                         $nodeXmlClasses = $nodeXmlNamespace->classes;
                         $nodeXmlProperties = $nodeXmlNamespace->properties;
@@ -411,6 +440,10 @@ class ProjectController  extends Controller
                             if(!is_null($xmlDomainNamespace)){
                                 $domainNamespace = $em->getRepository("AppBundle:OntoNamespace")
                                     ->findOneBy(array("id" => (integer)$xmlDomainNamespace));
+                                if(!$idsReferences->contains((integer)$xmlDomainNamespace)){
+                                    echo "Un namespace de référence pour hasDomain n'a pas été déclaré avec la balise referenceNamespace";
+                                    die;
+                                }
                             }
                             else{
                                 $domainNamespace = $newNamespaceVersion;
@@ -437,6 +470,10 @@ class ProjectController  extends Controller
                             if(!is_null($xmlRangeNamespace)){
                                 $rangeNamespace = $em->getRepository("AppBundle:OntoNamespace")
                                     ->findOneBy(array("id" => (integer)$xmlRangeNamespace));
+                                if(!$idsReferences->contains((integer)$xmlDomainNamespace)){
+                                    echo "Un namespace de référence pour hasRange n'a pas été déclaré avec la balise referenceNamespace";
+                                    die;
+                                }
                             }
                             else{
                                 $rangeNamespace = $newNamespaceVersion;
@@ -459,7 +496,7 @@ class ProjectController  extends Controller
 
                             $domainMinQuantifier = null;
                             // La balise est dans le XML ?
-                            if(!empty($nodeXmlProperty->domainInstancesMinQuantifier)){
+                            if(isset($nodeXmlProperty->domainInstancesMinQuantifier)){
                                 //Inutile de vérifier sa valeur, le schéma XSD l'a déjà fait
                                 if((string)$nodeXmlProperty->domainInstancesMinQuantifier == 'n'){
                                     $domainMinQuantifier = -1;
@@ -472,7 +509,7 @@ class ProjectController  extends Controller
 
                             $domainMaxQuantifier = null;
                             // La balise est dans le XML ?
-                            if(!empty($nodeXmlProperty->domainInstancesMaxQuantifier)){
+                            if(isset($nodeXmlProperty->domainInstancesMaxQuantifier)){
                                 //Inutile de vérifier sa valeur, le schéma XSD l'a déjà fait
                                 if((string)$nodeXmlProperty->domainInstancesMaxQuantifier == 'n'){
                                     $domainMaxQuantifier = -1;
@@ -485,7 +522,7 @@ class ProjectController  extends Controller
 
                             $rangeMinQuantifier = null;
                             // La balise est dans le XML ?
-                            if(!empty($nodeXmlProperty->rangeInstancesMinQuantifier)){
+                            if(isset($nodeXmlProperty->rangeInstancesMinQuantifier)){
                                 //Inutile de vérifier sa valeur, le schéma XSD l'a déjà fait
                                 if((string)$nodeXmlProperty->rangeInstancesMinQuantifier == 'n'){
                                     $rangeMinQuantifier = -1;
@@ -498,7 +535,7 @@ class ProjectController  extends Controller
 
                             $rangeMaxQuantifier = null;
                             // La balise est dans le XML ?
-                            if(!empty($nodeXmlProperty->rangeInstancesMaxQuantifier)){
+                            if(isset($nodeXmlProperty->rangeInstancesMaxQuantifier)){
                                 //Inutile de vérifier sa valeur, le schéma XSD l'a déjà fait
                                 if((string)$nodeXmlProperty->rangeInstancesMaxQuantifier == 'n'){
                                     $rangeMaxQuantifier = -1;
@@ -519,18 +556,21 @@ class ProjectController  extends Controller
                             $defaultStandardLabelEn = null;
                             $defaultStandardLabelFr = null;
                             $defaultStandardLabel = null;
-                            foreach($nodeXmlClass->standardLabel as $keyLabel => $nodeXmlLabel){
+                            foreach($nodeXmlProperty->label as $keyLabel => $nodeXmlLabel){
                                 $propertyLabel = new Label();
                                 $propertyLabel->setProperty($property);
                                 $propertyLabel->setNamespaceForVersion($newNamespaceVersion);
-                                $propertyLabel->setLabel((string)$nodeXmlLabel);
+                                $propertyLabel->setLabel((string)$nodeXmlLabel->standardLabel);
+                                if(!empty((string)$nodeXmlLabel->inverseLabel)){
+                                    $propertyLabel->setInverseLabel((string)$nodeXmlLabel->inverseLabel);
+                                }
                                 $propertyLabel->setLanguageIsoCode((string)$nodeXmlLabel->attributes()->lang);
                                 if(!$langs->contains((string)$nodeXmlLabel->attributes()->lang)){
                                     $langs->add((string)$nodeXmlLabel->attributes()->lang);
-                                    $classLabel->setIsStandardLabelForLanguage(true);
+                                    $propertyLabel->setIsStandardLabelForLanguage(true);
                                 }
                                 else{
-                                    $classLabel->setIsStandardLabelForLanguage(false);
+                                    $propertyLabel->setIsStandardLabelForLanguage(false);
                                 }
                                 $propertyLabel->setCreator($this->getUser());
                                 $propertyLabel->setModifier($this->getUser());
@@ -540,14 +580,23 @@ class ProjectController  extends Controller
                                 $property->addLabel($propertyLabel);
                                 $em->persist($propertyLabel);
 
-                                if(is_null($defaultStandardLabelEn) || $classLabel->getLanguageIsoCode() == "en"){
-                                    $defaultStandardLabelEn = (string)$nodeXmlLabel;
+                                if(is_null($defaultStandardLabelEn) || $propertyLabel->getLanguageIsoCode() == "en"){
+                                    $defaultStandardLabelEn = (string)$nodeXmlLabel->standardLabel;
+                                    if(!is_null($propertyLabel->getInverseLabel())){
+                                        $defaultStandardLabelEn.= " (".$propertyLabel->getInverseLabel().")";
+                                    }
                                 }
-                                if(is_null($defaultStandardLabelFr) || $classLabel->getLanguageIsoCode() == "fr"){
-                                    $defaultStandardLabelFr = (string)$nodeXmlLabel;
+                                if(is_null($defaultStandardLabelFr) || $propertyLabel->getLanguageIsoCode() == "fr"){
+                                    $defaultStandardLabelFr = (string)$nodeXmlLabel->standardLabel;
+                                    if(!is_null($propertyLabel->getInverseLabel())){
+                                        $defaultStandardLabelFr.= " (".$propertyLabel->getInverseLabel().")";
+                                    }
                                 }
                                 if(is_null($defaultStandardLabel)){
-                                    $defaultStandardLabel = (string)$nodeXmlLabel;
+                                    $defaultStandardLabel = (string)$nodeXmlLabel->standardLabel;
+                                    if(!is_null($propertyLabel->getInverseLabel())){
+                                        $defaultStandardLabel.= " (".$propertyLabel->getInverseLabel().")";
+                                    }
                                 }
                             }
                             if(!is_null($defaultStandardLabelEn)){
@@ -607,6 +656,10 @@ class ProjectController  extends Controller
                                 if (!is_null($xmlParentClassNamespace)) {
                                     $parentClassNamespace = $em->getRepository("AppBundle:OntoNamespace")
                                         ->findOneBy(array("id" => (integer)$xmlParentClassNamespace));
+                                    if(!$idsReferences->contains((integer)$xmlParentClassNamespace)){
+                                        echo "Un namespace de référence pour subclassOf n'a pas été déclaré avec la balise referenceNamespace";
+                                        die;
+                                    }
                                 } else {
                                     $parentClassNamespace = $newNamespaceVersion;
                                 }
@@ -619,7 +672,7 @@ class ProjectController  extends Controller
                                     }
                                 }
                                 if (is_null($parentClass)) {
-                                    echo (string)$nodeXmlClass->identifierInNamespace." Parent class " . (string)$nodeXmlClass->subClassOf . " n'a pas été trouvé";
+                                    echo (string)$nodeXmlClass->identifierInNamespace." Parent class " . (string)$nodeXmlClass->subClassOf . " (".$parentClassNamespace->getId().") n'a pas été trouvé";
                                     die;
                                 }
 
@@ -658,24 +711,34 @@ class ProjectController  extends Controller
                                 if ($key == "equivalentClass" || $key == "disjointWith") {
                                     $entityAssociation = new EntityAssociation();
                                     // Quelle version Target ?
-                                    $xmlTargetClassNamespace = $nodeXmlClass->equivalentClass->attributes()->referenceNamespace;
+                                    if($key == "equivalentClass"){
+                                        $nodeXmlEntityAssociation = $nodeXmlClass->equivalentClass;
+                                    }
+                                    if($key == "disjointWith"){
+                                        $nodeXmlEntityAssociation = $nodeXmlClass->disjointWith;
+                                    }
+                                    $xmlTargetClassNamespace = $nodeXmlEntityAssociation->attributes()->referenceNamespace;
                                     //Si attribut referenceNamespace existe, utiliser cet id, sinon ce nouveau namespace
                                     if (!is_null($xmlTargetClassNamespace)) {
                                         $targetClassNamespace = $em->getRepository("AppBundle:OntoNamespace")
                                             ->findOneBy(array("id" => (integer)$xmlTargetClassNamespace));
+                                        if(!$idsReferences->contains((integer)$xmlTargetClassNamespace)){
+                                            echo "Un namespace de référence pour targetClass equivalentClass ou disjointWith n'a pas été déclaré avec la balise referenceNamespace";
+                                            die;
+                                        }
                                     } else {
                                         $targetClassNamespace = $newNamespaceVersion;
                                     }
                                     // Trouver la classe cible
                                     $targetClass = null;
                                     foreach ($targetClassNamespace->getClasses() as $tempClass) {
-                                        if ($tempClass->getIdentifierInNamespace() == (string)$nodeXmlClass->equivalentClass) {
+                                        if ($tempClass->getIdentifierInNamespace() == (string)$nodeXmlEntityAssociation) {
                                             $targetClass = $tempClass;
                                             break;
                                         }
                                     }
                                     if (is_null($targetClass)) {
-                                        echo (string)$nodeXmlClass->identifierInNamespace . " Target class " . (string)$nodeXmlClass->equivalentClass . " n'a pas été trouvé";
+                                        echo (string)$nodeXmlClass->identifierInNamespace . " Target class " . (string)$nodeXmlEntityAssociation . " n'a pas été trouvé";
                                         die;
                                     }
 
@@ -729,6 +792,10 @@ class ProjectController  extends Controller
                                 if (!is_null($xmlParentPropertyNamespace)) {
                                     $parentPropertyNamespace = $em->getRepository("AppBundle:OntoNamespace")
                                         ->findOneBy(array("id" => (integer)$xmlParentPropertyNamespace));
+                                    if(!$idsReferences->contains((integer)$xmlParentPropertyNamespace)){
+                                        echo "Un namespace de référence pour subPropertyOf n'a pas été déclaré avec la balise referenceNamespace";
+                                        die;
+                                    }
                                 } else {
                                     $parentPropertyNamespace = $newNamespaceVersion;
                                 }
@@ -779,24 +846,34 @@ class ProjectController  extends Controller
                                 if($key=="equivalentProperty" || $key=="inverseOf"){
                                     $entityAssociation = new EntityAssociation();
                                     // Quelle version Target ?
-                                    $xmlTargetPropertyNamespace = $nodeXmlProperty->equivalentProperty->attributes()->referenceNamespace;
+                                    if($key=="equivalentProperty"){
+                                        $nodeXmlEntityAssociation = $nodeXmlProperty->equivalentProperty;
+                                    }
+                                    if($key=="inverseOf"){
+                                        $nodeXmlEntityAssociation = $nodeXmlProperty->inverseOf;
+                                    }
+                                    $xmlTargetPropertyNamespace = $nodeXmlEntityAssociation->attributes()->referenceNamespace;
                                     //Si attribut referenceNamespace existe, utiliser cet id, sinon ce nouveau namespace
                                     if (!is_null($xmlTargetPropertyNamespace)) {
                                         $targetPropertyNamespace = $em->getRepository("AppBundle:OntoNamespace")
                                             ->findOneBy(array("id" => (integer)$xmlTargetPropertyNamespace));
+                                        if(!$idsReferences->contains((integer)$xmlTargetPropertyNamespace)){
+                                            echo "Un namespace de référence pour targetProperty equivalentProperty ou inverseOf n'a pas été déclaré avec la balise referenceNamespace";
+                                            die;
+                                        }
                                     } else {
                                         $targetPropertyNamespace = $newNamespaceVersion;
                                     }
                                     // Trouver la propriété cible
                                     $targetProperty = null;
                                     foreach ($targetPropertyNamespace->getProperties() as $tempProperty) {
-                                        if ($tempProperty->getIdentifierInNamespace() == (string)$nodeXmlProperty->equivalentProperty) {
+                                        if ($tempProperty->getIdentifierInNamespace() == (string)$nodeXmlEntityAssociation) {
                                             $targetProperty = $tempProperty;
                                             break;
                                         }
                                     }
                                     if (is_null($targetProperty)) {
-                                        echo (string)$nodeXmlProperty->identifierInNamespace." Target property " . (string)$nodeXmlProperty->equivalentProperty . " n'a pas été trouvé";
+                                        echo (string)$nodeXmlProperty->identifierInNamespace." Target property " . (string)$nodeXmlEntityAssociation . " n'a pas été trouvé";
                                         die;
                                     }
 

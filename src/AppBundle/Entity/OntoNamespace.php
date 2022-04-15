@@ -352,6 +352,7 @@ class OntoNamespace
         $this->textProperties = new ArrayCollection();
         $this->classAssociations = new ArrayCollection();
         $this->propertyAssociations = new ArrayCollection();
+        $this->entityAssociations = new ArrayCollection();
         $this->referencedNamespaceAssociations = new ArrayCollection();
         $this->childVersions = new ArrayCollection();
         $this->profiles = new ArrayCollection();
@@ -902,6 +903,14 @@ class OntoNamespace
             return;
         }
         $this->entityAssociations[] = $entityAssociation;
+    }
+
+    public function addReferencedNamespaceAssociation(ReferencedNamespaceAssociation $referencedNamespaceAssociation)
+    {
+        if ($this->referencedNamespaceAssociations->contains($referencedNamespaceAssociation)) {
+            return;
+        }
+        $this->referencedNamespaceAssociations[] = $referencedNamespaceAssociation;
     }
 
     public function addClassVersion(OntoClassVersion $classVersion){
