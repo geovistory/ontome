@@ -264,26 +264,24 @@ class PropertyRepository extends EntityRepository
         // Construit la chaine ?,? pour les namespacesId dans la requête SQL
         $in  = str_repeat('?,', count($namespacesId) - 1) . '?';
 
-        $sql = "SELECT identifier_in_namespace AS domain,
-                  pk_parent AS \"parentClassId\", 
-                  parent_identifier AS \"parentClass\",
+        $sql = "SELECT concat(present_class_identifier, ' ', present_class_label) AS domain,
+                  pk_domain_class AS \"parentClassId\", 
+                  concat(domain_identifier_in_namespace, ' ', domain_standard_label) AS \"parentClass\",
                   pk_property AS \"propertyId\",
-                  identifier_property AS property,
-                  pv.fk_namespace_for_version AS \"propertyNamespaceId\",
+                  concat(identifier_in_namespace, ' ', standard_label) AS property,
+                  fk_namespace_for_version AS \"propertyNamespaceId\",
                   array_append(array_agg(asrefns.fk_referenced_namespace), v.fk_namespace_for_version) AS \"selectedNamespacesId\",
-                  pk_range AS \"rangeId\",
-                  identifier_range AS range,
-                  v.fk_range_namespace AS \"rangeNamespaceId\",
-                  v.fk_domain_namespace AS \"domainNamespaceId\",
-                  che.get_root_namespace_prefix(che.get_root_namespace(pv.fk_namespace_for_version)) AS \"propertyRootNamespacePrefix\",
+                  pk_range_class AS \"rangeId\",
+                  concat(range_identifier_in_namespace, ' ', range_standard_label) AS range,
+                  fk_range_namespace_for_version AS \"rangeNamespaceId\",
+                  fk_range_namespace_for_version AS \"domainNamespaceId\",
+                  che.get_root_namespace_prefix(che.get_root_namespace(fk_namespace_for_version)) AS \"propertyRootNamespacePrefix\",
                   replace(ancestors, '|', '→') AS ancestors,
-                  (SELECT label FROM che.get_namespace_labels(nsp.pk_namespace) WHERE language_iso_code = 'en') AS namespace
+                  (SELECT label FROM che.get_namespace_labels(fk_namespace_for_version) WHERE language_iso_code = 'en') AS namespace
                 FROM che.class_outgoing_inherited_properties(?, ARRAY[".$in."]::integer[]) v
-                INNER JOIN che.property_version pv ON pv.fk_property = v.pk_property
-                INNER JOIN che.namespace nsp ON nsp.pk_namespace = pv.fk_namespace_for_version
                 LEFT JOIN che.associates_referenced_namespace asrefns ON v.fk_namespace_for_version = asrefns.fk_namespace
-                WHERE pv.fk_namespace_for_version IN (".$in.")
-                GROUP BY nsp.pk_namespace, v.ancestors, v.identifier_in_namespace, v.pk_parent, v.parent_identifier, v.pk_property, v.identifier_property, v.fk_namespace_for_version, pv.fk_namespace_for_version, v.pk_range, v.identifier_range, v.fk_domain_namespace, v.fk_range_namespace;";
+                WHERE fk_namespace_for_version IN (".$in.")
+                GROUP BY v.present_class_identifier, v.present_class_label, v.pk_domain_class, v.domain_identifier_in_namespace, v.domain_standard_label, v.standard_label, v.range_standard_label, v.ancestors, v.identifier_in_namespace, v.pk_property, v.fk_namespace_for_version, v.pk_range_class, v.range_identifier_in_namespace, v.fk_domain_namespace_for_version, v.fk_range_namespace_for_version;";
 
         $conn = $this->getEntityManager()->getConnection();
         $stmt = $conn->prepare($sql);
@@ -343,15 +341,15 @@ class PropertyRepository extends EntityRepository
         // Construit la chaine ?,? pour les namespacesId dans la requête SQL
         $in  = str_repeat('?,', count($namespacesId) - 1) . '?';
 
-        $sql = "SELECT pk_domain AS \"domainId\",
-                  identifier_domain AS domain,
-                  identifier_property AS property,
+        $sql = "SELECT pk_domain_class AS \"domainId\",
+                  concat(domain_identifier_in_namespace, ' ', domain_standard_label) AS domain,
+                  concat(identifier_in_namespace, ' ', pv.standard_label) AS property,
                   pk_property AS \"propertyId\",
                   pv.fk_namespace_for_version AS \"propertyNamespaceId\",
-                  pk_parent AS \"rangeId\",
-                  parent_identifier AS range,
-                  v.fk_range_namespace AS \"rangeNamespaceId\",
-                  v.fk_domain_namespace AS \"domainNamespaceId\",
+                  pk_range_class AS \"rangeId\",
+                  range_identifier_in_namespace AS range,
+                  v.fk_range_namespace_for_version AS \"rangeNamespaceId\",
+                  v.fk_domain_namespace_for_version AS \"domainNamespaceId\",
                   che.get_root_namespace_prefix(che.get_root_namespace(pv.fk_namespace_for_version)) AS \"propertyRootNamespacePrefix\",
                   replace(ancestors, '|', '→') AS ancestors,
                   (SELECT label FROM che.get_namespace_labels(nsp.pk_namespace) WHERE language_iso_code = 'en') AS namespace
@@ -480,25 +478,45 @@ class PropertyRepository extends EntityRepository
         $conn = $this->getEntityManager()
             ->getConnection();
 
-        $sql = "SELECT DISTINCT identifier_property AS property,
-                                identifier_range AS range,
-                                che.get_root_namespace_prefix(che.get_root_namespace(pv.fk_range_namespace)) as \"rangeRootNamespacePrefix\",
-                                pk_property AS \"propertyId\",
-                                pk_range AS \"rangeId\",
-                                identifier_domain AS domain,
-                                che.get_root_namespace_prefix(che.get_root_namespace(pv.fk_domain_namespace)) as \"domainRootNamespacePrefix\",
-                                che.get_root_namespace(nsp.pk_namespace) AS \"rootNamespaceId\",
-                                (SELECT label FROM che.get_namespace_labels(nsp.pk_namespace) WHERE language_iso_code = 'en') AS namespace,
-                                CASE
-                                    WHEN aspro.fk_system_type IS NULL THEN 999
-                                    ELSE aspro.fk_system_type
-                                END AS fk_system_type
-                FROM che.v_properties_with_domain_range
-                JOIN che.property_version pv ON pv.fk_property = pk_property AND pv.fk_namespace_for_version IN (SELECT pk_namespace FROM che.get_all_references_namespaces_for_profile(:profile))
-                JOIN che.namespace nsp ON nsp.pk_namespace = pv.fk_namespace_for_version                 
-                LEFT JOIN che.associates_profile aspro ON aspro.fk_property = pk_property AND aspro.fk_profile = :profile AND aspro.fk_inheriting_range_class IS NULL AND aspro.fk_inheriting_domain_class IS NULL
-                
-                WHERE pk_domain = :class;";
+        $sql = "SELECT DISTINCT
+                    che.get_root_namespace_prefix(che.get_root_namespace(dv.fk_namespace_for_version)) AS domain_root_namespace_prefix,
+                    d.pk_class AS domain_id,
+                    dv.fk_namespace_for_version AS domain_namespace_id,
+                    d.identifier_in_namespace AS domain_identifier,
+                    dv.standard_label AS domain_label,
+                    pv.domain_instances_min_quantifier AS domain_min_quantifier,
+                    pv.domain_instances_max_quantifier AS domain_max_quantifier,
+                    p.pk_property AS property_id,
+                    p.identifier_in_namespace AS property_identifier,
+                    pv.standard_label AS property_label,
+                    pv.fk_namespace_for_version AS property_namespace_id,
+                    (SELECT label FROM che.get_namespace_labels(pv.fk_namespace_for_version) WHERE language_iso_code = 'en') AS namespace,
+                    pv.range_instances_min_quantifier AS range_min_quantifier,
+                    pv.range_instances_max_quantifier AS range_max_quantifier,
+                    che.get_root_namespace_prefix(che.get_root_namespace(rv.fk_namespace_for_version)) AS range_root_namespace_prefix,
+                    r.pk_class AS range_id,
+                    rv.fk_namespace_for_version AS range_namespace_id,
+                    r.identifier_in_namespace AS range_identifier,
+                    rv.standard_label AS range_label,
+                    CASE
+                        WHEN aspro.fk_system_type IS NULL THEN 999
+                        ELSE aspro.fk_system_type
+                    END AS fk_system_type
+                FROM che.property p
+                JOIN che.property_version pv ON pv.fk_property = p.pk_property
+                JOIN che.class d ON d.pk_class = pv.has_domain 
+                JOIN che.class_version dv ON dv.fk_class = pv.has_domain 
+                                          AND dv.fk_namespace_for_version = pv.fk_domain_namespace
+                JOIN che.class r ON r.pk_class = pv.has_range
+                JOIN che.class_version rv ON rv.fk_class = pv.has_range 
+                                          AND rv.fk_namespace_for_version = pv.fk_range_namespace
+                LEFT JOIN che.associates_profile aspro ON aspro.fk_property = p.pk_property 
+                                                       AND aspro.fk_profile = :profile 
+                                                       AND aspro.fk_inheriting_range_class IS NULL 
+                                                       AND aspro.fk_inheriting_domain_class IS NULL
+                WHERE pv.fk_namespace_for_version IN (SELECT pk_namespace FROM che.get_all_references_namespaces_for_profile(:profile))
+                AND d.pk_class = :class
+                ";
 
         $stmt = $conn->prepare($sql);
         $stmt->execute(array('class' => $class->getId(), 'profile' => $profile->getId()));
@@ -515,25 +533,45 @@ class PropertyRepository extends EntityRepository
         $conn = $this->getEntityManager()
             ->getConnection();
 
-        $sql = "SELECT  pk_domain AS \"domainId\",
-                        identifier_domain AS domain,
-                        che.get_root_namespace_prefix(che.get_root_namespace(pv.fk_domain_namespace)) as \"domainRootNamespacePrefix\",
-                        identifier_property AS property,
-                        pk_property AS \"propertyId\",
-                        pk_range AS \"rangeId\",
-                        identifier_range AS range,
-                        che.get_root_namespace_prefix(che.get_root_namespace(pv.fk_range_namespace)) as \"rangeRootNamespacePrefix\",
-                        che.get_root_namespace(nsp.pk_namespace) AS \"rootNamespaceId\",
-                        (SELECT label FROM che.get_namespace_labels(nsp.pk_namespace) WHERE language_iso_code = 'en') AS namespace,
-                        CASE
-                            WHEN aspro.fk_system_type IS NULL THEN 999
-                            ELSE aspro.fk_system_type
-                        END AS fk_system_type
-                FROM  che.v_properties_with_domain_range
-                JOIN che.property_version pv ON pv.fk_property = pk_property AND pv.fk_namespace_for_version IN (SELECT pk_namespace FROM che.get_all_references_namespaces_for_profile(:profile))
-                JOIN che.namespace nsp ON nsp.pk_namespace = pv.fk_namespace_for_version 
-                LEFT JOIN che.associates_profile aspro ON aspro.fk_property = pk_property AND aspro.fk_profile = :profile AND aspro.fk_inheriting_range_class IS NULL AND aspro.fk_inheriting_domain_class IS NULL
-                WHERE pk_range = :class;";
+        $sql = "SELECT DISTINCT
+                    che.get_root_namespace_prefix(che.get_root_namespace(dv.fk_namespace_for_version)) AS domain_root_namespace_prefix,
+                    d.pk_class AS domain_id,
+                    dv.fk_namespace_for_version AS domain_namespace_id,
+                    d.identifier_in_namespace AS domain_identifier,
+                    dv.standard_label AS domain_label,
+                    pv.domain_instances_min_quantifier AS domain_min_quantifier,
+                    pv.domain_instances_max_quantifier AS domain_max_quantifier,
+                    p.pk_property AS property_id,
+                    p.identifier_in_namespace AS property_identifier,
+                    pv.standard_label AS property_label,
+                    pv.fk_namespace_for_version AS property_namespace_id,
+                    (SELECT label FROM che.get_namespace_labels(pv.fk_namespace_for_version) WHERE language_iso_code = 'en') AS namespace,
+                    pv.range_instances_min_quantifier AS range_min_quantifier,
+                    pv.range_instances_max_quantifier AS range_max_quantifier,
+                    che.get_root_namespace_prefix(che.get_root_namespace(rv.fk_namespace_for_version)) AS range_root_namespace_prefix,
+                    r.pk_class AS range_id,
+                    rv.fk_namespace_for_version AS range_namespace_id,
+                    r.identifier_in_namespace AS range_identifier,
+                    rv.standard_label AS range_label,
+                    CASE
+                        WHEN aspro.fk_system_type IS NULL THEN 999
+                        ELSE aspro.fk_system_type
+                    END AS fk_system_type
+                FROM che.property p
+                JOIN che.property_version pv ON pv.fk_property = p.pk_property
+                JOIN che.class d ON d.pk_class = pv.has_domain 
+                JOIN che.class_version dv ON dv.fk_class = pv.has_domain 
+                                          AND dv.fk_namespace_for_version = pv.fk_domain_namespace
+                JOIN che.class r ON r.pk_class = pv.has_range
+                JOIN che.class_version rv ON rv.fk_class = pv.has_range 
+                                          AND rv.fk_namespace_for_version = pv.fk_range_namespace
+                LEFT JOIN che.associates_profile aspro ON aspro.fk_property = p.pk_property 
+                                                       AND aspro.fk_profile = :profile 
+                                                       AND aspro.fk_inheriting_range_class IS NULL 
+                                                       AND aspro.fk_inheriting_domain_class IS NULL
+                WHERE pv.fk_namespace_for_version IN (SELECT pk_namespace FROM che.get_all_references_namespaces_for_profile(:profile))
+                AND r.pk_class = :class
+                ";
 
         $stmt = $conn->prepare($sql);
         $stmt->execute(array('class' => $class->getId(), 'profile' => $profile->getId()));
@@ -565,41 +603,63 @@ class PropertyRepository extends EntityRepository
             $in.=','.$prfNs;
         }
 
-        $sql = "SELECT DISTINCT identifier_in_namespace AS domain,
-                pk_property AS \"propertyId\",
-                identifier_property AS property,
-                pk_range AS \"rangeId\",
-                identifier_range AS range,
-                che.get_root_namespace_prefix(che.get_root_namespace(pv.fk_range_namespace)) as \"rangeRootNamespacePrefix\",
-                CASE
-                    WHEN aspro.fk_system_type IS NULL THEN 999
-                    ELSE aspro.fk_system_type
+        $sql = "SELECT DISTINCT
+                coip.present_class_identifier,
+                coip.present_class_label,
+                    coip.domain_instances_min_quantifier AS domain_min_quantifier,
+                    coip.domain_instances_max_quantifier AS domain_max_quantifier,
+                    coip.pk_property AS property_id,
+                    coip.identifier_in_namespace AS property_identifier,
+                    coip.standard_label AS property_label,
+                    coip.fk_namespace_for_version AS property_namespace_id,
+                    (SELECT label FROM che.get_namespace_labels(coip.fk_namespace_for_version) WHERE language_iso_code = 'en') AS namespace,
+                    coip.range_instances_min_quantifier AS range_min_quantifier,
+                    coip.range_instances_max_quantifier AS range_max_quantifier,
+                    che.get_root_namespace_prefix(che.get_root_namespace(coip.fk_range_namespace_for_version)) AS range_root_namespace_prefix,
+                    coip.pk_range_class AS range_id,
+                    coip.fk_range_namespace_for_version AS range_namespace_id,
+                    coip.range_identifier_in_namespace AS range_identifier,
+                    coip.range_standard_label AS range_label,
+                    CASE
+                        WHEN aspro.fk_system_type IS NULL THEN 999
+                        ELSE aspro.fk_system_type
                     END AS fk_system_type
                 FROM che.class_outgoing_inherited_properties(:class, ARRAY[".$in."]::integer[]) coip
-                JOIN che.property_version pv ON pv.fk_property = coip.pk_property AND pv.fk_namespace_for_version IN (SELECT pk_namespace FROM che.get_all_references_namespaces_for_profile(:profile))
-                --JOIN che.associates_referenced_namespace asrefns ON asrefns.fk_referenced_namespace = pv.fk_namespace_for_version AND asrefns.fk_profile = :profile
-                LEFT JOIN che.associates_profile aspro ON aspro.fk_property = pk_property AND aspro.fk_inheriting_domain_class = :class AND aspro.fk_inheriting_range_class = pk_range AND aspro.fk_profile = :profile
+                LEFT JOIN che.associates_profile aspro ON aspro.fk_property = coip.pk_property AND aspro.fk_inheriting_domain_class = :class AND aspro.fk_inheriting_range_class = coip.pk_range_class AND aspro.fk_profile = :profile
                 
                 UNION DISTINCT
                 
-                SELECT clsdmn.identifier_in_namespace || ' ' || domain_cv.standard_label AS domain,
-                       aspro.fk_property AS \"propertyId\",
-                       prop.identifier_in_namespace  || ' ' ||  pv.standard_label,
-                       aspro.fk_inheriting_range_class AS \"rangeId\",
-                       clsrng.identifier_in_namespace || ' ' || range_cv.standard_label AS range,
-                che.get_root_namespace_prefix(che.get_root_namespace(range_cv.fk_namespace_for_version)) as \"rangeRootNamespacePrefix\",
-                       CASE
-                           WHEN aspro.fk_system_type IS NULL THEN 999
-                           ELSE aspro.fk_system_type
-                           END AS fk_system_type
+                SELECT DISTINCT
+                d.identifier_in_namespace AS present_class_identifier,
+                dv.standard_label AS present_class_label,
+                    pv.domain_instances_min_quantifier AS domain_min_quantifier,
+                    pv.domain_instances_max_quantifier AS domain_max_quantifier,
+                    p.pk_property AS property_id,
+                    p.identifier_in_namespace AS property_identifier,
+                    pv.standard_label AS property_label,
+                    pv.fk_namespace_for_version AS property_namespace_id,
+                    (SELECT label FROM che.get_namespace_labels(pv.fk_namespace_for_version) WHERE language_iso_code = 'en') AS namespace,
+                    pv.range_instances_min_quantifier AS range_min_quantifier,
+                    pv.range_instances_max_quantifier AS range_max_quantifier,
+                    che.get_root_namespace_prefix(che.get_root_namespace(rv.fk_namespace_for_version)) AS range_root_namespace_prefix,
+                    r.pk_class AS range_id,
+                    rv.fk_namespace_for_version AS range_namespace_id,
+                    r.identifier_in_namespace AS range_identifier,
+                    rv.standard_label AS range_label,
+                    CASE
+                        WHEN aspro.fk_system_type IS NULL THEN 999
+                        ELSE aspro.fk_system_type
+                    END AS fk_system_type
                 FROM che.associates_profile aspro
-                JOIN che.property prop ON aspro.fk_property = prop.pk_property
-                JOIN che.property_version pv ON prop.pk_property = pv.fk_property AND pv.fk_namespace_for_version IN (SELECT pk_namespace FROM che.get_all_references_namespaces_for_profile(:profile))
+                JOIN che.property p ON aspro.fk_property = p.pk_property
+                JOIN che.property_version pv ON p.pk_property = pv.fk_property AND pv.fk_namespace_for_version IN (SELECT pk_namespace FROM che.get_all_references_namespaces_for_profile(:profile))
                 --JOIN che.associates_referenced_namespace asrefns ON asrefns.fk_referenced_namespace = pv.fk_namespace_for_version AND asrefns.fk_profile = :profile
-                JOIN che.class clsdmn ON aspro.fk_inheriting_domain_class = clsdmn.pk_class
-                JOIN che.class_version domain_cv ON clsdmn.pk_class = domain_cv.fk_class 
-                JOIN che.class clsrng ON aspro.fk_inheriting_range_class = clsrng.pk_class
-                JOIN che.class_version range_cv ON clsrng.pk_class = range_cv.fk_class
+                JOIN che.class d ON d.pk_class = aspro.fk_inheriting_domain_class
+                JOIN che.class_version dv ON dv.fk_class = aspro.fk_inheriting_domain_class
+                                          AND dv.fk_namespace_for_version = aspro.fk_domain_namespace
+                JOIN che.class r ON r.pk_class = aspro.fk_inheriting_range_class
+                JOIN che.class_version rv ON rv.fk_class = aspro.fk_inheriting_range_class
+                                          AND rv.fk_namespace_for_version = aspro.fk_range_namespace
                 WHERE aspro.fk_profile = :profile AND aspro.fk_system_type = 5 AND aspro.fk_inheriting_domain_class = :class;";
 
         $stmt = $conn->prepare($sql);
@@ -628,47 +688,69 @@ class PropertyRepository extends EntityRepository
         }
         $in.=','.implode(",", $namespacesId);
 
-        $sql = "SELECT  pk_domain AS \"domainId\",
-                        identifier_domain AS domain,
-                        che.get_root_namespace_prefix(che.get_root_namespace(pv.fk_domain_namespace)) as \"domainRootNamespacePrefix\",
-                        identifier_property AS property,
-                        pk_property AS \"propertyId\",
-                        :class AS \"rangeId\",
-                        cls.identifier_in_namespace || ' ' || cv.standard_label AS range,
-                        che.get_root_namespace_prefix(che.get_root_namespace(pv.fk_range_namespace)) as \"rangeRootNamespacePrefix\",
-                        CASE
-                            WHEN aspro.fk_system_type IS NULL THEN 999
-                            ELSE aspro.fk_system_type
-                            END AS fk_system_type
+        $sql = "SELECT DISTINCT
+                ciip.present_class_identifier,
+                ciip.present_class_label,
+                che.get_root_namespace_prefix(che.get_root_namespace(ciip.fk_domain_namespace_for_version)) AS domain_root_namespace_prefix,
+                ciip.pk_domain_class AS domain_id,
+                ciip.domain_identifier_in_namespace AS domain_identifier,
+                ciip.domain_standard_label AS domain_label,
+                    ciip.domain_instances_min_quantifier AS domain_min_quantifier,
+                    ciip.domain_instances_max_quantifier AS domain_max_quantifier,
+                    ciip.pk_property AS property_id,
+                    ciip.identifier_in_namespace AS property_identifier,
+                    ciip.standard_label AS property_label,
+                    ciip.fk_namespace_for_version AS property_namespace_id,
+                    (SELECT label FROM che.get_namespace_labels(ciip.fk_namespace_for_version) WHERE language_iso_code = 'en') AS namespace,
+                    ciip.range_instances_min_quantifier AS range_min_quantifier,
+                    ciip.range_instances_max_quantifier AS range_max_quantifier,
+                    aspro.fk_inheriting_range_class AS range_id,
+                    aspro.fk_range_namespace AS range_namespace_id,
+                    ciip.present_class_identifier AS range_identifier,
+                    ciip.present_class_label AS range_label,
+                    CASE
+                        WHEN aspro.fk_system_type IS NULL THEN 999
+                        ELSE aspro.fk_system_type
+                    END AS fk_system_type
                 FROM che.class_ingoing_inherited_properties(:class, ARRAY[".$in."]::integer[]) ciip
-                JOIN che.property_version pv ON pv.fk_property = ciip.pk_property AND pv.fk_namespace_for_version IN (SELECT pk_namespace FROM che.get_all_references_namespaces_for_profile(:profile))
-                --JOIN che.associates_referenced_namespace asrefns ON asrefns.fk_referenced_namespace = pv.fk_namespace_for_version AND asrefns.fk_profile = :profile
-                JOIN che.class cls ON cls.pk_class = :class
-                JOIN che.class_version cv ON cls.pk_class = cv.fk_class
-                LEFT JOIN che.associates_profile aspro ON aspro.fk_property = pk_property AND aspro.fk_inheriting_range_class = :class AND aspro.fk_inheriting_domain_class = pk_domain AND aspro.fk_profile = :profile
+                LEFT JOIN che.associates_profile aspro ON aspro.fk_property = ciip.pk_property AND aspro.fk_inheriting_range_class = :class AND aspro.fk_inheriting_domain_class = ciip.pk_domain_class AND aspro.fk_profile = :profile 
                 
                 UNION DISTINCT
                 
-                SELECT clsdmn.pk_class AS \"domainId\",
-                       clsdmn.identifier_in_namespace || ' ' || domain_cv.standard_label AS domain,
-                        che.get_root_namespace_prefix(che.get_root_namespace(pv.fk_domain_namespace)) as \"domainRootNamespacePrefix\",
-                       prop.identifier_in_namespace  || ' ' ||  pv.standard_label AS property,
-                       aspro.fk_property AS \"propertyId\",
-                       aspro.fk_inheriting_range_class AS \"rangeId\",
-                       clsrng.identifier_in_namespace || ' ' || range_cv.standard_label AS range,
-                        che.get_root_namespace_prefix(che.get_root_namespace(pv.fk_range_namespace)) as \"rangeRootNamespacePrefix\",
-                       CASE
-                           WHEN aspro.fk_system_type IS NULL THEN 999
-                           ELSE aspro.fk_system_type
-                           END AS fk_system_type
+                SELECT DISTINCT
+                r.identifier_in_namespace AS present_class_identifier,
+                rv.standard_label AS present_class_label,
+                che.get_root_namespace_prefix(che.get_root_namespace(dv.fk_namespace_for_version)) AS domain_root_namespace_prefix,
+                d.pk_class AS domain_id,
+                d.identifier_in_namespace AS domain_identifier,
+                dv.standard_label AS domain_label,
+                    pv.domain_instances_min_quantifier AS domain_min_quantifier,
+                    pv.domain_instances_max_quantifier AS domain_max_quantifier,
+                    p.pk_property AS property_id,
+                    p.identifier_in_namespace AS property_identifier,
+                    pv.standard_label AS property_label,
+                    pv.fk_namespace_for_version AS property_namespace_id,
+                    (SELECT label FROM che.get_namespace_labels(pv.fk_namespace_for_version) WHERE language_iso_code = 'en') AS namespace,
+                    pv.range_instances_min_quantifier AS range_min_quantifier,
+                    pv.range_instances_max_quantifier AS range_max_quantifier,
+                    r.pk_class AS range_id,
+                    rv.fk_namespace_for_version AS range_namespace_id,
+                    r.identifier_in_namespace AS range_identifier,
+                    rv.standard_label AS range_label,
+                    CASE
+                        WHEN aspro.fk_system_type IS NULL THEN 999
+                        ELSE aspro.fk_system_type
+                    END AS fk_system_type
                 FROM che.associates_profile aspro
-                JOIN che.property prop ON aspro.fk_property = prop.pk_property
-                JOIN che.property_version pv ON prop.pk_property = pv.fk_property AND pv.fk_namespace_for_version IN (SELECT pk_namespace FROM che.get_all_references_namespaces_for_profile(:profile)) 
+                JOIN che.property p ON aspro.fk_property = p.pk_property
+                JOIN che.property_version pv ON p.pk_property = pv.fk_property AND pv.fk_namespace_for_version IN (SELECT pk_namespace FROM che.get_all_references_namespaces_for_profile(:profile))
                 --JOIN che.associates_referenced_namespace asrefns ON asrefns.fk_referenced_namespace = pv.fk_namespace_for_version AND asrefns.fk_profile = :profile
-                JOIN che.class clsdmn ON aspro.fk_inheriting_domain_class = clsdmn.pk_class
-                JOIN che.class_version domain_cv ON clsdmn.pk_class = domain_cv.fk_class
-                JOIN che.class clsrng ON aspro.fk_inheriting_range_class = clsrng.pk_class
-                JOIN che.class_version range_cv ON clsrng.pk_class = range_cv.fk_class
+                JOIN che.class d ON d.pk_class = aspro.fk_inheriting_domain_class
+                JOIN che.class_version dv ON dv.fk_class = aspro.fk_inheriting_domain_class
+                                        AND dv.fk_namespace_for_version = aspro.fk_domain_namespace
+                JOIN che.class r ON r.pk_class = aspro.fk_inheriting_range_class
+                JOIN che.class_version rv ON rv.fk_class = aspro.fk_inheriting_range_class
+                                        AND rv.fk_namespace_for_version = aspro.fk_range_namespace
                 WHERE aspro.fk_profile = :profile AND aspro.fk_system_type = 5 AND aspro.fk_inheriting_range_class = :class;";
 
         $stmt = $conn->prepare($sql);

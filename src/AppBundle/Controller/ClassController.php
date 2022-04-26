@@ -252,8 +252,8 @@ class ClassController extends Controller
         $namespacesIdFromClassVersion[] = $nsId;
         $rootNamespacesFromClassVersion[] = $em->getRepository('AppBundle:OntoNamespace')->findOneBy(array('id' => $nsId))->getTopLevelNamespace();
 
-        foreach($classVersion->getNamespaceForVersion()->getReferencedNamespaceAssociations() as $referencedNamespacesAssociation){
-            $nsId = $referencedNamespacesAssociation->getReferencedNamespace()->getId();
+        foreach($classVersion->getNamespaceForVersion()->getAllReferencedNamespaces() as $referencedNamespaces){
+            $nsId = $referencedNamespaces->getId();
             $namespacesIdFromClassVersion[] = $nsId;
             $rootNamespacesFromClassVersion[] = $em->getRepository('AppBundle:OntoNamespace')->findOneBy(array('id' => $nsId))->getTopLevelNamespace();
         }

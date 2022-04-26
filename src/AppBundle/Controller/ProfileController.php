@@ -591,7 +591,7 @@ class ProfileController  extends Controller
             $data = json_encode($data);
         }
         catch (NotFoundHttpException $e) {
-            return new JsonResponse(null,404, 'content-type:application/problem+json');
+            return new JsonResponse(null,404, array('content-type:application/problem+json'));
         }
 
         if(empty($classes)) {
@@ -617,7 +617,7 @@ class ProfileController  extends Controller
             $data = json_encode($data);
         }
         catch (NotFoundHttpException $e) {
-            return new JsonResponse(null,404, 'content-type:application/problem+json');
+            return new JsonResponse(null,404, array('content-type:application/problem+json'));
         }
 
         if(empty($classes)) {
@@ -955,7 +955,7 @@ class ProfileController  extends Controller
         }
 
         catch (\Exception $e) {
-            return new JsonResponse(null, 400, 'content-type:application/problem+json');
+            return new JsonResponse(null, 400, array('content-type:application/problem+json'));
         }
         return new JsonResponse(null, 204);
 
@@ -996,7 +996,7 @@ class ProfileController  extends Controller
             $data = json_encode($data);
         }
         catch (NotFoundHttpException $e) {
-            return new JsonResponse(null,404, 'content-type:application/problem+json');
+            return new JsonResponse(null,404, array('content-type:application/problem+json'));
         }
 
         return new JsonResponse($data,200, array(), true);
@@ -1021,7 +1021,7 @@ class ProfileController  extends Controller
             $data = json_encode($data);
         }
         catch (NotFoundHttpException $e) {
-            return new JsonResponse(null,404, 'content-type:application/problem+json');
+            return new JsonResponse(null,404, array('content-type:application/problem+json'));
         }
 
         return new JsonResponse($data,200, array(), true);
@@ -1046,7 +1046,7 @@ class ProfileController  extends Controller
             $data = json_encode($data);
         }
         catch (NotFoundHttpException $e) {
-            return new JsonResponse(null,404, 'content-type:application/problem+json');
+            return new JsonResponse(null,404, array('content-type:application/problem+json'));
         }
 
         return new JsonResponse($data,200, array(), true);
@@ -1071,7 +1071,7 @@ class ProfileController  extends Controller
             $data = json_encode($data);
         }
         catch (NotFoundHttpException $e) {
-            return new JsonResponse(null,404, 'content-type:application/problem+json');
+            return new JsonResponse(null,404, array('content-type:application/problem+json'));
         }
 
         return new JsonResponse($data,200, array(), true);
@@ -1098,7 +1098,7 @@ class ProfileController  extends Controller
             $data = json_encode($data);
         }
         catch (NotFoundHttpException $e) {
-            return new JsonResponse(null,404, 'content-type:application/problem+json');
+            return new JsonResponse(null,404, array('content-type:application/problem+json'));
         }
 
         if(empty($classes)) {
@@ -1130,7 +1130,7 @@ class ProfileController  extends Controller
             $data = json_encode($data);
         }
         catch (NotFoundHttpException $e) {
-            return new JsonResponse(null,404, 'content-type:application/problem+json');
+            return new JsonResponse(null,404, array('content-type:application/problem+json'));
         }
 
         if(empty($classes)) {
@@ -1162,7 +1162,7 @@ class ProfileController  extends Controller
             $data = json_encode($data);
         }
         catch (NotFoundHttpException $e) {
-            return new JsonResponse(null,404, 'content-type:application/problem+json');
+            return new JsonResponse(null,404, array('content-type:application/problem+json'));
         }
 
         if(empty($classes)) {
