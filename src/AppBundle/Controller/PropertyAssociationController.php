@@ -246,6 +246,10 @@ class PropertyAssociationController extends Controller
         {
             $em->remove($textProperty);
         }
+        foreach($propertyAssociation->getComments() as $comment)
+        {
+            $em->remove($comment);
+        }
         $em->remove($propertyAssociation);
         $em->flush();
         return new JsonResponse(null, 204);

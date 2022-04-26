@@ -270,6 +270,10 @@ class ClassAssociationController extends Controller
         {
             $em->remove($textProperty);
         }
+        foreach($classAssociation->getComments() as $comment)
+        {
+            $em->remove($comment);
+        }
         $em->remove($classAssociation);
         $em->flush();
         return new JsonResponse(null, 204);

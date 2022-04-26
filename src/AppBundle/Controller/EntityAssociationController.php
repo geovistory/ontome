@@ -397,6 +397,10 @@ class EntityAssociationController extends Controller
         {
             $em->remove($textProperty);
         }
+        foreach($entityAssociation->getComments() as $comment)
+        {
+            $em->remove($comment);
+        }
         $em->remove($entityAssociation);
         $em->flush();
         return new JsonResponse(null, 204);
