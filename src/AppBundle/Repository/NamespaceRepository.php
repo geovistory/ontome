@@ -377,7 +377,12 @@ class NamespaceRepository extends EntityRepository
                 UNION
                 SELECT fk_referenced_namespace AS fk_namespace 
                 FROM che.associates_referenced_namespace 
-                WHERE fk_namespace IN (SELECT fk_namespace FROM selectionNamespacesId);";
+                WHERE fk_namespace IN (SELECT fk_namespace FROM selectionNamespacesId)
+                UNION
+                SELECT DISTINCT pk_namespace AS fk_namespace
+                FROM che.namespace, 
+                selectionNamespacesId s
+                WHERE pk_namespace IN (SELECT pk_namespace FROM che.get_all_references_namespaces_for_namespace(s.fk_namespace));";
 
         $stmt = $conn->prepare($sql);
         $stmt->execute(array('userId' => $user->getId()));
