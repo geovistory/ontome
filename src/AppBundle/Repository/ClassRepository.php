@@ -143,16 +143,17 @@ class ClassRepository extends EntityRepository
                   ARRAY_TO_STRING(descendants,'|') AS \"descendants\",
                   ARRAY_TO_STRING(pk_descendants,'|') AS \"pk_descendants\",
                   ARRAY_TO_STRING(pk_version_descendants,'|') AS \"pk_version_descendants\"
-                  FROM che.descendant_class_hierarchy(?) cls,
+                  FROM che.descendant_class_hierarchy(?, ARRAY[".$in."]::integer[]) cls,
                   che.namespace nsp
                 WHERE nsp.pk_namespace = cls.fk_namespace_for_version
                 AND nsp.pk_namespace IN (".$in.")
+                AND cls.fk_namespace_for_version IN (".$in.")
                 GROUP BY pk_child, child_identifier, depth, nsp.pk_namespace, che.get_root_namespace(nsp.pk_namespace), fk_namespace_for_version, descendants, pk_descendants, pk_version_descendants
                 ORDER BY depth ASC;";
 
         $conn = $this->getEntityManager()->getConnection();
         $stmt = $conn->prepare($sql);
-        $stmt->execute(array_merge(array($classVersion->getClass()->getId()), $namespacesId));
+        $stmt->execute(array_merge(array($classVersion->getClass()->getId()), $namespacesId, $namespacesId, $namespacesId));
 
         return $stmt->fetchAll();
     }
