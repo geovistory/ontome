@@ -1,0 +1,106 @@
+{% extends 'base.html.twig' %}
+{% block body %}
+    <div class="container">
+        <a href="{{ path('profile_show', {'id': profile.id, '_fragment': 'classes'}) }}" class="pull-right btn btn-link">
+            <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
+        </a>
+        <h2>{{ classVersion.standardLabel }} - {{ classVersion.class.identifierInNamespace }} in {{ profile.standardLabel }}</h2>
+        <ul class="nav nav-tabs" id="main-tabs">
+            <li class="active"><a data-toggle="tab" href="#details">Details</a></li>
+            <li><a data-toggle="tab" href="#justification">Justification</a></li>
+        </ul>
+        <div class="tab-content">
+            <div id="details" class="tab-pane fade in active">
+                <h3>Details</h3>
+                <div class="container">
+                    <div class="row">
+                        <div class="col-lg-2">
+                            <p>Standard label:</p>
+                        </div>
+                        <div class="col-lg-10">
+                            {{ classVersion.standardLabel }}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-2">
+                            <p>Profile label:</p>
+                        </div>
+                        <div class="col-lg-10">
+                            {% for label in classVersion.class.labels|filter(v => v.profileForCustom is not null and v.namespaceForVersion == classVersion.namespaceForVersion) %}
+                                {{ label }}
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-2">
+                            <p>Scope note:</p>
+                        </div>
+                        <div class="col-lg-10">
+                            {% for scopeNote in classVersion.class.textProperties|filter(v => v.systemType.id == 1 and v.profileForCustom is null and v.namespaceForVersion == classVersion.namespaceForVersion) %}
+                                {{ scopeNote.textProperty|raw }}
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-2">
+                            <p>Profile scope note:</p>
+                        </div>
+                        <div class="col-lg-10">
+                            {% for scopeNote in classVersion.class.textProperties|filter(v => v.systemType.id == 1 and v.profileForCustom is not null and v.profileForCustom.id == profile.id and v.namespaceForVersion == classVersion.namespaceForVersion) %}
+                                {{ scopeNote.textProperty|raw }}
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-2">
+                            <p>Examples:</p>
+                        </div>
+                        <div class="col-lg-10">
+                            {% for example in classVersion.class.textProperties|filter(v => v.systemType.id == 7 and v.profileForCustom is null and v.namespaceForVersion == classVersion.namespaceForVersion) %}
+                                {{ example.textProperty|raw }}
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-2">
+                            <p>Profile examples:</p>
+                        </div>
+                        <div class="col-lg-10">
+                            {% for example in classVersion.class.textProperties|filter(v => v.systemType.id == 7 and v.profileForCustom is not null and v.profileForCustom.id == profile.id and v.namespaceForVersion == classVersion.namespaceForVersion) %}
+                                {{ example.textProperty|raw }}
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-2">
+                            <p>Additional note:</p>
+                        </div>
+                        <div class="col-lg-10">
+                            <ul>
+                            {% for example in classVersion.class.textProperties|filter(v => v.systemType.id in [33,34,35] and v.profileForCustom is null and v.namespaceForVersion == classVersion.namespaceForVersion) %}
+                                {{ example.textProperty|raw }}
+                            {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-2">
+                            <p>Profile additional note:</p>
+                        </div>
+                        <div class="col-lg-10">
+                            {% for example in classVersion.class.textProperties|filter(v => v.systemType.id in [33,34,35] and v.profileForCustom is not null and v.profileForCustom.id == profile.id and v.namespaceForVersion == classVersion.namespaceForVersion) %}
+                                {{ example.textProperty|raw }}
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="justification" class="tab-pane fade">
+                <h3>Justification</h3>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block javascripts %}
+    {{ parent() }}
+{% endblock %}

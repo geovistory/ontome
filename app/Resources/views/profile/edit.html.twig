@@ -361,11 +361,12 @@
                                     <tr>
                                         <th></th>
                                         <th>ID</th>
-                                        <th>Identifier</th>
+                                        <th>I</th><!-- identifier -->
                                         <th>Class label</th>
                                         <th>Namespace</th>
                                         <th>Association type</th>
                                         <th>Pick properties</th>
+                                        <th>C</th><!-- customisation -->
                                     </tr>
                                     </thead>
                                 </table>
@@ -376,7 +377,7 @@
                                     <thead>
                                     <tr>
                                         <th></th>
-                                        <th>Identifier</th>
+                                        <th>I</th>
                                         <th>Class label</th>
                                         <th>Namespace</th>
                                     </tr>
@@ -458,6 +459,7 @@
                             <th>Range</th>
                             <th>Namespace</th>
                             <th>Association type</th>
+                            <th>Customisation</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -556,7 +558,7 @@
                                             'id': profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).range.id,
                                             'namespaceFromUrlId': profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).rangeNamespace.id
                                         }) }}">
-                                            {% set rangeClassVersion = profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).range.classVersionForDisplay(profileAssociation.rangeNamespace) %}
+                                            {% set rangeClassVersion = profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).range.classVersionForDisplay(profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).rangeNamespace) %}
                                             {{ rangeClassVersion.namespaceForVersion.topLevelNamespace.rootNamespacePrefix }}:{{ rangeClassVersion.class.identifierInNamespace }} {{ rangeClassVersion.standardLabel }}
                                         </a>
                                     {% endif %}
@@ -566,6 +568,11 @@
                                 </td>
                                 <td>
                                     {{ profileAssociation.systemType }}
+                                </td>
+                                <td>
+                                    <a href="{{ path("property_edit_customisation", {'id': profileAssociation.property.id, 'profile': profile.id}) }}" class="btn btn-xs btn-primary">
+                                        <span class="fas fa-cog"></span>
+                                    </a>
                                 </td>
                             </tr>
                         {% endfor %}
@@ -966,6 +973,7 @@
                     { data: 'standardLabel' },
                     { data: 'namespace' },
                     { data: 'associationType' },
+                    { data: null },
                     { data: null }
                 ],
                 columnDefs: [
@@ -1001,7 +1009,7 @@
                         }
                     },
                     {
-                        targets: -1,
+                        targets: -2,
                         "data": null,
                         render: function ( data, type, row, meta ) {
                             if(row.associationType == 'Selected'){
@@ -1014,6 +1022,20 @@
                                 else return '';
                             }
                             else return '';
+                        }
+                    },
+                    {
+                        targets: -1,
+                        "data": null,
+                        render: function ( data, type, row, meta ) {
+                            var urlCustomClass = '{{ path("class_edit_customisation", {'id' : 'classID','profile' : 'profileID'}) }}';
+                            urlCustomClass = urlCustomClass.replace("profileID", profileID);
+                            urlCustomClass = urlCustomClass.replace("classID", row.id);
+                            var btnColor = 'btn-primary';
+                            if(row.nbLbLCustom+row.nbTxtpCustom>0){
+                                btnColor = 'btn-success';
+                            }
+                            return '<a href="' + urlCustomClass + '" class="btn btn-xs '+btnColor+'"><span class="fas fa-cog"></span></a>';
                         }
                     },
                     {

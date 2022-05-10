@@ -11,6 +11,8 @@ namespace AppBundle\Controller;
 
 use AppBundle\Entity\Label;
 use AppBundle\Entity\OntoClass;
+use AppBundle\Entity\OntoNamespace;
+use AppBundle\Entity\Profile;
 use AppBundle\Entity\Project;
 use AppBundle\Entity\Property;
 use AppBundle\Entity\PropertyVersion;
@@ -528,6 +530,46 @@ class PropertyController extends Controller
             'namespacesIdFromPropertyVersion' => $namespacesIdFromPropertyVersion,
             'namespacesIdFromUser' => $namespacesIdFromUser
         ));
+    }
+
+    /**
+     * @Route("/property/{id}/profile/{profile}", name="property_show_customisation", requirements={"id"="^([0-9]+)|(propertyID){1}$", "profile"="^([0-9]+)|(profileID){1}$"})
+     * @param Property $property
+     * @param Profile $profile
+     * @return Response the rendered template
+     */
+    public function showCustomisationAction(Property $property, Profile $profile)
+    {
+        $rootNamespaceProperty = $property->getTopLevelNamespace();
+        $referencedNamespace = null;
+        foreach($profile->getAllReferencedNamespaces() as $referencedNamespaceProfile){
+            if($referencedNamespaceProfile->getTopLevelNamespace() === $rootNamespaceProperty){
+                $referencedNamespace = $referencedNamespaceProfile;
+                break;
+            }
+        }
+        $propertyVersion = $property->getPropertyVersionForDisplay($referencedNamespace);
+        return $this->render('property/show_customisation.html.twig', array('propertyVersion' => $propertyVersion, 'profile' => $profile));
+    }
+
+    /**
+     * @Route("/property/{id}/profile/{profile}/edit", name="property_edit_customisation", requirements={"id"="^([0-9]+)|(propertyID){1}$", "profile"="^([0-9]+)|(profileID){1}$"})
+     * @param Property $property
+     * @param Profile $profile
+     * @return Response the rendered template
+     */
+    public function editCustomisationAction(Property $property, Profile $profile)
+    {
+        $rootNamespaceProperty = $property->getTopLevelNamespace();
+        $referencedNamespace = null;
+        foreach($profile->getAllReferencedNamespaces() as $referencedNamespaceProfile){
+            if($referencedNamespaceProfile->getTopLevelNamespace() === $rootNamespaceProperty){
+                $referencedNamespace = $referencedNamespaceProfile;
+                break;
+            }
+        }
+        $propertyVersion = $property->getPropertyVersionForDisplay($referencedNamespace);
+        return $this->render('property/edit_customisation.html.twig', array('propertyVersion' => $propertyVersion, 'profile' => $profile));
     }
 
     /**

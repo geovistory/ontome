@@ -853,16 +853,15 @@ FOOTER Styling
     color: red;
 }
 
-#summary div.row {
+#summary div.row, #details div.row {
     border-bottom: solid 1px #DDDDDD;
 }
 
-#summary div.row:last-child {
+#summary div.row:last-child, #details div.row:last-child {
     border-bottom: none;
 }
 
-#summary div.row div
-{
+#summary div.row div, #details div.row div{
     padding: 10px;
 }
 

@@ -54,6 +54,12 @@ class TextProperty implements GroupSequenceProviderInterface
     private $namespaceForVersion;
 
     /**
+     * @ORM\ManyToOne(targetEntity="Profile", inversedBy="textProperties")
+     * @ORM\JoinColumn(name="fk_profile_for_custom", referencedColumnName="pk_profile", nullable=false)
+     */
+    private $profileForCustom;
+
+    /**
      * @ORM\ManyToOne(targetEntity="OntoClass", inversedBy="textProperties")
      * @ORM\JoinColumn(name="fk_class", referencedColumnName="pk_class")
      * @Assert\Type(type="AppBundle\Entity\OntoClass")
@@ -179,6 +185,14 @@ class TextProperty implements GroupSequenceProviderInterface
     public function getNamespaceForVersion()
     {
         return $this->namespaceForVersion;
+    }
+
+    /**
+     * @return Profile
+     */
+    public function getProfileForCustom()
+    {
+        return $this->profileForCustom;
     }
 
     /**
@@ -356,6 +370,14 @@ class TextProperty implements GroupSequenceProviderInterface
     public function setNamespaceForVersion($namespaceForVersion)
     {
         $this->namespaceForVersion = $namespaceForVersion;
+    }
+
+    /**
+     * @param Profile $profileForCustom
+     */
+    public function setProfileForCustom($profileForCustom)
+    {
+        $this->profileForCustom = $profileForCustom;
     }
 
     /**

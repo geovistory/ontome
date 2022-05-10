@@ -262,6 +262,7 @@
                                 <th>Class label</th>
                                 <th>Namespace</th>
                                 <th>Association type</th>
+                                <th>View customisation</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -278,6 +279,11 @@
                                     </td>
                                     <td>{{ class.namespace }}</td>
                                     <td>{{ class.associationType }}</td>
+                                    {% set btnColor = "btn-primary" %}
+                                    {% if class.nbLbLCustom + class.nbTxtpCustom > 0 %}
+                                        {% set btnColor = "btn-success" %}
+                                    {% endif %}
+                                    <td><a href="{{ path('class_show_customisation', {'id': class.id, 'profile': profile.id}) }}" class="btn btn-xs {{ btnColor }}"><span class="fas fa-cog"></span></a></td>
                                 </tr>
                             {% endfor %}
                             </tbody>
@@ -314,6 +320,7 @@
                                 <th>Range</th>
                                 <th>Namespace</th>
                                 <th>Association type</th>
+                                <th>View customisation</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -403,7 +410,7 @@
                                                 'id': profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).range.id,
                                                 'namespaceFromUrlId': profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).rangeNamespace.id
                                             }) }}">
-                                                {% set rangeClassVersion = profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).range.classVersionForDisplay(profileAssociation.rangeNamespace) %}
+                                                {% set rangeClassVersion = profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).range.classVersionForDisplay(profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).rangeNamespace) %}
                                                 {{ rangeClassVersion.namespaceForVersion.topLevelNamespace.rootNamespacePrefix }}:{{ rangeClassVersion.class.identifierInNamespace }} {{ rangeClassVersion.standardLabel }}
                                             </a>
                                         {% endif %}
@@ -414,6 +421,7 @@
                                     <td>
                                         {{ profileAssociation.systemType }}
                                     </td>
+                                    <td><a href="{{ path('property_show_customisation', {'id': profileAssociation.property.id, 'profile': profile.id}) }}" class="btn btn-xs btn-primary"><span class="fas fa-cog"></span></a></td>
                                 </tr>
                             {% endfor %}
                             </tbody>

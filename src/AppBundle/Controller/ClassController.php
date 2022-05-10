@@ -13,6 +13,7 @@ use AppBundle\Entity\Label;
 use AppBundle\Entity\OntoClass;
 use AppBundle\Entity\OntoClassVersion;
 use AppBundle\Entity\OntoNamespace;
+use AppBundle\Entity\Profile;
 use AppBundle\Entity\Project;
 use AppBundle\Entity\SystemType;
 use AppBundle\Entity\TextProperty;
@@ -404,7 +405,6 @@ class ClassController extends Controller
             ]);
         }
 
-
         return $this->render('class/edit.html.twig', array(
             'classVersion' => $classVersion,
             'ancestors' => $ancestors,
@@ -419,6 +419,46 @@ class ClassController extends Controller
             'namespacesIdFromUser' => $namespacesIdFromUser,
             'classIdentifierForm' => $formIdentifier->createView()
         ));
+    }
+
+    /**
+     * @Route("/class/{id}/profile/{profile}", name="class_show_customisation", requirements={"id"="^([0-9]+)|(classID){1}$", "profile"="^([0-9]+)|(profileID){1}$"})
+     * @param OntoClass $class
+     * @param Profile $profile
+     * @return Response the rendered template
+     */
+    public function showCustomisationAction(OntoClass $class, Profile $profile)
+    {
+        $rootNamespaceClass = $class->getTopLevelNamespace();
+        $referencedNamespace = null;
+        foreach($profile->getAllReferencedNamespaces() as $referencedNamespaceProfile){
+            if($referencedNamespaceProfile->getTopLevelNamespace() === $rootNamespaceClass){
+                $referencedNamespace = $referencedNamespaceProfile;
+                break;
+            }
+        }
+        $classVersion = $class->getClassVersionForDisplay($referencedNamespace);
+        return $this->render('class/show_customisation.html.twig', array('classVersion' => $classVersion, 'profile' => $profile));
+    }
+
+    /**
+     * @Route("/class/{id}/profile/{profile}/edit", name="class_edit_customisation", requirements={"id"="^([0-9]+)|(classID){1}$", "profile"="^([0-9]+)|(profileID){1}$"})
+     * @param OntoClass $class
+     * @param Profile $profile
+     * @return Response the rendered template
+     */
+    public function editCustomisationAction(OntoClass $class, Profile $profile)
+    {
+        $rootNamespaceClass = $class->getTopLevelNamespace();
+        $referencedNamespace = null;
+        foreach($profile->getAllReferencedNamespaces() as $referencedNamespaceProfile){
+            if($referencedNamespaceProfile->getTopLevelNamespace() === $rootNamespaceClass){
+                $referencedNamespace = $referencedNamespaceProfile;
+                break;
+            }
+        }
+        $classVersion = $class->getClassVersionForDisplay($referencedNamespace);
+        return $this->render('class/edit_customisation.html.twig', array('classVersion' => $classVersion, 'profile' => $profile));
     }
 
     /**
