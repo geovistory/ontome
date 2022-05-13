@@ -280,10 +280,10 @@
                                     <td>{{ class.namespace }}</td>
                                     <td>{{ class.associationType }}</td>
                                     {% set btnColor = "btn-primary" %}
-                                    {% if class.nbLbLCustom + class.nbTxtpCustom > 0 %}
+                                    {% if class.nbTxtpCustom > 0 %}
                                         {% set btnColor = "btn-success" %}
                                     {% endif %}
-                                    <td><a href="{{ path('class_show_customisation', {'id': class.id, 'profile': profile.id}) }}" class="btn btn-xs {{ btnColor }}"><span class="fas fa-cog"></span></a></td>
+                                    <td>{% if class.associationType == "Selected" %}<a href="{{ path('class_show_customisation', {'id': class.id, 'profile': profile.id}) }}" class="btn btn-xs {{ btnColor }}"><i class="fas fa-eye"></i></a>{% endif %}</td>
                                 </tr>
                             {% endfor %}
                             </tbody>
@@ -613,7 +613,7 @@
                     { type: 'natural-ci', targets: 0, width: '1%', className: 'text-right' }
                 ],
                 "autoWidth": false,
-                order: [[ 0, 'asc' ]],
+                order: [[ 4, 'desc' ],[ 0, 'asc' ]],
                 initComplete: function(){
                     this.api().columns([2]).every(function(){
                         var column = this;

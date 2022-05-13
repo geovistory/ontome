@@ -361,12 +361,11 @@
                                     <tr>
                                         <th></th>
                                         <th>ID</th>
-                                        <th>I</th><!-- identifier -->
+                                        <th>Identifier</th><!-- identifier -->
                                         <th>Class label</th>
                                         <th>Namespace</th>
                                         <th>Association type</th>
-                                        <th>Pick properties</th>
-                                        <th>C</th><!-- customisation -->
+                                        <th>Customisation</th>
                                     </tr>
                                     </thead>
                                 </table>
@@ -973,7 +972,6 @@
                     { data: 'standardLabel' },
                     { data: 'namespace' },
                     { data: 'associationType' },
-                    { data: null },
                     { data: null }
                 ],
                 columnDefs: [
@@ -1009,33 +1007,30 @@
                         }
                     },
                     {
-                        targets: -2,
+                        targets: -1,
                         "data": null,
                         render: function ( data, type, row, meta ) {
                             if(row.associationType == 'Selected'){
+                                var htmlButtons = '';
+
                                 var urlSelectProperties = '{{ path("profile_properties_edit", {'profile' : 'profileID', 'class' : 'classID'}) }}';
                                 urlSelectProperties = urlSelectProperties.replace("profileID", profileID);
                                 urlSelectProperties = urlSelectProperties.replace("classID", row.id);
                                 if([{{ allProfileNamespacesId|join(',') }}].indexOf(row.namespaceForVersion) >= 0){
-                                    return '<a href="' + urlSelectProperties + '"><span class="glyphicon glyphicon-th-list"></span></a>';
+                                    htmlButtons += '<a title="Pick properties" href="' + urlSelectProperties + '"><span class="glyphicon glyphicon-th-list"></span></a>';
                                 }
-                                else return '';
+
+                                var urlCustomClass = '{{ path("class_edit_customisation", {'id' : 'classID','profile' : 'profileID'}) }}';
+                                urlCustomClass = urlCustomClass.replace("profileID", profileID);
+                                urlCustomClass = urlCustomClass.replace("classID", row.id);
+                                var btnColor = 'btn-primary';
+                                if(row.nbTxtpCustom>0){
+                                    btnColor = 'btn-success';
+                                }
+                                htmlButtons += ' <a title="Customisation" href="' + urlCustomClass + '" class="btn btn-xs '+btnColor+'"><i class="fas fa-tools"></i></a>';
+                                return htmlButtons;
                             }
                             else return '';
-                        }
-                    },
-                    {
-                        targets: -1,
-                        "data": null,
-                        render: function ( data, type, row, meta ) {
-                            var urlCustomClass = '{{ path("class_edit_customisation", {'id' : 'classID','profile' : 'profileID'}) }}';
-                            urlCustomClass = urlCustomClass.replace("profileID", profileID);
-                            urlCustomClass = urlCustomClass.replace("classID", row.id);
-                            var btnColor = 'btn-primary';
-                            if(row.nbLbLCustom+row.nbTxtpCustom>0){
-                                btnColor = 'btn-success';
-                            }
-                            return '<a href="' + urlCustomClass + '" class="btn btn-xs '+btnColor+'"><span class="fas fa-cog"></span></a>';
                         }
                     },
                     {

@@ -309,22 +309,15 @@ class ClassRepository extends EntityRepository
             ->getConnection();
 
         $sql = "SELECT DISTINCT pk_class AS id,
-                        CASE 
-                            WHEN lblDef.label IS NOT NULL THEN lblDef.label
-                            ELSE class_standard_label
-                        END
-                        AS \"standardLabel\",
+                        class_standard_label AS \"standardLabel\",
                         identifier_in_namespace AS \"identifierInNamespace\" ,
                         namespace AS \"namespace\" ,
                         profile_association_type AS \"associationType\",
                         fk_class_namespace_for_version AS \"namespaceForVersion\",
-                        COUNT(lbl.*) AS \"nbLbLCustom\",
                         COUNT(txtp.*) AS \"nbTxtpCustom\"
                 FROM che.get_all_classes_for_profile(:profile)
-                LEFT JOIN che.label lblDef ON lblDef.fk_class = pk_class AND lblDef.fk_profile_for_custom = :profile
-                LEFT JOIN che.label lbl ON lbl.fk_class = pk_class AND lbl.fk_profile_for_custom = :profile
                 LEFT JOIN che.text_property txtp ON txtp.fk_class = pk_class AND txtp.fk_profile_for_custom = :profile
-                GROUP BY pk_class, lblDef.label, class_standard_label, identifier_in_namespace, namespace, profile_association_type, fk_class_namespace_for_version;";
+                GROUP BY pk_class, class_standard_label, identifier_in_namespace, namespace, profile_association_type, fk_class_namespace_for_version;";
         $stmt = $conn->prepare($sql);
         $stmt->execute(array('profile' => $profile->getId()));
 

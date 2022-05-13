@@ -50,12 +50,6 @@ class Label
     private $namespaceForVersion;
 
     /**
-     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Profile", inversedBy="labelCustoms")
-     * @ORM\JoinColumn(name="fk_profile_for_custom", referencedColumnName="pk_profile", nullable=false)
-     */
-    private $profileForCustom;
-
-    /**
      * @ORM\Column(type="integer")
      */
     private $importerInteger;
@@ -322,14 +316,6 @@ class Label
     }
 
     /**
-     * @return mixed
-     */
-    public function getProfileForCustom()
-    {
-        return $this->profileForCustom;
-    }
-
-    /**
      * @param mixed $namespaceForVersion
      */
     public function setNamespaceForVersion($namespaceForVersion)
@@ -447,14 +433,6 @@ class Label
     public function setModificationTime($modificationTime)
     {
         $this->modificationTime = $modificationTime;
-    }
-
-    /**
-     * @param mixed $profileForCustom
-     */
-    public function setProfileForCustom($profileForCustom)
-    {
-        $this->profileForCustom = $profileForCustom;
     }
 
     public function __toString()
