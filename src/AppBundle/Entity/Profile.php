@@ -623,10 +623,18 @@ class Profile
 
     public function isPublishable(){
         if ($this->isRootProfile) return false;
+        $profileNamespaces = $this->getNamespaces();
+        foreach($this->getNamespaces() as $ns){
+            foreach($ns->getAllReferencedNamespaces() as $nsRef){
+                if(!$profileNamespaces->contains($nsRef)){
+                    $profileNamespaces->add($nsRef);
+                }
+            }
+        }
         foreach ($this->getProfileAssociations() as $profileAssociation){
             if($profileAssociation->getSystemType()->getId() == 5
                 // Refuser la publication s'il y a des entités qui ne sont pas dans les namespaces reférencés du profil
-                and !$this->getNamespaces()->contains($profileAssociation->getEntityNamespaceForVersion())){
+                and !$profileNamespaces->contains($profileAssociation->getEntityNamespaceForVersion())){
                 return false;
             }
         }
