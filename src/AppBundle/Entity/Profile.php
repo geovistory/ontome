@@ -623,7 +623,7 @@ class Profile
 
     public function isPublishable(){
         if ($this->isRootProfile) return false;
-        $profileNamespaces = $this->getNamespaces();
+        $profileNamespaces = clone $this->getNamespaces();
         foreach($this->getNamespaces() as $ns){
             foreach($ns->getAllReferencedNamespaces() as $nsRef){
                 if(!$profileNamespaces->contains($nsRef)){
