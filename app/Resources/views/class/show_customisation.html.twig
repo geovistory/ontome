@@ -4,9 +4,8 @@
         <a href="{{ path('profile_show', {'id': profile.id, '_fragment': 'classes'}) }}" class="pull-right btn btn-link">
             <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
         </a>
-        <h2>{{ classVersion.standardLabel }} - {{ classVersion.class.identifierInNamespace }} in {{ profile.standardLabel }}</h2>
-        <h3>Details</h3>
-        <div class="container">
+        <h2>View {{ classVersion.standardLabel }} - {{ classVersion.class.identifierInNamespace }} in {{ profile.standardLabel }}</h2>
+        <div class="container" id="details">
             <div class="row">
                 <div class="col-lg-2">
                     <p>Label:</p>
@@ -37,7 +36,25 @@
             </div>
             <div class="row">
                 <div class="col-lg-2">
-                    <p>Profile examples:</p>
+                    <p>Justification of addition to profile:</p>
+                </div>
+                <div class="col-lg-10">
+
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-2">
+                    <p>Use cases:</p>
+                </div>
+                <div class="col-lg-10">
+                    <ul>
+
+                    </ul>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-2">
+                    <p>Examples:</p>
                 </div>
                 <div class="col-lg-10">
                     {% for example in classVersion.class.textProperties|filter(v => v.systemType.id == 7 and v.profileForCustom is not null and v.profileForCustom.id == profile.id and v.namespaceForVersion == classVersion.namespaceForVersion) %}
@@ -47,23 +64,11 @@
             </div>
             <div class="row">
                 <div class="col-lg-2">
-                    <p>Additional note:</p>
+                    <p>Notes:</p>
                 </div>
                 <div class="col-lg-10">
-                    <ul>
-                    {% for example in classVersion.class.textProperties|filter(v => v.systemType.id in [33,34,35] and v.profileForCustom is null and v.namespaceForVersion == classVersion.namespaceForVersion) %}
-                        {{ example.textProperty|raw }}
-                    {% endfor %}
-                    </ul>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-lg-2">
-                    <p>Profile additional note:</p>
-                </div>
-                <div class="col-lg-10">
-                    {% for example in classVersion.class.textProperties|filter(v => v.systemType.id in [33,34,35] and v.profileForCustom is not null and v.profileForCustom.id == profile.id and v.namespaceForVersion == classVersion.namespaceForVersion) %}
-                        {{ example.textProperty|raw }}
+                    {% for note in classVersion.class.textProperties|filter(v => v.systemType.id == 33 and v.profileForCustom is not null and v.profileForCustom.id == profile.id and v.namespaceForVersion == classVersion.namespaceForVersion) %}
+                        {{ note.textProperty|raw }}
                     {% endfor %}
                 </div>
             </div>

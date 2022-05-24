@@ -18,6 +18,7 @@ use AppBundle\Entity\Project;
 use AppBundle\Entity\SystemType;
 use AppBundle\Entity\TextProperty;
 use AppBundle\Form\ClassEditIdentifierForm;
+use AppBundle\Form\CustomClassProfileForm;
 use AppBundle\Form\NamespaceEditIdentifiersForm;
 use AppBundle\Form\ClassQuickAddForm;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
@@ -458,7 +459,12 @@ class ClassController extends Controller
             }
         }
         $classVersion = $class->getClassVersionForDisplay($referencedNamespace);
-        return $this->render('class/edit_customisation.html.twig', array('classVersion' => $classVersion, 'profile' => $profile));
+        $form = $this->createForm(CustomClassProfileForm::class, $class);
+        return $this->render('class/edit_customisation.html.twig', array(
+            'classVersion' => $classVersion,
+            'profile' => $profile,
+            'form' => $form->createView())
+        );
     }
 
     /**

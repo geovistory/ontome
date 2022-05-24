@@ -861,7 +861,7 @@ FOOTER Styling
     border-bottom: none;
 }
 
-#summary div.row div, #details div.row div{
+#summary div.row div[class^='col'], #details div.row div[class^='col']{
     padding: 10px;
 }
 
