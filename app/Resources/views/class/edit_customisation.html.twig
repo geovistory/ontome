@@ -16,16 +16,9 @@
         <a href="{{ path('profile_edit', {'id': profile.id, '_fragment': 'classes'}) }}" class="pull-right btn btn-link">
             <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
         </a>
-        <h2>Customise {{ classVersion.standardLabel }} - {{ classVersion.class.identifierInNamespace }} in {{ profile.standardLabel }}</h2>
-        <div class="container" id="details">
-            <div class="row">
-                <div class="col-lg-2">
-                    <p>Label:</p>
-                </div>
-                <div class="col-lg-10">
-                    {{ classVersion.standardLabel }}
-                </div>
-            </div>
+        <h2>Customise {{ classVersion.standardLabel }} - {{ classVersion.class.identifierInNamespace }} in {{ profile.standardLabel }} profile</h2>
+
+        <div class="container well" id="details">
             <div class="row">
                 <div class="col-lg-2">
                     <p>Scope note:</p>
@@ -46,48 +39,127 @@
                     {% endfor %}
                 </div>
             </div>
-            {{ form_start(form) }}
-            {{ form_errors(form) }}
-            <div class="row">
-                <div class="col-lg-2">
-                    <p>Justification of addition to profile:</p>
-                </div>
-                <div class="col-lg-10">
-                    <a href="#" class="btn-justification">Add a justification</a>
-                    <div class="paddingInherit input-add-justification">{{ form_row(form.justification) }}</div>
-                </div>
+        </div>
+        <div class="container">
+            <div>
+                {% set justification = classVersion.class.textProperties|filter(v => v.systemType.id == 15 and v.profileForCustom is not null and v.profileForCustom.id == profile.id and v.namespaceForVersion == classVersion.namespaceForVersion)|first %}
+                <h3>Justification of the selection in the profile
+                {% if justification %}
+                    <a href="#" class="btn-justification btn btn-success btn-xs"><i class="fa fa-edit"></i></a>
+                {% else %}
+                    <a href="#" class="btn-justification btn btn-xs btn-primary"><i class="fa fa-plus"></i> Add</a>
+                {% endif %}
+                </h3>
+                <span class="txtp-justification">{{ justification ? justification.textProperty|raw : '<i>Not justification yet.</i>' }}</span>
 
+                {{ form_start(formJustification) }}
+                {{ form_errors(formJustification) }}
+                <div class="paddingInherit input-add-justification">
+                    {{ form_row(formJustification.textProperty) }}
+                    {{ form_row(formJustification.languageIsoCode) }}
+                    <p class="pull-right">
+                        <button type="submit" class="btn btn-primary save" formnovalidate><i class="fas fa-save"></i> Save</button>
+                        <button type="reset" class="btn btn-default"><i class="fas fa-undo-alt"></i> Reset</button>
+                        <button type="button" class="btn btn-danger close-justification"><i class="fas fa-undo-alt"></i> Close</button>
+                    </p>
+                </div>
+                {{ form_end(formJustification) }}
             </div>
-            {{ form_end(form) }}
-            <div class="row">
-                <div class="col-lg-2">
-                    <p>Use cases:</p>
+
+            <div class="clearfix">
+                {% set useCase = classVersion.class.textProperties|filter(v => v.systemType.id == 36 and v.profileForCustom is not null and v.profileForCustom.id == profile.id and v.namespaceForVersion == classVersion.namespaceForVersion)|first %}
+                <h3>Use case
+                    {% if useCase %}
+                        <a href="#" class="btn-use-case btn btn-success btn-xs"><i class="fa fa-edit"></i></a>
+                    {% else %}
+                        <a href="#" class="btn-use-case btn btn-xs btn-primary"><i class="fa fa-plus"></i> Add</a>
+                    {% endif %}
+                </h3>
+                <span class="txtp-use-case">{{ useCase ? useCase.textProperty|raw : '<i>Not use case yet.</i>' }}</span>
+                {{ form_start(formUseCase) }}
+                {{ form_errors(formUseCase) }}
+                <div class="paddingInherit input-add-use-case">
+                    {{ form_row(formUseCase.textProperty) }}
+                    {{ form_row(formUseCase.languageIsoCode) }}
+                    <p class="pull-right">
+                        <button type="submit" class="btn btn-primary save" formnovalidate><i class="fas fa-save"></i> Save</button>
+                        <button type="reset" class="btn btn-default"><i class="fas fa-undo-alt"></i> Reset</button>
+                        <button type="button" class="btn btn-danger close-use-case"><i class="fas fa-undo-alt"></i> Close</button>
+                    </p>
                 </div>
-                <div class="col-lg-10">
-                    <a href="#" class="add-use-case">Add an use case</a>
-                </div>
+                {{ form_end(formUseCase) }}
             </div>
-            <div class="row">
-                <div class="col-lg-2">
-                    <p>Profile examples:</p>
+
+            <div class="clearfix">
+                {% set examples = classVersion.class.textProperties|filter(v => v.systemType.id == 7 and v.profileForCustom is not null and v.profileForCustom.id == profile.id and v.namespaceForVersion == classVersion.namespaceForVersion) %}
+                <h3>Additional examples <a href="#" class="btn-new-example btn btn-xs btn-primary"><i class="fas fa-plus"></i> Add</a></h3>
+                {{ form_start(formNewExample) }}
+                {{ form_errors(formNewExample) }}
+                <div class="paddingInherit input-add-new-example">
+                    {{ form_row(formNewExample.textProperty) }}
+                    {{ form_row(formNewExample.languageIsoCode) }}
+                    <p class="pull-right">
+                        <button type="submit" class="btn btn-primary save" formnovalidate><i class="fas fa-save"></i> Save</button>
+                        <button type="reset" class="btn btn-default"><i class="fas fa-undo-alt"></i> Reset</button>
+                        <button type="button" class="btn btn-danger close-new-example"><i class="fas fa-undo-alt"></i> Close</button>
+                    </p>
                 </div>
-                <div class="col-lg-10">
-                    <a href="#" class="add-example">Add an example</a>
-                    {% for example in classVersion.class.textProperties|filter(v => v.systemType.id == 7 and v.profileForCustom is not null and v.profileForCustom.id == profile.id and v.namespaceForVersion == classVersion.namespaceForVersion) %}
-                        {{ example.textProperty|raw }}
+                {{ form_end(formNewExample) }}
+                <table class="table table-striped" id="profile-examples-table">
+                    <thead>
+                    <tr>
+                        <th>Additional examples</th>
+                        <th>Edit</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for example in examples %}
+                        <tr>
+                            <td>{{ example.textProperty|raw }}</td>
+                            <td>
+                                <a href="#" class="btn-edit-example btn btn-success btn-xs" data-id="{{ example.id }}"><i class="fa fa-edit"></i></a>
+                            </td>
+                        </tr>
                     {% endfor %}
-                </div>
+                    </tbody>
+                </table>
+                {% for formExample in formsExample %}
+                    {{ form_start(formExample) }}
+                    {{ form_errors(formExample) }}
+                    <div class="paddingInherit input-edit-example" data-id="{{ formExample.vars.id }}">
+                        {{ form_row(formExample.textProperty) }}
+                        {{ form_row(formExample.languageIsoCode) }}
+                        <p class="pull-right">
+                            <button type="submit" class="btn btn-primary save" formnovalidate><i class="fas fa-save"></i> Save</button>
+                            <button type="reset" class="btn btn-default"><i class="fas fa-undo-alt"></i> Reset</button>
+                            <button type="button" class="btn btn-danger close-edit-example" data-id="{{ formExample.vars.id }}"><i class="fas fa-undo-alt"></i> Close</button>
+                        </p>
+                    </div>
+                    {{ form_end(formExample) }}
+                {% endfor %}
             </div>
-            <div class="row">
-                <div class="col-lg-2">
-                    <p>Notes:</p>
+
+            <div class="clearfix">
+                {% set note = classVersion.class.textProperties|filter(v => v.systemType.id == 33 and v.profileForCustom is not null and v.profileForCustom.id == profile.id and v.namespaceForVersion == classVersion.namespaceForVersion)|first %}
+                <h3>Profile internal note {% if note %}
+                        <a href="#" class="btn-note btn btn-success btn-xs"><i class="fa fa-edit"></i></a>
+                    {% else %}
+                        <a href="#" class="btn-note btn btn-xs btn-primary"><i class="fa fa-plus"></i> Add</a>
+                    {% endif %}
+                </h3>
+                <span class="txtp-note">{{ note ? note.textProperty|raw : '<i>Not profile internal note yet.</i>' }}</span>
+                {{ form_start(formNote) }}
+                {{ form_errors(formNote) }}
+                <div class="paddingInherit input-add-note">
+                    {{ form_row(formNote.textProperty) }}
+                    {{ form_row(formNote.languageIsoCode) }}
+                    <p class="pull-right">
+                        <button type="submit" class="btn btn-primary save" formnovalidate><i class="fas fa-save"></i> Save</button>
+                        <button type="reset" class="btn btn-default"><i class="fas fa-undo-alt"></i> Reset</button>
+                        <button type="button" class="btn btn-danger close-note"><i class="fas fa-undo-alt"></i> Close</button>
+                    </p>
                 </div>
-                <div class="col-lg-10">
-                    <a href="#" class="add-note">Add an internal note</a>
-                    {% for note in classVersion.class.textProperties|filter(v => v.systemType.id == 33 and v.profileForCustom is not null and v.profileForCustom.id == profile.id and v.namespaceForVersion == classVersion.namespaceForVersion) %}
-                        {{ note.textProperty|raw }}
-                    {% endfor %}
-                </div>
+                {{ form_end(formNote) }}
             </div>
         </div>
     </div>
@@ -96,28 +168,44 @@
     {{ parent() }}
     <script>
         $(document).ready(function() {
+            $('a[class^="close"]').hide();
+            $('div[class*="input-"]').hide();
 
-            $('.input-add-justification').hide();
-            $('.btn-justification').click(function (e){
+            $('.btn-justification, .close-justification').click(function (e){
                 e.preventDefault();
+                $('.btn-justification').toggle();
+                $('.txtp-justification').toggle();
                 $('.input-add-justification').slideToggle();
-                if($('.btn-justification').html() == "Add a justification"){
-                    $('.btn-justification').html("Close justification form");
-                }
-                else{
-                    $('.btn-justification').html("Add a justification");
-                }
             });
 
-            $('.add-use-case').click(function (){
-                alert("test2");
+            $('.btn-note, .close-note').click(function (e){
+                e.preventDefault();
+                $('.btn-note').toggle();
+                $('.txtp-note').toggle();
+                $('.input-add-note').slideToggle();
             });
-            $('.add-example').click(function (){
-                alert("test3");
+
+            $('.btn-use-case, .close-use-case').click(function (e){
+                e.preventDefault();
+                $('.btn-use-case').toggle();
+                $('.txtp-use-case').toggle();
+                $('.input-add-use-case').slideToggle();
             });
-            $('.add-note').click(function (){
-                alert("test4");
+
+            $('.btn-new-example, .close-new-example').click(function (e){
+                e.preventDefault();
+                $('.btn-new-example').toggle();
+                $('.input-add-new-example').slideToggle();
             });
+
+            $('.btn-edit-example, .close-edit-example').click(function (e){
+                e.preventDefault();
+                var idExample = $(this).data('id');
+                $('.input-edit-example').slideUp();
+                $('.input-edit-example[data-id="formExample' + idExample + '"]').slideToggle();
+            });
+
+            $('#profile-examples-table').DataTable();
         });
     </script>
 {% endblock %}

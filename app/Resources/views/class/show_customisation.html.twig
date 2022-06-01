@@ -4,16 +4,8 @@
         <a href="{{ path('profile_show', {'id': profile.id, '_fragment': 'classes'}) }}" class="pull-right btn btn-link">
             <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
         </a>
-        <h2>View {{ classVersion.standardLabel }} - {{ classVersion.class.identifierInNamespace }} in {{ profile.standardLabel }}</h2>
-        <div class="container" id="details">
-            <div class="row">
-                <div class="col-lg-2">
-                    <p>Label:</p>
-                </div>
-                <div class="col-lg-10">
-                    {{ classVersion.standardLabel }}
-                </div>
-            </div>
+        <h2>View {{ classVersion.standardLabel }} - {{ classVersion.class.identifierInNamespace }} in {{ profile.standardLabel }} profile</h2>
+        <div class="container well" id="details">
             <div class="row">
                 <div class="col-lg-2">
                     <p>Scope note:</p>
@@ -34,47 +26,52 @@
                     {% endfor %}
                 </div>
             </div>
-            <div class="row">
-                <div class="col-lg-2">
-                    <p>Justification of addition to profile:</p>
-                </div>
-                <div class="col-lg-10">
+        </div>
+        <div class="container">
+            <div>
+                {% set justification = classVersion.class.textProperties|filter(v => v.systemType.id == 15 and v.profileForCustom is not null and v.profileForCustom.id == profile.id and v.namespaceForVersion == classVersion.namespaceForVersion)|first %}
+                <h3>Justification of the selection in the profile</h3>
+                <span class="txtp-justification">{{ justification ? justification.textProperty|raw : '<i>Not justification yet.</i>' }}</span>
+            </div>
 
-                </div>
+            <div class="clearfix">
+                {% set useCase = classVersion.class.textProperties|filter(v => v.systemType.id == 36 and v.profileForCustom is not null and v.profileForCustom.id == profile.id and v.namespaceForVersion == classVersion.namespaceForVersion)|first %}
+                <h3>Use cases</h3>
+                <span class="txtp-use-case">{{ useCase ? useCase.textProperty|raw : '<i>Not use case yet.</i>' }}</span>
             </div>
-            <div class="row">
-                <div class="col-lg-2">
-                    <p>Use cases:</p>
-                </div>
-                <div class="col-lg-10">
-                    <ul>
 
-                    </ul>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-lg-2">
-                    <p>Examples:</p>
-                </div>
-                <div class="col-lg-10">
-                    {% for example in classVersion.class.textProperties|filter(v => v.systemType.id == 7 and v.profileForCustom is not null and v.profileForCustom.id == profile.id and v.namespaceForVersion == classVersion.namespaceForVersion) %}
-                        {{ example.textProperty|raw }}
+            <div class="clearfix">
+                {% set examples = classVersion.class.textProperties|filter(v => v.systemType.id == 7 and v.profileForCustom is not null and v.profileForCustom.id == profile.id and v.namespaceForVersion == classVersion.namespaceForVersion) %}
+                <h3>Additional examples</h3>
+                <table class="table table-striped" id="profile-examples-table">
+                    <thead>
+                    <tr>
+                        <th>Additional examples</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for example in examples %}
+                        <tr>
+                            <td>{{ example.textProperty|raw }}</td>
+                        </tr>
                     {% endfor %}
-                </div>
+                    </tbody>
+                </table>
             </div>
-            <div class="row">
-                <div class="col-lg-2">
-                    <p>Notes:</p>
-                </div>
-                <div class="col-lg-10">
-                    {% for note in classVersion.class.textProperties|filter(v => v.systemType.id == 33 and v.profileForCustom is not null and v.profileForCustom.id == profile.id and v.namespaceForVersion == classVersion.namespaceForVersion) %}
-                        {{ note.textProperty|raw }}
-                    {% endfor %}
-                </div>
+
+            <div class="clearfix">
+                {% set note = classVersion.class.textProperties|filter(v => v.systemType.id == 33 and v.profileForCustom is not null and v.profileForCustom.id == profile.id and v.namespaceForVersion == classVersion.namespaceForVersion)|first %}
+                <h3>Profile internal note</h3>
+                <span class="txtp-note">{{ note ? note.textProperty|raw : '<i>Not profile internal note yet.</i>' }}</span>
             </div>
         </div>
     </div>
 {% endblock %}
 {% block javascripts %}
     {{ parent() }}
+    <script>
+        $(document).ready(function() {
+            $('#profile-examples-table').DataTable();
+        });
+    </script>
 {% endblock %}

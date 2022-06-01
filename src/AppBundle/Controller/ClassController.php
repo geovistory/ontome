@@ -18,9 +18,9 @@ use AppBundle\Entity\Project;
 use AppBundle\Entity\SystemType;
 use AppBundle\Entity\TextProperty;
 use AppBundle\Form\ClassEditIdentifierForm;
-use AppBundle\Form\CustomClassProfileForm;
 use AppBundle\Form\NamespaceEditIdentifiersForm;
 use AppBundle\Form\ClassQuickAddForm;
+use AppBundle\Form\TextPropertyForm;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
@@ -448,8 +448,9 @@ class ClassController extends Controller
      * @param Profile $profile
      * @return Response the rendered template
      */
-    public function editCustomisationAction(OntoClass $class, Profile $profile)
+    public function editCustomisationAction(OntoClass $class, Profile $profile, Request $request)
     {
+        $em = $this->getDoctrine()->getManager();
         $rootNamespaceClass = $class->getTopLevelNamespace();
         $referencedNamespace = null;
         foreach($profile->getAllReferencedNamespaces() as $referencedNamespaceProfile){
@@ -459,12 +460,166 @@ class ClassController extends Controller
             }
         }
         $classVersion = $class->getClassVersionForDisplay($referencedNamespace);
-        $form = $this->createForm(CustomClassProfileForm::class, $class);
+
+        // Justification form
+        $systemTypeJustification = $em->getRepository('AppBundle:SystemType')->find(15);
+        $textPropertyJustification = $em->getRepository("AppBundle:TextProperty")->findOneBy(
+            array("class" => $class->getId(), "profileForCustom" => $profile->getId(), "systemType" => $systemTypeJustification->getId())
+        );
+        if(is_null($textPropertyJustification)){
+            $textPropertyJustification = new TextProperty();
+            $textPropertyJustification->setCreator($this->getUser());
+            $textPropertyJustification->setCreationTime(new \DateTime('now'));
+            $textPropertyJustification->setModifier($this->getUser());
+            $textPropertyJustification->setModificationTime(new \DateTime('now'));
+            $textPropertyJustification->setClass($class);
+            $textPropertyJustification->setProfileForCustom($profile);
+            $textPropertyJustification->setNamespaceForVersion($classVersion->getNamespaceForVersion());
+            $textPropertyJustification->setSystemType($systemTypeJustification);
+        }
+
+        $formJustification = $this->get('form.factory')->createNamed('formJustification', TextPropertyForm::class, $textPropertyJustification);
+        $formJustification->handleRequest($request);
+        if($formJustification->isSubmitted() && $formJustification->isValid()){
+            $textPropertyJustification = $formJustification->getData();
+            $textPropertyJustification->setModifier($this->getUser());
+            $textPropertyJustification->setModificationTime(new \DateTime('now'));
+            $em->persist($textPropertyJustification);
+            $em->flush();
+
+            return $this->redirectToRoute('class_edit_customisation', array(
+                    'id' => $classVersion->getClass()->getId(),
+                    'profile' => $profile->getId())
+            );
+        }
+        // End justification form
+
+        // Use case form
+        $systemTypeUseCase = $em->getRepository('AppBundle:SystemType')->find(36);
+        $textPropertyUseCase = $em->getRepository("AppBundle:TextProperty")->findOneBy(
+            array("class" => $class->getId(), "profileForCustom" => $profile->getId(), "systemType" => $systemTypeUseCase->getId())
+        );
+        if(is_null($textPropertyUseCase)){
+            $textPropertyUseCase = new TextProperty();
+            $textPropertyUseCase->setCreator($this->getUser());
+            $textPropertyUseCase->setCreationTime(new \DateTime('now'));
+            $textPropertyUseCase->setModifier($this->getUser());
+            $textPropertyUseCase->setModificationTime(new \DateTime('now'));
+            $textPropertyUseCase->setClass($class);
+            $textPropertyUseCase->setProfileForCustom($profile);
+            $textPropertyUseCase->setNamespaceForVersion($classVersion->getNamespaceForVersion());
+            $textPropertyUseCase->setSystemType($systemTypeUseCase);
+        }
+
+        $formUseCase = $this->get('form.factory')->createNamed('formUseCase', TextPropertyForm::class, $textPropertyUseCase);
+        $formUseCase->handleRequest($request);
+        if($formUseCase->isSubmitted() && $formUseCase->isValid()){
+            $textPropertyUseCase = $formUseCase->getData();
+            $textPropertyUseCase->setModifier($this->getUser());
+            $textPropertyUseCase->setModificationTime(new \DateTime('now'));
+            $em->persist($textPropertyUseCase);
+            $em->flush();
+
+            return $this->redirectToRoute('class_edit_customisation', array(
+                    'id' => $classVersion->getClass()->getId(),
+                    'profile' => $profile->getId())
+            );
+        }
+        // End use case form
+
+        // Profile internal note form
+        $systemTypeNote = $em->getRepository('AppBundle:SystemType')->find(33);
+        $textPropertyNote = $em->getRepository("AppBundle:TextProperty")->findOneBy(
+            array("class" => $class->getId(), "profileForCustom" => $profile->getId(), "systemType" => $systemTypeNote->getId())
+        );
+        if(is_null($textPropertyNote)){
+            $textPropertyNote = new TextProperty();
+            $textPropertyNote->setCreator($this->getUser());
+            $textPropertyNote->setCreationTime(new \DateTime('now'));
+            $textPropertyNote->setModifier($this->getUser());
+            $textPropertyNote->setModificationTime(new \DateTime('now'));
+            $textPropertyNote->setClass($class);
+            $textPropertyNote->setProfileForCustom($profile);
+            $textPropertyNote->setNamespaceForVersion($classVersion->getNamespaceForVersion());
+            $textPropertyNote->setSystemType($systemTypeNote);
+        }
+
+        $formNote = $this->get('form.factory')->createNamed('formNote', TextPropertyForm::class, $textPropertyNote);
+        $formNote->handleRequest($request);
+        if($formNote->isSubmitted() && $formNote->isValid()){
+            $textPropertyNote = $formNote->getData();
+            $textPropertyNote->setModifier($this->getUser());
+            $textPropertyNote->setModificationTime(new \DateTime('now'));
+            $em->persist($textPropertyNote);
+            $em->flush();
+
+            return $this->redirectToRoute('class_edit_customisation', array(
+                    'id' => $classVersion->getClass()->getId(),
+                    'profile' => $profile->getId())
+            );
+        }
+        // End profile internal note form
+
+        // Additionnals examples form
+        $systemTypeExample = $em->getRepository('AppBundle:SystemType')->find(7);
+
+        // First $textPropertyNewExample is only for add
+        $textPropertyNewExample =  new TextProperty();
+        $textPropertyNewExample->setCreator($this->getUser());
+        $textPropertyNewExample->setCreationTime(new \DateTime('now'));
+        $textPropertyNewExample->setModifier($this->getUser());
+        $textPropertyNewExample->setModificationTime(new \DateTime('now'));
+        $textPropertyNewExample->setClass($class);
+        $textPropertyNewExample->setProfileForCustom($profile);
+        $textPropertyNewExample->setNamespaceForVersion($classVersion->getNamespaceForVersion());
+        $textPropertyNewExample->setSystemType($systemTypeExample);
+
+        $formNewExample = $this->get('form.factory')->createNamed('formNewExample', TextPropertyForm::class, $textPropertyNewExample);
+        $formNewExample->handleRequest($request);
+        if($formNewExample->isSubmitted() && $formNewExample->isValid()){
+            $textPropertyNewExample = $formNewExample->getData();
+            $textPropertyNewExample->setModifier($this->getUser());
+            $textPropertyNewExample->setModificationTime(new \DateTime('now'));
+            $em->persist($textPropertyNewExample);
+            $em->flush();
+
+            return $this->redirectToRoute('class_edit_customisation', array(
+                    'id' => $classVersion->getClass()->getId(),
+                    'profile' => $profile->getId())
+            );
+        }
+
+        // Next examples is only for edit
+        $textPropertyExamples = $em->getRepository("AppBundle:TextProperty")->findBy(
+            array("class" => $class->getId(), "profileForCustom" => $profile->getId(), "systemType" => $systemTypeExample->getId())
+        );
+
+        $forms = array();
+        foreach($textPropertyExamples as $example){
+            $uniqueFormName = 'formExample'.$example->getId();
+            $form = $this->get('form.factory')->createNamed($uniqueFormName, TextPropertyForm::class, $example);
+            $forms[$uniqueFormName] = $form;
+        }
+
+        foreach ($forms as $formName => $formExample){
+            $formExample->handleRequest($request);
+            if ($formExample->isSubmitted() && $formExample->isValid())
+            {
+                //Do stuff
+            }
+            //Create the view *after* calling handleRequest, so data is updated to the form, even if, say, there are validation errors.
+            $formsExampleViews[$formName] = $formExample->createView();
+        }
+
         return $this->render('class/edit_customisation.html.twig', array(
             'classVersion' => $classVersion,
             'profile' => $profile,
-            'form' => $form->createView())
-        );
+            'formJustification' => $formJustification->createView(),
+            'formUseCase' => $formUseCase->createView(),
+            'formNote' => $formNote->createView(),
+            'formNewExample' => $formNewExample->createView(),
+            'formsExample' => $formsExampleViews
+        ));
     }
 
     /**
