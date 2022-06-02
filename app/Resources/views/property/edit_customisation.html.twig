@@ -1,106 +1,211 @@
 {% extends 'base.html.twig' %}
 {% block body %}
+    {% import _self as formMacros %}
+    {% macro printTextPropertyRow(textPropertyForm) %}
+        {{ form_errors(textPropertyForm) }}
+        {{ form_row(textPropertyForm.textProperty, {
+            'label': 'Scope note'
+        }) }}
+        {{ form_row(textPropertyForm.languageIsoCode, {
+            'label': 'Language'
+        }) }}
+        {{ form_row(textPropertyForm.creator) }}
+        {{ form_row(textPropertyForm.modifier) }}
+    {% endmacro %}
     <div class="container">
         <a href="{{ path('profile_edit', {'id': profile.id, '_fragment': 'properties'}) }}" class="pull-right btn btn-link">
             <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
         </a>
-        <h2>{{ propertyVersion.standardLabel }} - {{ propertyVersion.property.identifierInNamespace }} in {{ profile.standardLabel }}</h2>
-        <ul class="nav nav-tabs" id="main-tabs">
-            <li class="active"><a data-toggle="tab" href="#details">Details</a></li>
-            <li><a data-toggle="tab" href="#justification">Justification</a></li>
-        </ul>
-        <div class="tab-content">
-            <div id="details" class="tab-pane fade in active">
-                <h3>Details</h3>
-                <div class="container">
-                    <div class="row">
-                        <div class="col-lg-2">
-                            <p>Standard label:</p>
-                        </div>
-                        <div class="col-lg-10">
-                            {{ propertyVersion.standardLabel }}
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-lg-2">
-                            <p>Profile label:</p>
-                        </div>
-                        <div class="col-lg-10">
-                            {% for label in propertyVersion.property.labels|filter(v => v.profileForCustom is not null and v.namespaceForVersion == propertyVersion.namespaceForVersion) %}
-                                {{ label }}
-                            {% endfor %}
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-lg-2">
-                            <p>Scope note:</p>
-                        </div>
-                        <div class="col-lg-10">
-                            {% for scopeNote in propertyVersion.property.textProperties|filter(v => v.systemType.id == 1 and v.profileForCustom is null and v.namespaceForVersion == propertyVersion.namespaceForVersion) %}
-                                {{ scopeNote.textProperty|raw }}
-                            {% endfor %}
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-lg-2">
-                            <p>Profile scope note:</p>
-                        </div>
-                        <div class="col-lg-10">
-                            {% for scopeNote in propertyVersion.property.textProperties|filter(v => v.systemType.id == 1 and v.profileForCustom is not null and v.profileForCustom.id == profile.id and v.namespaceForVersion == propertyVersion.namespaceForVersion) %}
-                                {{ scopeNote.textProperty|raw }}
-                            {% endfor %}
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-lg-2">
-                            <p>Examples:</p>
-                        </div>
-                        <div class="col-lg-10">
-                            {% for example in propertyVersion.property.textProperties|filter(v => v.systemType.id == 7 and v.profileForCustom is null and v.namespaceForVersion == propertyVersion.namespaceForVersion) %}
-                                {{ example.textProperty|raw }}
-                            {% endfor %}
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-lg-2">
-                            <p>Profile examples:</p>
-                        </div>
-                        <div class="col-lg-10">
-                            {% for example in propertyVersion.property.textProperties|filter(v => v.systemType.id == 7 and v.profileForCustom is not null and v.profileForCustom.id == profile.id and v.namespaceForVersion == propertyVersion.namespaceForVersion) %}
-                                {{ example.textProperty|raw }}
-                            {% endfor %}
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-lg-2">
-                            <p>Additional note:</p>
-                        </div>
-                        <div class="col-lg-10">
-                            <ul>
-                                {% for example in propertyVersion.property.textProperties|filter(v => v.systemType.id in [33,34,35] and v.profileForCustom is null and v.namespaceForVersion == propertyVersion.namespaceForVersion) %}
-                                    {{ example.textProperty|raw }}
-                                {% endfor %}
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-lg-2">
-                            <p>Profile additional note:</p>
-                        </div>
-                        <div class="col-lg-10">
-                            {% for example in propertyVersion.property.textProperties|filter(v => v.systemType.id in [33,34,35] and v.profileForCustom is not null and v.profileForCustom.id == profile.id and v.namespaceForVersion == propertyVersion.namespaceForVersion) %}
-                                {{ example.textProperty|raw }}
-                            {% endfor %}
-                        </div>
-                    </div>
+        <h2>Customise {{ propertyVersion.standardLabel }} - {{ propertyVersion.property.identifierInNamespace }} in {{ profile.standardLabel }} profile</h2>
+
+        <div class="container well" id="details">
+            <div class="row">
+                <div class="col-lg-2">
+                    <p>Scope note:</p>
+                </div>
+                <div class="col-lg-10">
+                    {% for scopeNote in propertyVersion.property.textProperties|filter(v => v.systemType.id == 1 and v.profileForCustom is null and v.namespaceForVersion == propertyVersion.namespaceForVersion) %}
+                        {{ scopeNote.textProperty|raw }}
+                    {% endfor %}
                 </div>
             </div>
-            <div id="justification" class="tab-pane fade">
-                <h3>Justification</h3>
+            <div class="row">
+                <div class="col-lg-2">
+                    <p>Examples:</p>
+                </div>
+                <div class="col-lg-10">
+                    {% for example in propertyVersion.property.textProperties|filter(v => v.systemType.id == 7 and v.profileForCustom is null and v.namespaceForVersion == propertyVersion.namespaceForVersion) %}
+                        {{ example.textProperty|raw }}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <div class="container">
+            <div>
+                {% set justification = propertyVersion.property.textProperties|filter(v => v.systemType.id == 15 and v.profileForCustom is not null and v.profileForCustom.id == profile.id and v.namespaceForVersion == propertyVersion.namespaceForVersion)|first %}
+                <h3>Justification of the selection in the profile
+                    {% if justification %}
+                        <a href="#" class="btn-justification btn btn-success btn-xs"><i class="fa fa-edit"></i></a>
+                    {% else %}
+                        <a href="#" class="btn-justification btn btn-xs btn-primary"><i class="fa fa-plus"></i> Add</a>
+                    {% endif %}
+                </h3>
+                <span class="txtp-justification">{{ justification ? justification.textProperty|raw : '<i>Not justification yet.</i>' }}</span>
+
+                {{ form_start(formJustification) }}
+                {{ form_errors(formJustification) }}
+                <div class="paddingInherit input-add-justification">
+                    {{ form_row(formJustification.textProperty) }}
+                    {{ form_row(formJustification.languageIsoCode) }}
+                    <p class="pull-right">
+                        <button type="submit" class="btn btn-primary save" formnovalidate><i class="fas fa-save"></i> Save</button>
+                        <button type="reset" class="btn btn-default"><i class="fas fa-undo-alt"></i> Reset</button>
+                        <button type="button" class="btn btn-danger close-justification"><i class="fas fa-undo-alt"></i> Close</button>
+                    </p>
+                </div>
+                {{ form_end(formJustification) }}
+            </div>
+
+            <div class="clearfix">
+                {% set useCase = propertyVersion.property.textProperties|filter(v => v.systemType.id == 36 and v.profileForCustom is not null and v.profileForCustom.id == profile.id and v.namespaceForVersion == propertyVersion.namespaceForVersion)|first %}
+                <h3>Use case
+                    {% if useCase %}
+                        <a href="#" class="btn-use-case btn btn-success btn-xs"><i class="fa fa-edit"></i></a>
+                    {% else %}
+                        <a href="#" class="btn-use-case btn btn-xs btn-primary"><i class="fa fa-plus"></i> Add</a>
+                    {% endif %}
+                </h3>
+                <span class="txtp-use-case">{{ useCase ? useCase.textProperty|raw : '<i>Not use case yet.</i>' }}</span>
+                {{ form_start(formUseCase) }}
+                {{ form_errors(formUseCase) }}
+                <div class="paddingInherit input-add-use-case">
+                    {{ form_row(formUseCase.textProperty) }}
+                    {{ form_row(formUseCase.languageIsoCode) }}
+                    <p class="pull-right">
+                        <button type="submit" class="btn btn-primary save" formnovalidate><i class="fas fa-save"></i> Save</button>
+                        <button type="reset" class="btn btn-default"><i class="fas fa-undo-alt"></i> Reset</button>
+                        <button type="button" class="btn btn-danger close-use-case"><i class="fas fa-undo-alt"></i> Close</button>
+                    </p>
+                </div>
+                {{ form_end(formUseCase) }}
+            </div>
+
+            <div class="clearfix">
+                {% set examples = propertyVersion.property.textProperties|filter(v => v.systemType.id == 7 and v.profileForCustom is not null and v.profileForCustom.id == profile.id and v.namespaceForVersion == propertyVersion.namespaceForVersion) %}
+                <h3>Additional examples <a href="#" class="btn-new-example btn btn-xs btn-primary"><i class="fas fa-plus"></i> Add</a></h3>
+                {{ form_start(formNewExample) }}
+                {{ form_errors(formNewExample) }}
+                <div class="paddingInherit input-add-new-example">
+                    {{ form_row(formNewExample.textProperty) }}
+                    {{ form_row(formNewExample.languageIsoCode) }}
+                    <p class="pull-right">
+                        <button type="submit" class="btn btn-primary save" formnovalidate><i class="fas fa-save"></i> Save</button>
+                        <button type="reset" class="btn btn-default"><i class="fas fa-undo-alt"></i> Reset</button>
+                        <button type="button" class="btn btn-danger close-new-example"><i class="fas fa-undo-alt"></i> Close</button>
+                    </p>
+                </div>
+                {{ form_end(formNewExample) }}
+                <table class="table table-striped" id="profile-examples-table">
+                    <thead>
+                    <tr>
+                        <th>Additional examples</th>
+                        <th>Edit</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for example in examples %}
+                        <tr>
+                            <td>{{ example.textProperty|raw }}</td>
+                            <td>
+                                <a href="#" class="btn-edit-example btn btn-success btn-xs" data-id="{{ example.id }}"><i class="fa fa-edit"></i></a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                {% for formExample in formsExample %}
+                    {{ form_start(formExample) }}
+                    {{ form_errors(formExample) }}
+                    <div class="paddingInherit input-edit-example" data-id="{{ formExample.vars.id }}">
+                        {{ form_row(formExample.textProperty) }}
+                        {{ form_row(formExample.languageIsoCode) }}
+                        <p class="pull-right">
+                            <button type="submit" class="btn btn-primary save" formnovalidate><i class="fas fa-save"></i> Save</button>
+                            <button type="reset" class="btn btn-default"><i class="fas fa-undo-alt"></i> Reset</button>
+                            <button type="button" class="btn btn-danger close-edit-example" data-id="{{ formExample.vars.id }}"><i class="fas fa-undo-alt"></i> Close</button>
+                        </p>
+                    </div>
+                    {{ form_end(formExample) }}
+                {% endfor %}
+            </div>
+
+            <div class="clearfix">
+                {% set note = propertyVersion.property.textProperties|filter(v => v.systemType.id == 33 and v.profileForCustom is not null and v.profileForCustom.id == profile.id and v.namespaceForVersion == propertyVersion.namespaceForVersion)|first %}
+                <h3>Profile internal note {% if note %}
+                        <a href="#" class="btn-note btn btn-success btn-xs"><i class="fa fa-edit"></i></a>
+                    {% else %}
+                        <a href="#" class="btn-note btn btn-xs btn-primary"><i class="fa fa-plus"></i> Add</a>
+                    {% endif %}
+                </h3>
+                <span class="txtp-note">{{ note ? note.textProperty|raw : '<i>Not profile internal note yet.</i>' }}</span>
+                {{ form_start(formNote) }}
+                {{ form_errors(formNote) }}
+                <div class="paddingInherit input-add-note">
+                    {{ form_row(formNote.textProperty) }}
+                    {{ form_row(formNote.languageIsoCode) }}
+                    <p class="pull-right">
+                        <button type="submit" class="btn btn-primary save" formnovalidate><i class="fas fa-save"></i> Save</button>
+                        <button type="reset" class="btn btn-default"><i class="fas fa-undo-alt"></i> Reset</button>
+                        <button type="button" class="btn btn-danger close-note"><i class="fas fa-undo-alt"></i> Close</button>
+                    </p>
+                </div>
+                {{ form_end(formNote) }}
             </div>
         </div>
     </div>
 {% endblock %}
 {% block javascripts %}
     {{ parent() }}
+    <script>
+        $(document).ready(function() {
+            $('a[class^="close"]').hide();
+            $('div[class*="input-"]').hide();
+
+            $('.btn-justification, .close-justification').click(function (e){
+                e.preventDefault();
+                $('.btn-justification').toggle();
+                $('.txtp-justification').toggle();
+                $('.input-add-justification').slideToggle();
+            });
+
+            $('.btn-note, .close-note').click(function (e){
+                e.preventDefault();
+                $('.btn-note').toggle();
+                $('.txtp-note').toggle();
+                $('.input-add-note').slideToggle();
+            });
+
+            $('.btn-use-case, .close-use-case').click(function (e){
+                e.preventDefault();
+                $('.btn-use-case').toggle();
+                $('.txtp-use-case').toggle();
+                $('.input-add-use-case').slideToggle();
+            });
+
+            $('.btn-new-example, .close-new-example').click(function (e){
+                e.preventDefault();
+                $('.btn-new-example').toggle();
+                $('.input-add-new-example').slideToggle();
+            });
+
+            $('.btn-edit-example, .close-edit-example').click(function (e){
+                e.preventDefault();
+                var idExample = $(this).data('id');
+                $('.input-edit-example').slideUp();
+                $('.input-edit-example[data-id="formExample' + idExample + '"]').slideToggle();
+            });
+
+            $('#profile-examples-table').DataTable();
+        });
+    </script>
 {% endblock %}

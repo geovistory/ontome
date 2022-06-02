@@ -4,103 +4,74 @@
         <a href="{{ path('profile_show', {'id': profile.id, '_fragment': 'properties'}) }}" class="pull-right btn btn-link">
             <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
         </a>
-        <h2>{{ propertyVersion.standardLabel }} - {{ propertyVersion.property.identifierInNamespace }} in {{ profile.standardLabel }}</h2>
-        <ul class="nav nav-tabs" id="main-tabs">
-            <li class="active"><a data-toggle="tab" href="#details">Details</a></li>
-            <li><a data-toggle="tab" href="#justification">Justification</a></li>
-        </ul>
-        <div class="tab-content">
-            <div id="details" class="tab-pane fade in active">
-                <h3>Details</h3>
-                <div class="container">
-                    <div class="row">
-                        <div class="col-lg-2">
-                            <p>Standard label:</p>
-                        </div>
-                        <div class="col-lg-10">
-                            {{ propertyVersion.standardLabel }}
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-lg-2">
-                            <p>Profile label:</p>
-                        </div>
-                        <div class="col-lg-10">
-                            {% for label in propertyVersion.property.labels|filter(v => v.profileForCustom is not null and v.namespaceForVersion == propertyVersion.namespaceForVersion) %}
-                                {{ label }}
-                            {% endfor %}
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-lg-2">
-                            <p>Scope note:</p>
-                        </div>
-                        <div class="col-lg-10">
-                            {% for scopeNote in propertyVersion.property.textProperties|filter(v => v.systemType.id == 1 and v.profileForCustom is null and v.namespaceForVersion == propertyVersion.namespaceForVersion) %}
-                                {{ scopeNote.textProperty|raw }}
-                            {% endfor %}
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-lg-2">
-                            <p>Profile scope note:</p>
-                        </div>
-                        <div class="col-lg-10">
-                            {% for scopeNote in propertyVersion.property.textProperties|filter(v => v.systemType.id == 1 and v.profileForCustom is not null and v.profileForCustom.id == profile.id and v.namespaceForVersion == propertyVersion.namespaceForVersion) %}
-                                {{ scopeNote.textProperty|raw }}
-                            {% endfor %}
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-lg-2">
-                            <p>Examples:</p>
-                        </div>
-                        <div class="col-lg-10">
-                            {% for example in propertyVersion.property.textProperties|filter(v => v.systemType.id == 7 and v.profileForCustom is null and v.namespaceForVersion == propertyVersion.namespaceForVersion) %}
-                                {{ example.textProperty|raw }}
-                            {% endfor %}
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-lg-2">
-                            <p>Profile examples:</p>
-                        </div>
-                        <div class="col-lg-10">
-                            {% for example in propertyVersion.property.textProperties|filter(v => v.systemType.id == 7 and v.profileForCustom is not null and v.profileForCustom.id == profile.id and v.namespaceForVersion == propertyVersion.namespaceForVersion) %}
-                                {{ example.textProperty|raw }}
-                            {% endfor %}
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-lg-2">
-                            <p>Additional note:</p>
-                        </div>
-                        <div class="col-lg-10">
-                            <ul>
-                                {% for example in propertyVersion.property.textProperties|filter(v => v.systemType.id in [33,34,35] and v.profileForCustom is null and v.namespaceForVersion == propertyVersion.namespaceForVersion) %}
-                                    {{ example.textProperty|raw }}
-                                {% endfor %}
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-lg-2">
-                            <p>Profile additional note:</p>
-                        </div>
-                        <div class="col-lg-10">
-                            {% for example in propertyVersion.property.textProperties|filter(v => v.systemType.id in [33,34,35] and v.profileForCustom is not null and v.profileForCustom.id == profile.id and v.namespaceForVersion == propertyVersion.namespaceForVersion) %}
-                                {{ example.textProperty|raw }}
-                            {% endfor %}
-                        </div>
-                    </div>
+        <h2>View {{ propertyVersion.standardLabel }} - {{ propertyVersion.property.identifierInNamespace }} in {{ profile.standardLabel }} profile</h2>
+        <div class="container well" id="details">
+            <div class="row">
+                <div class="col-lg-2">
+                    <p>Scope note:</p>
+                </div>
+                <div class="col-lg-10">
+                    {% for scopeNote in propertyVersion.property.textProperties|filter(v => v.systemType.id == 1 and v.profileForCustom is null and v.namespaceForVersion == propertyVersion.namespaceForVersion) %}
+                        {{ scopeNote.textProperty|raw }}
+                    {% endfor %}
                 </div>
             </div>
-            <div id="justification" class="tab-pane fade">
-                <h3>Justification</h3>
+            <div class="row">
+                <div class="col-lg-2">
+                    <p>Examples:</p>
+                </div>
+                <div class="col-lg-10">
+                    {% for example in propertyVersion.property.textProperties|filter(v => v.systemType.id == 7 and v.profileForCustom is null and v.namespaceForVersion == propertyVersion.namespaceForVersion) %}
+                        {{ example.textProperty|raw }}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <div class="container">
+            <div>
+                {% set justification = propertyVersion.property.textProperties|filter(v => v.systemType.id == 15 and v.profileForCustom is not null and v.profileForCustom.id == profile.id and v.namespaceForVersion == propertyVersion.namespaceForVersion)|first %}
+                <h3>Justification of the selection in the profile</h3>
+                <span class="txtp-justification">{{ justification ? justification.textProperty|raw : '<i>Not justification yet.</i>' }}</span>
+            </div>
+
+            <div class="clearfix">
+                {% set useCase = propertyVersion.property.textProperties|filter(v => v.systemType.id == 36 and v.profileForCustom is not null and v.profileForCustom.id == profile.id and v.namespaceForVersion == propertyVersion.namespaceForVersion)|first %}
+                <h3>Use cases</h3>
+                <span class="txtp-use-case">{{ useCase ? useCase.textProperty|raw : '<i>Not use case yet.</i>' }}</span>
+            </div>
+
+            <div class="clearfix">
+                {% set examples = propertyVersion.property.textProperties|filter(v => v.systemType.id == 7 and v.profileForCustom is not null and v.profileForCustom.id == profile.id and v.namespaceForVersion == propertyVersion.namespaceForVersion) %}
+                <h3>Additional examples</h3>
+                <table class="table table-striped" id="profile-examples-table">
+                    <thead>
+                    <tr>
+                        <th>Additional examples</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for example in examples %}
+                        <tr>
+                            <td>{{ example.textProperty|raw }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="clearfix">
+                {% set note = propertyVersion.property.textProperties|filter(v => v.systemType.id == 33 and v.profileForCustom is not null and v.profileForCustom.id == profile.id and v.namespaceForVersion == propertyVersion.namespaceForVersion)|first %}
+                <h3>Profile internal note</h3>
+                <span class="txtp-note">{{ note ? note.textProperty|raw : '<i>Not profile internal note yet.</i>' }}</span>
             </div>
         </div>
     </div>
 {% endblock %}
 {% block javascripts %}
     {{ parent() }}
+    <script>
+        $(document).ready(function() {
+            $('#profile-examples-table').DataTable();
+        });
+    </script>
 {% endblock %}

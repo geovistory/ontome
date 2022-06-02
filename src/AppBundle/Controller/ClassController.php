@@ -601,11 +601,21 @@ class ClassController extends Controller
             $forms[$uniqueFormName] = $form;
         }
 
+        $formsExampleViews = [];
         foreach ($forms as $formName => $formExample){
             $formExample->handleRequest($request);
             if ($formExample->isSubmitted() && $formExample->isValid())
             {
-                //Do stuff
+                $textPropertyExample = $formExample->getData();
+                $textPropertyExample->setModifier($this->getUser());
+                $textPropertyExample->setModificationTime(new \DateTime('now'));
+                $em->persist($textPropertyExample);
+                $em->flush();
+
+                return $this->redirectToRoute('class_edit_customisation', array(
+                        'id' => $classVersion->getClass()->getId(),
+                        'profile' => $profile->getId())
+                );
             }
             //Create the view *after* calling handleRequest, so data is updated to the form, even if, say, there are validation errors.
             $formsExampleViews[$formName] = $formExample->createView();

@@ -421,7 +421,13 @@
                                     <td>
                                         {{ profileAssociation.systemType }}
                                     </td>
-                                    <td><a href="{{ path('property_show_customisation', {'id': profileAssociation.property.id, 'profile': profile.id}) }}" class="btn btn-xs btn-primary"><span class="fas fa-cog"></span></a></td>
+
+                                    <td>
+                                        {% set txtPCustom = profileAssociation.property.textProperties|filter(v => v.profileForCustom is not null and v.profileForCustom.id == profile.id and v.namespaceForVersion == profileAssociation.entityNamespaceForVersion)|first %}
+                                        <a href="{{ path('property_show_customisation', {'id': profileAssociation.property.id, 'profile': profile.id}) }}" class="btn btn-xs btn-{{ txtPCustom ? "success" : "primary" }}">
+                                            <span class="fas fa-eye"></span>
+                                        </a>
+                                    </td>
                                 </tr>
                             {% endfor %}
                             </tbody>
