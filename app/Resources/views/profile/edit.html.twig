@@ -1014,13 +1014,6 @@
                             if(row.associationType == 'Selected'){
                                 var htmlButtons = '';
 
-                                var urlSelectProperties = '{{ path("profile_properties_edit", {'profile' : 'profileID', 'class' : 'classID'}) }}';
-                                urlSelectProperties = urlSelectProperties.replace("profileID", profileID);
-                                urlSelectProperties = urlSelectProperties.replace("classID", row.id);
-                                if([{{ allProfileNamespacesId|join(',') }}].indexOf(row.namespaceForVersion) >= 0){
-                                    htmlButtons += '<a title="Pick properties" href="' + urlSelectProperties + '"><span class="glyphicon glyphicon-th-list"></span></a>';
-                                }
-
                                 var urlCustomClass = '{{ path("class_edit_customisation", {'id' : 'classID','profile' : 'profileID'}) }}';
                                 urlCustomClass = urlCustomClass.replace("profileID", profileID);
                                 urlCustomClass = urlCustomClass.replace("classID", row.id);
@@ -1028,7 +1021,14 @@
                                 if(row.nbTxtpCustom>0){
                                     btnColor = 'btn-success';
                                 }
-                                htmlButtons += ' <a title="Customisation" href="' + urlCustomClass + '" class="btn btn-xs '+btnColor+'"><i class="fas fa-tools"></i></a>';
+                                htmlButtons += '<a title="Customisation" href="' + urlCustomClass + '" class="btn btn-xs btn-default text-primary">Class</a><br>';
+
+                                var urlSelectProperties = '{{ path("profile_properties_edit", {'profile' : 'profileID', 'class' : 'classID'}) }}';
+                                urlSelectProperties = urlSelectProperties.replace("profileID", profileID);
+                                urlSelectProperties = urlSelectProperties.replace("classID", row.id);
+                                if([{{ allProfileNamespacesId|join(',') }}].indexOf(row.namespaceForVersion) >= 0){
+                                    htmlButtons += '<a title="Pick properties" href="' + urlSelectProperties + '" class="btn btn-xs btn-default text-primary">Properties</a>';
+                                }
                                 return htmlButtons;
                             }
                             else return '';
