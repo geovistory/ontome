@@ -29,7 +29,7 @@
                     <a href="{{ path('namespace_new', {'project': app.request.get('project').id}) }}" class="btn btn-primary pull-right">Reset <span class="fa fa-undo"></span></a>
                 </div>
                 <h2>
-                    Add new namespace to the {{ app.request.get('project') }} project
+                    Add a namespace to the {{ app.request.get('project') }} project
                     <a href="{{ path('project_edit', {'id': app.request.get('project').id}) }}#managed-namespaces" class="pull-right btn btn-link">
                         <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
                     </a>
@@ -104,11 +104,11 @@
                     </a>
                     <a href="#" class="js-reference-remove">
                         <span class="fa fa-minus-circle"></span>
-                        Close reference namespace form
+                        Cancel selection of reference namespace
                     </a>
                 </div>
 
-                <button type="submit" class="btn btn-primary" formnovalidate>Save</button>
+                <button type="submit" class="btn btn-primary" formnovalidate>Create</button>
                 {{ form_end(namespaceForm) }}
             </div>
         </div>
@@ -289,7 +289,7 @@
             var copyLabelToUriGenerator = true;
             if ($('#namespace_quick_add_form_labels_0_label').val() == $('#namespace_quick_add_form_uriGenerator').val()) {
                 $(document).on('keyup', '#namespace_quick_add_form_labels_0_label', function() {
-                    if(copyLabelToUriGenerator){
+                    if(copyLabelToUriGenerator && !$('#namespace_quick_add_form_isExternalNamespace').prop('checked')){
                         $('#namespace_quick_add_form_uriGenerator').val($('#namespace_quick_add_form_labels_0_label').val());
                     }
                     if (this.value == $('#namespace_quick_add_form_uriGenerator').val() || $('#namespace_quick_add_form_uriGenerator').val() == '' ) {
@@ -301,6 +301,20 @@
                 });
             }
 
+            $(document).on('keyup', '#namespace_quick_add_form_namespaceURI', function() {
+                copyLabelToUriGenerator = false;
+            });
+
+            $(document).on('change', '#namespace_quick_add_form_uriGenerator', function() {
+                if($('#namespace_quick_add_form_uriGenerator').val() == ''){
+                    copyLabelToUriGenerator = true;
+                    $('#namespace_quick_add_form_uriGenerator').val($('#namespace_quick_add_form_labels_0_label').val());
+                    var stringForURI = this.value;
+                    stringForURI = stringForURI.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+                    stringForURI = stringForURI.replace(/[\s-]+/g, '-').toLowerCase().replace(/[^0-9a-z\-]/g, '');
+                    $('#namespace_quick_add_form_namespaceURI').val('https://ontome.net/ns/' + stringForURI);
+                }
+            });
 
             $(document).on('keyup', '#namespace_quick_add_form_uriGenerator', function() {
                 copyLabelToUriGenerator = false;
@@ -320,13 +334,14 @@
                 var $input = $(this);
                 if ($input.prop('checked')) {
                     $('#namespace_quick_add_form_namespaceURI').val('');
-                    $('#namespace_quick_add_form_uriGenerator').val('');
                     $('#namespace_quick_add_form_uriGenerator').parent().hide();
                     $('#namespace_quick_add_form_namespaceURI').prop('readOnly', false);
+                    copyLabelToUriGenerator = false;
                 }
                 else {
                     $('#namespace_quick_add_form_uriGenerator').parent().show();
                     $('#namespace_quick_add_form_namespaceURI').prop('readOnly', true);
+                    $('#namespace_quick_add_form_uriGenerator').val($('#namespace_quick_add_form_labels_0_label').val());
                     var stringForURI = $('#namespace_quick_add_form_uriGenerator').val();
                     stringForURI = stringForURI.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
                     stringForURI = stringForURI.replace(/[\s-]+/g, '-').toLowerCase().replace(/[^0-9a-z\-]/g, '');
@@ -342,8 +357,12 @@
                 $('#namespace_quick_add_form_propertyPrefix').prop('readOnly', true);
             }
             else{
-                $('#namespace_quick_add_form_classPrefix').val('C');
-                $('#namespace_quick_add_form_propertyPrefix').val('P');
+                if($('#namespace_quick_add_form_classPrefix').val() == ''){
+                    $('#namespace_quick_add_form_classPrefix').val('C');
+                }
+                if($('#namespace_quick_add_form_propertyPrefix').val() == '') {
+                    $('#namespace_quick_add_form_propertyPrefix').val('P');
+                }
             }
 
             $(document).on('change', '#namespace_quick_add_form_automaticIdentifierManagement', function() {
