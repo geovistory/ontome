@@ -336,7 +336,7 @@ class ProjectController  extends Controller
                                 $example = new TextProperty();
                                 $example->setClass($class);
                                 $example->setNamespaceForVersion($newNamespaceVersion);
-                                $example->setTextProperty((string)$nodeXmlExample);
+                                $example->setTextProperty("<p>".(string)$nodeXmlExample."</p>");
                                 $example->setLanguageIsoCode((string)$nodeXmlExample->attributes()->lang);
                                 $example->setSystemType($systemTypeExample);
                                 $example->setCreator($this->getUser());
