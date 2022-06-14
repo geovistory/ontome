@@ -216,7 +216,7 @@ class ClassController extends Controller
         }
 
         // Récupérer la version de la classe demandée
-        // Dans l'ordre : (la version demandée - TO DO) > la version ongoing > la version la plus récente > la première version dans la boucle
+        // Dans l'ordre : la version demandée > la version ongoing > la version la plus récente > la première version dans la boucle
         $classVersion = $class->getClassVersionForDisplay($namespaceFromUrl);
 
         // On doit avoir une version de la classe sinon on lance une exception.
@@ -244,6 +244,10 @@ class ClassController extends Controller
                     ]);
                 }
             }
+            return $this->redirectToRoute('class_show_with_version', [
+                'id' => $class->getId(),
+                'namespaceFromUrlId' => $classVersion->getNamespaceForVersion()->getId()
+            ]);
         }
 
         // $namespacesIdFromClassVersion : Ensemble de namespaces provenant de la classe affiché (namespaceForVersion + references)

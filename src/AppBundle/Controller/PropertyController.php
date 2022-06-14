@@ -308,6 +308,10 @@ class PropertyController extends Controller
                     ]);
                 }
             }
+            return $this->redirectToRoute('property_show_with_version', [
+                'id' => $property->getId(),
+                'namespaceFromUrlId' => $propertyVersion->getNamespaceForVersion()->getId()
+            ]);
         }
 
         // $namespacesIdFromPropertyVersion : Ensemble de namespaces provenant de la propriété affiché (namespaceForVersion + references)

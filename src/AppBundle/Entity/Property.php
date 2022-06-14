@@ -551,7 +551,12 @@ class Property
                 });
             }
         }
-        return $pvCollection->first();
+        if($pvCollection->count() >= 1) {
+            return $pvCollection->first();
+        }
+        else{
+            return $this->getPropertyVersions()->first();
+        }
     }
 
 }

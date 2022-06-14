@@ -588,6 +588,11 @@ class OntoClass
                 });
             }
         }
-        return $cvCollection->first();
+        if($cvCollection->count() >= 1) {
+            return $cvCollection->first();
+        }
+        else{
+            return $this->getClassVersions()->first();
+        }
     }
 }
