@@ -2,21 +2,11 @@
     <xs:element name="namespace">
         <xs:complexType>
             <xs:sequence>
-                <xs:element name="standardLabel" minOccurs="0" maxOccurs="unbounded">
+                <xs:element name="standardLabel" minOccurs="1" maxOccurs="unbounded">
                     <xs:complexType>
                         <xs:simpleContent>
                             <xs:extension base="xs:string">
-                                <xs:attribute name="lang" use="required">
-                                    <xs:simpleType>
-                                        <xs:restriction base="xs:string">
-                                            <xs:enumeration value="en"/>
-                                            <xs:enumeration value="fr"/>
-                                            <xs:enumeration value="de"/>
-                                            <xs:enumeration value="it"/>
-                                            <xs:enumeration value="es"/>
-                                        </xs:restriction>
-                                    </xs:simpleType>
-                                </xs:attribute>
+                                <xs:attribute name="lang" use="required" type="xs:language" />
                             </xs:extension>
                         </xs:simpleContent>
                     </xs:complexType>
@@ -29,17 +19,7 @@
                     <xs:complexType>
                         <xs:simpleContent>
                             <xs:extension base="xs:string">
-                                <xs:attribute name="lang" use="required">
-                                    <xs:simpleType>
-                                        <xs:restriction base="xs:string">
-                                            <xs:enumeration value="en"/>
-                                            <xs:enumeration value="fr"/>
-                                            <xs:enumeration value="de"/>
-                                            <xs:enumeration value="it"/>
-                                            <xs:enumeration value="es"/>
-                                        </xs:restriction>
-                                    </xs:simpleType>
-                                </xs:attribute>
+                                <xs:attribute name="lang" use="required" type="xs:language" />
                             </xs:extension>
                         </xs:simpleContent>
                     </xs:complexType>
@@ -61,17 +41,7 @@
                                             <xs:complexType>
                                                 <xs:simpleContent>
                                                     <xs:extension base="xs:string">
-                                                        <xs:attribute name="lang" use="required">
-                                                            <xs:simpleType>
-                                                                <xs:restriction base="xs:string">
-                                                                    <xs:enumeration value="en"/>
-                                                                    <xs:enumeration value="fr"/>
-                                                                    <xs:enumeration value="de"/>
-                                                                    <xs:enumeration value="it"/>
-                                                                    <xs:enumeration value="es"/>
-                                                                </xs:restriction>
-                                                            </xs:simpleType>
-                                                        </xs:attribute>
+                                                        <xs:attribute name="lang" use="required" type="xs:language" />
                                                     </xs:extension>
                                                 </xs:simpleContent>
                                             </xs:complexType>
@@ -106,34 +76,14 @@
                                         <xs:element name="textProperties">
                                             <xs:complexType>
                                                 <xs:sequence>
-                                                    <xs:element name="scopeNote" minOccurs="0" maxOccurs="unbounded">
+                                                    <xs:element name="scopeNote" minOccurs="1" maxOccurs="unbounded">
                                                         <xs:complexType mixed="true">
-                                                            <xs:attribute name="lang" use="required">
-                                                                <xs:simpleType>
-                                                                    <xs:restriction base="xs:string">
-                                                                        <xs:enumeration value="en"/>
-                                                                        <xs:enumeration value="fr"/>
-                                                                        <xs:enumeration value="de"/>
-                                                                        <xs:enumeration value="it"/>
-                                                                        <xs:enumeration value="es"/>
-                                                                    </xs:restriction>
-                                                                </xs:simpleType>
-                                                            </xs:attribute>
+                                                            <xs:attribute name="lang" use="required" type="xs:language"/>
                                                         </xs:complexType>
                                                     </xs:element>
                                                     <xs:element name="example" minOccurs="0" maxOccurs="unbounded">
                                                         <xs:complexType mixed="true">
-                                                            <xs:attribute name="lang" use="required">
-                                                                <xs:simpleType>
-                                                                    <xs:restriction base="xs:string">
-                                                                        <xs:enumeration value="en"/>
-                                                                        <xs:enumeration value="fr"/>
-                                                                        <xs:enumeration value="de"/>
-                                                                        <xs:enumeration value="it"/>
-                                                                        <xs:enumeration value="es"/>
-                                                                    </xs:restriction>
-                                                                </xs:simpleType>
-                                                            </xs:attribute>
+                                                            <xs:attribute name="lang" use="required" type="xs:language"/>
                                                         </xs:complexType>
                                                     </xs:element>
                                                 </xs:sequence>
@@ -158,17 +108,7 @@
                                                     <xs:element name="standardLabel" type="xs:string"/>
                                                     <xs:element name="inverseLabel" type="xs:string" minOccurs="0"/>
                                                 </xs:sequence>
-                                                <xs:attribute name="lang" use="required">
-                                                    <xs:simpleType>
-                                                        <xs:restriction base="xs:string">
-                                                            <xs:enumeration value="en"/>
-                                                            <xs:enumeration value="fr"/>
-                                                            <xs:enumeration value="de"/>
-                                                            <xs:enumeration value="it"/>
-                                                            <xs:enumeration value="es"/>
-                                                        </xs:restriction>
-                                                    </xs:simpleType>
-                                                </xs:attribute>
+                                                <xs:attribute name="lang" use="required" type="xs:language" />
                                             </xs:complexType>
                                         </xs:element>
                                         <xs:element minOccurs="0" maxOccurs="unbounded" name="subPropertyOf">
@@ -249,32 +189,12 @@
                                                 <xs:sequence>
                                                     <xs:element name="scopeNote">
                                                         <xs:complexType mixed="true">
-                                                            <xs:attribute name="lang" use="required">
-                                                                <xs:simpleType>
-                                                                    <xs:restriction base="xs:string">
-                                                                        <xs:enumeration value="en"/>
-                                                                        <xs:enumeration value="fr"/>
-                                                                        <xs:enumeration value="de"/>
-                                                                        <xs:enumeration value="it"/>
-                                                                        <xs:enumeration value="es"/>
-                                                                    </xs:restriction>
-                                                                </xs:simpleType>
-                                                            </xs:attribute>
+                                                            <xs:attribute name="lang" use="required" type="xs:language" />
                                                         </xs:complexType>
                                                     </xs:element>
                                                     <xs:element name="example" minOccurs="0" maxOccurs="unbounded">
                                                         <xs:complexType mixed="true">
-                                                            <xs:attribute name="lang" use="required">
-                                                                <xs:simpleType>
-                                                                    <xs:restriction base="xs:string">
-                                                                        <xs:enumeration value="en"/>
-                                                                        <xs:enumeration value="fr"/>
-                                                                        <xs:enumeration value="de"/>
-                                                                        <xs:enumeration value="it"/>
-                                                                        <xs:enumeration value="es"/>
-                                                                    </xs:restriction>
-                                                                </xs:simpleType>
-                                                            </xs:attribute>
+                                                            <xs:attribute name="lang" use="required" type="xs:language" />
                                                         </xs:complexType>
                                                     </xs:element>
                                                 </xs:sequence>
