@@ -2,7 +2,7 @@
     <xs:element name="namespace">
         <xs:complexType>
             <xs:sequence>
-                <xs:element name="standardLabel">
+                <xs:element name="standardLabel" minOccurs="0" maxOccurs="unbounded">
                     <xs:complexType>
                         <xs:simpleContent>
                             <xs:extension base="xs:string">
@@ -22,8 +22,28 @@
                     </xs:complexType>
                 </xs:element>
                 <xs:element name="version" type="xs:string" minOccurs="0" maxOccurs="1" />
+                <xs:element name="publishedAt" type="xs:dateTime" minOccurs="0" maxOccurs="1" />
                 <xs:element name="contributors" type="xs:string" minOccurs="0" maxOccurs="1" />
                 <xs:element name="referenceNamespace" type="xs:positiveInteger" minOccurs="0" maxOccurs="unbounded" />
+                <xs:element name="description" minOccurs="0" maxOccurs="unbounded">
+                    <xs:complexType>
+                        <xs:simpleContent>
+                            <xs:extension base="xs:string">
+                                <xs:attribute name="lang" use="required">
+                                    <xs:simpleType>
+                                        <xs:restriction base="xs:string">
+                                            <xs:enumeration value="en"/>
+                                            <xs:enumeration value="fr"/>
+                                            <xs:enumeration value="de"/>
+                                            <xs:enumeration value="it"/>
+                                            <xs:enumeration value="es"/>
+                                        </xs:restriction>
+                                    </xs:simpleType>
+                                </xs:attribute>
+                            </xs:extension>
+                        </xs:simpleContent>
+                    </xs:complexType>
+                </xs:element>
                 <xs:element name="classes" minOccurs="0" maxOccurs="unbounded">
                     <xs:complexType>
                         <xs:sequence>
@@ -86,7 +106,7 @@
                                         <xs:element name="textProperties">
                                             <xs:complexType>
                                                 <xs:sequence>
-                                                    <xs:element name="scopeNote">
+                                                    <xs:element name="scopeNote" minOccurs="0" maxOccurs="unbounded">
                                                         <xs:complexType mixed="true">
                                                             <xs:attribute name="lang" use="required">
                                                                 <xs:simpleType>

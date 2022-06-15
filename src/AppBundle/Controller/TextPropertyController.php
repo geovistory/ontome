@@ -240,7 +240,8 @@ class TextPropertyController extends Controller
             }
             $textProperty->setProfile($associatedEntity);
             $associatedObject = $associatedEntity;
-            if($associatedEntity->isGranted('edit')){
+            //if($associatedEntity->isGranted('edit')){
+            if($this->isGranted('edit', $associatedObject)){
                 $redirectToRoute = 'profile_edit';
             }
             else{

@@ -197,24 +197,66 @@ class ProjectController  extends Controller
                         $systemTypeExample = $em->getRepository('AppBundle:SystemType')->find(7); // example
                         $systemTypeVersion = $em->getRepository('AppBundle:SystemType')->find(31); //owl:versionInfo
                         $systemTypeContributors = $em->getRepository('AppBundle:SystemType')->find(2); //contributor
+                        $systemTypeDescription = $em->getRepository('AppBundle:SystemType')->find(16); //contributor
 
                         $newNamespaceVersion = new OntoNamespace();
                         $newNamespaceVersion->setTopLevelNamespace($namespaceRoot);
 
                         // Label
-                        $namespaceLabel = new Label();
-                        $namespaceLabel->setIsStandardLabelForLanguage(true);
-                        $namespaceLabel->setLabel((string)$nodeXmlNamespace->standardLabel);
-                        $namespaceLabel->setLanguageIsoCode((string)$nodeXmlNamespace->standardLabel->attributes()->lang);
-                        $namespaceLabel->setCreator($this->getUser());
-                        $namespaceLabel->setModifier($this->getUser());
-                        $namespaceLabel->setCreationTime(new \DateTime('now'));
-                        $namespaceLabel->setModificationTime(new \DateTime('now'));
-                        $newNamespaceVersion->addLabel($namespaceLabel);
-                        $em->persist($namespaceLabel);
+                        // Scope note: un par langue
+                        $langCollection = new ArrayCollection();
+                        $defaultStandardLabel = null;
+                        foreach($nodeXmlNamespace->standardLabel as $keySl => $nodeXmlStandardLabel) {
+                            if (!$langCollection->contains((string)$nodeXmlStandardLabel->attributes()->lang)) {
+                                $langCollection->add((string)$nodeXmlStandardLabel->attributes()->lang);
+                            } else {
+                                echo "2 standards labels au moins ont la même langue.";
+                                die;
+                            }
+                            $namespaceLabel = new Label();
+                            $namespaceLabel->setIsStandardLabelForLanguage(true);
+                            $namespaceLabel->setLabel((string)$nodeXmlStandardLabel);
+                            $namespaceLabel->setLanguageIsoCode((string)$nodeXmlStandardLabel->attributes()->lang);
+                            $namespaceLabel->setCreator($this->getUser());
+                            $namespaceLabel->setModifier($this->getUser());
+                            $namespaceLabel->setCreationTime(new \DateTime('now'));
+                            $namespaceLabel->setModificationTime(new \DateTime('now'));
+                            $newNamespaceVersion->addLabel($namespaceLabel);
+                            $em->persist($namespaceLabel);
+
+                            if($namespaceLabel->getLanguageIsoCode() == "en" || (is_null($defaultStandardLabel) && $namespaceLabel->getLanguageIsoCode() == "fr")){
+                                $defaultStandardLabel = (string)$nodeXmlStandardLabel;
+                            }
+                        }
 
                         // StandardLabel
-                        $newNamespaceVersion->setStandardLabel((string)$nodeXmlNamespace->standardLabel);
+                        if(is_null($defaultStandardLabel)){
+                            $newNamespaceVersion->setStandardLabel((string)$nodeXmlNamespace->standardLabel);
+                        }
+                        else{
+                            $newNamespaceVersion->setStandardLabel($defaultStandardLabel);
+                        }
+
+                        // Description : un par langue
+                        $langCollection = new ArrayCollection();
+                        foreach($nodeXmlNamespace->description as $keyD => $nodeXmlDescription) {
+                            if (!$langCollection->contains((string)$nodeXmlDescription->attributes()->lang)) {
+                                $langCollection->add((string)$nodeXmlDescription->attributes()->lang);
+                            } else {
+                                echo "2 descriptions au moins ont la même langue.";
+                                die;
+                            }
+                            $namespaceDescription = new TextProperty();
+                            $namespaceDescription->setTextProperty((string)$nodeXmlDescription);
+                            $namespaceDescription->setSystemType($systemTypeDescription);
+                            $namespaceDescription->setLanguageIsoCode((string)$nodeXmlDescription->attributes()->lang);
+                            $namespaceDescription->setCreator($this->getUser());
+                            $namespaceDescription->setModifier($this->getUser());
+                            $namespaceDescription->setCreationTime(new \DateTime('now'));
+                            $namespaceDescription->setModificationTime(new \DateTime('now'));
+                            $newNamespaceVersion->addTextProperty($namespaceDescription);
+                            $em->persist($namespaceDescription);
+                        }
 
                         // Version
                         $txtpVersion = new TextProperty();
@@ -226,6 +268,15 @@ class ProjectController  extends Controller
                         $txtpVersion->setModificationTime(new \DateTime('now'));
                         $newNamespaceVersion->addTextProperty($txtpVersion);
                         $em->persist($txtpVersion);
+
+                        // published_at
+                        if(!empty((string)$nodeXmlNamespace->publishedAt)){
+                            $newNamespaceVersion->setPublishedAt(new \DateTime((string)$nodeXmlNamespace->publishedAt));
+                        }
+                        else{
+                            $now = new \DateTime('now');
+                            $newNamespaceVersion->setPublishedAt($now);
+                        }
 
                         // Contributors
                         if(!empty((string)$nodeXmlNamespace->contributors)){
@@ -316,20 +367,32 @@ class ProjectController  extends Controller
                             $class->addClassVersion($newClassVersion);
                             $em->persist($newClassVersion);
 
-                            // Scope note
-                            $scopeNote = new TextProperty();
-                            $scopeNote->setClass($class);
-                            $scopeNote->setNamespaceForVersion($newNamespaceVersion);
-                            $scopeNote->setTextProperty((string)$nodeXmlClass->textProperties->scopeNote);
-                            $scopeNote->setLanguageIsoCode((string)$nodeXmlClass->textProperties->scopeNote->attributes()->lang);
-                            $scopeNote->setSystemType($systemTypeScopeNote);
-                            $scopeNote->setCreator($this->getUser());
-                            $scopeNote->setModifier($this->getUser());
-                            $scopeNote->setCreationTime(new \DateTime('now'));
-                            $scopeNote->setModificationTime(new \DateTime('now'));
+                            // Scope note: un par langue
+                            $langCollection = new ArrayCollection();
+                            foreach($nodeXmlClass->textProperties->scopeNote as $keySn => $nodeXmlScopeNote) {
+                                if(!$langCollection->contains((string)$nodeXmlScopeNote->attributes()->lang)){
+                                    $langCollection->add((string)$nodeXmlScopeNote->attributes()->lang);
+                                }
+                                else{
+                                    var_dump($langCollection);
+                                    echo (string)$nodeXmlScopeNote->attributes()->lang;
+                                    echo "- 2 scopes notes au moins ont la même langue. j".$newClassVersion->getClass()->getIdentifierInNamespace();
+                                    die;
+                                }
+                                $scopeNote = new TextProperty();
+                                $scopeNote->setClass($class);
+                                $scopeNote->setNamespaceForVersion($newNamespaceVersion);
+                                $scopeNote->setTextProperty((string)$nodeXmlScopeNote);
+                                $scopeNote->setLanguageIsoCode((string)$nodeXmlScopeNote->attributes()->lang);
+                                $scopeNote->setSystemType($systemTypeScopeNote);
+                                $scopeNote->setCreator($this->getUser());
+                                $scopeNote->setModifier($this->getUser());
+                                $scopeNote->setCreationTime(new \DateTime('now'));
+                                $scopeNote->setModificationTime(new \DateTime('now'));
 
-                            $class->addTextProperty($scopeNote);
-                            $em->persist($scopeNote);
+                                $class->addTextProperty($scopeNote);
+                                $em->persist($scopeNote);
+                            }
 
                             // Examples
                             foreach($nodeXmlClass->textProperties->example as $keyEx => $nodeXmlExample){
@@ -612,21 +675,31 @@ class ProjectController  extends Controller
                             $property->addPropertyVersion($newPropertyVersion);
                             $em->persist($newPropertyVersion);
 
-                            // Scope note
-                            $scopeNote = new TextProperty();
-                            $scopeNote->setProperty($property);
-                            $scopeNote->setNamespaceForVersion($newNamespaceVersion);
-                            $scopeNote->setTextProperty((string)$nodeXmlProperty->textProperties->scopeNote);
-                            $scopeNote->setLanguageIsoCode((string)$nodeXmlProperty->textProperties->scopeNote->attributes()->lang);
-                            $scopeNote->setSystemType($systemTypeScopeNote);
-                            $scopeNote->setCreator($this->getUser());
-                            $scopeNote->setModifier($this->getUser());
-                            $scopeNote->setCreationTime(new \DateTime('now'));
-                            $scopeNote->setModificationTime(new \DateTime('now'));
+                            // Scope note: un par langue
+                            $langCollection = new ArrayCollection();
+                            foreach($nodeXmlProperty->textProperties->scopeNote as $keySn => $nodeXmlScopeNote) {
+                                if (!$langCollection->contains((string)$nodeXmlScopeNote->attributes()->lang)) {
+                                    $langCollection->add((string)$nodeXmlScopeNote->attributes()->lang);
+                                } else {
+                                    var_dump($langCollection);
+                                    echo (string)$nodeXmlScopeNote->attributes()->lang;
+                                    echo "- 2 scopes notes au moins ont la même langue. j" . $newClassVersion->getClass()->getIdentifierInNamespace();
+                                    die;
+                                }
+                                $scopeNote = new TextProperty();
+                                $scopeNote->setProperty($property);
+                                $scopeNote->setNamespaceForVersion($newNamespaceVersion);
+                                $scopeNote->setTextProperty((string)$nodeXmlScopeNote);
+                                $scopeNote->setLanguageIsoCode((string)$nodeXmlScopeNote->attributes()->lang);
+                                $scopeNote->setSystemType($systemTypeScopeNote);
+                                $scopeNote->setCreator($this->getUser());
+                                $scopeNote->setModifier($this->getUser());
+                                $scopeNote->setCreationTime(new \DateTime('now'));
+                                $scopeNote->setModificationTime(new \DateTime('now'));
 
-                            $property->addTextProperty($scopeNote);
-                            $em->persist($scopeNote);
-
+                                $property->addTextProperty($scopeNote);
+                                $em->persist($scopeNote);
+                            }
                             // Examples
                             foreach($nodeXmlProperty->textProperties->example as $keyEx => $nodeXmlExample){
                                 $example = new TextProperty();

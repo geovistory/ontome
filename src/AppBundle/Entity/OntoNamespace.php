@@ -1008,7 +1008,7 @@ class OntoNamespace
         }
 
         // array_unique évite les doublons - utile si on veut compter combien de ns différents
-        return array_unique($arrayIds);
+        return array_values(array_unique($arrayIds));
     }
 
     /**
@@ -1035,6 +1035,6 @@ class OntoNamespace
         }
 
         // array_unique évite les doublons - utile si on veut compter combien de ns différents
-        return array_unique($arrayIds);
+        return array_values(array_unique($arrayIds));
     }
 }
