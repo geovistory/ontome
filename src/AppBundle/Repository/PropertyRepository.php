@@ -188,7 +188,7 @@ class PropertyRepository extends EntityRepository
                        (SELECT label FROM che.get_namespace_labels(che.get_root_namespace(nsp.pk_namespace)) WHERE language_iso_code = 'en') AS \"rootNamespaceLabel\",
                        nsp.pk_namespace AS \"propertyNamespaceId\",
                        nsp.standard_label AS \"propertyNamespaceLabel\"
-                    FROM che.descendant_property_hierarchy(?) t_descendants_properties,
+                    FROM che.descendant_property_hierarchy(?, ARRAY[".$in."]::integer[]) t_descendants_properties,
                          che.property p JOIN che.property_version pv ON p.pk_property = pv.fk_property,
                          che.namespace nsp,
                          che.class domain_class JOIN che.class_version domain_cv ON domain_class.pk_class = domain_cv.fk_class,
@@ -197,10 +197,12 @@ class PropertyRepository extends EntityRepository
                     AND   nsp.pk_namespace = pv.fk_namespace_for_version
                     AND pv.has_domain = domain_class.pk_class
                     AND pv.has_range = range_class.pk_class
-                    AND pv.fk_namespace_for_version IN (".$in.");";
+                    AND pv.fk_namespace_for_version IN (".$in.")
+                    AND domain_cv.fk_namespace_for_version IN (".$in.")
+                    AND range_cv.fk_namespace_for_version IN (".$in.");";
 
         $stmt = $conn->prepare($sql);
-        $stmt->execute(array_merge(array($propertyVersion->getProperty()->getId()), $namespacesId));
+        $stmt->execute(array_merge(array($propertyVersion->getProperty()->getId()), $namespacesId, $namespacesId, $namespacesId, $namespacesId));
 
         return $stmt->fetchAll();
     }
