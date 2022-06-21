@@ -576,6 +576,7 @@ class OntoClass
     public function getClassVersionForDisplay(OntoNamespace $namespace=null)
     {
         $cvCollection = $this->getClassVersions();
+
         if(!is_null($namespace)){
             $cvCollection = $this->getClassVersions()->filter(function(OntoClassVersion $classVersion) use ($namespace){
                 return $classVersion->getNamespaceForVersion() === $namespace;
@@ -588,11 +589,23 @@ class OntoClass
                 });
             }
         }
-        if($cvCollection->count() >= 1) {
+
+        // La classe a été trouvée
+        if($cvCollection->count() == 1){
             return $cvCollection->first();
         }
-        else{
-            return $this->getClassVersions()->first();
-        }
+
+        // Avec le filtre IsOngoing ci dessus, si un NS root n'en possède pas, cvCollection est maintenant vide, il faut donc le réinitialiser
+        $cvCollection = $this->getClassVersions();
+        //filtrer que les NS qui ont bien published_at rempli
+        $cvCollection = $cvCollection->filter(function(OntoClassVersion $classVersion) {
+            return !is_null($classVersion->getNamespaceForVersion()->getPublishedAt());
+        });
+        $iterator = $cvCollection->getIterator();
+        $iterator->uasort(function ($a, $b) {
+            return ($a->getNamespaceForVersion()->getPublishedAt() > $b->getNamespaceForVersion()->getPublishedAt()) ? -1 : 1;
+        });
+        $collection = new ArrayCollection(iterator_to_array($iterator));
+        return $collection->first();
     }
 }

@@ -336,16 +336,17 @@ class PropertyController extends Controller
         // sauf ceux automatiquement activés par l'entité
         $namespacesIdFromUser = array_diff($namespacesIdFromUser, $namespacesIdFromPropertyVersion);
 
-        // Enlever les id dont la version racine est déjà utilisée
+        // Créer un array de ns à ajouter (ne pas rajouter ceux dont le root est déjà utilisé
+        $nsIdFromUser = array();
         foreach ($namespacesIdFromUser as $namespaceIdFromUser){
             $nsRootUser = $em->getRepository('AppBundle:OntoNamespace')->findOneBy(array('id' => $namespaceIdFromUser))->getTopLevelNamespace();
-            if(in_array($nsRootUser, $rootNamespacesFromClassVersion)){
-                unset($namespacesIdFromUser[array_search($namespaceIdFromUser, $namespacesIdFromUser)]);
+            if(!in_array($nsRootUser, $rootNamespacesFromClassVersion)){
+                $nsIdFromUser[] = $namespaceIdFromUser;
             }
         }
 
         // $namespacesId : Tous les namespaces trouvés ci-dessus
-        $namespacesId = array_merge($namespacesIdFromPropertyVersion, $namespacesIdFromUser);
+        $namespacesId = array_merge($namespacesIdFromPropertyVersion, $nsIdFromUser);
 
         $ancestors = $em->getRepository('AppBundle:Property')->findAncestorsByPropertyVersionAndNamespacesId($propertyVersion, $namespacesId);
         $descendants = $em->getRepository('AppBundle:Property')->findDescendantsByPropertyVersionAndNamespacesId($propertyVersion, $namespacesId);
