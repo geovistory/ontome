@@ -710,6 +710,11 @@
             </div>
             <div id="identification" class="tab-pane fade">
                 <h3>Identifier : {{ propertyVersion.property.identifierInNamespace }}</h3>
+                <p>
+                    {% if not propertyVersion.namespaceForVersion.topLevelNamespace.isExternalNamespace %}
+                        URI: <strong><a>{{ propertyVersion.namespaceForVersion.topLevelNamespace.namespaceURI }}/{{ propertyVersion.property.identifierInNamespace }}</a></strong>
+                    {% endif %}
+                </p>
 
                 {% if propertyVersion.domain is not null and propertyVersion.range is not null %}
                     <h3>Domain and range</h3>

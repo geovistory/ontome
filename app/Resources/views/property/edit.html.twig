@@ -723,7 +723,11 @@
                 {% else %}
                     <h3 id="identifier-details-block">Identifier : {{ propertyVersion.property.identifierInNamespace }}</h3>
                 {% endif %}
-
+                <p>
+                    {% if not propertyVersion.namespaceForVersion.topLevelNamespace.isExternalNamespace %}
+                        URI: <strong><a>{{ propertyVersion.namespaceForVersion.topLevelNamespace.namespaceURI }}/{{ propertyVersion.property.identifierInNamespace }}</a></strong>
+                    {% endif %}
+                </p>
                 {% if propertyVersion.domain is not null and propertyVersion.range is not null %}
                     <h3>Domain and range</h3>
                     <div id="domain-range-form-block">

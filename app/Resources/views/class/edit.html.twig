@@ -670,6 +670,11 @@
                 {% else %}
                     <h3 id="identifier-details-block">Identifier : {{ classVersion.class.identifierInNamespace }}</h3>
                 {% endif %}
+                <p>
+                    {% if not classVersion.namespaceForVersion.topLevelNamespace.isExternalNamespace %}
+                        URI: <strong><a>{{ classVersion.namespaceForVersion.topLevelNamespace.namespaceURI }}/{{ classVersion.class.identifierInNamespace }}</a></strong>
+                    {% endif %}
+                </p>
                 <div class="pull-right add-div">
                     <a href="{{ path('label_new', {'object': 'class', 'objectId': classVersion.class.id })}}"
                        class="btn btn-primary pull-right">
