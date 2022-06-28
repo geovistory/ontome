@@ -179,6 +179,7 @@ class OntoClassVersion
     public function setNamespaceForVersion($namespaceForVersion)
     {
         $this->namespaceForVersion = $namespaceForVersion;
+        $namespaceForVersion->addClassVersion($this);
     }
 
     /**
@@ -219,6 +220,14 @@ class OntoClassVersion
     public function setModificationTime($modificationTime)
     {
         $this->modificationTime = $modificationTime;
+    }
+
+    /**
+     * @param mixed $standardLabel
+     */
+    public function setStandardLabel($standardLabel)
+    {
+        $this->standardLabel = $standardLabel;
     }
 
     /**

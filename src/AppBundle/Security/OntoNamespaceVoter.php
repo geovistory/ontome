@@ -100,6 +100,10 @@ class OntoNamespaceVoter extends Voter
      */
     private function canEdit(OntoNamespace $namespace, User $user)
     {
+        if($user->getCurrentActiveProject() !== $namespace->getProjectForTopLevelNamespace()) {
+            return false;
+        }
+
         foreach($user->getUserProjectAssociations()->getIterator() as $i => $userProjectAssociation) {
             if($userProjectAssociation->getProject() === $namespace->getProjectForTopLevelNamespace() && $userProjectAssociation->getPermission() <= 2){
                 return true;
@@ -115,6 +119,10 @@ class OntoNamespaceVoter extends Voter
      */
     private function canEditManager(OntoNamespace $namespace, User $user)
     {
+        if($user->getCurrentActiveProject() !== $namespace->getProjectForTopLevelNamespace()) {
+            return false;
+        }
+
         if(!$namespace->getIsOngoing()) {
             return false;
         }

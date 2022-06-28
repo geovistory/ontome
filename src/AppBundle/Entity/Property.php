@@ -551,7 +551,24 @@ class Property
                 });
             }
         }
-        return $pvCollection->first();
+
+        // La propriété a été trouvée
+        if($pvCollection->count() == 1){
+            return $pvCollection->first();
+        }
+
+        // Avec le filtre IsOngoing ci dessus, si un NS root n'en possède pas, cvCollection est maintenant vide, il faut donc le réinitialiser
+        $pvCollection = $this->getPropertyVersions();
+        //filtrer que les NS qui ont bien published_at rempli
+        $pvCollection = $pvCollection->filter(function(PropertyVersion $propertyVersion) {
+            return !is_null($propertyVersion->getNamespaceForVersion()->getPublishedAt());
+        });
+        $iterator = $pvCollection->getIterator();
+        $iterator->uasort(function ($a, $b) {
+            return ($a->getNamespaceForVersion()->getPublishedAt() > $b->getNamespaceForVersion()->getPublishedAt()) ? -1 : 1;
+        });
+        $collection = new ArrayCollection(iterator_to_array($iterator));
+        return $collection->first();
     }
 
 }

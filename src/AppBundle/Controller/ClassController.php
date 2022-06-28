@@ -216,7 +216,7 @@ class ClassController extends Controller
         }
 
         // Récupérer la version de la classe demandée
-        // Dans l'ordre : (la version demandée - TO DO) > la version ongoing > la version la plus récente > la première version dans la boucle
+        // Dans l'ordre : la version demandée > la version ongoing > la version la plus récente > la première version dans la boucle
         $classVersion = $class->getClassVersionForDisplay($namespaceFromUrl);
 
         // On doit avoir une version de la classe sinon on lance une exception.
@@ -244,6 +244,10 @@ class ClassController extends Controller
                     ]);
                 }
             }
+            return $this->redirectToRoute('class_show_with_version', [
+                'id' => $class->getId(),
+                'namespaceFromUrlId' => $classVersion->getNamespaceForVersion()->getId()
+            ]);
         }
 
         // $namespacesIdFromClassVersion : Ensemble de namespaces provenant de la classe affiché (namespaceForVersion + references)
@@ -268,16 +272,17 @@ class ClassController extends Controller
         // sauf ceux automatiquement activés par l'entité
         $namespacesIdFromUser = array_diff($namespacesIdFromUser, $namespacesIdFromClassVersion);
 
-        // Enlever les id dont la version racine est déjà utilisée
+        // Créer un array de ns à ajouter (ne pas rajouter ceux dont le root est déjà utilisé
+        $nsIdFromUser = array();
         foreach ($namespacesIdFromUser as $namespaceIdFromUser){
             $nsRootUser = $em->getRepository('AppBundle:OntoNamespace')->findOneBy(array('id' => $namespaceIdFromUser))->getTopLevelNamespace();
-            if(in_array($nsRootUser, $rootNamespacesFromClassVersion)){
-                unset($namespacesIdFromUser[array_search($namespaceIdFromUser, $namespacesIdFromUser)]);
+            if(!in_array($nsRootUser, $rootNamespacesFromClassVersion)){
+                $nsIdFromUser[] = $namespaceIdFromUser;
             }
         }
 
         // $namespacesId : Tous les namespaces trouvés ci-dessus
-        $namespacesId = array_merge($namespacesIdFromClassVersion, $namespacesIdFromUser);
+        $namespacesId = array_merge($namespacesIdFromClassVersion, $nsIdFromUser);
 
         $ancestors = $em->getRepository('AppBundle:OntoClass')->findAncestorsByClassVersionAndNamespacesId($classVersion, $namespacesId);
         $descendants = $em->getRepository('AppBundle:OntoClass')->findDescendantsByClassVersionAndNamespacesId($classVersion, $namespacesId);

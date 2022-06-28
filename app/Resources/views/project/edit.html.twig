@@ -13,6 +13,9 @@
             <li><a data-toggle="tab" href="#definition">Definition</a></li>
             <li><a data-toggle="tab" href="#project-hierarchy">Hierarchy</a></li>
             <li><a data-toggle="tab" href="#managed-namespaces">Namespaces</a></li>
+            {% if app.user is not null and "ROLE_ADMIN" in app.user.roles %}
+            <li><a data-toggle="tab" href="#import">Import (only admin)</a></li>
+            {% endif %}
             <li><a data-toggle="tab" href="#profiles">Profiles</a></li>
             <li><a data-toggle="tab" href="#members">Members</a></li>
             <!--<li><a data-toggle="tab" href="#comments-list">Comments list</a></li>-->
@@ -313,6 +316,21 @@
                         {% endfor %}
                         </tbody>
                     </table>
+                {% endif %}
+            </div>
+            <div id="import" class="tab-pane fade">
+                <h3>Import (only admin can see this page)</h3>
+                {% if project.managedNamespaces is not empty or 1==1 %}
+                {{ form_start(formImport) }}
+                {{ form_row(formImport.uploadXMLFile) }}
+                    <p>
+                        <button type="submit" class="btn btn-primary" formnovalidate>Import</button>
+                        <button type="reset" class="btn btn-default">Cancel&nbsp;<i class="fas fa-undo-alt"></i></button>
+                        <!-- <button type="button" class="btn btn-default" onclick="window.location.reload();">Cancel&nbsp;<i class="fas fa-undo-alt"></i></button> -->
+                    </p>
+                {{ form_end(formImport) }}
+                {% else %}
+                    Pas de namespace root, pas d'import possible
                 {% endif %}
             </div>
             <div id="profiles" class="tab-pane fade">

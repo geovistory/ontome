@@ -65,6 +65,10 @@ class ProjectVoter extends Voter
      */
     private function canEdit(Project $project, User $user)
     {
+        if($user->getCurrentActiveProject() !== $project) {
+            return false;
+        }
+
         foreach ($user->getUserProjectAssociations()->getIterator() as $i => $userProjectAssociation) {
             if ($userProjectAssociation->getProject() == $project && $userProjectAssociation->getPermission() <= 2 ) { //permission <= means that the user is a project admin or manager
                 return true;

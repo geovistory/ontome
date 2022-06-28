@@ -14,6 +14,7 @@ use AppBundle\Entity\Profile;
 use AppBundle\Entity\Project;
 use AppBundle\Entity\Property;
 use AppBundle\Entity\User;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityRepository;
 
 class ClassRepository extends EntityRepository
@@ -143,16 +144,17 @@ class ClassRepository extends EntityRepository
                   ARRAY_TO_STRING(descendants,'|') AS \"descendants\",
                   ARRAY_TO_STRING(pk_descendants,'|') AS \"pk_descendants\",
                   ARRAY_TO_STRING(pk_version_descendants,'|') AS \"pk_version_descendants\"
-                  FROM che.descendant_class_hierarchy(?) cls,
+                  FROM che.descendant_class_hierarchy(?, ARRAY[".$in."]::integer[]) cls,
                   che.namespace nsp
                 WHERE nsp.pk_namespace = cls.fk_namespace_for_version
                 AND nsp.pk_namespace IN (".$in.")
+                AND cls.fk_namespace_for_version IN (".$in.")
                 GROUP BY pk_child, child_identifier, depth, nsp.pk_namespace, che.get_root_namespace(nsp.pk_namespace), fk_namespace_for_version, descendants, pk_descendants, pk_version_descendants
                 ORDER BY depth ASC;";
 
         $conn = $this->getEntityManager()->getConnection();
         $stmt = $conn->prepare($sql);
-        $stmt->execute(array_merge(array($classVersion->getClass()->getId()), $namespacesId));
+        $stmt->execute(array_merge(array($classVersion->getClass()->getId()), $namespacesId, $namespacesId, $namespacesId));
 
         return $stmt->fetchAll();
     }
@@ -396,23 +398,34 @@ class ClassRepository extends EntityRepository
         $conn = $this->getEntityManager()
             ->getConnection();
 
+        $namespacesId = new ArrayCollection();
+        foreach($profile->getNamespaces() as $namespace){
+            if(!$namespacesId->contains($namespace->getId())){
+                $namespacesId->add($namespace->getId());
+            }
+            foreach ($namespace->getAllReferencedNamespaces() as $nsRef){
+                if(!$namespacesId->contains($nsRef->getId())){
+                    $namespacesId->add($nsRef->getId());
+                }
+            }
+        }
+
         $iLike = '';
         $queryParams = array(
             'profile' => $profile->getId(),
             'domain' => $domain->getId(),
             'range' => $range->getId(),
-            'property' => $property->getId()
+            'property' => $property->getId(),
         );
         if(!empty($searchTerm)) {
             $iLike = ' AND text ILIKE :searchTerm';
             $queryParams['searchTerm'] = '%'.$searchTerm.'%';
         }
-
         $sql = "SELECT *
                 FROM (
                     SELECT DISTINCT pk_child AS id,
                                     che.get_root_namespace_prefix(che.get_root_namespace(cv.fk_namespace_for_version)) || ':' || child_identifier AS \"text\"
-                    FROM che.descendant_class_hierarchy (:range) cls
+                    FROM che.descendant_class_hierarchy (:range, ARRAY[".implode(',',$namespacesId->toArray())."]) cls
                     JOIN che.class_version cv ON cv.fk_class = cls.pk_child AND cv.fk_namespace_for_version IN (SELECT pk_namespace FROM che.get_all_references_namespaces_for_profile(:profile)) 
                     
                     EXCEPT 
@@ -451,6 +464,18 @@ class ClassRepository extends EntityRepository
         $conn = $this->getEntityManager()
             ->getConnection();
 
+        $namespacesId = new ArrayCollection();
+        foreach($profile->getNamespaces() as $namespace){
+            if(!$namespacesId->contains($namespace->getId())){
+                $namespacesId->add($namespace->getId());
+            }
+            foreach ($namespace->getAllReferencedNamespaces() as $nsRef){
+                if(!$namespacesId->contains($nsRef->getId())){
+                    $namespacesId->add($nsRef->getId());
+                }
+            }
+        }
+
         $iLike = '';
         $queryParams = array(
             'profile' => $profile->getId(),
@@ -467,7 +492,7 @@ class ClassRepository extends EntityRepository
                 FROM (
                     SELECT DISTINCT pk_child AS id,
                                     che.get_root_namespace_prefix(che.get_root_namespace(cv.fk_namespace_for_version)) || ':' || child_identifier AS \"text\"
-                    FROM che.descendant_class_hierarchy (:domain) cls
+                    FROM che.descendant_class_hierarchy (:domain, ARRAY[".implode(',',$namespacesId->toArray())."]) cls
                     JOIN che.class_version cv ON cv.fk_class = cls.pk_child AND cv.fk_namespace_for_version IN (SELECT pk_namespace FROM che.get_all_references_namespaces_for_profile(:profile)) 
                     
                     EXCEPT 

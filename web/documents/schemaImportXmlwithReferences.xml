@@ -1,0 +1,212 @@
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:element name="namespace">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="standardLabel" minOccurs="1" maxOccurs="unbounded">
+                    <xs:complexType>
+                        <xs:simpleContent>
+                            <xs:extension base="xs:string">
+                                <xs:attribute name="lang" use="required" type="xs:language" />
+                            </xs:extension>
+                        </xs:simpleContent>
+                    </xs:complexType>
+                </xs:element>
+                <xs:element name="version" type="xs:string" minOccurs="0" maxOccurs="1" />
+                <xs:element name="publishedAt" type="xs:dateTime" minOccurs="0" maxOccurs="1" />
+                <xs:element name="contributors" type="xs:string" minOccurs="0" maxOccurs="1" />
+                <xs:element name="referenceNamespace" type="xs:positiveInteger" minOccurs="0" maxOccurs="unbounded" />
+                <xs:element name="description" minOccurs="0" maxOccurs="unbounded">
+                    <xs:complexType>
+                        <xs:simpleContent>
+                            <xs:extension base="xs:string">
+                                <xs:attribute name="lang" use="required" type="xs:language" />
+                            </xs:extension>
+                        </xs:simpleContent>
+                    </xs:complexType>
+                </xs:element>
+                <xs:element name="classes" minOccurs="0" maxOccurs="unbounded">
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:element name="class" maxOccurs="unbounded">
+                                <xs:complexType>
+                                    <xs:sequence>
+                                        <xs:element name="identifierInNamespace" minOccurs="0" maxOccurs="1">
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:string">
+                                                    <xs:pattern value="\S+"/>
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
+                                        <xs:element name="standardLabel" maxOccurs="unbounded">
+                                            <xs:complexType>
+                                                <xs:simpleContent>
+                                                    <xs:extension base="xs:string">
+                                                        <xs:attribute name="lang" use="required" type="xs:language" />
+                                                    </xs:extension>
+                                                </xs:simpleContent>
+                                            </xs:complexType>
+                                        </xs:element>
+                                        <xs:element minOccurs="0" maxOccurs="unbounded" name="subClassOf">
+                                            <xs:complexType>
+                                                <xs:simpleContent>
+                                                    <xs:extension base="xs:string">
+                                                        <xs:attribute name="referenceNamespace" type="xs:positiveInteger" use="optional" />
+                                                    </xs:extension>
+                                                </xs:simpleContent>
+                                            </xs:complexType>
+                                        </xs:element>
+                                        <xs:element minOccurs="0" maxOccurs="unbounded" name="equivalentClass">
+                                            <xs:complexType>
+                                                <xs:simpleContent>
+                                                    <xs:extension base="xs:string">
+                                                        <xs:attribute name="referenceNamespace" type="xs:positiveInteger" use="optional" />
+                                                    </xs:extension>
+                                                </xs:simpleContent>
+                                            </xs:complexType>
+                                        </xs:element>
+                                        <xs:element minOccurs="0" maxOccurs="unbounded" name="disjointWith">
+                                            <xs:complexType>
+                                                <xs:simpleContent>
+                                                    <xs:extension base="xs:string">
+                                                        <xs:attribute name="referenceNamespace" type="xs:positiveInteger" use="optional" />
+                                                    </xs:extension>
+                                                </xs:simpleContent>
+                                            </xs:complexType>
+                                        </xs:element>
+                                        <xs:element name="textProperties">
+                                            <xs:complexType>
+                                                <xs:sequence>
+                                                    <xs:element name="scopeNote" minOccurs="1" maxOccurs="unbounded">
+                                                        <xs:complexType mixed="true">
+                                                            <xs:attribute name="lang" use="required" type="xs:language"/>
+                                                        </xs:complexType>
+                                                    </xs:element>
+                                                    <xs:element name="example" minOccurs="0" maxOccurs="unbounded">
+                                                        <xs:complexType mixed="true">
+                                                            <xs:attribute name="lang" use="required" type="xs:language"/>
+                                                        </xs:complexType>
+                                                    </xs:element>
+                                                </xs:sequence>
+                                            </xs:complexType>
+                                        </xs:element>
+                                    </xs:sequence>
+                                </xs:complexType>
+                            </xs:element>
+                        </xs:sequence>
+                    </xs:complexType>
+                </xs:element>
+                <xs:element name="properties" minOccurs="0" maxOccurs="unbounded">
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:element name="property" maxOccurs="unbounded">
+                                <xs:complexType>
+                                    <xs:sequence>
+                                        <xs:element name="identifierInNamespace" type="xs:string" minOccurs="0" maxOccurs="1" />
+                                        <xs:element name="label" maxOccurs="unbounded">
+                                            <xs:complexType>
+                                                <xs:sequence>
+                                                    <xs:element name="standardLabel" type="xs:string"/>
+                                                    <xs:element name="inverseLabel" type="xs:string" minOccurs="0"/>
+                                                </xs:sequence>
+                                                <xs:attribute name="lang" use="required" type="xs:language" />
+                                            </xs:complexType>
+                                        </xs:element>
+                                        <xs:element minOccurs="0" maxOccurs="unbounded" name="subPropertyOf">
+                                            <xs:complexType>
+                                                <xs:simpleContent>
+                                                    <xs:extension base="xs:string">
+                                                        <xs:attribute name="referenceNamespace" type="xs:positiveInteger" use="optional" />
+                                                    </xs:extension>
+                                                </xs:simpleContent>
+                                            </xs:complexType>
+                                        </xs:element>
+                                        <xs:element minOccurs="0" maxOccurs="unbounded" name="equivalentProperty">
+                                            <xs:complexType>
+                                                <xs:simpleContent>
+                                                    <xs:extension base="xs:string">
+                                                        <xs:attribute name="referenceNamespace" type="xs:positiveInteger" use="optional" />
+                                                    </xs:extension>
+                                                </xs:simpleContent>
+                                            </xs:complexType>
+                                        </xs:element>
+                                        <xs:element minOccurs="0" maxOccurs="unbounded" name="inverseOf">
+                                            <xs:complexType>
+                                                <xs:simpleContent>
+                                                    <xs:extension base="xs:string">
+                                                        <xs:attribute name="referenceNamespace" type="xs:positiveInteger" use="optional" />
+                                                    </xs:extension>
+                                                </xs:simpleContent>
+                                            </xs:complexType>
+                                        </xs:element>
+                                        <xs:element maxOccurs="1" name="hasDomain">
+                                            <xs:complexType>
+                                                <xs:simpleContent>
+                                                    <xs:extension base="xs:string">
+                                                        <xs:attribute name="referenceNamespace" type="xs:positiveInteger" use="optional" />
+                                                    </xs:extension>
+                                                </xs:simpleContent>
+                                            </xs:complexType>
+                                        </xs:element>
+                                        <xs:element maxOccurs="1" name="hasRange">
+                                            <xs:complexType>
+                                                <xs:simpleContent>
+                                                    <xs:extension base="xs:string">
+                                                        <xs:attribute name="referenceNamespace" type="xs:positiveInteger" use="optional" />
+                                                    </xs:extension>
+                                                </xs:simpleContent>
+                                            </xs:complexType>
+                                        </xs:element>
+                                        <xs:element name="domainInstancesMinQuantifier" minOccurs="0" maxOccurs="1">
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:string">
+                                                    <xs:pattern value="[0,1,2,3,4,5,n]"/>
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
+                                        <xs:element name="domainInstancesMaxQuantifier" minOccurs="0" maxOccurs="1">
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:string">
+                                                    <xs:pattern value="[1,2,3,4,5,n]"/>
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
+                                        <xs:element name="rangeInstancesMinQuantifier" minOccurs="0" maxOccurs="1">
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:string">
+                                                    <xs:pattern value="[0,1,2,3,4,5,n]"/>
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
+                                        <xs:element name="rangeInstancesMaxQuantifier" minOccurs="0" maxOccurs="1">
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:string">
+                                                    <xs:pattern value="[1,2,3,4,5,n]"/>
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
+                                        <xs:element name="textProperties">
+                                            <xs:complexType>
+                                                <xs:sequence>
+                                                    <xs:element name="scopeNote">
+                                                        <xs:complexType mixed="true">
+                                                            <xs:attribute name="lang" use="required" type="xs:language" />
+                                                        </xs:complexType>
+                                                    </xs:element>
+                                                    <xs:element name="example" minOccurs="0" maxOccurs="unbounded">
+                                                        <xs:complexType mixed="true">
+                                                            <xs:attribute name="lang" use="required" type="xs:language" />
+                                                        </xs:complexType>
+                                                    </xs:element>
+                                                </xs:sequence>
+                                            </xs:complexType>
+                                        </xs:element>
+                                    </xs:sequence>
+                                </xs:complexType>
+                            </xs:element>
+                        </xs:sequence>
+                    </xs:complexType>
+                </xs:element>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+</xs:schema>

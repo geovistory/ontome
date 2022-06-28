@@ -75,8 +75,12 @@ class TextPropertyForm extends AbstractType
                         'English' => 'en',
                         'French' => 'fr',
                         'German' => 'de',
+                        'Greek' => 'el',
+                        'Spanish' => 'es',
                         'Italian' => 'it',
-                        'Spanish' => 'es'
+                        'Portuguese' => 'pt',
+                        'Russian' => 'ru',
+                        'Chinese' => 'zh'
                     ),
                     'label' => 'Language'
                 ));
@@ -92,8 +96,12 @@ class TextPropertyForm extends AbstractType
                         'English' => 'en',
                         'French' => 'fr',
                         'German' => 'de',
+                        'Greek' => 'el',
+                        'Spanish' => 'es',
                         'Italian' => 'it',
-                        'Spanish' => 'es'
+                        'Portuguese' => 'pt',
+                        'Russian' => 'ru',
+                        'Chinese' => 'zh'
                     ),
                     'label' => 'Language'
                 ));

@@ -352,6 +352,7 @@ class OntoNamespace
         $this->textProperties = new ArrayCollection();
         $this->classAssociations = new ArrayCollection();
         $this->propertyAssociations = new ArrayCollection();
+        $this->entityAssociations = new ArrayCollection();
         $this->referencedNamespaceAssociations = new ArrayCollection();
         $this->childVersions = new ArrayCollection();
         $this->profiles = new ArrayCollection();
@@ -886,8 +887,6 @@ class OntoNamespace
             return;
         }
         $this->classAssociations[] = $classAssociation;
-        // needed to update the owning side of the relationship!
-        $classAssociation->addNamespace($this);
     }
 
     public function addPropertyAssociation(PropertyAssociation $propertyAssociation)
@@ -896,8 +895,44 @@ class OntoNamespace
             return;
         }
         $this->propertyAssociations[] = $propertyAssociation;
-        // needed to update the owning side of the relationship!
-        $propertyAssociation->addNamespace($this);
+    }
+
+    public function addEntityAssociation(EntityAssociation $entityAssociation)
+    {
+        if ($this->entityAssociations->contains($entityAssociation)) {
+            return;
+        }
+        $this->entityAssociations[] = $entityAssociation;
+    }
+
+    public function addReferencedNamespaceAssociation(ReferencedNamespaceAssociation $referencedNamespaceAssociation)
+    {
+        if ($this->referencedNamespaceAssociations->contains($referencedNamespaceAssociation)) {
+            return;
+        }
+        $this->referencedNamespaceAssociations[] = $referencedNamespaceAssociation;
+    }
+
+    public function addClassVersion(OntoClassVersion $classVersion){
+        if ($this->classVersions->contains($classVersion)) {
+            return;
+        }
+        $this->classVersions[] = $classVersion;
+
+        if (!$this->classes->contains($classVersion->getClass())) {
+            $this->classes[] = $classVersion->getClass();
+        }
+    }
+
+    public function addPropertyVersion(PropertyVersion $propertyVersion){
+        if ($this->propertyVersions->contains($propertyVersion)) {
+            return;
+        }
+        $this->propertyVersions[] = $propertyVersion;
+
+        if (!$this->properties->contains($propertyVersion->getProperty())) {
+            $this->properties[] = $propertyVersion->getProperty();
+        }
     }
 
     public function addLabel(Label $label)
@@ -973,7 +1008,7 @@ class OntoNamespace
         }
 
         // array_unique évite les doublons - utile si on veut compter combien de ns différents
-        return array_unique($arrayIds);
+        return array_values(array_unique($arrayIds));
     }
 
     /**
@@ -1000,6 +1035,6 @@ class OntoNamespace
         }
 
         // array_unique évite les doublons - utile si on veut compter combien de ns différents
-        return array_unique($arrayIds);
+        return array_values(array_unique($arrayIds));
     }
 }
