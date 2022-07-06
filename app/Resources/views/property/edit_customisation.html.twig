@@ -109,6 +109,7 @@
                     <thead>
                     <tr>
                         <th>Additional examples</th>
+                        <th>Language</th>
                         <th>Edit</th>
                     </tr>
                     </thead>
@@ -116,6 +117,7 @@
                     {% for example in examples %}
                         <tr>
                             <td>{{ example.textProperty|raw }}</td>
+                            <td>{{ example.languageIsoCode }}</td>
                             <td>
                                 <a href="#" class="btn-edit-example btn btn-success btn-xs" data-id="{{ example.id }}"><i class="fa fa-edit"></i></a>
                             </td>

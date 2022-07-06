@@ -279,11 +279,11 @@
                                     </td>
                                     <td>{{ class.namespace }}</td>
                                     <td>{{ class.associationType }}</td>
-                                    {% set btnColor = "btn-primary" %}
+                                    <td>
                                     {% if class.nbTxtpCustom > 0 %}
-                                        {% set btnColor = "btn-success" %}
+                                        {% if class.associationType == "Selected" %}<a href="{{ path('class_show_customisation', {'id': class.id, 'profile': profile.id}) }}" class="btn btn-xs btn-primary"><i class="fas fa-eye"></i></a>{% endif %}</td>
                                     {% endif %}
-                                    <td>{% if class.associationType == "Selected" %}<a href="{{ path('class_show_customisation', {'id': class.id, 'profile': profile.id}) }}" class="btn btn-xs {{ btnColor }}"><i class="fas fa-eye"></i></a>{% endif %}</td>
+                                    </td>
                                 </tr>
                             {% endfor %}
                             </tbody>
@@ -424,9 +424,11 @@
 
                                     <td>
                                         {% set txtPCustom = profileAssociation.property.textProperties|filter(v => v.profileForCustom is not null and v.profileForCustom.id == profile.id and v.namespaceForVersion == profileAssociation.entityNamespaceForVersion)|first %}
-                                        <a href="{{ path('property_show_customisation', {'id': profileAssociation.property.id, 'profile': profile.id}) }}" class="btn btn-xs btn-{{ txtPCustom ? "success" : "primary" }}">
+                                        {% if txtPCustom|length > 0 %}
+                                        <a href="{{ path('property_show_customisation', {'id': profileAssociation.property.id, 'profile': profile.id}) }}" class="btn btn-xs btn-primary">
                                             <span class="fas fa-eye"></span>
                                         </a>
+                                        {% endif %}
                                     </td>
                                 </tr>
                             {% endfor %}

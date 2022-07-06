@@ -65,7 +65,7 @@
                     </li>
                 </ul>
             </li>
-            <li class="{{ 'property' in route and 'text_property' not in route or textProperty is defined and textProperty.property is not null ? 'active' }}"><a href="{{ url('app_property_list') }}">Properties</a></li>
+            <li class="{{ ('property' in route and 'customisation' not in route and 'text_property' not in route) or (textProperty is defined and textProperty.property is not null) ? 'active' }}"><a href="{{ url('app_property_list') }}">Properties</a></li>
             <li class="{{ 'namespace' in route ? 'active' }}"><a href="{{ url('app_namespace_list') }}">Namespaces</a></li>
             <li class="{{ 'project' in route or textProperty is defined and textProperty.project is not null ? 'active' }}"><a href="{{ url('app_project_list') }}">Projects</a></li>
             <li class="{{ 'profile' in route or 'customisation' in route ? 'active' }}"><a href="{{ url('app_profile_list') }}">Profiles</a></li>
