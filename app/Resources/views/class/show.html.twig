@@ -664,6 +664,11 @@
             </div>
             <div id="identification" class="tab-pane fade">
                 <h3>Identifier : {{ classVersion.class.identifierInNamespace }}</h3>
+                <p>
+                    {% if not classVersion.namespaceForVersion.topLevelNamespace.isExternalNamespace %}
+                        URI: <strong><a>{{ classVersion.namespaceForVersion.topLevelNamespace.namespaceURI }}/{{ classVersion.class.identifierInNamespace }}</a></strong>
+                    {% endif %}
+                </p>
                 <h3>Labels</h3>
                 <table class="table table-striped" id="labels-table" style="width:100%">
                     <thead>

@@ -13,6 +13,7 @@ use AppBundle\Entity\OntoNamespace;
 use AppBundle\Entity\Profile;
 use AppBundle\Entity\Project;
 use AppBundle\Entity\User;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Criteria;
 use Doctrine\DBAL\DBALException;
 use Doctrine\ORM\EntityRepository;
@@ -509,5 +510,36 @@ class NamespaceRepository extends EntityRepository
         }
 
         return $change;
+    }
+
+    /**
+     * @param $name
+     * @param $identifierInNamespace
+     * @return ArrayCollection
+     * @throws DBALException
+     */
+    public function findEntity($name, $identifierInNamespace){
+        $conn = $this->getEntityManager()->getConnection();
+
+        $sql = "SELECT entity.entity_id, entity.entity_type 
+                FROM (
+                    SELECT pk_class AS entity_id, clsv.fk_namespace_for_version AS namespace_id, 'class' AS entity_type
+                    FROM che.class cls
+                    LEFT JOIN che.class_version clsv ON cls.pk_class = clsv.fk_class
+                    WHERE cls.identifier_in_namespace = :identifier
+                    UNION
+                    SELECT pk_property AS entity_id, prpv.fk_namespace_for_version AS namespace_id, 'property' AS entity_type
+                    FROM che.property prp
+                    LEFT JOIN che.property_version prpv ON prp.pk_property = prpv.fk_property
+                    WHERE prp.identifier_in_namespace = :identifier
+                ) AS entity
+                JOIN che.namespace nsp ON entity.namespace_id = nsp.pk_namespace
+                JOIN che.namespace root_nsp ON nsp.fk_top_level_namespace = root_nsp.pk_namespace
+                WHERE root_nsp.namespace_uri = 'https://ontome.net/ns/' || :name;";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->execute(array('identifier' => $identifierInNamespace, 'name' => $name));
+
+        return $stmt->fetchAll();
     }
 }

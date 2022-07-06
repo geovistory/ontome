@@ -9,12 +9,15 @@
 namespace AppBundle\Controller;
 
 
+use AppBundle\AppBundle;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\Request;
 use Twig_Environment;
 
 class MainController extends Controller
 {
+
     public function homepageAction()
     {
         return $this->render('main/homepage.html.twig');
@@ -63,5 +66,30 @@ class MainController extends Controller
             }
         }
         return $this->render('main/search.html.twig', array('query' => $query_sanitized, 'resultatTxtp' => $resultatTxtp, 'resultatLbl' => $resultatLbl, 'lexemes' => $arrayLexemes));
+    }
+
+    /**
+     * @Route("/ns/{name}/{identifierInNamespace}")
+     * @param string $query
+     */
+    public function redirectUriAction($name, $identifierInNamespace)
+    {
+
+        // Sécurité anti-injection SQL...
+        $name = filter_var($name, FILTER_SANITIZE_STRING);
+        $identifierInNamespace = filter_var($identifierInNamespace, FILTER_SANITIZE_STRING);
+
+        $em = $this->getDoctrine()->getManager();
+        $entity = $em->getRepository('AppBundle:OntoNamespace')->findEntity($name,$identifierInNamespace);
+
+        if(count($entity) == 0){
+            // Rien n'a été trouvé
+            $this->addFlash('warning', 'URI ontome.net/ns/'.$name."/".$identifierInNamespace." is not valid");
+            return $this->redirectToRoute('home');
+        }
+
+        return $this->redirectToRoute($entity[0]['entity_type'].'_show', [
+            'id' => $entity[0]['entity_id']
+        ]);
     }
 }
