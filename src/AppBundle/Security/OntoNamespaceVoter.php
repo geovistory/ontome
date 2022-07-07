@@ -231,24 +231,21 @@ class OntoNamespaceVoter extends Voter
                 $activeNamespace=$managedNamespace;
             }
         }
-
         if(is_null($activeNamespace)){
             return false;
         }
-
         foreach($user->getUserProjectAssociations()->getIterator() as $i => $userProjectAssociation) {
             if($userProjectAssociation->getProject() === $activeNamespace->getProjectForTopLevelNamespace() && $userProjectAssociation->getPermission() <= 2){
                 if(($activeNamespace->getIsOngoing() && $namespace === $activeNamespace)){
                     return true;
                 }
-                foreach ($activeNamespace->getReferencedNamespaceAssociations() as $referencedNamespaceAssociation){
-                    if($referencedNamespaceAssociation->getReferencedNamespace() == $namespace){
+                foreach ($activeNamespace->getAllReferencedNamespaces() as $referencedNamespace){
+                    if($namespace->getTopLevelNamespace()->getChildVersions()->contains($referencedNamespace)){
                         return true;
                     }
                 }
             }
         }
-
         return false;
     }
 }
