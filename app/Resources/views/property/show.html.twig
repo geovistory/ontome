@@ -875,8 +875,8 @@
                         <th></th>
                         <th>Range</th>
                         <th>Property namespace</th>
-                        <th>Justification</th>
                         <th>Relation defined in</th>
+                        <th>Justification</th>
                         <th>View details</th>
                         <th>Edit</th>
                         <th>Delete</th>
@@ -991,6 +991,7 @@
                             <td>
                                 {{ association.parentPropertyNamespace }}
                             </td>
+                            <td>{{ association.namespaceForVersion }}</td>
                             <td>
                                 {% if association.textProperties is not null %}
                                     {% for textProperty in association.textProperties if textProperty.systemType.id == 15 %}
@@ -1001,7 +1002,6 @@
                                     {% endfor %}
                                 {% endif %}
                             </td>
-                            <td>{{ association.namespaceForVersion }}</td>
                             <td>
                                 <a href="{{ path('property_association_show', {'id': association.id}) }}"><span class="fa fa-info-circle"></span></a>
                             </td>
@@ -1249,8 +1249,8 @@
                         <th>Relation</th>
                         <th>Property</th>
                         <th>Property namespace</th>
-                        <th>Justification</th>
                         <th>Relation defined in</th>
+                        <th>Justification</th>
                         <th>View details</th>
                         <th>Edit</th>
                         <th>Delete</th>
@@ -1309,6 +1309,7 @@
                                     {{ relation.sourceNamespaceForVersion }}
                                 </td>
                             {% endif %}
+                            <td>{{ relation.namespaceForVersion.topLevelNamespace }}</td>
                             <td>
                                 {% if relation.textProperties is not null %}
                                     {% for textProperty in relation.textProperties if textProperty.systemType.id == 15 %}
@@ -1319,7 +1320,6 @@
                                     {% endfor %}
                                 {% endif %}
                             </td>
-                            <td>{{ relation.namespaceForVersion.topLevelNamespace }}</td>
                             <td>
                                 {% if propertyVersion.property.id == relation.sourceProperty.id %}
                                     <a href="{{ path('entity_association_show', {

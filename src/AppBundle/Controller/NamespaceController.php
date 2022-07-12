@@ -8,6 +8,7 @@
 
 namespace AppBundle\Controller;
 
+use AppBundle\Entity\ClassAssociation;
 use AppBundle\Entity\EntityUserProjectAssociation;
 use AppBundle\Entity\Label;
 use AppBundle\Entity\OntoClassVersion;
@@ -21,7 +22,9 @@ use AppBundle\Form\NamespaceEditIdentifiersForm;
 use AppBundle\Form\NamespaceForm;
 use AppBundle\Form\NamespacePublicationForm;
 use AppBundle\Form\NamespaceQuickAddForm;
+use Doctrine\Common\Collections\ArrayCollection;
 use PhpOffice\PhpWord\Element\Footer;
+use PhpOffice\PhpWord\Element\TextBreak;
 use PhpOffice\PhpWord\Element\TextRun;
 use PhpOffice\PhpWord\IOFactory;
 use PhpOffice\PhpWord\PhpWord;
@@ -735,14 +738,20 @@ class NamespaceController  extends Controller
 
     }
 
-    /**
-     * @Route("/namespace/{namespace}/document", name="namespace_document", requirements={"namespace"="^[0-9]+$"})
+     /**
+      * @Route("/namespace/{namespace}/document", name="namespace_document", requirements={"namespace"="^([0-9]+)|(namespaceID){1}$"})
      * @Method({ "GET"})
      * @param OntoNamespace  $namespace    The namespace
      * @return BinaryFileResponse
      */
-    public function getNamespaceOdt(OntoNamespace $namespace)
+    public function getNamespaceOdt(OntoNamespace $namespace, Request $request)
     {
+        $em = $this->getDoctrine()->getManager();
+
+        $optionCardinality = $request->get('optCardinality', 'cardinality-opt-uml'); //cardinality-opt-er est l'autre option
+        $optionTextCardinality = filter_var($request->get('optTextCardinality', true), FILTER_VALIDATE_BOOLEAN);; //false est l'autre option
+        $optionFol = filter_var($request->get('optFol', true), FILTER_VALIDATE_BOOLEAN);; //false est l'autre option
+
         foreach ($namespace->getTextProperties() as $textProperty){
             if($textProperty->getSystemType()->getId() == 2 and $textProperty->getLanguageIsoCode() == "en"){
                 $textp_contributors = $textProperty;
@@ -756,11 +765,16 @@ class NamespaceController  extends Controller
             if($textProperty->getSystemType()->getId() == 16 and !isset($textp_definition)){
                 $textp_definition = $textProperty;
             }
+            if($textProperty->getSystemType()->getId() == 31 and !isset($textp_version)){
+                $textp_version = $textProperty;
+            }
         }
 
         // Creating the new document...
         $phpWord = new \PhpOffice\PhpWord\PhpWord();
+        \PhpOffice\PhpWord\Settings::setOutputEscapingEnabled(true);
         $phpWord->getSettings()->setThemeFontLang(new Language(Language::EN_GB));
+        $phpWord->setDefaultFontName("Times New Roman");
 
         // STYLES
         $paragrapheCentre = 'pCentre';
@@ -770,51 +784,478 @@ class NamespaceController  extends Controller
         $phpWord->addTitleStyle(3, array('bold' => true, 'size' => 16));
 
         $phpWord->addFontStyle("gras", array('bold' => true));
+        $phpWord->addFontStyle("italic11", array('italic' => true, 'size' => 11));
 
+        $fancyTableStyleName2 = 'Fancy Table 2';
+        $fancyTableStyle = array('borderSize' => 1, 'borderColor' => '000000', 'unit' => \PhpOffice\PhpWord\SimpleType\TblWidth::TWIP);
+        $fancyTableFirstRowStyle = array();
+        $phpWord->addTableStyle($fancyTableStyleName2, $fancyTableStyle, $fancyTableFirstRowStyle);
 
         // Couverture
         $section = $phpWord->addSection(array('vAlign' => VerticalJc::CENTER));
+        //-- Definition of
         $section->addTitle('Definition of '.$namespace->getStandardLabel(), 1);
-        $section->addTextBreak(20);
-        $status = "Published";
+        $section->addTextBreak(10);
+        //-- Version
+        if(isset($textp_version)){
+            $section->addText('Version: '.$textp_version->getTextProperty(), null, $paragrapheCentre);
+            $section->addTextBreak(1);
+        }
+        //-- Date
         $namespaceStatut = "Published";
         $namespaceDate  = $namespace->getPublishedAt();
         if($namespace->getIsOngoing() or is_null($namespaceDate)){
             $namespaceStatut = "Ongoing";
-            $namespaceDate = $namespace->getModificationTime();
+            $namespaceDate = new \DateTime();
         }
-        if($namespace->getIsOngoing()){$status = "Ongoing";}
-        $section->addText('Editorial Status: '.$namespaceStatut, null, $paragrapheCentre);
-        $section->addTextBreak(2);
-        $section->addText(date_format($namespaceDate,"Y/m/d H:i:s"), null, $paragrapheCentre);
-        $section->addTextBreak(20);
+        $section->addText(date_format($namespaceDate,"Y/m/d"), null, $paragrapheCentre);
+        $section->addTextBreak(5);
+        //-- Contributors
         if(isset($textp_contributors)){
             $section->addText("Contributors: ".html_entity_decode(strip_tags($textp_contributors->getTextProperty())), null, $paragrapheCentre);
         }
+        $section->addTextBreak(15);
+        //-- Licence
+        $section->addText('License information: Creative Commons Licence Attribution-ShareAlike 4.0 International', null, $paragrapheCentre);
+        $txtrun = $section->addTextRun(array('alignment' => Jc::CENTER));
+        $txtrun->addText('Exported from OntoME: ');
+        $txtrun->addText('https://ontome.net/namespace/'.$namespace->getId());
 
-        $footer = $section->addFooter(Footer::AUTO);
-        $textRun = $footer->addTextRun(array('alignment' => Jc::CENTER));
+        $centerTableStyleName = 'Center Table';
+        $centerTableStyle = array('alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER);
+        $centerTableStyleFirstRow = array();
+        $phpWord->addTableStyle($centerTableStyleName, $centerTableStyle, $centerTableStyleFirstRow);
+        $footer = $section->addFooter();
+        $textRun = $footer->addTextRun(array('alignment' => Jc::END));
         $textRun->addField('PAGE', array('format' => 'ARABIC'));
-        $textRun->addText(' of ');
-        $textRun->addField('NUMPAGES', array('format' => 'ARABIC'));
+        //$textRun = $footer->addTextRun(array('alignment' => Jc::CENTER));
+        //$textRun->addField('PAGE', array('format' => 'ARABIC'));
+        //$textRun->addText(' of ');
+        //$textRun->addField('NUMPAGES', array('format' => 'ARABIC'));
 
-        // Section suivante
+        // Blank page
         $section = $phpWord->addSection();
-        $section->addTitle('1.1 Introduction', 2);
+
+        // Introduction
+        $section = $phpWord->addSection();
+        $section->addTitle('Introduction', 2);
         $section->addTextBreak();
-        $section->addTitle('1.1.1 Scope', 3);
+        $section->addTitle('Scope', 3);
         if(isset($textp_definition)){
             $section->addTextBreak();
             $section->addText(html_entity_decode(strip_tags($textp_definition->getTextProperty())));
         }
         $section->addTextBreak(2);
-        $section->addTitle('1.1.2 Status', 3);
+        $section->addTitle('Status', 3);
         $section->addTextBreak();
         $section->addText($namespaceStatut." version");
 
+        // Class hierarchy
+        $section = $phpWord->addSection();
+        if($namespace->getDirectReferencedNamespaces()->count() > 0){ //S'il y a les NS références
+            $directNamespacesReferences = $namespace->getDirectReferencedNamespaces();
+            $standardLabelDirectNamespacesReferences = $directNamespacesReferences->map(function(OntoNamespace $ns){return $ns->getStandardLabel();});
+            $allNamespacesReferences = $namespace->getAllReferencedNamespaces();
+            $nsCRM = $allNamespacesReferences->filter(function($v){return $v->getTopLevelNamespace()->getId() == 7;});
+
+            // Plusieurs formulations
+            // Soit le CIDOC CRM est l'unique référence
+            if($directNamespacesReferences->count() == 1 and $directNamespacesReferences->first()->getTopLevelNamespace()->getId() == 7)
+            {
+                $section->addTitle($namespace->getStandardLabel().' class hierarchy, aligned with portions from the CIDOC CRM hierarchy', 2);
+            }
+
+            // Soit le CIDOC CRM n'est ni espace de référence direct ni espace de référence d'un espace de référence
+            if($nsCRM->count() == 0)
+            {
+                if($directNamespacesReferences->count() > 1){
+                    $section->addTitle($namespace->getStandardLabel().' class hierarchy, aligned with portions from the '.implode($standardLabelDirectNamespacesReferences->toArray(), ', ').'class hierarchies', 2);
+                }
+            }
+
+            // Soit le CIDOC CRM est un espace de réf direct ou indirect
+            if($nsCRM->count() == 1 and $directNamespacesReferences->count() != 1)
+            {
+                $section->addTitle($namespace->getStandardLabel().' class hierarchy, aligned with portions from the '.implode($standardLabelDirectNamespacesReferences->toArray(), ', ').' and the CIDOC CRM class hierarchies', 2);
+            }
+            $section->addTextBreak(2);
+            $section->addText('This class hierarchy lists:');
+            $section->addTextBreak();
+            $section->addListItem('all classes declared in '.$namespace->getStandardLabel());
+            $section->addTextBreak();
+            // Les NS ref CRM
+            foreach ($namespace->getAllReferencedNamespaces()->filter(function($v){return $v->getTopLevelNamespace()->getId() == 7;}) as $ns){
+                $version = '';
+                $ns_txtp_versions = $ns->getTextProperties()->filter(function($v){return $v->getSystemType()->getId() == 31;});
+                if($ns_txtp_versions->count() > 0){$version = ' version '.$ns_txtp_versions->first()->getTextProperty();}
+                $section->addListItem('all classes declared in CIDOC CRM'.$version.' that are declared as superclasses of classes declared in the '.$namespace->getStandardLabel());
+                $section->addTextBreak();
+            }
+            // Les NS direct sauf CRM
+            foreach ($directNamespacesReferences->filter(function($v){return $v->getTopLevelNamespace()->getId() != 7;}) as $ns){
+                $version = '';
+                $ns_txtp_versions = $ns->getTextProperties()->filter(function($v){return $v->getSystemType()->getId() == 31;});
+                if($ns_txtp_versions->count() > 0){$version = ' version '.$ns_txtp_versions->first()->getTextProperty();}
+                $section->addListItem('all classes declared in '.$ns->getStandardLabel().$version.' that are declared as superclasses of classes declared in the '.$namespace->getStandardLabel());
+                $section->addTextBreak();
+            }
+            // Les NS ref CRM
+            foreach ($namespace->getAllReferencedNamespaces()->filter(function($v){return $v->getTopLevelNamespace()->getId() == 7;}) as $ns){
+                $version = '';
+                $ns_txtp_versions = $ns->getTextProperties()->filter(function($v){return $v->getSystemType()->getId() == 31;});
+                if($ns_txtp_versions->count() > 0){$version = ' version '.$ns_txtp_versions->first()->getTextProperty();}
+                $section->addListItem('all classes declared in CIDOC CRM'.$version.' that are either domain or range for a property declared in  the '.$namespace->getStandardLabel());
+                $section->addTextBreak();
+            }
+            // Les NS direct sauf CRM
+            foreach ($directNamespacesReferences->filter(function($v){return $v->getTopLevelNamespace()->getId() != 7;}) as $ns){
+                $version = '';
+                $ns_txtp_versions = $ns->getTextProperties()->filter(function($v){return $v->getSystemType()->getId() == 31;});
+                if($ns_txtp_versions->count() > 0){$version = ' version '.$ns_txtp_versions->first()->getTextProperty();}
+                $section->addListItem('all classes declared in '.$ns->getStandardLabel().$version.' that are either domain or range for a property declared in  the '.$namespace->getStandardLabel());
+                $section->addTextBreak();
+            }
+        }
+        else{ //Pas de NS réferences
+            $section->addTitle($namespace->getStandardLabel().' Class hierarchy', 2);
+        }
+
+        $section->addTextBreak();
+        $section->addText('Table 1: Class Hierarchy', 'italic11');
+        $fancyTableStyleName = 'Fancy Table';
+        $fancyTableStyle = array('borderSize' => 1, 'borderColor' => 'FFFFFF');
+        $fancyTableFirstRowStyle = array();
+        $phpWord->addTableStyle($fancyTableStyleName, $fancyTableStyle, $fancyTableFirstRowStyle);
+
+        // Peut on construire un tableau hierarchique ? (trouver les classes qui n'ont pas de superclass dans les ns ref)
+        $nsRef = $namespace->getAllReferencedNamespaces();
+        $nsRef->add($namespace);
+        $allClasses = $namespace->getClasses();
+        foreach($namespace->getAllReferencedNamespaces() as $referencedNamespace){
+            foreach ($referencedNamespace->getClasses() as $class){
+                $allClasses->add($class);
+            }
+        }
+        $rootClasses = $allClasses->filter(function($v) use ($nsRef, $namespace){return $v->getChildClassAssociations()->filter(function($w) use ($nsRef, $namespace){return $namespace == $w->getNamespaceForVersion() and $nsRef->contains($w->getParentClassNamespace());})->count() == 0 and $v->getParentClassAssociations()->filter(function($w) use ($namespace){return $w->getNamespaceForVersion() == $namespace;})->count() > 0;});
+        /*foreach($namespace->getAllReferencedNamespaces() as $referencedNamespace){
+            $rootClassesRef = $referencedNamespace->getClasses()->filter(function ($v) use ($namespace, $nsRef){return $v->getChildClassAssociations()->filter(function($w) use ($namespace, $nsRef){return $namespace == $w->getNamespaceForVersion() and $nsRef->contains($w->getParentClassNamespace());})->count() == 0;});
+            foreach ($rootClassesRef as $rootClassRef){
+                $rootClasses->add($rootClassRef);
+            }
+        }*/
+
+        $nbColumn = 2;
+        foreach ($rootClasses as $rootClass){
+            foreach ($rootClass->getHierarchicalTreeClasses($namespace) as $tuple){
+                if($nbColumn < $tuple[1]){
+                    $nbColumn = $tuple[1]+2;
+                }
+            }
+        }
+
+        // tableau
+        $table = $section->addTable($fancyTableStyleName);
+        foreach ($rootClasses as $rootClass){
+            $classVersion = $rootClass->getClassVersions()->filter(function($v) use ($nsRef){return $nsRef->contains($v->getNamespaceForVersion());})->first();
+            $table->addRow();
+            $cell = $table->addCell(1000);
+            $cell->addText($rootClass->getIdentifierInNamespace());
+            //$table->addCell(null, array('gridSpan' => $nbColumn))->addText($classVersion->getStandardLabel());
+            $cell = $table->addCell(4000);
+            $cell->getStyle()->setGridSpan($nbColumn-1);
+            $cell->addText($classVersion->getStandardLabel());
+            foreach($rootClass->getHierarchicalTreeClasses($namespace) as $tuple){
+                $table->addRow();
+                $table->addCell(1000)->addText($tuple[0]->getIdentifierInNamespace());
+                for ($i = 0; $i <= $tuple[1]; $i++){
+                    if($i < $tuple[1]) {
+                        $table->addCell(400)->addText('-');
+                    }
+                    else{
+                        $cell = $table->addCell(4000);
+                        $cell->getStyle()->setGridSpan($nbColumn-$i-1);
+                        $cell->addText($tuple[0]->getClassVersionForDisplay($tuple[2])->getStandardLabel());
+                    }
+                }
+            }
+        }
+
+        $classesVersionWithNSref = new ArrayCollection();
+        // Domains & Ranges utilisés NSref
+        foreach($namespace->getPropertyVersions() as $propertyVersion){
+            if(!is_null($propertyVersion->getDomain()) && $propertyVersion->getDomainNamespace() != $namespace && $propertyVersion->getDomainNamespace()->getId() != 4 and !$classesVersionWithNSref->contains($propertyVersion->getDomain())){
+                if(!$classesVersionWithNSref->contains($propertyVersion->getDomain()->getClassVersionForDisplay($propertyVersion->getDomainNamespace()))){
+                    $classesVersionWithNSref->add($propertyVersion->getDomain()->getClassVersionForDisplay($propertyVersion->getDomainNamespace()));
+                }
+            }
+            if(!is_null($propertyVersion->getRange()) && $propertyVersion->getRangeNamespace() != $namespace && $propertyVersion->getRangeNamespace()->getId() != 4 and !$classesVersionWithNSref->contains($propertyVersion->getRange())){
+                if(!$classesVersionWithNSref->contains($propertyVersion->getRange()->getClassVersionForDisplay($propertyVersion->getRangeNamespace()))){
+                    $classesVersionWithNSref->add($propertyVersion->getRange()->getClassVersionForDisplay($propertyVersion->getRangeNamespace()));
+                }
+            }
+        }
+
+        // Hierarchy classes utilisés NSref
+        foreach($namespace->getClassAssociations() as $classAssociation){
+            if($classAssociation->getParentClassNamespace() != $namespace && $classAssociation->getParentClassNamespace()->getId() != 4 and !$classesVersionWithNSref->contains($classAssociation->getParentClass())){
+                if(!$classesVersionWithNSref->contains($classAssociation->getParentClass()->getClassVersionForDisplay($classAssociation->getParentClassNamespace()))){
+                    $classesVersionWithNSref->add($classAssociation->getParentClass()->getClassVersionForDisplay($classAssociation->getParentClassNamespace()));
+                }
+            }
+            if($classAssociation->getChildClassNamespace() != $namespace && $classAssociation->getChildClassNamespace()->getId() != 4 and !$classesVersionWithNSref->contains($classAssociation->getChildClass())){
+                if(!$classesVersionWithNSref->contains($classAssociation->getChildClass()->getClassVersionForDisplay($classAssociation->getChildClassNamespace()))){
+                    $classesVersionWithNSref->add($classAssociation->getChildClass()->getClassVersionForDisplay($classAssociation->getChildClassNamespace()));
+                }
+            }
+        }
+
+        // Relations autres
+        foreach($namespace->getEntityAssociations()->filter(function($v){return !is_null($v->getSourceClass());}) as $classAssociation){
+            if($classAssociation->getSourceNamespaceForVersion() != $namespace && $classAssociation->getSourceNamespaceForVersion()->getId() != 4 and !$classesVersionWithNSref->contains($classAssociation->getSourceClass())){
+                if(!$classesVersionWithNSref->contains($classAssociation->getSourceClass()->getClassVersionForDisplay($classAssociation->getSourceNamespaceForVersion()))){
+                    $classesVersionWithNSref->add($classAssociation->getSourceClass()->getClassVersionForDisplay($classAssociation->getSourceNamespaceForVersion()));
+                }
+            }
+            if($classAssociation->getTargetNamespaceForVersion() != $namespace && $classAssociation->getTargetNamespaceForVersion()->getId() != 4 and !$classesVersionWithNSref->contains($classAssociation->getTargetClass())){
+                if(!$classesVersionWithNSref->contains($classAssociation->getTargetClass()->getClassVersionForDisplay($classAssociation->getTargetNamespaceForVersion()))){
+                    $classesVersionWithNSref->add($classAssociation->getTargetClass()->getClassVersionForDisplay($classAssociation->getTargetNamespaceForVersion()));
+                }
+            }
+        }
+
+        // Trier d'abord CRM les autres puis par identifier
+        $iterator = $classesVersionWithNSref->getIterator();
+        $iterator->uasort(function ($a,$b){
+            if($a->getNamespaceForVersion()->getTopLevelNamespace()->getId() == 7 and $b->getNamespaceForVersion()->getTopLevelNamespace()->getId() == 7){
+                return strnatcmp($a->getClass()->getIdentifierInNamespace(), $b->getClass()->getIdentifierInNamespace());
+            }
+            elseif($a->getNamespaceForVersion()->getTopLevelNamespace()->getId() != 7 and $b->getNamespaceForVersion()->getTopLevelNamespace()->getId() != 7){
+                // C'est la même chose que le premier if mais plus clair à la lecture.
+                return strnatcmp($a->getClass()->getIdentifierInNamespace(), $b->getClass()->getIdentifierInNamespace());
+            }
+            elseif($a->getNamespaceForVersion()->getTopLevelNamespace()->getId() == 7 and $b->getNamespaceForVersion()->getTopLevelNamespace()->getId() != 7){
+                return false;
+            }
+            elseif($a->getNamespaceForVersion()->getTopLevelNamespace()->getId() != 7 and $b->getNamespaceForVersion()->getTopLevelNamespace()->getId() == 7){
+                return true;
+            }
+        });
+        $classesVersionWithNSref = new ArrayCollection(iterator_to_array($iterator));
+
+        if($classesVersionWithNSref->count() >0){
+            $section->addTextBreak();
+            $section->addTitle('List of external classes used in '.$namespace->getStandardLabel(), 2);
+            $section->addTextBreak();
+            $section->addText('Table 2: List of external classes grouped by model and ordered by model (exception: CRMbase always goes first) and then by class identifier.', 'italic11');
+
+            $table = $section->addTable($fancyTableStyleName2);
+            $table->addRow();
+            $table->addCell(2250)->addText('Class identifier', array('bold' => true));
+            $table->addCell(2250)->addText('Class name', array('bold' => true));
+            $table->addCell(2250)->addText('Model', array('bold' => true));
+            $table->addCell(2250)->addText('Version', array('bold' => true));
+
+            foreach ($classesVersionWithNSref as $classVersion){
+                $table->addRow();
+                $table->addCell(2000)->addText($classVersion->getClass()->getIdentifierInNamespace());
+                $table->addCell(2000)->addText($classVersion->getStandardLabel());
+                $table->addCell(2000)->addText($classVersion->getNamespaceForVersion()->getTopLevelNamespace());
+                $txtps_version = $classVersion->getNamespaceForVersion()->getTextProperties()->filter(function($v){return $v->getSystemType()->getId() == 31;});
+                if($txtps_version->count() > 0){
+                    $table->addCell(2000)->addText($txtps_version->first()->getTextProperty());
+                }
+                else{
+                    $table->addCell(1000)->addText('');
+                }
+            }
+        }
+
+        // Property hierarchy
+        $section = $phpWord->addSection();
+        if($namespace->getDirectReferencedNamespaces()->count() > 0){ //S'il y a les NS références
+            $directNamespacesReferences = $namespace->getDirectReferencedNamespaces();
+            $standardLabelDirectNAmespacesReferences = $directNamespacesReferences->map(function(OntoNamespace $ns){return $ns->getStandardLabel();});
+            $allNamespacesReferences = $namespace->getAllReferencedNamespaces();
+            $nsCRM = $allNamespacesReferences->filter(function($v){return $v->getTopLevelNamespace()->getId() == 7;});
+
+            // Plusieurs formulations
+            // Soit le CIDOC CRM est l'unique référence
+            if($directNamespacesReferences->count() == 1 and $directNamespacesReferences->first()->getTopLevelNamespace()->getId() == 7)
+            {
+                $section->addTitle($namespace->getStandardLabel().' property hierarchy, aligned with portions from the CIDOC CRM hierarchy', 2);
+            }
+
+            // Soit le CIDOC CRM n'est ni espace de référence direct ni espace de référence d'un espace de référence
+            if($nsCRM->count() == 0)
+            {
+                if($directNamespacesReferences->count() > 1) {
+                    $section->addTitle($namespace->getStandardLabel().' property hierarchy, aligned with portions from the '.implode($standardLabelDirectNAmespacesReferences->toArray(), ', ').'property hierarchies', 2);
+                }
+            }
+
+            // Soit le CIDOC CRM est un espace de réf direct ou indirect
+            if($nsCRM->count() == 1 and $directNamespacesReferences->count() != 1)
+            {
+                $section->addTitle($namespace->getStandardLabel().' property hierarchy, aligned with portions from the '.implode($standardLabelDirectNAmespacesReferences->toArray(), ', ').' and the CIDOC CRM property hierarchies', 2);
+            }
+            $section->addTextBreak(2);
+            $section->addText('This property hierarchy lists:');
+            $section->addTextBreak();
+            $section->addListItem('all properties declared in '.$namespace->getStandardLabel());
+            $section->addTextBreak();
+            // Les NS ref CRM
+            foreach ($namespace->getAllReferencedNamespaces()->filter(function($v){return $v->getTopLevelNamespace()->getId() == 7;}) as $ns){
+                $version = '';
+                $ns_txtp_versions = $ns->getTextProperties()->filter(function($v){return $v->getSystemType()->getId() == 31;});
+                if($ns_txtp_versions->count() > 0){$version = ' version '.$ns_txtp_versions->first()->getTextProperty();}
+                $section->addListItem('all properties declared in CIDOC CRM'.$version.' that are declared as superproperties of properties declared in the '.$namespace->getStandardLabel());
+                $section->addTextBreak();
+            }
+            // Les NS direct sauf CRM
+            foreach ($directNamespacesReferences->filter(function($v){return $v->getTopLevelNamespace()->getId() != 7;}) as $ns){
+                $version = '';
+                $ns_txtp_versions = $ns->getTextProperties()->filter(function($v){return $v->getSystemType()->getId() == 31;});
+                if($ns_txtp_versions->count() > 0){$version = ' version '.$ns_txtp_versions->first()->getTextProperty();}
+                $section->addListItem('all properties declared in '.$ns->getStandardLabel().$version.' that are declared as superproperties of properties declared in the '.$namespace->getStandardLabel());
+                $section->addTextBreak();
+            }
+        }
+        else{ //Pas de NS réferences
+            $section->addTitle($namespace->getStandardLabel().' Property hierarchy', 2);
+        }
+        $section->addTextBreak();
+        $section->addText('Table 3: Property Hierarchy', 'italic11');
+
+
+        // Peut on construire un tableau hierarchique ? (trouver les propriétés sans parents)
+        $nsRef = $namespace->getAllReferencedNamespaces();
+        $nsRef->add($namespace);
+        $allProperties = $namespace->getProperties();
+        foreach($namespace->getAllReferencedNamespaces() as $referencedNamespace){
+            foreach ($referencedNamespace->getProperties() as $property){
+                $allProperties->add($property);
+            }
+        }
+        $rootProperties = $allProperties->filter(function($v) use ($nsRef, $namespace){return $v->getChildPropertyAssociations()->filter(function($w) use ($nsRef, $namespace){return $namespace == $w->getNamespaceForVersion() and $nsRef->contains($w->getParentPropertyNamespace());})->count() == 0 and $v->getParentPropertyAssociations()->filter(function($w) use ($namespace){return $w->getNamespaceForVersion() == $namespace;})->count() > 0;});
+
+        // tableau
+        $table = $section->addTable($fancyTableStyleName);
+        $table->addRow();
+        $table->addCell(2000)->addText('Property id', array('bold' => true));
+        $table->addCell(2000)->addText('Property Name', array('bold' => true));
+        $table->addCell(2000)->addText('Entity – Domain', array('bold' => true));
+        $table->addCell(2000)->addText('Entity - Range', array('bold' => true));;
+        foreach ($rootProperties as $rootProperty){
+            $propertyVersion = $rootProperty->getPropertyVersions()->filter(function($v) use ($nsRef){return $nsRef->contains($v->getNamespaceForVersion());})->first();
+
+            $table->addRow();
+            $table->addCell(1000, array('valign' => 'center', 'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER))->addText($rootProperty->getIdentifierInNamespace());
+            $table->addCell(2000, array('valign' => 'center'))->addText($propertyVersion->getStandardLabel());
+            if(!is_null($propertyVersion->getDomain())){
+                $table->addCell(2000, array('valign' => 'center'))->addText(html_entity_decode(strip_tags($propertyVersion->getDomain()->getClassVersionForDisplay($propertyVersion->getDomainNamespace())->getInvertedLabel())));
+            }
+            else{
+                $table->addCell(2000, array('valign' => 'center'))->addText('');
+            }
+
+            if(!is_null($propertyVersion->getRange())) {
+                $table->addCell(2000, array('valign' => 'center'))->addText(html_entity_decode(strip_tags($propertyVersion->getRange()->getClassVersionForDisplay($propertyVersion->getRangeNamespace())->getInvertedLabel())));
+            }
+            else{
+                $table->addCell(2000, array('valign' => 'center'))->addText('');
+            }
+            foreach($rootProperty->getHierarchicalTreeProperties($namespace) as $tuple){
+                $table->addRow();
+                $table->addCell(1000, array('valign' => 'center'))->addText($tuple[0]->getIdentifierInNamespace());
+                $table->addCell(2000, array('valign' => 'center'))->addText(str_repeat('-  ', $tuple[1]).$tuple[0]->getPropertyVersionForDisplay($tuple[2])->getStandardLabel());
+                if(!is_null($tuple[0]->getPropertyVersionForDisplay($tuple[2])->getDomain())) {
+                    $table->addCell(2000, array('valign' => 'center'))->addText(html_entity_decode(strip_tags($tuple[0]->getPropertyVersionForDisplay($tuple[2])->getDomain()->getClassVersionForDisplay($tuple[0]->getPropertyVersionForDisplay($tuple[2])->getDomainNamespace())->getInvertedLabel())));
+                }
+                else{
+                    $table->addCell(2000, array('valign' => 'center'))->addText('');
+                }
+
+                if(!is_null($tuple[0]->getPropertyVersionForDisplay($tuple[2])->getDomain())) {
+                    $table->addCell(2000, array('valign' => 'center'))->addText(html_entity_decode(strip_tags($tuple[0]->getPropertyVersionForDisplay($tuple[2])->getRange()->getClassVersionForDisplay($tuple[0]->getPropertyVersionForDisplay($tuple[2])->getRangeNamespace())->getInvertedLabel())));
+                }
+                else{
+                    $table->addCell(2000, array('valign' => 'center'))->addText('');
+                }
+            }
+        }
+
+        $propertiesVersionWithNSref = new ArrayCollection();
+
+        // Hierarchy properties utilisés NSref
+        foreach($namespace->getPropertyAssociations() as $propertyAssociation){
+            if($propertyAssociation->getParentPropertyNamespace() != $namespace && $propertyAssociation->getParentPropertyNamespace()->getId() != 4 and !$propertiesVersionWithNSref->contains($propertyAssociation->getParentProperty())){
+                if(!$propertiesVersionWithNSref->contains($propertyAssociation->getParentProperty()->getPropertyVersionForDisplay($propertyAssociation->getParentPropertyNamespace()))){
+                    $propertiesVersionWithNSref->add($propertyAssociation->getParentProperty()->getPropertyVersionForDisplay($propertyAssociation->getParentPropertyNamespace()));
+                }
+            }
+            if($propertyAssociation->getChildPropertyNamespace() != $namespace && $propertyAssociation->getChildPropertyNamespace()->getId() != 4 and !$propertiesVersionWithNSref->contains($propertyAssociation->getChildProperty())){
+                if(!$propertiesVersionWithNSref->contains($propertyAssociation->getChildProperty()->getPropertyVersionForDisplay($propertyAssociation->getChildPropertyNamespace()))){
+                    $propertiesVersionWithNSref->add($propertyAssociation->getChildProperty()->getPropertyVersionForDisplay($propertyAssociation->getChildPropertyNamespace()));
+                }
+            }
+        }
+
+        // Relations autres
+        foreach($namespace->getEntityAssociations()->filter(function($v){return !is_null($v->getSourceProperty());}) as $propertyAssociation){
+            if($propertyAssociation->getSourceNamespaceForVersion() != $namespace && $propertyAssociation->getSourceNamespaceForVersion()->getId() != 4 and !$propertiesVersionWithNSref->contains($propertyAssociation->getSourceProperty())){
+                if(!$propertiesVersionWithNSref->contains($propertyAssociation->getSourceProperty()->getPropertyVersionForDisplay($propertyAssociation->getSourceNamespaceForVersion()))){
+                    $propertiesVersionWithNSref->add($propertyAssociation->getSourceProperty()->getPropertyVersionForDisplay($propertyAssociation->getSourceNamespaceForVersion()));
+                }
+            }
+            if($propertyAssociation->getTargetNamespaceForVersion() != $namespace && $propertyAssociation->getTargetNamespaceForVersion()->getId() != 4 and !$propertiesVersionWithNSref->contains($propertyAssociation->getTargetProperty())){
+                if(!$propertiesVersionWithNSref->contains($propertyAssociation->getTargetProperty()->getPropertyVersionForDisplay($propertyAssociation->getTargetNamespaceForVersion()))){
+                    $propertiesVersionWithNSref->add($propertyAssociation->getTargetProperty()->getPropertyVersionForDisplay($propertyAssociation->getTargetNamespaceForVersion()));
+                }
+            }
+        }
+
+        $iterator = $propertiesVersionWithNSref->getIterator();
+        $iterator->uasort(function ($a,$b){
+            if($a->getNamespaceForVersion()->getTopLevelNamespace()->getId() == 7 and $b->getNamespaceForVersion()->getTopLevelNamespace()->getId() == 7){
+                return strnatcmp($a->getProperty()->getIdentifierInNamespace(), $b->getProperty()->getIdentifierInNamespace());
+            }
+            elseif($a->getNamespaceForVersion()->getTopLevelNamespace()->getId() != 7 and $b->getNamespaceForVersion()->getTopLevelNamespace()->getId() != 7){
+                // C'est la même chose que le premier if mais plus clair à la lecture.
+                return strnatcmp($a->getProperty()->getIdentifierInNamespace(), $b->getProperty()->getIdentifierInNamespace());
+            }
+            elseif($a->getNamespaceForVersion()->getTopLevelNamespace()->getId() == 7 and $b->getNamespaceForVersion()->getTopLevelNamespace()->getId() != 7){
+                return false;
+            }
+            elseif($a->getNamespaceForVersion()->getTopLevelNamespace()->getId() != 7 and $b->getNamespaceForVersion()->getTopLevelNamespace()->getId() == 7){
+                return true;
+            }
+        });
+        $propertiesVersionWithNSref = new ArrayCollection(iterator_to_array($iterator));
+
+        if($propertiesVersionWithNSref->count() >0){
+            $section->addTextBreak();
+            $section->addTitle('List of external properties used in '.$namespace->getStandardLabel(), 2);
+            $section->addTextBreak();
+            $section->addText('Table 4: List of external properties grouped by model and ordered by model and then by property identifier.', 'italic11');
+            $table = $section->addTable($fancyTableStyleName2);
+            foreach ($propertiesVersionWithNSref as $propertyVersion){
+                $table->addRow();
+                $table->addCell(1000)->addText($propertyVersion->getProperty()->getIdentifierInNamespace());
+                $table->addCell(2000)->addText($propertyVersion->getStandardLabel());
+                $table->addCell(2000)->addText($propertyVersion->getNamespaceForVersion()->getTopLevelNamespace());
+                $txtps_version = $propertyVersion->getNamespaceForVersion()->getTextProperties()->filter(function($v){return $v->getSystemType()->getId() == 31;});
+                if($txtps_version->count() > 0){
+                    $table->addCell(2000)->addText($txtps_version->first()->getTextProperty());
+                }
+                else{
+                    $table->addCell(2000)->addText('');
+                }
+            }
+        }
+
         // Section suivante
         $section = $phpWord->addSection();
-        $section->addTitle('1.4 Class Declarations', 2);
+        $section->addTitle($namespace->getStandardLabel().' Class Declarations', 2);
         $section->addTextBreak();
         $section->addText('The classes are comprehensively declared in this section using the following format:');
         $section->addTextBreak();
@@ -828,33 +1269,40 @@ class NamespaceController  extends Controller
         $section->addListItem('Inherited properties are not represented;');
 
         /** @var OntoClassVersion $classVersion */
-        foreach ($namespace->getClassVersions() as $classVersion) {
+        // Trier naturellement par identifiant A1 A2 B1 B2...
+        $classesVersion = $namespace->getClassVersions();
+        $iterator = $classesVersion->getIterator();
+        $iterator->uasort(function ($a,$b){ return strnatcasecmp($a->getClass()->getIdentifierInNamespace(), $b->getClass()->getIdentifierInNamespace());});
+        $classesVersion = new ArrayCollection(iterator_to_array($iterator));
+
+        foreach ($classesVersion as $classVersion) {
             $section->addTextBreak(2);
-            $section->addTitle($classVersion->getClass()->getIdentifierInNamespace()." - ".$classVersion->getStandardLabel(), 3);
-            $associations = $classVersion->getClass()->getChildClassAssociations();
-            foreach ($associations as $association){
-                if(in_array($association->getNamespaceForVersion()->getId(), $namespace->getLargeSelectedNamespacesId())){
-                    $parentClassVersion = $association->getParentClass()->getClassVersionForDisplay($association->getParentClassNamespace());
-                }
-            }
-            if(isset($parentClassVersion)){
+            $section->addTitle($classVersion->getClass()->getIdentifierInNamespace()." ".$classVersion->getStandardLabel(), 3);
+            $childAssociations = $classVersion->getClass()->getChildClassAssociations()->filter(function($v) use ($namespace){return $v->getNamespaceForVersion() == $namespace && $v->getParentClassNamespace()->getId() != 4;});
+
+            if($childAssociations->count() > 0){
                 $section->addTextBreak();
-                $textRun = $section->addTextRun();
-                $textRun->addText('Subclass of: ', "gras");
-                $textRun->addText($parentClassVersion->getStandardLabel());
+                $section->addText('Subclass of: ', "gras");
+                // Trier naturellement par identifiant A1 A2 B1 B2...
+                $iterator = $childAssociations->getIterator();
+                $iterator->uasort(function ($a,$b){ return strnatcasecmp($a->getParentClass()->getIdentifierInNamespace(), $b->getParentClass()->getIdentifierInNamespace());});
+                $childAssociations = new ArrayCollection(iterator_to_array($iterator));
+                foreach ($childAssociations as $association) {
+                    $section->addText($association->getParentClass()->getIdentifierInNamespace() . ' ' . $association->getParentClass()->getClassVersionForDisplay($association->getParentClassNamespace())->getStandardLabel(), null, array('indentation' => array('left' => 1100)));
+                }
             }
 
-            $associations = $classVersion->getClass()->getParentClassAssociations();
-            $i = 0;
-            foreach ($associations as $association){
-                if($i == 0){
-                    $section->addTextBreak();
-                    $section->addText('Superclass of:', "gras");
-                    $i++;
-                }
-                if(in_array($association->getNamespaceForVersion()->getId(), $namespace->getLargeSelectedNamespacesId())){
-                    $childClassVersion = $association->getChildClass()->getClassVersionForDisplay($association->getChildClassNamespace());
-                    $section->addText($childClassVersion->getStandardLabel(), null, array('indentation' => array('left' => 800)));
+            $parentAssociations = $classVersion->getClass()->getParentClassAssociations()->filter(function($v) use ($namespace){return $v->getNamespaceForVersion() == $namespace && $v->getChildClassNamespace()->getId() != 4;});
+            if($parentAssociations->count() > 0){
+                $section->addTextBreak();
+                $section->addText('Superclass of:', "gras");
+                // Trier naturellement par identifiant A1 A2 B1 B2...
+                $iterator = $parentAssociations->getIterator();
+                $iterator->uasort(function ($a,$b){ return strnatcasecmp($a->getChildClass()->getIdentifierInNamespace(), $b->getChildClass()->getIdentifierInNamespace());});
+                $parentAssociations = new ArrayCollection(iterator_to_array($iterator));
+
+                foreach ($parentAssociations as $association) {
+                    $section->addText($association->getChildClass()->getIdentifierInNamespace() . ' ' . $association->getChildClass()->getClassVersionForDisplay($association->getChildClassNamespace())->getStandardLabel(), null, array('indentation' => array('left' => 1100)));
                 }
             }
 
@@ -870,9 +1318,31 @@ class NamespaceController  extends Controller
             }
             if(isset($textp_scopenote)){
                 $section->addTextBreak();
-                $textRun = $section->addTextRun();
-                $textRun->addText('Scope note: ', "gras");
-                $textRun->addText(html_entity_decode(strip_tags($textp_scopenote->getTextProperty())));
+                $section->addText('Scope note:', "gras");
+                //$table = $section->addTable();
+                //$table->addRow();
+                //$table->addCell(1000);
+                //$cell = $table->addCell(8000);
+                $string = $textp_scopenote->getTextProperty();
+                \PhpOffice\PhpWord\Shared\Html::addHtml($section, $string, false, false);
+
+                // Impossible de mettre l'indentation avec addHtml ou dans l'HTML, phpword ne prévoit pas ça. DONC bricolage by Alex...
+                // Récupérer le dernier élément concerné et mettre l'indentation.
+                $arrayElements = $section->getElements();
+                $lastElement = end($arrayElements);
+                if($lastElement->getFontStyle() !== null){
+                    $lastElement->getFontStyle()->getParagraph()->setIndentation(array('left' => 1100));
+                }
+                elseif($lastElement->getParagraphStyle() !== null){
+                    foreach (array_reverse($arrayElements) as $element){
+                        if($element->getText() != 'Scope note:'){ // On remonte les éléments crées par addHtml jusqu'à l'élément crée par le dernier addText
+                            $lastElements[] = $element->getParagraphStyle()->setIndentation(array('left' => 1100));;
+                        }
+                        else{
+                            break;
+                        }
+                    }
+                }
             }
 
             $i = 0;
@@ -884,15 +1354,37 @@ class NamespaceController  extends Controller
                             $section->addText('Examples:', "gras");
                             $i++;
                         }
-                        $section->addText(html_entity_decode(htmlspecialchars(strip_tags($textProperty->getTextProperty()))), null, array('indentation' => array('left' => 800)));
+                        $string = $textProperty->getTextProperty();
+                        \PhpOffice\PhpWord\Shared\Html::addHtml($section, $string, false, false);
+
+                        // Impossible de mettre l'indentation avec addHtml ou dans l'HTML, phpword ne prévoit pas ça. DONC bricolage by Alex...
+                        // Récupérer le dernier élément concerné et mettre l'indentation.
+                        $arrayElements = $section->getElements();
+                        $lastElement = end($arrayElements);
+                        if($lastElement->getFontStyle() !== null){
+                            $lastElement->getFontStyle()->getParagraph()->setIndentation(array('left' => 1100));
+                        }
+                        elseif($lastElement->getParagraphStyle() !== null){
+                            foreach (array_reverse($arrayElements) as $element){
+                                if($element->getText() != 'Examples:'){ // On remonte les éléments crées par addHtml jusqu'à l'élément crée par le dernier addText
+                                    $lastElements[] = $element->getParagraphStyle()->setIndentation(array('left' => 1100));;
+                                }
+                                else{
+                                    break;
+                                }
+                            }
+                        }
                     }
                 }
             }
-            if(isset($parentClassVersion)){
+
+            if($childAssociations->count() > 0 && $optionFol){
                 $section->addTextBreak();
                 $textRun = $section->addTextRun();
                 $textRun->addText('In First Order Logic: ', "gras");
-                $textRun->addText($classVersion->getClass()->getIdentifierInNamespace().' ⊃ '.$parentClassVersion->getClass()->getIdentifierInNamespace());
+                foreach ($childAssociations as $association) {
+                    $section->addText($association->getChildClass()->getIdentifierInNamespace() . '(x) ⇒ ' . $association->getParentClass()->getIdentifierInNamespace(). '(x)', null, array('indentation' => array('left' => 1100)));
+                }
             }
 
             $i = 0;
@@ -905,13 +1397,13 @@ class NamespaceController  extends Controller
                     $i++;
                 }
                 $propertyVersion = $em->getRepository('AppBundle:PropertyVersion')->findOneBy(array("property"=>$outgoingProperty['propertyId'], "namespaceForVersion"=>$outgoingProperty['propertyNamespaceId']));
-                $section->addText($propertyVersion->getDomain()->getIdentifierInNamespace()." ".$propertyVersion->getStandardLabel()." (".$propertyVersion->getInvertedLabel()."): ".$propertyVersion->getRange()->getIdentifierInNamespace(), null, array('indentation' => array('left' => 800)));
+                $section->addText($propertyVersion->getInvertedLabel().": ".$propertyVersion->getRange()->getIdentifierInNamespace().' '.$propertyVersion->getRange()->getClassVersionForDisplay($propertyVersion->getRangeNamespace())->getStandardLabel(), null, array('indentation' => array('left' => 1100)));
             }
         }
 
         // Section suivante
         $section = $phpWord->addSection();
-        $section->addTitle('1.4 Property Declarations', 2);
+        $section->addTitle($namespace->getStandardLabel().' Property Declarations', 2);
         $section->addTextBreak();
         $section->addText('The properties are comprehensively declared in this section using the following format:');
         $section->addTextBreak();
@@ -919,26 +1411,31 @@ class NamespaceController  extends Controller
         $section->addListItem('The line “Domain:” declares the class for which the property is defined;');
         $section->addListItem('The line “Range:” declares the class to which the property points, or that provides the values for the property;');
         $section->addListItem('The line “Superproperty of:” is a cross-reference to any subproperties the property may have;');
+        $section->addListItem('The line “Quantification:” declares the possible number of occurrences for domain and range class instances for the property. Possible values are: one to many, many to many, many to one. Quantifications are presented in UML format and in ER format (used by the CIDOC CRM);');
         $section->addListItem('The line “Scope note:” contains the textual definition of the concept the property represents;');
         $section->addListItem('The line “Examples:” contains a bulleted list of examples of instances of this property.');
         $section->addTextBreak(2);
 
         /** @var PropertyVersion $propertyVersion */
-        foreach ($namespace->getPropertyVersions() as $propertyVersion) {
-            $label = $propertyVersion->getProperty()->getIdentifierInNamespace() . " - " . $propertyVersion->getStandardLabel();
+        // Trier naturellement par identifiant A1 A2 B1 B2...
+        $propertiesVersion = $namespace->getPropertyVersions();
+        $iterator = $propertiesVersion->getIterator();
+        $iterator->uasort(function ($a,$b){ return strnatcasecmp($a->getProperty()->getIdentifierInNamespace(), $b->getProperty()->getIdentifierInNamespace());});
+        $propertiesVersion = new ArrayCollection(iterator_to_array($iterator));
+
+        foreach ($propertiesVersion as $propertyVersion) {
+            $label = $propertyVersion->getProperty()->getIdentifierInNamespace() . " " . $propertyVersion->getStandardLabel();
             $section->addTitle($label, 3);
             $section->addTextBreak();
             if(!is_null($propertyVersion->getDomain())){
                 $label = $propertyVersion->getDomain()->getIdentifierInNamespace()." ".$propertyVersion->getDomain()->getClassVersionForDisplay($propertyVersion->getDomainNamespace())->getStandardLabel();
-                $textRun = $section->addTextRun();
-                $textRun->addText('Domain: ', "gras");
-                $textRun->addText($label);
+                $section->addText('Domain: ', "gras");
+                $section->addText($label, null, array('indentation' => array('left' => 1100)));
             }
             if(!is_null($propertyVersion->getRange())){
                 $label = $propertyVersion->getRange()->getIdentifierInNamespace()." ".$propertyVersion->getRange()->getClassVersionForDisplay($propertyVersion->getRangeNamespace())->getStandardLabel();
-                $textRun = $section->addTextRun();
-                $textRun->addText('Range: ', "gras");
-                $textRun->addText($label);
+                $section->addText('Range: ', "gras");
+                $section->addText($label, null, array('indentation' => array('left' => 1100)));
             }
             $associations = $propertyVersion->getProperty()->getChildPropertyAssociations();
             $parentPropertyVersion = null;
@@ -955,22 +1452,27 @@ class NamespaceController  extends Controller
                 if(!is_null($parentPropertyVersion->getRange())){$labelRange = ":".$parentPropertyVersion->getRange()->getIdentifierInNamespace()." ".$parentPropertyVersion->getRange()->getClassVersionForDisplay($parentPropertyVersion->getRangeNamespace())->getStandardLabel();}
                 $label = $labelDomain.$label.$labelRange;
                 $section->addTextBreak();
-                $textRun = $section->addTextRun();
-                $textRun->addText('Subproperty of: ', "gras");
-                $textRun->addText($label);
+                $section->addText('Subproperty of: ', "gras");
+                $section->addText($label, null, array('indentation' => array('left' => 1100)));
             }
 
             if(!is_null($propertyVersion->getQuantifiersString())){
                 $section->addTextBreak();
-                $textRun = $section->addTextRun();
-                $textRun->addText('Quantification: ',"gras");
-                $textRun->addText($propertyVersion->getQuantifiersString());
-                $section->addText("UML: ".$propertyVersion->getQuantifiers());
-                $section->addText("Merise: ".$propertyVersion->getQuantifiersMerise());
+                $section->addText('Quantification: ',"gras");
+                $trun = $section->addTextRun(array('indentation' => array('left' => 1100)));
+                if($optionTextCardinality){
+                    $trun->addText($propertyVersion->getQuantifiersString());
+                }
+                if($optionCardinality == "cardinality-opt-uml"){
+                    $trun->addText(" (".$propertyVersion->getQuantifiers().')');
+                }
+                if($optionCardinality == "cardinality-opt-er"){
+                    $trun->addText(" (".$propertyVersion->getQuantifiersMerise().')');
+                }
             }
 
             foreach ($propertyVersion->getProperty()->getTextProperties() as $textProperty){
-                if(in_array($textProperty->getNamespaceForVersion()->getId(), $namespace->getLargeSelectedNamespacesId())){
+                if(!is_null($textProperty->getNamespaceForVersion()) and in_array($textProperty->getNamespaceForVersion()->getId(), $namespace->getLargeSelectedNamespacesId())){
                     if($textProperty->getSystemType()->getId() == 1 and $textProperty->getLanguageIsoCode() == "en"){
                         $textp_scopenote = $textProperty;
                     }
@@ -981,34 +1483,73 @@ class NamespaceController  extends Controller
             }
             if(isset($textp_scopenote)){
                 $section->addTextBreak();
-                $textRun = $section->addTextRun();
-                $textRun->addText('Scope note: ', "gras");
-                $textRun->addText(html_entity_decode(strip_tags($textp_scopenote->getTextProperty())));
+                $section->addText('Scope note:', "gras");
+                $string = $textp_scopenote->getTextProperty();
+                \PhpOffice\PhpWord\Shared\Html::addHtml($section, $string, false, false);
+
+                // Impossible de mettre l'indentation avec addHtml ou dans l'HTML, phpword ne prévoit pas ça. DONC bricolage by Alex...
+                // Récupérer le dernier élément concerné et mettre l'indentation.
+                $arrayElements = $section->getElements();
+                $lastElement = end($arrayElements);
+                if($lastElement->getFontStyle() !== null){
+                    $lastElement->getFontStyle()->getParagraph()->setIndentation(array('left' => 1100));
+                }
+                elseif($lastElement->getParagraphStyle() !== null){
+                    foreach (array_reverse($arrayElements) as $element){
+                        if($element->getText() != 'Scope note:'){ // On remonte les éléments crées par addHtml jusqu'à l'élément crée par le dernier addText
+                            $lastElements[] = $element->getParagraphStyle()->setIndentation(array('left' => 1100));;
+                        }
+                        else{
+                            break;
+                        }
+                    }
+                }
             }
 
             $i = 0;
             foreach ($propertyVersion->getProperty()->getTextProperties() as $textProperty){
-                if(in_array($textProperty->getNamespaceForVersion()->getId(), $namespace->getLargeSelectedNamespacesId())){
+                if(!is_null($textProperty->getNamespaceForVersion()) and in_array($textProperty->getNamespaceForVersion()->getId(), $namespace->getLargeSelectedNamespacesId())){
                     if($textProperty->getSystemType()->getId() == 7){
                         if($i == 0){
                             $section->addTextBreak();
                             $section->addText('Examples:', "gras");
                             $i++;
                         }
-                        $section->addText(html_entity_decode(strip_tags($textProperty->getTextProperty())), null, array('indentation' => array('left' => 800)));
+                        $string = $textProperty->getTextProperty();
+                        \PhpOffice\PhpWord\Shared\Html::addHtml($section, $string, false, false);
+
+                        // Impossible de mettre l'indentation avec addHtml ou dans l'HTML, phpword ne prévoit pas ça. DONC bricolage by Alex...
+                        // Récupérer les derniers éléments concernés et mettre l'indentation.
+                        $arrayElements = $section->getElements();
+                        $lastElement = end($arrayElements);
+                        if($lastElement->getFontStyle() !== null){
+                            $lastElement->getFontStyle()->getParagraph()->setIndentation(array('left' => 1100));
+                        }
+                        elseif($lastElement->getParagraphStyle() !== null){
+                            foreach (array_reverse($arrayElements) as $element){
+                                if($element->getText() != 'Examples:'){ // On remonte les éléments crées par addHtml jusqu'à l'élément crée par le dernier addText
+                                    $lastElements[] = $element->getParagraphStyle()->setIndentation(array('left' => 1100));;
+                                }
+                                else{
+                                    break;
+                                }
+                            }
+                        }
                     }
                 }
             }
-            $section->addTextBreak();
-            $section->addText('In First Order Logic:', "gras");
-            if(!is_null($propertyVersion->getDomain())){
-                $section->addText($propertyVersion->getProperty()->getIdentifierInNamespace().'(x,y) ⊃ '.$propertyVersion->getDomain()->getIdentifierInNamespace().'(x)', null, array('indentation' => array('left' => 800)));
-            }
-            if(!is_null($propertyVersion->getRange())){
-                $section->addText($propertyVersion->getProperty()->getIdentifierInNamespace().'(x,y) ⊃ '.$propertyVersion->getRange()->getIdentifierInNamespace().'(y)', null, array('indentation' => array('left' => 800)));
-            }
-            if(!is_null($parentPropertyVersion)){
-                $section->addText($propertyVersion->getProperty()->getIdentifierInNamespace().'(x,y) ⊃ '.$parentPropertyVersion->getProperty()->getIdentifierInNamespace().'(x,y)', null, array('indentation' => array('left' => 800)));
+            if($optionFol){
+                $section->addTextBreak();
+                $section->addText('In First Order Logic:', "gras");
+                if(!is_null($propertyVersion->getDomain())){
+                    $section->addText($propertyVersion->getProperty()->getIdentifierInNamespace().'(x,y) ⇒ '.$propertyVersion->getDomain()->getIdentifierInNamespace().'(x)', null, array('indentation' => array('left' => 1100)));
+                }
+                if(!is_null($propertyVersion->getRange())){
+                    $section->addText($propertyVersion->getProperty()->getIdentifierInNamespace().'(x,y) ⇒ '.$propertyVersion->getRange()->getIdentifierInNamespace().'(y)', null, array('indentation' => array('left' => 1100)));
+                }
+                if(!is_null($parentPropertyVersion)){
+                    $section->addText($propertyVersion->getProperty()->getIdentifierInNamespace().'(x,y) ⇒ '.$parentPropertyVersion->getProperty()->getIdentifierInNamespace().'(x,y)', null, array('indentation' => array('left' => 1100)));
+                }
             }
             $section->addTextBreak(2);
         }
@@ -1017,7 +1558,8 @@ class NamespaceController  extends Controller
         $objWriter = IOFactory::createWriter($phpWord, 'Word2007');
 
         // Create a temporal file in the system
-        $fileName = 'namespace-'.$namespace->getStandardLabel().'.docx';
+        $fileName = 'namespace-'.preg_replace('/[^a-zA-Z0-9\-\._]/','',$namespace->getStandardLabel()).'.docx';
+        //var_dump($fileName); die;
         $temp_file = tempnam(sys_get_temp_dir(), $fileName);
 
         // Write in the temporal filepath

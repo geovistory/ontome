@@ -608,4 +608,25 @@ class OntoClass
         $collection = new ArrayCollection(iterator_to_array($iterator));
         return $collection->first();
     }
+
+    /**
+     * @return ArrayCollection|Mixed Retourne un arbre hierarchique de classes descendantes dans un NS donné
+     */
+    public function getHierarchicalTreeClasses($namespace, ArrayCollection $tree=null, $depth=1){
+        if(is_null($tree)){$tree = new ArrayCollection;}
+        $nsRef = $namespace->getAllReferencedNamespaces();
+        $nsRef->add($namespace);
+        if($this->getParentClassAssociations()->filter(function($v) use ($namespace){return $namespace == $v->getNamespaceForVersion();})->isEmpty()){
+            return $tree;
+        }
+        else
+        {
+            foreach ($this->getParentClassAssociations()->filter(function($v) use ($namespace){return $namespace == $v->getNamespaceForVersion();}) as $parentClassAssociation)
+            {
+                $tree->add(array($parentClassAssociation->getChildClass(),$depth, $parentClassAssociation->getChildClassNamespace()));
+                $tree = $parentClassAssociation->getChildClass()->getHierarchicalTreeClasses($namespace, $tree, $depth+1);
+            }
+            return $tree;
+        }
+    }
 }

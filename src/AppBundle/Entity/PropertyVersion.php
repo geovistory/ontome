@@ -348,12 +348,12 @@ class PropertyVersion
         $s = null;
 
         if(!is_null($this->domainMinQuantifier)&&!is_null($this->domainMaxQuantifier)&&!is_null($this->rangeMinQuantifier)&&!is_null($this->rangeMaxQuantifier)){
-            if($this->domainMaxQuantifier == -1){$s = "many";}
+            if($this->domainMaxQuantifier == -1 || $this->domainMaxQuantifier > 1){$s = "many";}
             if($this->domainMaxQuantifier == 1){$s = "one";}
             $s .= ' to ';
-            if($this->rangeMaxQuantifier == -1){$s .= "many";}
+            if($this->rangeMaxQuantifier == -1 || $this->rangeMaxQuantifier > 1){$s .= "many";}
             if($this->rangeMaxQuantifier == 1){$s .= "one";}
-            if($this->rangeMinQuantifier == 1){$s .= ", necessary";}
+            if($this->rangeMinQuantifier >= 1){$s .= ", necessary";}
             if($this->domainMinQuantifier == 1){$s .= ", dependant";}
         }
         return $s;

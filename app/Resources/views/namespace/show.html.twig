@@ -24,15 +24,59 @@
                         download="namespace-{{ namespace.standardLabel }}.rdf">
                         <i class="fas fa-code"></i> OWL-RDF
                     </a>
-                    <a  href="{{ path('namespace_document', {
-                        namespace: namespace.id
-                    }) }}"
-                        class="btn btn-primary">
-                    <i class="fas fa-file-alt"></i></i> DOCX
-                </a>
+                    <a href="#"
+                        class="btn btn-primary" data-toggle="modal" data-target="#myModal">
+                        <i class="fas fa-file-alt"></i> DOCX
+                    </a>
                 {% endif %}
             </span>
         </h2>
+        <!-- Options pour export docx -->
+        <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title">DOCX export options</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-xs-6">
+                                <p>Quantification</p>
+                                <p>
+                                    <input type="radio" name="cardinality" id="cardinality-opt-uml" value="cardinality-opt-uml" checked> <label for="cardinality-opt-uml">UML</label><br>
+                                    <input type="radio" name="cardinality" id="cardinality-opt-er" value="cardinality-opt-er"> <label for="cardinality-opt-er">ER</label><br>
+                                    <input type="checkbox" id="text-cardinality" checked> <label for="text-cardinality" checked>Add verbal notation</label>
+                                </p>
+                            </div>
+                            <div class="col-xs-6">
+                                <p>First Order Logic</p>
+                                <p>
+                                    <input type="checkbox" name="fol" id="fol" value="fol">  <label for="fol">Add FOL notation</label><br>
+                                </p>
+                            </div>
+                        </div>
+                        <hr>
+                        <p class="text-muted small">Example of what will be added to the properties in the document</p>
+                        <div class="row">
+                            <div class="col-xs-4">
+                                <p>Quantification:</p>
+                                <p id="example-fol-label">In First Order Logic:</p>
+                            </div>
+                            <div class="col-xs-8">
+                                <p id="example-cardinality">one to many (0,n:0,1)</p>
+                                <p id="example-fol">P1(x,y) ⊃ C1(x)<br>P1(x,y) ⊃ C2(y)<br>P1(x,y) ⊃ P2(x,y)</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        <button type="button" data-value="{{ namespace.id }}" class="btn btn-primary btn-export"><i class="fas fa-file-alt"></i> Export docx</button>
+                        <button type="button" class="btn btn-primary btn-export-disabled" disabled="disabled"><i class="fas fa-cog fa-spin"></i> Export docx</button>
+                    </div>
+                </div><!-- /.modal-content -->
+            </div><!-- /.modal-dialog -->
+        </div><!-- /.modal -->
         <ul class="nav nav-tabs">
             <li class="active"><a data-toggle="tab" href="#summary">Summary</a></li>
             <li><a data-toggle="tab" href="#identification">Identification</a></li>
@@ -1141,6 +1185,76 @@
                 $('#btns-choose-type-relations .btn').addClass("btn-default");
                 $(this).addClass("btn-primary");
                 tableRelations.draw();
+            });
+
+            $('#example-fol-label').hide();
+            $('#example-fol').hide();
+            $('input[id=fol]').on('click', function(){
+                if($('input[id=fol]').prop('checked')){
+                    $('#example-fol-label').show();
+                    $('#example-fol').show();
+                }
+                else{
+                    $('#example-fol-label').hide();
+                    $('#example-fol').hide();
+                }
+            });
+
+            $('input[name=cardinality], input[id=text-cardinality]').on('click', function(){
+                var strCardi = "(0,n:0,1)";
+                if($('input[name=cardinality]').val() == "cardinality-opt-uml"){
+                    strCardi = "(0,n:0,1)";
+                }
+                if($('input[name=cardinality]:checked').val() == "cardinality-opt-er"){
+                    strCardi = "(0,1:0,n)";
+                }
+                if($('input[id=text-cardinality]').prop('checked')){
+                    strCardi = "one to many "+strCardi;
+                }
+                $('#example-cardinality').html(strCardi);
+            });
+
+            //-- EXPORT DOCX --
+            $('.btn-export-disabled').hide();
+            $('.btn-export').on('click', function(){
+                $('.btn-export-disabled').show();
+                $('.btn-export').hide();
+                var namespaceID = $(this).data("value");
+                var optCardinality = $('input[name=cardinality]:checked').val();
+                var optFol = $('input[id=fol]').prop('checked');
+                var optTextCardinality = $('input[id=text-cardinality]').prop('checked');
+                //alert(optCardinality+optFol+optTextCardinality);
+                var url = '{{ path("namespace_document", {'namespace': 'namespaceID'}) }}';
+                url = url.replace("namespaceID", namespaceID);
+                //url = url.replace("CardinalityOPT", optCardinality);
+                //url = url.replace("TextCardinalityOPT", optTextCardinality);
+                //url = url.replace("FolOPT", optFol);
+                $.ajax({
+                    url: url,
+                    data:{
+                        optCardinality: optCardinality,
+                        optTextCardinality: optTextCardinality,
+                        optFol: optFol
+                    },
+                    method: 'GET',
+                    xhrFields: {
+                        responseType: 'blob'
+                    },
+                    success: function (response, status, xhr) {
+                        $('.btn-export-disabled').hide();
+                        $('.btn-export').show();
+                        var header = xhr.getResponseHeader('Content-Disposition');
+                        var a = document.createElement('a');
+                        var url = window.URL.createObjectURL(response);
+                        //console.log(response);
+                        a.href = url;
+                        a.download = xhr.getResponseHeader('content-disposition').split('filename=')[1].split('"')[1];
+                        document.body.append(a);
+                        a.click();
+                        a.remove();
+                        window.URL.revokeObjectURL(url);
+                    }
+                });
             });
 
         } );

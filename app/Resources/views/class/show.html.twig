@@ -359,7 +359,7 @@
                             <ul class="list-unstyled">
                             {% for association in classVersion.class.childClassAssociations
                                 if association.namespaceForVersion.id in namespacesId %}
-                                <li>{{ classVersion.class.identifierInNamespace }}(x) ⊃ {{ association.parentClass.identifierInNamespace }}(x)</li>
+                                <li>{{ classVersion.class.identifierInNamespace }}(x) ⇒ {{ association.parentClass.identifierInNamespace }}(x)</li>
                             {% endfor %}
                             </ul>
                         </div>
