@@ -361,11 +361,11 @@
                                     <tr>
                                         <th></th>
                                         <th>ID</th>
-                                        <th>Identifier</th>
+                                        <th>Identifier</th><!-- identifier -->
                                         <th>Class label</th>
                                         <th>Namespace</th>
                                         <th>Association type</th>
-                                        <th>Pick properties</th>
+                                        <th>Customisation</th>
                                     </tr>
                                     </thead>
                                 </table>
@@ -376,7 +376,7 @@
                                     <thead>
                                     <tr>
                                         <th></th>
-                                        <th>Identifier</th>
+                                        <th>Id</th>
                                         <th>Class label</th>
                                         <th>Namespace</th>
                                     </tr>
@@ -458,6 +458,7 @@
                             <th>Range</th>
                             <th>Namespace</th>
                             <th>Association type</th>
+                            <th>Customisation</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -556,7 +557,7 @@
                                             'id': profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).range.id,
                                             'namespaceFromUrlId': profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).rangeNamespace.id
                                         }) }}">
-                                            {% set rangeClassVersion = profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).range.classVersionForDisplay(profileAssociation.rangeNamespace) %}
+                                            {% set rangeClassVersion = profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).range.classVersionForDisplay(profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).rangeNamespace) %}
                                             {{ rangeClassVersion.namespaceForVersion.topLevelNamespace.rootNamespacePrefix }}:{{ rangeClassVersion.class.identifierInNamespace }} {{ rangeClassVersion.standardLabel }}
                                         </a>
                                     {% endif %}
@@ -566,6 +567,12 @@
                                 </td>
                                 <td>
                                     {{ profileAssociation.systemType }}
+                                </td>
+                                <td>
+                                    {% set txtPCustom = profileAssociation.property.textProperties|filter(v => v.profileForCustom is not null and v.profileForCustom.id == profile.id and v.namespaceForVersion == profileAssociation.entityNamespaceForVersion)|first %}
+                                    <a href="{{ path("property_edit_customisation", {'id': profileAssociation.property.id, 'profile': profile.id}) }}" class="btn btn-xs btn-{{ txtPCustom ? "success" : "primary" }}">
+                                        <span class="fas fa-tools"></span>
+                                    </a>
                                 </td>
                             </tr>
                         {% endfor %}
@@ -1005,13 +1012,24 @@
                         "data": null,
                         render: function ( data, type, row, meta ) {
                             if(row.associationType == 'Selected'){
+                                var htmlButtons = '';
+
+                                var urlCustomClass = '{{ path("class_edit_customisation", {'id' : 'classID','profile' : 'profileID'}) }}';
+                                urlCustomClass = urlCustomClass.replace("profileID", profileID);
+                                urlCustomClass = urlCustomClass.replace("classID", row.id);
+                                var btnColor = 'btn-primary';
+                                if(row.nbTxtpCustom>0){
+                                    btnColor = 'btn-success';
+                                }
+                                htmlButtons += '<a title="Customisation" href="' + urlCustomClass + '" class="btn btn-xs btn-default text-primary">Class</a><br>';
+
                                 var urlSelectProperties = '{{ path("profile_properties_edit", {'profile' : 'profileID', 'class' : 'classID'}) }}';
                                 urlSelectProperties = urlSelectProperties.replace("profileID", profileID);
                                 urlSelectProperties = urlSelectProperties.replace("classID", row.id);
                                 if([{{ allProfileNamespacesId|join(',') }}].indexOf(row.namespaceForVersion) >= 0){
-                                    return '<a href="' + urlSelectProperties + '"><span class="glyphicon glyphicon-th-list"></span></a>';
+                                    htmlButtons += '<a title="Pick properties" href="' + urlSelectProperties + '" class="btn btn-xs btn-default text-primary">Properties</a>';
                                 }
-                                else return '';
+                                return htmlButtons;
                             }
                             else return '';
                         }

@@ -420,6 +420,30 @@ class Profile
     }
 
     /**
+     * @return ArrayCollection|OntoNamespace[] Retourne TOUS les espaces de noms référencés directs ET indirects
+     */
+    public function getAllReferencedNamespaces(ArrayCollection $allReferencedNamespaces=null){
+        if(is_null($allReferencedNamespaces)){$allReferencedNamespaces = new ArrayCollection;}
+        if($this->getNamespaces()->isEmpty()){
+            return new ArrayCollection;
+        }
+        else
+        {
+            foreach ($this->getNamespaces() as $directReferencedNamespace){
+                if(!$allReferencedNamespaces->contains($directReferencedNamespace)){
+                    $allReferencedNamespaces->add($directReferencedNamespace);
+                    foreach($directReferencedNamespace->getAllReferencedNamespaces($allReferencedNamespaces) as $ns){
+                        if(!$allReferencedNamespaces->contains($ns)){
+                            $allReferencedNamespaces->add($ns);
+                        }
+                    }
+                }
+            }
+            return $allReferencedNamespaces;
+        }
+    }
+
+    /**
      * @param mixed $startDate
      */
     public function setStandardLabel($standardLabel)

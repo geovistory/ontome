@@ -262,6 +262,7 @@
                                 <th>Class label</th>
                                 <th>Namespace</th>
                                 <th>Association type</th>
+                                <th>View customisation</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -278,6 +279,11 @@
                                     </td>
                                     <td>{{ class.namespace }}</td>
                                     <td>{{ class.associationType }}</td>
+                                    <td>
+                                    {% if class.nbTxtpCustom > 0 %}
+                                        {% if class.associationType == "Selected" %}<a href="{{ path('class_show_customisation', {'id': class.id, 'profile': profile.id}) }}" class="btn btn-xs btn-primary"><i class="fas fa-eye"></i></a>{% endif %}</td>
+                                    {% endif %}
+                                    </td>
                                 </tr>
                             {% endfor %}
                             </tbody>
@@ -314,6 +320,7 @@
                                 <th>Range</th>
                                 <th>Namespace</th>
                                 <th>Association type</th>
+                                <th>View customisation</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -403,7 +410,7 @@
                                                 'id': profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).range.id,
                                                 'namespaceFromUrlId': profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).rangeNamespace.id
                                             }) }}">
-                                                {% set rangeClassVersion = profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).range.classVersionForDisplay(profileAssociation.rangeNamespace) %}
+                                                {% set rangeClassVersion = profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).range.classVersionForDisplay(profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion).rangeNamespace) %}
                                                 {{ rangeClassVersion.namespaceForVersion.topLevelNamespace.rootNamespacePrefix }}:{{ rangeClassVersion.class.identifierInNamespace }} {{ rangeClassVersion.standardLabel }}
                                             </a>
                                         {% endif %}
@@ -413,6 +420,15 @@
                                     </td>
                                     <td>
                                         {{ profileAssociation.systemType }}
+                                    </td>
+
+                                    <td>
+                                        {% set txtPCustom = profileAssociation.property.textProperties|filter(v => v.profileForCustom is not null and v.profileForCustom.id == profile.id and v.namespaceForVersion == profileAssociation.entityNamespaceForVersion)|first %}
+                                        {% if txtPCustom|length > 0 %}
+                                        <a href="{{ path('property_show_customisation', {'id': profileAssociation.property.id, 'profile': profile.id}) }}" class="btn btn-xs btn-primary">
+                                            <span class="fas fa-eye"></span>
+                                        </a>
+                                        {% endif %}
                                     </td>
                                 </tr>
                             {% endfor %}
@@ -605,7 +621,7 @@
                     { type: 'natural-ci', targets: 0, width: '1%', className: 'text-right' }
                 ],
                 "autoWidth": false,
-                order: [[ 0, 'asc' ]],
+                order: [[ 4, 'desc' ],[ 0, 'asc' ]],
                 initComplete: function(){
                     this.api().columns([2]).every(function(){
                         var column = this;

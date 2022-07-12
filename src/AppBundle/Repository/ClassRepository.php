@@ -313,8 +313,11 @@ class ClassRepository extends EntityRepository
                         identifier_in_namespace AS \"identifierInNamespace\" ,
                         namespace AS \"namespace\" ,
                         profile_association_type AS \"associationType\",
-                        fk_class_namespace_for_version AS \"namespaceForVersion\"
-                FROM che.get_all_classes_for_profile(:profile);";
+                        fk_class_namespace_for_version AS \"namespaceForVersion\",
+                        COUNT(txtp.*) AS \"nbTxtpCustom\"
+                FROM che.get_all_classes_for_profile(:profile)
+                LEFT JOIN che.text_property txtp ON txtp.fk_class = pk_class AND txtp.fk_profile_for_custom = :profile
+                GROUP BY pk_class, class_standard_label, identifier_in_namespace, namespace, profile_association_type, fk_class_namespace_for_version;";
         $stmt = $conn->prepare($sql);
         $stmt->execute(array('profile' => $profile->getId()));
 

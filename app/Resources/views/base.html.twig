@@ -10,7 +10,7 @@
         <link rel="stylesheet" href="{{ asset('css/jquery.readall.min.css') }}"/>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/css/flag-icon.min.css"/>
     {% endblock %}
-    <script defer src="https://use.fontawesome.com/releases/v5.0.13/js/all.js" crossorigin="anonymous"></script>
+    <script defer src="https://use.fontawesome.com/releases/v5.15.4/js/all.js" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/4.8.2/tinymce.min.js"></script>
 
     <script>
@@ -57,7 +57,7 @@
         <ul class="nav navbar-nav">
             {% set route = app.request.get('_route') %}
             <li class="{{ 'home' in route ? 'active' }}"><a href="{{ url('home') }}">Home</a></li>
-            <li class="{{ 'class' in route or textProperty is defined and textProperty.class is not null ? 'active' }}"><a href="#" class="dropdown-toggle" data-toggle="dropdown">Classes <span class="caret"></span></a>
+            <li class="{{ 'class' in route and 'customisation' not in route or textProperty is defined and textProperty.class is not null ? 'active' }}"><a href="#" class="dropdown-toggle" data-toggle="dropdown">Classes <span class="caret"></span></a>
                 <ul class="dropdown-menu">
                     <li><a href="{{ url('app_class_list') }}">Classes list</a>
                     </li>
@@ -65,10 +65,10 @@
                     </li>
                 </ul>
             </li>
-            <li class="{{ 'property' in route and 'text_property' not in route or textProperty is defined and textProperty.property is not null ? 'active' }}"><a href="{{ url('app_property_list') }}">Properties</a></li>
+            <li class="{{ ('property' in route and 'customisation' not in route and 'text_property' not in route) or (textProperty is defined and textProperty.property is not null) ? 'active' }}"><a href="{{ url('app_property_list') }}">Properties</a></li>
             <li class="{{ 'namespace' in route ? 'active' }}"><a href="{{ url('app_namespace_list') }}">Namespaces</a></li>
             <li class="{{ 'project' in route or textProperty is defined and textProperty.project is not null ? 'active' }}"><a href="{{ url('app_project_list') }}">Projects</a></li>
-            <li class="{{ 'profile' in route ? 'active' }}"><a href="{{ url('app_profile_list') }}">Profiles</a></li>
+            <li class="{{ 'profile' in route or 'customisation' in route ? 'active' }}"><a href="{{ url('app_profile_list') }}">Profiles</a></li>
             <li class="{{ 'search' in route ? 'active' }}"><a href="{{ url('app_main_search') }}"><i class="fas fa-search"></i> Search</a></li>
             {% if app.user %}
                 <li class="{{ 'user' in route ? 'active' }}"><a href="{{ path('user_show', {
