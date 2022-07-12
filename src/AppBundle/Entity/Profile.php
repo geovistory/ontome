@@ -422,26 +422,26 @@ class Profile
     /**
      * @return ArrayCollection|OntoNamespace[] Retourne TOUS les espaces de noms référencés directs
      */
-    public function getDirectReferencedNamespaces()
+    /*public function getDirectReferencedNamespaces()
     {
         $referencedNamespaces = new ArrayCollection;
         foreach ($this->getNamespaces() as $namespace){
             $referencedNamespaces->add($namespace);
         }
         return $referencedNamespaces;
-    }
+    }*/
 
     /**
      * @return ArrayCollection|OntoNamespace[] Retourne TOUS les espaces de noms référencés directs ET indirects
      */
     public function getAllReferencedNamespaces(ArrayCollection $allReferencedNamespaces=null){
         if(is_null($allReferencedNamespaces)){$allReferencedNamespaces = new ArrayCollection;}
-        if($this->getDirectReferencedNamespaces()->isEmpty()){
+        if($this->getNamespaces()->isEmpty()){
             return new ArrayCollection;
         }
         else
         {
-            foreach ($this->getDirectReferencedNamespaces() as $directReferencedNamespace){
+            foreach ($this->getNamespaces() as $directReferencedNamespace){
                 if(!$allReferencedNamespaces->contains($directReferencedNamespace)){
                     $allReferencedNamespaces->add($directReferencedNamespace);
                     foreach($directReferencedNamespace->getAllReferencedNamespaces($allReferencedNamespaces) as $ns){
