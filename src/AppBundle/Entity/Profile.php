@@ -420,18 +420,6 @@ class Profile
     }
 
     /**
-     * @return ArrayCollection|OntoNamespace[] Retourne TOUS les espaces de noms référencés directs
-     */
-    /*public function getDirectReferencedNamespaces()
-    {
-        $referencedNamespaces = new ArrayCollection;
-        foreach ($this->getNamespaces() as $namespace){
-            $referencedNamespaces->add($namespace);
-        }
-        return $referencedNamespaces;
-    }*/
-
-    /**
      * @return ArrayCollection|OntoNamespace[] Retourne TOUS les espaces de noms référencés directs ET indirects
      */
     public function getAllReferencedNamespaces(ArrayCollection $allReferencedNamespaces=null){
