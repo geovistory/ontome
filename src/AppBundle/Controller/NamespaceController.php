@@ -837,7 +837,10 @@ class NamespaceController  extends Controller
         $section->addTextBreak(5);
         //-- Contributors
         if(isset($textp_contributors)){
-            $section->addText("Contributors: ".html_entity_decode(strip_tags($textp_contributors->getTextProperty())), null, $paragrapheCentre);
+            //$string = htmlentities($textp_contributors->getTextProperty());
+            //$string = str_replace($allowedTagsEncoded, $allowedTagsDecoded, $string);
+            $string = htmlspecialchars_decode(htmlentities($textp_contributors->getTextProperty()));
+            $section->addText("Contributors: ".strip_tags($string), null, $paragrapheCentre);
         }
         $section->addTextBreak(15);
         //-- Licence
@@ -868,7 +871,11 @@ class NamespaceController  extends Controller
         $section->addTitle('Scope', 3);
         if(isset($textp_definition)){
             $section->addTextBreak();
-            $section->addText(html_entity_decode(strip_tags($textp_definition->getTextProperty())));
+            //$string = htmlentities($textp_definition->getTextProperty());
+            //$string = str_replace($allowedTagsEncoded, $allowedTagsDecoded, $string);
+            $string = htmlspecialchars_decode(htmlentities($textp_definition->getTextProperty()));
+            //$section->addText($string);
+            \PhpOffice\PhpWord\Shared\Html::addHtml($section, $string, true, false);
         }
         $section->addTextBreak(2);
         $section->addTitle('Status', 3);
@@ -1421,8 +1428,10 @@ class NamespaceController  extends Controller
                 //$table->addRow();
                 //$table->addCell(1000);
                 //$cell = $table->addCell(8000);
-                $string = $textp_scopenote->getTextProperty();
-                \PhpOffice\PhpWord\Shared\Html::addHtml($section, $string, false, false);
+                //$string = htmlentities($textp_scopenote->getTextProperty());
+                //$string = str_replace($allowedTagsEncoded, $allowedTagsDecoded, $string);
+                $string = htmlspecialchars_decode(htmlentities($textp_scopenote->getTextProperty()));
+                \PhpOffice\PhpWord\Shared\Html::addHtml($section, $string, true, false);
 
                 // Impossible de mettre l'indentation avec addHtml ou dans l'HTML, phpword ne prévoit pas ça. DONC bricolage by Alex...
                 // Récupérer le dernier élément concerné et mettre l'indentation.
@@ -1453,8 +1462,10 @@ class NamespaceController  extends Controller
                             $section->addText('Examples:', "gras");
                             $i++;
                         }
-                        $string = $textProperty->getTextProperty();
-                        \PhpOffice\PhpWord\Shared\Html::addHtml($section, $string, false, false);
+                        //$string = htmlentities($textProperty->getTextProperty());
+                        //$string = str_replace($allowedTagsEncoded, $allowedTagsDecoded, $string);
+                        $string = htmlspecialchars_decode(htmlentities($textProperty->getTextProperty()));
+                        \PhpOffice\PhpWord\Shared\Html::addHtml($section, $string, true, false);
 
                         // Impossible de mettre l'indentation avec addHtml ou dans l'HTML, phpword ne prévoit pas ça. DONC bricolage by Alex...
                         // Récupérer le dernier élément concerné et mettre l'indentation.
@@ -1586,8 +1597,10 @@ class NamespaceController  extends Controller
             if(isset($textp_scopenote)){
                 $section->addTextBreak();
                 $section->addText('Scope note:', "gras");
-                $string = $textp_scopenote->getTextProperty();
-                \PhpOffice\PhpWord\Shared\Html::addHtml($section, $string, false, false);
+                //$string = htmlentities($textp_scopenote->getTextProperty());
+                //$string = str_replace($allowedTagsEncoded, $allowedTagsDecoded, $string);
+                $string = htmlspecialchars_decode(htmlentities($textp_scopenote->getTextProperty()));
+                \PhpOffice\PhpWord\Shared\Html::addHtml($section, $string, true, false);
 
                 // Impossible de mettre l'indentation avec addHtml ou dans l'HTML, phpword ne prévoit pas ça. DONC bricolage by Alex...
                 // Récupérer le dernier élément concerné et mettre l'indentation.
@@ -1618,8 +1631,10 @@ class NamespaceController  extends Controller
                             $section->addText('Examples:', "gras");
                             $i++;
                         }
-                        $string = $textProperty->getTextProperty();
-                        \PhpOffice\PhpWord\Shared\Html::addHtml($section, $string, false, false);
+                        //$string = htmlentities($textProperty->getTextProperty());
+                        //$string = str_replace($allowedTagsEncoded, $allowedTagsDecoded, $string);
+                        $string = htmlspecialchars_decode(htmlentities($textProperty->getTextProperty()));
+                        \PhpOffice\PhpWord\Shared\Html::addHtml($section, $string, true, false);
 
                         // Impossible de mettre l'indentation avec addHtml ou dans l'HTML, phpword ne prévoit pas ça. DONC bricolage by Alex...
                         // Récupérer les derniers éléments concernés et mettre l'indentation.
