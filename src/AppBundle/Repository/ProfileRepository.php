@@ -172,4 +172,26 @@ class ProfileRepository extends EntityRepository
         return $stmt->fetchAll();
     }
 
+    /**
+     * @param $lang string the language iso code
+     * @param $profile int the ID of the profile
+     * @return array
+     * @throws DBALException
+     */
+    public function findClassesAndPropertiesByProfileIdApiRdfs($lang, $profile)
+    {
+        $conn = $this->getEntityManager()
+            ->getConnection();
+
+        $sql = "SELECT result::text FROM api.get_rdfs_classes_and_properties_for_profiles(:lang, :profile, 0) as result;";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->execute(array(
+            'lang' => $lang,
+            'profile' => $profile
+        ));
+
+        return $stmt->fetchAll();
+    }
+
 }

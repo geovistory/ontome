@@ -323,6 +323,27 @@ class NamespaceRepository extends EntityRepository
     }
 
     /**
+     * @param $lang string the language iso code
+     * @param $namespace int the ID of the namespace
+     * @return array
+     */
+    public function findClassesAndPropertiesByNamespaceIdApiRdfs($lang, $namespace)
+    {
+        $conn = $this->getEntityManager()
+            ->getConnection();
+
+        $sql = "SELECT result::text FROM api.get_classes_and_properties_for_namespace_rdfs(:lang, :namespace) as result;";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->execute(array(
+            'lang' => $lang,
+            'namespace' => $namespace
+        ));
+
+        return $stmt->fetchAll();
+    }
+
+    /**
      * @return array - An array with namespace keys
      * @throws DBALException
      */
