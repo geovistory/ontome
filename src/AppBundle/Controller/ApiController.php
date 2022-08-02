@@ -276,8 +276,11 @@ class ApiController extends Controller
             $response->headers->set('Content-Type', 'application/rdf+xml');
             return $response;
         }
-
-        $response = new Response($xml[0]['result']);
+        $dom = new \DOMDocument;
+        $dom->preserveWhiteSpace = FALSE;
+        $dom->loadXML($xml[0]['result']);
+        $dom->formatOutput = TRUE;
+        $response = new Response($dom->saveXML());
         $response->headers->set('Content-Type', 'application/rdf+xml');
         return $response;
     }
@@ -304,7 +307,11 @@ class ApiController extends Controller
             return $response;
         }
 
-        $response = new Response($xml[0]['result']);
+        $dom = new \DOMDocument;
+        $dom->preserveWhiteSpace = FALSE;
+        $dom->loadXML($xml[0]['result']);
+        $dom->formatOutput = TRUE;
+        $response = new Response($dom->saveXML());
         $response->headers->set('Content-Type', 'application/rdf+xml');
         return $response;
     }
