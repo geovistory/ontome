@@ -30,6 +30,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Finder\Exception\AccessDeniedException;
+use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -95,10 +96,32 @@ class ProjectController  extends Controller
 
         $project->addLabel($projectLabel);
 
+        $allProjects = $em->getRepository('AppBundle:Project')->findAll();
+
+        $allLabels = new ArrayCollection();
+        foreach ($allProjects as $var_project){
+            foreach ($var_project->getLabels() as $label){
+                $allLabels->add($label->getLabel());
+            }
+        }
+
         $form = $this->createForm(ProjectQuickAddForm::class, $project);
         // only handles data on POST
         $form->handleRequest($request);
-        if ($form->isSubmitted() && $form->isValid()) {
+
+        //Vérification si le label n'a jamais été utilisé ailleurs
+        $isLabelValid = true;
+        if($form->isSubmitted()){
+            $labels = $form->get('labels');
+            foreach ($labels as $label){
+                if($allLabels->contains($label->get('label')->getData())){
+                    $label->get('label')->addError(new FormError('This label is already used by another project, please enter another one'));
+                    $isLabelValid = false;
+                }
+            }
+        }
+
+        if ($form->isSubmitted() && $form->isValid() && $isLabelValid) {
             $project = $form->getData();
             $project->setStartDate($now);
             $project->setCreator($this->getUser());

@@ -38,6 +38,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Finder\Exception\AccessDeniedException;
+use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -114,11 +115,32 @@ class NamespaceController  extends Controller
         $txtpContributors = new TextProperty();
         $txtpContributors->setSystemType($txtpContributors);
 
-        $form = $this->createForm(NamespaceQuickAddForm::class, $namespace, array("txtpContributors" => $txtpContributors));
+        $allNamespaces = $em->getRepository('AppBundle:OntoNamespace')->findAll();
+        $allLabels = new ArrayCollection();
+
+        foreach ($allNamespaces as $var_namespace){
+            foreach ($var_namespace->getLabels() as $label){
+                $allLabels->add($label->getLabel());
+            }
+        }
+
+        $form = $this->createForm(NamespaceQuickAddForm::class, $namespace);
         // only handles data on POST
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
+        //Vérification si le label n'a jamais été utilisé ailleurs
+        $isLabelValid = true;
+        if($form->isSubmitted()){
+            $labels = $form->get('labels');
+            foreach ($labels as $label){
+                if($allLabels->contains($label->get('label')->getData())){
+                    $label->get('label')->addError(new FormError('This label is already used by another namespace, please enter another one'));
+                    $isLabelValid = false;
+                }
+            }
+        }
+
+        if ($form->isSubmitted() && $form->isValid() && $isLabelValid) {
             $namespace = $form->getData();
             $namespace->setProjectForTopLevelNamespace($project);
             $namespace->setTopLevelNamespace($namespace);
