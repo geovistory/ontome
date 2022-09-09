@@ -75,6 +75,12 @@ class NamespaceQuickAddForm extends AbstractType
                 'allow_add' => true,
                 'by_reference' => false,
             ))
+            ->add('contributors', TextPropertyType::class, array(
+                'label' => 'Contributors to the ongoing namespace',
+                'error_bubbling' => false,
+                'by_reference' => false,
+                'mapped' => false
+            ))
             ->add('referenceNamespaces', HiddenType::class, array(
                 'mapped' => false
             ));

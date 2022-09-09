@@ -77,9 +77,13 @@ class NamespaceController  extends Controller
         }
 
         $namespace = new OntoNamespace();
+        $ongoingNamespace = new OntoNamespace();
+        $namespaceLabel = new Label();
+        $ongoingNamespaceLabel = new Label();
 
         $em = $this->getDoctrine()->getManager();
         $systemTypeDescription = $em->getRepository('AppBundle:SystemType')->find(16); //systemType 16 = Description
+        $systemTypeContributors = $em->getRepository('AppBundle:SystemType')->find(2); //systemType 2 = Contributors
 
         $description = new TextProperty();
         $description->setNamespace($namespace);
@@ -89,19 +93,15 @@ class NamespaceController  extends Controller
         $description->setCreationTime(new \DateTime('now'));
         $description->setModificationTime(new \DateTime('now'));
 
-        $ongoingDescription = new TextProperty();
-        $ongoingDescription->setNamespace($namespace);
-        $ongoingDescription->setSystemType($systemTypeDescription);
-        $ongoingDescription->setCreator($this->getUser());
-        $ongoingDescription->setModifier($this->getUser());
-        $ongoingDescription->setCreationTime(new \DateTime('now'));
-        $ongoingDescription->setModificationTime(new \DateTime('now'));
-
         $namespace->addTextProperty($description);
 
-        $ongoingNamespace = new OntoNamespace();
-        $namespaceLabel = new Label();
-        $ongoingNamespaceLabel = new Label();
+        $contributors = new TextProperty();
+        $contributors->setNamespace($namespace);
+        $contributors->setSystemType($systemTypeContributors);
+        $contributors->setCreator($this->getUser());
+        $contributors->setModifier($this->getUser());
+        $contributors->setCreationTime(new \DateTime('now'));
+        $contributors->setModificationTime(new \DateTime('now'));
 
         $now = new \DateTime();
 
@@ -170,24 +170,16 @@ class NamespaceController  extends Controller
             $ongoingNamespace->setModificationTime(new \DateTime('now'));
 
             $ongoingNamespaceLabel->setIsStandardLabelForLanguage(true);
-            $ongoingNamespaceLabel->setLabel($namespaceLabel->getLabel());
+            $ongoingNamespaceLabel->setLabel($namespaceLabel->getLabel().' ongoing');
             $ongoingNamespaceLabel->setLanguageIsoCode($namespaceLabel->getLanguageIsoCode());
             $ongoingNamespaceLabel->setCreator($this->getUser());
             $ongoingNamespaceLabel->setModifier($this->getUser());
             $ongoingNamespaceLabel->setCreationTime(new \DateTime('now'));
             $ongoingNamespaceLabel->setModificationTime(new \DateTime('now'));
             $ongoingNamespace->addLabel($ongoingNamespaceLabel);
-
-            if($namespace->getTextProperties()->containsKey(1)){
-                $namespace->getTextProperties()[1]->setCreationTime(new \DateTime('now'));
-                $namespace->getTextProperties()[1]->setModificationTime(new \DateTime('now'));
-                $namespace->getTextProperties()[1]->setSystemType($systemTypeDescription);
-                $namespace->getTextProperties()[1]->setNamespace($ongoingNamespace);
-            }
-            else {
-                $ongoingDescription = $description;
-                $ongoingNamespace->addTextProperty($ongoingDescription);
-            }
+            $ongoingDescription = clone $description;
+            $ongoingDescription->setNamespace($ongoingNamespace);
+            $ongoingNamespace->addTextProperty($ongoingDescription);
 
             // Créer les entity_to_user_project pour les activer par défaut
             $userProjectAssociations = $em->getRepository('AppBundle:UserProjectAssociation')->findByProject($project);
@@ -217,7 +209,7 @@ class NamespaceController  extends Controller
         }
 
         $rootNamespaces = $em->getRepository('AppBundle:OntoNamespace')
-            ->findBy(array("isTopLevelNamespace" => true));
+            ->findBy(array("isTopLevelNamespace" => true), array("standardLabel" => "ASC"));
 
         return $this->render('namespace/new.html.twig', [
             'namespace' => $namespace,

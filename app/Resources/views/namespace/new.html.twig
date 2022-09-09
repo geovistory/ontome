@@ -13,7 +13,7 @@
     {% macro printTextPropertyRow(textPropertyForm) %}
         {{ form_errors(textPropertyForm) }}
         {{ form_row(textPropertyForm.textProperty, {
-            'label': 'Description'
+            'label': 'Root namespace description'
         }) }}
         {{ form_row(textPropertyForm.languageIsoCode, {
             'label': 'Language'
@@ -36,7 +36,35 @@
                 </h2>
 
                 {{ form_start(namespaceForm) }}
-                {{ form_row(namespaceForm.labels) }}
+                {{ form_row(namespaceForm.labels, {
+                    'label': 'Root namespace label'
+                }) }}
+                {% for textPropertyForm in namespaceForm.textProperties %}
+                    {{ formMacros.printTextPropertyRow(textPropertyForm) }}
+                {% endfor %}
+                {{ form_row(namespaceForm.contributors) }}
+                <div class="row">
+                    <div class="col-lg-6">
+                        {{ form_row(namespaceForm.rootNamespacePrefix) }}
+                    </div>
+                </div>
+                <div class="js-customize-identifiers-wrapper">
+                    <div>
+                        {{ form_row(namespaceForm.automaticIdentifierManagement) }}
+                        <div class="row">
+                            <div class="col-lg-6">{{ form_row(namespaceForm.classPrefix) }}</div>
+                            <div class="col-lg-6">{{ form_row(namespaceForm.propertyPrefix) }}</div>
+                        </div>
+                    </div>
+                    <a href="#" class="js-customize-open">
+                        <span class="fa fa-plus-circle"></span>
+                        Customize class and property identifiers (default "C" and "P")
+                    </a>
+                    <a href="#" class="js-customize-close">
+                        <span class="fa fa-minus-circle"></span>
+                        Cancel customize class and property identifiers
+                    </a>
+                </div>
                 {{ form_row(namespaceForm.isExternalNamespace, {
                     help: 'Only tick this checkbox if your namespace already has its URI outside OntoME. Otherwise leave it unchecked.'
                 }) }}
@@ -44,35 +72,7 @@
                     help: 'Fill this field to generate automatically the namespace URI. Eg. "my namespace" generates "https://ontome.net/ns/my-namespace".'
                 }) }}
                 {{ form_row(namespaceForm.namespaceURI) }}
-                <div class="row">
-                    <div class="col-lg-6">
-                    {{ form_row(namespaceForm.rootNamespacePrefix) }}
-                    </div>
-                </div>
-                {{ form_row(namespaceForm.automaticIdentifierManagement) }}
-                <div class="row">
-                    <div class="col-lg-6">{{ form_row(namespaceForm.classPrefix) }}</div>
-                    <div class="col-lg-6">{{ form_row(namespaceForm.propertyPrefix) }}</div>
-                </div>
                 {{ form_errors(namespaceForm) }}
-
-
-                <div class="js-text-property-wrapper"
-                     data-prototype="{{ formMacros.printTextPropertyRow(namespaceForm.textProperties.vars.prototype)|e('html_attr') }}"
-                     data-index="{{ namespaceForm.textProperties|length }}"
-                >
-                    {% for textPropertyForm in namespaceForm.textProperties %}
-                        {{ formMacros.printTextPropertyRow(textPropertyForm) }}
-                    {% endfor %}
-                    <a href="#" class="js-description-ongoing-add">
-                        <span class="fa fa-plus-circle"></span>
-                        Add a description for the ongoing namespace (if different from the root namespace)
-                    </a>
-                    <a href="#" class="js-description-ongoing-remove">
-                        <span class="fa fa-minus-circle"></span>
-                        Close description for the ongoing namespace form
-                    </a>
-                </div>
 
                 <div class="js-reference-wrapper">
                     <div>
@@ -82,6 +82,7 @@
                         <div class="row" style="margin-bottom: 20px">
                             <div class="col-sm-6">
                                 <select id="select-root-namespace">
+                                    <option></option> <!-- For placeholder -->
                                     {% for rootNamespace in rootNamespaces %}
                                         <option value="{{ rootNamespace.id }}">{{ rootNamespace.standardLabel }}</option>
                                     {% endfor %}
@@ -123,6 +124,7 @@
         $(document).ready(function() {
             $('#select-root-namespace').select2({
                 width: '100%',
+                placeholder: "Select a reference namespace",
                 sorter: function(data) {
                     /* Sort data using lowercase comparison */
                     return data.sort(function (a, b) {
@@ -209,61 +211,29 @@
                 }));
             });
 
-            $('.js-description-ongoing-remove').hide();
+            $('.js-customize-close').hide();
+
+            var $wrapperIdentifiers = $('.js-customize-identifiers-wrapper');
+            $('.js-customize-identifiers-wrapper div').first().hide();
+            $wrapperIdentifiers.on('click', '.js-customize-open', function(e) {
+                e.preventDefault();
+                $('.js-customize-close').show();
+                $('.js-customize-identifiers-wrapper div').first().show();
+                $('.js-customize-open').hide();
+            });
+
+            $wrapperIdentifiers.on('click', '.js-customize-close', function(e) {
+                e.preventDefault();
+                $('.js-customize-close').hide();
+                $('.js-customize-identifiers-wrapper div').first().hide();
+                $('.js-customize-open').show();
+
+                //Réinitialisation (le fait de cocher simplement appelle à une autre fonction plus bas et donc réinitialise)
+                $('#namespace_quick_add_form_automaticIdentifierManagement').prop("checked", true);
+                $('#namespace_quick_add_form_automaticIdentifierManagement').trigger("change");
+            });
+
             $('.js-reference-remove').hide();
-
-            if($('[for=namespace_quick_add_form_textProperties_1_textProperty]').length) {
-                //we hide the button in order to prevent the add of more than 2 text properties
-                $('.js-description-ongoing-add').hide();
-                $('[for=namespace_quick_add_form_textProperties_1_textProperty]').text('Ongoing namespace description');
-                $('.js-description-ongoing-remove').show();
-            }
-
-            var $wrapper = $('.js-text-property-wrapper');
-            $wrapper.on('click', '.js-description-ongoing-add', function(e) {
-                e.preventDefault();
-
-                // Get the data-prototype explained earlier
-                var prototype = $wrapper.data('prototype');
-
-                // get the new index
-                var index = $wrapper.data('index');
-
-                // Replace '__name__' in the prototype's HTML to
-                // instead be a number based on how many items we have
-                var newForm = prototype.replace(/__name__/g, index);
-
-                // increase the index with one for the next item
-                $wrapper.data('index', index + 1);
-
-                // Display the form in the page before the "new" link
-                $(this).before(newForm).slideDown();
-                $('#namespace_quick_add_form_textProperties_1_creator').val($('#namespace_quick_add_form_textProperties_0_creator').val());
-                $('#namespace_quick_add_form_textProperties_1_modifier').val($('#namespace_quick_add_form_textProperties_0_creator').val());
-                $('.js-description-ongoing-add').hide();
-                $('[for=namespace_quick_add_form_textProperties_1_textProperty]').text('Ongoing namespace description');
-                tinymce.init({
-                    selector:'.tinymce',
-                    entity_encoding : "raw"
-                });
-                $('.js-description-ongoing-remove').show();
-            });
-
-            $wrapper.on('click', '.js-description-ongoing-remove', function(e) {
-                e.preventDefault();
-
-                // get the new index
-                var index = $wrapper.data('index');
-
-                // decrease the index with one for the next item
-                $wrapper.data('index', index - 1);
-
-                $("[id^='namespace_quick_add_form_textProperties_1_']").remove();
-                $("[for^='namespace_quick_add_form_textProperties_1_']").remove();
-                tinymce.get("namespace_quick_add_form_textProperties_1_textProperty").remove();
-                $('.js-description-ongoing-add').show();
-                $('.js-description-ongoing-remove').hide();
-            });
 
             var $wrapperRef = $('.js-reference-wrapper');
             $('.js-reference-wrapper div').first().hide();
@@ -279,6 +249,9 @@
                 $('.js-reference-remove').hide();
                 $('.js-reference-wrapper div').first().hide();
                 $('.js-reference-add').show();
+                $('.remove-namespace').trigger('click'); //Simule l'effacement des choix
+                $('#select-root-namespace').val(null).trigger('change'); //Réinitialise le select2
+                $("#chosable-namespaces-list").empty(); //Vide les propositions
             });
 
             if (!$('#namespace_quick_add_form_isExternalNamespace').prop('checked')) {
