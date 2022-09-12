@@ -533,7 +533,7 @@ class ProjectController  extends Controller
                             if(!is_null($xmlRangeNamespace)){
                                 $rangeNamespace = $em->getRepository("AppBundle:OntoNamespace")
                                     ->findOneBy(array("id" => (integer)$xmlRangeNamespace));
-                                if(!$idsReferences->contains((integer)$xmlDomainNamespace)){
+                                if(!$idsReferences->contains((integer)$xmlRangeNamespace)){
                                     echo "Un namespace de référence pour hasRange n'a pas été déclaré avec la balise referenceNamespace";
                                     die;
                                 }
