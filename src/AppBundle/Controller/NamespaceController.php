@@ -95,14 +95,6 @@ class NamespaceController  extends Controller
 
         $namespace->addTextProperty($description);
 
-        $contributors = new TextProperty();
-        $contributors->setNamespace($namespace);
-        $contributors->setSystemType($systemTypeContributors);
-        $contributors->setCreator($this->getUser());
-        $contributors->setModifier($this->getUser());
-        $contributors->setCreationTime(new \DateTime('now'));
-        $contributors->setModificationTime(new \DateTime('now'));
-
         $now = new \DateTime();
 
         $namespace->setCreator($this->getUser());
@@ -180,6 +172,15 @@ class NamespaceController  extends Controller
             $ongoingDescription = clone $description;
             $ongoingDescription->setNamespace($ongoingNamespace);
             $ongoingNamespace->addTextProperty($ongoingDescription);
+
+            $contributors = $form->get("contributors")->getData();
+            $contributors->setNamespace($ongoingNamespace);
+            $contributors->setSystemType($systemTypeContributors);
+            $contributors->setCreator($this->getUser());
+            $contributors->setModifier($this->getUser());
+            $contributors->setCreationTime(new \DateTime('now'));
+            $contributors->setModificationTime(new \DateTime('now'));
+            $ongoingNamespace->addTextProperty($contributors);
 
             // Créer les entity_to_user_project pour les activer par défaut
             $userProjectAssociations = $em->getRepository('AppBundle:UserProjectAssociation')->findByProject($project);
