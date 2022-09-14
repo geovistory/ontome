@@ -90,8 +90,8 @@ class PropertyController extends Controller
             $allNamespacesId[] = $defaultNamespace->getId();
         }
 
-        // Récupérer toutes les classes selon $allNamespacesId
-        $allProperties= $em->getRepository('AppBundle:Property')->findPropertiesByNamespacesId($allNamespacesId);
+        // Récupérer toutes les propriétés
+        $allProperties= $em->getRepository('AppBundle:Property')->findAll(); //->findPropertiesByNamespacesId($allNamespacesId);
 
         return $this->render('property/list.html.twig', [
             'properties' => $allProperties,

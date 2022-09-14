@@ -86,8 +86,8 @@ class ClassController extends Controller
             $allNamespacesId[] = $defaultNamespace->getId();
         }
 
-        // Récupérer toutes les classes selon $allNamespacesId
-        $allClasses = $em->getRepository('AppBundle:OntoClass')->findClassesByNamespacesId($allNamespacesId);
+        // Récupérer toutes les classes
+        $allClasses = $em->getRepository('AppBundle:OntoClass')->findAll(); //->findClassesByNamespacesId($allNamespacesId);
 
         return $this->render('class/list.html.twig', [
             'classes' => $allClasses,
@@ -331,24 +331,38 @@ class ClassController extends Controller
         $em = $this->getDoctrine()->getManager();
 
         // $namespacesIdFromClassVersion : Ensemble de namespaces provenant de la classe affiché (namespaceForVersion + references)
-        $namespacesIdFromClassVersion[] = $classVersion->getNamespaceForVersion()->getId();
+        // $rootNamespacesFromClassVersion : Ensemble des versions racines (pour contrôle en dessous)
+        $nsId = $classVersion->getNamespaceForVersion()->getId();
+        $namespacesIdFromClassVersion[] = $nsId;
+        $rootNamespacesFromClassVersion[] = $em->getRepository('AppBundle:OntoNamespace')->findOneBy(array('id' => $nsId))->getTopLevelNamespace();
 
-        foreach($classVersion->getNamespaceForVersion()->getReferencedNamespaceAssociations() as $referencedNamespacesAssociation){
-            $namespacesIdFromClassVersion[] = $referencedNamespacesAssociation->getReferencedNamespace()->getId();
+        foreach($classVersion->getNamespaceForVersion()->getAllReferencedNamespaces() as $referencedNamespaces){
+            $nsId = $referencedNamespaces->getId();
+            $namespacesIdFromClassVersion[] = $nsId;
+            $rootNamespacesFromClassVersion[] = $em->getRepository('AppBundle:OntoNamespace')->findOneBy(array('id' => $nsId))->getTopLevelNamespace();
         }
 
         // $namespacesIdFromUser : Ensemble de tous les namespaces activés par l'utilisateur
         if(is_null($this->getUser()) || $this->getUser()->getCurrentActiveProject()->getId() == 21){
             $namespacesIdFromUser = $em->getRepository('AppBundle:OntoNamespace')->findPublicProjectNamespacesId();
         }
-        else{ // Utilisateur connecté et utilisant un autre projet
+        else{ // Utilisateur connecté et utilisant un projet
             $namespacesIdFromUser = $em->getRepository('AppBundle:OntoNamespace')->findNamespacesIdByUser($this->getUser());
         }
         // sauf ceux automatiquement activés par l'entité
         $namespacesIdFromUser = array_diff($namespacesIdFromUser, $namespacesIdFromClassVersion);
 
+        // Créer un array de ns à ajouter (ne pas rajouter ceux dont le root est déjà utilisé
+        $nsIdFromUser = array();
+        foreach ($namespacesIdFromUser as $namespaceIdFromUser){
+            $nsRootUser = $em->getRepository('AppBundle:OntoNamespace')->findOneBy(array('id' => $namespaceIdFromUser))->getTopLevelNamespace();
+            if(!in_array($nsRootUser, $rootNamespacesFromClassVersion)){
+                $nsIdFromUser[] = $namespaceIdFromUser;
+            }
+        }
+
         // $namespacesId : Tous les namespaces trouvés ci-dessus
-        $namespacesId = array_merge($namespacesIdFromClassVersion, $namespacesIdFromUser);
+        $namespacesId = array_merge($namespacesIdFromClassVersion, $nsIdFromUser);
 
         $ancestors = $em->getRepository('AppBundle:OntoClass')->findAncestorsByClassVersionAndNamespacesId($classVersion, $namespacesId);
         $descendants = $em->getRepository('AppBundle:OntoClass')->findDescendantsByClassVersionAndNamespacesId($classVersion, $namespacesId);
