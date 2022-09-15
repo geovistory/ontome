@@ -701,17 +701,7 @@
             </div>
             <div id="identification" class="tab-pane fade">
                 {# Test de vérification si cet identifiant existe déjà dans un namespace fermé (il n'est donc plus éditable #}
-                {% set isIdentifierExistAndPublished = false %}
-                {% for namespace in propertyVersion.property.namespaces %}
-                    {% if not namespace.isOngoing %}
-                        {% for propertyNamespace in namespace.properties %}
-                            {% if propertyNamespace.identifierInNamespace == property.identifierInNamespace %}
-                                {% set isIdentifierExistAndPublished = true %}
-                            {% endif %}
-                        {% endfor %}
-                    {% endif %}
-                {% endfor %}
-                {% if propertyVersion.namespaceForVersion.topLevelNamespace.propertyPrefix is null and not isIdentifierExistAndPublished %}
+                {% if propertyVersion.namespaceForVersion.topLevelNamespace.propertyPrefix is null and propertyVersion.property.propertyVersions|filter(v => v.namespaceForVersion != propertyVersion.namespaceForVersion)|length == 0 %}
                     <div id="identifier-form-block">
                         {{ form_start(propertyIdentifierForm) }}
                         {{ form_errors(propertyIdentifierForm) }}
