@@ -701,7 +701,7 @@
             </div>
             <div id="identification" class="tab-pane fade">
                 {# Test de vérification si cet identifiant existe déjà dans un namespace fermé (il n'est donc plus éditable #}
-                {% if propertyVersion.namespaceForVersion.topLevelNamespace.propertyPrefix is null and propertyVersion.property.propertyVersions|filter(v => v.namespaceForVersion != propertyVersion.namespaceForVersion)|length == 0 %}
+                {% if propertyVersion.namespaceForVersion.topLevelNamespace.propertyPrefix is null and propertyVersion.property.propertyVersions|filter(v => v.namespaceForVersion != propertyVersion.namespaceForVersion)|length == 0 and propertyVersion.namespaceForVersion.isOngoing %}
                     <div id="identifier-form-block">
                         {{ form_start(propertyIdentifierForm) }}
                         {{ form_errors(propertyIdentifierForm) }}

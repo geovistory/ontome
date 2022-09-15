@@ -649,7 +649,7 @@
             </div>
             <div id="identification" class="tab-pane fade">
                 {# Test de vérification si cet identifiant existe déjà dans un namespace fermé (il n'est donc plus éditable #}
-                {% if classVersion.namespaceForVersion.topLevelNamespace.classPrefix is null and classVersion.class.classVersions|filter(v => v.namespaceForVersion != classVersion.namespaceForVersion)|length == 0 %}
+                {% if classVersion.namespaceForVersion.topLevelNamespace.classPrefix is null and classVersion.class.classVersions|filter(v => v.namespaceForVersion != classVersion.namespaceForVersion)|length == 0 and propertyVersion.namespaceForVersion.isOngoing %}
                     <div id="identifier-form-block">
                         {{ form_start(classIdentifierForm) }}
                         {{ form_errors(classIdentifierForm) }}
