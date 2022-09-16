@@ -242,7 +242,7 @@ class ClassController extends Controller
                 if ($classVersion->getNamespaceForVersion()->getTopLevelNamespace()->getId() === $namespaceFromUser->getTopLevelNamespace()->getId() and $class->getClassVersionForDisplay($namespaceFromUser)) {
                     return $this->redirectToRoute('class_show_with_version', [
                         'id' => $class->getId(),
-                        'namespaceFromUrlId' => $namespaceIdFromUser
+                        'namespaceFromUrlId' => $class->getClassVersionForDisplay($namespaceFromUser)->getNamespaceForVersion()->getId()
                     ]);
                 }
             }

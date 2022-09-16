@@ -307,7 +307,7 @@ class PropertyController extends Controller
                 if ($propertyVersion->getNamespaceForVersion()->getTopLevelNamespace()->getId() === $namespaceFromUser->getTopLevelNamespace()->getId() and $property->getPropertyVersionForDisplay($namespaceFromUser)) {
                     return $this->redirectToRoute('property_show_with_version', [
                         'id' => $property->getId(),
-                        'namespaceFromUrlId' => $namespaceIdFromUser
+                        'namespaceFromUrlId' => $property->getPropertyVersionForDisplay($namespaceFromUser)->getNamespaceForVersion()->getId()
                     ]);
                 }
             }
