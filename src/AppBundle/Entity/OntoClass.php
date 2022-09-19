@@ -187,7 +187,7 @@ class OntoClass
             $rootNamespace = $this->getClassVersionForDisplay()->getNamespaceForVersion()->getTopLevelNamespace();
             foreach ($rootNamespace->getChildVersions() as $namespace) {
                 foreach ($namespace->getClasses() as $class) {
-                    if ($class->identifierInNamespace == $this->identifierInNamespace) {
+                    if ($class->identifierInNamespace == $this->identifierInNamespace and $class != $this) {
                         $context->buildViolation('The identifier must be unique. Please enter another one.')
                             ->atPath('identifierInNamespace')
                             ->addViolation();
