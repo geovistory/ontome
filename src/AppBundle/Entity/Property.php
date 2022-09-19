@@ -183,7 +183,7 @@ class Property
             $rootNamespace = $this->getPropertyVersionForDisplay()->getNamespaceForVersion()->getTopLevelNamespace();
             foreach ($rootNamespace->getChildVersions() as $namespace) {
                 foreach ($namespace->getProperties() as $property) {
-                    if ($property->identifierInNamespace == $this->identifierInNamespace) {
+                    if ($property->identifierInNamespace == $this->identifierInNamespace and $property != $this) {
                         $context->buildViolation('The identifier must be unique. Please enter another one.')
                             ->atPath('identifierInNamespace')
                             ->addViolation();
