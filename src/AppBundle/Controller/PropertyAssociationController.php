@@ -168,7 +168,7 @@ class PropertyAssociationController extends Controller
         $this->denyAccessUnlessGranted('edit', $propertyAssociation);
 
         $em = $this->getDoctrine()->getManager();
-
+        /*
         // FILTRAGE : Récupérer les clés de namespaces à utiliser
         if(is_null($this->getUser()) || $this->getUser()->getCurrentActiveProject()->getId() == 21){ // Utilisateur non connecté OU connecté et utilisant le projet public
             $namespacesIdFromUser = $em->getRepository('AppBundle:OntoNamespace')->findPublicProjectNamespacesId();
@@ -190,10 +190,12 @@ class PropertyAssociationController extends Controller
             }
         }
 
-        $namespacesId = array_merge($namespacesIdFromUser, $namespacesIdFromChildProperty);
+        $namespacesId = array_merge($namespacesIdFromUser, $namespacesIdFromChildProperty);*/
 
-        $arrayPropertiesVersion = $em->getRepository('AppBundle:PropertyVersion')
-            ->findIdAndStandardLabelOfPropertiesVersionByNamespacesId($namespacesIdFromChildProperty);
+        $namespacesId = $this->getUser()->getCurrentOngoingNamespace()->getSelectedNamespacesId();
+
+        //$arrayPropertiesVersion = $em->getRepository('AppBundle:PropertyVersion')->findIdAndStandardLabelOfPropertiesVersionByNamespacesId($namespacesIdFromChildProperty);
+        $arrayPropertiesVersion = $em->getRepository('AppBundle:PropertyVersion')->findIdAndStandardLabelOfPropertiesVersionByNamespacesId($namespacesId);
 
         $form = $this->createForm(PropertyAssociationEditForm::class, $propertyAssociation, array(
             'propertiesVersion' => $arrayPropertiesVersion,

@@ -108,7 +108,7 @@
                         <th>Justification</th>
                         <th>Language</th>
                         <th>Namespace</th>
-                        {% if is_granted('edit', class) %}
+                        {% if is_granted('edit', classAssociation) %}
                         <th>Edit</th>
                         {% endif %}
                     </tr>
@@ -131,7 +131,7 @@
                                     {% endfor %}
                                 {% endif %} -->
                             </td>
-                            {% if is_granted('edit', class) %}
+                            {% if is_granted('edit', classAssociation) %}
                                 <td>
                                     <a href="{{ path('text_property_edit', {
                                         'id': textProperty.id
@@ -162,7 +162,7 @@
                         <th>Example</th>
                         <th>Language</th>
                         <th>Namespace</th>
-                        {% if is_granted('edit', class) %}
+                        {% if is_granted('edit', classAssociation) %}
                             <th>Edit</th>
                         {% endif %}
                     </tr>
@@ -177,7 +177,7 @@
                             </td>
                             <td>{{ textProperty.languageIsoCode}}</td>
                             <td>WIP</td>
-                            {% if is_granted('edit', class) %}
+                            {% if is_granted('edit', classAssociation) %}
                                 <td>
                                     <a href="{{ path('text_property_edit', {
                                         'id': textProperty.id
