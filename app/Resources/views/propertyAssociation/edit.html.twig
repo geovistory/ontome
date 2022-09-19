@@ -108,7 +108,7 @@
                         <th>Justification</th>
                         <th>Language</th>
                         <th>Namespace</th>
-                        {% if is_granted('edit', property) %}
+                        {% if is_granted('edit', propertyAssociation) %}
                         <th>Edit</th>
                         {% endif %}
                     </tr>
@@ -131,16 +131,16 @@
                                     {% endfor %}
                                 {% endif %} -->
                             </td>
+                            {% if is_granted('edit', propertyAssociation) %}
                             <td>
-                                {% if is_granted('edit', property) %}
                                     <a href="{{ path('text_property_edit', {
                                         'id': textProperty.id
                                     }) }}"
                                        class="btn btn-xs btn-success">
                                         <span class="fa fa-edit"></span>
                                     </a>
-                                {% endif %}
                             </td>
+                            {% endif %}
                         </tr>
                     {% endfor %}
                     </tbody>
@@ -162,7 +162,9 @@
                         <th>Example</th>
                         <th>Language</th>
                         <th>Namespace</th>
+                        {% if is_granted('edit', propertyAssociation) %}
                         <th>Edit</th>
+                        {% endif %}
                     </tr>
                     </thead>
                     <tbody>
@@ -175,16 +177,16 @@
                             </td>
                             <td>{{ textProperty.languageIsoCode}}</td>
                             <td>WIP</td>
+                            {% if is_granted('edit', propertyAssociation) %}
                             <td>
-                                {% if is_granted('edit', property) %}
                                     <a href="{{ path('text_property_edit', {
                                         'id': textProperty.id
                                     }) }}"
                                        class="btn btn-xs btn-success">
                                         <span class="fa fa-edit"></span>
                                     </a>
-                                {% endif %}
                             </td>
+                            {% endif %}
                         </tr>
                     {% endfor %}
                     </tbody>

@@ -26,9 +26,7 @@
             {# Rappel : "classes" est déjà filtrée : toutes ces classes ont au moins une classVersion compatible avec le filtrage #}
             {# Inutile donc de refiltrer sur classes #}
             {% for class in classes %}
-                {# Une version par root est activé pour filtrage, donc pas possible d'avoir 2 classes identiques affichées #}
-                {# Donc l'utilisation de la boucle est justifiée par la condition if, et qui ne retournera qu'une classe #}
-                {% for classVersion in class.classVersions if classVersion.namespaceForVersion.id in allNamespacesId %}
+                {% for classVersion in class.classVersions %} <!-- Ancien code : if classVersion.namespaceForVersion.id in allNamespacesId -->
                 <tr>
                     <td>
                         {{ classVersion.class.identifierInNamespace }}

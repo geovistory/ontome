@@ -18,7 +18,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @ORM\Entity
  * @ORM\Table(schema="che", name="is_subclass_of")
  * @UniqueEntity(
- *     fields={"childClass", "parentClass"},
+ *     fields={"childClass", "parentClass", "namespaceForVersion"},
  *     message="This parent class is already associated with this child class"
  * )
  */

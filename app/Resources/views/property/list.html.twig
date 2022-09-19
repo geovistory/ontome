@@ -32,7 +32,7 @@
             {% for property in properties %}
                 {# Une version par root est activé pour filtrage, donc pas possible d'avoir 2 propriétés identiques affichées #}
                 {# Donc l'utilisation de la boucle est justifiée par la condition if, et qui ne retournera qu'une propriété #}
-                {% for propertyVersion in property.propertyVersions if propertyVersion.namespaceForVersion.id in allNamespacesId %}
+                {% for propertyVersion in property.propertyVersions %} {# Ancien code : if propertyVersion.namespaceForVersion.id in allNamespacesId #}
                 <tr>
                     <td class="text-right small">
                         {% if propertyVersion.domain is not null and propertyVersion.domainNamespace is not null %}
