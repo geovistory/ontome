@@ -108,7 +108,11 @@ class NamespaceController  extends Controller
 
         $namespace->addLabel($namespaceLabel);
 
-        $form = $this->createForm(NamespaceQuickAddForm::class, $namespace);
+        // Pour forcer le champ Contributors à ne pas avoir l'éditeur enrichi
+        $txtpContributors = new TextProperty();
+        $txtpContributors->setSystemType($txtpContributors);
+
+        $form = $this->createForm(NamespaceQuickAddForm::class, $namespace, array("txtpContributors" => $txtpContributors));
         // only handles data on POST
         $form->handleRequest($request);
 

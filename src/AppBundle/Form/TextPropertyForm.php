@@ -56,6 +56,27 @@ class TextPropertyForm extends AbstractType
                     'data' => 'en'
                 ));
         }
+        // Les contributors n'ont pas besoin de l'editeur enrichi
+        elseif (isset($options['systemType']) and $options['systemType'] === 2) {
+            $builder
+                ->add('textProperty', TextareaType::class, array(
+                    'label' => $labelTextProperty
+                ))
+                ->add('languageIsoCode', ChoiceType::class, array(
+                    'choices'  => array(
+                        'English' => 'en',
+                        'French' => 'fr',
+                        'German' => 'de',
+                        'Greek' => 'el',
+                        'Spanish' => 'es',
+                        'Italian' => 'it',
+                        'Portuguese' => 'pt',
+                        'Russian' => 'ru',
+                        'Chinese' => 'zh'
+                    ),
+                    'label' => 'Language'
+                ));
+        }
         elseif(in_array($options['systemType'],[33,34,35]) and in_array($options['objectType'], ['class', 'property'])) {
             $builder
                 ->add('systemType', ChoiceType::class, array(
