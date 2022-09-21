@@ -811,6 +811,7 @@
                         <div class="row">
                             <div class="col-sm-6">
                                 <select id="select-root-namespace">
+                                    <option></option> <!-- For placeholder -->
                                     {% for rootNamespace in rootNamespaces %}
                                         <option value="{{ rootNamespace.id }}">{{ rootNamespace.standardLabel }}</option>
                                     {% endfor %}
@@ -1201,6 +1202,7 @@
             {% endif %}
 
             $('#select-root-namespace').select2({
+                placeholder: "Select a namespace",
                 width: '100%',
                 sorter: function(data) {
                     /* Sort data using lowercase comparison */

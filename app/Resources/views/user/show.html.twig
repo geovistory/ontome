@@ -71,16 +71,13 @@
                         </thead>
                         <tbody>
                         {% for userProjectAssociation in userProjectAssociations %}
-                            <tr>
+                            <tr{% if userProjectAssociation.project.standardLabel == userActiveProjectAssociation.project.standardLabel %} class="success" {% endif %}>
                                 <td>
                                     <a href="{{ path('project_show', {
                                         'id': userProjectAssociation.project.id
                                     }) }}">
                                         {{ userProjectAssociation.project.standardLabel }}
                                     </a>
-                                    {% if userProjectAssociation.project.standardLabel == userActiveProjectAssociation.project.standardLabel %}
-                                        <span class="label label-success" style="margin-left: 10px;"><i class="fas fa-dot-circle"></i> Active</span>
-                                    {% endif %}
                                 </td>
                                 <td>
                                     {% if userProjectAssociation.project.parentProject is not null %}
