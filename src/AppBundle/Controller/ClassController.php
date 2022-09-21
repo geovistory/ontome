@@ -193,6 +193,7 @@ class ClassController extends Controller
 
     /**
      * @Route("/class/{id}", name="class_show", requirements={"id"="^[0-9]+$"})
+     * @Route("/ontology/c{id}", name="class_show", requirements={"id"="^[0-9]+$"})
      * @Route("/class/{id}/namespace/{namespaceFromUrlId}", name="class_show_with_version", requirements={"id"="^([0-9]+)|(classID){1}$", "namespaceFromUrlId"="^([0-9]+)|(namespaceFromUrlId){1}$"})
      * @param OntoClass $class
      * @param int|null $namespaceFromUrlId
