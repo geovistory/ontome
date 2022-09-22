@@ -372,7 +372,7 @@
                                         <th>Class label</th>
                                         <th>Namespace</th>
                                         <th>Association type</th>
-                                        <th>Customisation</th>
+                                        <th>Customization</th>
                                     </tr>
                                     </thead>
                                 </table>
@@ -465,7 +465,7 @@
                             <th>Range</th>
                             <th>Namespace</th>
                             <th>Association type</th>
-                            <th>Customisation</th>
+                            <th>Customization</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -576,8 +576,8 @@
                                     {{ profileAssociation.systemType }}
                                 </td>
                                 <td>
-                                    {% set txtPCustom = profileAssociation.property.textProperties|filter(v => v.profileForCustom is not null and v.profileForCustom.id == profile.id and v.namespaceForVersion == profileAssociation.entityNamespaceForVersion)|first %}
-                                    <a href="{{ path("property_edit_customisation", {'id': profileAssociation.property.id, 'profile': profile.id}) }}" class="btn btn-xs btn-{{ txtPCustom ? "success" : "primary" }}">
+                                    {% set txtPCustom = profileAssociation.textProperties|filter(v => v.namespaceForVersion == profileAssociation.entityNamespaceForVersion)|first %}
+                                    <a href="{{ path("edit_customisation", {'id': profileAssociation.id}) }}" class="btn btn-xs btn-{{ txtPCustom ? "success" : "primary" }}">
                                         <span class="fas fa-tools"></span>
                                     </a>
                                 </td>
@@ -1021,14 +1021,15 @@
                             if(row.associationType == 'Selected'){
                                 var htmlButtons = '';
 
-                                var urlCustomClass = '{{ path("class_edit_customisation", {'id' : 'classID','profile' : 'profileID'}) }}';
-                                urlCustomClass = urlCustomClass.replace("profileID", profileID);
-                                urlCustomClass = urlCustomClass.replace("classID", row.id);
-                                var btnColor = 'btn-primary';
+                                var urlCustomClass = '{{ path("edit_customisation", {'id' : 'profileAssociationID'}) }}';
+                                urlCustomClass = urlCustomClass.replace("profileAssociationID", row.profileAssociationId);
+
                                 if(row.nbTxtpCustom>0){
-                                    btnColor = 'btn-success';
+                                    htmlButtons += '<a title="Customization" href="' + urlCustomClass + '" class="btn btn-xs btn-default"><span class="text-success">Class</span></a><br>';
                                 }
-                                htmlButtons += '<a title="Customisation" href="' + urlCustomClass + '" class="btn btn-xs btn-default text-primary">Class</a><br>';
+                                else{
+                                    htmlButtons += '<a title="Customization" href="' + urlCustomClass + '" class="btn btn-xs btn-default">Class</a><br>';
+                                }
 
                                 var urlSelectProperties = '{{ path("profile_properties_edit", {'profile' : 'profileID', 'class' : 'classID'}) }}';
                                 urlSelectProperties = urlSelectProperties.replace("profileID", profileID);

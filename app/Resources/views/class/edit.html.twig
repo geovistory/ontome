@@ -269,7 +269,6 @@
                             {# SystemType utilisé: 7=Example #}
                             {% for textProperty in classVersion.class.textProperties
                                 if textProperty.namespaceForVersion.id in namespacesId
-                                and textProperty.profileForCustom is null
                                 and textProperty.systemType.id == 7 %}
                                 {% set isExamplesEmpty = false %}
                                 {{ textProperty.textProperty|raw }}
@@ -298,7 +297,7 @@
 
                     {# Context notes #}
                     {% set contextNoteType = 34 %}
-                    {% if classVersion.class.textProperties|filter(v => v.namespaceForVersion.id in namespacesId and v.systemType.id == contextNoteType)|length > 0 and v.profileForCustom is null %}
+                    {% if classVersion.class.textProperties|filter(v => v.namespaceForVersion.id in namespacesId and v.systemType.id == contextNoteType)|length > 0 %}
                         <div class="row">
                             <div class="col-lg-2">
                                 <p>Context notes:</p>
@@ -520,7 +519,6 @@
                     <tbody>
                     {% for textProperty in classVersion.class.textProperties
                         if textProperty.systemType.id == 7
-                        and textProperty.profileForCustom is null
                         and textProperty.namespaceForVersion.id in namespacesId %}
                         {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
                         <tr>

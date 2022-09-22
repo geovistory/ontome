@@ -93,7 +93,7 @@ class PropertyRepository extends EntityRepository
                        domain_version.standard_label AS \"domainStandardLabel\",
                        domain_version.fk_namespace_for_version AS \"domainNamespaceId\",
                        che.get_root_namespace_prefix(che.get_root_namespace(domain_version.fk_namespace_for_version)) AS \"domainRootNamespacePrefix\",
-                       (SELECT label FROM che.get_namespace_labels(domain_version.fk_namespace_for_version) WHERE language_iso_code = 'en') AS \"domainNamespaceLabel\",
+                       (SELECT label FROM che.get_namespace_labels(domain_version.fk_namespace_for_version) WHERE language_iso_code = 'en' ORDER BY is_standard_label_for_language DESC LIMIT 1 OFFSET 0) AS \"domainNamespaceLabel\",
                        pv.domain_instances_min_quantifier,
                        pv.domain_instances_max_quantifier,
                        pv.has_range,
@@ -101,13 +101,13 @@ class PropertyRepository extends EntityRepository
                        range_version.standard_label AS \"rangeStandardLabel\",
                        range_version.fk_namespace_for_version AS \"rangeNamespaceId\",
                        che.get_root_namespace_prefix(che.get_root_namespace(range_version.fk_namespace_for_version)) AS \"rangeRootNamespacePrefix\",
-                       (SELECT label FROM che.get_namespace_labels(range_version.fk_namespace_for_version) WHERE language_iso_code = 'en') AS \"rangeNamespaceLabel\",
+                       (SELECT label FROM che.get_namespace_labels(range_version.fk_namespace_for_version) WHERE language_iso_code = 'en' ORDER BY is_standard_label_for_language DESC LIMIT 1 OFFSET 0) AS \"rangeNamespaceLabel\",
                        pv.range_instances_min_quantifier,
                        pv.range_instances_max_quantifier,
                        t_ascendants_properties.DEPTH,
                        replace(t_ascendants_properties.ancestors, '|', '→') AS ancestors,
                        che.get_root_namespace(nsp.pk_namespace) AS \"rootNamespaceId\",
-                       (SELECT label FROM che.get_namespace_labels(che.get_root_namespace(nsp.pk_namespace)) WHERE language_iso_code = 'en') AS \"rootNamespaceLabel\",
+                       (SELECT label FROM che.get_namespace_labels(che.get_root_namespace(nsp.pk_namespace)) WHERE language_iso_code = 'en' ORDER BY is_standard_label_for_language DESC LIMIT 1 OFFSET 0) AS \"rootNamespaceLabel\",
                        nsp.pk_namespace AS \"propertyNamespaceId\",
                        nsp.standard_label AS \"propertyNamespaceLabel\",
                        t_ascendants_properties.fk_namespace_for_version
@@ -171,7 +171,7 @@ class PropertyRepository extends EntityRepository
                        domain_cv.standard_label AS \"domainStandardLabel\",
                        domain_cv.fk_namespace_for_version AS \"domainNamespaceId\",
                        che.get_root_namespace_prefix(che.get_root_namespace(domain_cv.fk_namespace_for_version)) AS \"domainRootNamespacePrefix\",
-                       (SELECT label FROM che.get_namespace_labels(domain_cv.fk_namespace_for_version) WHERE language_iso_code = 'en') AS \"domainNamespaceLabel\",
+                       (SELECT label FROM che.get_namespace_labels(domain_cv.fk_namespace_for_version) WHERE language_iso_code = 'en' ORDER BY is_standard_label_for_language DESC LIMIT 1 OFFSET 0) AS \"domainNamespaceLabel\",
                        pv.domain_instances_min_quantifier,
                        pv.domain_instances_max_quantifier,
                        pv.has_range,
@@ -179,13 +179,13 @@ class PropertyRepository extends EntityRepository
                        range_cv.standard_label AS \"rangeStandardLabel\",
                        range_cv.fk_namespace_for_version AS \"rangeNamespaceId\",
                        che.get_root_namespace_prefix(che.get_root_namespace(range_cv.fk_namespace_for_version)) AS \"rangeRootNamespacePrefix\",
-                       (SELECT label FROM che.get_namespace_labels(range_cv.fk_namespace_for_version) WHERE language_iso_code = 'en') AS \"rangeNamespaceLabel\",
+                       (SELECT label FROM che.get_namespace_labels(range_cv.fk_namespace_for_version) WHERE language_iso_code = 'en' ORDER BY is_standard_label_for_language DESC LIMIT 1 OFFSET 0) AS \"rangeNamespaceLabel\",
                        pv.range_instances_min_quantifier,
                        pv.range_instances_max_quantifier,
                         t_descendants_properties.depth,
                         replace(t_descendants_properties.descendants, '|', '→') AS descendants,
                         che.get_root_namespace(nsp.pk_namespace) AS \"rootNamespaceId\",
-                       (SELECT label FROM che.get_namespace_labels(che.get_root_namespace(nsp.pk_namespace)) WHERE language_iso_code = 'en') AS \"rootNamespaceLabel\",
+                       (SELECT label FROM che.get_namespace_labels(che.get_root_namespace(nsp.pk_namespace)) WHERE language_iso_code = 'en' ORDER BY is_standard_label_for_language DESC LIMIT 1 OFFSET 0) AS \"rootNamespaceLabel\",
                        nsp.pk_namespace AS \"propertyNamespaceId\",
                        nsp.standard_label AS \"propertyNamespaceLabel\"
                     FROM che.descendant_property_hierarchy(?, ARRAY[".$in."]::integer[]) t_descendants_properties,
@@ -231,8 +231,8 @@ class PropertyRepository extends EntityRepository
                         v.fk_domain_namespace AS \"domainNamespaceId\",
                         che.get_root_namespace(fk_namespace_for_version) AS \"rootNamespaceId\",
                         che.get_root_namespace_prefix(che.get_root_namespace(fk_namespace_for_version)) AS \"propertyRootNamespacePrefix\",
-                        (SELECT label FROM che.get_namespace_labels(fk_namespace_for_version) WHERE language_iso_code = 'en') AS namespace,
-                        (SELECT label FROM che.get_namespace_labels(v.fk_range_namespace) WHERE language_iso_code = 'en') AS \"rangeNamespace\"
+                        (SELECT label FROM che.get_namespace_labels(fk_namespace_for_version) WHERE language_iso_code = 'en' ORDER BY is_standard_label_for_language DESC LIMIT 1 OFFSET 0) AS namespace,
+                        (SELECT label FROM che.get_namespace_labels(v.fk_range_namespace) WHERE language_iso_code = 'en' ORDER BY is_standard_label_for_language DESC LIMIT 1 OFFSET 0) AS \"rangeNamespace\"
                 FROM    che.v_properties_with_domain_range v
                 LEFT JOIN   che.associates_referenced_namespace asrefns ON v.fk_namespace_for_version = asrefns.fk_namespace
                 WHERE   v.pk_domain = ?
@@ -280,7 +280,7 @@ class PropertyRepository extends EntityRepository
                   fk_domain_namespace_for_version AS \"domainNamespaceId\",
                   che.get_root_namespace_prefix(che.get_root_namespace(fk_namespace_for_version)) AS \"propertyRootNamespacePrefix\",
                   replace(ancestors, '|', '→') AS ancestors,
-                  (SELECT label FROM che.get_namespace_labels(fk_namespace_for_version) WHERE language_iso_code = 'en') AS namespace
+                  (SELECT label FROM che.get_namespace_labels(fk_namespace_for_version) WHERE language_iso_code = 'en' ORDER BY is_standard_label_for_language DESC LIMIT 1 OFFSET 0) AS namespace
                 FROM che.class_outgoing_inherited_properties(?, ARRAY[".$in."]::integer[]) v
                 LEFT JOIN che.associates_referenced_namespace asrefns ON v.fk_namespace_for_version = asrefns.fk_namespace
                 WHERE fk_namespace_for_version IN (".$in.")
@@ -320,8 +320,8 @@ class PropertyRepository extends EntityRepository
                   v.fk_domain_namespace AS \"domainNamespaceId\",
                   che.get_root_namespace(fk_namespace_for_version) AS \"rootNamespaceId\",
                   che.get_root_namespace_prefix(che.get_root_namespace(fk_namespace_for_version)) AS \"propertyRootNamespacePrefix\",
-                  (SELECT label FROM che.get_namespace_labels(fk_namespace_for_version) WHERE language_iso_code = 'en') AS namespace,
-                  (SELECT label FROM che.get_namespace_labels(v.fk_range_namespace) WHERE language_iso_code = 'en') AS \"domainNamespace\"
+                  (SELECT label FROM che.get_namespace_labels(fk_namespace_for_version) WHERE language_iso_code = 'en' ORDER BY is_standard_label_for_language DESC LIMIT 1 OFFSET 0) AS namespace,
+                  (SELECT label FROM che.get_namespace_labels(v.fk_range_namespace) WHERE language_iso_code = 'en' ORDER BY is_standard_label_for_language DESC LIMIT 1 OFFSET 0) AS \"domainNamespace\"
                 FROM che.v_properties_with_domain_range v
                 LEFT JOIN che.associates_referenced_namespace asrefns ON v.fk_namespace_for_version = asrefns.fk_namespace
                 WHERE pk_range = ?
@@ -359,7 +359,7 @@ class PropertyRepository extends EntityRepository
                   v.fk_domain_namespace_for_version AS \"domainNamespaceId\",
                   che.get_root_namespace_prefix(che.get_root_namespace(pv.fk_namespace_for_version)) AS \"propertyRootNamespacePrefix\",
                   replace(ancestors, '|', '→') AS ancestors,
-                  (SELECT label FROM che.get_namespace_labels(nsp.pk_namespace) WHERE language_iso_code = 'en') AS namespace
+                  (SELECT label FROM che.get_namespace_labels(nsp.pk_namespace) WHERE language_iso_code = 'en' ORDER BY is_standard_label_for_language DESC LIMIT 1 OFFSET 0) AS namespace
                 FROM che.class_ingoing_inherited_properties(?, ARRAY[".$in."]::integer[]) v,
                   che.property_version pv,
                   che.namespace nsp 
@@ -499,7 +499,7 @@ class PropertyRepository extends EntityRepository
                     p.identifier_in_namespace AS property_identifier,
                     pv.standard_label AS property_label,
                     pv.fk_namespace_for_version AS property_namespace_id,
-                    (SELECT label FROM che.get_namespace_labels(pv.fk_namespace_for_version) WHERE language_iso_code = 'en') AS namespace,
+                    (SELECT label FROM che.get_namespace_labels(pv.fk_namespace_for_version) WHERE language_iso_code = 'en' ORDER BY is_standard_label_for_language DESC LIMIT 1 OFFSET 0) AS namespace,
                     pv.range_instances_min_quantifier AS range_min_quantifier,
                     pv.range_instances_max_quantifier AS range_max_quantifier,
                     che.get_root_namespace_prefix(che.get_root_namespace(rv.fk_namespace_for_version)) AS range_root_namespace_prefix,
@@ -554,7 +554,7 @@ class PropertyRepository extends EntityRepository
                     p.identifier_in_namespace AS property_identifier,
                     pv.standard_label AS property_label,
                     pv.fk_namespace_for_version AS property_namespace_id,
-                    (SELECT label FROM che.get_namespace_labels(pv.fk_namespace_for_version) WHERE language_iso_code = 'en') AS namespace,
+                    (SELECT label FROM che.get_namespace_labels(pv.fk_namespace_for_version) WHERE language_iso_code = 'en' ORDER BY is_standard_label_for_language DESC LIMIT 1 OFFSET 0) AS namespace,
                     pv.range_instances_min_quantifier AS range_min_quantifier,
                     pv.range_instances_max_quantifier AS range_max_quantifier,
                     che.get_root_namespace_prefix(che.get_root_namespace(rv.fk_namespace_for_version)) AS range_root_namespace_prefix,
@@ -621,7 +621,7 @@ class PropertyRepository extends EntityRepository
                     coip.identifier_in_namespace AS property_identifier,
                     coip.standard_label AS property_label,
                     coip.fk_namespace_for_version AS property_namespace_id,
-                    (SELECT label FROM che.get_namespace_labels(coip.fk_namespace_for_version) WHERE language_iso_code = 'en') AS namespace,
+                    (SELECT label FROM che.get_namespace_labels(coip.fk_namespace_for_version) WHERE language_iso_code = 'en' ORDER BY is_standard_label_for_language DESC LIMIT 1 OFFSET 0) AS namespace,
                     coip.range_instances_min_quantifier AS range_min_quantifier,
                     coip.range_instances_max_quantifier AS range_max_quantifier,
                     che.get_root_namespace_prefix(che.get_root_namespace(coip.fk_range_namespace_for_version)) AS range_root_namespace_prefix,
@@ -647,7 +647,7 @@ class PropertyRepository extends EntityRepository
                     p.identifier_in_namespace AS property_identifier,
                     pv.standard_label AS property_label,
                     pv.fk_namespace_for_version AS property_namespace_id,
-                    (SELECT label FROM che.get_namespace_labels(pv.fk_namespace_for_version) WHERE language_iso_code = 'en') AS namespace,
+                    (SELECT label FROM che.get_namespace_labels(pv.fk_namespace_for_version) WHERE language_iso_code = 'en' ORDER BY is_standard_label_for_language DESC LIMIT 1 OFFSET 0) AS namespace,
                     pv.range_instances_min_quantifier AS range_min_quantifier,
                     pv.range_instances_max_quantifier AS range_max_quantifier,
                     che.get_root_namespace_prefix(che.get_root_namespace(rv.fk_namespace_for_version)) AS range_root_namespace_prefix,
@@ -710,7 +710,7 @@ class PropertyRepository extends EntityRepository
                     ciip.identifier_in_namespace AS property_identifier,
                     ciip.standard_label AS property_label,
                     ciip.fk_namespace_for_version AS property_namespace_id,
-                    (SELECT label FROM che.get_namespace_labels(ciip.fk_namespace_for_version) WHERE language_iso_code = 'en') AS namespace,
+                    (SELECT label FROM che.get_namespace_labels(ciip.fk_namespace_for_version) WHERE language_iso_code = 'en' ORDER BY is_standard_label_for_language DESC LIMIT 1 OFFSET 0) AS namespace,
                     ciip.range_instances_min_quantifier AS range_min_quantifier,
                     ciip.range_instances_max_quantifier AS range_max_quantifier,
                     aspro.fk_inheriting_range_class AS range_id,
@@ -739,7 +739,7 @@ class PropertyRepository extends EntityRepository
                     p.identifier_in_namespace AS property_identifier,
                     pv.standard_label AS property_label,
                     pv.fk_namespace_for_version AS property_namespace_id,
-                    (SELECT label FROM che.get_namespace_labels(pv.fk_namespace_for_version) WHERE language_iso_code = 'en') AS namespace,
+                    (SELECT label FROM che.get_namespace_labels(pv.fk_namespace_for_version) WHERE language_iso_code = 'en' ORDER BY is_standard_label_for_language DESC LIMIT 1 OFFSET 0) AS namespace,
                     pv.range_instances_min_quantifier AS range_min_quantifier,
                     pv.range_instances_max_quantifier AS range_max_quantifier,
                     r.pk_class AS range_id,

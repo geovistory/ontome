@@ -9,6 +9,7 @@
 namespace AppBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Class ProfileAssociation
@@ -77,6 +78,14 @@ class ProfileAssociation
      * @ORM\JoinColumn(name="fk_system_type", referencedColumnName="pk_system_type")
      */
     private $systemType;
+
+    /**
+     * @Assert\Valid()
+     * @Assert\NotNull()
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\TextProperty", mappedBy="profileAssociation", cascade={"persist"})
+     * @ORM\OrderBy({"languageIsoCode" = "ASC"})
+     */
+    private $textProperties;
 
     /**
      * @ORM\Column(type="text")
@@ -162,6 +171,14 @@ class ProfileAssociation
     }
 
     /**
+     * @return ArrayCollection|TextProperty[]
+     */
+    public function getTextProperties()
+    {
+        return $this->textProperties;
+    }
+
+    /**
      * @return mixed
      */
     public function getNotes()
@@ -207,6 +224,19 @@ class ProfileAssociation
     public function getEntityNamespaceForVersion()
     {
         return $this->entityNamespaceForVersion;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getObjectType()
+    {
+        if(!is_null($this->getClass())){
+            return 'class';
+        }
+        if(!is_null($this->getProperty())){
+            return 'property';
+        }
     }
 
     /**
@@ -272,6 +302,20 @@ class ProfileAssociation
     {
         $this->systemType = $systemType;
     }
+
+    /**
+     * @param mixed $textProperty
+     */
+    public function addTextProperty(TextProperty $textProperty)
+    {
+        if ($this->textProperties->contains($textProperty)) {
+            return;
+        }
+        $this->textProperties[] = $textProperty;
+        // needed to update the owning side of the relationship!
+        $textProperty->setProfileAssociation($this);
+    }
+
 
     /**
      * @param mixed $notes

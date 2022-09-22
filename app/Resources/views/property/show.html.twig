@@ -411,8 +411,7 @@
                             {# SystemType utilisé: 7=Example #}
                             {% for textProperty in propertyVersion.property.textProperties
                                 if textProperty.namespaceForVersion.id in namespacesId
-                                and textProperty.systemType.id == 7
-                                and textProperty.profileForCustom is null %}
+                                and textProperty.systemType.id == 7 %}
                                 {% set isExamplesEmpty = false %}
                                 {{ textProperty.textProperty|raw }}
                             {% endfor %}
@@ -424,7 +423,7 @@
 
                     {# Internal notes #}
                     {% set internalNoteType = 33 %}
-                    {% if propertyVersion.property.textProperties|filter(v => is_granted('edit', v) and v.profileForCustom is null and v.namespaceForVersion == app.user.getCurrentOngoingNamespace|default(null) and v.systemType.id == internalNoteType)|length > 0 %}
+                    {% if propertyVersion.property.textProperties|filter(v => is_granted('edit', v) and v.namespaceForVersion == app.user.getCurrentOngoingNamespace|default(null) and v.systemType.id == internalNoteType)|length > 0 %}
                         <div class="row">
                             <div class="col-lg-2">
                                 <p>Internal notes:</p>
@@ -440,7 +439,7 @@
 
                     {# Context notes #}
                     {% set contextNoteType = 34 %}
-                    {% if propertyVersion.property.textProperties|filter(v => v.namespaceForVersion.id in namespacesId and v.profileForCustom is null and v.systemType.id == contextNoteType)|length > 0 %}
+                    {% if propertyVersion.property.textProperties|filter(v => v.namespaceForVersion.id in namespacesId and v.systemType.id == contextNoteType)|length > 0 %}
                         <div class="row">
                             <div class="col-lg-2">
                                 <p>Context notes:</p>
@@ -456,7 +455,7 @@
 
                     {# Bibliographical notes #}
                     {% set bibliographicalNoteType = 35 %}
-                    {% if propertyVersion.property.textProperties|filter(v => v.namespaceForVersion.id in namespacesId and v.profileForCustom is null and v.systemType.id == bibliographicalNoteType)|length > 0 %}
+                    {% if propertyVersion.property.textProperties|filter(v => v.namespaceForVersion.id in namespacesId and v.systemType.id == bibliographicalNoteType)|length > 0 %}
                         <div class="row">
                             <div class="col-lg-2">
                                 <p>Bibliographical notes:</p>
@@ -577,8 +576,7 @@
                     <tbody>
                     {% for textProperty in propertyVersion.property.textProperties
                         if textProperty.systemType.id == 7
-                        and textProperty.namespaceForVersion.id in namespacesId
-                        and textProperty.profileForCustom is null %}
+                        and textProperty.namespaceForVersion.id in namespacesId %}
                         {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
                         <tr>
                             <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
