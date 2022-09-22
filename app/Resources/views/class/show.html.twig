@@ -663,11 +663,14 @@
                 </table>
             </div>
             <div id="identification" class="tab-pane fade">
-                <h3>Identifier : {{ classVersion.class.identifierInNamespace }}</h3>
+                <h3>Identifier: {{ classVersion.class.identifierInNamespace }}</h3>
                 <p>
                     {% if not classVersion.namespaceForVersion.topLevelNamespace.isExternalNamespace %}
-                        URI: <strong><a>{{ classVersion.namespaceForVersion.topLevelNamespace.namespaceURI }}/{{ classVersion.class.identifierInNamespace }}</a></strong>
+                        Official URI: <strong><a id="official-uri">{{ classVersion.namespaceForVersion.topLevelNamespace.namespaceURI }}/{{ classVersion.class.identifierInNamespace }}</a></strong>
+                        <button data-id="official-uri" class="btn btn-xs btn-link copyToClipboard" title="Copy to clipboard"><i class="fas fa-copy"></i></button><br>
                     {% endif %}
+                    OntoME URI: <strong><a id="ontome-uri" href="https://ontome.net/ontology/c{{ classVersion.class.id }}">https://ontome.net/ontology/c{{ classVersion.class.id }}</a></strong>
+                    <button data-id="ontome-uri" class="btn btn-xs btn-link copyToClipboard" title="Copy to clipboard"><i class="fas fa-copy"></i></button>
                 </p>
                 <h3>Labels</h3>
                 <table class="table table-striped" id="labels-table" style="width:100%">

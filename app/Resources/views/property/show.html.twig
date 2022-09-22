@@ -709,11 +709,14 @@
                 </table>
             </div>
             <div id="identification" class="tab-pane fade">
-                <h3>Identifier : {{ propertyVersion.property.identifierInNamespace }}</h3>
+                <h3>Identifier: {{ propertyVersion.property.identifierInNamespace }}</h3>
                 <p>
                     {% if not propertyVersion.namespaceForVersion.topLevelNamespace.isExternalNamespace %}
-                        URI: <strong><a>{{ propertyVersion.namespaceForVersion.topLevelNamespace.namespaceURI }}/{{ propertyVersion.property.identifierInNamespace }}</a></strong>
+                        Official URI: <strong><a id="official-uri">{{ propertyVersion.namespaceForVersion.topLevelNamespace.namespaceURI }}/{{ propertyVersion.property.identifierInNamespace }}</a></strong>
+                        <button data-id="official-uri" class="btn btn-xs btn-link copyToClipboard" title="Copy to clipboard"><i class="fas fa-copy"></i></button><br>
                     {% endif %}
+                    OntoME URI: <strong><a id="ontome-uri" href="https://ontome.net/ontology/p{{ propertyVersion.property.id }}">https://ontome.net/ontology/p{{ propertyVersion.property.id }}</a></strong>
+                    <button data-id="ontome-uri" class="btn btn-xs btn-link copyToClipboard" title="Copy to clipboard"><i class="fas fa-copy"></i></button>
                 </p>
 
                 {% if propertyVersion.domain is not null and propertyVersion.range is not null %}
