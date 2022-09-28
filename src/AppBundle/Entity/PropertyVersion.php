@@ -622,4 +622,42 @@ class PropertyVersion
 
         return (string) $s;
     }
+
+    /**
+     * @return bool
+     * Savoir si l'URI est atteignable. Afin de mettre ou non un lien pour Official URI
+     */
+    public function getIsLinkableURI()
+    {
+        if(!$this->getNamespaceForVersion()->getIsExternalNamespace()){
+            return false; // Namespace interne on n'en met pas.
+        }
+        $uri = $this->getNamespaceForVersion()->getTopLevelNamespace()->getNamespaceURI().$this->getProperty()->getIdentifierInNamespace();
+
+        $ch = curl_init($uri);
+        curl_setopt($ch,CURLOPT_NOBODY, true);
+        curl_setopt($ch,CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($ch,CURLOPT_SSL_VERIFYPEER, 0);
+        curl_setopt($ch,CURLOPT_HEADER, true);
+        curl_setopt($ch, CURLOPT_FAILONERROR, true);
+        curl_setopt($ch,CURLOPT_RETURNTRANSFER, TRUE);
+        curl_setopt($ch,CURLOPT_MAXREDIRS, 15);
+        curl_setopt($ch,CURLOPT_TIMEOUT, 15);
+        curl_setopt($ch,CURLOPT_USERAGENT,'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.13) Gecko/20080311 Firefox/2.0.0.13');
+
+        if (isset($options['timeout'])) {
+            $timeout = (int) $options['timeout'];
+            curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
+        }
+
+        curl_exec($ch);
+        $returnedStatusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        if($returnedStatusCode == 0){print curl_error($ch);}
+        curl_close($ch);
+
+        if($returnedStatusCode >= 200 && $returnedStatusCode < 400){
+            return true;
+        }
+        return false;
+    }
 }

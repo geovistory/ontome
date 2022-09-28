@@ -54,10 +54,10 @@ class TextProperty implements GroupSequenceProviderInterface
     private $namespaceForVersion;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Profile", inversedBy="textProperties")
-     * @ORM\JoinColumn(name="fk_profile_for_custom", referencedColumnName="pk_profile", nullable=false)
+     * @ORM\ManyToOne(targetEntity="ProfileAssociation", inversedBy="textProperties")
+     * @ORM\JoinColumn(name="fk_associates_profile", referencedColumnName="pk_associates_profile", nullable=false)
      */
-    private $profileForCustom;
+    private $profileAssociation;
 
     /**
      * @ORM\ManyToOne(targetEntity="OntoClass", inversedBy="textProperties")
@@ -188,14 +188,6 @@ class TextProperty implements GroupSequenceProviderInterface
     }
 
     /**
-     * @return Profile
-     */
-    public function getProfileForCustom()
-    {
-        return $this->profileForCustom;
-    }
-
-    /**
      * @return mixed
      */
     public function getTextProperty()
@@ -311,6 +303,14 @@ class TextProperty implements GroupSequenceProviderInterface
     /**
      * @return mixed
      */
+    public function getProfileAssociation()
+    {
+        return $this->profileAssociation;
+    }
+
+    /**
+     * @return mixed
+     */
     public function getValidationStatus()
     {
         return $this->validationStatus;
@@ -373,14 +373,6 @@ class TextProperty implements GroupSequenceProviderInterface
     }
 
     /**
-     * @param Profile $profileForCustom
-     */
-    public function setProfileForCustom($profileForCustom)
-    {
-        $this->profileForCustom = $profileForCustom;
-    }
-
-    /**
      * @param mixed $textProperty
      */
     public function setTextProperty($textProperty)
@@ -434,6 +426,14 @@ class TextProperty implements GroupSequenceProviderInterface
     public function setSystemType($systemType)
     {
         $this->systemType = $systemType;
+    }
+
+    /**
+     * @param mixed $profileAssociation
+     */
+    public function setProfileAssociation($profileAssociation)
+    {
+        $this->profileAssociation = $profileAssociation;
     }
 
     /**

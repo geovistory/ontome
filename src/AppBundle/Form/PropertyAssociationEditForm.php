@@ -40,16 +40,18 @@ class PropertyAssociationEditForm extends AbstractType
 
         $choices = array();
         foreach ($options['propertiesVersion'] as $pv){
-            if($pv['standardLabel'] != $pv['identifierInNamespace'])
-                $choices[$pv['rootNamespacePrefix'].":".$pv['identifierInNamespace']." ".$pv['standardLabel']] = $pv['id'];
-            else
-                $choices[$pv['rootNamespacePrefix'].":".$pv['standardLabel']] = $pv['id'];
+            if($pv['standardLabel'] != $pv['identifierInNamespace']){
+                $choices[$pv['rootNamespacePrefix'] . ":" . $pv['identifierInNamespace'] . " " . $pv['standardLabel']] = $pv['id'];
+
+            }
+            else {
+                $choices[$pv['rootNamespacePrefix'] . ":" . $pv['standardLabel']] = $pv['id'];
+            }
         }
 
         $builder
             ->add('parentPropertyVersion', ChoiceType::class, array(
                 'mapped' => false,
-                'placeholder'       => '',
                 'choices'           => $choices,
                 'data'              => $options['defaultParent']
             ))

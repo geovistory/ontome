@@ -285,7 +285,6 @@
                             {# SystemType utilisé: 7=Example #}
                             {% for textProperty in classVersion.class.textProperties
                                 if textProperty.namespaceForVersion.id in namespacesId
-                                and textProperty.profileForCustom is null
                                 and textProperty.systemType.id == 7 %}
                                 {% set isExamplesEmpty = false %}
                                 {{ textProperty.textProperty|raw }}
@@ -298,7 +297,7 @@
 
                     {# Internal notes #}
                     {% set internalNoteType = 33 %}
-                        {% if classVersion.class.textProperties|filter(v => is_granted('edit', v) and v.namespaceForVersion == app.user.getCurrentOngoingNamespace|default(null) and v.systemType.id == internalNoteType)|length > 0 and v.profileForCustom is null %}
+                        {% if classVersion.class.textProperties|filter(v => is_granted('edit', v) and v.namespaceForVersion == app.user.getCurrentOngoingNamespace|default(null) and v.systemType.id == internalNoteType)|length > 0 is null %}
                         <div class="row">
                             <div class="col-lg-2">
                                 <p>Internal notes:</p>
@@ -528,7 +527,6 @@
                     <tbody>
                     {% for textProperty in classVersion.class.textProperties
                         if textProperty.systemType.id == 7
-                        and textProperty.profileForCustom is null
                         and textProperty.namespaceForVersion.id in namespacesId %}
                         {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
                         <tr>
@@ -665,11 +663,15 @@
                 </table>
             </div>
             <div id="identification" class="tab-pane fade">
-                <h3>Identifier : {{ classVersion.class.identifierInNamespace }}</h3>
-                <p>
-                    {% if not classVersion.namespaceForVersion.topLevelNamespace.isExternalNamespace %}
-                        URI: <strong><a>{{ classVersion.namespaceForVersion.topLevelNamespace.namespaceURI }}/{{ classVersion.class.identifierInNamespace }}</a></strong>
+                <h3>Identifier: {{ classVersion.class.identifierInNamespace }}</h3>
+                <p>{% if classVersion.isLinkableURI %}
+                        Official URI: <a target="_blank" href="{{ classVersion.namespaceForVersion.topLevelNamespace.namespaceURI }}{{ classVersion.class.identifierInNamespace }}"><strong><span id="official-uri">{{ classVersion.namespaceForVersion.topLevelNamespace.namespaceURI }}{{ classVersion.class.identifierInNamespace }}</span></strong></a>
+                    {% else %}
+                        Official URI: <strong><span id="official-uri">{{ classVersion.namespaceForVersion.topLevelNamespace.namespaceURI }}{{ classVersion.class.identifierInNamespace }}</span></strong>
                     {% endif %}
+                    <button data-id="official-uri" class="btn btn-xs btn-link copyToClipboard" title="Copy to clipboard"><i class="fas fa-copy"></i></button><br>
+                    OntoME URI: <strong><span id="ontome-uri">https://ontome.net/ontology/c{{ classVersion.class.id }}</span></strong>
+                    <button data-id="ontome-uri" class="btn btn-xs btn-link copyToClipboard" title="Copy to clipboard"><i class="fas fa-copy"></i></button>
                 </p>
                 <h3>Labels</h3>
                 <table class="table table-striped" id="labels-table" style="width:100%">

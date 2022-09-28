@@ -13,24 +13,33 @@
     <div class="container">
         <h2 class="profile-name">
             {{ profile.standardLabel }}{% if profile.isRootProfile %}&nbsp;<span class="label label-default" style="font-size: 12px; vertical-align: middle">Root</span>{% endif %}
-            <span class="pull-right">
             {% if (not profile.isOngoing and profile.wasClosedAt is not null and profile.endDate is null) or (profile.isForcedPublication and profile.isOngoing) %}
-                <a  href="{{ path('api_classes_and_properties_by_profile_xml_rdfs', {
-                    'profile': profile.id
-                }) }}"
-                    class="btn btn-primary"
-                    download="profile-{{ profile.standardLabel }}.rdf">
-                    <i class="fas fa-code"></i> RDFS
-                </a>
-                <a  href="{{ path('api_classes_and_properties_by_profile_xml', {
-                    'profile': profile.id
-                }) }}"
-                    class="btn btn-primary"
-                    download="profile-{{ profile.standardLabel }}.rdf">
-                    <i class="fas fa-code"></i> OWL-DL
-                </a>
+            <span class="pull-right">
+                <div class="btn-group">
+                    <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i class="fas fa-file-export"></i> Export <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a  href="{{ path('api_classes_and_properties_by_profile_xml_rdfs', {
+                                'profile': profile.id
+                            }) }}"
+                                download="profile-{{ profile.standardLabel }}.rdf">
+                                <i class="fas fa-code"></i> RDFS
+                            </a>
+                        </li>
+                        <li>
+                            <a  href="{{ path('api_classes_and_properties_by_profile_xml', {
+                                'profile': profile.id
+                            }) }}"
+                                download="profile-{{ profile.standardLabel }}.rdf">
+                                <i class="fas fa-code"></i> OWL-DL
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </span>
             {% endif %}
-        </span>
         </h2>
         <ul class="nav nav-tabs" id="main-tabs">
             <li class="active"><a data-toggle="tab" href="#summary">Summary</a></li>
@@ -372,7 +381,7 @@
                                         <th>Class label</th>
                                         <th>Namespace</th>
                                         <th>Association type</th>
-                                        <th>Customisation</th>
+                                        <th>Customization</th>
                                     </tr>
                                     </thead>
                                 </table>
@@ -465,7 +474,7 @@
                             <th>Range</th>
                             <th>Namespace</th>
                             <th>Association type</th>
-                            <th>Customisation</th>
+                            <th>Customization</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -576,8 +585,8 @@
                                     {{ profileAssociation.systemType }}
                                 </td>
                                 <td>
-                                    {% set txtPCustom = profileAssociation.property.textProperties|filter(v => v.profileForCustom is not null and v.profileForCustom.id == profile.id and v.namespaceForVersion == profileAssociation.entityNamespaceForVersion)|first %}
-                                    <a href="{{ path("property_edit_customisation", {'id': profileAssociation.property.id, 'profile': profile.id}) }}" class="btn btn-xs btn-{{ txtPCustom ? "success" : "primary" }}">
+                                    {% set txtPCustom = profileAssociation.textProperties|filter(v => v.namespaceForVersion == profileAssociation.entityNamespaceForVersion)|first %}
+                                    <a href="{{ path("edit_customisation", {'id': profileAssociation.id}) }}" class="btn btn-xs btn-{{ txtPCustom ? "success" : "primary" }}">
                                         <span class="fas fa-tools"></span>
                                     </a>
                                 </td>
@@ -1021,14 +1030,15 @@
                             if(row.associationType == 'Selected'){
                                 var htmlButtons = '';
 
-                                var urlCustomClass = '{{ path("class_edit_customisation", {'id' : 'classID','profile' : 'profileID'}) }}';
-                                urlCustomClass = urlCustomClass.replace("profileID", profileID);
-                                urlCustomClass = urlCustomClass.replace("classID", row.id);
-                                var btnColor = 'btn-primary';
+                                var urlCustomClass = '{{ path("edit_customisation", {'id' : 'profileAssociationID'}) }}';
+                                urlCustomClass = urlCustomClass.replace("profileAssociationID", row.profileAssociationId);
+
                                 if(row.nbTxtpCustom>0){
-                                    btnColor = 'btn-success';
+                                    htmlButtons += '<a title="Customization" href="' + urlCustomClass + '" class="btn btn-xs btn-default"><span class="text-success">Class</span></a><br>';
                                 }
-                                htmlButtons += '<a title="Customisation" href="' + urlCustomClass + '" class="btn btn-xs btn-default text-primary">Class</a><br>';
+                                else{
+                                    htmlButtons += '<a title="Customization" href="' + urlCustomClass + '" class="btn btn-xs btn-default">Class</a><br>';
+                                }
 
                                 var urlSelectProperties = '{{ path("profile_properties_edit", {'profile' : 'profileID', 'class' : 'classID'}) }}';
                                 urlSelectProperties = urlSelectProperties.replace("profileID", profileID);

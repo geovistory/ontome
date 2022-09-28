@@ -86,7 +86,7 @@
                 <h3>Edit property association</h3>
                 {{ form_start(propertyAssociationForm) }}
                     {{ form_errors(propertyAssociationForm) }}
-                    {{ form_row(propertyAssociationForm.parentPropertyVersion) }}
+                    {{ form_row(propertyAssociationForm.parentPropertyVersion, {'label' : "Parent property"}) }}
 
                     {{ form_row(propertyAssociationForm.childProperty) }}
 
@@ -230,7 +230,7 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.4/js/select2.min.js"></script>
     <script>
         $(document).ready(function() {
-            $('#property_association_edit_form_parentProperty').select2({
+            $('#property_association_edit_form_parentPropertyVersion').select2({
                 sorter: function(data) {
                     /* Sort data using lowercase comparison */
                     return data.sort(function (a, b) {
@@ -245,6 +245,7 @@
                     });
                 }
             });
+
             $('#justifications-table').DataTable();
             $('#examples-table').DataTable();
 

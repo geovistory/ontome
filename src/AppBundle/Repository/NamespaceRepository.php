@@ -556,7 +556,7 @@ class NamespaceRepository extends EntityRepository
                 ) AS entity
                 JOIN che.namespace nsp ON entity.namespace_id = nsp.pk_namespace
                 JOIN che.namespace root_nsp ON nsp.fk_top_level_namespace = root_nsp.pk_namespace
-                WHERE root_nsp.namespace_uri = 'https://ontome.net/ns/' || :name;";
+                WHERE root_nsp.namespace_uri = 'https://ontome.net/ns/' || :name || '/';";
 
         $stmt = $conn->prepare($sql);
         $stmt->execute(array('identifier' => $identifierInNamespace, 'name' => $name));

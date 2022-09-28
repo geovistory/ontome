@@ -13,10 +13,20 @@
         {{ form_row(textPropertyForm.modifier) }}
     {% endmacro %}
     <div class="container">
-        <a href="{{ path('profile_edit', {'id': profile.id, '_fragment': 'classes'}) }}" class="pull-right btn btn-link">
+        {% if profileAssociation.objectType == "class" %}
+            {% set fragment = "classes" %}
+            {% set object = profileAssociation.class %}
+            {% set objectVersion = profileAssociation.class.classVersionForDisplay(profileAssociation.entityNamespaceForVersion) %}
+        {% endif %}
+        {% if profileAssociation.objectType == "property" %}
+            {% set fragment = "properties" %}
+            {% set object = profileAssociation.property %}
+            {% set objectVersion = profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion) %}
+        {% endif %}
+        <a href="{{ path('profile_edit', {'id': profileAssociation.profile.id, '_fragment': fragment}) }}" class="pull-right btn btn-link">
             <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
         </a>
-        <h2>Customise {{ classVersion.standardLabel }} - {{ classVersion.class.identifierInNamespace }} in {{ profile.standardLabel }} profile</h2>
+        <h2>Customize {{ objectVersion.standardLabel }} - {{ object.identifierInNamespace }} in {{ profileAssociation.profile.standardLabel }} profile</h2>
 
         <div class="container well" id="details">
             <div class="row">
@@ -24,7 +34,7 @@
                     <p>Scope note:</p>
                 </div>
                 <div class="col-lg-10">
-                    {% for scopeNote in classVersion.class.textProperties|filter(v => v.systemType.id == 1 and v.profileForCustom is null and v.namespaceForVersion == classVersion.namespaceForVersion) %}
+                    {% for scopeNote in object.textProperties|filter(v => v.systemType.id == 1 and v.namespaceForVersion == objectVersion.namespaceForVersion) %}
                         {{ scopeNote.textProperty|raw }}
                     {% endfor %}
                 </div>
@@ -34,7 +44,7 @@
                     <p>Examples:</p>
                 </div>
                 <div class="col-lg-10">
-                    {% for example in classVersion.class.textProperties|filter(v => v.systemType.id == 7 and v.profileForCustom is null and v.namespaceForVersion == classVersion.namespaceForVersion) %}
+                    {% for example in object.textProperties|filter(v => v.systemType.id == 7 and v.namespaceForVersion == objectVersion.namespaceForVersion) %}
                         {{ example.textProperty|raw }}
                     {% endfor %}
                 </div>
@@ -42,7 +52,7 @@
         </div>
         <div class="container">
             <div>
-                {% set justification = classVersion.class.textProperties|filter(v => v.systemType.id == 15 and v.profileForCustom is not null and v.profileForCustom.id == profile.id and v.namespaceForVersion == classVersion.namespaceForVersion)|first %}
+                {% set justification = profileAssociation.textProperties|filter(v => v.systemType.id == 15 and v.namespaceForVersion == objectVersion.namespaceForVersion)|first %}
                 <h3>Justification of the selection in the profile
                 {% if justification %}
                     <a href="#" class="btn-justification btn btn-success btn-xs"><i class="fa fa-edit"></i></a>
@@ -67,7 +77,7 @@
             </div>
 
             <div class="clearfix">
-                {% set useCase = classVersion.class.textProperties|filter(v => v.systemType.id == 36 and v.profileForCustom is not null and v.profileForCustom.id == profile.id and v.namespaceForVersion == classVersion.namespaceForVersion)|first %}
+                {% set useCase = profileAssociation.textProperties|filter(v => v.systemType.id == 36 and v.namespaceForVersion == objectVersion.namespaceForVersion)|first %}
                 <h3>Use case
                     {% if useCase %}
                         <a href="#" class="btn-use-case btn btn-success btn-xs"><i class="fa fa-edit"></i></a>
@@ -91,7 +101,7 @@
             </div>
 
             <div class="clearfix">
-                {% set examples = classVersion.class.textProperties|filter(v => v.systemType.id == 7 and v.profileForCustom is not null and v.profileForCustom.id == profile.id and v.namespaceForVersion == classVersion.namespaceForVersion) %}
+                {% set examples = profileAssociation.textProperties|filter(v => v.systemType.id == 7 and v.namespaceForVersion == objectVersion.namespaceForVersion) %}
                 <h3>Additional examples <a href="#" class="btn-new-example btn btn-xs btn-primary"><i class="fas fa-plus"></i> Add</a></h3>
                 {{ form_start(formNewExample) }}
                 {{ form_errors(formNewExample) }}
@@ -142,7 +152,7 @@
             </div>
 
             <div class="clearfix">
-                {% set note = classVersion.class.textProperties|filter(v => v.systemType.id == 33 and v.profileForCustom is not null and v.profileForCustom.id == profile.id and v.namespaceForVersion == classVersion.namespaceForVersion)|first %}
+                {% set note = profileAssociation.textProperties|filter(v => v.systemType.id == 33 and v.namespaceForVersion == objectVersion.namespaceForVersion)|first %}
                 <h3>Profile internal note {% if note %}
                         <a href="#" class="btn-note btn btn-success btn-xs"><i class="fa fa-edit"></i></a>
                     {% else %}

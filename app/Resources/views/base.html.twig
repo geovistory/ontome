@@ -212,6 +212,23 @@
             $('#iconTabShowMyProjects').click(function(){
                 $('.nav-tabs a[href="#my-projects"]').tab('show');
             })
+
+            function copyToClipboard(element) {
+                var $temp = $("<input>");
+                $("body").append($temp);
+                $temp.val($(element).text()).select();
+                document.execCommand("copy");
+                $temp.remove();
+            }
+
+            $('button.copyToClipboard').on('click', function () {
+                // On améliore la fonction copyToClipboard avec un message "Copied!"
+                var elementId = $(this).data("id");
+                var element = $('#'+elementId);
+                copyToClipboard(element);
+                $(this).after('<span class="copyConfirm small text-primary">Copied! </span>');
+                setTimeout(function() { $('.copyConfirm').fadeOut(); }, 500);
+            });
         });
 
         let searchParams = new URLSearchParams(window.location.search);

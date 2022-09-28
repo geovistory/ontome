@@ -20,20 +20,29 @@
                     </a>
                 {% endif %}
                 {% if app.user is not null and ((not profile.isOngoing and profile.wasClosedAt is not null and profile.endDate is null) or (profile.isForcedPublication and profile.isOngoing)) %}
-                    <a  href="{{ path('api_classes_and_properties_by_profile_xml_rdfs', {
-                        'profile': profile.id
-                    }) }}"
-                        class="btn btn-primary"
-                        download="profile-{{ profile.standardLabel }}.rdf">
-                        <i class="fas fa-code"></i> RDFS
-                    </a>
-                    <a  href="{{ path('api_classes_and_properties_by_profile_xml', {
-                        'profile': profile.id
-                    }) }}"
-                        class="btn btn-primary"
-                        download="profile-{{ profile.standardLabel }}.rdf">
-                        <i class="fas fa-code"></i> OWL-DL
-                    </a>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="fas fa-file-export"></i> Export <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a  href="{{ path('api_classes_and_properties_by_profile_xml_rdfs', {
+                                    'profile': profile.id
+                                }) }}"
+                                    download="profile-{{ profile.standardLabel }}.rdf">
+                                    <i class="fas fa-code"></i> RDFS
+                                </a>
+                            </li>
+                            <li>
+                                <a  href="{{ path('api_classes_and_properties_by_profile_xml', {
+                                    'profile': profile.id
+                                }) }}"
+                                    download="profile-{{ profile.standardLabel }}.rdf">
+                                    <i class="fas fa-code"></i> OWL-DL
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
                 {% endif %}
             </span>
         </h2>
@@ -269,7 +278,7 @@
                                 <th>Class label</th>
                                 <th>Namespace</th>
                                 <th>Association type</th>
-                                <th>View customisation</th>
+                                <th>View customization</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -288,7 +297,7 @@
                                     <td>{{ class.associationType }}</td>
                                     <td>
                                     {% if class.nbTxtpCustom > 0 %}
-                                        {% if class.associationType == "Selected" %}<a href="{{ path('class_show_customisation', {'id': class.id, 'profile': profile.id}) }}" class="btn btn-xs btn-primary"><i class="fas fa-eye"></i></a>{% endif %}</td>
+                                        {% if class.associationType == "Selected" %}<a href="{{ path('show_customisation', {'id': class.profileAssociationId}) }}" class="btn btn-xs btn-success"><i class="fas fa-eye"></i></a>{% endif %}</td>
                                     {% endif %}
                                     </td>
                                 </tr>
@@ -327,7 +336,7 @@
                                 <th>Range</th>
                                 <th>Namespace</th>
                                 <th>Association type</th>
-                                <th>View customisation</th>
+                                <th>View customization</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -430,9 +439,9 @@
                                     </td>
 
                                     <td>
-                                        {% set txtPCustom = profileAssociation.property.textProperties|filter(v => v.profileForCustom is not null and v.profileForCustom.id == profile.id and v.namespaceForVersion == profileAssociation.entityNamespaceForVersion)|first %}
+                                        {% set txtPCustom = profileAssociation.textProperties|filter(v => v.namespaceForVersion == profileAssociation.entityNamespaceForVersion)|first %}
                                         {% if txtPCustom|length > 0 %}
-                                        <a href="{{ path('property_show_customisation', {'id': profileAssociation.property.id, 'profile': profile.id}) }}" class="btn btn-xs btn-primary">
+                                        <a href="{{ path('show_customisation', {'id': profileAssociation.id}) }}" class="btn btn-xs btn-success">
                                             <span class="fas fa-eye"></span>
                                         </a>
                                         {% endif %}
