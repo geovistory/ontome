@@ -76,7 +76,9 @@ class PropertyRepository extends EntityRepository
         $conn = $this->getEntityManager()
             ->getConnection();
 
-        $sql = "WITH t_ascendants_properties AS
+        $sql = "WITH t_namespaces AS(
+                    SELECT pk_namespace FROM che.namespace WHERE pk_namespace IN (".$in.")),
+                t_ascendants_properties AS
                 (
                 SELECT pk_parent,
                      parent_identifier,
@@ -84,7 +86,7 @@ class PropertyRepository extends EntityRepository
                      ARRAY_TO_STRING(_path,'|') ancestors,
                         pk_is_subproperty_of,
                         fk_namespace_for_version
-                  FROM che.ascendant_property_hierarchy(?, ARRAY[".$in."]::integer[])
+                  FROM che.ascendant_property_hierarchy(?, (SELECT array_agg(pk_namespace) FROM t_namespaces))
                 )
                 SELECT t_ascendants_properties.pk_parent  AS id,
                        t_ascendants_properties.parent_identifier AS identifier,
@@ -118,11 +120,13 @@ class PropertyRepository extends EntityRepository
                      che.class range JOIN che.class_version range_version ON range.pk_class = range_version.fk_class
                 WHERE p.pk_property = t_ascendants_properties.pk_parent
     AND   nsp.pk_namespace = pv.fk_namespace_for_version
-    AND pv.fk_namespace_for_version IN (".$in.")
+    AND pv.fk_namespace_for_version IN (SELECT pk_namespace FROM t_namespaces)
+    AND domain_version.fk_namespace_for_version IN (SELECT pk_namespace FROM t_namespaces)
+    AND range_version.fk_namespace_for_version IN (SELECT pk_namespace FROM t_namespaces)
     AND depth > 1
     AND pv.has_domain = domain.pk_class
     AND pv.has_range = range.pk_class
-    AND t_ascendants_properties.fk_namespace_for_version = pv.fk_namespace_for_version
+    AND t_ascendants_properties.fk_namespace_for_version IN (SELECT pk_namespace FROM t_namespaces)
                 GROUP BY t_ascendants_properties.pk_parent,
                      t_ascendants_properties.parent_identifier,
                      pv.has_domain,
@@ -143,10 +147,11 @@ class PropertyRepository extends EntityRepository
                      t_ascendants_properties.fk_namespace_for_version;";
 
         $stmt = $conn->prepare($sql);
-        $stmt->execute(array_merge(array($propertyVersion->getProperty()->getId()), $namespacesId, $namespacesId));
+        $stmt->execute(array_merge($namespacesId, array($propertyVersion->getProperty()->getId())));
 
         return $stmt->fetchAll();
     }
+
 
 
     /**

@@ -17,24 +17,28 @@
                     </a>
                 {% endif %}
                 {% if ((not namespace.isTopLevelNamespace and not namespace.isOngoing) or (namespace.isOngoing and is_granted('edit', namespace))) %}
-                    <a  href="{{ path('api_classes_and_properties_by_namespace_xml_rdfs', {
-                        namespace: namespace.id
-                    }) }}"
-                        class="btn btn-primary"
-                        download="namespace-{{ namespace.standardLabel }}.rdf">
-                        <i class="fas fa-code"></i> RDFS
-                    </a>
-                    <a  href="{{ path('api_classes_and_properties_by_namespace_xml', {
-                        namespace: namespace.id
-                    }) }}"
-                        class="btn btn-primary"
-                        download="namespace-{{ namespace.standardLabel }}.rdf">
-                        <i class="fas fa-code"></i> OWL-DL
-                    </a>
-                    <a href="#"
-                        class="btn btn-primary" data-toggle="modal" data-target="#myModal">
-                        <i class="fas fa-file-alt"></i> DOCX
-                    </a>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i class="fas fa-file-export"></i> Export <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a  href="{{ path('api_classes_and_properties_by_namespace_xml_rdfs', {namespace: namespace.id}) }}" download="namespace-{{ namespace.standardLabel }}.rdf">
+                                    <i class="fas fa-code"></i> RDFS
+                                </a>
+                            </li>
+                            <li>
+                                <a  href="{{ path('api_classes_and_properties_by_namespace_xml', {namespace: namespace.id}) }}" download="namespace-{{ namespace.standardLabel }}.rdf">
+                                    <i class="fas fa-code"></i> OWL-DL
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" data-toggle="modal" data-target="#myModal">
+                                    <i class="fas fa-file-alt"></i> DOCX
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
                 {% endif %}
             </span>
         </h2>
@@ -356,9 +360,9 @@
                 <h3>Identification</h3>
                 <p>
                     {% if namespace.topLevelNamespace.isExternalNamespace %}
-                        URI: <strong><a>{{ namespace.namespaceURI }}</a></strong>
+                        Base URI: <strong>{{ namespace.namespaceURI }}</strong>
                     {% else %}
-                        Internal URI: <strong><a>{{ namespace.topLevelNamespace.namespaceURI }}</a></strong>
+                        Base URI: <strong>{{ namespace.topLevelNamespace.namespaceURI }}</strong>
                     {% endif %}
                 </p>
                 {% if namespace.projectForTopLevelNamespace is not null %}

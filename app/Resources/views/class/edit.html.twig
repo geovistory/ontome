@@ -661,11 +661,13 @@
                     <h3 id="identifier-details-block">Identifier: {{ classVersion.class.identifierInNamespace }}</h3>
                 {% endif %}
                 <p>
-                    {% if not classVersion.namespaceForVersion.topLevelNamespace.isExternalNamespace %}
-                        Official URI: <strong><a id="official-uri">{{ classVersion.namespaceForVersion.topLevelNamespace.namespaceURI }}/{{ classVersion.class.identifierInNamespace }}</a></strong>
-                        <button data-id="official-uri" class="btn btn-xs btn-link copyToClipboard" title="Copy to clipboard"><i class="fas fa-copy"></i></button><br>
+                    {% if classVersion.isLinkableURI %}
+                        Official URI: <a href="{{ classVersion.namespaceForVersion.topLevelNamespace.namespaceURI }}{{ classVersion.class.identifierInNamespace }}"><strong><span id="official-uri">{{ classVersion.namespaceForVersion.topLevelNamespace.namespaceURI }}{{ classVersion.class.identifierInNamespace }}</span></strong></a>
+                    {% else %}
+                        Official URI: <strong><span id="official-uri">{{ classVersion.namespaceForVersion.topLevelNamespace.namespaceURI }}{{ classVersion.class.identifierInNamespace }}</span></strong>
                     {% endif %}
-                    OntoME URI: <strong><a id="ontome-uri" href="https://ontome.net/ontology/c{{ classVersion.class.id }}">https://ontome.net/ontology/c{{ classVersion.class.id }}</a></strong>
+                    <button data-id="official-uri" class="btn btn-xs btn-link copyToClipboard" title="Copy to clipboard"><i class="fas fa-copy"></i></button><br>
+                    OntoME URI: <strong><span id="ontome-uri">https://ontome.net/ontology/c{{ classVersion.class.id }}</span></strong>
                     <button data-id="ontome-uri" class="btn btn-xs btn-link copyToClipboard" title="Copy to clipboard"><i class="fas fa-copy"></i></button>
                 </p>
                 <div class="pull-right add-div">

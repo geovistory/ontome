@@ -711,11 +711,13 @@
             <div id="identification" class="tab-pane fade">
                 <h3>Identifier: {{ propertyVersion.property.identifierInNamespace }}</h3>
                 <p>
-                    {% if not propertyVersion.namespaceForVersion.topLevelNamespace.isExternalNamespace %}
-                        Official URI: <strong><a id="official-uri">{{ propertyVersion.namespaceForVersion.topLevelNamespace.namespaceURI }}/{{ propertyVersion.property.identifierInNamespace }}</a></strong>
-                        <button data-id="official-uri" class="btn btn-xs btn-link copyToClipboard" title="Copy to clipboard"><i class="fas fa-copy"></i></button><br>
+                    {% if propertyVersion.isLinkableURI %}
+                        Official URI: <a href="{{ propertyVersion.namespaceForVersion.topLevelNamespace.namespaceURI }}{{ propertyVersion.property.identifierInNamespace }}"><strong><span id="official-uri">{{ propertyVersion.namespaceForVersion.topLevelNamespace.namespaceURI }}{{ propertyVersion.property.identifierInNamespace }}</span></strong></a>
+                    {% else %}
+                        Official URI: <strong><span id="official-uri">{{ propertyVersion.namespaceForVersion.topLevelNamespace.namespaceURI }}{{ propertyVersion.property.identifierInNamespace }}</span></strong>
                     {% endif %}
-                    OntoME URI: <strong><a id="ontome-uri" href="https://ontome.net/ontology/p{{ propertyVersion.property.id }}">https://ontome.net/ontology/p{{ propertyVersion.property.id }}</a></strong>
+                    <button data-id="official-uri" class="btn btn-xs btn-link copyToClipboard" title="Copy to clipboard"><i class="fas fa-copy"></i></button><br>
+                    OntoME URI: <strong><span id="ontome-uri">https://ontome.net/ontology/p{{ propertyVersion.property.id }}</span></strong>
                     <button data-id="ontome-uri" class="btn btn-xs btn-link copyToClipboard" title="Copy to clipboard"><i class="fas fa-copy"></i></button>
                 </p>
 

@@ -49,7 +49,7 @@ class NamespaceForm extends AbstractType
                 'attr' => ['autocomplete' => 'off']
             ))
             ->add('namespaceURI', UrlType::class, array(
-                'label' => 'Namespace URI',
+                'label' => 'Base URI',
                 'default_protocol' => 'http',
                 'attr' => ['autocomplete' => 'off']
             ))
