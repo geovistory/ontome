@@ -715,7 +715,7 @@
                 {% endif %}
                 <p>
                     {% if propertyVersion.isLinkableURI %}
-                        Official URI: <a href="{{ propertyVersion.namespaceForVersion.topLevelNamespace.namespaceURI }}{{ propertyVersion.property.identifierInNamespace }}"><strong><span id="official-uri">{{ propertyVersion.namespaceForVersion.topLevelNamespace.namespaceURI }}{{ propertyVersion.property.identifierInNamespace }}</span></strong></a>
+                        Official URI: <a target="_blank" href="{{ propertyVersion.namespaceForVersion.topLevelNamespace.namespaceURI }}{{ propertyVersion.property.identifierInNamespace }}"><strong><span id="official-uri">{{ propertyVersion.namespaceForVersion.topLevelNamespace.namespaceURI }}{{ propertyVersion.property.identifierInNamespace }}</span></strong></a>
                     {% else %}
                         Official URI: <strong><span id="official-uri">{{ propertyVersion.namespaceForVersion.topLevelNamespace.namespaceURI }}{{ propertyVersion.property.identifierInNamespace }}</span></strong>
                     {% endif %}
