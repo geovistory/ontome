@@ -270,7 +270,7 @@
                         var stringForURI = this.value;
                         stringForURI = stringForURI.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
                         stringForURI = stringForURI.replace(/[\s-]+/g, '-').toLowerCase().replace(/[^0-9a-z\-]/g, '');
-                        $('#namespace_quick_add_form_namespaceURI').val('https://ontome.net/ns/' + stringForURI);
+                        $('#namespace_quick_add_form_namespaceURI').val('https://ontome.net/ns/' + stringForURI + '/');
                     }
                 });
             }
@@ -286,7 +286,7 @@
                     var stringForURI = this.value;
                     stringForURI = stringForURI.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
                     stringForURI = stringForURI.replace(/[\s-]+/g, '-').toLowerCase().replace(/[^0-9a-z\-]/g, '');
-                    $('#namespace_quick_add_form_namespaceURI').val('https://ontome.net/ns/' + stringForURI);
+                    $('#namespace_quick_add_form_namespaceURI').val('https://ontome.net/ns/' + stringForURI + '/');
                 }
             });
 
@@ -296,7 +296,7 @@
                 stringForURI = stringForURI.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
                 stringForURI = stringForURI.replace(/[\s-]+/g, '-').toLowerCase().replace(/[^0-9a-z\-]/g, '');
                 if (stringForURI != '') {
-                    $('#namespace_quick_add_form_namespaceURI').val('https://ontome.net/ns/' + stringForURI);
+                    $('#namespace_quick_add_form_namespaceURI').val('https://ontome.net/ns/' + stringForURI + '/');
                 }
                 else {
                     $('#namespace_quick_add_form_namespaceURI').val('');
@@ -319,7 +319,7 @@
                     var stringForURI = $('#namespace_quick_add_form_uriGenerator').val();
                     stringForURI = stringForURI.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
                     stringForURI = stringForURI.replace(/[\s-]+/g, '-').toLowerCase().replace(/[^0-9a-z\-]/g, '');
-                    $('#namespace_quick_add_form_namespaceURI').val('https://ontome.net/ns/' + stringForURI);
+                    $('#namespace_quick_add_form_namespaceURI').val('https://ontome.net/ns/' + stringForURI + '/');
                 }
             });
 

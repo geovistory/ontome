@@ -159,6 +159,7 @@ class ClassController extends Controller
         if ($form->isSubmitted() && $form->isValid()) {
             $class = $form->getData();
             $class->setIsManualIdentifier(is_null($namespace->getTopLevelNamespace()->getClassPrefix()));
+            $class->setIdentifierInURI($class->getIdentifierInNamespace()); // On attribue le même identifiant à la création en attendant un nouveau ticket (si identifier automatique c'est dans le trigger)
             $class->setCreator($this->getUser());
             $class->setModifier($this->getUser());
             $class->setCreationTime(new \DateTime('now'));

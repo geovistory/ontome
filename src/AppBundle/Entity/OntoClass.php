@@ -35,6 +35,11 @@ class OntoClass
     private $identifierInNamespace;
 
     /**
+     * @ORM\Column(type="string", name="identifier_in_uri")
+     */
+    private $identifierInURI;
+
+    /**
      * @var boolean
      * A non-persisted field that's used to know if the $identifierInNamespace field is manually set by the user
      * or automatically set by a trigger in the database
@@ -217,6 +222,14 @@ class OntoClass
     }
 
     /**
+     * @return mixed
+     */
+    public function getIdentifierInURI()
+    {
+        return $this->identifierInURI;
+    }
+
+    /**
      * @return bool
      */
     public function isManualIdentifier()
@@ -391,6 +404,14 @@ class OntoClass
     public function setIdentifierInNamespace($identifierInNamespace)
     {
         $this->identifierInNamespace = $identifierInNamespace;
+    }
+
+    /**
+     * @param mixed $identifierInURI
+     */
+    public function setIdentifierInURI($identifierInURI)
+    {
+        $this->identifierInURI = $identifierInURI;
     }
 
 

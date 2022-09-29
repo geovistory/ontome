@@ -34,6 +34,11 @@ class Property
     private $identifierInNamespace;
 
     /**
+     * @ORM\Column(type="string", name="identifier_in_uri")
+     */
+    private $identifierInURI;
+
+    /**
      * @ORM\Column(type="text")
      */
     private $importerXmlField;
@@ -214,6 +219,15 @@ class Property
     /**
      * @return mixed
      */
+    public function getIdentifierInURI()
+    {
+        return $this->identifierInURI;
+    }
+
+
+    /**
+     * @return mixed
+     */
     public function getImporterXmlField()
     {
         return $this->importerXmlField;
@@ -379,6 +393,14 @@ class Property
     public function setIdentifierInNamespace($identifierInNamespace)
     {
         $this->identifierInNamespace = $identifierInNamespace;
+    }
+
+    /**
+     * @param mixed $identifierInURI
+     */
+    public function setIdentifierInURI($identifierInURI)
+    {
+        $this->identifierInURI = $identifierInURI;
     }
 
 

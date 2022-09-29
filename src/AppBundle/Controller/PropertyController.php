@@ -193,6 +193,7 @@ class PropertyController extends Controller
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $property = $form->getData();
+            $property->setIdentifierInURI($property->getIdentifierInNamespace()); // On attribue le même identifiant à la création en attendant un nouveau ticket (si identifier automatique c'est dans le trigger)
             if($type == 'outgoing') {
                 $propertyVersion->setDomain($class);
                 $domainNamespace = $em->getRepository("AppBundle:OntoClassVersion")->findClassVersionByClassAndNamespacesId($class, $namespacesId)->getNamespaceForVersion();

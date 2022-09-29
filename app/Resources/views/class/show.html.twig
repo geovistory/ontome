@@ -668,9 +668,9 @@
             <div id="identification" class="tab-pane fade">
                 <h3>Identifier: {{ classVersion.class.identifierInNamespace }}</h3>
                 <p>{% if classVersion.isLinkableURI %}
-                        Official URI: <a target="_blank" href="{{ classVersion.namespaceForVersion.topLevelNamespace.namespaceURI }}{{ classVersion.class.identifierInNamespace }}"><strong><span id="official-uri">{{ classVersion.namespaceForVersion.topLevelNamespace.namespaceURI }}{{ classVersion.class.identifierInNamespace }}</span></strong></a>
+                        Official URI: <a target="_blank" href="{{ classVersion.namespaceForVersion.topLevelNamespace.namespaceURI }}{{ classVersion.class.identifierInURI }}"><strong><span id="official-uri">{{ classVersion.namespaceForVersion.topLevelNamespace.namespaceURI }}{{ classVersion.class.identifierInNamespace }}</span></strong></a>
                     {% else %}
-                        Official URI: <strong><span id="official-uri">{{ classVersion.namespaceForVersion.topLevelNamespace.namespaceURI }}{{ classVersion.class.identifierInNamespace }}</span></strong>
+                        Official URI: <strong><span id="official-uri">{{ classVersion.namespaceForVersion.topLevelNamespace.namespaceURI }}{{ classVersion.class.identifierInURI }}</span></strong>
                     {% endif %}
                     <button data-id="official-uri" class="btn btn-xs btn-link copyToClipboard" title="Copy to clipboard"><i class="fas fa-copy"></i></button><br>
                     OntoME URI: <strong><span id="ontome-uri">https://ontome.net/ontology/c{{ classVersion.class.id }}</span></strong>
