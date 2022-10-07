@@ -15,67 +15,87 @@
             <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
         </a>
         <h2>View {{ objectVersion.standardLabel }} - {{ object.identifierInNamespace }} in {{ profileAssociation.profile.standardLabel }} profile</h2>
-        <div class="container well" id="details">
-            <div class="row">
-                <div class="col-lg-2">
-                    <p>Scope note:</p>
+        <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+            <div class="panel panel-default">
+                <div class="panel-heading" role="tab" id="headingDefinition">
+                    <h4 class="panel-title">
+                        <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseDefinition" aria-expanded="true" aria-controls="collapseDefinition">
+                            {% if profileAssociation.objectType == "class" %}
+                                <i class="fas fa-eye"></i> Class definition
+                            {% endif %}
+                            {% if profileAssociation.objectType == "property" %}
+                                <i class="fas fa-eye"></i> Property definition
+                            {% endif %}
+                        </a>
+                    </h4>
                 </div>
-                <div class="col-lg-10">
-                    {% for scopeNote in object.textProperties|filter(v => v.systemType.id == 1 and v.namespaceForVersion == objectVersion.namespaceForVersion) %}
-                        {{ scopeNote.textProperty|raw }}
-                    {% endfor %}
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-lg-2">
-                    <p>Examples:</p>
-                </div>
-                <div class="col-lg-10">
-                    {% for example in object.textProperties|filter(v => v.systemType.id == 7 and v.namespaceForVersion == objectVersion.namespaceForVersion) %}
-                        {{ example.textProperty|raw }}
-                    {% endfor %}
+                <div id="collapseDefinition" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingDefinition">
+                    <ul class="list-group">
+                        <li class="list-group-item">
+                            <div class="row">
+                                <div class="col-lg-2">
+                                    <p>Scope note:</p>
+                                </div>
+                                <div class="col-lg-10">
+                                    {% for scopeNote in object.textProperties|filter(v => v.systemType.id == 1 and v.namespaceForVersion == objectVersion.namespaceForVersion) %}
+                                        {{ scopeNote.textProperty|raw }}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </li>
+                        <li class="list-group-item">
+                            <div class="row">
+                                <div class="col-lg-2">
+                                    <p>Examples:</p>
+                                </div>
+                                <div class="col-lg-10">
+                                    {% for example in object.textProperties|filter(v => v.systemType.id == 7 and v.namespaceForVersion == objectVersion.namespaceForVersion) %}
+                                        {{ example.textProperty|raw }}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
                 </div>
             </div>
         </div>
-        <div class="container">
-            <div>
-                {% set justification = profileAssociation.textProperties|filter(v => v.systemType.id == 15 and v.namespaceForVersion == objectVersion.namespaceForVersion)|first %}
-                <h3>Justification of the selection in the profile</h3>
-                <span class="txtp-justification">{{ justification ? justification.textProperty|raw : '<i>Not justification yet.</i>' }}</span>
-            </div>
+        <div>
+            {% set justification = profileAssociation.textProperties|filter(v => v.systemType.id == 15 and v.namespaceForVersion == objectVersion.namespaceForVersion)|first %}
+            <h3>Justification of the selection in the profile</h3>
+            <span class="txtp-justification">{{ justification ? justification.textProperty|raw : '<i>Not justification yet.</i>' }}</span>
+        </div>
 
-            <div class="clearfix">
-                {% set useCase = profileAssociation.textProperties|filter(v => v.systemType.id == 36 and v.namespaceForVersion == classVersion.namespaceForVersion)|first %}
-                <h3>Use cases</h3>
-                <span class="txtp-use-case">{{ useCase ? useCase.textProperty|raw : '<i>Not use case yet.</i>' }}</span>
-            </div>
+        <div class="clearfix">
+            {% set useCase = profileAssociation.textProperties|filter(v => v.systemType.id == 36 and v.namespaceForVersion == classVersion.namespaceForVersion)|first %}
+            <h3>Use cases</h3>
+            <span class="txtp-use-case">{{ useCase ? useCase.textProperty|raw : '<i>Not use case yet.</i>' }}</span>
+        </div>
 
-            <div class="clearfix">
-                {% set examples = profileAssociation.textProperties|filter(v => v.systemType.id == 7 and v.namespaceForVersion == objectVersion.namespaceForVersion) %}
-                <h3>Additional examples</h3>
-                <table class="table table-striped" id="profile-examples-table">
-                    <thead>
+        <div class="clearfix">
+            {% set examples = profileAssociation.textProperties|filter(v => v.systemType.id == 7 and v.namespaceForVersion == objectVersion.namespaceForVersion) %}
+            <h3>Additional examples</h3>
+            <table class="table table-striped" id="profile-examples-table">
+                <thead>
+                <tr>
+                    <th>Additional examples</th>
+                    <th>Language</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for example in examples %}
                     <tr>
-                        <th>Additional examples</th>
-                        <th>Language</th>
+                        <td>{{ example.textProperty|raw }}</td>
+                        <td>{{ example.languageIsoCode }}</td>
                     </tr>
-                    </thead>
-                    <tbody>
-                    {% for example in examples %}
-                        <tr>
-                            <td>{{ example.textProperty|raw }}</td>
-                            <td>{{ example.languageIsoCode }}</td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
 
-            <div class="clearfix">
-                {% set note = profileAssociation.textProperties|filter(v => v.systemType.id == 33 and v.namespaceForVersion == objectVersion.namespaceForVersion)|first %}
-                <h3>Profile internal note</h3>
-                <span class="txtp-note">{{ note ? note.textProperty|raw : '<i>Not profile internal note yet.</i>' }}</span>
-            </div>
+        <div class="clearfix">
+            {% set note = profileAssociation.textProperties|filter(v => v.systemType.id == 33 and v.namespaceForVersion == objectVersion.namespaceForVersion)|first %}
+            <h3>Profile internal note</h3>
+            <span class="txtp-note">{{ note ? note.textProperty|raw : '<i>Not profile internal note yet.</i>' }}</span>
         </div>
     </div>
 {% endblock %}
