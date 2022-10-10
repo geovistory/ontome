@@ -471,24 +471,49 @@
             <div id="namespace-hierarchy" class="tab-pane fade">
                 <h3>Versions</h3>
                 {% if namespace.isTopLevelNamespace %}
-                    <p>{{ namespace.standardLabel }} is a <b>root namespace</b>.</p>
-                <h3>Versions of this namespace</h3>
+                    {% set ongoingNamespace = namespace.childVersions|filter(v => v.isOngoing)|first %}
+                    {% set deprecatedNamespace = namespace.childVersions|filter(v => v.deprecatedAt is not null)|first %}
+                    <p>{{ namespace.standardLabel}} is a <b>root namespace</b>.</p>
+                    {% if ongoingNamespace %}
+                    <p>Ongoing namespace:
+                        <a href="{{ path('namespace_show', {
+                            'id': ongoingNamespace.id,
+                            '_fragment': 'namespace-hierarchy'
+                        }) }}">{{ ongoingNamespace.standardLabel }}</a>
+                    </p>
+                    {% endif %}
+                    {% if deprecatedNamespace %}
+                    <p>Deprecated namespace:
+                        <a href="{{ path('namespace_show', {
+                            'id': deprecatedNamespace.id,
+                            '_fragment': 'namespace-hierarchy'
+                        }) }}">{{ deprecatedNamespace.standardLabel }}</a>
+                    </p>
+                    {% endif %}
+                {% elseif namespace.isOngoing %}
+                    {% set rootNamespace = namespace.topLevelNamespace %}
+                    {% set deprecatedNamespace = rootNamespace.childVersions|filter(v => v.deprecatedAt is not null)|first %}
+                {% elseif namespace.publishedAt is not null and namespace.deprecatedAt is null %}
+                    {% set rootNamespace = namespace.topLevelNamespace %}
+                    {% set ongoingNamespace = rootNamespace.childVersions|filter(v => v.isOngoingl)|first %}
+                {% else %}<!--Deprecated version-->
+                    {% set rootNamespace = namespace.topLevelNamespace %}
+                    {% set ongoingNamespace = rootNamespace.childVersions|filter(v => v.isOngoingl)|first %}
+                {% endif %}
+                <h3>Published versions</h3>
                 <table class="table table-striped" id="child-namespaces-table">
                     <thead>
                     <tr>
-                        <th>PublishedAt</th>
                         <th>Namespace</th>
-                        <th>URI</th>
-                        <th>Last updated</th>
+                        <th>Publication date</th>
                         {% if app.user.id is defined %}
                         <th>Current namespace</th>
                         {% endif %}
                     </tr>
                     </thead>
                     <tbody>
-                    {% for childNamespace in namespace.childVersions %}
-                        <tr {% if is_granted('edit', childNamespace) and childNamespace.isOngoing %}class="success"{% endif %}>
-                            <td>{{ childNamespace.publishedAt|date('Y-m-d H-i:s') }}</td>
+                    {% for childNamespace in namespace.childVersions|filter(v => not v.isOngoing and v.deprecatedAt is null) %}
+                        <tr>
                             <td>
                                 <a href="{{ path('namespace_show', {
                                     'id': childNamespace.id,
@@ -497,8 +522,7 @@
                                     {{ childNamespace.standardLabel }}
                                 </a>
                             </td>
-                            <td>{{ childNamespace.displayURI }}</td>
-                            <td>{{ childNamespace.modificationTime|date('Y-m-d') }}</td>
+                            <td>{{ childNamespace.publishedAt|date('Y-m-d') }}</td>
                             {% if app.user.id is defined %}
                             <td>
                                 {% set isEnabled = false %}
@@ -524,16 +548,6 @@
                     {% endfor %}
                     </tbody>
                 </table>
-                {% else %}
-                    <p>Root namespace: <a href="{{ path('namespace_show', {
-                            'id': namespace.topLevelNamespace.id,
-                            '_fragment':'namespace-hierarchy'
-                        }) }}">
-                            {{ namespace.topLevelNamespace.standardLabel }}
-                        </a>
-                    </p>
-                    <p>Root namespace prefix: {{ namespace.topLevelNamespace.rootNamespacePrefix }}</p>
-                {% endif %}
             </div>
             {% if namespace.isTopLevelNamespace and namespace.projectForTopLevelNamespace.permissionForUser(app.user) == 1 %}
             <div id="identifiers" class="tab-pane fade">
@@ -1151,10 +1165,7 @@
             });
             $('#mismatches-table').DataTable();
             $('#child-namespaces-table').DataTable({
-                "order": [[0, 'desc']],
-                "columnDefs": [
-                    {"visible": false, "targets": 0 }
-                ],
+                "order": [[1, 'desc']],
                 "autoWidth": false
             });
 
