@@ -125,7 +125,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for textProperty in project.textProperties|(v => v.systemType.id == 33) %}
+                    {% for textProperty in project.textProperties|filter(v => v.systemType.id == 33) %}
                         {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
                         <tr>
                             <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
