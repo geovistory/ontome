@@ -58,20 +58,22 @@
                         </div>
                     </div>
 
-                    {# Additional notes #}
-                    {% set hasOneOrManyAdditionalNotes = false %}
-                    {% for textProperty in project.textProperties
-                        if textProperty.systemType.id in [33,34,35] %}
-                        {% set hasOneOrManyAdditionalNotes = true %}
-                    {% endfor %}
-                    {% if hasOneOrManyAdditionalNotes %}
+                    {# Internal notes #}
+                    {% set canSeeInternalNotes = false %}
+                    {% if app.user is not null %}
+                        {% for userProjectAssociation in project.userProjectAssociations
+                            if userProjectAssociation.user.id == app.user.id and userProjectAssociation.permission <= 3 %}
+                            {# Seuls les admins et managers du projet peuvent voir les internal notes #}
+                            {% set canSeeInternalNotes = true %}
+                        {% endfor %}
+                    {% endif %}
+                    {% if canSeeInternalNotes and project.textProperties|filter(v => v.systemType.id == 33)|length > 0 %}
                         <div class="row">
                             <div class="col-lg-2">
                                 <p>Additional notes:</p>
                             </div>
                             <div class="col-lg-10">
-                                {% for textProperty in project.textProperties
-                                    if textProperty.systemType.id in [33,34,35] %}
+                                {% for textProperty in project.textProperties|filter(v => v.systemType.id == 33) %}
                                     {{ textProperty.textProperty|raw }}
                                 {% endfor %}
                             </div>
@@ -123,8 +125,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for textProperty in project.textProperties
-                        if textProperty.systemType.id == 33 %}
+                    {% for textProperty in project.textProperties|(v => v.systemType.id == 33) %}
                         {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
                         <tr>
                             <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
