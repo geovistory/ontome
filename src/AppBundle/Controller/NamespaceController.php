@@ -704,7 +704,10 @@ class NamespaceController  extends Controller
             //Source
             if($relation->getSourceNamespaceForVersion() == $referencedNamespace){
                 //Verifier si la classe ou propriété source existe dans la nouvelle référence
-                if($relation->getSource()->getClassVersionForDisplay($newReferencedNamespace)->getNamespaceForVersion() == $newReferencedNamespace){
+                if(!is_null($relation->getSourceClass()) && $relation->getSource()->getClassVersionForDisplay($newReferencedNamespace)->getNamespaceForVersion() == $newReferencedNamespace){
+                    $relation->setSourceNamespaceForVersion($newReferencedNamespace);
+                }
+                if(!is_null($relation->getSourceProperty()) && $relation->getSource()->getPropertyVersionForDisplay($newReferencedNamespace)->getNamespaceForVersion() == $newReferencedNamespace){
                     $relation->setSourceNamespaceForVersion($newReferencedNamespace);
                 }
             }
@@ -712,7 +715,10 @@ class NamespaceController  extends Controller
             //Target
             if($relation->getTargetNamespaceForVersion() == $referencedNamespace){
                 //Verifier si la classe ou propriété target existe dans la nouvelle référence
-                if($relation->getTarget()->getClassVersionForDisplay($newReferencedNamespace)->getNamespaceForVersion() == $newReferencedNamespace){
+                if(!is_null($relation->getSourceClass()) && $relation->getTarget()->getClassVersionForDisplay($newReferencedNamespace)->getNamespaceForVersion() == $newReferencedNamespace){
+                    $relation->setTargetNamespaceForVersion($newReferencedNamespace);
+                }
+                if(!is_null($relation->getSourceProperty()) && $relation->getTarget()->getPropertyVersionForDisplay($newReferencedNamespace)->getNamespaceForVersion() == $newReferencedNamespace){
                     $relation->setTargetNamespaceForVersion($newReferencedNamespace);
                 }
             }
