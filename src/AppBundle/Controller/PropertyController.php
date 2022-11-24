@@ -467,28 +467,7 @@ class PropertyController extends Controller
             ]);
         }
 
-        $propertyTemp = new Property();
-        $propertyVersionTemp = new PropertyVersion();
-        $propertyVersionTemp->setNamespaceForVersion($propertyVersion->getNamespaceForVersion());
-        $propertyVersionTemp->setProperty($propertyTemp);
-
-        //$propertyTemp->addNamespace($property->getOngoingNamespace());
-        $propertyTemp->setIdentifierInNamespace($property->getIdentifierInNamespace());
-        $propertyTemp->setIsManualIdentifier(is_null($propertyVersion->getNamespaceForVersion()->getTopLevelNamespace()->getPropertyPrefix()));
-        $propertyTemp->setCreator($this->getUser());
-        $propertyTemp->setModifier($this->getUser());
-        $propertyTemp->setCreationTime(new \DateTime('now'));
-        $propertyTemp->setModificationTime(new \DateTime('now'));
-
-        $propertyVersionTemp->setCreator($this->getUser());
-        $propertyVersionTemp->setModifier($this->getUser());
-        $propertyVersionTemp->setCreationTime(new \DateTime('now'));
-        $propertyVersionTemp->setModificationTime(new \DateTime('now'));
-
-        $propertyVersionTemp->setDomain($propertyVersion->getDomain());
-        $propertyVersionTemp->setRange($propertyVersion->getRange());
-
-        $propertyTemp->addPropertyVersion($propertyVersionTemp);
+        $propertyTemp = clone $property;
 
         $formIdentifier = $this->createForm(PropertyEditIdentifierForm::class, $propertyTemp);
         $formIdentifier->handleRequest($request);

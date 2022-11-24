@@ -777,7 +777,7 @@
                     {% endif %}
                 {% endfor %}
 
-                <h3>Published versions</h3>
+                <h3>{% if namespace.isTopLevelNamespace or namespace.isOngoing %}Published versions{% else %}Other published versions{% endif %}</h3>
                 <table class="table table-striped" id="child-namespaces-table">
                     <thead>
                     <tr>
