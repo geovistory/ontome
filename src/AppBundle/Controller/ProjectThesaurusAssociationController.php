@@ -142,7 +142,7 @@ class ProjectThesaurusAssociationController extends Controller
     }
 
     /**
-     * @Route("/project-thesaurus-association/{id}/delete", name="project_thesaurus_association_delete", requirements={"id"="^[0-9]+$"})
+     * @Route("/project-thesaurus-association/{id}/delete", name="project_thesaurus_association_delete", requirements={"id"="^([0-9]+)|(associationID){1}$"})
      * @param ProjectThesaurusAssociation $ProjectThesaurusAssociation
      * @return JsonResponse a Json 204 HTTP response
      */
