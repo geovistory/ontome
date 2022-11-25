@@ -1,0 +1,69 @@
+<script>
+    $(document).on("submit", "#form_project_thesaurus_association_new", function(e){
+        e.preventDefault();
+        return  false;
+    });
+
+    $(document).on('click', '#mySubmitButton', function(e){
+        e.preventDefault();
+        var form = $('#form_project_thesaurus_association_new');
+        // get the properties and values from the form
+        var form_data = form.serialize();
+        var values = {};
+        $.each($("form").serializeArray(), function (i, field) {
+            values[field.name] = field.value;
+        });
+        //var form_data_array = form.serializeArray();
+        var getValue = function (valueName) {
+            return values[valueName];
+        };
+        var thesaurusURL = getValue('project_thesaurus_association_form[thesaurusURL]');
+
+        // always makes sense to signal user that something is happening
+        $('#submit-icon').attr('class', 'fas fa-spinner fa-spin');
+        $('#submit-text').text('Sending');
+
+        // simple approach avoid submitting multiple times
+        $('#mySubmitButton').attr("disabled",true);
+
+        // the actual request to your newAction
+        $.ajax({
+            url: "{{ path('project_thesaurus_association_new', {'projectId': projectId }) }}",
+            type: 'POST',
+            dataType: 'json',
+            data: form_data,
+            success:function(data){
+
+                // handling the response data from the controller
+                if(data.status == 'Error'){
+                    console.log("[API] ERROR: "+data.message);
+                    var innerHTML = $(data.html);
+                    $('#form_project_thesaurus_association_new').remove();
+                    $('#new-project-thesaurus-association-form').html(innerHTML);
+                }
+                if(data.status == 'Success'){
+                    var innerHTML = $(data.html);
+                    var associationID = data.associationID;
+                    var urlRemoveThesaurus = '{{ path("project_thesaurus_association_delete", {'id' : 'associationID'}) }}';
+                    urlRemoveThesaurus = urlRemoveThesaurus.replace("associationID", associationID);
+
+                    $('#form_project_thesaurus_association_new').remove();
+                    $('#project-thesaurus-association-not-found').remove();
+                    $('#new-project-thesaurus-association-form').html(innerHTML);
+                    $('#project_thesaurus_association_form_thesaurusURL').val('');
+                    $('#project-thesaurus-associations-list').prepend( $('<li id="li-thesaurus-association-id-'+associationID+'">\n' +
+                        '                                        <p><a href="'+thesaurusURL+'" target="_blank">'+thesaurusURL+'</a>\n' +
+                        '                                        <a data-id="' + associationID + '" data-url="' + urlRemoveThesaurus + '" class="remove-thesaurus"><span class="glyphicon glyphicon-remove text-danger" aria-hidden="true"></span></a><span class="remove-thesaurus-loading-icon" data-id="' + associationID + '" style="display: none"><span class="fas fa-spinner fa-spin"></span></span></p>\n' +
+                        '                                </li>').hide().delay(500).show('slow') );
+
+                    console.log("[API] SUCCESS: "+data.message);
+                }
+
+                // signal to user the action is done
+                $('#submit-icon').attr('class', 'far fa-save');
+                $('#submit-text').text('Send');
+                $('#mySubmitButton').attr("disabled",false);
+            }
+        });
+    });
+</script>

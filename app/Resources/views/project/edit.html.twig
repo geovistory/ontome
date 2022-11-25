@@ -17,6 +17,7 @@
             <li><a data-toggle="tab" href="#import">Import (only admin)</a></li>
             {% endif %}
             <li><a data-toggle="tab" href="#profiles">Profiles</a></li>
+            <li><a data-toggle="tab" href="#vocabulary">Vocabulary</a></li>
             <li><a data-toggle="tab" href="#members">Members</a></li>
             <!--<li><a data-toggle="tab" href="#comments-list">Comments list</a></li>-->
         </ul>
@@ -408,6 +409,26 @@
                         </table>
                     </div>
                 </div>
+            </div>
+            <div id="vocabulary" class="tab-pane fade">
+                <h3>Thesaurus list</h3>
+                {% if project.projectThesaurusAssociations is empty %}
+                    <p>There is currently no controlled vocabulary linked to this project.</p>
+                {% else %}
+                    <ul id="project-thesaurus-associations-list" class="project-thesaurus-associations-list">
+                        {% for thesaurus in project.projectThesaurusAssociations %}
+                            <li id="li-thesaurus-association-id-{{ thesaurus.id }}">
+                                <p><a href="{{ thesaurus.thesaurusURL }}" target="_blank">{{ thesaurus.thesaurusURL }}</a><a data-id="{{ thesaurus.id }}" data-url="{{ path("project_thesaurus_association_delete", {'id' : thesaurus.id}) }}" class="remove-thesaurus">&nbsp;<span class="glyphicon glyphicon-remove text-danger" aria-hidden="true"></span></a><span class="remove-thesaurus-loading-icon" data-id="{{ thesaurus.id }}" style="display: none"><span class="fas fa-spinner fa-spin"></span></span></p>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+                <h3>Add a new thesaurus</h3>
+                {% if app.user %}
+                    <div class="new-project-thesaurus-association-form" id="new-project-thesaurus-association-form">
+                        {{ render(controller('AppBundle:ProjectThesaurusAssociation:new', {'projectId' : project.id})) }}
+                    </div>
+                {% endif %}
             </div>
             <div id="members" class="tab-pane fade">
                 <div class="row">
@@ -846,7 +867,22 @@
                 });
             });
 
+            $(document).on("click", ".remove-thesaurus", function() {
+                var selectedValue = $(this).data("id");
+                $(".remove-thesaurus[data-id='"+selectedValue+"']").hide(0);
+                $(".remove-thesaurus-loading-icon[data-id='"+selectedValue+"']").css('display','inline');
+                var url =  $(this).data("url");
+                $.ajax({
+                    url: url ,
+                    type: 'POST',
+                    dataType: 'json',
+                    success:function(data){
+                        $("#li-thesaurus-association-id-"+selectedValue).remove();
+                    }
+                });
+            });
         } );
     </script>
+    {% include 'projectThesaurusAssociation/js-bock.html.twig'  with {'projectId' : project.id} %}
 
 {% endblock %}

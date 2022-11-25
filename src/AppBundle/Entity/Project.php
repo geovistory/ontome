@@ -136,6 +136,11 @@ class Project
      */
     private $projectAssociations;
 
+    /**
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\ProjectThesaurusAssociation", mappedBy="project")
+     */
+    private $projectThesaurusAssociations;
+
     public function __construct()
     {
         $this->ownedProfiles = new ArrayCollection();
@@ -147,6 +152,7 @@ class Project
         $this->childProjects = new ArrayCollection();
         $this->userProjectAssociations = new ArrayCollection();
         $this->projectAssociations = new ArrayCollection();
+        $this->projectThesaurusAssociations = new ArrayCollection();
     }
 
 
@@ -204,6 +210,14 @@ class Project
     public function getChildProjects()
     {
         return $this->childProjects;
+    }
+
+    /**
+     * @return ArrayCollection|ProjectThesaurusAssociation[]
+     */
+    public function getProjectThesaurusAssociations()
+    {
+        return $this->projectThesaurusAssociations;
     }
 
     /**
@@ -311,7 +325,7 @@ class Project
     }
 
     /**
-     * @return ArrayCollection|ProjectAssociation
+     * @return ArrayCollection|ProjectAssociation[]
      */
     public function getProjectAssociations()
     {

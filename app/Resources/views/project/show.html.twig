@@ -23,6 +23,7 @@
             <li><a data-toggle="tab" href="#project-hierarchy">Hierarchy</a></li>
             <li><a data-toggle="tab" href="#managed-namespaces">Namespaces</a></li>
             <li><a data-toggle="tab" href="#profiles">Profiles</a></li>
+            <li><a data-toggle="tab" href="#vocabulary">Vocabulary</a></li>
             <li><a data-toggle="tab" href="#members">Members</a></li>
             <!-- <li><a data-toggle="tab" href="#comments-list">Comments list</a></li> -->
         </ul>
@@ -364,6 +365,20 @@
                     {% endfor %}
                     </tbody>
                 </table>
+            </div>
+            <div id="vocabulary" class="tab-pane fade">
+                <h3>Thesaurus list</h3>
+                {% if project.projectThesaurusAssociations is empty %}
+                    <p>There is currently no controlled vocabulary linked to this project.</p>
+                {% else %}
+                    <ul id="project-thesaurus-associations-list" class="project-thesaurus-associations-list">
+                        {% for thesaurus in project.projectThesaurusAssociations %}
+                            <li>
+                                <p><a href="{{ thesaurus.thesaurusURL }}" target="_blank">{{ thesaurus.thesaurusURL }}</a></p>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
             </div>
             <div id="members" class="tab-pane fade">
                 <h3>Members of the project</h3>
