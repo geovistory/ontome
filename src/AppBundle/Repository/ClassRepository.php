@@ -546,4 +546,34 @@ class ClassRepository extends EntityRepository
 
         return $stmt->fetchAll();
     }
+
+    /**
+     * @param $label string the label of the class to find
+     * @return array
+     * @throws \Doctrine\DBAL\DBALException
+     */
+    public function findE55ChildClassesFromLabel($label)
+    {
+        $conn = $this->getEntityManager()
+            ->getConnection();
+
+        $sql = "SELECT array_to_json(array_agg(result)) AS json FROM ( 
+                    SELECT DISTINCT     pk_child AS id,
+                                        child_identifier AS \"standardLabel\",
+                                        'https://ontome.net/ontology/c'||pk_child AS \"ontomeURI\",
+                                        che.get_root_namespace(nsp.pk_namespace) AS \"rootNamespaceId\",
+                                        ( SELECT label FROM che.get_namespace_labels(che.get_root_namespace(nsp.pk_namespace)) WHERE language_iso_code = 'en') AS \"rootNamespaceLabel\"
+                    FROM che.descendant_class_hierarchy(53) cls, che.namespace nsp
+                    WHERE nsp.pk_namespace = cls.fk_namespace_for_version AND child_identifier ILIKE :label
+                    GROUP BY pk_child, child_identifier, nsp.pk_namespace, che.get_root_namespace(nsp.pk_namespace)
+                    ORDER BY \"rootNamespaceLabel\" ASC
+                ) result;";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->execute(array(
+            'label' => '%'.$label.'%'
+        ));
+
+        return $stmt->fetchAll();
+    }
 }

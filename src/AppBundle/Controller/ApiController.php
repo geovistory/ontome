@@ -316,5 +316,35 @@ class ApiController extends Controller
         return $response;
     }
 
+    /**
+     * @Route("/api/classes-type-descendants/label/{label}/json", name="classes_type_descendants_json", requirements={"label"="^[a-zA-Z0-9 -]+$"})
+     * @Method("GET")
+     * @param String $label the class label to find
+     * @return JsonResponse a Json formatted list representation of OntoClasses related to a Project
+     */
+    public function getE55ChildrenClassesByLabel($label)
+    {
+        try{
+            $em = $this->getDoctrine()->getManager();
+            $classes = $em->getRepository('AppBundle:OntoClass')
+                ->findE55ChildClassesFromLabel($label);
+        }
+        catch (\Exception $e) {
+            $message = $e->getMessage();
+            $status = 'Error';
+            $response = array(
+                'status' => $status,
+                'message' => $message
+            );
+            return new JsonResponse($response, 500, array('content-type:application/problem+json'));
+        }
+
+        if(empty($classes[0]['json'])) {
+            return new JsonResponse(null,204, array());
+        }
+
+        return new JsonResponse($classes[0]['json'],200, array(), true);
+    }
+
 
 }
