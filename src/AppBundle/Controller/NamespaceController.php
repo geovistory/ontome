@@ -774,6 +774,7 @@ class NamespaceController  extends Controller
         $allNamespacesReferences = $namespace->getAllReferencedNamespaces();
         $allNamespacesReferences->add($namespace);
         $allNamespacesReferences->add($em->getRepository('AppBundle:OntoNamespace')->findOneBy(array('id' => 4)));
+        //var_dump($allNamespacesReferences->map(function($v){return $v->getId();})->toArray()); die;
 
         foreach ($namespace->getTextProperties() as $textProperty){
             if($textProperty->getSystemType()->getId() == 2 and $textProperty->getLanguageIsoCode() == "en"){
@@ -878,7 +879,6 @@ class NamespaceController  extends Controller
         if($namespace->getDirectReferencedNamespaces()->count() > 0){ //S'il y a les NS références
             $directNamespacesReferences = $namespace->getDirectReferencedNamespaces();
             $standardLabelDirectNamespacesReferences = $directNamespacesReferences->map(function(OntoNamespace $ns){return $ns->getStandardLabel();});
-            $allNamespacesReferences = $namespace->getAllReferencedNamespaces();
             $nsCRM = $allNamespacesReferences->filter(function($v){return $v->getTopLevelNamespace()->getId() == 7;});
 
             // Plusieurs formulations
