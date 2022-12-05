@@ -1217,7 +1217,7 @@ class NamespaceController  extends Controller
             }
             elseif($a->getPropertyVersions()->first()->getNamespaceForVersion()->getTopLevelNamespace()->getId() != 7 and $b->getPropertyVersions()->first()->getNamespaceForVersion()->getTopLevelNamespace()->getId() != 7){
                 // C'est la même chose que le premier if mais plus clair à la lecture.
-                return strnatcmp($a()->getIdentifierInNamespace(), $b()->getIdentifierInNamespace());
+                return strnatcmp($a->getIdentifierInNamespace(), $b->getIdentifierInNamespace());
             }
             elseif($a->getPropertyVersions()->first()->getNamespaceForVersion()->getTopLevelNamespace()->getId() == 7 and $b->getPropertyVersions()->first()->getNamespaceForVersion()->getTopLevelNamespace()->getId() != 7){
                 return false;

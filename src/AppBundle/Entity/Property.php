@@ -618,17 +618,17 @@ class Property
             // Trier d'abord CRM les autres puis par identifier
             $iterator = $parentPropertyAssociations->getIterator();
             $iterator->uasort(function ($a,$b){
-                if($a->getNamespaceForVersion()->getTopLevelNamespace()->getId() == 7 and $b->getNamespaceForVersion()->getTopLevelNamespace()->getId() == 7){
-                    return strnatcmp($a->getParentProperty()->getIdentifierInNamespace(), $b->getParentProperty()->getIdentifierInNamespace());
+                if($a->getChildPropertyNamespace()->getTopLevelNamespace()->getId() == 7 and $b->getChildPropertyNamespace()->getTopLevelNamespace()->getId() == 7){
+                    return strnatcmp($a->getChildProperty()->getIdentifierInNamespace(), $b->getChildProperty()->getIdentifierInNamespace());
                 }
-                elseif($a->getNamespaceForVersion()->getTopLevelNamespace()->getId() != 7 and $b->getNamespaceForVersion()->getTopLevelNamespace()->getId() != 7){
+                elseif($a->getChildPropertyNamespace()->getTopLevelNamespace()->getId() != 7 and $b->getChildPropertyNamespace()->getTopLevelNamespace()->getId() != 7){
                     // C'est la même chose que le premier if mais plus clair à la lecture.
-                    return strnatcmp($a->getParentProperty()->getIdentifierInNamespace(), $b->getParentProperty()->getIdentifierInNamespace());
+                    return strnatcmp($a->getChildProperty()->getIdentifierInNamespace(), $b->getChildProperty()->getIdentifierInNamespace());
                 }
-                elseif($a->getNamespaceForVersion()->getTopLevelNamespace()->getId() == 7 and $b->getNamespaceForVersion()->getTopLevelNamespace()->getId() != 7){
+                elseif($a->getChildPropertyNamespace()->getTopLevelNamespace()->getId() == 7 and $b->getChildPropertyNamespace()->getTopLevelNamespace()->getId() != 7){
                     return false;
                 }
-                elseif($a->getNamespaceForVersion()->getTopLevelNamespace()->getId() != 7 and $b->getNamespaceForVersion()->getTopLevelNamespace()->getId() == 7){
+                elseif($a->getChildPropertyNamespace()->getTopLevelNamespace()->getId() != 7 and $b->getChildPropertyNamespace()->getTopLevelNamespace()->getId() == 7){
                     return true;
                 }
             });
