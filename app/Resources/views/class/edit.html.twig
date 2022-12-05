@@ -1649,8 +1649,8 @@
                                             .attr("text-anchor", function(d) {
                                                 return d.children || d._children ? "end" : "start";
                                             })
-                                            .text(function(d) { return d.data.name; })
-                                            .on("click",function(d){window.open(nodeLink+'/'+d.real_id,'_blank');});;
+                                            .text(function(d) { return d.data.name; });
+                                            //.on("click",function(d){window.open(nodeLink+'/'+d.real_id,'_blank');});;
 
 
                                         // UPDATE
