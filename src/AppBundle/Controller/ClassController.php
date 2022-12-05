@@ -21,6 +21,7 @@ use AppBundle\Form\ClassEditIdentifierForm;
 use AppBundle\Form\NamespaceEditIdentifiersForm;
 use AppBundle\Form\ClassQuickAddForm;
 use AppBundle\Form\TextPropertyForm;
+use Doctrine\DBAL\DBALException;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
@@ -198,6 +199,7 @@ class ClassController extends Controller
      * @param OntoClass $class
      * @param int|null $namespaceFromUrlId
      * @return Response the rendered template
+     * @throws DBALException
      */
     public function showAction(OntoClass $class, $namespaceFromUrlId=null)
     {
@@ -287,14 +289,32 @@ class ClassController extends Controller
         // $namespacesId : Tous les namespaces trouvés ci-dessus
         $namespacesId = array_merge($namespacesIdFromClassVersion, $nsIdFromUser);
 
-        $ancestors = $em->getRepository('AppBundle:OntoClass')->findAncestorsByClassVersionAndNamespacesId($classVersion, $namespacesId);
-        $descendants = $em->getRepository('AppBundle:OntoClass')->findDescendantsByClassVersionAndNamespacesId($classVersion, $namespacesId);
-        $relations = $em->getRepository('AppBundle:OntoClass')->findRelationsByClassVersionAndNamespacesId($classVersion, $namespacesId);
+        $ancestors = array();
+        $descendants = array();
+        $relations = array();
 
-        $outgoingProperties = $em->getRepository('AppBundle:property')->findOutgoingPropertiesByClassVersionAndNamespacesId($classVersion, $namespacesId);
-        $outgoingInheritedProperties = $em->getRepository('AppBundle:property')->findOutgoingInheritedPropertiesByClassVersionAndNamespacesId($classVersion, $namespacesId);
-        $ingoingProperties = $em->getRepository('AppBundle:property')->findIngoingPropertiesByClassVersionAndNamespacesId($classVersion, $namespacesId);
-        $ingoingInheritedProperties =  $em->getRepository('AppBundle:property')->findIngoingInheritedPropertiesByClassVersionAndNamespacesId($classVersion, $namespacesId);
+        $outgoingProperties = array();
+        $outgoingInheritedProperties = array();
+        $ingoingProperties = array();
+        $ingoingInheritedProperties = array();
+        $error = '';
+        $isE55Descendant = false;
+
+        try {
+            $ancestors = $em->getRepository('AppBundle:OntoClass')->findAncestorsByClassVersionAndNamespacesId($classVersion, $namespacesId);
+            $descendants = $em->getRepository('AppBundle:OntoClass')->findDescendantsByClassVersionAndNamespacesId($classVersion, $namespacesId);
+            $relations = $em->getRepository('AppBundle:OntoClass')->findRelationsByClassVersionAndNamespacesId($classVersion, $namespacesId);
+
+            $outgoingProperties = $em->getRepository('AppBundle:property')->findOutgoingPropertiesByClassVersionAndNamespacesId($classVersion, $namespacesId);
+            $outgoingInheritedProperties = $em->getRepository('AppBundle:property')->findOutgoingInheritedPropertiesByClassVersionAndNamespacesId($classVersion, $namespacesId);
+            $ingoingProperties = $em->getRepository('AppBundle:property')->findIngoingPropertiesByClassVersionAndNamespacesId($classVersion, $namespacesId);
+            $ingoingInheritedProperties =  $em->getRepository('AppBundle:property')->findIngoingInheritedPropertiesByClassVersionAndNamespacesId($classVersion, $namespacesId);
+
+            $isE55Descendant = $em->getRepository('AppBundle:OntoClass')->findE55ChildClasses($class->getId());
+        }
+        catch (DBALException $e) {
+            $error = $e->getMessage();
+        }
 
         return $this->render('class/show.html.twig', array(
             'classVersion' => $classVersion,
@@ -307,15 +327,18 @@ class ClassController extends Controller
             'ingoingInheritedProperties' => $ingoingInheritedProperties,
             'namespacesId' => $namespacesId,
             'namespacesIdFromClassVersion' => $namespacesIdFromClassVersion,
-            'namespacesIdFromUser' => $namespacesIdFromUser
-
+            'namespacesIdFromUser' => $namespacesIdFromUser,
+            'isE55Descendant' => $isE55Descendant,
+            'error' => $error
         ));
     }
 
     /**
      * @Route("/class/{id}/edit", name="class_edit", requirements={"id"="^[0-9]+$"})
      * @param OntoClass $class
+     * @param Request $request
      * @return Response the rendered template
+     * @throws DBALException
      */
     public function editAction(OntoClass $class, Request $request)
     {
@@ -374,6 +397,8 @@ class ClassController extends Controller
         $ingoingProperties = $em->getRepository('AppBundle:property')->findIngoingPropertiesByClassVersionAndNamespacesId($classVersion, $namespacesId);
         $ingoingInheritedProperties =  $em->getRepository('AppBundle:property')->findIngoingInheritedPropertiesByClassVersionAndNamespacesId($classVersion, $namespacesId);
 
+        $isE55Descendant = $em->getRepository('AppBundle:OntoClass')->findE55ChildClasses($class->getId());
+
         $this->denyAccessUnlessGranted('edit', $classVersion);
 
         $classVersionTemp = new OntoClassVersion();
@@ -417,6 +442,7 @@ class ClassController extends Controller
                 'outgoingInheritedProperties' => $outgoingInheritedProperties,
                 'ingoingProperties' => $ingoingProperties,
                 'ingoingInheritedProperties' => $ingoingInheritedProperties,
+                'isE55Descendant' => $isE55Descendant,
                 'namespacesId' => $namespacesId
             ]);
         }
@@ -430,6 +456,7 @@ class ClassController extends Controller
             'outgoingInheritedProperties' => $outgoingInheritedProperties,
             'ingoingProperties' => $ingoingProperties,
             'ingoingInheritedProperties' => $ingoingInheritedProperties,
+            'isE55Descendant' => $isE55Descendant,
             'namespacesId' => $namespacesId,
             'namespacesIdFromClassVersion' => $namespacesIdFromClassVersion,
             'namespacesIdFromUser' => $namespacesIdFromUser,

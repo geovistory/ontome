@@ -10,3 +10,19 @@ line {
 .node text {
     font: 8px sans-serif;
 }
+
+.thesaurus-graph .node circle {
+    fill: #fff;
+    stroke: steelblue;
+    stroke-width: 3px;
+}
+
+.thesaurus-graph .node text {
+    font: 12px sans-serif;
+}
+
+.thesaurus-graph .link {
+    fill: none;
+    stroke: #ccc;
+    stroke-width: 2px;
+}
