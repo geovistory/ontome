@@ -853,11 +853,11 @@ FOOTER Styling
     color: red;
 }
 
-#summary div.row, #details div.row {
+#summary div.row, #details div.row, #vocabulary div.thesaurus-div {
     border-bottom: solid 1px #DDDDDD;
 }
 
-#summary div.row:last-child, #details div.row:last-child {
+#summary div.row:last-child, #details div.row:last-child, #vocabulary div.thesaurus-div:last-child {
     border-bottom: none;
 }
 

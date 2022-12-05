@@ -574,6 +574,29 @@ class ClassRepository extends EntityRepository
             'label' => '%'.$label.'%'
         ));
 
+        return $stmt->fetchColumn();
+    }
+
+    /**
+     * @param $class integer the id of the class to find in the CRM E55 Type class descendants
+     * @return array
+     * @throws \Doctrine\DBAL\DBALException
+     */
+    public function findE55ChildClasses($class)
+    {
+        $conn = $this->getEntityManager()
+            ->getConnection();
+
+        $sql = "SELECT DISTINCT pk_child AS id
+                FROM che.descendant_class_hierarchy(53) cls, che.namespace nsp
+                WHERE nsp.pk_namespace = cls.fk_namespace_for_version AND pk_child = :class
+                GROUP BY pk_child;";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->execute(array(
+            'class' => $class
+        ));
+
         return $stmt->fetchAll();
     }
 }
