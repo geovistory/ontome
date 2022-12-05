@@ -8,6 +8,7 @@
 
 namespace AppBundle\Controller;
 
+use AppBundle\AppBundle;
 use AppBundle\Entity\ClassAssociation;
 use AppBundle\Entity\EntityUserProjectAssociation;
 use AppBundle\Entity\Label;
@@ -770,6 +771,10 @@ class NamespaceController  extends Controller
         $optionTextCardinality = filter_var($request->get('optTextCardinality', true), FILTER_VALIDATE_BOOLEAN);; //false est l'autre option
         $optionFol = filter_var($request->get('optFol', true), FILTER_VALIDATE_BOOLEAN);; //false est l'autre option
 
+        $allNamespacesReferences = $namespace->getAllReferencedNamespaces();
+        $allNamespacesReferences->add($namespace);
+        $allNamespacesReferences->add($em->getRepository('AppBundle:OntoNamespace')->findOneBy(array('id' => 4)));
+
         foreach ($namespace->getTextProperties() as $textProperty){
             if($textProperty->getSystemType()->getId() == 2 and $textProperty->getLanguageIsoCode() == "en"){
                 $textp_contributors = $textProperty;
@@ -1093,7 +1098,6 @@ class NamespaceController  extends Controller
         if($namespace->getDirectReferencedNamespaces()->count() > 0){ //S'il y a les NS références
             $directNamespacesReferences = $namespace->getDirectReferencedNamespaces();
             $standardLabelDirectNAmespacesReferences = $directNamespacesReferences->map(function(OntoNamespace $ns){return $ns->getStandardLabel();});
-            $allNamespacesReferences = $namespace->getAllReferencedNamespaces();
             $nsCRM = $allNamespacesReferences->filter(function($v){return $v->getTopLevelNamespace()->getId() == 7;});
 
             // Plusieurs formulations
@@ -1325,7 +1329,8 @@ class NamespaceController  extends Controller
             }
 
             foreach ($classVersion->getClass()->getTextProperties() as $textProperty){
-                if(in_array($textProperty->getNamespaceForVersion()->getId(), $namespace->getLargeSelectedNamespacesId())){
+                //if(in_array($textProperty->getNamespaceForVersion()->getId(), $namespace->getLargeSelectedNamespacesId())){
+                if(!is_null($textProperty->getNamespaceForVersion()) and $allNamespacesReferences->contains($textProperty->getNamespaceForVersion())){
                     if($textProperty->getSystemType()->getId() == 1 and $textProperty->getLanguageIsoCode() == "en"){
                         $textp_scopenote = $textProperty;
                     }
@@ -1365,7 +1370,8 @@ class NamespaceController  extends Controller
 
             $i = 0;
             foreach ($classVersion->getClass()->getTextProperties() as $textProperty){
-                if(in_array($textProperty->getNamespaceForVersion()->getId(), $namespace->getLargeSelectedNamespacesId())){
+                //if(in_array($textProperty->getNamespaceForVersion()->getId(), $namespace->getLargeSelectedNamespacesId())){
+                if($allNamespacesReferences->contains($textProperty->getNamespaceForVersion())){
                     if($textProperty->getSystemType()->getId() == 7){
                         if($i == 0){
                             $section->addTextBreak();
@@ -1407,7 +1413,8 @@ class NamespaceController  extends Controller
 
             $i = 0;
             $em = $this->getDoctrine()->getManager();
-            $outgoingProperties = $em->getRepository('AppBundle:property')->findOutgoingPropertiesByClassVersionAndNamespacesId($classVersion, $namespace->getLargeSelectedNamespacesId());
+            //$outgoingProperties = $em->getRepository('AppBundle:property')->findOutgoingPropertiesByClassVersionAndNamespacesId($classVersion, $namespace->getLargeSelectedNamespacesId());
+            $outgoingProperties = $em->getRepository('AppBundle:property')->findOutgoingPropertiesByClassVersionAndNamespacesId($classVersion, $allNamespacesReferences->map(function($v){return $v->getId();})->toArray());
             foreach($outgoingProperties as $outgoingProperty){
                 if($i == 0){
                     $section->addTextBreak();
@@ -1458,7 +1465,8 @@ class NamespaceController  extends Controller
             $associations = $propertyVersion->getProperty()->getChildPropertyAssociations();
             $parentPropertyVersion = null;
             foreach ($associations as $association){
-                if(in_array($association->getNamespaceForVersion()->getId(), $namespace->getLargeSelectedNamespacesId())){
+                //if(in_array($association->getNamespaceForVersion()->getId(), $namespace->getLargeSelectedNamespacesId())){
+                if($allNamespacesReferences->contains($textProperty->getNamespaceForVersion())){
                     $parentPropertyVersion = $association->getParentProperty()->getPropertyVersionForDisplay($association->getParentPropertyNamespace());
                 }
             }
@@ -1490,7 +1498,8 @@ class NamespaceController  extends Controller
             }
 
             foreach ($propertyVersion->getProperty()->getTextProperties() as $textProperty){
-                if(!is_null($textProperty->getNamespaceForVersion()) and in_array($textProperty->getNamespaceForVersion()->getId(), $namespace->getLargeSelectedNamespacesId())){
+                //if(!is_null($textProperty->getNamespaceForVersion()) and in_array($textProperty->getNamespaceForVersion()->getId(), $namespace->getLargeSelectedNamespacesId())){
+                if(!is_null($textProperty->getNamespaceForVersion()) and $allNamespacesReferences->contains($textProperty->getNamespaceForVersion())){
                     if($textProperty->getSystemType()->getId() == 1 and $textProperty->getLanguageIsoCode() == "en"){
                         $textp_scopenote = $textProperty;
                     }
@@ -1526,7 +1535,8 @@ class NamespaceController  extends Controller
 
             $i = 0;
             foreach ($propertyVersion->getProperty()->getTextProperties() as $textProperty){
-                if(!is_null($textProperty->getNamespaceForVersion()) and in_array($textProperty->getNamespaceForVersion()->getId(), $namespace->getLargeSelectedNamespacesId())){
+                //if(!is_null($textProperty->getNamespaceForVersion()) and in_array($textProperty->getNamespaceForVersion()->getId(), $namespace->getLargeSelectedNamespacesId())){
+                if(!is_null($textProperty->getNamespaceForVersion()) and $allNamespacesReferences->contains($textProperty->getNamespaceForVersion())){
                     if($textProperty->getSystemType()->getId() == 7){
                         if($i == 0){
                             $section->addTextBreak();
