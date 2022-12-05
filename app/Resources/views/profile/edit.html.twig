@@ -119,20 +119,22 @@
                             </div>
                         </div>
 
-                        {# Additional notes #}
-                        {% set hasOneOrManyAdditionalNotes = false %}
-                        {% for textProperty in profile.textProperties
-                            if textProperty.systemType.id in [33,34,35] %}
-                            {% set hasOneOrManyAdditionalNotes = true %}
-                        {% endfor %}
-                        {% if hasOneOrManyAdditionalNotes %}
+                        {# Internal notes #}
+                        {% set canSeeInternalNotes = false %}
+                        {% if app.user is not null %}
+                            {% for userProjectAssociation in profile.projectOfBelonging.userProjectAssociations
+                                if userProjectAssociation.user.id == app.user.id and userProjectAssociation.permission <= 3 %}
+                                {# Seuls les admins et managers du projet peuvent voir les internal notes #}
+                                {% set canSeeInternalNotes = true %}
+                            {% endfor %}
+                        {% endif %}
+                        {% if canSeeInternalNotes and profile.textProperties|filter(v => v.systemType.id == 33)|length > 0 %}
                             <div class="row">
                                 <div class="col-lg-2">
-                                    <p>Additional notes:</p>
+                                    <p>Internal notes:</p>
                                 </div>
                                 <div class="col-lg-10">
-                                    {% for textProperty in profile.textProperties
-                                        if textProperty.systemType.id in [33,34,35] %}
+                                    {% for textProperty in profile.textProperties|filter(v => v.systemType.id == 33) %}
                                         {{ textProperty.textProperty|raw }}
                                     {% endfor %}
                                 </div>
@@ -811,6 +813,7 @@
                         <div class="row">
                             <div class="col-sm-6">
                                 <select id="select-root-namespace">
+                                    <option></option> <!-- For placeholder -->
                                     {% for rootNamespace in rootNamespaces %}
                                         <option value="{{ rootNamespace.id }}">{{ rootNamespace.standardLabel }}</option>
                                     {% endfor %}
@@ -1201,6 +1204,7 @@
             {% endif %}
 
             $('#select-root-namespace').select2({
+                placeholder: "Select a namespace",
                 width: '100%',
                 sorter: function(data) {
                     /* Sort data using lowercase comparison */
@@ -1703,6 +1707,12 @@
                         window.location.reload();
                     });
                 });
+
+            $('.dataTables_paginate').click(function () {
+                $([document.documentElement, document.body]).animate({
+                    scrollTop: $(this).closest('.dataTables_wrapper').prevAll("h3").offset().top
+                }, 1000);
+            });
         } );
     </script>
 

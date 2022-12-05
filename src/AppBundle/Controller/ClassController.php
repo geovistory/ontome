@@ -159,6 +159,7 @@ class ClassController extends Controller
         if ($form->isSubmitted() && $form->isValid()) {
             $class = $form->getData();
             $class->setIsManualIdentifier(is_null($namespace->getTopLevelNamespace()->getClassPrefix()));
+            $class->setIdentifierInURI($class->getIdentifierInNamespace()); // On attribue le même identifiant à la création en attendant un nouveau ticket (si identifier automatique c'est dans le trigger)
             $class->setCreator($this->getUser());
             $class->setModifier($this->getUser());
             $class->setCreationTime(new \DateTime('now'));
@@ -401,23 +402,12 @@ class ClassController extends Controller
 
         $this->denyAccessUnlessGranted('edit', $classVersion);
 
-        $classVersionTemp = new OntoClassVersion();
-        $classVersionTemp->setNamespaceForVersion($classVersion->getNamespaceForVersion());
-
-        $classTemp = new OntoClass();
-        $classTemp->addClassVersion($classVersionTemp);
-        $classTemp->setIdentifierInNamespace($class->getIdentifierInNamespace());
-        $classTemp->setIsManualIdentifier(is_null($classVersion->getNamespaceForVersion()->getTopLevelNamespace()->getClassPrefix()));
-        $classTemp->setCreator($this->getUser());
-        $classTemp->setModifier($this->getUser());
-        $classTemp->setCreationTime(new \DateTime('now'));
-        $classTemp->setModificationTime(new \DateTime('now'));
+        $classTemp = clone $class;
 
         $formIdentifier = $this->createForm(ClassEditIdentifierForm::class, $classTemp);
         $formIdentifier->handleRequest($request);
         if ($formIdentifier->isSubmitted() && $formIdentifier->isValid()) {
             $class->setIdentifierInNamespace($classTemp->getIdentifierInNamespace());
-            $em = $this->getDoctrine()->getManager();
             $em->persist($class);
             $em->flush();
 

@@ -935,6 +935,16 @@ class OntoNamespace
         }
     }
 
+    public function addReferenceNamespaceAssociation(ReferencedNamespaceAssociation $referencedNamespaceAssociation)
+    {
+        if ($this->referencedNamespaceAssociations->contains($referencedNamespaceAssociation)) {
+            return;
+        }
+        $this->referencedNamespaceAssociations[] = $referencedNamespaceAssociation;
+        // needed to update the owning side of the relationship!
+        $referencedNamespaceAssociation->setNamespace($this);
+    }
+
     public function addLabel(Label $label)
     {
         if ($this->labels->contains($label)) {

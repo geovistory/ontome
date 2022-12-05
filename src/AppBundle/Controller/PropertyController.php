@@ -193,6 +193,7 @@ class PropertyController extends Controller
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $property = $form->getData();
+            $property->setIdentifierInURI($property->getIdentifierInNamespace()); // On attribue le même identifiant à la création en attendant un nouveau ticket (si identifier automatique c'est dans le trigger)
             if($type == 'outgoing') {
                 $propertyVersion->setDomain($class);
                 $domainNamespace = $em->getRepository("AppBundle:OntoClassVersion")->findClassVersionByClassAndNamespacesId($class, $namespacesId)->getNamespaceForVersion();
@@ -466,28 +467,7 @@ class PropertyController extends Controller
             ]);
         }
 
-        $propertyTemp = new Property();
-        $propertyVersionTemp = new PropertyVersion();
-        $propertyVersionTemp->setNamespaceForVersion($propertyVersion->getNamespaceForVersion());
-        $propertyVersionTemp->setProperty($propertyTemp);
-
-        //$propertyTemp->addNamespace($property->getOngoingNamespace());
-        $propertyTemp->setIdentifierInNamespace($property->getIdentifierInNamespace());
-        $propertyTemp->setIsManualIdentifier(is_null($propertyVersion->getNamespaceForVersion()->getTopLevelNamespace()->getPropertyPrefix()));
-        $propertyTemp->setCreator($this->getUser());
-        $propertyTemp->setModifier($this->getUser());
-        $propertyTemp->setCreationTime(new \DateTime('now'));
-        $propertyTemp->setModificationTime(new \DateTime('now'));
-
-        $propertyVersionTemp->setCreator($this->getUser());
-        $propertyVersionTemp->setModifier($this->getUser());
-        $propertyVersionTemp->setCreationTime(new \DateTime('now'));
-        $propertyVersionTemp->setModificationTime(new \DateTime('now'));
-
-        $propertyVersionTemp->setDomain($propertyVersion->getDomain());
-        $propertyVersionTemp->setRange($propertyVersion->getRange());
-
-        $propertyTemp->addPropertyVersion($propertyVersionTemp);
+        $propertyTemp = clone $property;
 
         $formIdentifier = $this->createForm(PropertyEditIdentifierForm::class, $propertyTemp);
         $formIdentifier->handleRequest($request);

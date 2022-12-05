@@ -13,7 +13,7 @@
     {% macro printTextPropertyRow(textPropertyForm) %}
         {{ form_errors(textPropertyForm) }}
         {{ form_row(textPropertyForm.textProperty, {
-            'label': 'Description'
+            'label': 'Root namespace description'
         }) }}
         {{ form_row(textPropertyForm.languageIsoCode, {
             'label': 'Language'
@@ -29,14 +29,78 @@
                     <a href="{{ path('namespace_new', {'project': app.request.get('project').id}) }}" class="btn btn-primary pull-right">Reset <span class="fa fa-undo"></span></a>
                 </div>
                 <h2>
-                    Add new namespace to the {{ app.request.get('project') }} project
+                    Add a namespace to the {{ app.request.get('project') }} project
                     <a href="{{ path('project_edit', {'id': app.request.get('project').id}) }}#managed-namespaces" class="pull-right btn btn-link">
                         <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
                     </a>
                 </h2>
 
                 {{ form_start(namespaceForm) }}
-                {{ form_row(namespaceForm.labels) }}
+                {{ form_row(namespaceForm.labels, {
+                    'label': 'Root namespace label'
+                }) }}
+                {% for textPropertyForm in namespaceForm.textProperties %}
+                    {{ formMacros.printTextPropertyRow(textPropertyForm) }}
+                {% endfor %}
+                {{ form_row(namespaceForm.contributors) }}
+                <div class="row">
+                    <div class="col-lg-6">
+                        {{ form_row(namespaceForm.rootNamespacePrefix) }}
+                    </div>
+                </div>
+                <div class="js-customize-identifiers-wrapper">
+                    <div>
+                        {{ form_row(namespaceForm.automaticIdentifierManagement) }}
+                        <div class="row">
+                            <div class="col-lg-6">{{ form_row(namespaceForm.classPrefix) }}</div>
+                            <div class="col-lg-6">{{ form_row(namespaceForm.propertyPrefix) }}</div>
+                        </div>
+                    </div>
+                    <a href="#" class="js-customize-open">
+                        <span class="fa fa-plus-circle"></span>
+                        Customize class and property identifiers (default "C" and "P")
+                    </a>
+                    <a href="#" class="js-customize-close">
+                        <span class="fa fa-minus-circle"></span>
+                        Cancel customize class and property identifiers
+                    </a>
+                </div>
+
+                <div class="js-reference-wrapper">
+                    <div>
+                        {{ form_row(namespaceForm.referenceNamespaces) }}
+                        <h4>Pick a reference namespace</h4>
+                        <p>Please note that if the selected version is ongoing, it might be modified at any time and you will not be able to publish your namespace as long as you have selected it.</p>
+                        <div class="row" style="margin-bottom: 20px">
+                            <div class="col-sm-6">
+                                <select id="select-root-namespace">
+                                    <option></option> <!-- For placeholder -->
+                                    {% for rootNamespace in rootNamespaces %}
+                                        <option value="{{ rootNamespace.id }}">{{ rootNamespace.standardLabel }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-sm-6">
+                                <div id="loading-icon">
+                                    <span class="fas fa-spinner fa-spin"></span>
+                                </div>
+                                <div class="list-group" id="chosable-namespaces-list">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row" id="reference-namespaces-list">
+                        </div>
+                    </div>
+                    <a href="#" class="js-reference-add">
+                        <span class="fa fa-plus-circle"></span>
+                        Add reference namespace to which the ongoing namespace refers
+                    </a>
+                    <a href="#" class="js-reference-remove">
+                        <span class="fa fa-minus-circle"></span>
+                        Cancel selection of reference namespace
+                    </a>
+                </div>
+
                 {{ form_row(namespaceForm.isExternalNamespace, {
                     help: 'Only tick this checkbox if your namespace already has its URI outside OntoME. Otherwise leave it unchecked.'
                 }) }}
@@ -44,38 +108,9 @@
                     help: 'Fill this field to generate automatically the namespace URI. Eg. "my namespace" generates "https://ontome.net/ns/my-namespace".'
                 }) }}
                 {{ form_row(namespaceForm.namespaceURI) }}
-                <div class="row">
-                    <div class="col-lg-6">
-                    {{ form_row(namespaceForm.rootNamespacePrefix) }}
-                    </div>
-                </div>
-                {{ form_row(namespaceForm.automaticIdentifierManagement) }}
-                <div class="row">
-                    <div class="col-lg-6">{{ form_row(namespaceForm.classPrefix) }}</div>
-                    <div class="col-lg-6">{{ form_row(namespaceForm.propertyPrefix) }}</div>
-                </div>
                 {{ form_errors(namespaceForm) }}
 
-
-                <div class="js-text-property-wrapper"
-                     data-prototype="{{ formMacros.printTextPropertyRow(namespaceForm.textProperties.vars.prototype)|e('html_attr') }}"
-                     data-index="{{ namespaceForm.textProperties|length }}"
-                >
-                    {% for textPropertyForm in namespaceForm.textProperties %}
-                        {{ formMacros.printTextPropertyRow(textPropertyForm) }}
-                    {% endfor %}
-                    <a href="#" class="js-example-add">
-                        <span class="fa fa-plus-circle"></span>
-                        Add a description for the ongoing namespace (if different from the root namespace)
-                    </a>
-                    <a href="#" class="js-description-ongoing-remove">
-                        <span class="fa fa-minus-circle"></span>
-                        Close description for the ongoing namespace form
-                    </a>
-
-                </div>
-
-                <button type="submit" class="btn btn-primary" formnovalidate>Save</button>
+                <button type="submit" class="btn btn-primary" formnovalidate>Create</button>
                 {{ form_end(namespaceForm) }}
             </div>
         </div>
@@ -87,9 +122,10 @@
     {{ parent() }}
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.4/js/select2.min.js"></script>
     <script>
-
         $(document).ready(function() {
-            $('#namespace_form_parentClass').select2({
+            $('#select-root-namespace').select2({
+                width: '100%',
+                placeholder: "Select a reference namespace",
                 sorter: function(data) {
                     /* Sort data using lowercase comparison */
                     return data.sort(function (a, b) {
@@ -105,58 +141,118 @@
                 }
             });
 
-            $('.js-description-ongoing-remove').hide();
+            $('#loading-icon').hide();
+            $('#select-root-namespace').on('select2:select', function (e) {
+                $('#loading-icon').show();
+                $('#chosable-namespaces-list').empty();
+                var selectedValue = e.params.data.id;
+                var url = '{{ path("namespaces_by_root_id_list_json", {'id': 'selectedValue'}) }}';
+                url = url.replace("selectedValue", selectedValue);
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    dataType: 'json',
+                    success:function(data){
+                        $('#loading-icon').hide();
 
-            if($('[for=namespace_quick_add_form_textProperties_1_textProperty]').length) {
-                //we hide the button in order to prevent the add of more than 2 text properties
-                $('.js-example-add').hide();
-                $('[for=namespace_quick_add_form_textProperties_1_textProperty]').text('Ongoing namespace description');
-                $('.js-description-ongoing-remove').show();
-            }
-            var $wrapper = $('.js-text-property-wrapper');
-            $wrapper.on('click', '.js-example-add', function(e) {
-                e.preventDefault();
-
-                // Get the data-prototype explained earlier
-                var prototype = $wrapper.data('prototype');
-
-                // get the new index
-                var index = $wrapper.data('index');
-
-                // Replace '__name__' in the prototype's HTML to
-                // instead be a number based on how many items we have
-                var newForm = prototype.replace(/__name__/g, index);
-
-                // increase the index with one for the next item
-                $wrapper.data('index', index + 1);
-
-                // Display the form in the page before the "new" link
-                $(this).before(newForm);
-                $('#namespace_quick_add_form_textProperties_1_creator').val($('#namespace_quick_add_form_textProperties_0_creator').val());
-                $('#namespace_quick_add_form_textProperties_1_modifier').val($('#namespace_quick_add_form_textProperties_0_creator').val());
-                $('.js-example-add').hide();
-                $('[for=namespace_quick_add_form_textProperties_1_textProperty]').text('Ongoing namespace description');
-                tinymce.init({
-                    selector:'.tinymce',
-                    entity_encoding : "raw"
+                        // handling the response data from the controller
+                        if(data.status == 'Error'){
+                            console.log("[API] ERROR: "+data.message);
+                        }
+                        if(data.status == 'Success'){
+                            $.each(data.namespaces, function(key, val){
+                                $("#chosable-namespaces-list").append($("<a class=\"list-group-item pickable-namespace\" id="+val.id+">"+val.standardLabel+"</a>"));
+                            });
+                        }
+                    }
                 });
-                $('.js-description-ongoing-remove').show();
             });
 
-            $wrapper.on('click', '.js-description-ongoing-remove', function(e) {
+            $(document).on("mouseenter touchstart", ".pickable-namespace", function() {
+                $(this).prepend($("<span><i class=\"fas fa-plus\"></i>&nbsp;</span>"));
+            });
+
+            $(document).on("mouseleave touchend", ".pickable-namespace", function() {
+                $(this).find(":first-child").remove();
+            });
+
+            $(document).on("click", ".pickable-namespace", function() {
+                var selectedValue = $(this).attr("id");
+                var labelNamespace = $(this).text();
+                var urlNamespace = '{{ path('namespace_show', {'id' : 'selectedValue'}) }}';
+                urlNamespace = urlNamespace.replace('selectedValue', selectedValue);
+                var refs = new Object();
+                if($("#namespace_quick_add_form_referenceNamespaces").val() != ''){
+                    refs = JSON.parse($("#namespace_quick_add_form_referenceNamespaces").val());
+                }
+                refs[selectedValue] = labelNamespace;
+                $("#namespace_quick_add_form_referenceNamespaces").val(JSON.stringify(refs));
+                var rootNamespaceId = $("#select-root-namespace option:selected").val();
+                var rootNamespaceLabel = $("#select-root-namespace option:selected").text();
+                $("#reference-namespaces-list").append($('<div class="col-lg-6"><div class="well well-sm" style="margin-left:0px;"><a href="#delete" class="remove-namespace" data-id="'+selectedValue+'" data-root-id="'+rootNamespaceId+'" data-root-label="'+rootNamespaceLabel+'"><span class="glyphicon glyphicon-remove text-danger" aria-hidden="true"></span></a><a href="'+urlNamespace+'">'+labelNamespace+'</a><span class="loading-icon2" data-id="'+selectedValue+'">&nbsp;<span class="fas fa-spinner fa-spin"></span></span></div><div class="col-lg-6"></div></div>'));
+                $(".loading-icon2[data-id='"+selectedValue+"']").hide();
+                //$("#select-root-namespace option:selected").remove();
+                $("#chosable-namespaces-list").empty();
+                $("#select-root-namespace option:selected").remove();
+            });
+
+            $(document).on("click", ".remove-namespace", function() {
+                var selectedValue = $(this).data("id");
+                var refs = new Object();
+                if($("#namespace_quick_add_form_referenceNamespaces").val() != ''){
+                    refs = JSON.parse($("#namespace_quick_add_form_referenceNamespaces").val());
+                }
+                delete refs[selectedValue];
+                $("#namespace_quick_add_form_referenceNamespaces").val(JSON.stringify(refs));
+                $(".loading-icon2[data-id='"+selectedValue+"']").show();
+                $(".remove-namespace[data-id='"+selectedValue+"']").parent().parent().remove();
+                $("#select-root-namespace").append($('<option>', {
+                    value: $(this).data("root-id"),
+                    text: $(this).data("root-label")
+                }));
+            });
+
+            $('.js-customize-close').hide();
+
+            var $wrapperIdentifiers = $('.js-customize-identifiers-wrapper');
+            $('.js-customize-identifiers-wrapper div').first().hide();
+            $wrapperIdentifiers.on('click', '.js-customize-open', function(e) {
                 e.preventDefault();
+                $('.js-customize-close').show();
+                $('.js-customize-identifiers-wrapper div').first().show();
+                $('.js-customize-open').hide();
+            });
 
-                // get the new index
-                var index = $wrapper.data('index');
+            $wrapperIdentifiers.on('click', '.js-customize-close', function(e) {
+                e.preventDefault();
+                $('.js-customize-close').hide();
+                $('.js-customize-identifiers-wrapper div').first().hide();
+                $('.js-customize-open').show();
 
-                // decrease the index with one for the next item
-                $wrapper.data('index', index - 1);
+                //Réinitialisation (le fait de cocher simplement appelle à une autre fonction plus bas et donc réinitialise)
+                $('#namespace_quick_add_form_automaticIdentifierManagement').prop("checked", true);
+                $('#namespace_quick_add_form_automaticIdentifierManagement').trigger("change");
+            });
 
-                $("[id^='namespace_quick_add_form_textProperties_1_']").remove();
-                $("[for^='namespace_quick_add_form_textProperties_1_']").remove();
-                tinymce.get("namespace_quick_add_form_textProperties_1_textProperty").remove();
-                $('.js-example-add').show();
-                $('.js-description-ongoing-remove').hide();
+            $('.js-reference-remove').hide();
+
+            var $wrapperRef = $('.js-reference-wrapper');
+            $('.js-reference-wrapper div').first().hide();
+            $wrapperRef.on('click', '.js-reference-add', function(e) {
+                e.preventDefault();
+                $('.js-reference-remove').show();
+                $('.js-reference-wrapper div').first().show();
+                $('.js-reference-add').hide();
+            });
+
+            $wrapperRef.on('click', '.js-reference-remove', function(e) {
+                e.preventDefault();
+                $('.js-reference-remove').hide();
+                $('.js-reference-wrapper div').first().hide();
+                $('.js-reference-add').show();
+                $('.remove-namespace').trigger('click'); //Simule l'effacement des choix
+                $('#select-root-namespace').val(null).trigger('change'); //Réinitialise le select2
+                $("#chosable-namespaces-list").empty(); //Vide les propositions
             });
 
             if (!$('#namespace_quick_add_form_isExternalNamespace').prop('checked')) {
@@ -167,18 +263,32 @@
             var copyLabelToUriGenerator = true;
             if ($('#namespace_quick_add_form_labels_0_label').val() == $('#namespace_quick_add_form_uriGenerator').val()) {
                 $(document).on('keyup', '#namespace_quick_add_form_labels_0_label', function() {
-                    if(copyLabelToUriGenerator){
+                    if(copyLabelToUriGenerator && !$('#namespace_quick_add_form_isExternalNamespace').prop('checked')){
                         $('#namespace_quick_add_form_uriGenerator').val($('#namespace_quick_add_form_labels_0_label').val());
                     }
                     if (this.value == $('#namespace_quick_add_form_uriGenerator').val() || $('#namespace_quick_add_form_uriGenerator').val() == '' ) {
                         var stringForURI = this.value;
                         stringForURI = stringForURI.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
                         stringForURI = stringForURI.replace(/[\s-]+/g, '-').toLowerCase().replace(/[^0-9a-z\-]/g, '');
-                        $('#namespace_quick_add_form_namespaceURI').val('https://ontome.net/ns/' + stringForURI);
+                        $('#namespace_quick_add_form_namespaceURI').val('https://ontome.net/ns/' + stringForURI + '/');
                     }
                 });
             }
 
+            $(document).on('keyup', '#namespace_quick_add_form_namespaceURI', function() {
+                copyLabelToUriGenerator = false;
+            });
+
+            $(document).on('change', '#namespace_quick_add_form_uriGenerator', function() {
+                if($('#namespace_quick_add_form_uriGenerator').val() == ''){
+                    copyLabelToUriGenerator = true;
+                    $('#namespace_quick_add_form_uriGenerator').val($('#namespace_quick_add_form_labels_0_label').val());
+                    var stringForURI = this.value;
+                    stringForURI = stringForURI.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+                    stringForURI = stringForURI.replace(/[\s-]+/g, '-').toLowerCase().replace(/[^0-9a-z\-]/g, '');
+                    $('#namespace_quick_add_form_namespaceURI').val('https://ontome.net/ns/' + stringForURI + '/');
+                }
+            });
 
             $(document).on('keyup', '#namespace_quick_add_form_uriGenerator', function() {
                 copyLabelToUriGenerator = false;
@@ -186,7 +296,7 @@
                 stringForURI = stringForURI.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
                 stringForURI = stringForURI.replace(/[\s-]+/g, '-').toLowerCase().replace(/[^0-9a-z\-]/g, '');
                 if (stringForURI != '') {
-                    $('#namespace_quick_add_form_namespaceURI').val('https://ontome.net/ns/' + stringForURI);
+                    $('#namespace_quick_add_form_namespaceURI').val('https://ontome.net/ns/' + stringForURI + '/');
                 }
                 else {
                     $('#namespace_quick_add_form_namespaceURI').val('');
@@ -198,17 +308,18 @@
                 var $input = $(this);
                 if ($input.prop('checked')) {
                     $('#namespace_quick_add_form_namespaceURI').val('');
-                    $('#namespace_quick_add_form_uriGenerator').val('');
                     $('#namespace_quick_add_form_uriGenerator').parent().hide();
                     $('#namespace_quick_add_form_namespaceURI').prop('readOnly', false);
+                    copyLabelToUriGenerator = false;
                 }
                 else {
                     $('#namespace_quick_add_form_uriGenerator').parent().show();
                     $('#namespace_quick_add_form_namespaceURI').prop('readOnly', true);
+                    $('#namespace_quick_add_form_uriGenerator').val($('#namespace_quick_add_form_labels_0_label').val());
                     var stringForURI = $('#namespace_quick_add_form_uriGenerator').val();
                     stringForURI = stringForURI.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
                     stringForURI = stringForURI.replace(/[\s-]+/g, '-').toLowerCase().replace(/[^0-9a-z\-]/g, '');
-                    $('#namespace_quick_add_form_namespaceURI').val('https://ontome.net/ns/' + stringForURI);
+                    $('#namespace_quick_add_form_namespaceURI').val('https://ontome.net/ns/' + stringForURI + '/');
                 }
             });
 
@@ -220,8 +331,12 @@
                 $('#namespace_quick_add_form_propertyPrefix').prop('readOnly', true);
             }
             else{
-                $('#namespace_quick_add_form_classPrefix').val('C');
-                $('#namespace_quick_add_form_propertyPrefix').val('P');
+                if($('#namespace_quick_add_form_classPrefix').val() == ''){
+                    $('#namespace_quick_add_form_classPrefix').val('C');
+                }
+                if($('#namespace_quick_add_form_propertyPrefix').val() == '') {
+                    $('#namespace_quick_add_form_propertyPrefix').val('P');
+                }
             }
 
             $(document).on('change', '#namespace_quick_add_form_automaticIdentifierManagement', function() {
@@ -239,6 +354,20 @@
                     $('#namespace_quick_add_form_propertyPrefix').prop('readOnly', true);
                 }
             });
+
+            // Restauration en cas d'échec du formulaire
+            if($("#namespace_quick_add_form_referenceNamespaces").val() != ''){
+                $('.js-reference-remove').show();
+                $('.js-reference-wrapper div').first().show();
+                $('.js-reference-add').hide();
+                refs = JSON.parse($("#namespace_quick_add_form_referenceNamespaces").val());
+                Object.entries(refs).forEach(([key, value]) => {
+                    var urlNamespace = '{{ path('namespace_show', {'id' : 'selectedValue'}) }}';
+                    urlNamespace = urlNamespace.replace('selectedValue', key);
+                    $("#reference-namespaces-list").append($('<div class="col-lg-6"><div class="well well-sm" style="margin-left:0px;"><a href="#" class="remove-namespace" data-id="'+key+'"><span class="glyphicon glyphicon-remove text-danger" aria-hidden="true"></span></a><a href="'+urlNamespace+'">'+value+'</a><span class="loading-icon2" data-id="'+key+'">&nbsp;<span class="fas fa-spinner fa-spin"></span></span></div><div class="col-lg-6"></div></div>'));
+                });
+                $('.loading-icon2').hide();
+            }
         } );
     </script>
 {% endblock %}

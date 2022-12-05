@@ -8,6 +8,7 @@
 
 namespace AppBundle\Controller;
 
+use AppBundle\AppBundle;
 use AppBundle\Entity\ClassAssociation;
 use AppBundle\Entity\EntityUserProjectAssociation;
 use AppBundle\Entity\Label;
@@ -77,9 +78,13 @@ class NamespaceController  extends Controller
         }
 
         $namespace = new OntoNamespace();
+        $ongoingNamespace = new OntoNamespace();
+        $namespaceLabel = new Label();
+        $ongoingNamespaceLabel = new Label();
 
         $em = $this->getDoctrine()->getManager();
         $systemTypeDescription = $em->getRepository('AppBundle:SystemType')->find(16); //systemType 16 = Description
+        $systemTypeContributors = $em->getRepository('AppBundle:SystemType')->find(2); //systemType 2 = Contributors
 
         $description = new TextProperty();
         $description->setNamespace($namespace);
@@ -89,19 +94,7 @@ class NamespaceController  extends Controller
         $description->setCreationTime(new \DateTime('now'));
         $description->setModificationTime(new \DateTime('now'));
 
-        $ongoingDescription = new TextProperty();
-        $ongoingDescription->setNamespace($namespace);
-        $ongoingDescription->setSystemType($systemTypeDescription);
-        $ongoingDescription->setCreator($this->getUser());
-        $ongoingDescription->setModifier($this->getUser());
-        $ongoingDescription->setCreationTime(new \DateTime('now'));
-        $ongoingDescription->setModificationTime(new \DateTime('now'));
-
         $namespace->addTextProperty($description);
-
-        $ongoingNamespace = new OntoNamespace();
-        $namespaceLabel = new Label();
-        $ongoingNamespaceLabel = new Label();
 
         $now = new \DateTime();
 
@@ -116,7 +109,11 @@ class NamespaceController  extends Controller
 
         $namespace->addLabel($namespaceLabel);
 
-        $form = $this->createForm(NamespaceQuickAddForm::class, $namespace);
+        // Pour forcer le champ Contributors à ne pas avoir l'éditeur enrichi
+        $txtpContributors = new TextProperty();
+        $txtpContributors->setSystemType($txtpContributors);
+
+        $form = $this->createForm(NamespaceQuickAddForm::class, $namespace, array("txtpContributors" => $txtpContributors));
         // only handles data on POST
         $form->handleRequest($request);
 
@@ -135,13 +132,27 @@ class NamespaceController  extends Controller
             $namespace->setCurrentClassNumber(0);
             $namespace->setCurrentPropertyNumber(0);
 
+            // Ajout des namespaces références si choisi(s)
+            $referencesNamespaces = json_decode($form->get("referenceNamespaces")->getData());
+            foreach ($referencesNamespaces as $referenceNamespace => $labelNamespace){
+                $referencedNamespaceAssociation = new ReferencedNamespaceAssociation();
+                $referencedNamespaceAssociation->setNamespace($ongoingNamespace);
+                $referenceNamespace = $em->getRepository("AppBundle:OntoNamespace")->find(intval($referenceNamespace));
+                $referencedNamespaceAssociation->setReferencedNamespace($referenceNamespace);
+                $referencedNamespaceAssociation->setCreator($this->getUser());
+                $referencedNamespaceAssociation->setModifier($this->getUser());
+                $referencedNamespaceAssociation->setCreationTime(new \DateTime('now'));
+                $referencedNamespaceAssociation->setModificationTime(new \DateTime('now'));
+                $ongoingNamespace->addReferenceNamespaceAssociation($referencedNamespaceAssociation);
+                $em->persist($referencedNamespaceAssociation);
+            }
+
             //just in case, we set the domain to ontome.net for non external namespaces
             if (!$namespace->getIsExternalNamespace() && strpos($namespace->getNamespaceURI(), 'https://ontome.net/ns') !== 0 ) {
                 $u = parse_url($namespace->getNamespaceURI());
                 $uri = 'https://ontome.net/ns'.$u['path']; //if the user tries to change the domain, we force it to be ontome.net
                 $namespace->setNamespaceURI($uri);
             }
-
 
             //$ongoingNamespace->setNamespaceURI($namespace->getNamespaceURI());
             $ongoingNamespace->setIsExternalNamespace($namespace->getIsExternalNamespace());
@@ -156,24 +167,25 @@ class NamespaceController  extends Controller
             $ongoingNamespace->setModificationTime(new \DateTime('now'));
 
             $ongoingNamespaceLabel->setIsStandardLabelForLanguage(true);
-            $ongoingNamespaceLabel->setLabel($namespaceLabel->getLabel());
+            $ongoingNamespaceLabel->setLabel($namespaceLabel->getLabel().' ongoing');
             $ongoingNamespaceLabel->setLanguageIsoCode($namespaceLabel->getLanguageIsoCode());
             $ongoingNamespaceLabel->setCreator($this->getUser());
             $ongoingNamespaceLabel->setModifier($this->getUser());
             $ongoingNamespaceLabel->setCreationTime(new \DateTime('now'));
             $ongoingNamespaceLabel->setModificationTime(new \DateTime('now'));
             $ongoingNamespace->addLabel($ongoingNamespaceLabel);
+            $ongoingDescription = clone $description;
+            $ongoingDescription->setNamespace($ongoingNamespace);
+            $ongoingNamespace->addTextProperty($ongoingDescription);
 
-            if($namespace->getTextProperties()->containsKey(1)){
-                $namespace->getTextProperties()[1]->setCreationTime(new \DateTime('now'));
-                $namespace->getTextProperties()[1]->setModificationTime(new \DateTime('now'));
-                $namespace->getTextProperties()[1]->setSystemType($systemTypeDescription);
-                $namespace->getTextProperties()[1]->setNamespace($ongoingNamespace);
-            }
-            else {
-                $ongoingDescription = $description;
-                $ongoingNamespace->addTextProperty($ongoingDescription);
-            }
+            $contributors = $form->get("contributors")->getData();
+            $contributors->setNamespace($ongoingNamespace);
+            $contributors->setSystemType($systemTypeContributors);
+            $contributors->setCreator($this->getUser());
+            $contributors->setModifier($this->getUser());
+            $contributors->setCreationTime(new \DateTime('now'));
+            $contributors->setModificationTime(new \DateTime('now'));
+            $ongoingNamespace->addTextProperty($contributors);
 
             // Créer les entity_to_user_project pour les activer par défaut
             $userProjectAssociations = $em->getRepository('AppBundle:UserProjectAssociation')->findByProject($project);
@@ -202,12 +214,13 @@ class NamespaceController  extends Controller
 
         }
 
-        $em = $this->getDoctrine()->getManager();
-
+        $rootNamespaces = $em->getRepository('AppBundle:OntoNamespace')
+            ->findBy(array("isTopLevelNamespace" => true), array("standardLabel" => "ASC"));
 
         return $this->render('namespace/new.html.twig', [
             'namespace' => $namespace,
-            'namespaceForm' => $form->createView()
+            'namespaceForm' => $form->createView(),
+            'rootNamespaces' => $rootNamespaces
         ]);
     }
 
@@ -692,7 +705,10 @@ class NamespaceController  extends Controller
             //Source
             if($relation->getSourceNamespaceForVersion() == $referencedNamespace){
                 //Verifier si la classe ou propriété source existe dans la nouvelle référence
-                if($relation->getSource()->getClassVersionForDisplay($newReferencedNamespace)->getNamespaceForVersion() == $newReferencedNamespace){
+                if(!is_null($relation->getSourceClass()) && $relation->getSource()->getClassVersionForDisplay($newReferencedNamespace)->getNamespaceForVersion() == $newReferencedNamespace){
+                    $relation->setSourceNamespaceForVersion($newReferencedNamespace);
+                }
+                if(!is_null($relation->getSourceProperty()) && $relation->getSource()->getPropertyVersionForDisplay($newReferencedNamespace)->getNamespaceForVersion() == $newReferencedNamespace){
                     $relation->setSourceNamespaceForVersion($newReferencedNamespace);
                 }
             }
@@ -700,7 +716,10 @@ class NamespaceController  extends Controller
             //Target
             if($relation->getTargetNamespaceForVersion() == $referencedNamespace){
                 //Verifier si la classe ou propriété target existe dans la nouvelle référence
-                if($relation->getTarget()->getClassVersionForDisplay($newReferencedNamespace)->getNamespaceForVersion() == $newReferencedNamespace){
+                if(!is_null($relation->getSourceClass()) && $relation->getTarget()->getClassVersionForDisplay($newReferencedNamespace)->getNamespaceForVersion() == $newReferencedNamespace){
+                    $relation->setTargetNamespaceForVersion($newReferencedNamespace);
+                }
+                if(!is_null($relation->getSourceProperty()) && $relation->getTarget()->getPropertyVersionForDisplay($newReferencedNamespace)->getNamespaceForVersion() == $newReferencedNamespace){
                     $relation->setTargetNamespaceForVersion($newReferencedNamespace);
                 }
             }
@@ -751,6 +770,11 @@ class NamespaceController  extends Controller
         $optionCardinality = $request->get('optCardinality', 'cardinality-opt-uml'); //cardinality-opt-er est l'autre option
         $optionTextCardinality = filter_var($request->get('optTextCardinality', true), FILTER_VALIDATE_BOOLEAN);; //false est l'autre option
         $optionFol = filter_var($request->get('optFol', true), FILTER_VALIDATE_BOOLEAN);; //false est l'autre option
+
+        $allNamespacesReferences = $namespace->getAllReferencedNamespaces();
+        $allNamespacesReferences->add($namespace);
+        $allNamespacesReferences->add($em->getRepository('AppBundle:OntoNamespace')->findOneBy(array('id' => 4)));
+        //var_dump($allNamespacesReferences->map(function($v){return $v->getId();})->toArray()); die;
 
         foreach ($namespace->getTextProperties() as $textProperty){
             if($textProperty->getSystemType()->getId() == 2 and $textProperty->getLanguageIsoCode() == "en"){
@@ -855,7 +879,6 @@ class NamespaceController  extends Controller
         if($namespace->getDirectReferencedNamespaces()->count() > 0){ //S'il y a les NS références
             $directNamespacesReferences = $namespace->getDirectReferencedNamespaces();
             $standardLabelDirectNamespacesReferences = $directNamespacesReferences->map(function(OntoNamespace $ns){return $ns->getStandardLabel();});
-            $allNamespacesReferences = $namespace->getAllReferencedNamespaces();
             $nsCRM = $allNamespacesReferences->filter(function($v){return $v->getTopLevelNamespace()->getId() == 7;});
 
             // Plusieurs formulations
@@ -1075,7 +1098,6 @@ class NamespaceController  extends Controller
         if($namespace->getDirectReferencedNamespaces()->count() > 0){ //S'il y a les NS références
             $directNamespacesReferences = $namespace->getDirectReferencedNamespaces();
             $standardLabelDirectNAmespacesReferences = $directNamespacesReferences->map(function(OntoNamespace $ns){return $ns->getStandardLabel();});
-            $allNamespacesReferences = $namespace->getAllReferencedNamespaces();
             $nsCRM = $allNamespacesReferences->filter(function($v){return $v->getTopLevelNamespace()->getId() == 7;});
 
             // Plusieurs formulations
@@ -1307,7 +1329,8 @@ class NamespaceController  extends Controller
             }
 
             foreach ($classVersion->getClass()->getTextProperties() as $textProperty){
-                if(in_array($textProperty->getNamespaceForVersion()->getId(), $namespace->getLargeSelectedNamespacesId())){
+                //if(in_array($textProperty->getNamespaceForVersion()->getId(), $namespace->getLargeSelectedNamespacesId())){
+                if(!is_null($textProperty->getNamespaceForVersion()) and $allNamespacesReferences->contains($textProperty->getNamespaceForVersion())){
                     if($textProperty->getSystemType()->getId() == 1 and $textProperty->getLanguageIsoCode() == "en"){
                         $textp_scopenote = $textProperty;
                     }
@@ -1347,7 +1370,8 @@ class NamespaceController  extends Controller
 
             $i = 0;
             foreach ($classVersion->getClass()->getTextProperties() as $textProperty){
-                if(in_array($textProperty->getNamespaceForVersion()->getId(), $namespace->getLargeSelectedNamespacesId())){
+                //if(in_array($textProperty->getNamespaceForVersion()->getId(), $namespace->getLargeSelectedNamespacesId())){
+                if($allNamespacesReferences->contains($textProperty->getNamespaceForVersion())){
                     if($textProperty->getSystemType()->getId() == 7){
                         if($i == 0){
                             $section->addTextBreak();
@@ -1389,7 +1413,8 @@ class NamespaceController  extends Controller
 
             $i = 0;
             $em = $this->getDoctrine()->getManager();
-            $outgoingProperties = $em->getRepository('AppBundle:property')->findOutgoingPropertiesByClassVersionAndNamespacesId($classVersion, $namespace->getLargeSelectedNamespacesId());
+            //$outgoingProperties = $em->getRepository('AppBundle:property')->findOutgoingPropertiesByClassVersionAndNamespacesId($classVersion, $namespace->getLargeSelectedNamespacesId());
+            $outgoingProperties = $em->getRepository('AppBundle:property')->findOutgoingPropertiesByClassVersionAndNamespacesId($classVersion, $allNamespacesReferences->map(function($v){return $v->getId();})->toArray());
             foreach($outgoingProperties as $outgoingProperty){
                 if($i == 0){
                     $section->addTextBreak();
@@ -1440,7 +1465,8 @@ class NamespaceController  extends Controller
             $associations = $propertyVersion->getProperty()->getChildPropertyAssociations();
             $parentPropertyVersion = null;
             foreach ($associations as $association){
-                if(in_array($association->getNamespaceForVersion()->getId(), $namespace->getLargeSelectedNamespacesId())){
+                //if(in_array($association->getNamespaceForVersion()->getId(), $namespace->getLargeSelectedNamespacesId())){
+                if($allNamespacesReferences->contains($textProperty->getNamespaceForVersion())){
                     $parentPropertyVersion = $association->getParentProperty()->getPropertyVersionForDisplay($association->getParentPropertyNamespace());
                 }
             }
@@ -1472,7 +1498,8 @@ class NamespaceController  extends Controller
             }
 
             foreach ($propertyVersion->getProperty()->getTextProperties() as $textProperty){
-                if(!is_null($textProperty->getNamespaceForVersion()) and in_array($textProperty->getNamespaceForVersion()->getId(), $namespace->getLargeSelectedNamespacesId())){
+                //if(!is_null($textProperty->getNamespaceForVersion()) and in_array($textProperty->getNamespaceForVersion()->getId(), $namespace->getLargeSelectedNamespacesId())){
+                if(!is_null($textProperty->getNamespaceForVersion()) and $allNamespacesReferences->contains($textProperty->getNamespaceForVersion())){
                     if($textProperty->getSystemType()->getId() == 1 and $textProperty->getLanguageIsoCode() == "en"){
                         $textp_scopenote = $textProperty;
                     }
@@ -1508,7 +1535,8 @@ class NamespaceController  extends Controller
 
             $i = 0;
             foreach ($propertyVersion->getProperty()->getTextProperties() as $textProperty){
-                if(!is_null($textProperty->getNamespaceForVersion()) and in_array($textProperty->getNamespaceForVersion()->getId(), $namespace->getLargeSelectedNamespacesId())){
+                //if(!is_null($textProperty->getNamespaceForVersion()) and in_array($textProperty->getNamespaceForVersion()->getId(), $namespace->getLargeSelectedNamespacesId())){
+                if(!is_null($textProperty->getNamespaceForVersion()) and $allNamespacesReferences->contains($textProperty->getNamespaceForVersion())){
                     if($textProperty->getSystemType()->getId() == 7){
                         if($i == 0){
                             $section->addTextBreak();

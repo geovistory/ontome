@@ -193,20 +193,22 @@
                     </div>
                     {% endif %}
 
-                    {# Additional notes #}
-                    {% set hasOneOrManyAdditionalNotes = false %}
-                    {% for textProperty in namespace.textProperties
-                        if textProperty.systemType.id in [33,34,35] %}
-                        {% set hasOneOrManyAdditionalNotes = true %}
-                    {% endfor %}
-                    {% if hasOneOrManyAdditionalNotes %}
+                    {# Internal notes #}
+                    {% set canSeeInternalNotes = false %}
+                    {% if app.user is not null %}
+                        {% for userProjectAssociation in namespace.projectForTopLevelNamespace.userProjectAssociations
+                            if userProjectAssociation.user.id == app.user.id and userProjectAssociation.permission <= 3 %}
+                            {# Seuls les admins et managers du projet peuvent voir les internal notes #}
+                            {% set canSeeInternalNotes = true %}
+                        {% endfor %}
+                    {% endif %}
+                    {% if canSeeInternalNotes and namespace.textProperties|filter(v => v.systemType.id == 33)|length > 0 %}
                         <div class="row">
                             <div class="col-lg-2">
-                                <p>Additional notes:</p>
+                                <p>Internal notes:</p>
                             </div>
                             <div class="col-lg-10">
-                                {% for textProperty in namespace.textProperties
-                                    if textProperty.systemType.id in [33,34,35] %}
+                                {% for textProperty in namespace.textProperties|filter(v => v.systemType.id == 33) %}
                                     {{ textProperty.textProperty|raw }}
                                 {% endfor %}
                             </div>
@@ -470,25 +472,61 @@
             </div>
             <div id="namespace-hierarchy" class="tab-pane fade">
                 <h3>Versions</h3>
+                {% set labelRoot = "Root namespace: " %}
+                {% set labelOngoing = "Ongoing namespace: " %}
+                {% set labelDeprecated = "Deprecated namespace: " %}
+                {% set excludeNs = null %}
+                {% set ns3 = null %}
                 {% if namespace.isTopLevelNamespace %}
-                    <p>{{ namespace.standardLabel }} is a <b>root namespace</b>.</p>
-                <h3>Versions of this namespace</h3>
+                    {% set rootNamespace = namespace %}
+                    {% set ongoingNamespace = namespace.childVersions|filter(v => v.isOngoing)|first %}
+                    {% set deprecatedNamespace = namespace.childVersions|filter(v => v.deprecatedAt is not null)|first %}
+                    <p>{{ namespace.standardLabel}} is a <b>root namespace</b>.</p>
+                    {% set ns1 = [ongoingNamespace, labelOngoing] %}
+                    {% set ns2 = [deprecatedNamespace, labelDeprecated] %}
+                {% elseif namespace.isOngoing %}
+                    {% set rootNamespace = namespace.topLevelNamespace %}
+                    {% set deprecatedNamespace = rootNamespace.childVersions|filter(v => v.deprecatedAt is not null)|first %}
+                    <p>{{ namespace.standardLabel}} is an <b>ongoing namespace</b>.</p>
+                    {% set ns1 = [rootNamespace, labelRoot] %}
+                    {% set ns2 = [deprecatedNamespace, labelDeprecated] %}
+                {% elseif namespace.publishedAt is not null and namespace.deprecatedAt is null %}
+                    {% set rootNamespace = namespace.topLevelNamespace %}
+                    {% set ongoingNamespace = rootNamespace.childVersions|filter(v => v.isOngoing)|first %}
+                    {% set deprecatedNamespace = rootNamespace.childVersions|filter(v => v.deprecatedAt is not null)|first %}
+                    <p>{{ namespace.standardLabel}} is a <b>published namespace</b>.</p>
+                    {% set ns1 = [rootNamespace, labelRoot] %}
+                    {% set ns2 = [ongoingNamespace, labelOngoing] %}
+                    {% set ns3 = [deprecatedNamespace, labelDeprecated] %}
+                    {% set excludeNs = namespace %}
+                {% else %}
+                    <!--Deprecated version-->
+                    {% set rootNamespace = namespace.topLevelNamespace %}
+                    {% set ongoingNamespace = rootNamespace.childVersions|filter(v => v.isOngoingl)|first %}
+                    <p>{{ namespace.standardLabel}} is a <b>deprecated namespace</b>.</p>
+                    {% set ns1 = [rootNamespace, labelRoot] %}
+                    {% set ns2 = [deprecatedNamespace, labelDeprecated] %}
+                {% endif %}
+                {% for ns in [ns1, ns2, ns3]|filter(v => v is not null and v[0])%}
+                    {% if ns is not null %}
+                    <p>{{ ns[1] }}<a href="{{ path('namespace_show', {'id': ns[0].id, '_fragment': 'namespace-hierarchy'}) }}">{{ ns[0].standardLabel }}</a></p>
+                    {% endif %}
+                {% endfor %}
+
+                <h3>{% if namespace.isTopLevelNamespace or namespace.isOngoing %}Published versions{% else %}Other published versions{% endif %}</h3>
                 <table class="table table-striped" id="child-namespaces-table">
                     <thead>
                     <tr>
-                        <th>PublishedAt</th>
                         <th>Namespace</th>
-                        <th>URI</th>
-                        <th>Last updated</th>
+                        <th>Publication date</th>
                         {% if app.user.id is defined %}
-                        <th>Current namespace</th>
+                        <th>Current namespace}</th>
                         {% endif %}
                     </tr>
                     </thead>
                     <tbody>
-                    {% for childNamespace in namespace.childVersions %}
-                        <tr {% if is_granted('edit', childNamespace) and childNamespace.isOngoing %}class="success"{% endif %}>
-                            <td>{{ childNamespace.publishedAt|date('Y-m-d H-i:s') }}</td>
+                    {% for childNamespace in rootNamespace.childVersions|filter(v => not v.isOngoing and v.deprecatedAt is null and v != excludeNs)  %}
+                        <tr>
                             <td>
                                 <a href="{{ path('namespace_show', {
                                     'id': childNamespace.id,
@@ -497,8 +535,7 @@
                                     {{ childNamespace.standardLabel }}
                                 </a>
                             </td>
-                            <td>{{ childNamespace.displayURI }}</td>
-                            <td>{{ childNamespace.modificationTime|date('Y-m-d') }}</td>
+                            <td>{{ childNamespace.publishedAt|date('Y-m-d') }}</td>
                             {% if app.user.id is defined %}
                             <td>
                                 {% set isEnabled = false %}
@@ -524,16 +561,6 @@
                     {% endfor %}
                     </tbody>
                 </table>
-                {% else %}
-                    <p>Root namespace: <a href="{{ path('namespace_show', {
-                            'id': namespace.topLevelNamespace.id,
-                            '_fragment':'namespace-hierarchy'
-                        }) }}">
-                            {{ namespace.topLevelNamespace.standardLabel }}
-                        </a>
-                    </p>
-                    <p>Root namespace prefix: {{ namespace.topLevelNamespace.rootNamespacePrefix }}</p>
-                {% endif %}
             </div>
             {% if namespace.isTopLevelNamespace and namespace.projectForTopLevelNamespace.permissionForUser(app.user) == 1 %}
             <div id="identifiers" class="tab-pane fade">
@@ -1151,10 +1178,7 @@
             });
             $('#mismatches-table').DataTable();
             $('#child-namespaces-table').DataTable({
-                "order": [[0, 'desc']],
-                "columnDefs": [
-                    {"visible": false, "targets": 0 }
-                ],
+                "order": [[1, 'desc']],
                 "autoWidth": false
             });
 
@@ -1196,6 +1220,12 @@
                 $('#btns-choose-type-relations .btn').addClass("btn-default");
                 $(this).addClass("btn-primary");
                 tableRelations.draw();
+            });
+
+            $('.dataTables_paginate').click(function () {
+                $([document.documentElement, document.body]).animate({
+                    scrollTop: $(this).closest('.dataTables_wrapper').prevAll("h3").offset().top
+                }, 1000);
             });
 
             $('#example-fol-label').hide();

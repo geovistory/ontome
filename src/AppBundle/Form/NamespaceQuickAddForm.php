@@ -9,6 +9,7 @@
 namespace AppBundle\Form;
 
 
+use AppBundle\Entity\TextProperty;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -74,6 +75,16 @@ class NamespaceQuickAddForm extends AbstractType
                 'error_bubbling' => false,
                 'allow_add' => true,
                 'by_reference' => false,
+            ))
+            ->add('contributors', TextPropertyType::class, array(
+                'label' => 'Contributors to the ongoing namespace',
+                'error_bubbling' => false,
+                'by_reference' => false,
+                'mapped' => false,
+                'systemType' => 2, //Contributors: pas besoin d'éditeur enrichi,
+            ))
+            ->add('referenceNamespaces', HiddenType::class, array(
+                'mapped' => false
             ));
     }
 
@@ -82,7 +93,8 @@ class NamespaceQuickAddForm extends AbstractType
         $resolver->setDefaults([
             'data_class' => 'AppBundle\Entity\OntoNamespace',
             "allow_extra_fields" => true,
-            'validation_groups' => ['Default', 'Description']
+            'validation_groups' => ['Default', 'Description'],
+            'txtpContributors' => new TextProperty()
         ]);
     }
 

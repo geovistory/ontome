@@ -251,7 +251,15 @@ class PropertyRepository extends EntityRepository
                             v.pk_range, 
                             v.fk_namespace_for_version, 
                             v.identifier_domain, 
-                            v.fk_domain_namespace;
+                            v.fk_domain_namespace,
+							v.identifier_in_namespace
+                ORDER BY 
+                    CASE
+                        WHEN v.fk_namespace_for_version = ".$classVersion->getNamespaceForVersion()->getId()." THEN 1
+                        ELSE 2 END ASC,
+                        che.get_root_namespace_prefix(che.get_root_namespace(fk_namespace_for_version)) ASC,
+						LENGTH(v.identifier_in_namespace) ASC, v.identifier_in_namespace ASC;
+                ;
                 ";
 
         $conn = $this->getEntityManager()->getConnection();
@@ -333,7 +341,13 @@ class PropertyRepository extends EntityRepository
                 AND fk_range_namespace IN (".$in.")
                 AND fk_domain_namespace IN (".$in.")
                 AND fk_namespace_for_version IN (".$in.")
-                GROUP BY v.pk_domain, v.identifier_property, v.identifier_range, v.fk_range_namespace, v.pk_property, v.pk_range, v.fk_namespace_for_version, v.identifier_domain, v.fk_domain_namespace;";
+                GROUP BY v.pk_domain, v.identifier_property, v.identifier_range, v.fk_range_namespace, v.pk_property, v.pk_range, v.fk_namespace_for_version, v.identifier_domain, v.fk_domain_namespace, v.identifier_in_namespace
+                ORDER BY 
+                    CASE
+                        WHEN v.fk_namespace_for_version = ".$classVersion->getNamespaceForVersion()->getId()." THEN 1
+                        ELSE 2 END ASC,
+                        che.get_root_namespace_prefix(che.get_root_namespace(fk_namespace_for_version)) ASC,
+						LENGTH(v.identifier_in_namespace) ASC, v.identifier_in_namespace ASC;";
 
         $conn = $this->getEntityManager()->getConnection();
         $stmt = $conn->prepare($sql);

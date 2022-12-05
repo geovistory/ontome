@@ -29,9 +29,15 @@ class OntoClass
     private $id;
 
     /**
+     * @Assert\Regex(pattern="/^[a-zA-Z0-9_]+$/", message="This identifier should be alphanumeric without space. Underscores are allowed.")
      * @ORM\Column(type="string")
      */
     private $identifierInNamespace;
+
+    /**
+     * @ORM\Column(type="string", name="identifier_in_uri")
+     */
+    private $identifierInURI;
 
     /**
      * @var boolean
@@ -172,7 +178,6 @@ class OntoClass
      */
     public function validate(ExecutionContextInterface $context, $payload)
     {
-
         // check if the identifier is set when needed
         if ($this->isManualIdentifier && empty($this->identifierInNamespace)) {
             $context->buildViolation('The identifier cannot be null.')
@@ -213,6 +218,14 @@ class OntoClass
     public function getIdentifierInNamespace()
     {
         return $this->identifierInNamespace;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getIdentifierInURI()
+    {
+        return $this->identifierInURI;
     }
 
     /**
@@ -390,6 +403,14 @@ class OntoClass
     public function setIdentifierInNamespace($identifierInNamespace)
     {
         $this->identifierInNamespace = $identifierInNamespace;
+    }
+
+    /**
+     * @param mixed $identifierInURI
+     */
+    public function setIdentifierInURI($identifierInURI)
+    {
+        $this->identifierInURI = $identifierInURI;
     }
 
 
