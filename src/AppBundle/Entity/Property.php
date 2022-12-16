@@ -613,7 +613,28 @@ class Property
         }
         else
         {
-            foreach ($this->getParentPropertyAssociations()->filter(function($v) use ($namespace){return $v->getNamespaceForVersion() == $namespace;}) as $parentPropertyAssociation){
+            $parentPropertyAssociations = $this->getParentPropertyAssociations()->filter(function($v) use ($namespace){return $v->getNamespaceForVersion() == $namespace;});
+
+            // Trier d'abord CRM les autres puis par identifier
+            $iterator = $parentPropertyAssociations->getIterator();
+            $iterator->uasort(function ($a,$b){
+                if($a->getChildPropertyNamespace()->getTopLevelNamespace()->getId() == 7 and $b->getChildPropertyNamespace()->getTopLevelNamespace()->getId() == 7){
+                    return strnatcmp($a->getChildProperty()->getIdentifierInNamespace(), $b->getChildProperty()->getIdentifierInNamespace());
+                }
+                elseif($a->getChildPropertyNamespace()->getTopLevelNamespace()->getId() != 7 and $b->getChildPropertyNamespace()->getTopLevelNamespace()->getId() != 7){
+                    // C'est la même chose que le premier if mais plus clair à la lecture.
+                    return strnatcmp($a->getChildProperty()->getIdentifierInNamespace(), $b->getChildProperty()->getIdentifierInNamespace());
+                }
+                elseif($a->getChildPropertyNamespace()->getTopLevelNamespace()->getId() == 7 and $b->getChildPropertyNamespace()->getTopLevelNamespace()->getId() != 7){
+                    return false;
+                }
+                elseif($a->getChildPropertyNamespace()->getTopLevelNamespace()->getId() != 7 and $b->getChildPropertyNamespace()->getTopLevelNamespace()->getId() == 7){
+                    return true;
+                }
+            });
+            $parentPropertyAssociations = new ArrayCollection(iterator_to_array($iterator));
+
+            foreach ($parentPropertyAssociations as $parentPropertyAssociation){
                 $tree->add(array($parentPropertyAssociation->getChildProperty(),$depth, $parentPropertyAssociation->getChildPropertyNamespace()));
                 $tree = $parentPropertyAssociation->getChildProperty()->getHierarchicalTreeProperties($namespace, $tree, $depth+1);
             }
