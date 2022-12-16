@@ -574,7 +574,7 @@ class ClassRepository extends EntityRepository
             'label' => '%'.$label.'%'
         ));
 
-        return $stmt->fetchColumn();
+        return $stmt->fetchAll();
     }
 
     /**
