@@ -1313,7 +1313,7 @@
                 <h3>Controlled vocabulary</h3>
                 {% for thesaurus in classVersion.namespaceForVersion.topLevelNamespace.projectForTopLevelNamespace.projectThesaurusAssociations %}
                     <div class="thesaurus-div" data-id="{{ loop.index }}">
-                        <h4 class="thesaurus-title" data-url="{{ thesaurus.thesaurusURL }}" data-id="{{ loop.index }}">{{ loop.index }}. {{ thesaurus.thesaurusURL }}</h4>
+                        <h4 class="thesaurus-title" data-url="{{ thesaurus.thesaurusURL }}" data-id="{{ loop.index }}">{{ loop.index }}. <span class="thesaurus-label" data-id="{{ loop.index }}">{{ thesaurus.thesaurusURL }}</span></h4>
                         <p><a href="{{ thesaurus.thesaurusURL }}" target="_blank">Launch Opentheso instance {{ thesaurus.thesaurusURL }}</a></p>
                         <p class="thesaurus-empty-message" data-id="{{ loop.index }}"></p>
                         <div class="thesaurus-graph" data-id="{{ loop.index }}"></div>
@@ -1499,12 +1499,14 @@
 
                     dataType: 'json',
                     success:function(data){
-                        if (data.length == 0) {
+                        if (data.length <= 1 ) {
                             $(".thesaurus-empty-message[data-id='"+id+"']").text('There is currently no top-level term related to this class.');
                         }
                         else {
-                            console.log(data[0].uri);
-                            let uri = new URL(data[0].uri);
+                            console.log(data[1].uri);
+                            console.log(data[0].thesaurusLabel);
+                            $(".thesaurus-label[data-id='"+id+"']").text(data[0].thesaurusLabel);
+                            let uri = new URL(data[1].uri);
                             let searchParams = new URLSearchParams(uri.search);
                             let conceptID = searchParams.get("idc");
                             let graphApiURL = "https://ontomeopentheso.mom.fr/ontomeopentheso/api/graph?theso="+ thesaurusID +"&id="+ conceptID +"&lang=en";
@@ -1515,9 +1517,13 @@
                                 success: function (data) {
                                     treeData = data;
                                     // Set the dimensions and margins of the diagram
-                                    var margin = {top: 20, right: 90, bottom: 30, left: 90},
-                                        width = 960 - margin.left - margin.right,
-                                        height = 500 - margin.top - margin.bottom;
+                                    // size of the diagram
+                                    var realWidth = $(".thesaurus-div").width();
+                                    var realHeight = 400;
+
+                                    var margin = {top: 20, right: 120, bottom: 30, left: 120},
+                                        width = realWidth - margin.left - margin.right,
+                                        height = realHeight - margin.top - margin.bottom;
 
                                     // append the svg object to the body of the page
                                     // appends a 'group' element to 'svg'
@@ -1598,7 +1604,10 @@
                                             .attr("text-anchor", function(d) {
                                                 return d.children || d._children ? "end" : "start";
                                             })
-                                            .text(function(d) { return d.data.name; });
+                                            .text(function(d) { return d.data.name; })
+                                            //.style("fill-opacity", 0)
+                                            .call(wrap, 125)
+                                            .on("click",function(d){window.open(d.data.url,'_blank');});
 
                                         // UPDATE
                                         var nodeUpdate = nodeEnter.merge(node);
@@ -1700,6 +1709,29 @@
                     }
                 });
             });
+            function wrap(text, width) {
+                text.each(function() {
+                    var text = d3.select(this),
+                        words = text.text().split(/\s+/).reverse(),
+                        word,
+                        line = [],
+                        lineNumber = 0,
+                        lineHeight = 1.1, // ems
+                        y = text.attr("y"),
+                        dy = parseFloat(text.attr("dy")),
+                        tspan = text.text(null).append("tspan").attr("x", function(d) { return d.children || d._children ? -10 : 10; }).attr("y", y).attr("dy", dy + "em");
+                    while (word = words.pop()) {
+                        line.push(word);
+                        tspan.text(line.join(" "));
+                        if (tspan.node().getComputedTextLength() > width) {
+                            line.pop();
+                            tspan.text(line.join(" "));
+                            line = [word];
+                            tspan = text.append("tspan").attr("x", function(d) { return d.children || d._children ? -10 : 10; }).attr("y", y).attr("dy", ++lineNumber * lineHeight/2.5 + dy + "em").text(word);
+                        }
+                    }
+                });
+            }
             {% endif %}
         });
 
