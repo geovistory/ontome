@@ -766,6 +766,17 @@ class NamespaceController  extends Controller
      */
     public function getNamespaceOdt(OntoNamespace $namespace, Request $request)
     {
+        header('Content-type: text/html; charset=utf-8');
+        mb_internal_encoding("UTF-8");
+        function specialCharactersConversion($string, $forHTML=false){
+            $string = htmlspecialchars_decode($string, ENT_QUOTES);
+            $string = html_entity_decode($string, ENT_QUOTES, 'UTF-8');
+            if($forHTML){
+                $string = '<meta http-equiv="Content-Type" content="text/html; charset=utf-8">'.$string;
+            }
+            return $string;
+        }
+
         $em = $this->getDoctrine()->getManager();
 
         $optionCardinality = $request->get('optCardinality', 'cardinality-opt-uml'); //cardinality-opt-er est l'autre option
@@ -823,7 +834,7 @@ class NamespaceController  extends Controller
         $section->addTextBreak(10);
         //-- Version
         if(isset($textp_version)){
-            $section->addText('Version: '.$textp_version->getTextProperty(), null, $paragrapheCentre);
+            $section->addText('Version: '.specialCharactersConversion($textp_version->getTextProperty()), null, $paragrapheCentre);
             $section->addTextBreak(1);
         }
         //-- Date
@@ -839,7 +850,7 @@ class NamespaceController  extends Controller
         if(isset($textp_contributors)){
             //$string = htmlentities($textp_contributors->getTextProperty());
             //$string = str_replace($allowedTagsEncoded, $allowedTagsDecoded, $string);
-            $string = htmlspecialchars_decode(htmlentities($textp_contributors->getTextProperty()));
+            $string = specialCharactersConversion($textp_contributors->getTextProperty());
             $section->addText("Contributors: ".strip_tags($string), null, $paragrapheCentre);
         }
         $section->addTextBreak(15);
@@ -873,7 +884,7 @@ class NamespaceController  extends Controller
             $section->addTextBreak();
             //$string = htmlentities($textp_definition->getTextProperty());
             //$string = str_replace($allowedTagsEncoded, $allowedTagsDecoded, $string);
-            $string = htmlspecialchars_decode(htmlentities($textp_definition->getTextProperty()));
+            $string = specialCharactersConversion($textp_definition->getTextProperty());
             //$section->addText($string);
             \PhpOffice\PhpWord\Shared\Html::addHtml($section, $string, true, false);
         }
@@ -1424,16 +1435,10 @@ class NamespaceController  extends Controller
             if(isset($textp_scopenote)){
                 $section->addTextBreak();
                 $section->addText('Scope note:', "gras");
-                //$table = $section->addTable();
-                //$table->addRow();
-                //$table->addCell(1000);
-                //$cell = $table->addCell(8000);
-                //$string = htmlentities($textp_scopenote->getTextProperty());
-                //$string = str_replace($allowedTagsEncoded, $allowedTagsDecoded, $string);
-                $string = htmlspecialchars_decode(htmlentities($textp_scopenote->getTextProperty()));
+                $string = specialCharactersConversion($textp_scopenote->getTextProperty(), true);
                 \PhpOffice\PhpWord\Shared\Html::addHtml($section, $string, true, false);
 
-                // Impossible de mettre l'indentation avec addHtml ou dans l'HTML, phpword ne prévoit pas ça. DONC bricolage by Alex...
+                // Impossible de mettre l'indentation avec addHtml ou dans l'HTML, phpword ne prévoit pas ça.
                 // Récupérer le dernier élément concerné et mettre l'indentation.
                 $arrayElements = $section->getElements();
                 $lastElement = end($arrayElements);
@@ -1462,9 +1467,7 @@ class NamespaceController  extends Controller
                             $section->addText('Examples:', "gras");
                             $i++;
                         }
-                        //$string = htmlentities($textProperty->getTextProperty());
-                        //$string = str_replace($allowedTagsEncoded, $allowedTagsDecoded, $string);
-                        $string = htmlspecialchars_decode(htmlentities($textProperty->getTextProperty()));
+                        $string = specialCharactersConversion($textProperty->getTextProperty(), true);
                         \PhpOffice\PhpWord\Shared\Html::addHtml($section, $string, true, false);
 
                         // Impossible de mettre l'indentation avec addHtml ou dans l'HTML, phpword ne prévoit pas ça. DONC bricolage by Alex...
@@ -1597,9 +1600,7 @@ class NamespaceController  extends Controller
             if(isset($textp_scopenote)){
                 $section->addTextBreak();
                 $section->addText('Scope note:', "gras");
-                //$string = htmlentities($textp_scopenote->getTextProperty());
-                //$string = str_replace($allowedTagsEncoded, $allowedTagsDecoded, $string);
-                $string = htmlspecialchars_decode(htmlentities($textp_scopenote->getTextProperty()));
+                $string = specialCharactersConversion($textp_scopenote->getTextProperty(), true);
                 \PhpOffice\PhpWord\Shared\Html::addHtml($section, $string, true, false);
 
                 // Impossible de mettre l'indentation avec addHtml ou dans l'HTML, phpword ne prévoit pas ça. DONC bricolage by Alex...
@@ -1631,9 +1632,7 @@ class NamespaceController  extends Controller
                             $section->addText('Examples:', "gras");
                             $i++;
                         }
-                        //$string = htmlentities($textProperty->getTextProperty());
-                        //$string = str_replace($allowedTagsEncoded, $allowedTagsDecoded, $string);
-                        $string = htmlspecialchars_decode(htmlentities($textProperty->getTextProperty()));
+                        $string = specialCharactersConversion($textProperty->getTextProperty(), true);
                         \PhpOffice\PhpWord\Shared\Html::addHtml($section, $string, true, false);
 
                         // Impossible de mettre l'indentation avec addHtml ou dans l'HTML, phpword ne prévoit pas ça. DONC bricolage by Alex...
@@ -1692,5 +1691,4 @@ class NamespaceController  extends Controller
 
         return $response;
     }
-
 }
