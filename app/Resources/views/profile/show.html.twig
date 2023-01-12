@@ -182,31 +182,31 @@
                     {% endfor %}
                 {% endif %}
                 {% if canSeeInternalNotes %}
-                <h3>Internal notes</h3>
-                <table class="table table-striped" id="additional-notes-table">
-                    <thead>
-                    <tr>
-                        <th>Show</th>
-                        <th>Notes</th>
-                        <th>Language</th>
-                        <th>Namespace</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% for textProperty in profile.textProperties
-                        if textProperty.systemType.id == 33 %}
-                        {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
+                    <h3>Internal notes</h3>
+                    <table class="table table-striped" id="additional-notes-table">
+                        <thead>
                         <tr>
-                            <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
-                            <td class="truncated-text">
-                                <span>{{ textProperty.textProperty|striptags|raw }}</span>
-                            </td>
-                            <td>{{ textProperty.languageIsoCode}}</td>
-                            <td>WIP</td>
+                            <th>Show</th>
+                            <th>Notes</th>
+                            <th>Language</th>
+                            <th>Namespace</th>
                         </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                        {% for textProperty in profile.textProperties
+                            if textProperty.systemType.id == 33 %}
+                            {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
+                            <tr>
+                                <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
+                                <td class="truncated-text">
+                                    <span>{{ textProperty.textProperty|striptags|raw }}</span>
+                                </td>
+                                <td>{{ textProperty.languageIsoCode}}</td>
+                                <td>WIP</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
                 {% endif %}
             </div>
             <div id="identification" class="tab-pane fade">
@@ -298,7 +298,7 @@
                                     <td>{{ class.namespace }}</td>
                                     <td>{{ class.associationType }}</td>
                                     <td>
-                                    {% if class.nbTxtpCustom > 0 %}
+                                        {% if class.nbTxtpCustom > 0 %}
                                         {% if class.associationType == "Selected" %}<a href="{{ path('show_customisation', {'id': class.profileAssociationId}) }}" class="btn btn-xs btn-success"><i class="fas fa-eye"></i></a>{% endif %}</td>
                                     {% endif %}
                                     </td>
@@ -443,9 +443,9 @@
                                     <td>
                                         {% set txtPCustom = profileAssociation.textProperties|filter(v => v.namespaceForVersion == profileAssociation.entityNamespaceForVersion)|first %}
                                         {% if txtPCustom|length > 0 %}
-                                        <a href="{{ path('show_customisation', {'id': profileAssociation.id}) }}" class="btn btn-xs btn-success">
-                                            <span class="fas fa-eye"></span>
-                                        </a>
+                                            <a href="{{ path('show_customisation', {'id': profileAssociation.id}) }}" class="btn btn-xs btn-success">
+                                                <span class="fas fa-eye"></span>
+                                            </a>
                                         {% endif %}
                                     </td>
                                 </tr>
@@ -504,6 +504,10 @@
                                 {% endif %}
                                 profile</strong>.
                         </p>
+                    {% else %}
+                        <p>
+                            {{ profile.standardLabel }} is an <strong>ongoing profile</strong>.
+                        </p>
                     {% endif %}
                     <p>
                         Root profile:
@@ -522,7 +526,7 @@
                         {% endfor %}
                     {% endif %}
                 {% endif %}
-                <h3>Published versions</h3>
+                <h3>Other versions</h3>
                 <table class="table table-striped" id="profile-versions-table">
                     <thead>
                     <tr>
@@ -530,7 +534,6 @@
                         <th>Version</th>
                         <th>Status</th>
                         <th>Publication date</th>
-                        <th>Current profile</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -554,7 +557,6 @@
                                     {% endif %}
                                 </td>
                                 <td>{{ publishedProfile.startDate|date('Y-m-d') }}</td>
-                                <td>todo</td>
                             </tr>
                         {% endfor %}
                     {% else %}
@@ -577,7 +579,6 @@
                                     {% endif %}
                                 </td>
                                 <td>{{ publishedProfile.startDate|date('Y-m-d') }}</td>
-                                <td>todo</td>
                             </tr>
                         {% endfor %}
                     {% endif %}
