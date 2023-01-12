@@ -214,6 +214,10 @@
                                     <span class="label label-warning">
                                     {{ textProperty.validationStatus }}
                                 </span>
+                                {% elseif textProperty.validationStatus.id == 37 %}
+                                    <span class="label label-warning2">
+                                    {{ textProperty.validationStatus }}
+                                </span>
                                 {% endif %}
                                 &nbsp;<span class="caret"></span>
                             </button>
@@ -235,6 +239,16 @@
                                     }) }}">
                                     <span class="label label-warning">
                                         Validation request
+                                    </span>
+                                    </a>
+                                </li>
+                                <li class="label-warning2">
+                                    <a class="select-validation-status" data-id="37" href="{{ path('text_property_validation_status_edit', {
+                                        id: textProperty.id,
+                                        validationStatus: 37
+                                    }) }}">
+                                    <span class="label label-warning2">
+                                        Under revision
                                     </span>
                                     </a>
                                 </li>

@@ -376,7 +376,7 @@ class TextPropertyController extends Controller
     }
 
     /**
-     * @Route("/text-property/{id}/edit-validity/{validationStatus}", name="text_property_validation_status_edit", requirements={"id"="^[0-9]+$", "validationStatus"="^(26|27|28){1}$"})
+     * @Route("/text-property/{id}/edit-validity/{validationStatus}", name="text_property_validation_status_edit", requirements={"id"="^[0-9]+$", "validationStatus"="^(26|27|28|37){1}$"})
      * @param TextProperty $textProperty
      * @param SystemType $validationStatus
      * @param Request $request
@@ -433,7 +433,7 @@ class TextPropertyController extends Controller
 
         if (!is_null($newValidationStatus)) {
             $statusId = intval($newValidationStatus->getId());
-            if (in_array($statusId, [26,27,28], true)) {
+            if (in_array($statusId, [26,27,28,37], true)) {
                 $textProperty->setValidationStatus($newValidationStatus);
                 $textProperty->setModifier($this->getUser());
                 $textProperty->setModificationTime(new \DateTime('now'));

@@ -507,6 +507,10 @@
                                         <span class="label label-warning">
                                         {{ textProperty.validationStatus }}
                                     </span>
+                                    {% elseif textProperty.validationStatus.id == 37  %}
+                                        <span class="label label-warning2">
+                                        {{ textProperty.validationStatus }}
+                                    </span>
                                     {% endif %}
                                     </a>
                                 </td>
@@ -576,6 +580,10 @@
                                     </span>
                                     {% elseif textProperty.validationStatus.id == 28  %}
                                         <span class="label label-warning">
+                                        {{ textProperty.validationStatus }}
+                                    </span>
+                                    {% elseif textProperty.validationStatus.id == 37  %}
+                                        <span class="label label-warning2">
                                         {{ textProperty.validationStatus }}
                                     </span>
                                     {% endif %}
@@ -668,6 +676,10 @@
                                         <span class="label label-warning">
                                         {{ textProperty.validationStatus }}
                                     </span>
+                                    {% elseif textProperty.validationStatus.id == 37  %}
+                                        <span class="label label-warning2">
+                                        {{ textProperty.validationStatus }}
+                                    </span>
                                     {% endif %}
                                     </a>
                                 </td>
@@ -746,6 +758,10 @@
                                     </span>
                                     {% elseif label.validationStatus.id == 28  %}
                                         <span class="label label-warning">
+                                        {{ label.validationStatus }}
+                                    </span>
+                                    {% elseif label.validationStatus.id == 37  %}
+                                        <span class="label label-warning2">
                                         {{ label.validationStatus }}
                                     </span>
                                     {% endif %}
@@ -885,6 +901,10 @@
                                     </span>
                                     {% elseif association.validationStatus.id == 28  %}
                                         <span class="label label-warning">
+                                        {{ association.validationStatus }}
+                                    </span>
+                                    {% elseif association.validationStatus.id == 37  %}
+                                        <span class="label label-warning2">
                                         {{ association.validationStatus }}
                                     </span>
                                     {% endif %}
@@ -1137,6 +1157,10 @@
                                     </span>
                                     {% elseif relation.validationStatus.id == 28  %}
                                         <span class="label label-warning">
+                                        {{ relation.validationStatus }}
+                                    </span>
+                                    {% elseif relation.validationStatus.id == 37  %}
+                                        <span class="label label-warning2">
                                         {{ relation.validationStatus }}
                                     </span>
                                     {% endif %}

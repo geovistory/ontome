@@ -73,6 +73,10 @@
                                     <span class="label label-warning">
                                     {{ label.validationStatus }}
                                 </span>
+                                {% elseif label.validationStatus.id == 37  %}
+                                    <span class="label label-warning">
+                                    {{ label.validationStatus }}
+                                </span>
                                 {% endif %}
                                 &nbsp;<span class="caret"></span>
                             </button>
@@ -94,6 +98,16 @@
                                     }) }}">
                                     <span class="label label-warning">
                                         Validation request
+                                    </span>
+                                    </a>
+                                </li>
+                                <li class="label-warning2">
+                                    <a class="select-validation-status" data-id="37" href="{{ path('label_validation_status_edit', {
+                                        id: label.id,
+                                        validationStatus: 37
+                                    }) }}">
+                                    <span class="label label-warning2">
+                                        Under revision
                                     </span>
                                     </a>
                                 </li>

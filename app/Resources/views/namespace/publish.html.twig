@@ -82,6 +82,10 @@
                                     <span class="label label-warning">
                                     {{ classVersion.validationStatus }}
                                 </span>
+                                {% elseif classVersion.validationStatus.id == 37  %}
+                                    <span class="label label-warning2">
+                                    {{ classVersion.validationStatus }}
+                                </span>
                                 {% endif %}
                             </td>
                         </tr>
@@ -160,6 +164,10 @@
                                     <span class="label label-warning">
                                     {{ propertyVersion.validationStatus }}
                                 </span>
+                                {% elseif propertyVersion.validationStatus.id == 37  %}
+                                    <span class="label label-warning2">
+                                    {{ propertyVersion.validationStatus }}
+                                </span>
                                 {% endif %}
                             </td>
                         </tr>
@@ -209,6 +217,10 @@
                                     <span class="label label-warning">
                                     {{ classAssociation.validationStatus }}
                                 </span>
+                                {% elseif classAssociation.validationStatus.id == 37  %}
+                                    <span class="label label-warning2">
+                                    {{ classAssociation.validationStatus }}
+                                </span>
                                 {% endif %}
                             </td>
                         </tr>
@@ -241,7 +253,11 @@
                                     {{ propertyAssociation.validationStatus }}
                                 </span>
                                 {% elseif propertyAssociation.validationStatus.id == 28  %}
-                                    <span propertyAssociation="label label-warning">
+                                    <span class="label label-warning">
+                                    {{ propertyAssociation.validationStatus }}
+                                </span>
+                                {% elseif propertyAssociation.validationStatus.id == 37  %}
+                                    <span class="label label-warning2">
                                     {{ propertyAssociation.validationStatus }}
                                 </span>
                                 {% endif %}
@@ -298,7 +314,11 @@
                                     {{ entityAssociation.validationStatus }}
                                 </span>
                                 {% elseif entityAssociation.validationStatus.id == 28  %}
-                                    <span entityAssociation="label label-warning">
+                                    <span class="label label-warning">
+                                    {{ entityAssociation.validationStatus }}
+                                </span>
+                                {% elseif entityAssociation.validationStatus.id == 37 %}
+                                    <span class="label label-warning">
                                     {{ entityAssociation.validationStatus }}
                                 </span>
                                 {% endif %}

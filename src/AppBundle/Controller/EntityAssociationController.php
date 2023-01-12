@@ -322,7 +322,7 @@ class EntityAssociationController extends Controller
     }
 
     /**
-     * @Route("/entity-association/{id}/edit-validity/{validationStatus}", name="entity_association_validation_status_edit", requirements={"id"="^[0-9]+$", "validationStatus"="^(26|27|28){1}$"})
+     * @Route("/entity-association/{id}/edit-validity/{validationStatus}", name="entity_association_validation_status_edit", requirements={"id"="^[0-9]+$", "validationStatus"="^(26|27|28|37){1}$"})
      * @param EntityAssociation $entityAssociation
      * @param SystemType $validationStatus
      * @param Request $request
@@ -359,7 +359,7 @@ class EntityAssociationController extends Controller
 
         if (!is_null($newValidationStatus)) {
             $statusId = intval($newValidationStatus->getId());
-            if (in_array($statusId, [26,27,28], true)) {
+            if (in_array($statusId, [26,27,28,37], true)) {
                 $entityAssociation->setValidationStatus($newValidationStatus);
                 $entityAssociation->setModifier($this->getUser());
                 $entityAssociation->setModificationTime(new \DateTime('now'));

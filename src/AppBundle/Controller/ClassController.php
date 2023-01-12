@@ -455,7 +455,7 @@ class ClassController extends Controller
     }
 
     /**
-     * @Route("/class-version/{id}/edit-validity/{validationStatus}", name="class_version_validation_status_edit", requirements={"id"="^[0-9]+$", "validationStatus"="^26|27|28$"})
+     * @Route("/class-version/{id}/edit-validity/{validationStatus}", name="class_version_validation_status_edit", requirements={"id"="^[0-9]+$", "validationStatus"="^26|27|28|37$"})
      * @param OntoClassVersion $classVersion
      * @param SystemType $validationStatus
      * @param Request $request
@@ -477,6 +477,20 @@ class ClassController extends Controller
 
         $newValidationStatus = new SystemType();
 
+        $txtpValides = $classVersion->getClass()->getTextProperties()->filter(function($t)use($classVersion){
+            return $t->getSystemType()->getId() == 1
+                && $t->getNamespaceForVersion() == $classVersion->getNamespaceForVersion()
+                && !is_null($t->getValidationStatus())
+                && $t->getValidationStatus()->getId() == 26;
+        });
+        $lblValides = $classVersion->getClass()->getLabels()->filter(function($l)use($classVersion){
+            return $l->getNamespaceForVersion() == $classVersion->getNamespaceForVersion()
+                && !is_null($l->getValidationStatus())
+                && $l->getValidationStatus()->getId() == 26;
+        });
+
+        $isMinimumRequirementReached = $txtpValides->count() > 0 && $lblValides->count() > 0;
+
         try{
             $em = $this->getDoctrine()->getManager();
             $newValidationStatus = $em->getRepository('AppBundle:SystemType')
@@ -487,10 +501,99 @@ class ClassController extends Controller
 
         if (!is_null($newValidationStatus)) {
             $statusId = intval($newValidationStatus->getId());
-            if (in_array($statusId, [26,27,28], true)) {
+            if (in_array($statusId, [26,27,28,37], true)) {
                 $classVersion->setValidationStatus($newValidationStatus);
                 $classVersion->setModifier($this->getUser());
                 $classVersion->setModificationTime(new \DateTime('now'));
+
+                // Validation request && minimum not reached => all related candidate entities (txtp, lbl) must be "validation request"
+                if($statusId == 28 && !$isMinimumRequirementReached){
+                    $txtpCandidates = $classVersion->getClass()->getTextProperties()->filter(function($t)use($classVersion){
+                        return $t->getNamespaceForVersion() == $classVersion->getNamespaceForVersion()
+                            && is_null($t->getValidationStatus());
+                    });
+                    $lblCandidates = $classVersion->getClass()->getLabels()->filter(function($l)use($classVersion){
+                        return $l->getNamespaceForVersion() == $classVersion->getNamespaceForVersion()
+                            && is_null($l->getValidationStatus());
+                    });
+                    $childClassAssociationCandidates = $classVersion->getClass()->getChildClassAssociations()->filter(function($c)use($classVersion){
+                        return $c->getNamespaceForVersion() == $classVersion->getNamespaceForVersion()
+                            && is_null($c->getValidationStatus());
+                    });
+                    $sourceEntityAssociationCandidates = $classVersion->getClass()->getSourceEntityAssociations()->filter(function($c)use($classVersion){
+                        return $c->getNamespaceForVersion() == $classVersion->getNamespaceForVersion()
+                            && is_null($c->getValidationStatus());
+                    });
+                    $targetEntityAssociationCandidates = $classVersion->getClass()->getTargetEntityAssociations()->filter(function($c)use($classVersion){
+                        return $c->getNamespaceForVersion() == $classVersion->getNamespaceForVersion()
+                            && is_null($c->getValidationStatus());
+                    });
+
+                    $allEntitiesCandidates = array(
+                        $txtpCandidates,
+                        $lblCandidates,
+                        $childClassAssociationCandidates,
+                        $sourceEntityAssociationCandidates,
+                        $targetEntityAssociationCandidates
+                    );
+
+                    foreach ($allEntitiesCandidates as $entitiesCandidates){
+                        foreach ($entitiesCandidates as $entitieCandidate){
+                            $entitieCandidate->setValidationStatus($newValidationStatus);
+                            $entitieCandidate->setModifier($this->getUser());
+                            $entitieCandidate->setModificationTime(new \DateTime('now'));
+                            $em->persist($entitieCandidate);
+                        }
+                    }
+                }
+
+                // Denied && minimum not reached => all related validated entities (txtp, lbl) must be "validation request"
+                $validationRequestStatus = $em->getRepository('AppBundle:SystemType')->findOneBy(array('id' => 28));
+
+                if($statusId == 27){
+                    $txtpValidateds = $classVersion->getClass()->getTextProperties()->filter(function($t)use($classVersion){
+                        return $t->getNamespaceForVersion() == $classVersion->getNamespaceForVersion()
+                            && !is_null($t->getValidationStatus())
+                            && $t->getValidationStatus()->getId() == 26;
+                    });
+                    $lblValidateds = $classVersion->getClass()->getLabels()->filter(function($l)use($classVersion){
+                        return $l->getNamespaceForVersion() == $classVersion->getNamespaceForVersion()
+                            && !is_null($l->getValidationStatus())
+                            && $l->getValidationStatus()->getId() == 26;
+                    });
+                    $childClassAssociationValidateds = $classVersion->getClass()->getChildClassAssociations()->filter(function($c)use($classVersion){
+                        return $c->getNamespaceForVersion() == $classVersion->getNamespaceForVersion()
+                            && !is_null($c->getValidationStatus())
+                            && $c->getValidationStatus()->getId() == 26;
+                    });
+                    $sourceEntityAssociationValidateds = $classVersion->getClass()->getSourceEntityAssociations()->filter(function($c)use($classVersion){
+                        return $c->getNamespaceForVersion() == $classVersion->getNamespaceForVersion()
+                            && !is_null($c->getValidationStatus())
+                            && $c->getValidationStatus()->getId() == 26;
+                    });
+                    $targetEntityAssociationValidateds = $classVersion->getClass()->getTargetEntityAssociations()->filter(function($c)use($classVersion){
+                        return $c->getNamespaceForVersion() == $classVersion->getNamespaceForVersion()
+                            && !is_null($c->getValidationStatus())
+                            && $c->getValidationStatus()->getId() == 26;
+                    });
+
+                    $allEntitiesValidateds = array(
+                        $txtpValidateds,
+                        $lblValidateds,
+                        $childClassAssociationValidateds,
+                        $sourceEntityAssociationValidateds,
+                        $targetEntityAssociationValidateds
+                    );
+
+                    foreach ($allEntitiesValidateds as $entitiesValidateds){
+                        foreach ($entitiesValidateds as $entitiesValidated){
+                            $entitiesValidated->setValidationStatus($validationRequestStatus);
+                            $entitiesValidated->setModifier($this->getUser());
+                            $entitiesValidated->setModificationTime(new \DateTime('now'));
+                            $em->persist($entitiesValidated);
+                        }
+                    }
+                }
 
                 $em->persist($classVersion);
 

@@ -632,6 +632,10 @@
                                     <span class="label label-warning">
                                     {{ classVersion.validationStatus }}
                                 </span>
+                                {% elseif classVersion.validationStatus.id == 37  %}
+                                    <span class="label label-warning2">
+                                    {{ classVersion.validationStatus }}
+                                </span>
                                 {% endif %}
                             </td>
                             {% endif %}
@@ -717,6 +721,10 @@
                                 </span>
                                 {% elseif propertyVersion.validationStatus.id == 28  %}
                                     <span class="label label-warning">
+                                    {{ propertyVersion.validationStatus }}
+                                </span>
+                                {% elseif propertyVersion.validationStatus.id == 37  %}
+                                    <span class="label label-warning2">
                                     {{ propertyVersion.validationStatus }}
                                 </span>
                                 {% endif %}

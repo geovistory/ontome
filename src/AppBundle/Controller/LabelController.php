@@ -231,7 +231,7 @@ class LabelController  extends Controller
     }
 
     /**
-     * @Route("/label/{id}/edit-validity/{validationStatus}", name="label_validation_status_edit", requirements={"id"="^[0-9]+$", "validationStatus"="^(26|27|28){1}$"})
+     * @Route("/label/{id}/edit-validity/{validationStatus}", name="label_validation_status_edit", requirements={"id"="^[0-9]+$", "validationStatus"="^(26|27|28|37){1}$"})
      * @param Label $label
      * @param SystemType $validationStatus
      * @param Request $request
@@ -285,7 +285,7 @@ class LabelController  extends Controller
 
         if (!is_null($newValidationStatus)) {
             $statusId = intval($newValidationStatus->getId());
-            if (in_array($statusId, [26,27,28], true)) {
+            if (in_array($statusId, [26,27,28,37], true)) {
                 $label->setValidationStatus($newValidationStatus);
                 $label->setModifier($this->getUser());
                 $label->setModificationTime(new \DateTime('now'));

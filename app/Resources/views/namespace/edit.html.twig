@@ -336,6 +336,10 @@
                                     <span class="label label-warning">
                                         {{ textProperty.validationStatus }}
                                     </span>
+                                {% elseif textProperty.validationStatus.id == 37  %}
+                                    <span class="label label-warning2">
+                                        {{ textProperty.validationStatus }}
+                                    </span>
                                 {% endif %}
                             </td>
                             {% endif %}
@@ -387,6 +391,10 @@
                             </span>
                         {% elseif txtpContributors.validationStatus.id == 28  %}
                             <span class="label label-warning">
+                                {{ txtpContributors.validationStatus }}
+                            </span>
+                        {% elseif txtpContributors.validationStatus.id == 37  %}
+                            <span class="label label-warning2">
                                 {{ txtpContributors.validationStatus }}
                             </span>
                         {% endif %}
@@ -536,6 +544,10 @@
                                 {{ txtpVersion.validationStatus }}
                             </span>
                                 {% elseif txtpVersion.validationStatus.id == 28  %}
+                                    <span class="label label-warning">
+                                {{ txtpVersion.validationStatus }}
+                            </span>
+                                {% elseif txtpVersion.validationStatus.id == 37  %}
                                     <span class="label label-warning">
                                 {{ txtpVersion.validationStatus }}
                             </span>

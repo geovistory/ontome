@@ -64,11 +64,7 @@
                 {% endif %}
             {% endfor %}
 
-            {% if countValidationsTxtp > 0 and countValidationsLbl > 0 %}
-                {{ include('property/_validation.html.twig') }}
-            {% else %}
-                <h6><span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span><em>This property does not yet have the minimum number of validated parts required for publication.</em></h6>
-            {% endif %}
+            {{ include('property/_validation.html.twig') }}
         </div>
         <ul class="nav nav-tabs" id="main-tabs">
             <li class="active"><a data-toggle="tab" href="#summary">Summary</a></li>
@@ -548,6 +544,10 @@
                                     <span class="label label-warning">
                                     {{ textProperty.validationStatus }}
                                 </span>
+                                {% elseif textProperty.validationStatus.id == 37  %}
+                                    <span class="label label-warning2">
+                                    {{ textProperty.validationStatus }}
+                                </span>
                                 {% endif %}
                             </td>
                         </tr>
@@ -620,6 +620,10 @@
                                 </span>
                                 {% elseif textProperty.validationStatus.id == 28  %}
                                     <span class="label label-warning">
+                                    {{ textProperty.validationStatus }}
+                                </span>
+                                {% elseif textProperty.validationStatus.id == 37  %}
+                                    <span class="label label-warning2">
                                     {{ textProperty.validationStatus }}
                                 </span>
                                 {% endif %}
@@ -707,6 +711,10 @@
                                 </span>
                                 {% elseif textProperty.validationStatus.id == 28  %}
                                     <span class="label label-warning">
+                                    {{ textProperty.validationStatus }}
+                                </span>
+                                {% elseif textProperty.validationStatus.id == 37  %}
+                                    <span class="label label-warning2">
                                     {{ textProperty.validationStatus }}
                                 </span>
                                 {% endif %}
@@ -880,6 +888,10 @@
                                 </span>
                                 {% elseif label.validationStatus.id == 28  %}
                                     <span class="label label-warning">
+                                    {{ label.validationStatus }}
+                                </span>
+                                {% elseif label.validationStatus.id == 37  %}
+                                    <span class="label label-warning2">
                                     {{ label.validationStatus }}
                                 </span>
                                 {% endif %}
@@ -1109,6 +1121,10 @@
                                 </span>
                                 {% elseif association.validationStatus.id == 28  %}
                                     <span class="label label-warning">
+                                    {{ association.validationStatus }}
+                                </span>
+                                {% elseif association.validationStatus.id == 37  %}
+                                    <span class="label label-warning2">
                                     {{ association.validationStatus }}
                                 </span>
                                 {% endif %}
@@ -1477,6 +1493,10 @@
                                     </span>
                                 {% elseif relation.validationStatus.id == 28  %}
                                     <span class="label label-warning">
+                                        {{ relation.validationStatus }}
+                                    </span>
+                                {% elseif relation.validationStatus.id == 37  %}
+                                    <span class="label label-warning2">
                                         {{ relation.validationStatus }}
                                     </span>
                                 {% endif %}
