@@ -783,6 +783,67 @@ class ProjectController  extends Controller
                                 }
                             }
 
+                            //parentClassOf
+                            if (!empty($nodeXmlClass->parentClassOf)) {
+                                foreach($nodeXmlClass->parentClassOf as $keySub => $nodeXmlParentClassOf){
+                                    $classAssociation = new ClassAssociation();
+                                    // Quelle version Child ?
+                                    $xmlChildClassNamespace = $nodeXmlParentClassOf->attributes()->referenceNamespace;
+                                    //Si attribut referenceNamespace existe, utiliser cet id, sinon ce nouveau namespace
+                                    if (!is_null($xmlChildClassNamespace)) {
+                                        $childClassNamespace = $em->getRepository("AppBundle:OntoNamespace")
+                                            ->findOneBy(array("id" => (integer)$xmlChildClassNamespace));
+                                        if(!$idsReferences->contains((integer)$xmlChildClassNamespace)){
+                                            echo "Un namespace de référence pour parentClassOf n'a pas été déclaré avec la balise referenceNamespace";
+                                            die;
+                                        }
+                                    } else {
+                                        $childClassNamespace = $newNamespaceVersion;
+                                    }
+                                    // Trouver la classe child
+                                    $childClass = null;
+                                    foreach ($childClassNamespace->getClasses() as $tempClass) {
+                                        if ($tempClass->getIdentifierInNamespace() == (string)$nodeXmlParentClassOf) {
+                                            $childClass = $tempClass;
+                                            break;
+                                        }
+                                    }
+                                    if (is_null($childClass)) {
+                                        echo (string)$nodeXmlClass->identifierInNamespace." Parent class " . (string)$nodeXmlParentClassOf . " (".$childClassNamespace->getId().") n'a pas été trouvé";
+                                        die;
+                                    }
+
+                                    // Trouver la classe parente
+                                    $parentClass = null;
+                                    foreach ($newNamespaceVersion->getClasses() as $tempClass) {
+                                        if ($tempClass->getIdentifierInNamespace() == (string)$nodeXmlClass->identifierInNamespace) {
+                                            $parentClass = $tempClass;
+                                            break;
+                                        }
+                                    }
+                                    if (is_null($parentClass)) {
+                                        echo (string)$nodeXmlClass->identifierInNamespace." Parent class " . (string)$nodeXmlClass->identifierInNamespace . " n'a pas été trouvé";
+                                        die;
+                                    }
+
+                                    //TODO Justification ClassAssociation?
+                                    $classAssociation->setParentClass($parentClass);
+                                    $classAssociation->setParentClassNamespace($newNamespaceVersion);
+                                    $classAssociation->setChildClass($childClass);
+                                    $classAssociation->setChildClassNamespace($childClassNamespace);
+
+                                    $classAssociation->setNamespaceForVersion($newNamespaceVersion);
+
+                                    $classAssociation->setCreator($this->getUser());
+                                    $classAssociation->setModifier($this->getUser());
+                                    $classAssociation->setCreationTime(new \DateTime('now'));
+                                    $classAssociation->setModificationTime(new \DateTime('now'));
+
+                                    $newNamespaceVersion->addClassAssociation($classAssociation);
+                                    $em->persist($classAssociation);
+                                }
+                            }
+
                             //equivalentClass or disjointWith
                             foreach ($nodeXmlClass->children() as $key => $value) {
                                 if ($key == "equivalentClass" || $key == "disjointWith") {
@@ -907,6 +968,67 @@ class ProjectController  extends Controller
                                     $propertyAssociation->setParentPropertyNamespace($parentPropertyNamespace);
                                     $propertyAssociation->setChildProperty($childProperty);
                                     $propertyAssociation->setChildPropertyNamespace($newNamespaceVersion);
+
+                                    $propertyAssociation->setNamespaceForVersion($newNamespaceVersion);
+
+                                    $propertyAssociation->setCreator($this->getUser());
+                                    $propertyAssociation->setModifier($this->getUser());
+                                    $propertyAssociation->setCreationTime(new \DateTime('now'));
+                                    $propertyAssociation->setModificationTime(new \DateTime('now'));
+
+                                    $newNamespaceVersion->addPropertyAssociation($propertyAssociation);
+                                    $em->persist($propertyAssociation);
+
+                                }
+                            }
+
+                            //parentPropertyOf
+                            if (!empty($nodeXmlProperty->parentPropertyOf)) {
+                                foreach ($nodeXmlProperty->parentPropertyOf as $keySub => $nodeXmlParentPropertyOf){
+                                    $propertyAssociation = new PropertyAssociation();
+                                    // Quelle version Child ?
+                                    $xmlChildPropertyNamespace = $nodeXmlParentPropertyOf->attributes()->referenceNamespace;
+                                    //Si attribut referenceNamespace existe, utiliser cet id, sinon ce nouveau namespace
+                                    if (!is_null($xmlChildPropertyNamespace)) {
+                                        $childPropertyNamespace = $em->getRepository("AppBundle:OntoNamespace")
+                                            ->findOneBy(array("id" => (integer)$xmlChildPropertyNamespace));
+                                        if(!$idsReferences->contains((integer)$xmlChildPropertyNamespace)){
+                                            echo "Un namespace de référence pour parentPropertyOf n'a pas été déclaré avec la balise referenceNamespace";
+                                            die;
+                                        }
+                                    } else {
+                                        $childPropertyNamespace = $newNamespaceVersion;
+                                    }
+                                    // Trouver la propriété enfante
+                                    $childProperty = null;
+                                    foreach ($childPropertyNamespace->getProperties() as $tempProperty) {
+                                        if ($tempProperty->getIdentifierInNamespace() == (string)$nodeXmlParentPropertyOf) {
+                                            $childProperty = $tempProperty;
+                                            break;
+                                        }
+                                    }
+                                    if (is_null($childProperty)) {
+                                        echo (string)$nodeXmlProperty->identifierInNamespace . " Child property " . (string)$nodeXmlParentPropertyOf . " n'a pas été trouvé";
+                                        die;
+                                    }
+
+                                    // Trouver la propriété parente
+                                    $parentProperty = null;
+                                    foreach ($newNamespaceVersion->getProperties() as $tempProperty) {
+                                        if ($tempProperty->getIdentifierInNamespace() == (string)$nodeXmlProperty->identifierInNamespace) {
+                                            $parentProperty = $tempProperty;
+                                            break;
+                                        }
+                                    }
+                                    if (is_null($parentProperty)) {
+                                        echo "Parent property " . (string)$nodeXmlProperty->identifierInNamespace . " n'a pas été trouvé";
+                                        die;
+                                    }
+                                    //TODO Justification PropertyAssociation?
+                                    $propertyAssociation->setParentProperty($parentProperty);
+                                    $propertyAssociation->setParentPropertyNamespace($newNamespaceVersion);
+                                    $propertyAssociation->setChildProperty($childProperty);
+                                    $propertyAssociation->setChildPropertyNamespace($childPropertyNamespace);
 
                                     $propertyAssociation->setNamespaceForVersion($newNamespaceVersion);
 
