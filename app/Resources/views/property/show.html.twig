@@ -476,14 +476,14 @@
                         <div class="col-lg-10">
                             <ul class="list-unstyled">
                                 {% if propertyVersion.domain is not null %}
-                                    <li>{{ propertyVersion.property.identifierInNamespace }}(x,y) ⊃ {{ propertyVersion.domain.identifierInNamespace }}(x)</li>
+                                    <li>{{ propertyVersion.property.identifierInNamespace }}(x,y) ⇒ {{ propertyVersion.domain.identifierInNamespace }}(x)</li>
                                 {% endif %}
                                 {% if propertyVersion.range is not null %}
-                                    <li>{{ propertyVersion.property.identifierInNamespace }}(x,y) ⊃ {{ propertyVersion.range.identifierInNamespace }}(y)</li>
+                                    <li>{{ propertyVersion.property.identifierInNamespace }}(x,y) ⇒ {{ propertyVersion.range.identifierInNamespace }}(y)</li>
                                 {% endif %}
                                 {% for association in propertyVersion.property.childPropertyAssociations
                                     if association.namespaceForVersion.id in namespacesId %}
-                                    <li>{{ propertyVersion.property.identifierInNamespace }}(x,y) ⊃ {{ association.parentProperty.identifierInNamespace }}(x,y)</li>
+                                    <li>{{ propertyVersion.property.identifierInNamespace }}(x,y) ⇒ {{ association.parentProperty.identifierInNamespace }}(x,y)</li>
                                 {% endfor %}
                             </ul>
                         </div>
