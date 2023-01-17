@@ -347,6 +347,7 @@ class ProjectController  extends Controller
                                 // On a donc une nouvelle classe
                                 $class = new OntoClass();
                                 $class->setIdentifierInNamespace((string)$nodeXmlClass->identifierInNamespace);
+                                $class->setIdentifierInURI((string)$nodeXmlClass->identifierInURI);
                                 $class->setIsManualIdentifier(is_null($newNamespaceVersion->getTopLevelNamespace()->getClassPrefix()));
                                 $class->setCreator($this->getUser());
                                 $class->setModifier($this->getUser());
@@ -484,6 +485,7 @@ class ProjectController  extends Controller
                                 // On a donc une nouvelle propriété
                                 $property = new Property();
                                 $property->setIdentifierInNamespace((string)$nodeXmlProperty->identifierInNamespace);
+                                $property->setIdentifierInURI((string)$nodeXmlProperty->identifierInURI);
                                 $property->setIsManualIdentifier(is_null($newNamespaceVersion->getTopLevelNamespace()->getPropertyPrefix()));
                                 $property->setCreator($this->getUser());
                                 $property->setModifier($this->getUser());
