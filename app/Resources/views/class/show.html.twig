@@ -488,6 +488,9 @@
                             </td>
                             {% if classVersion.namespaceForVersion.isOngoing %}
                                 <td>
+                                    <a class="btn" href="{{ path('text_property_show', {
+                                        'id': textProperty.id
+                                    }) }}">
                                     {% if textProperty.validationStatus is null %}
                                         <span class="label label-info">
                                         Candidate
@@ -505,6 +508,7 @@
                                         {{ textProperty.validationStatus }}
                                     </span>
                                     {% endif %}
+                                    </a>
                                 </td>
                             {% endif %}
                         </tr>
@@ -555,6 +559,9 @@
                             </td>
                             {% if classVersion.namespaceForVersion.isOngoing %}
                                 <td>
+                                    <a class="btn" href="{{ path('text_property_show', {
+                                        'id': textProperty.id
+                                    }) }}">
                                     {% if textProperty.validationStatus is null %}
                                         <span class="label label-info">
                                         Candidate
@@ -572,6 +579,7 @@
                                         {{ textProperty.validationStatus }}
                                     </span>
                                     {% endif %}
+                                    </a>
                                 </td>
                             {% endif %}
                         </tr>
@@ -641,6 +649,9 @@
                             </td>
                             {% if classVersion.namespaceForVersion.isOngoing %}
                                 <td>
+                                    <a class="btn" href="{{ path('text_property_show', {
+                                        'id': textProperty.id
+                                    }) }}">
                                     {% if textProperty.validationStatus is null %}
                                         <span class="label label-info">
                                         Candidate
@@ -658,6 +669,7 @@
                                         {{ textProperty.validationStatus }}
                                     </span>
                                     {% endif %}
+                                    </a>
                                 </td>
                             {% endif %}
                         </tr>
@@ -717,6 +729,9 @@
                             </td>
                             {% if classVersion.namespaceForVersion.isOngoing %}
                                 <td>
+                                    <a class="btn" href="{{ path('label_show', {
+                                        'id': label.id
+                                    }) }}">
                                     {% if label.validationStatus is null %}
                                         <span class="label label-info">
                                         Candidate
@@ -734,6 +749,7 @@
                                         {{ label.validationStatus }}
                                     </span>
                                     {% endif %}
+                                    </a>
                                 </td>
                             {% endif %}
                         </tr>
@@ -854,6 +870,7 @@
                             </td>
                             {% if classVersion.namespaceForVersion.isOngoing %}
                                 <td>
+                                    <a class="btn" href="{{ path('class_association_show', {'id': association.id}) }}">
                                     {% if association.validationStatus is null %}
                                         <span class="label label-info">
                                         Candidate
@@ -871,6 +888,7 @@
                                         {{ association.validationStatus }}
                                     </span>
                                     {% endif %}
+                                    </a>
                                 </td>
                             {% endif %}
                         </tr>
@@ -1096,6 +1114,15 @@
                             </td>
                             {% if classVersion.namespaceForVersion.isOngoing %}
                                 <td>
+                                    {% if classVersion.class.id == relation.sourceClass.id %}
+                                        <a class="btn" href="{{ path('entity_association_show', {
+                                            'id': relation.id
+                                        }) }}">
+                                    {% else %}
+                                        <a class="btn" href="{{ path('entity_association_inverse_show', {
+                                            'id': relation.id
+                                        }) }}">
+                                    {% endif %}
                                     {% if relation.validationStatus is null %}
                                         <span class="label label-info">
                                         Candidate
@@ -1113,6 +1140,7 @@
                                         {{ relation.validationStatus }}
                                     </span>
                                     {% endif %}
+                                    </a>
                                 </td>
                             {% endif %}
                         </tr>

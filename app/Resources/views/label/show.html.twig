@@ -12,9 +12,9 @@
                             {% elseif label.property is not null %}
                                 {{ label.object.propertyVersionForDisplay(label.namespaceForVersion) }}
                             {% else %}
-                                {{ label.object.standardLabel }}
+                                {{ label.object.standardLabel }} – {{ label.object.identifierInNamespace }}
                             {% endif %}
-                             – {{ label.object.identifierInNamespace }}: Label
+                            : Label
                         {% else %}
                             {{ label.object.objectIdentification }}: Label
                         {% endif %}

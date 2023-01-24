@@ -528,6 +528,10 @@
                                 </a>
                             </td>
                             <td>
+                                <a href="{{ path('text_property_edit', {
+                                    'id': textProperty.id
+                                }) }}"
+                                   class="btn">
                                 {% if textProperty.validationStatus is null %}
                                     <span class="label label-info">
                                     Candidate
@@ -598,6 +602,10 @@
                                 </a>
                             </td>
                             <td>
+                                <a href="{{ path('text_property_edit', {
+                                    'id': textProperty.id
+                                }) }}"
+                                   class="btn">
                                 {% if textProperty.validationStatus is null %}
                                     <span class="label label-info">
                                     Candidate
@@ -675,6 +683,16 @@
                                 </a>
                             </td>
                             <td>
+                                {% if not is_granted('edit', textProperty) %}
+                                    <a class="btn" href="{{ path('text_property_show', {
+                                        'id': textProperty.id
+                                    }) }}">
+                                {% else %}
+                                    <a href="{{ path('text_property_edit', {
+                                        'id': textProperty.id
+                                    }) }}"
+                                       class="btn">
+                                {% endif %}
                                 {% if textProperty.validationStatus is null %}
                                     <span class="label label-info">
                                     Candidate
@@ -692,6 +710,7 @@
                                     {{ textProperty.validationStatus }}
                                 </span>
                                 {% endif %}
+                                </a>
                             </td>
                         </tr>
                     {% endfor %}
@@ -843,6 +862,10 @@
                                 </a>
                             </td>
                             <td>
+                                <a href="{{ path('label_edit', {
+                                    'id': label.id
+                                }) }}"
+                                   class="btn">
                                 {% if label.validationStatus is null %}
                                     <span class="label label-info">
                                     Candidate
@@ -860,6 +883,7 @@
                                     {{ label.validationStatus }}
                                 </span>
                                 {% endif %}
+                                </a>
                             </td>
                         </tr>
                     {% endfor %}
@@ -1050,7 +1074,7 @@
                             </td>
                             <td>
                                 {% if is_granted('edit', association) %}
-                                <a href="{{ path('property_association_edit', {'id': association.id}) }}" class="btn btn-xs btn-success"><span class="fa fa-edit"></span></a>
+                                <a href="{{ path('property_association_edit', {'id': association.id}) }}" class="btn"><span class="fa fa-edit"></span></a>
                                 {% endif %}
                             </td>
                             <td>
@@ -1066,6 +1090,11 @@
                                 </a>
                             </td>
                             <td>
+                                {% if is_granted('edit', association) %}
+                                    <a href="{{ path('property_association_edit', {'id': association.id}) }}" class="btn">
+                                {% else %}
+                                    <a href="{{ path('property_association_show', {'id': association.id}) }}" class="btn">
+                                {% endif %}
                                 {% if association.validationStatus is null %}
                                     <span class="label label-info">
                                     Candidate
@@ -1083,6 +1112,7 @@
                                     {{ association.validationStatus }}
                                 </span>
                                 {% endif %}
+                                </a>
                             </td>
                         </tr>
                     {% endfor %}
@@ -1412,6 +1442,27 @@
                                 {% endif %}
                             </td>
                             <td>
+                                {% if is_granted('edit', relation) %}
+                                    {% if propertyVersion.property.id == relation.sourceProperty.id %}
+                                        <a href="{{ path('entity_association_edit', {
+                                            'id': relation.id
+                                        }) }}" class="btn">
+                                    {% else %}
+                                        <a href="{{ path('entity_association_inverse_edit', {
+                                            'id': relation.id
+                                        }) }}" class="btn">
+                                    {% endif %}
+                                {% else %}
+                                    {% if propertyVersion.property.id == relation.sourceProperty.id %}
+                                        <a href="{{ path('entity_association_show', {
+                                            'id': relation.id
+                                        }) }}" class="btn">
+                                    {% else %}
+                                        <a href="{{ path('entity_association_inverse_show', {
+                                            'id': relation.id
+                                        }) }}" class="btn">
+                                    {% endif %}
+                                {% endif %}
                                 {% if relation.validationStatus is null %}
                                     <span class="label label-info">
                                         Candidate
@@ -1429,6 +1480,7 @@
                                         {{ relation.validationStatus }}
                                     </span>
                                 {% endif %}
+                                </a>
                             </td>
                         </tr>
                     {% endfor %}
