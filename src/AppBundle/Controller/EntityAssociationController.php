@@ -345,6 +345,18 @@ class EntityAssociationController extends Controller
         }
         else throw new AccessDeniedHttpException();
 
+        //Verifier que les références sont cohérents
+        $nsRefsEntityAssociation = $entityAssociation->getNamespaceForVersion()->getAllReferencedNamespaces();
+        $nsSource = $entityAssociation->getParentClassNamespace();
+        $nsTarget = $entityAssociation->getChildClassNamespace();
+        if(!$nsRefsEntityAssociation->contains($nsSource) || !$nsRefsEntityAssociation->contains($nsTarget)){
+            $uriNamespaceMismatches = $this->generateUrl('namespace_show', ['id' => $entityAssociation->getNamespaceForVersion()->getId(), '_fragment' => 'mismatches']);
+            $this->addFlash('warning', 'This relation can\'t be validated. Check <a href="'.$uriNamespaceMismatches.'">mismatches</a>.');
+            return $this->redirectToRoute('entity_association_show', [
+                'id' => $entityAssociation->getId()
+            ]);
+        }
+
         $entityAssociation->setModifier($this->getUser());
 
         $newValidationStatus = new SystemType();

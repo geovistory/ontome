@@ -93,12 +93,12 @@
 <div class="main-content">
     {% for msg in app.session.flashBag.get('success') %}
         <div class="alert alert-success">
-            {{ msg }}
+            {{ msg|raw }}
         </div>
     {% endfor %}
     {% for msg in app.session.flashBag.get('warning') %}
         <div class="alert alert-warning">
-            {{ msg }}
+            {{ msg|raw }}
         </div>
     {% endfor %}
     {% block body %}{% endblock %}

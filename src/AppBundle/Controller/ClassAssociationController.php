@@ -216,6 +216,18 @@ class ClassAssociationController extends Controller
         //Denied access if not an authorized validator
         $this->denyAccessUnlessGranted('validate', $classAssociation->getChildClass()->getClassVersionForDisplay());
 
+        //Verifier que les références sont cohérents
+        $nsRefsClassAssociation = $classAssociation->getNamespaceForVersion()->getAllReferencedNamespaces();
+        $nsParent = $classAssociation->getParentClassNamespace();
+        $nsChild = $classAssociation->getChildClassNamespace();
+        if(!$nsRefsClassAssociation->contains($nsParent) || !$nsRefsClassAssociation->contains($nsChild)){
+            $uriNamespaceMismatches = $this->generateUrl('namespace_show', ['id' => $classAssociation->getNamespaceForVersion()->getId(), '_fragment' => 'mismatches']);
+            $this->addFlash('warning', 'This relation can\'t be validated. Check <a href="'.$uriNamespaceMismatches.'">mismatches</a>.');
+            return $this->redirectToRoute('class_association_show', [
+                'id' => $classAssociation->getId()
+            ]);
+        }
+
 
         $classAssociation->setModifier($this->getUser());
 
