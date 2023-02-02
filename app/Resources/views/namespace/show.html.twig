@@ -647,11 +647,13 @@
                     <thead>
                     <tr>
                         <th class="text-right">Domain</th>
+                        <th>Domain namespace</th> <!--Not visible -->
                         <th></th>
                         <th>Identifier</th>
                         <th class="text-center">Property</th>
                         <th></th>
                         <th>Range</th>
+                        <th>Range namespace</th> <!--Not visible -->
                         <th>Last updated</th>
                         {% if namespace.isOngoing %}
                         <th>Validation status</th>
@@ -671,6 +673,7 @@
                                 </a>
                                 {% endif %}
                             </td>
+                            <td>{{ propertyVersion.domainNamespace }}</td>
                             <td class="small" style="padding-left: 30px;">
                                 {% if propertyVersion.domainMinQuantifier is not null and propertyVersion.domainMaxQuantifier is not null %}
                                     ({% if  propertyVersion.domainMinQuantifier != -1 %}{{ propertyVersion.domainMinQuantifier }}{% else %}n{% endif %},{% if  propertyVersion.domainMaxQuantifier != -1 %}{{ propertyVersion.domainMaxQuantifier }}{% else %}n{% endif %})
@@ -700,6 +703,7 @@
                                     </a>
                                 {% endif %}
                             </td>
+                            <td>{{ propertyVersion.rangeNamespace }}</td>
                             <td>{{ propertyVersion.modificationTime|date('Y-m-d') }}</td>
                             {% if namespace.isOngoing %}
                             <td>
@@ -748,16 +752,19 @@
                     <thead>
                     <tr>
                         <th>Source</th>
+                        <th>Source namespace</th><!-- not visible -->
                         <th>Relation</th>
                         <th>Target</th>
+                        <th>Target namespace</th><!-- not visible -->
                         <th>Last updated</th>
-                        <th>Type</th>
+                        <th>Type</th><!-- not visible -->
                     </tr>
                     </thead>
                     <tbody>
                     {% for classAssociation in namespace.classAssociations %}
                         <tr>
                             <td>{{ classAssociation.childClass.classVersionForDisplay(classAssociation.childClassNamespace) }}</td>
+                            <td>{{ classAssociation.childClassNamespace }}</td>
                             <td>
                                 <a href="{{ path('class_show_with_version', {
                                     'id': classAssociation.childClass.id,
@@ -768,6 +775,7 @@
                                 </a>
                             </td>
                             <td>{{ classAssociation.parentClass.classVersionForDisplay(classAssociation.parentClassNamespace) }}</td>
+                            <td>{{ classAssociation.parentClassNamespace }}</td>
                             <td>{{ classAssociation.modificationTime|date('Y-m-d') }}</td>
                             <td>ClassesRelation-HierarchyAssociation</td>
                         </tr>
@@ -775,6 +783,7 @@
                     {% for propertyAssociation in namespace.propertyAssociations %}
                         <tr>
                             <td>{{ propertyAssociation.childProperty.propertyVersionForDisplay(propertyAssociation.childPropertyNamespace) }}</td>
+                            <td>{{ propertyAssociation.childPropertyNamespace }}</td>
                             <td>
                                 <a href="{{ path('property_show_with_version', {
                                     'id': propertyAssociation.childProperty.id,
@@ -785,6 +794,7 @@
                                 </a>
                             </td>
                             <td>{{ propertyAssociation.parentProperty.propertyVersionForDisplay(propertyAssociation.parentPropertyNamespace) }}</td>
+                            <td>{{ propertyAssociation.parentPropertyNamespace }}</td>
                             <td>{{ propertyAssociation.modificationTime|date('Y-m-d') }}</td>
                             <td>PropertiesRelation-HierarchyAssociation</td>
                         </tr>
@@ -796,6 +806,13 @@
                                     {{ entityAssociation.sourceClass.classVersionForDisplay(entityAssociation.sourceNamespaceForVersion) }}
                                 {% elseif entityAssociation.sourceProperty is not null %}
                                     {{ entityAssociation.sourceProperty.propertyVersionForDisplay(entityAssociation.sourceNamespaceForVersion) }}
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if entityAssociation.sourceClass is not null %}
+                                    {{ entityAssociation.sourceNamespaceForVersion }}
+                                {% elseif entityAssociation.sourceProperty is not null %}
+                                    {{ entityAssociation.sourceNamespaceForVersion }}
                                 {% endif %}
                             </td>
                             <td>
@@ -822,6 +839,13 @@
                                     {{ entityAssociation.targetClass.classVersionForDisplay(entityAssociation.targetNamespaceForVersion) }}
                                 {% elseif entityAssociation.targetProperty is not null %}
                                     {{ entityAssociation.targetProperty.propertyVersionForDisplay(entityAssociation.targetNamespaceForVersion) }}
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if entityAssociation.targetClass is not null %}
+                                    {{ entityAssociation.targetNamespaceForVersion }}
+                                {% elseif entityAssociation.targetProperty is not null %}
+                                    {{ entityAssociation.targetNamespaceForVersion }}
                                 {% endif %}
                             </td>
                             <td>{{ entityAssociation.modificationTime|date('Y-m-d') }}</td>
@@ -1135,7 +1159,7 @@
                 var filterEntityRelations = $("#btns-choose-entity-relations .btn-primary").val();
                 var filterTypeRelations = $("#btns-choose-type-relations .btn-primary").val();
                 var filterRelations = filterEntityRelations+"-"+filterTypeRelations;
-                var strForFilter = data[4]; // use data for comparaison
+                var strForFilter = data[6]; // use data for comparaison
                 return strForFilter.includes(filterRelations);
             }
         );
@@ -1158,11 +1182,73 @@
             $('#additional-notes-table').DataTable();
             $('#properties-table').DataTable({
                 columnDefs: [
-                    { type: 'natural-ci', targets: 2, width: '1%', className: 'text-right' },
+                    { type: 'natural-ci', targets: 3, width: '1%', className: 'text-right' },
+                    { targets: [1, 7], visible: false},
                     { targets: -1, width: '1%'}
                 ],
                 "autoWidth": false,
-                order: [[ 3, 'asc' ]]});
+                order: [[ 3, 'asc' ]],
+                initComplete: function(){
+                    var columnAppend = this.api().columns([0]);
+                    this.api().columns([1]).every(function(){
+                        var column = this;
+                        var select = $('<br><select id="properties-namespace-select" style="width:100%;"></select>')
+                            .appendTo($(columnAppend.header()))
+                            .on('change', function(){
+                                var val = $.fn.dataTable.util.escapeRegex(
+                                    $(this).val()
+                                );
+
+                                if(val == "All namespaces"){val = "";}
+
+                                column
+                                    .search(val ? '^'+val+'$' : '', true, false)
+                                    .draw();
+                            });
+
+                        $(select).click(function(e){
+                            e.stopPropagation();
+                        });
+
+                        select.append('<option value="All namespaces">All namespaces</option>');
+                        select.append('<option value="{{ namespace }}">{{ namespace }}</option>');
+                        column.data().unique().sort().each(function(d, j){
+                            if(d != '{{ namespace.standardLabel }}'){
+                                select.append('<option value="'+d+'">'+d+'</option>')
+                            }
+                        });
+                    });
+                    var columnAppend = this.api().columns([6]);
+                    this.api().columns([7]).every(function(){
+                        var column = this;
+                        var select = $('<select id="properties-status-select" style="width:100%;"></select>')
+                            .appendTo($(columnAppend.header()))
+                            .on('change', function(){
+                                var val = $.fn.dataTable.util.escapeRegex(
+                                    $(this).val()
+                                );
+
+                                if(val == "All namespaces"){val = "";}
+
+                                column
+                                    .search(val ? '^'+val+'$' : '', true, false)
+                                    .draw();
+                            });
+
+                        $(select).click(function(e){
+                            e.stopPropagation();
+                        });
+
+                        select.append('<option value="All namespaces">All namespaces</option>');
+                        select.append('<option value="{{ namespace }}">{{ namespace }}</option>');
+                        column.data().unique().sort().each(function(d, j){
+                            if(d != '{{ namespace.standardLabel }}'){
+                                select.append('<option value="'+d+'">'+d+'</option>')
+                            }
+                        });
+                    });
+                }
+            });
             $('#classes-table').DataTable({
                 columnDefs: [
                     { type: 'natural-ci', targets: 0, width: '1%', className: 'text-right' },
@@ -1172,9 +1258,69 @@
                 order: [[ 1, 'asc' ]]});
             var tableRelations = $('#relations-table').DataTable({
                 "columnDefs": [
-                    { "visible": false, "targets": 4 }
+                    { "visible": false, "targets": [1, 4, 6] }
                 ],
-                "autoWidth": false
+                "autoWidth": false,
+                initComplete: function(){
+                    var columnAppend = this.api().columns([0]);
+                    this.api().columns([1]).every(function(){
+                        var column = this;
+                        var select = $('<br><select id="properties-namespace-select" style="width:100%;"></select>')
+                            .appendTo($(columnAppend.header()))
+                            .on('change', function(){
+                                var val = $.fn.dataTable.util.escapeRegex(
+                                    $(this).val()
+                                );
+
+                                if(val == "All namespaces"){val = "";}
+
+                                column
+                                    .search(val ? '^'+val+'$' : '', true, false)
+                                    .draw();
+                            });
+
+                        $(select).click(function(e){
+                            e.stopPropagation();
+                        });
+
+                        select.append('<option value="All namespaces">All namespaces</option>');
+                        select.append('<option value="{{ namespace }}">{{ namespace }}</option>');
+                        column.data().unique().sort().each(function(d, j){
+                            if(d != '{{ namespace.standardLabel }}'){
+                                select.append('<option value="'+d+'">'+d+'</option>')
+                            }
+                        });
+                    });
+                    var columnAppend = this.api().columns([3]);
+                    this.api().columns([4]).every(function(){
+                        var column = this;
+                        var select = $('<select id="properties-status-select" style="width:100%;"></select>')
+                            .appendTo($(columnAppend.header()))
+                            .on('change', function(){
+                                var val = $.fn.dataTable.util.escapeRegex(
+                                    $(this).val()
+                                );
+
+                                if(val == "All namespaces"){val = "";}
+
+                                column
+                                    .search(val ? '^'+val+'$' : '', true, false)
+                                    .draw();
+                            });
+
+                        $(select).click(function(e){
+                            e.stopPropagation();
+                        });
+
+                        select.append('<option value="All namespaces">All namespaces</option>');
+                        select.append('<option value="{{ namespace }}">{{ namespace }}</option>');
+                        column.data().unique().sort().each(function(d, j){
+                            if(d != '{{ namespace.standardLabel }}'){
+                                select.append('<option value="'+d+'">'+d+'</option>')
+                            }
+                        });
+                    });
+                }
             });
             $('#mismatches-table').DataTable();
             $('#child-namespaces-table').DataTable({
