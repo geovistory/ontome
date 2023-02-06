@@ -257,7 +257,11 @@
                 {% if project.managedNamespaces is not empty %}
                     <h3>Root namespace</h3>
                     <p>This project manages the <strong><a href="{{ path('namespace_show', {'id':project.managedNamespaces|first.topLevelNamespace.id}) }}">{{ project.managedNamespaces|first.topLevelNamespace }}</a></strong> namespace.</p>
-                    <h3>Versions of this namespace:</h3>
+                    {% set ongoingNamespace = project.managedNamespaces|filter(v => v.isOngoing)|first %}
+                    {% if ongoingNamespace %}
+                        Ongoing namespace: <a href="{{ path('namespace_show', {'id': ongoingNamespace.id}) }}">{{ ongoingNamespace }}</a>
+                    {% endif %}
+                    <h3>Published versions</h3>
                     <table class="table table-striped" id="managed-namespaces-table">
                         <thead>
                         <tr>
@@ -266,7 +270,7 @@
                         </tr>
                         </thead>
                         <tbody>
-                        {% for namespace in project.managedNamespaces|first.topLevelNamespace.childVersions %}
+                        {% for namespace in project.managedNamespaces|first.topLevelNamespace.childVersions|filter(v => not v.isOngoing) %}
                             <tr>
                                 <td>
                                     <a href="{{ path('namespace_show', {
