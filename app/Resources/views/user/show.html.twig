@@ -119,6 +119,7 @@
                     <div class="row">
                         <div class="col-lg-12">
                             <a href="{{ path('user_reinitialization', {id: user.id}) }}" class="btn btn-success">Reset</a>
+                            <a href="#" class="btn btn-primary btn-deselect-all">Deselect all</a>
                         </div>
                         <div class="col-lg-6">
                             {% if defaultNamespace is not null %}
@@ -754,6 +755,11 @@
                         }
                     }
                 });
+            });
+
+            $(document).on("click", ".btn-deselect-all", function(){
+                $('.uncheck-profile').trigger('click');
+                $('.uncheck-namespace').trigger('click');
             });
 
             $(document).on("click", ".uncheck-namespace", function() {
