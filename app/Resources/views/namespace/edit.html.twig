@@ -97,6 +97,7 @@
                 <li><a data-toggle="tab" href="#classes">Classes</a></li>
                 <li><a data-toggle="tab" href="#properties">Properties</a></li>
                 <li><a data-toggle="tab" href="#relations">Relations</a></li>
+                <li><a data-toggle="tab" href="#notes">Notes</a></li>
                 <li><a data-toggle="tab" href="#graph">Graph</a></li>
             {% endif %}
             <li><a data-toggle="tab" href="#comments" class="updateViewComment" data-id="{{ namespace.id }}" data-object="namespace">Comments</a></li>
@@ -1113,6 +1114,65 @@
                     </tbody>
                 </table>
             </div>
+            <div id="notes" class="tab-pane fade">
+                <h3>Notes</h3>
+                <table class="table table-striped" id="notes-table">
+                    <thead>
+                    <tr>
+                        <th>Show</th>
+                        <th>Note</th>
+                        <th>Type</th>
+                        <th>Language</th>
+                        <th>Entity</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for textProperty in textProperties|filter(v => (is_granted('edit', v) and v.systemType.id == 33) or v.systemType.id in [34,35]) %}
+                        {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
+                        <tr>
+                            <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
+                            <td class="truncated-text">
+                                <span>{{ textProperty.textProperty|striptags|raw }}</span>
+                            </td>
+                            <td class="text-nowrap">{{ textProperty.systemType }}</td>
+                            <td>{{ textProperty.languageIsoCode }}</td>
+                            {% if textProperty.class is not null %}
+                                {% set classVersion = textProperty.class.classVersions|filter(v => v.namespaceForVersion in namespace.allReferencedNamespaces or v.namespaceForVersion == namespace)|first  %}
+                                {% set prefix = '' %}
+                                {% if classVersion.namespaceForVersion.topLevelNamespace.rootNamespacePrefix is not null %}
+                                    {% set prefix = classVersion.namespaceForVersion.topLevelNamespace.rootNamespacePrefix ~ ':' %}
+                                {% endif %}
+                                <td class="text-nowrap">
+                                    <a href="{{ path('class_show_with_version', {
+                                        'id': classVersion.class.id,
+                                        'namespaceFromUrlId': classVersion.namespaceForVersion.id,
+                                        '_fragment':'definition'
+                                    }) }}">
+                                        {{ prefix ~ classVersion.invertedLabel }}
+                                    </a>
+                                </td>
+                            {% endif %}
+                            {% if textProperty.property is not null %}
+                                {% set propertyVersion = textProperty.property.propertyVersions|filter(v => v.namespaceForVersion in namespace.allReferencedNamespaces or v.namespaceForVersion == namespace)|first  %}
+                                {% set prefix = '' %}
+                                {% if propertyVersion.namespaceForVersion.topLevelNamespace.rootNamespacePrefix is not null %}
+                                    {% set prefix = propertyVersion.namespaceForVersion.topLevelNamespace.rootNamespacePrefix ~ ':' %}
+                                {% endif %}
+                                <td class="text-nowrap">
+                                    <a href="{{ path('property_show_with_version', {
+                                        'id': propertyVersion.property.id,
+                                        'namespaceFromUrlId': propertyVersion.namespaceForVersion.id,
+                                        '_fragment':'definition'
+                                    }) }}">
+                                        {{ prefix ~ propertyVersion.invertedLabel }}
+                                    </a>
+                                </td>
+                            {% endif %}
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
             <div id="graph" class="tab-pane fade">
                 <h3>Graph</h3>
                 {% if namespace.classes|length > 0 and namespace.properties|length > 0 %}
@@ -1433,6 +1493,11 @@
             });
             $('#descriptions-table').DataTable();
             $('#additional-notes-table').DataTable();
+            $('#notes-table').DataTable({
+                columnDefs: [
+                    { targets: [0, 2, 3, 4], width: '1%'}
+                ],
+                "autoWidth": false});
             $('#properties-table').DataTable({
                 columnDefs: [
                     { type: 'natural-ci', targets: 2, width: '1%', className: 'text-right' },

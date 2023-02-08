@@ -234,8 +234,12 @@ class NamespaceController  extends Controller
     {
         $em = $this->getDoctrine()->getManager();
 
+        $textProperties = $em
+            ->getRepository('AppBundle:TextProperty')
+            ->findBy(array("namespaceForVersion" => $namespace->getId()));
         return $this->render('namespace/show.html.twig', array(
-            'namespace' => $namespace
+            'namespace' => $namespace,
+            'textProperties' => $textProperties
         ));
     }
 
@@ -258,6 +262,10 @@ class NamespaceController  extends Controller
 
         $rootNamespaces = $em->getRepository('AppBundle:OntoNamespace')
             ->findAllNonAssociatedToNamespaceByNamespaceId($namespace);
+
+        $textProperties = $em
+            ->getRepository('AppBundle:TextProperty')
+            ->findBy(array("namespaceForVersion" => $namespace->getId()));
 
         if($this->isGranted('full_edit', $namespace)) {
 
@@ -315,6 +323,7 @@ class NamespaceController  extends Controller
                 'namespaceIdentifiersForm' => $formIdentifiers->createView(),
                 'namespace' => $namespace,
                 'rootNamespaces' => $rootNamespaces,
+                'textProperties' => $textProperties,
                 'hasChanged' => $ongoingNamespaceHasChanged,
             ]);
         }
@@ -323,6 +332,7 @@ class NamespaceController  extends Controller
                 'namespaceForm' => null,
                 'namespace' => $namespace,
                 'rootNamespaces' => $rootNamespaces,
+                'textProperties' => $textProperties,
                 'hasChanged' => null,
             ]);
         }
