@@ -16,23 +16,28 @@ $(document).ready(function() {
         data.forEach(function(node) {
             // add to parent
             var parent = dataMap[node.parent_id];
-            if (parent) {
+            if(node.depth == 1){
+                treeData.push(node);
+            }
+            else if (parent) {
                 // create child array if it doesn't exist
-                (parent.children || (parent.children = []))
+                if(!parent.children){
+                    parent.children = [];
+                }
                 // add node to child array
-                    .push(node);
+                parent.children.push(node);
             } else {
                 // parent is null or missing
                 treeData.push(node);
             }
         });
 
-        var sTreeData = '{"name": "'+$("#class-label").text()+'","children": '+JSON.stringify(treeData)+'}';
+        var sTreeData = '{"name": "'+$("div#summary h3:first").text()+'","children": '+JSON.stringify(treeData)+'}';
         treeData = JSON.parse(sTreeData);
 
         //initialising hierarchical data
         root = d3.hierarchy(treeData);
-        console.log(root);
+        //console.log(root);
         var i = 0;
 
         var transform = d3.zoomIdentity;
@@ -74,7 +79,7 @@ $(document).ready(function() {
             nodes[0].x = width / 2;
             nodes[0].y = height / 2;
 
-            console.log(nodes);
+            //console.log(nodes);
             linkSvg = svg.selectAll(".link")
                 .data(links, function(d) { return d.target.id; })
 
@@ -127,15 +132,17 @@ $(document).ready(function() {
 
         function color(d) {
             var hexaCode;
-            if(d.data.link_type == "parent_class"){
+            //if(d.data.link_type == "parent_class"){
+            if(d.data.link_type == "ingoing_property"){
                 hexaCode = "#3182bd";
             }
-            else if(d.data.link_type == "child_class"){
+            //else if(d.data.link_type == "child_class"){
+            else if(d.data.link_type == "outgoing_property"){
                 hexaCode = "#c6dbef";
             }
-            else if(d.data.link_type == "equivalent_class"){
-                hexaCode = "#2cd66b";
-            }
+            //else if(d.data.link_type == "equivalent_class"){
+            //    hexaCode = "#2cd66b";
+            //}
             else hexaCode = "#fd8d3c";
 
             return hexaCode;

@@ -565,16 +565,17 @@ class ClassController extends Controller
     }
 
     /**
-     * @Route("/class/{class}/graph/json", name="class_graph_json", requirements={"class"="^[0-9]+$"})
+     * @Route("/class/{class}/{namespace}/graph/json", name="class_graph_json", requirements={"class"="^[0-9]+$"})
      * @Method("GET")
      * @param OntoClass $class
+     * @param OntoNamespace $namespace
      * @return JsonResponse a Json formatted tree representation of OntoClasses
      */
-    public function getGraphJson(OntoClass $class)
+    public function getGraphJson(OntoClass $class, OntoNamespace $namespace)
     {
         $em = $this->getDoctrine()->getManager();
         $classes = $em->getRepository('AppBundle:OntoClass')
-            ->findClassesGraphById($class);
+            ->findClassesGraphById($class, $namespace);
 
         return new JsonResponse($classes[0]['json'],200, array(), true);
     }
