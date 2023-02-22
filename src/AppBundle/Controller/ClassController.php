@@ -9,6 +9,8 @@
 namespace AppBundle\Controller;
 
 
+use AppBundle\Entity\ClassAssociation;
+use AppBundle\Entity\EntityAssociation;
 use AppBundle\Entity\Label;
 use AppBundle\Entity\OntoClass;
 use AppBundle\Entity\OntoClassVersion;
@@ -21,6 +23,7 @@ use AppBundle\Form\ClassEditIdentifierForm;
 use AppBundle\Form\NamespaceEditIdentifiersForm;
 use AppBundle\Form\ClassQuickAddForm;
 use AppBundle\Form\TextPropertyForm;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\DBAL\DBALException;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -317,8 +320,119 @@ class ClassController extends Controller
             $error = $e->getMessage();
         }
 
+        //Tri
+        // En tête, les relations appartenant à la même version que cette classe
+        // Puis par identifiant / label
+        // Ensuite, les autres versions
+        // Puis par Préfixe, identifiant / label
+        function sortRelationsByClasses($a, $b, OntoNamespace $version, $type, $class=null){
+            if($type == 'childClassAssociations'){
+                $classA = $a->getParentClass();
+                $classB = $b->getParentClass();
+                $classNamespaceA = $a->getParentClassNamespace();
+                $classNamespaceB = $b->getParentClassNamespace();
+            }
+            if($type == 'parentClassAssociations'){
+                $classA = $a->getChildClass();
+                $classB = $a->getChildClass();
+                $classNamespaceA = $a->getChildClassNamespace();
+                $classNamespaceB = $b->getChildClassNamespace();
+            }
+            if($type == 'entityAssociations'){
+                if($a->getSystemType()->getId() > $b->getSystemType()->getId()){
+                    return 1;
+                }
+                elseif($a->getSystemType()->getId() < $b->getSystemType()->getId()){
+                    return -1;
+                }
+                else{
+                    if($class == $a->getSourceClass()){
+                        $classA = $a->getTargetClass();
+                        $classNamespaceA = $a->getTargetNamespaceForVersion();
+                    }
+                    else{
+                        $classA = $a->getSourceClass();
+                        $classNamespaceA = $a->getSourceNamespaceForVersion();
+                    }
+
+                    if($class == $b->getSourceClass()){
+                        $classB = $b->getTargetClass();
+                        $classNamespaceB = $b->getTargetNamespaceForVersion();
+                    }
+                    else{
+                        $classB = $b->getSourceClass();
+                        $classNamespaceB =$b->getSourceNamespaceForVersion();
+                    }
+                }
+            }
+
+            if($classNamespaceA === $version && $classNamespaceB !== $version){
+                return -1;
+            }
+            elseif($classNamespaceB === $version && $classNamespaceA !== $version){
+                return 1;
+            }
+            else{
+                $prefixA = $classNamespaceA->getTopLevelNamespace()->getRootNamespacePrefix();
+                $prefixB = $classNamespaceB->getTopLevelNamespace()->getRootNamespacePrefix();
+                $identifierInNamespaceA =  $classA->getIdentifierInNamespace();
+                $identifierInNamespaceB =  $classB->getIdentifierInNamespace();
+
+                if($prefixA == $prefixB){
+                    if(strlen($identifierInNamespaceA) == strlen($identifierInNamespaceB)){
+                        return strcmp($identifierInNamespaceA, $identifierInNamespaceB);
+                    }
+                    elseif(strlen($identifierInNamespaceA) > strlen($identifierInNamespaceB)){
+                        return 1;
+                    }
+                    elseif(strlen($identifierInNamespaceA) < strlen($identifierInNamespaceB)){
+                        return -1;
+                    }
+                }
+                else{
+                    return strcmp($prefixA, $prefixB);
+                }
+            }
+        }
+
+        // -- Associations Subclass of
+        $childClassAssociations = $classVersion->getClass()->getChildClassAssociations()
+            ->filter(function($v) use ($classVersion, $namespacesId){
+                return $classVersion->getNamespaceForVersion() == $v->getNamespaceForVersion() || in_array($v->getNamespaceForVersion()->getId(), $namespacesId);
+            });
+        $iterator = $childClassAssociations->getIterator();
+        $iterator->uasort(function($a, $b) use ($classVersion){
+            return sortRelationsByClasses($a, $b, $classVersion->getNamespaceForVersion(), 'childClassAssociations');
+        });
+        $childClassAssociations = new ArrayCollection(iterator_to_array($iterator));
+
+        // -- Associations Superclass of
+        $parentClassAssociations = $classVersion->getClass()->getParentClassAssociations()
+            ->filter(function($v) use ($classVersion, $namespacesId){
+                return $classVersion->getNamespaceForVersion() == $v->getNamespaceForVersion() || in_array($v->getNamespaceForVersion()->getId(), $namespacesId);
+            });
+        $iterator = $parentClassAssociations->getIterator();
+        $iterator->uasort(function($a, $b) use ($classVersion){
+            return sortRelationsByClasses($a, $b, $classVersion->getNamespaceForVersion(), 'parentClassAssociations');
+        });
+        $parentClassAssociations = new ArrayCollection(iterator_to_array($iterator));
+
+        // -- Relations
+        $entityAssociations = $classVersion->getClass()->getEntityAssociations()
+            ->filter(function($v) use ($classVersion, $namespacesId){
+            return $classVersion->getNamespaceForVersion() == $v->getNamespaceForVersion() || in_array($v->getNamespaceForVersion()->getId(), $namespacesId);
+        });
+        $iterator = $entityAssociations->getIterator();
+        $iterator->uasort(function($a, $b) use ($classVersion){
+            return sortRelationsByClasses($a, $b, $classVersion->getNamespaceForVersion(), 'entityAssociations', $classVersion->getClass());
+        });
+        $entityAssociations = new ArrayCollection(iterator_to_array($iterator));
+
         return $this->render('class/show.html.twig', array(
             'classVersion' => $classVersion,
+            'childClassAssociations' => $childClassAssociations,
+            'parentClassAssociations' => $parentClassAssociations,
+            'entityAssociations' => $entityAssociations,
             'ancestors' => $ancestors,
             'descendants' => $descendants,
             'relations' => $relations,
@@ -421,10 +535,122 @@ class ClassController extends Controller
         $this->get('logger')
             ->info('Showing class: '.$class->getIdentifierInNamespace());
 
+        //Tri
+        // En tête, les relations appartenant à la même version que cette classe
+        // Puis par identifiant / label
+        // Ensuite, les autres versions
+        // Puis par Préfixe, identifiant / label
+        function sortRelationsByClasses($a, $b, OntoNamespace $version, $type, $class=null){
+            if($type == 'childClassAssociations'){
+                $classA = $a->getParentClass();
+                $classB = $b->getParentClass();
+                $classNamespaceA = $a->getParentClassNamespace();
+                $classNamespaceB = $b->getParentClassNamespace();
+            }
+            if($type == 'parentClassAssociations'){
+                $classA = $a->getChildClass();
+                $classB = $a->getChildClass();
+                $classNamespaceA = $a->getChildClassNamespace();
+                $classNamespaceB = $b->getChildClassNamespace();
+            }
+            if($type == 'entityAssociations'){
+                if($a->getSystemType()->getId() > $b->getSystemType()->getId()){
+                    return 1;
+                }
+                elseif($a->getSystemType()->getId() < $b->getSystemType()->getId()){
+                    return -1;
+                }
+                else{
+                    if($class == $a->getSourceClass()){
+                        $classA = $a->getTargetClass();
+                        $classNamespaceA = $a->getTargetNamespaceForVersion();
+                    }
+                    else{
+                        $classA = $a->getSourceClass();
+                        $classNamespaceA = $a->getSourceNamespaceForVersion();
+                    }
+
+                    if($class == $b->getSourceClass()){
+                        $classB = $b->getTargetClass();
+                        $classNamespaceB = $b->getTargetNamespaceForVersion();
+                    }
+                    else{
+                        $classB = $b->getSourceClass();
+                        $classNamespaceB =$b->getSourceNamespaceForVersion();
+                    }
+                }
+            }
+
+            if($classNamespaceA === $version && $classNamespaceB !== $version){
+                return -1;
+            }
+            elseif($classNamespaceB === $version && $classNamespaceA !== $version){
+                return 1;
+            }
+            else{
+                $prefixA = $classNamespaceA->getTopLevelNamespace()->getRootNamespacePrefix();
+                $prefixB = $classNamespaceB->getTopLevelNamespace()->getRootNamespacePrefix();
+                $identifierInNamespaceA =  $classA->getIdentifierInNamespace();
+                $identifierInNamespaceB =  $classB->getIdentifierInNamespace();
+
+                if($prefixA == $prefixB){
+                    if(strlen($identifierInNamespaceA) == strlen($identifierInNamespaceB)){
+                        return strcmp($identifierInNamespaceA, $identifierInNamespaceB);
+                    }
+                    elseif(strlen($identifierInNamespaceA) > strlen($identifierInNamespaceB)){
+                        return 1;
+                    }
+                    elseif(strlen($identifierInNamespaceA) < strlen($identifierInNamespaceB)){
+                        return -1;
+                    }
+                }
+                else{
+                    return strcmp($prefixA, $prefixB);
+                }
+            }
+        }
+
+        // -- Associations Subclass of
+        $childClassAssociations = $classVersion->getClass()->getChildClassAssociations()
+            ->filter(function($v) use ($classVersion, $namespacesId){
+                return $classVersion->getNamespaceForVersion() == $v->getNamespaceForVersion() || in_array($v->getNamespaceForVersion()->getId(), $namespacesId);
+            });
+        $iterator = $childClassAssociations->getIterator();
+        $iterator->uasort(function($a, $b) use ($classVersion){
+            return sortRelationsByClasses($a, $b, $classVersion->getNamespaceForVersion(), 'childClassAssociations');
+        });
+        $childClassAssociations = new ArrayCollection(iterator_to_array($iterator));
+
+        // -- Associations Superclass of
+        $parentClassAssociations = $classVersion->getClass()->getParentClassAssociations()
+            ->filter(function($v) use ($classVersion, $namespacesId){
+                return $classVersion->getNamespaceForVersion() == $v->getNamespaceForVersion() || in_array($v->getNamespaceForVersion()->getId(), $namespacesId);
+            });
+        $iterator = $parentClassAssociations->getIterator();
+        $iterator->uasort(function($a, $b) use ($classVersion){
+            return sortRelationsByClasses($a, $b, $classVersion->getNamespaceForVersion(), 'parentClassAssociations');
+        });
+        $parentClassAssociations = new ArrayCollection(iterator_to_array($iterator));
+
+        // -- Relations
+        $entityAssociations = $classVersion->getClass()->getEntityAssociations()
+            ->filter(function($v) use ($classVersion, $namespacesId){
+                return $classVersion->getNamespaceForVersion() == $v->getNamespaceForVersion() || in_array($v->getNamespaceForVersion()->getId(), $namespacesId);
+            });
+        $iterator = $entityAssociations->getIterator();
+        $iterator->uasort(function($a, $b) use ($classVersion){
+            return sortRelationsByClasses($a, $b, $classVersion->getNamespaceForVersion(), 'entityAssociations', $classVersion->getClass());
+        });
+        $entityAssociations = new ArrayCollection(iterator_to_array($iterator));
+
+
         //If validation status is in validation request or is validation, we can't allow edition of the entity and we rended the show template
         if (!is_null($classVersion->getValidationStatus()) && ($classVersion->getValidationStatus()->getId() === 26 || $classVersion->getValidationStatus()->getId() === 28)) {
             return $this->render('class/show.html.twig', [
                 'classVersion' => $classVersion,
+                'childClassAssociations' => $childClassAssociations,
+                'parentClassAssociations' => $parentClassAssociations,
+                'entityAssociations' => $entityAssociations,
                 'ancestors' => $ancestors,
                 'descendants' => $descendants,
                 'relations' => $relations,
@@ -439,6 +665,9 @@ class ClassController extends Controller
 
         return $this->render('class/edit.html.twig', array(
             'classVersion' => $classVersion,
+            'childClassAssociations' => $childClassAssociations,
+            'parentClassAssociations' => $parentClassAssociations,
+            'entityAssociations' => $entityAssociations,
             'ancestors' => $ancestors,
             'descendants' => $descendants,
             'relations' => $relations,
