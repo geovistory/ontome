@@ -68,6 +68,12 @@ class PropertyAssociationController extends Controller
         $arrayPropertiesVersion = $em->getRepository('AppBundle:PropertyVersion')
             ->findIdAndStandardLabelOfPropertiesVersionByNamespacesId($namespacesId);
 
+        foreach ($arrayPropertiesVersion as $pv){
+            if($pv['id'] == $childProperty->getId()){
+                unset($arrayPropertiesVersion[array_search($pv, $arrayPropertiesVersion)]);
+            }
+        }
+
         $form = $this->createForm(ParentPropertyAssociationForm::class, $propertyAssociation, array(
             "propertiesVersion" => $arrayPropertiesVersion
         ));
@@ -194,8 +200,13 @@ class PropertyAssociationController extends Controller
 
         $namespacesId = $this->getUser()->getCurrentOngoingNamespace()->getSelectedNamespacesId();
 
-        //$arrayPropertiesVersion = $em->getRepository('AppBundle:PropertyVersion')->findIdAndStandardLabelOfPropertiesVersionByNamespacesId($namespacesIdFromChildProperty);
         $arrayPropertiesVersion = $em->getRepository('AppBundle:PropertyVersion')->findIdAndStandardLabelOfPropertiesVersionByNamespacesId($namespacesId);
+
+        foreach ($arrayPropertiesVersion as $pv){
+            if($pv['id'] == $propertyAssociation->getChildProperty()->getId()){
+                unset($arrayPropertiesVersion[array_search($pv, $arrayPropertiesVersion)]);
+            }
+        }
 
         $form = $this->createForm(PropertyAssociationEditForm::class, $propertyAssociation, array(
             'propertiesVersion' => $arrayPropertiesVersion,

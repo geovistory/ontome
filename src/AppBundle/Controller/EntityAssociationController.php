@@ -93,10 +93,25 @@ class EntityAssociationController extends Controller
         if($entityAssociation->getSourceObjectType() == "class"){
             $arrayEntitiesVersion = $em->getRepository('AppBundle:OntoClassVersion')
                 ->findIdAndStandardLabelOfClassesVersionByNamespacesId($namespacesId);
+
+            if(!$entityAssociation->getSourceClass()->getIsRecursive()){
+                foreach ($arrayEntitiesVersion as $cv){
+                    if($cv['id'] == $objectId){
+                        unset($arrayEntitiesVersion[array_search($cv, $arrayEntitiesVersion)]);
+                    }
+                }
+            }
         }
         elseif($entityAssociation->getSourceObjectType() == "property"){
             $arrayEntitiesVersion = $em->getRepository('AppBundle:PropertyVersion')
                 ->findIdAndStandardLabelOfPropertiesVersionByNamespacesId($namespacesId);
+            if(!$entityAssociation->getSourceProperty()->getIsRecursive()){
+                foreach ($arrayEntitiesVersion as $pv){
+                    if($pv['id'] == $objectId){
+                        unset($arrayEntitiesVersion[array_search($pv, $arrayEntitiesVersion)]);
+                    }
+                }
+            }
         }
 
         $form = $this->createForm(EntityAssociationForm::class, $entityAssociation, array(
