@@ -403,6 +403,8 @@
                                     <span class="label label-warning">Manager</span>
                                 {% elseif userProjectAssociation.permission == 3 %}
                                     <span class="label label-success">Member</span>
+                                {% elseif userProjectAssociation.permission == 4 %}
+                                    <span class="label label-info">Observer</span>
                                 {% endif %}
                             </td>
                         </tr>

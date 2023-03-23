@@ -116,6 +116,11 @@ class OntoNamespace
     /**
      * @ORM\Column(type="boolean")
      */
+    private $isVisible;
+
+    /**
+     * @ORM\Column(type="boolean")
+     */
     private $hasPublication;
 
     /**
@@ -342,7 +347,21 @@ class OntoNamespace
         $this->namespaceUserProjectAssociation = $namespaceUserProjectAssociation;
     }
 
+    /**
+     * @return mixed
+     */
+    public function getIsVisible()
+    {
+        return $this->isVisible;
+    }
 
+    /**
+     * @param mixed $isVisible
+     */
+    public function setIsVisible($isVisible)
+    {
+        $this->isVisible = $isVisible;
+    }
 
     public function __construct()
     {

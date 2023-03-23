@@ -491,6 +491,12 @@
                         </a>
                     </p>
                 {% endif %}
+
+
+                {% if namespace.isOngoing %}
+                    <p><input type="checkbox" id="make-visible" data-url="{{ path('namespace_make_visible', {'id': namespace.id }) }}" {% if namespace.isVisible %}checked="checked" disabled{% endif %} /> Make the classes and properties of this namespace visible</p>
+                    <!-- Once the classes and properties of an ongoing namespace are made visible, it's not possible to hide them again or to create new ones that would be hidden. Do you wish to proceed? -->
+                {% endif %}
                 {% if namespace.isTopLevelNamespace == false %}
                     {% if namespace.isOngoing %}
                         <p>This namespace is ongoing and can be modified at any time. It is not advisable to use its classes and properties.</p>
@@ -1661,6 +1667,41 @@
                         }
                     }
                 });
+            });
+
+            $(document).on('change', '#make-visible', function(){
+                var url =  $(this).data("url");
+                var cbx = $(this);
+                if(this.checked){
+                    bootbox.confirm({
+                        message: "Once the classes and properties of an ongoing namespace are made visible, it's not possible to hide them again or to create new ones that would be hidden. Do you wish to proceed?",
+                        buttons: {
+                            confirm: {
+                                label: 'Yes',
+                                className: 'btn-success'
+                            },
+                            cancel: {
+                                label: 'No',
+                                className: 'btn-danger'
+                            }
+                        },
+                        callback: function (result) {
+                            if(result){
+                                $.ajax({
+                                    url: url,
+                                    type: 'POST',
+                                    dataType: 'json',
+                                    success: function (data) {
+                                        cbx.attr('disabled', 'disabled');
+                                    }
+                                });
+                            }
+                            else{
+                                cbx.prop('checked', false);
+                            }
+                        }
+                    });
+                }
             });
 
             $(document).on("click", ".remove-namespace", function() {

@@ -454,7 +454,8 @@ class NamespaceController  extends Controller
         if($rootNamespace->getIsTopLevelNamespace()) {
             $status = 'Success';
             $message = 'This namespace is valid';
-            foreach ($rootNamespace->getChildVersions() as $namespace) {
+            $user = $this->getUser();
+            foreach ($rootNamespace->getChildVersions()->filter(function($v)use($user){return $v->getIsVisible() or $v->getProjectForTopLevelNamespace()->getuserProjectAssociations()->filter(function($v)use($user){return $v->getUser() == $user;})->count() == 1; }) as $namespace) {
                 $referencedNamespaces = array();
                 foreach ($namespace->getAllReferencedNamespaces() as $referencedNamespace){
                     $referencedNamespaces[$referencedNamespace->getTopLevelNamespace()->getId()] = [$referencedNamespace->getId(), $referencedNamespace->getStandardLabel()];
@@ -520,8 +521,6 @@ class NamespaceController  extends Controller
 
         return new JsonResponse($response);
     }
-
-
 
     /**
      * @Route("/namespace/{id}/json", name="namespace_json", schemes={"https"}, requirements={"id"="^[0-9]+"})
@@ -1698,5 +1697,20 @@ class NamespaceController  extends Controller
         );
 
         return $response;
+    }
+
+    /**
+     * @Route("/namespace/{id}/makevisible", name="namespace_make_visible", requirements={"id"="^([0-9]+)|(namespaceID){1}$"})
+     * @param OntoNamespace $namespace
+     * @return JsonResponse
+     */
+    public function makeVisibleAction(OntoNamespace $namespace)
+    {
+        $namespace->setIsVisible(true);
+        $em = $this->getDoctrine()->getManager();
+        $em->persist($namespace);
+        $em->flush();
+
+        return new JsonResponse(null, 204);
     }
 }

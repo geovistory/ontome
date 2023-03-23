@@ -1502,4 +1502,19 @@ class ProfileController  extends Controller
             'formsExample' => $formsExampleViews
         ));
     }
+
+    /**
+     * @Route("/profile/{id}/makevisible", name="profile_make_visible", requirements={"id"="^([0-9]+)|(profileID){1}$"})
+     * @param Profile $profile
+     * @return JsonResponse
+     */
+    public function makeVisibleAction(Profile $profile)
+    {
+        $profile->setIsVisible(true);
+        $em = $this->getDoctrine()->getManager();
+        $em->persist($profile);
+        $em->flush();
+
+        return new JsonResponse(null, 204);
+    }
 }

@@ -1502,6 +1502,7 @@
                     {% set profilesAssociated = [] %}
                     {% for profileAssociation in propertyVersion.property.profileAssociations
                         if profileAssociation.systemType.id == 5
+                        and profileAssociation.profile.isVisible
                         and profileAssociation.profile not in profilesAssociated %}
                         {% set profilesAssociated = [profileAssociation.profile]|merge(profilesAssociated) %}
                     {% endfor %}
