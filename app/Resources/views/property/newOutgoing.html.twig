@@ -151,7 +151,10 @@
                 $('[for=outgoing_property_quick_add_form_textProperties_1_textProperty]').text('Example');
                 tinymce.init({
                     selector:'.tinymce',
-                    entity_encoding : "raw"
+                    plugins : 'autolink link lists charmap print preview paste',
+                    entity_encoding : "raw",
+                    paste_as_text: true,
+                    paste_enable_default_filters: false
                 });
                 $('.js-example-remove').show();
             });
