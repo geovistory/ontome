@@ -16,11 +16,12 @@
     <script>
         tinymce.init({
             selector:'.tinymce',
-            plugins : 'autolink link lists charmap print preview',
+            plugins : 'autolink link lists charmap print preview paste',
             default_link_target: "_blank",
             entity_encoding : "raw",
             convert_urls: false,
-            height: 350
+            height: 350,
+            paste_as_text: true
         });
     </script>
     <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}" />
