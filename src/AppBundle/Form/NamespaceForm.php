@@ -37,12 +37,17 @@ class NamespaceForm extends AbstractType
             );
         }
 
+        if($options['is_root_namespace']){
         $builder
             ->add('isExternalNamespace', CheckboxType::class, [
                 'required' => true,
                 'label' => 'External namespace',
                 'attr' => ['autocomplete' => 'off']
             ])
+            ->add('rootNamespacePrefix', TextType::class, array(
+                'label' => 'Root namespace prefix',
+                'attr' => ['autocomplete' => 'off']
+            ))
             ->add('uriGenerator', TextType::class, array(
                 'label' => 'OntoME URI generator',
                 'mapped' => false,
@@ -50,15 +55,29 @@ class NamespaceForm extends AbstractType
             ))
             ->add('namespaceURI', UrlType::class, array(
                 'label' => 'Base URI',
+                'required' => true,
                 'default_protocol' => 'http',
                 'attr' => ['autocomplete' => 'off']
             ))
-            ->add('rootNamespacePrefix', TextType::class, array(
-                'label' => 'Root namespace prefix',
-                'attr' => ['autocomplete' => 'off']
-            ))
             ->add('creator', HiddenType::class)
-            ->add('modifier', HiddenType::class);
+            ->add('modifier', HiddenType::class);;
+        }
+        else{
+            $builder
+                ->add('uriGenerator', TextType::class, array(
+                    'label' => 'OntoME URI generator',
+                    'mapped' => false,
+                    'attr' => ['autocomplete' => 'off']
+                ))
+                ->add('namespaceURI', UrlType::class, array(
+                    'label' => 'Base URI',
+                    'required' => false,
+                    'default_protocol' => 'http',
+                    'attr' => ['autocomplete' => 'off']
+                ))
+                ->add('creator', HiddenType::class)
+                ->add('modifier', HiddenType::class);
+        }
         $builder->get('creator')
             ->addModelTransformer($this->transformer);
         $builder->get('modifier')
@@ -70,6 +89,7 @@ class NamespaceForm extends AbstractType
     {
         $resolver->setDefaults(array(
             'data_class' => 'AppBundle\Entity\OntoNamespace',
+            'is_root_namespace' => true
         ));
     }
 

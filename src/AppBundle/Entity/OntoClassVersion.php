@@ -277,17 +277,38 @@ class OntoClassVersion
     }
 
     /**
+     * @return string
+     * Générer l'URI
+     */
+    public function getURI(){
+        $baseUri = $this->getNamespaceForVersion()->getTopLevelNamespace()->getNamespaceURI();
+
+        $identifier = $this->getClass()->getIdentifierInURI();
+
+        // Si la version est externe et qu'elle dispose de sa propre base URI
+        if($this->getNamespaceForVersion()->getIsExternalNamespace() && !empty($this->getNamespaceForVersion()->getNamespaceURI())){
+            $baseUri = $this->getNamespaceForVersion()->getNamespaceURI();
+        }
+
+        // Si la version est interne, utiliser identifier_in_namespace
+        if(!$this->getNamespaceForVersion()->getIsExternalNamespace()){
+            $identifier = $this->getClass()->getIdentifierInNamespace();
+        }
+
+        return $baseUri.$identifier;
+    }
+
+    /**
      * @return bool
      * Savoir si l'URI est atteignable. Afin de mettre ou non un lien pour Official URI
      */
     public function getIsLinkableURI()
     {
         if(!$this->getNamespaceForVersion()->getIsExternalNamespace()){
-            return false; // Namespace interne on n'en met pas.
+            return false; // Namespace interne, donc non linkable.
         }
-        $uri = $this->getNamespaceForVersion()->getTopLevelNamespace()->getNamespaceURI().$this->getClass()->getIdentifierInNamespace();
 
-        $ch = curl_init($uri);
+        $ch = curl_init($this->getURI());
         curl_setopt($ch,CURLOPT_NOBODY, true);
         curl_setopt($ch,CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($ch,CURLOPT_SSL_VERIFYPEER, 0);

@@ -30,7 +30,6 @@ class OntoNamespace
 
     /**
      * @Assert\Url(message="Please enter a valid URI")
-     * @Assert\NotBlank()
      * @ORM\Column(type="text", nullable=true, unique=true)
      */
     private $namespaceURI;

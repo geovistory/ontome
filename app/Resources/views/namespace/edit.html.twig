@@ -447,16 +447,20 @@
                     {% if is_granted('full_edit', namespace) and (not namespace.isOngoing or namespace.topLevelNamespace.isExternalNamespace) %}
                         {{ form_start(namespaceForm) }}
                         {{ form_errors(namespaceForm) }}
-                        {{ form_start(namespaceForm) }}
-                        {{ form_row(namespaceForm.isExternalNamespace, {
-                            help: 'Only tick this checkbox if your namespace already has its URI outside OntoME. Otherwise leave it unchecked.'
-                        }) }}
-                        {{ form_row(namespaceForm.uriGenerator, {
-                            help: 'Fill this field to generate automatically the namespace URI. Eg. "my namespace" generates "https://ontome.net/ns/my-namespace".'
-                        }) }}
-                        {{ form_row(namespaceForm.namespaceURI) }}
-                        {{ form_row(namespaceForm.rootNamespacePrefix) }}
-                        {{ form_errors(namespaceForm) }}
+                        {% if namespace.isTopLevelNamespace %}
+                            {{ form_row(namespaceForm.isExternalNamespace, {
+                                help: 'Only tick this checkbox if your namespace already has its URI outside OntoME. Otherwise leave it unchecked.'
+                            }) }}
+                            {{ form_row(namespaceForm.uriGenerator, {
+                                help: 'Fill this field to generate automatically the namespace URI. Eg. "my namespace" generates "https://ontome.net/ns/my-namespace".'
+                            }) }}
+                            {{ form_row(namespaceForm.namespaceURI) }}
+                            {{ form_row(namespaceForm.rootNamespacePrefix) }}
+                        {% else %}
+                            {{ form_row(namespaceForm.namespaceURI, {
+                                help: 'Leave blank if identical to the base URI of the root namespace.'
+                            }) }}
+                        {% endif %}
                         <button type="submit" class="btn btn-primary" formnovalidate>Save <span class="far fa-save"></span></button>
                         <a href="#"
                            onclick="window.location.reload()"
@@ -474,7 +478,7 @@
                         </a>
                         {{ form_end(namespaceForm) }}
                     {% else %}
-                        {% if namespace.topLevelNamespace.isExternalNamespace %}
+                        {% if namespace.topLevelNamespace.isExternalNamespace and namespace.namespaceURI is not null %}
                             Base URI: <strong>{{ namespace.namespaceURI }}</strong>
                         {% else %}
                             Base URI: <strong>{{ namespace.topLevelNamespace.namespaceURI }}</strong>
@@ -1732,10 +1736,18 @@
             });
 
             $(document).on('keyup', '#namespace_form_uriGenerator', function() {
-                var stringForURI = this.value;
+                var stringForURI = this.value.trim();
+
                 stringForURI = stringForURI.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
                 stringForURI = stringForURI.replace(/[\s-]+/g, '-').toLowerCase().replace(/[^0-9a-z\-]/g, '');
-                $('#namespace_form_namespaceURI').val('https://ontome.net/ns/' + stringForURI + "/");
+
+                if (stringForURI === '') {
+                    $('#namespace_form_namespaceURI').val('');
+                }
+                else {
+                    $('#namespace_form_namespaceURI').val('https://ontome.net/ns/' + stringForURI + '/');
+                }
+
             });
 
             //disable URI field if it's not an external URI
