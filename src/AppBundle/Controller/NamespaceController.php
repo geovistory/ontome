@@ -767,12 +767,6 @@ class NamespaceController  extends Controller
     public function getNamespaceOdt(OntoNamespace $namespace, Request $request)
     {
         function specialCharactersConversion($string, $forHTML=false){
-            if (mb_detect_encoding($string, 'UTF-8', true) === false) {
-                echo "La chaîne n'est pas encodée en UTF-8";
-                die;
-            } else {
-                echo "La chaîne est encodée en UTF-8";
-            }
             $string = htmlspecialchars_decode($string, ENT_QUOTES);
             $string = html_entity_decode($string, ENT_QUOTES, 'UTF-8');
             if($forHTML){
