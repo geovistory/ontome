@@ -157,6 +157,11 @@ class Property
      */
     private $namespaces;
 
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    private $isRecursive;
+
     public function __construct()
     {
         $this->namespaces = new ArrayCollection();
@@ -640,5 +645,21 @@ class Property
             }
             return $tree;
         }
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getIsRecursive()
+    {
+        return $this->isRecursive;
+    }
+
+    /**
+     * @param mixed $isRecursive
+     */
+    public function setIsRecursive($isRecursive)
+    {
+        $this->isRecursive = $isRecursive;
     }
 }

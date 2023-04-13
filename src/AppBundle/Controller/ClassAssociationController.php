@@ -59,6 +59,12 @@ class ClassAssociationController extends Controller
         $arrayClassesVersion = $em->getRepository('AppBundle:OntoClassVersion')
             ->findIdAndStandardLabelOfClassesVersionByNamespacesId($namespacesId);
 
+        foreach ($arrayClassesVersion as $cv){
+            if($cv['id'] == $childClass->getId()){
+                unset($arrayClassesVersion[array_search($cv, $arrayClassesVersion)]);
+            }
+        }
+
         $form = $this->createForm(ParentClassAssociationForm::class, $classAssociation, array(
             "classesVersion" => $arrayClassesVersion
         ));
@@ -164,6 +170,12 @@ class ClassAssociationController extends Controller
 
         $arrayClassesVersion = $em->getRepository('AppBundle:OntoClassVersion')
             ->findIdAndStandardLabelOfClassesVersionByNamespacesId($namespacesId);
+
+        foreach ($arrayClassesVersion as $cv){
+            if($cv['id'] == $classAssociation->getChildClass()->getId()){
+                unset($arrayClassesVersion[array_search($cv, $arrayClassesVersion)]);
+            }
+        }
 
         $form = $this->createForm(ClassAssociationEditForm::class, $classAssociation, array(
             'classesVersion' => $arrayClassesVersion,
