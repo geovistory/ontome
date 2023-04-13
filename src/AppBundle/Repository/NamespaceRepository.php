@@ -311,7 +311,7 @@ class NamespaceRepository extends EntityRepository
         $conn = $this->getEntityManager()
             ->getConnection();
 
-        $sql = "SELECT result::text FROM api.get_classes_and_properties_for_namespace(:lang, :namespace) as result;";
+        $sql = "SELECT result::text FROM api.get_xml_owl_classes_and_properties_for_namespace(:lang, :namespace) as result;";
 
         $stmt = $conn->prepare($sql);
         $stmt->execute(array(
@@ -332,7 +332,7 @@ class NamespaceRepository extends EntityRepository
         $conn = $this->getEntityManager()
             ->getConnection();
 
-        $sql = "SELECT result::text FROM api.get_classes_and_properties_for_namespace_rdfs(:lang, :namespace) as result;";
+        $sql = "SELECT result::text FROM api.get_xml_rdfs_classes_and_properties_for_namespace(:lang, :namespace) as result;";
 
         $stmt = $conn->prepare($sql);
         $stmt->execute(array(
