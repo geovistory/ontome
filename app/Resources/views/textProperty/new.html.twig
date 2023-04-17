@@ -38,8 +38,8 @@
                     {% else %}
                     Add a{% if textProperty.systemType.standardLabel|first|lower in ['a', 'e', 'i', 'o', 'u', 'y'] %}n{% endif %} {{ textProperty.systemType.standardLabel|lower }}
                     {% endif %}
-                    for the class {{ textProperty.class.classVersionForDisplay(textProperty.namespaceForVersion) }}
-                    {% if is_granted('edit', textProperty.class) %}
+                    for the class {{ textProperty.class.classVersionForDisplay() }}
+                    {% if is_granted('edit', textProperty.class) and (textProperty.class.classVersions|filter(v => v.namespaceForVersion.isOngoing)|first).namespaceForVersion == textProperty.namespaceForVersion %}
                     <a href="{{ path('class_edit', {
                         id: textProperty.class.id,
                         "_fragment": "definition"
@@ -49,7 +49,7 @@
                         <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
                     </a>
                     {% else %}
-                    <a href="{{ path('class_edit', {
+                    <a href="{{ path('class_show', {
                         id: textProperty.class.id,
                         "_fragment": "definition"
                     }) }}"
@@ -64,8 +64,8 @@
                     {% else %}
                     Add a{% if textProperty.systemType.standardLabel|first|lower in ['a', 'e', 'i', 'o', 'u', 'y'] %}n{% endif %} {{ textProperty.systemType.standardLabel|lower }}
                     {% endif %}
-                    for the property {{ textProperty.property.propertyVersionForDisplay(textProperty.namespaceForVersion) }}
-                    {% if is_granted('edit', textProperty.property) %}
+                    for the property {{ textProperty.property.propertyVersionForDisplay() }}
+                    {% if is_granted('edit', textProperty.property) and (textProperty.property.propertyVersions|filter(v => v.namespaceForVersion.isOngoing)|first).namespaceForVersion == textProperty.namespaceForVersion %}
                     <a href="{{ path('property_edit', {
                         id: textProperty.property.id,
                         "_fragment": "definition"
@@ -192,7 +192,11 @@
 
                 <button type="submit" class="btn btn-primary" formnovalidate>Save <span class="far fa-save"></span></button>
                 {% if textProperty.classAssociation is not null %}
-                    <a href="{{ path('class_association_edit', {
+                    {% set mode = 'show' %}
+                    {% if is_granted('edit', textProperty.classAssociation) %}
+                        {% set mode = 'edit' %}
+                    {% endif %}
+                    <a href="{{ path('class_association_'~mode, {
                         id: textProperty.classAssociation.id
                     }) }}"
                        class="btn btn-default"
@@ -200,7 +204,11 @@
                         Back <i class="fas fa-arrow-left"></i>
                     </a>
                 {% elseif textProperty.propertyAssociation is not null %}
-                    <a href="{{ path('property_association_edit', {
+                    {% set mode = 'show' %}
+                    {% if is_granted('edit', textProperty.propertyAssociation) %}
+                        {% set mode = 'edit' %}
+                    {% endif %}
+                    <a href="{{ path('property_association_'~mode, {
                         id: textProperty.propertyAssociation.id
                     }) }}"
                        class="btn btn-default"
@@ -208,23 +216,35 @@
                         Back <i class="fas fa-arrow-left"></i>
                     </a>
                 {% elseif textProperty.class is not null %}
-                    <a href="{{ path('class_edit', {
+                    {% set mode = 'show' %}
+                    {% if is_granted('edit', textProperty.class) and (textProperty.class.classVersions|filter(v => v.namespaceForVersion.isOngoing)|first).namespaceForVersion == textProperty.namespaceForVersion %}
+                        {% set mode = 'edit' %}
+                    {% endif %}
+                    <a href="{{ path('class_'~mode, {
                         id: textProperty.class.id
-                    }) }}#scopes-notes"
+                    }) }}#definition"
                        class="btn btn-default"
                        role="button">
                         Back <i class="fas fa-arrow-left"></i>
                     </a>
                 {% elseif textProperty.property is not null %}
-                    <a href="{{ path('property_edit', {
+                    {% set mode = 'show' %}
+                    {% if is_granted('edit', textProperty.property) and (textProperty.property.propertyVersions|filter(v => v.namespaceForVersion.isOngoing)|first).namespaceForVersion == textProperty.namespaceForVersion %}
+                        {% set mode = 'edit' %}
+                    {% endif %}
+                    <a href="{{ path('property_'~mode, {
                         id: textProperty.property.id
-                    }) }}#scopes-notes"
+                    }) }}#definition"
                        class="btn btn-default"
                        role="button">
                         Back <i class="fas fa-arrow-left"></i>
                     </a>
                 {% elseif textProperty.project is not null %}
-                    <a href="{{ path('project_edit', {
+                    {% set mode = 'show' %}
+                    {% if is_granted('edit', textProperty.project) %}
+                        {% set mode = 'edit' %}
+                    {% endif %}
+                    <a href="{{ path('project_'~mode, {
                         id: textProperty.project.id
                     }) }}#description-notes"
                        class="btn btn-default"
@@ -232,7 +252,11 @@
                         Back <i class="fas fa-arrow-left"></i>
                     </a>
                 {% elseif textProperty.profile is not null %}
-                    <a href="{{ path('profile_edit', {
+                    {% set mode = 'show' %}
+                    {% if is_granted('edit', textProperty.profile) %}
+                        {% set mode = 'edit' %}
+                    {% endif %}
+                    <a href="{{ path('profile_'~mode, {
                         id: textProperty.profile.id
                     }) }}#definition"
                        class="btn btn-default"
@@ -240,11 +264,15 @@
                         Back <i class="fas fa-arrow-left"></i>
                     </a>
                 {% elseif textProperty.namespace is not null %}
+                    {% set mode = 'show' %}
+                    {% if is_granted('edit', textProperty.namespace) %}
+                        {% set mode = 'edit' %}
+                    {% endif %}
                     {% set fragment = "definition" %}
                     {% if textProperty.systemType.id == 31 %}
                         {% set fragment = "identification" %}
                     {% endif %}
-                    <a href="{{ path('namespace_edit', {
+                    <a href="{{ path('namespace_'~mode, {
                         id: textProperty.namespace.id,
                         '_fragment': fragment
                     }) }}"
@@ -253,7 +281,11 @@
                         Back <i class="fas fa-arrow-left"></i>
                     </a>
                 {% elseif textProperty.entityAssociation is not null and app.request.attributes.get('_route') == 'text_property_inverse_new' %}
-                    <a href="{{ path('entity_association_inverse_edit', {
+                    {% set mode = 'show' %}
+                    {% if is_granted('edit', textProperty.entityAssociation) %}
+                        {% set mode = 'edit' %}
+                    {% endif %}
+                    <a href="{{ path('entity_association_inverse_'~mode, {
                         id: textProperty.entityAssociation.id
                     }) }}#definition"
                        class="btn btn-default"
@@ -261,7 +293,11 @@
                         Back <i class="fas fa-arrow-left"></i>
                     </a>
                 {% elseif textProperty.entityAssociation is not null %}
-                    <a href="{{ path('entity_association_edit', {
+                    {% set mode = 'show' %}
+                    {% if is_granted('edit', textProperty.entityAssociation) %}
+                        {% set mode = 'edit' %}
+                    {% endif %}
+                    <a href="{{ path('entity_association_'~mode, {
                         id: textProperty.entityAssociation.id
                     }) }}#definition"
                        class="btn btn-default"
