@@ -191,6 +191,18 @@ class OntoNamespace
     private $rootNamespacePrefix;
 
     /**
+     * @Assert\NotNull()
+     * @ORM\Column(type="integer")
+     */
+    private $uriParameter;
+    /*
+     * 0: Entity identifier
+     * 1: Entity identifier + label
+     * 2: camelCase
+     * 3: No parameter
+     */
+
+    /**
      * @Assert\Valid()
      * @Assert\NotBlank()
      * @ORM\OneToMany(targetEntity="AppBundle\Entity\Label", mappedBy="namespace", cascade={"persist"})
@@ -1020,6 +1032,22 @@ class OntoNamespace
         else{
             return ["classCss"=>"danger", "label"=>"Deprecated"];
         }
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getUriParameter()
+    {
+        return $this->uriParameter;
+    }
+
+    /**
+     * @param mixed $uriParameter
+     */
+    public function setUriParameter($uriParameter)
+    {
+        $this->uriParameter = $uriParameter;
     }
 
     /**
