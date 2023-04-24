@@ -785,7 +785,7 @@
                         <th>Namespace</th>
                         <th>Publication date</th>
                         {% if app.user.id is defined %}
-                            <th>Current namespace}</th>
+                            <th>Current namespace</th>
                         {% endif %}
                     </tr>
                     </thead>
@@ -1521,9 +1521,6 @@
             $('#mismatches-table').DataTable();
             $('#child-namespaces-table').DataTable({
                 "order": [[0, 'desc']],
-                "columnDefs": [
-                    {"visible": false, "targets": 0 }
-                ],
                 "autoWidth": false
             });
 
