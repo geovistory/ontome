@@ -22,6 +22,7 @@ use AppBundle\Form\IngoingPropertyQuickAddForm;
 use AppBundle\Form\OutgoingPropertyQuickAddForm;
 use AppBundle\Form\PropertyEditForm;
 use AppBundle\Form\PropertyEditIdentifierForm;
+use AppBundle\Form\PropertyEditUriIdentifierForm;
 use AppBundle\Form\TextPropertyForm;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -177,15 +178,40 @@ class PropertyController extends Controller
         $arrayClassesVersion = $em->getRepository('AppBundle:OntoClassVersion')
             ->findIdAndStandardLabelOfClassesVersionByNamespacesId($namespacesId);
 
+        $namespace = $propertyVersion->getNamespaceForVersion();
+        $uriParam = $namespace->getTopLevelNamespace()->getUriParameter();
+        $identifierInUriPrefilled = '';
+        if(!is_null($namespace->getTopLevelNamespace()->getPropertyPrefix())){
+            $identifierInUriPrefilled = $namespace->getTopLevelNamespace()->getPropertyPrefix().($namespace->getTopLevelNamespace()->getCurrentPropertyNumber()+1);
+        }
+        switch ($uriParam){
+            case 0:
+                // Rien à faire
+                break;
+            case 1:
+                if(!is_null($namespace->getTopLevelNamespace()->getPropertyPrefix())) {
+                    $identifierInUriPrefilled = $identifierInUriPrefilled . '_';
+                }
+                break;
+            default:
+                $identifierInUriPrefilled = ''; // Pour les cas 2 et 3
+        }
+
         $form = null;
         if($type == 'outgoing') {
             $form = $this->createForm(OutgoingPropertyQuickAddForm::class, $property, array(
-                "classesVersion" => $arrayClassesVersion
+                "classesVersion" => $arrayClassesVersion,
+                'identifier_in_uri_prefilled' => $identifierInUriPrefilled,
+                'uri_param' => $uriParam,
+                'is_external' => $propertyVersion->getNamespaceForVersion()->getTopLevelNamespace()->getIsExternalNamespace()
             ));
         }
         elseif ($type == 'ingoing') {
             $form = $this->createForm(IngoingPropertyQuickAddForm::class, $property, array(
-                "classesVersion" => $arrayClassesVersion
+                "classesVersion" => $arrayClassesVersion,
+                'identifier_in_uri_prefilled' => $identifierInUriPrefilled,
+                'uri_param' => $uriParam,
+                'is_external' => $propertyVersion->getNamespaceForVersion()->getTopLevelNamespace()->getIsExternalNamespace()
             ));
         }
 
@@ -193,7 +219,9 @@ class PropertyController extends Controller
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $property = $form->getData();
-            $property->setIdentifierInURI($property->getIdentifierInNamespace()); // On attribue le même identifiant à la création en attendant un nouveau ticket (si identifier automatique c'est dans le trigger)
+            if(!$propertyVersion->getNamespaceForVersion()->getTopLevelNamespace()->getIsExternalNamespace()){
+                $property->setIdentifierInURI($property->getIdentifierInNamespace()); // On attribue le même identifiant à la création si namespace interne
+            }
             if($type == 'outgoing') {
                 $propertyVersion->setDomain($class);
                 $domainNamespace = $em->getRepository("AppBundle:OntoClassVersion")->findClassVersionByClassAndNamespacesId($class, $namespacesId)->getNamespaceForVersion();
@@ -473,9 +501,25 @@ class PropertyController extends Controller
         $formIdentifier->handleRequest($request);
         if ($formIdentifier->isSubmitted() && $formIdentifier->isValid()) {
             $property->setIdentifierInNamespace($propertyTemp->getIdentifierInNamespace());
+            if(!$propertyVersion->getNamespaceForVersion()->getTopLevelNamespace()->getIsExternalNamespace()){
+                $property->setIdentifierInURI($propertyTemp->getIdentifierInNamespace());
+            }
             $em = $this->getDoctrine()->getManager();
             $em->persist($property);
             $em->persist($propertyVersion);
+            $em->flush();
+
+            $this->addFlash('success', 'Property updated!');
+            return $this->redirectToRoute('property_edit', [
+                'id' => $property->getId(),
+                '_fragment' => 'identification'
+            ]);
+        }
+
+        $formUriIdentifier = $this->createForm(PropertyEditUriIdentifierForm::class, $property);
+        $formUriIdentifier->handleRequest($request);
+        if ($formUriIdentifier->isSubmitted() && $formUriIdentifier->isValid()) {
+            $em->persist($property);
             $em->flush();
 
             $this->addFlash('success', 'Property updated!');
@@ -508,6 +552,7 @@ class PropertyController extends Controller
             'relations' => $relations,
             'propertyForm' => $form->createView(),
             'propertyIdentifierForm' => $formIdentifier->createView(),
+            'propertyUriIdentifierForm' => $formUriIdentifier->createView(),
             'namespacesId' => $namespacesId,
             'namespacesIdFromPropertyVersion' => $namespacesIdFromPropertyVersion,
             'namespacesIdFromUser' => $namespacesIdFromUser

@@ -35,6 +35,7 @@ class Property
 
     /**
      * @ORM\Column(type="string", name="identifier_in_uri")
+     * @Assert\NotBlank(message="The identifier in URI field cannot be empty")
      */
     private $identifierInURI;
 

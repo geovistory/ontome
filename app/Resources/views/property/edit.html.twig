@@ -738,7 +738,20 @@
                     {% else %}
                         Official URI: <strong><span id="official-uri">{{ propertyVersion.namespaceForVersion.topLevelNamespace.namespaceURI }}{{ propertyVersion.property.identifierInURI }}</span></strong>
                     {% endif %}
-                    <button data-id="official-uri" class="btn btn-xs btn-link copyToClipboard" title="Copy to clipboard"><i class="fas fa-copy"></i></button><br>
+                    <button data-id="official-uri" class="btn btn-xs btn-link copyToClipboard" title="Copy to clipboard"><i class="fas fa-copy"></i></button>
+                    {% if propertyVersion.namespaceForVersion.topLevelNamespace.isExternalNamespace %}
+                    <button class="btn btn-xs btn-success" title="Edit" id="uri-identifier-edit-btn"><i class="fas fa-edit"></i></button><br>
+                    <div id="uri-identifier-form-block">
+                        {{ form_start(propertyUriIdentifierForm) }}
+                        {{ form_errors(propertyUriIdentifierForm) }}
+                        <p>{{ form_row(propertyUriIdentifierForm.identifierInURI) }}</p>
+                        <button type="submit" class="btn btn-primary" formnovalidate>Save</button>
+                        <button type="button" id="uri-identifier-edit-btn-close" class="btn">Close</button>
+                        {{ form_end(propertyUriIdentifierForm) }}
+                    </div>
+                    {% else %}
+                    <br>
+                    {% endif %}
                     OntoME URI: <strong><span id="ontome-uri">https://ontome.net/ontology/p{{ propertyVersion.property.id }}</span></strong>
                     <button data-id="ontome-uri" class="btn btn-xs btn-link copyToClipboard" title="Copy to clipboard"><i class="fas fa-copy"></i></button>
                 </p>
@@ -1669,6 +1682,20 @@
             $('#identifier-edit-btn-close').click(function(){
                 $('#identifier-details-block').show(200);
                 $('#identifier-form-block').hide(200);
+            });
+
+            {% if not propertyUriIdentifierForm.vars.valid %}
+            $('#uri-identifier-details-block').hide(0);
+            {% else %}
+            $('#uri-identifier-form-block').hide(0);
+            {% endif %}
+
+            $('#uri-identifier-edit-btn').click(function(){
+                $('#uri-identifier-form-block').show(200);
+            });
+
+            $('#uri-identifier-edit-btn-close').click(function(){
+                $('#uri-identifier-form-block').hide(200);
             });
 
             $('[data-toggle="tooltip"]').tooltip();

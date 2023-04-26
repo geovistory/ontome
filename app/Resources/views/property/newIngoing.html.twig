@@ -43,6 +43,11 @@
                     {{ form_widget(propertyForm.identifierInNamespace, { 'attr': {'style': 'display:none'} }) }}
                 {% endif %}
                 {{ form_row(propertyForm.labels) }}
+                {% if app.user.currentOngoingNamespace.topLevelNamespace.isExternalNamespace %}
+                    {{ form_row(propertyForm.identifierInUri, {
+                        help: 'This field is automatically pre-filled according to the default settings of the root namespace, but can be modified if necessary.'
+                    }) }}
+                {% endif %}
                 <div class="row well well-sm" style="margin: 19px 0;">
                     <div class="col-lg-2">
                         <p class="text-center"><label>Domain</label></p>
@@ -186,6 +191,36 @@
                 {
                     $('#js-propertyLabel').text('→ Property Label →');
                 }
+            });
+
+            $('#ingoing_property_quick_add_form_labels_0_label, #ingoing_property_quick_add_form_identifierInNamespace').on('keyup', function(){
+                var champIdentifierInNamespace = $('#ingoing_property_quick_add_form_identifierInNamespace');
+                var champIdentifierInUri = $('#ingoing_property_quick_add_form_identifierInUri');
+                var champLabel = $('#ingoing_property_quick_add_form_labels_0_label');
+
+                // Case 0: identifier
+                if(champIdentifierInUri.data('uri-param') == 0){
+                    var baseDefault = champIdentifierInUri.data('default-value');
+                    if(baseDefault == ''){
+                        baseDefault = champIdentifierInNamespace.val();
+                    }
+                    var newInput = baseDefault;
+                }
+                // Case 1: identifier + label
+                if(champIdentifierInUri.data('uri-param') == 1){
+                    var baseDefault = champIdentifierInUri.data('default-value');
+                    if(baseDefault == ''){
+                        baseDefault = champIdentifierInNamespace.val() + '_';
+                    }
+                    var newInput = baseDefault + champLabel.val().trim().replaceAll(' ', '_');
+                }
+                // Case 2: camelCase
+                if(champIdentifierInUri.data('uri-param') == 2){
+                    var newInput = champLabel.val().trim().replace(/[-_\s]+([a-zA-Z])/g, function(match, letter) {
+                        return letter.toUpperCase();
+                    });
+                }
+                champIdentifierInUri.val(newInput);
             });
         } );
     </script>

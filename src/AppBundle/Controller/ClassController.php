@@ -18,8 +18,10 @@ use AppBundle\Entity\Project;
 use AppBundle\Entity\SystemType;
 use AppBundle\Entity\TextProperty;
 use AppBundle\Form\ClassEditIdentifierForm;
+use AppBundle\Form\ClassEditUriIdentifierForm;
 use AppBundle\Form\NamespaceEditIdentifiersForm;
 use AppBundle\Form\ClassQuickAddForm;
+use AppBundle\Form\NamespaceUriParameterForm;
 use AppBundle\Form\TextPropertyForm;
 use Doctrine\DBAL\DBALException;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
@@ -152,14 +154,38 @@ class ClassController extends Controller
         $class->setCreator($this->getUser());
         $class->setModifier($this->getUser());
 
-        $form = $this->createForm(ClassQuickAddForm::class, $class);
+        $uriParam = $namespace->getTopLevelNamespace()->getUriParameter();
+        $identifierInUriPrefilled = '';
+        if(!is_null($namespace->getTopLevelNamespace()->getClassPrefix())){
+            $identifierInUriPrefilled = $namespace->getTopLevelNamespace()->getClassPrefix().($namespace->getTopLevelNamespace()->getCurrentClassNumber()+1);
+        }
+        switch ($uriParam){
+            case 0:
+                // Rien à faire
+                break;
+            case 1:
+                if(!is_null($namespace->getTopLevelNamespace()->getClassPrefix())) {
+                    $identifierInUriPrefilled = $identifierInUriPrefilled . '_';
+                }
+                break;
+            default:
+                $identifierInUriPrefilled = ''; // Pour les cas 2 et 3
+        }
+
+        $form = $this->createForm(ClassQuickAddForm::class, $class, array(
+            'uri_param' => $uriParam,
+            'identifier_in_uri_prefilled' => $identifierInUriPrefilled,
+            'is_external' => $classVersion->getNamespaceForVersion()->getTopLevelNamespace()->getIsExternalNamespace()
+        ));
 
         // only handles data on POST
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $class = $form->getData();
             $class->setIsManualIdentifier(is_null($namespace->getTopLevelNamespace()->getClassPrefix()));
-            $class->setIdentifierInURI($class->getIdentifierInNamespace()); // On attribue le même identifiant à la création en attendant un nouveau ticket (si identifier automatique c'est dans le trigger)
+            if(!$namespace->getTopLevelNamespace()->getIsExternalNamespace()){
+                $class->setIdentifierInURI($class->getIdentifierInNamespace()); // On attribue le même identifiant si namespace interne
+            }
             $class->setCreator($this->getUser());
             $class->setModifier($this->getUser());
             $class->setCreationTime(new \DateTime('now'));
@@ -408,6 +434,22 @@ class ClassController extends Controller
         $formIdentifier->handleRequest($request);
         if ($formIdentifier->isSubmitted() && $formIdentifier->isValid()) {
             $class->setIdentifierInNamespace($classTemp->getIdentifierInNamespace());
+            if(!$classVersion->getNamespaceForVersion()->getTopLevelNamespace()->getIsExternalNamespace()){
+                $class->setIdentifierInURI($class->getIdentifierInNamespace()); // On attribue le même identifiant si namespace interne
+            }
+            $em->persist($class);
+            $em->flush();
+
+            $this->addFlash('success', 'Class updated!');
+            return $this->redirectToRoute('class_edit', [
+                'id' => $class->getId(),
+                '_fragment' => 'identification'
+            ]);
+        }
+
+        $formUriIdentifier = $this->createForm(ClassEditUriIdentifierForm::class, $class);
+        $formUriIdentifier->handleRequest($request);
+        if ($formUriIdentifier->isSubmitted() && $formUriIdentifier->isValid()) {
             $em->persist($class);
             $em->flush();
 
@@ -450,7 +492,8 @@ class ClassController extends Controller
             'namespacesId' => $namespacesId,
             'namespacesIdFromClassVersion' => $namespacesIdFromClassVersion,
             'namespacesIdFromUser' => $namespacesIdFromUser,
-            'classIdentifierForm' => $formIdentifier->createView()
+            'classIdentifierForm' => $formIdentifier->createView(),
+            'classUriIdentifierForm' => $formUriIdentifier->createView()
         ));
     }
 
