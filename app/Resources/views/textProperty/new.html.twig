@@ -38,7 +38,11 @@
                     {% else %}
                     Add a{% if textProperty.systemType.standardLabel|first|lower in ['a', 'e', 'i', 'o', 'u', 'y'] %}n{% endif %} {{ textProperty.systemType.standardLabel|lower }}
                     {% endif %}
-                    for the class {{ textProperty.class.classVersionForDisplay() }}
+
+                    {# Chercher la bonne version de la classe selon la version du txtp #}
+                    {% set classVersion = textProperty.class.classVersions|filter(v => v.namespaceForVersion in textProperty.namespaceForVersion.allReferencedNamespaces)|first|default(textProperty.class.classVersionForDisplay) %}
+
+                    for the class {{ classVersion }}
                     {% if is_granted('edit', textProperty.class) and (textProperty.class.classVersions|filter(v => v.namespaceForVersion.isOngoing)|first).namespaceForVersion == textProperty.namespaceForVersion %}
                     <a href="{{ path('class_edit', {
                         id: textProperty.class.id,
@@ -64,7 +68,11 @@
                     {% else %}
                     Add a{% if textProperty.systemType.standardLabel|first|lower in ['a', 'e', 'i', 'o', 'u', 'y'] %}n{% endif %} {{ textProperty.systemType.standardLabel|lower }}
                     {% endif %}
-                    for the property {{ textProperty.property.propertyVersionForDisplay() }}
+
+                    {# Chercher la bonne version de la propriété selon la version du txtp #}
+                    {% set propertyVersion = textProperty.property.propertyVersions|filter(v => v.namespaceForVersion in textProperty.namespaceForVersion.allReferencedNamespaces)|first|default(textProperty.property.propertyVersionForDisplay) %}
+
+                    for the property {{ propertyVersion }}
                     {% if is_granted('edit', textProperty.property) and (textProperty.property.propertyVersions|filter(v => v.namespaceForVersion.isOngoing)|first).namespaceForVersion == textProperty.namespaceForVersion %}
                     <a href="{{ path('property_edit', {
                         id: textProperty.property.id,

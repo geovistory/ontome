@@ -8,11 +8,15 @@
                     {% if textProperty.class is not null %}
                         {% set route = 'class_show_with_version' %}
                         {% set namespaceFromUrlId = textProperty.namespaceForVersion.id %}
-                        {{ textProperty.systemType.standardLabel|capitalize }} for the class {{ textProperty.class.classVersionForDisplay(textProperty.namespaceForVersion) }}
+                        {# Chercher la bonne version de la classe selon la version du txtp #}
+                        {% set classVersion = textProperty.class.classVersions|filter(v => v.namespaceForVersion in textProperty.namespaceForVersion.allReferencedNamespaces)|first|default(textProperty.class.classVersionForDisplay) %}
+                        {{ textProperty.systemType.standardLabel|capitalize }} for the class {{ classVersion }}
                     {% elseif textProperty.property is not null %}
                         {% set route = 'property_show_with_version' %}
+                        {# Chercher la bonne version de la propriété selon la version du txtp #}
+                        {% set propertyVersion = textProperty.property.propertyVersions|filter(v => v.namespaceForVersion in textProperty.namespaceForVersion.allReferencedNamespaces)|first|default(textProperty.property.propertyVersionForDisplay) %}
                         {% set namespaceFromUrlId = textProperty.namespaceForVersion.id %}
-                        {{ textProperty.systemType.standardLabel|capitalize }} for the property {{ textProperty.property.propertyVersionForDisplay(textProperty.namespaceForVersion) }}
+                        {{ textProperty.systemType.standardLabel|capitalize }} for the property {{ propertyVersion }}
                     {% elseif textProperty.namespace is not null %}
                         {% set route = 'namespace_show' %}
                         {% if textProperty.object is not null %}
