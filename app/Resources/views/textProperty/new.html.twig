@@ -1,42 +1,43 @@
 {% extends 'base.html.twig' %}
 {% block body %}
+
+    {% import _self as btnMacros %}
+    {% macro backButton(_route, _id, _fragment = "", idCss = 'top') %}
+        {% if idCss == 'form' %}
+            {% set css = 'btn btn-default' %}
+        {% else %}
+            {% set css = 'pull-right btn btn-link' %}
+        {% endif %}
+
+        <a href="{{ path(_route, {id: _id, '_fragment': _fragment}) }}" class={{ css|e('html_attr') }} role="button">
+            <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
+        </a>
+    {% endmacro %}
+
 <div class="container">
     <div class="row">
         <div class="col-xs-12">
             <h2>
                 {% if textProperty.classAssociation is not null %}
+
                     New {{ textProperty.systemType.standardLabel }}
-                    <a href="{{ path('class_association_edit', {
-                        id: textProperty.classAssociation.id
-                    }) }}"
-                       class="pull-right btn btn-link"
-                       role="button">
-                        <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
-                    </a>
+                    {% set _route, _id, _fragment = 'class_association_edit', textProperty.classAssociation.id, '' %}
+
                 {% elseif textProperty.propertyAssociation is not null %}
+
                     New {{ textProperty.systemType.standardLabel }}
                     {% if is_granted('edit', textProperty.propertyAssociation) %}
-                    <a href="{{ path('property_association_edit', {
-                        id: textProperty.propertyAssociation.id
-                    }) }}"
-                       class="pull-right btn btn-link"
-                       role="button">
-                        <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
-                    </a>
+                        {% set _route, _id, _fragment = 'property_association_edit', textProperty.propertyAssociation.id, '' %}
                     {% else %}
-                    <a href="{{ path('property_association_show', {
-                        id: textProperty.propertyAssociation.id
-                    }) }}"
-                       class="pull-right btn btn-link"
-                       role="button">
-                        <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
-                    </a>
+                        {% set _route, _id, _fragment = 'property_association_show', textProperty.propertyAssociation.id, '' %}
                     {% endif %}
+
                 {% elseif textProperty.class is not null %}
+
                     {% if textProperty.systemType.id in [33,34,35] %}
-                    Add an additional note
+                        Add an additional note
                     {% else %}
-                    Add a{% if textProperty.systemType.standardLabel|first|lower in ['a', 'e', 'i', 'o', 'u', 'y'] %}n{% endif %} {{ textProperty.systemType.standardLabel|lower }}
+                        Add a{% if textProperty.systemType.standardLabel|first|lower in ['a', 'e', 'i', 'o', 'u', 'y'] %}n{% endif %} {{ textProperty.systemType.standardLabel|lower }}
                     {% endif %}
 
                     {# Chercher la bonne version de la classe selon la version du txtp #}
@@ -44,29 +45,17 @@
 
                     for the class {{ classVersion }}
                     {% if is_granted('edit', textProperty.class) and (textProperty.class.classVersions|filter(v => v.namespaceForVersion.isOngoing)|first).namespaceForVersion == textProperty.namespaceForVersion %}
-                    <a href="{{ path('class_edit', {
-                        id: textProperty.class.id,
-                        "_fragment": "definition"
-                    }) }}"
-                       class="pull-right btn btn-link"
-                       role="button">
-                        <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
-                    </a>
+                        {% set _route, _id, _fragment = 'class_edit', textProperty.class.id, 'definition' %}
                     {% else %}
-                    <a href="{{ path('class_show', {
-                        id: textProperty.class.id,
-                        "_fragment": "definition"
-                    }) }}"
-                       class="pull-right btn btn-link"
-                       role="button">
-                        <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
-                    </a>
+                        {% set _route, _id, _fragment = 'class_show', textProperty.class.id, 'definition' %}
                     {% endif %}
+
                 {% elseif textProperty.property is not null %}
-                {% if textProperty.systemType.id in [33,34,35] %}
-                    Add an additional note
+
+                    {% if textProperty.systemType.id in [33,34,35] %}
+                        Add an additional note
                     {% else %}
-                    Add a{% if textProperty.systemType.standardLabel|first|lower in ['a', 'e', 'i', 'o', 'u', 'y'] %}n{% endif %} {{ textProperty.systemType.standardLabel|lower }}
+                        Add a{% if textProperty.systemType.standardLabel|first|lower in ['a', 'e', 'i', 'o', 'u', 'y'] %}n{% endif %} {{ textProperty.systemType.standardLabel|lower }}
                     {% endif %}
 
                     {# Chercher la bonne version de la propriété selon la version du txtp #}
@@ -74,67 +63,33 @@
 
                     for the property {{ propertyVersion }}
                     {% if is_granted('edit', textProperty.property) and (textProperty.property.propertyVersions|filter(v => v.namespaceForVersion.isOngoing)|first).namespaceForVersion == textProperty.namespaceForVersion %}
-                    <a href="{{ path('property_edit', {
-                        id: textProperty.property.id,
-                        "_fragment": "definition"
-                    }) }}"
-                       class="pull-right btn btn-link"
-                       role="button">
-                        <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
-                    </a>
+                        {% set _route, _id, _fragment = 'property_edit', textProperty.property.id, 'definition' %}
                     {% else %}
-                    <a href="{{ path('property_show', {
-                        id: textProperty.property.id,
-                        "_fragment": "definition"
-                    }) }}"
-                       class="pull-right btn btn-link"
-                       role="button">
-                        <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
-                    </a>
+                        {% set _route, _id, _fragment = 'property_show', textProperty.property.id, 'definition' %}
                     {% endif %}
+
                 {% elseif textProperty.project is not null %}
+
                     Add a{% if textProperty.systemType.standardLabel|first|lower in ['a', 'e', 'i', 'o', 'u', 'y'] %}n{% endif %} {{ textProperty.systemType.standardLabel|lower }}
                     for the project {{ textProperty.project }}
                     {% if is_granted('edit', textProperty.project) %}
-                    <a href="{{ path('project_edit', {
-                        id: textProperty.project.id,
-                        "_fragment": "definition"
-                    }) }}"
-                       class="pull-right btn btn-link"
-                       role="button">
-                        <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
-                    </a>
+                        {% set _route, _id, _fragment = 'project_edit', textProperty.project.id, 'definition' %}
                     {% else %}
-                    <a href="{{ path('project_show', {
-                        id: textProperty.project.id,
-                        "_fragment": "definition"
-                    }) }}"
-                       class="pull-right btn btn-link"
-                       role="button">
-                        <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
-                    </a>
+                        {% set _route, _id, _fragment = 'project_show', textProperty.project.id, 'definition' %}
                     {% endif %}
+
                 {% elseif textProperty.profile is not null %}
+
                     Add a{% if textProperty.systemType.standardLabel|first|lower in ['a', 'e', 'i', 'o', 'u', 'y'] %}n{% endif %} {{ textProperty.systemType.standardLabel|lower }}
                     for the profile {{ textProperty.profile }}
                     {% if is_granted('edit', textProperty.profile) %}
-                    <a href="{{ path('profile_edit', {
-                        id: textProperty.profile.id
-                    }) }}#definition"
-                       class="pull-right btn btn-link"
-                       role="button">
-                        <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
-                    </a>
+                        {% set _route, _id, _fragment = 'profile_edit', textProperty.profile.id, 'definition' %}
                     {% else %}
-                    <a href="{{ path('profile_show', {
-                        id: textProperty.profile.id
-                    }) }}#definition"
-                       class="pull-right btn btn-link"
-                       role="button">
-                        <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
-                    </a>
+                        {% set _route, _id, _fragment = 'profile_show', textProperty.profile.id, 'definition' %}
                     {% endif %}
+
                 {% elseif textProperty.namespace is not null %}
+
                     {% set fragment = "definition" %}
                     {% if textProperty.systemType.id == 31 %}
                         {% set fragment = "identification" %}
@@ -142,53 +97,27 @@
                     Add a{% if textProperty.systemType.standardLabel|first|lower in ['a', 'e', 'i', 'o', 'u', 'y'] %}n{% endif %} {{ textProperty.systemType.standardLabel|lower }}
                     for the namespace {{ textProperty.namespace }}
                     {% if is_granted('edit', textProperty.namespace) %}
-                    <a href="{{ path('namespace_edit', {
-                        id: textProperty.namespace.id,
-                        "_fragment": fragment
-                    }) }}"
-                       class="pull-right btn btn-link"
-                       role="button">
-                        <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
-                    </a>
+                        {% set _route, _id, _fragment = 'namespace_edit', textProperty.namespace.id, fragment %}
                     {% else %}
-                        <a href="{{ path('namespace_show', {
-                            id: textProperty.namespace.id,
-                            "_fragment": fragment
-                        }) }}"
-                           class="pull-right btn btn-link"
-                           role="button">
-                            <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
-                        </a>
+                        {% set _route, _id, _fragment = 'namespace_show', textProperty.namespace.id, fragment %}
                     {% endif %}
+
                 {% elseif textProperty.entityAssociation is not null and app.request.attributes.get('_route') == 'text_property_inverse_new' %}
+
                     New {{ textProperty.systemType.standardLabel }}
-                    <a href="{{ path('entity_association_inverse_edit', {
-                        id: textProperty.entityAssociation.id
-                    }) }}#definition"
-                       class="pull-right btn btn-link"
-                       role="button">
-                        <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
-                    </a>
+                    {% set _route, _id, _fragment = 'entity_association_inverse_edit', textProperty.entityAssociation.id, 'definition' %}
+
                 {% elseif textProperty.entityAssociation is not null %}
+
                     New {{ textProperty.systemType.standardLabel }}
                     {% if is_granted('edit', textProperty.entityAssociation) %}
-                    <a href="{{ path('entity_association_edit', {
-                        id: textProperty.entityAssociation.id
-                    }) }}#definition"
-                       class="pull-right btn btn-link"
-                       role="button">
-                        <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
-                    </a>
+                        {% set _route, _id, _fragment = 'entity_association_edit', textProperty.entityAssociation.id, 'definition' %}
                     {% else %}
-                    <a href="{{ path('entity_association_show', {
-                        id: textProperty.entityAssociation.id
-                    }) }}#definition"
-                       class="pull-right btn btn-link"
-                       role="button">
-                        <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
-                    </a>
+                        {% set _route, _id, _fragment = 'entity_association_show', textProperty.entityAssociation.id, 'definition' %}
                     {% endif %}
+
                 {% endif %}
+                {{ btnMacros.backButton(_route, _id, _fragment) }}
             </h2>
 
             {{ form_start(textPropertyForm) }}
@@ -199,120 +128,7 @@
                 {{ form_row(textPropertyForm.languageIsoCode) }}
 
                 <button type="submit" class="btn btn-primary" formnovalidate>Save <span class="far fa-save"></span></button>
-                {% if textProperty.classAssociation is not null %}
-                    {% set mode = 'show' %}
-                    {% if is_granted('edit', textProperty.classAssociation) %}
-                        {% set mode = 'edit' %}
-                    {% endif %}
-                    <a href="{{ path('class_association_'~mode, {
-                        id: textProperty.classAssociation.id
-                    }) }}"
-                       class="btn btn-default"
-                       role="button">
-                        Back <i class="fas fa-arrow-left"></i>
-                    </a>
-                {% elseif textProperty.propertyAssociation is not null %}
-                    {% set mode = 'show' %}
-                    {% if is_granted('edit', textProperty.propertyAssociation) %}
-                        {% set mode = 'edit' %}
-                    {% endif %}
-                    <a href="{{ path('property_association_'~mode, {
-                        id: textProperty.propertyAssociation.id
-                    }) }}"
-                       class="btn btn-default"
-                       role="button">
-                        Back <i class="fas fa-arrow-left"></i>
-                    </a>
-                {% elseif textProperty.class is not null %}
-                    {% set mode = 'show' %}
-                    {% if is_granted('edit', textProperty.class) and (textProperty.class.classVersions|filter(v => v.namespaceForVersion.isOngoing)|first).namespaceForVersion == textProperty.namespaceForVersion %}
-                        {% set mode = 'edit' %}
-                    {% endif %}
-                    <a href="{{ path('class_'~mode, {
-                        id: textProperty.class.id
-                    }) }}#definition"
-                       class="btn btn-default"
-                       role="button">
-                        Back <i class="fas fa-arrow-left"></i>
-                    </a>
-                {% elseif textProperty.property is not null %}
-                    {% set mode = 'show' %}
-                    {% if is_granted('edit', textProperty.property) and (textProperty.property.propertyVersions|filter(v => v.namespaceForVersion.isOngoing)|first).namespaceForVersion == textProperty.namespaceForVersion %}
-                        {% set mode = 'edit' %}
-                    {% endif %}
-                    <a href="{{ path('property_'~mode, {
-                        id: textProperty.property.id
-                    }) }}#definition"
-                       class="btn btn-default"
-                       role="button">
-                        Back <i class="fas fa-arrow-left"></i>
-                    </a>
-                {% elseif textProperty.project is not null %}
-                    {% set mode = 'show' %}
-                    {% if is_granted('edit', textProperty.project) %}
-                        {% set mode = 'edit' %}
-                    {% endif %}
-                    <a href="{{ path('project_'~mode, {
-                        id: textProperty.project.id
-                    }) }}#description-notes"
-                       class="btn btn-default"
-                       role="button">
-                        Back <i class="fas fa-arrow-left"></i>
-                    </a>
-                {% elseif textProperty.profile is not null %}
-                    {% set mode = 'show' %}
-                    {% if is_granted('edit', textProperty.profile) %}
-                        {% set mode = 'edit' %}
-                    {% endif %}
-                    <a href="{{ path('profile_'~mode, {
-                        id: textProperty.profile.id
-                    }) }}#definition"
-                       class="btn btn-default"
-                       role="button">
-                        Back <i class="fas fa-arrow-left"></i>
-                    </a>
-                {% elseif textProperty.namespace is not null %}
-                    {% set mode = 'show' %}
-                    {% if is_granted('edit', textProperty.namespace) %}
-                        {% set mode = 'edit' %}
-                    {% endif %}
-                    {% set fragment = "definition" %}
-                    {% if textProperty.systemType.id == 31 %}
-                        {% set fragment = "identification" %}
-                    {% endif %}
-                    <a href="{{ path('namespace_'~mode, {
-                        id: textProperty.namespace.id,
-                        '_fragment': fragment
-                    }) }}"
-                       class="btn btn-default"
-                       role="button">
-                        Back <i class="fas fa-arrow-left"></i>
-                    </a>
-                {% elseif textProperty.entityAssociation is not null and app.request.attributes.get('_route') == 'text_property_inverse_new' %}
-                    {% set mode = 'show' %}
-                    {% if is_granted('edit', textProperty.entityAssociation) %}
-                        {% set mode = 'edit' %}
-                    {% endif %}
-                    <a href="{{ path('entity_association_inverse_'~mode, {
-                        id: textProperty.entityAssociation.id
-                    }) }}#definition"
-                       class="btn btn-default"
-                       role="button">
-                        Back <i class="fas fa-arrow-left"></i>
-                    </a>
-                {% elseif textProperty.entityAssociation is not null %}
-                    {% set mode = 'show' %}
-                    {% if is_granted('edit', textProperty.entityAssociation) %}
-                        {% set mode = 'edit' %}
-                    {% endif %}
-                    <a href="{{ path('entity_association_'~mode, {
-                        id: textProperty.entityAssociation.id
-                    }) }}#definition"
-                       class="btn btn-default"
-                       role="button">
-                        Back <i class="fas fa-arrow-left"></i>
-                    </a>
-                {% endif %}
+                {{ btnMacros.backButton(_route, _id, _fragment, 'form') }}
             {{ form_end(textPropertyForm) }}
         </div>
     </div>
