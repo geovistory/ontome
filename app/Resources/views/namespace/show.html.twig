@@ -1218,9 +1218,46 @@
             $('#additional-notes-table').DataTable();
             $('#notes-table').DataTable({
                 columnDefs: [
-                    { targets: [0, 2, 3, 4], width: '1%'}
+                    { targets: [1], width: '100%'}
                 ],
-                "autoWidth": false});
+                "autoWidth": false,
+                initComplete: function(){
+                    this.api().columns([2]).every(function(){
+                        var column = this;
+                        var select = $('<br><select id="notes-select" style="width:100%;"></select>')
+                            .appendTo($(column.header()))
+                            .on('change', function(){
+                                var val = $.fn.dataTable.util.escapeRegex(
+                                    $(this).val()
+                                );
+
+                                if(val == "All") {
+                                    column
+                                        .search(val ? 'note' : '', true, false)
+                                        .draw();
+                                }
+                                else{
+                                    column
+                                        .search(val ? '^'+val+'$' : '', true, false)
+                                        .draw();
+                                }
+                            });
+
+                        $(select).click(function(e){
+                            e.stopPropagation();
+                        });
+
+                        select.append('<option value="All">All</option>');
+                        column.data().unique().sort().each(function(d, j){
+                            select.append('<option value="'+d+'">'+d+'</option>');
+                        });
+                    });
+                    var existsClassesSelectedInProfile = $("#notes-select option[value='All']").length !== 0; //détermine si cette valeur est dans le select
+                    if (existsClassesSelectedInProfile) {
+                        $("#notes-select").val('All').change(); //default filter on this column
+                    }
+                }
+            });
             $('#properties-table').DataTable({
                 columnDefs: [
                     { type: 'natural-ci', targets: 2, width: '1%', className: 'text-right' },
