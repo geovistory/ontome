@@ -13,12 +13,12 @@
         <div class="row">
             <div class="col-xs-12">
                 <h2>
-                    Publish the {{ namespace }} namespace
+                    Publish the {{ namespace.standardLabel|replace({(' ongoing'):''}) }} namespace
                 </h2>
                 <div class="alert alert-warning">
                     <h4><i class="fas fa-exclamation-triangle"></i>&nbsp;Please review the URI and the label before the publication</h4>
                 </div>
-                <p><strong>Label: {{ namespace.standardLabel }}</strong></p>
+                <p><strong>Label: {{ namespace.standardLabel|replace({(' ongoing'):''}) }}</strong></p>
                 <p><strong>URI: <a>{{ namespace.displayURI }}</a></strong></p>
                 {% set txtpVersion, break = null, false %}
                 {% for textProperty in namespace.textProperties if textProperty.systemType.id == 31 %}
