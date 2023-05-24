@@ -201,6 +201,7 @@ class NamespaceRepository extends EntityRepository
                       AND aseup.fk_associate_user_to_project = (SELECT pk_associate_user_to_project 
                                                                 FROM che.associate_user_to_project 
                                                                 WHERE fk_user = :id_user AND fk_project = :id_project)
+                        --+ All references namespaces from active namespaces
                       UNION
                       SELECT ns2.* FROM che.namespace ns2
                       WHERE ns2.pk_namespace IN (SELECT fk_referenced_namespace FROM che.associates_referenced_namespace WHERE fk_namespace IN(
@@ -211,6 +212,50 @@ class NamespaceRepository extends EntityRepository
                                                                   FROM che.associate_user_to_project 
                                                                   WHERE fk_user = :id_user AND fk_project = :id_project)
                       ))
+                      ";
+
+            $query = $this->getEntityManager()->createNativeQuery($sql, $rsm);
+            $query->setParameter('id_user', $user->getId());
+            $query->setParameter('id_project', $user->getCurrentActiveProject()->getId());
+            return $query->getResult();
+        }
+    }
+
+    /**
+     * @param User $user
+     * @return OntoNamespace[]
+     */
+    public function findActiveNamespacesWithoutReferencesForUser(User $user)
+    {
+        // Cas Projet public
+        if($user->getCurrentActiveProject()->getId() == 21){
+            $publicProjectNamespaces = $this->createQueryBuilder('nsp')
+                ->join('nsp.projectAssociations', 'npa')
+                ->andWhere('npa.project = :project')
+                ->andWhere('npa.systemType = 17')
+                ->setParameter('project', $user->getCurrentActiveProject())
+                ->getQuery()
+                ->execute();
+
+            $publicProjectReferendedNamespaces = $this->createQueryBuilder('nsp')
+                ->join('nsp.referencedVersion', 'nrv')
+                ->andWhere('nrv in (:publicProjectNamespaces)')
+                ->setParameter('publicProjectNamespaces', $publicProjectNamespaces)
+                ->getQuery()
+                ->execute();
+
+            return array_merge($publicProjectNamespaces, $publicProjectReferendedNamespaces);
+        }
+        else{ // Autre cas
+            $rsm = new ResultSetMappingBuilder($this->getEntityManager());
+            $rsm->addRootEntityFromClassMetadata('AppBundle\Entity\OntoNamespace', 'ns');
+
+            $sql = "  SELECT ns.* FROM che.namespace ns
+                      LEFT JOIN che.associates_entity_to_user_project aseup ON aseup.fk_namespace = ns.pk_namespace 
+                      WHERE aseup.fk_system_type = 25
+                      AND aseup.fk_associate_user_to_project = (SELECT pk_associate_user_to_project 
+                                                                FROM che.associate_user_to_project 
+                                                                WHERE fk_user = :id_user AND fk_project = :id_project)
                       ";
 
             $query = $this->getEntityManager()->createNativeQuery($sql, $rsm);

@@ -347,7 +347,7 @@ class UserController extends Controller
 
             // Les espaces de noms actifs
             $activeNamespaces = new ArrayCollection($em->getRepository('AppBundle:OntoNamespace')
-                ->findAllActiveNamespacesForUser($user));
+                ->findActiveNamespacesWithoutReferencesForUser($user));
 
             // Et enfin, tous les namespaces, y compris le defaut et ceux des profils, qu'il faut donc retirer ci-dessous
             $additionalNamespaces = new ArrayCollection($em->getRepository('AppBundle:OntoNamespace')
