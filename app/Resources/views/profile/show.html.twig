@@ -255,7 +255,7 @@
             </div>
             {% if not profile.isRootProfile %}
                 <div id="classes" class="tab-pane fade">
-                    {% if profile.isVisible or profile.projectOfBelonging.userProjectAssociations|filter(v => v.user.id == app.user.id)|length == 1 %}
+                    {% if profile.isVisible or (app.user is not null and profile.projectOfBelonging.userProjectAssociations|filter(v => v.user.id == app.user.id)|length == 1) %}
                         <h3>
                             Associated classes
                             <span class="pull-right">
@@ -314,7 +314,7 @@
                     {% endif %}
                 </div>
                 <div id="properties" class="tab-pane fade">
-                    {% if profile.isVisible or profile.projectOfBelonging.userProjectAssociations|filter(v => v.user.id == app.user.id)|length == 1 %}
+                    {% if profile.isVisible or (app.user is not null and profile.projectOfBelonging.userProjectAssociations|filter(v => v.user.id == app.user.id)|length == 1) %}
                     <h3>
                         Associated properties
                         <span class="pull-right">
@@ -598,28 +598,32 @@
             {% if not profile.isRootProfile %}
                 <div id="namespaces" class="tab-pane fade">
                     <h3>Namespaces used by this profile</h3>
-                    {% if profile.namespaces|length == 0 %}
+                    {% if profile.isVisible or (app.user is not null and profile.projectOfBelonging.userProjectAssociations|filter(v => v.user.id == app.user.id)|length == 1) %}
+                        {% if profile.namespaces|length == 0 %}
                         <em id="empty-namespace-list-message">There is currently no namespace used by this profile.</em>
-                    {% endif %}
-                    {% for namespace in profile.namespaces %}
-                        <div>
-                            <a href="{{ path('namespace_show', {
-                                'id': namespace.id
-                            }) }}">
-                                {{ namespace }}
-                            </a>
-                        </div>
-                        {% if namespace.directReferencedNamespaces|length > 0 %}
-                            <div class="small text-muted"><strong><em>Referenced:</em></strong></div>
-                            <ul>
-                                {% for referencedNamespace in namespace.allReferencedNamespaces %}
-                                    <li class="list-unstyled" style="border-left: 3px solid darkgrey; padding-left: 5px;">
-                                        <em><a href="{{ path('namespace_show', {'id': referencedNamespace.id}) }}">{{ referencedNamespace }}</a></em>
-                                    </li>
-                                {% endfor %}
-                            </ul>
                         {% endif %}
-                    {% endfor %}
+                        {% for namespace in profile.namespaces %}
+                            <div>
+                                <a href="{{ path('namespace_show', {
+                                    'id': namespace.id
+                                }) }}">
+                                    {{ namespace }}
+                                </a>
+                            </div>
+                            {% if namespace.directReferencedNamespaces|length > 0 %}
+                                <div class="small text-muted"><strong><em>Referenced:</em></strong></div>
+                                <ul>
+                                    {% for referencedNamespace in namespace.allReferencedNamespaces %}
+                                        <li class="list-unstyled" style="border-left: 3px solid darkgrey; padding-left: 5px;">
+                                            <em><a href="{{ path('namespace_show', {'id': referencedNamespace.id}) }}">{{ referencedNamespace }}</a></em>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        {% endfor %}
+                    {% else %}
+                        <p><i class="fas fa-eye-slash"></i> The selected namespaces in this ongoing profile are currently only visible to members of the <a href="{{ path('project_show', {'id': profile.projectOfBelonging.id}) }}">{{ profile.projectOfBelonging }}</a> project.</p>
+                    {% endif %}
                 </div>
                 <div id="graph" class="tab-pane fade">
                     <h3>Graph</h3>

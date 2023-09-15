@@ -494,8 +494,8 @@
 
 
                 {% if namespace.isOngoing %}
-                    <p><input type="checkbox" id="make-visible" data-url="{{ path('namespace_make_visible', {'id': namespace.id }) }}" {% if namespace.isVisible %}checked="checked" disabled{% endif %} /> Make the classes and properties of this namespace visible</p>
-                    <!-- Once the classes and properties of an ongoing namespace are made visible, it's not possible to hide them again or to create new ones that would be hidden. Do you wish to proceed? -->
+                    <p><input type="checkbox" id="make-visible" data-url="{{ path('namespace_make_visible', {'id': namespace.id }) }}" {% if namespace.isVisible %}checked="checked" disabled{% endif %} /> Make the classes and properties of this namespace visible to everyone</p>
+                    <!-- Once the classes and properties of an ongoing namespace are made visible to everyone, it's not possible to hide them again or to create new ones that would be hidden. Do you wish to proceed? -->
                 {% endif %}
                 {% if namespace.isTopLevelNamespace == false %}
                     {% if namespace.isOngoing %}
@@ -1674,7 +1674,7 @@
                 var cbx = $(this);
                 if(this.checked){
                     bootbox.confirm({
-                        message: "Once the classes and properties of an ongoing namespace are made visible, it's not possible to hide them again or to create new ones that would be hidden. Do you wish to proceed?",
+                        message: "Once the classes and properties of an ongoing namespace are made visible to everyone, it's not possible to hide them again or to create new ones that would be hidden. Do you wish to proceed?",
                         buttons: {
                             confirm: {
                                 label: 'Yes',
