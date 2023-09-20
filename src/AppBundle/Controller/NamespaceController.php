@@ -260,8 +260,13 @@ class NamespaceController  extends Controller
 
         $em = $this->getDoctrine()->getManager();
 
-        $rootNamespaces = $em->getRepository('AppBundle:OntoNamespace')
+        $rootNamespacesBrut = $em->getRepository('AppBundle:OntoNamespace')
             ->findAllNonAssociatedToNamespaceByNamespaceId($namespace);
+
+        $rootNamespaces = new ArrayCollection();
+        foreach($rootNamespacesBrut as $rootNamespace){
+            $rootNamespaces->add($em->getRepository('AppBundle:OntoNamespace')->find($rootNamespace['id']));
+        }
 
         $textProperties = $em
             ->getRepository('AppBundle:TextProperty')
