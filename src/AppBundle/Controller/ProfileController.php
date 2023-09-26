@@ -249,8 +249,13 @@ class ProfileController  extends Controller
 
         //$properties = $em->getRepository('AppBundle:Property')->findPropertiesByProfileId($profile);
 
-        $rootNamespaces = $em->getRepository('AppBundle:OntoNamespace')
+        $rootNamespacesBrut = $em->getRepository('AppBundle:OntoNamespace')
             ->findAllNonAssociatedToProfileByProfileId($profile);
+
+        $rootNamespaces = new ArrayCollection();
+        foreach($rootNamespacesBrut as $rootNamespace){
+            $rootNamespaces->add($em->getRepository('AppBundle:OntoNamespace')->find($rootNamespace['id']));
+        }
 
         $profileAssociations = $em->getRepository('AppBundle:ProfileAssociation')
             ->findBy(array('profile' => $profile));
@@ -291,6 +296,8 @@ class ProfileController  extends Controller
         $profile->setIsForcedPublication(false);
         $profile->setStartDate(new \DateTime('now'));
         $profile->setWasClosedAt(new \DateTime('now'));
+        $stateOfVisibility = $profile->getIsVisible();
+        $profile->setIsVisible(true);
 
         $em->persist($profile);
         $em->flush();
@@ -318,6 +325,7 @@ class ProfileController  extends Controller
         $newProfile->setModifier($this->getUser());
         $newProfile->setCreationTime(new \DateTime('now'));
         $newProfile->setModificationTime(new \DateTime('now'));
+        $newProfile->setIsVisible($stateOfVisibility);
 
         foreach ($profile->getTextProperties() as $textProperty){
             $newTextProperty = clone $textProperty;

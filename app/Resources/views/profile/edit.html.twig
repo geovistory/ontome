@@ -824,7 +824,9 @@
                                 <select id="select-root-namespace">
                                     <option></option> <!-- For placeholder -->
                                     {% for rootNamespace in rootNamespaces %}
-                                        <option value="{{ rootNamespace.id }}">{{ rootNamespace.standardLabel }}</option>
+                                        {% if rootNamespace.childVersions|length > 1 or (rootNamespace.childVersions|length == 1 and ((rootNamespace.childVersions|first).isVisible) or rootNamespace.projectForTopLevelNamespace.userProjectAssociations|filter(v => v.user.id == app.user.id)|length == 1) %}
+                                        <option value="{{ rootNamespace.id }}">{{ rootNamespace.standardLabel }}
+                                        {% endif %}
                                     {% endfor %}
                                 </select>
                             </div>
