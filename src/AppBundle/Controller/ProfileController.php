@@ -1518,11 +1518,16 @@ class ProfileController  extends Controller
      */
     public function makeVisibleAction(Profile $profile)
     {
-        $profile->setIsVisible(true);
-        $em = $this->getDoctrine()->getManager();
-        $em->persist($profile);
-        $em->flush();
-
+        $this->denyAccessUnlessGranted('edit', $profile);
+        try {
+            $profile->setIsVisible(true);
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($profile);
+            $em->flush();
+        }
+        catch (\Exception $e) {
+            return new JsonResponse(null, 500, array('content-type:application/problem+json'));
+        }
         return new JsonResponse(null, 204);
     }
 }

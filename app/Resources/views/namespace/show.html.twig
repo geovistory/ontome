@@ -503,7 +503,8 @@
                 {% else %}
                     <!--Deprecated version-->
                     {% set rootNamespace = namespace.topLevelNamespace %}
-                    {% set ongoingNamespace = rootNamespace.childVersions|filter(v => v.isOngoingl)|first %}
+                    {% set ongoingNamespace = rootNamespace.childVersions|filter(v => v.isOngoing)|first %}
+                    {% set deprecatedNamespace = rootNamespace.childVersions|filter(v => v.deprecatedAt is not null)|first %}
                     <p>{{ namespace.standardLabel}} is a <b>deprecated namespace</b>.</p>
                     {% set ns1 = [rootNamespace, labelRoot] %}
                     {% set ns2 = [deprecatedNamespace, labelDeprecated] %}

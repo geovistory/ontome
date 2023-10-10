@@ -636,7 +636,7 @@ class Profile
     }
 
     /**
-     * @return mixed
+     * @return bool
      */
     public function getIsVisible()
     {

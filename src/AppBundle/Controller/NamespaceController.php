@@ -1711,11 +1711,16 @@ class NamespaceController  extends Controller
      */
     public function makeVisibleAction(OntoNamespace $namespace)
     {
-        $namespace->setIsVisible(true);
-        $em = $this->getDoctrine()->getManager();
-        $em->persist($namespace);
-        $em->flush();
-
+        $this->denyAccessUnlessGranted('edit', $namespace);
+        try {
+            $namespace->setIsVisible(true);
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($namespace);
+            $em->flush();
+        }
+        catch (\Exception $e) {
+            return new JsonResponse(null, 500, array('content-type:application/problem+json'));
+        }
         return new JsonResponse(null, 204);
     }
 }
