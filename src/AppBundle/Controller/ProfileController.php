@@ -249,8 +249,13 @@ class ProfileController  extends Controller
 
         //$properties = $em->getRepository('AppBundle:Property')->findPropertiesByProfileId($profile);
 
-        $rootNamespaces = $em->getRepository('AppBundle:OntoNamespace')
+        $rootNamespacesBrut = $em->getRepository('AppBundle:OntoNamespace')
             ->findAllNonAssociatedToProfileByProfileId($profile);
+
+        $rootNamespaces = new ArrayCollection();
+        foreach($rootNamespacesBrut as $rootNamespace){
+            $rootNamespaces->add($em->getRepository('AppBundle:OntoNamespace')->find($rootNamespace['id']));
+        }
 
         $profileAssociations = $em->getRepository('AppBundle:ProfileAssociation')
             ->findBy(array('profile' => $profile));
@@ -291,6 +296,8 @@ class ProfileController  extends Controller
         $profile->setIsForcedPublication(false);
         $profile->setStartDate(new \DateTime('now'));
         $profile->setWasClosedAt(new \DateTime('now'));
+        $stateOfVisibility = $profile->getIsVisible();
+        $profile->setIsVisible(true);
 
         $em->persist($profile);
         $em->flush();
@@ -318,6 +325,7 @@ class ProfileController  extends Controller
         $newProfile->setModifier($this->getUser());
         $newProfile->setCreationTime(new \DateTime('now'));
         $newProfile->setModificationTime(new \DateTime('now'));
+        $newProfile->setIsVisible($stateOfVisibility);
 
         foreach ($profile->getTextProperties() as $textProperty){
             $newTextProperty = clone $textProperty;
@@ -1501,5 +1509,25 @@ class ProfileController  extends Controller
             'formNewExample' => $formNewExample->createView(),
             'formsExample' => $formsExampleViews
         ));
+    }
+
+    /**
+     * @Route("/profile/{id}/makevisible", name="profile_make_visible", requirements={"id"="^([0-9]+)|(profileID){1}$"})
+     * @param Profile $profile
+     * @return JsonResponse
+     */
+    public function makeVisibleAction(Profile $profile)
+    {
+        $this->denyAccessUnlessGranted('edit', $profile);
+        try {
+            $profile->setIsVisible(true);
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($profile);
+            $em->flush();
+        }
+        catch (\Exception $e) {
+            return new JsonResponse(null, 500, array('content-type:application/problem+json'));
+        }
+        return new JsonResponse(null, 204);
     }
 }

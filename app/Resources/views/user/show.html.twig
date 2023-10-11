@@ -95,6 +95,8 @@
                                         <span class="label label-warning">Manager</span>
                                     {% elseif userProjectAssociation.permission == 3 %}
                                         <span class="label label-success">Member</span>
+                                    {% elseif userProjectAssociation.permission == 4 %}
+                                        <span class="label label-info">Observer</span>
                                     {% endif %}
                                 </td>
                                 <td>{{ userProjectAssociation.project.modificationTime|date('Y-m-d') }}</td>
@@ -180,7 +182,9 @@
                             <select id="select-root-namespace">
                                 <option id="placeholder"></option>
                             {% for rootNamespace in rootNamespaces %}
+                                {% if rootNamespace.childVersions|length > 1 or (rootNamespace.childVersions|length == 1 and ((rootNamespace.childVersions|first).isVisible) or rootNamespace.projectForTopLevelNamespace.userProjectAssociations|filter(v => v.user.id == app.user.id)|length == 1) %}
                                 <option value="{{ rootNamespace.id }}">{{ rootNamespace.standardLabel }}</option>
+                                {% endif %}
                             {% endfor %}
                             </select>
                             <div id="loading-icon">
