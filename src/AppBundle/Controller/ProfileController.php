@@ -313,7 +313,6 @@ class ProfileController  extends Controller
         //Duplication of the published profile to create a new ongoing one
         $newProfile = new Profile();
 
-        $newProfile->setStandardLabel($profile->getStandardLabel().' ongoing');
         $newProfile->setIsOngoing(true);
         $newProfile->setIsForcedPublication(false);
         $newProfile->setVersion($profile->getVersion()+1);
@@ -334,7 +333,7 @@ class ProfileController  extends Controller
 
         foreach ($profile->getLabels() as $label){
             $newLabel = clone $label;
-            $newLabel->setLabel($profile->getStandardLabel().' ongoing');
+            $newLabel->setLabel(str_replace('ongoing', '', $profile->getStandardLabel()).' ongoing'); // On évite les "ongoing" en trop
             $newProfile->addLabel($newLabel);
         }
 
