@@ -193,6 +193,10 @@
                 }
             });
 
+            if($('#ingoing_property_quick_add_form_identifierInUri').data('uri-param') < 3){
+                $('#ingoing_property_quick_add_form_identifierInUri').prop('readonly', true);
+            }
+
             $('#ingoing_property_quick_add_form_labels_0_label, #ingoing_property_quick_add_form_identifierInNamespace').on('keyup', function(){
                 var champIdentifierInNamespace = $('#ingoing_property_quick_add_form_identifierInNamespace');
                 var champIdentifierInUri = $('#ingoing_property_quick_add_form_identifierInUri');

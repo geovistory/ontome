@@ -739,7 +739,7 @@
                         Official URI: <strong><span id="official-uri">{{ propertyVersion.namespaceForVersion.topLevelNamespace.namespaceURI }}{{ propertyVersion.property.identifierInURI }}</span></strong>
                     {% endif %}
                     <button data-id="official-uri" class="btn btn-xs btn-link copyToClipboard" title="Copy to clipboard"><i class="fas fa-copy"></i></button>
-                    {% if propertyVersion.namespaceForVersion.topLevelNamespace.isExternalNamespace %}
+                    {% if propertyVersion.namespaceForVersion.topLevelNamespace.isExternalNamespace and propertyVersion.namespaceForVersion.topLevelNamespace.uriParameter == 3 %}
                     <button class="btn btn-xs btn-success" title="Edit" id="uri-identifier-edit-btn"><i class="fas fa-edit"></i></button><br>
                     <div id="uri-identifier-form-block">
                         {{ form_start(propertyUriIdentifierForm) }}
