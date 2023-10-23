@@ -899,7 +899,7 @@
                                     {{ classVersion.standardLabel }}
                                 </a>
                             </td>
-                            <td>{{ classVersion.class.modificationTime|date('Y-m-d') }}</td>
+                            <td>{{ classVersion.modificationTime|date('Y-m-d') }}</td>
                             {% if namespace.isOngoing %}
                                 <td>
                                     {% if classVersion.validationStatus is null %}
