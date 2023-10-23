@@ -26,7 +26,6 @@ class NamespaceQuickAddForm extends AbstractType
     {
         $builder
             ->add('isExternalNamespace', CheckboxType::class, [
-                'required' => true,
                 'label' => 'External namespace',
             ])
             ->add('namespaceURI', UrlType::class, array(
@@ -50,7 +49,6 @@ class NamespaceQuickAddForm extends AbstractType
             ))
             ->add('automaticIdentifierManagement', CheckboxType::class, [
                 'mapped' => false,
-                'required' => true,
                 'data' => true,
                 'label' => 'Automatic identifier management',
             ])

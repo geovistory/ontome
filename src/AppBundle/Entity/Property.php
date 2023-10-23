@@ -333,7 +333,38 @@ class Property
      */
     public function getLabels()
     {
-        return $this->labels;
+        $labels = $this->labels->toArray();
+
+        // Fonction de comparaison personnalisée pour trier les labels
+        usort($labels, function($a, $b) {
+            $order = ['en', 'fr'];
+
+            $aIsoCode = $a->getLanguageIsoCode();
+            $bIsoCode = $b->getLanguageIsoCode();
+
+            // Si les deux codes sont dans l'ordre personnalisé, comparez-les
+            if (in_array($aIsoCode, $order) && in_array($bIsoCode, $order)) {
+                return array_search($aIsoCode, $order) - array_search($bIsoCode, $order);
+            }
+
+            // Si l'un des codes est dans l'ordre personnalisé, placez-le en premier
+            if (in_array($aIsoCode, $order)) {
+                return -1;
+            }
+            if (in_array($bIsoCode, $order)) {
+                return 1;
+            }
+
+            // Les deux codes ne sont pas dans l'ordre personnalisé, ne modifiez pas l'ordre
+            return 0;
+        });
+
+        $acLabels = new ArrayCollection();
+        foreach ($labels as $label){
+            $acLabels->add($label);
+        }
+
+        return $acLabels;
     }
 
     /**
@@ -662,5 +693,36 @@ class Property
     public function setIsRecursive($isRecursive)
     {
         $this->isRecursive = $isRecursive;
+    }
+
+    public function updateIdentifierInUri(){
+        function deleteAccents($str) {
+            $search = array('À', 'Á', 'Â', 'Ã', 'Ä', 'Å', 'à', 'á', 'â', 'ã', 'ä', 'å', 'Ò', 'Ó', 'Ô', 'Õ', 'Ö', 'Ø', 'ò', 'ó', 'ô', 'õ', 'ö', 'ø', 'È', 'É', 'Ê', 'Ë', 'è', 'é', 'ê', 'ë', 'Ç', 'ç', 'Ì', 'Í', 'Î', 'Ï', 'ì', 'í', 'î', 'ï', 'Ù', 'Ú', 'Û', 'Ü', 'ù', 'ú', 'û', 'ü', 'ÿ', 'Ñ', 'ñ');
+            $replace = array('A', 'A', 'A', 'A', 'A', 'A', 'a', 'a', 'a', 'a', 'a', 'a', 'O', 'O', 'O', 'O', 'O', 'O', 'o', 'o', 'o', 'o', 'o', 'o', 'E', 'E', 'E', 'E', 'e', 'e', 'e', 'e', 'C', 'c', 'I', 'I', 'I', 'I', 'i', 'i', 'i', 'i', 'U', 'U', 'U', 'U', 'u', 'u', 'u', 'u', 'y', 'N', 'n');
+
+            return strtr($str, array_combine($search, $replace));
+        }
+        $uriParameter = $this->getTopLevelNamespace()->getUriParameter();
+        switch ($uriParameter){
+            case 0: //Entity identifier
+                $this->setIdentifierInURI($this->getIdentifierInNamespace());
+                break;
+            case 1: //Entity identifier + label
+                $label = $this->getLabels()->filter(function($v){return $v->getIsStandardLabelForLanguage();})->first();
+                $label = deleteAccents($label);
+                $label = str_replace(array('"', "'"), '', $label);
+                $newIdentifierInUri = str_replace(' ', '_', $this->getIdentifierInNamespace() . ' ' . $label);
+                $this->setIdentifierInURI($newIdentifierInUri);
+                break;
+            case 2: //Camel Case
+                $label = $this->getLabels()->filter(function($v){return $v->getIsStandardLabelForLanguage();})->first();
+                $label = deleteAccents($label);
+                $label = str_replace(array('"', "'"), '', $label);
+                $words = preg_split('/[^a-zA-Z0-9]+/', $label);
+                $camelCaseString = implode('', array_map('ucfirst', $words));
+                $newIdentifierInUri = lcfirst($camelCaseString);
+                $this->setIdentifierInURI($newIdentifierInUri);
+                break;
+        }
     }
 }

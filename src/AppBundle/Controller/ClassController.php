@@ -437,6 +437,10 @@ class ClassController extends Controller
             if(!$classVersion->getNamespaceForVersion()->getTopLevelNamespace()->getIsExternalNamespace()){
                 $class->setIdentifierInURI($class->getIdentifierInNamespace()); // On attribue le même identifiant si namespace interne
             }
+            else{
+                $class->updateIdentifierInUri();
+            }
+
             $em->persist($class);
             $em->flush();
 

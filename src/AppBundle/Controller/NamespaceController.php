@@ -121,6 +121,7 @@ class NamespaceController  extends Controller
 
         if ($form->isSubmitted() && $form->isValid()) {
             $namespace = $form->getData();
+            $namespace->setUriParameter(0);
             $namespace->setProjectForTopLevelNamespace($project);
             $namespace->setTopLevelNamespace($namespace);
             $namespace->setCreator($this->getUser());
@@ -329,6 +330,17 @@ class NamespaceController  extends Controller
             $formUriParameter->handleRequest($request);
             if ($formUriParameter->isSubmitted() && $formUriParameter->isValid()) {
                 $em = $this->getDoctrine()->getManager();
+                $ongoingNamespace = $namespace->getChildVersions()->filter(function($v){return $v->getIsOngoing();})->first();
+                if(!is_null($ongoingNamespace)){
+                    foreach ($ongoingNamespace->getClasses() as $class){
+                        $class->updateIdentifierInUri();
+                        $em->persist($class);
+                    }
+                    foreach ($ongoingNamespace->getProperties() as $property){
+                        $property->updateIdentifierInUri();
+                        $em->persist($property);
+                    }
+                }
                 $em->persist($namespace);
                 $em->flush();
 

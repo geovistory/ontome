@@ -504,6 +504,9 @@ class PropertyController extends Controller
             if(!$propertyVersion->getNamespaceForVersion()->getTopLevelNamespace()->getIsExternalNamespace()){
                 $property->setIdentifierInURI($propertyTemp->getIdentifierInNamespace());
             }
+            else{
+                $property->updateIdentifierInUri();
+            }
             $em = $this->getDoctrine()->getManager();
             $em->persist($property);
             $em->persist($propertyVersion);

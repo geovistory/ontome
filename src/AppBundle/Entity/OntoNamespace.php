@@ -190,11 +190,11 @@ class OntoNamespace
     private $rootNamespacePrefix;
 
     /**
-     * @Assert\NotNull()
      * @ORM\Column(type="integer")
      */
     private $uriParameter;
     /*
+     * Pour les namespaces root (les namespaces versions n'auront pas besoin de champ = null)
      * 0: Entity identifier
      * 1: Entity identifier + label
      * 2: camelCase
@@ -1034,7 +1034,7 @@ class OntoNamespace
     }
 
     /**
-     * @return mixed
+     * @return integer
      */
     public function getUriParameter()
     {
@@ -1042,7 +1042,7 @@ class OntoNamespace
     }
 
     /**
-     * @param mixed $uriParameter
+     * @param integer $uriParameter
      */
     public function setUriParameter($uriParameter)
     {
