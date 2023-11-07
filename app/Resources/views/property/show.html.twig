@@ -633,7 +633,7 @@
                     </tbody>
                 </table>
 
-                {% if app.user.currentOngoingNamespace is not null %}
+                {% if app.user is not null and app.user.currentOngoingNamespace is not null %}
                     <div class="pull-right add-div">
                         <a href="{{ path('text_property_new', {'type': 'internal-note', 'object': 'property', 'objectId': propertyVersion.property.id })}}"
                            class="btn btn-primary pull-right">

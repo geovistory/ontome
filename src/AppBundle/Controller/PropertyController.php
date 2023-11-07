@@ -262,6 +262,7 @@ class PropertyController extends Controller
     /**
      * @Route("/property/{id}", name="property_show", requirements={"id"="^([0-9]+)|(propertyID){1}$"})
      * @Route("/ontology/p{id}", name="property_uri_show", requirements={"id"="^([0-9]+)|(propertyID){1}$"})
+     * @Route("/ontology/p{id}i", name="property_uri_inverse_show", requirements={"id"="^([0-9]+)|(propertyID){1}$"})
      * @Route("/property/{id}/namespace/{namespaceFromUrlId}", name="property_show_with_version", requirements={"id"="^([0-9]+)|(propertyID){1}$", "namespaceFromUrlId"="^([0-9]+)|(namespaceID){1}$"})
      * @param Property $property
      * @param int|null $namespaceFromUrlId
