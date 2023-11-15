@@ -345,8 +345,18 @@ class PropertyController extends Controller
         // Créer un array de ns à ajouter (ne pas rajouter ceux dont le root est déjà utilisé
         $nsIdFromUser = array();
         foreach ($namespacesIdFromUser as $namespaceIdFromUser){
-            $nsRootUser = $em->getRepository('AppBundle:OntoNamespace')->findOneBy(array('id' => $namespaceIdFromUser))->getTopLevelNamespace();
-            if(!in_array($nsRootUser, $rootNamespacesFromClassVersion)){
+            $isCompatible = true;
+            $nsUser = $em->getRepository('AppBundle:OntoNamespace')->findOneBy(array('id' => $namespaceIdFromUser));
+            $nsRootUser = $nsUser->getTopLevelNamespace();
+            if(in_array($nsRootUser, $rootNamespacesFromClassVersion) and !in_array($nsUser->getId(), $namespacesIdFromPropertyVersion)){
+                $isCompatible = false;
+            }
+            foreach ($nsUser->getAllReferencedNamespaces() as $referencedNamespace){
+                if(in_array($referencedNamespace->getTopLevelNamespace(), $rootNamespacesFromClassVersion) and !in_array($referencedNamespace->getId(), $namespacesIdFromPropertyVersion)){
+                    $isCompatible = false;
+                }
+            }
+            if($isCompatible){
                 $nsIdFromUser[] = $namespaceIdFromUser;
             }
         }
