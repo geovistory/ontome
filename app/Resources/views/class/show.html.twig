@@ -42,7 +42,7 @@
                         {% endif %}
                     </ul>
                 </div>
-                {% if is_granted('edit', classVersion) and (classVersion.validationStatus is null or classVersion.validationStatus.id == 27) %}
+                {% if is_granted('edit', classVersion) and (classVersion.validationStatus is null or classVersion.validationStatus.id == 27 or classVersion.validationStatus.id == 37) %}
                 <p class="inline-block">
                     <a href="{{ path('class_edit', {
                         'id': classVersion.class.id

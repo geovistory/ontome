@@ -921,6 +921,10 @@
                                         <span class="label label-warning">
                                     {{ classVersion.validationStatus }}
                                 </span>
+                                    {% elseif classVersion.validationStatus.id == 37  %}
+                                        <span class="label label-warning2">
+                                    {{ classVersion.validationStatus }}
+                                </span>
                                     {% endif %}
                                 </td>
                             {% endif %}

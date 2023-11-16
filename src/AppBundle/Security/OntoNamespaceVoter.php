@@ -226,7 +226,7 @@ class OntoNamespaceVoter extends Voter
             if($managedNamespace->getIsOngoing()){
                 $activeNamespace=$managedNamespace;
             }
-            elseif($activeNamespace->getIsOngoing() &&
+            elseif(!$activeNamespace->getIsOngoing() &&
                 $activeNamespace->getPublishedAt()<$managedNamespace->getPublishedAt()){
                 $activeNamespace=$managedNamespace;
             }
