@@ -8,6 +8,7 @@
 
 namespace AppBundle\Entity;
 
+use AppBundle\Utils\StringUtils;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -696,12 +697,6 @@ class Property
     }
 
     public function updateIdentifierInUri(){
-        function deleteAccents($str) {
-            $search = array('À', 'Á', 'Â', 'Ã', 'Ä', 'Å', 'à', 'á', 'â', 'ã', 'ä', 'å', 'Ò', 'Ó', 'Ô', 'Õ', 'Ö', 'Ø', 'ò', 'ó', 'ô', 'õ', 'ö', 'ø', 'È', 'É', 'Ê', 'Ë', 'è', 'é', 'ê', 'ë', 'Ç', 'ç', 'Ì', 'Í', 'Î', 'Ï', 'ì', 'í', 'î', 'ï', 'Ù', 'Ú', 'Û', 'Ü', 'ù', 'ú', 'û', 'ü', 'ÿ', 'Ñ', 'ñ');
-            $replace = array('A', 'A', 'A', 'A', 'A', 'A', 'a', 'a', 'a', 'a', 'a', 'a', 'O', 'O', 'O', 'O', 'O', 'O', 'o', 'o', 'o', 'o', 'o', 'o', 'E', 'E', 'E', 'E', 'e', 'e', 'e', 'e', 'C', 'c', 'I', 'I', 'I', 'I', 'i', 'i', 'i', 'i', 'U', 'U', 'U', 'U', 'u', 'u', 'u', 'u', 'y', 'N', 'n');
-
-            return strtr($str, array_combine($search, $replace));
-        }
         $uriParameter = $this->getTopLevelNamespace()->getUriParameter();
         switch ($uriParameter){
             case 0: //Entity identifier
@@ -709,14 +704,14 @@ class Property
                 break;
             case 1: //Entity identifier + label
                 $label = $this->getLabels()->filter(function($v){return $v->getIsStandardLabelForLanguage();})->first();
-                $label = deleteAccents($label);
+                $label = StringUtils::deleteAccents($label);
                 $label = str_replace(array('"', "'"), '', $label);
                 $newIdentifierInUri = str_replace(' ', '_', $this->getIdentifierInNamespace() . ' ' . $label);
                 $this->setIdentifierInURI($newIdentifierInUri);
                 break;
             case 2: //Camel Case
                 $label = $this->getLabels()->filter(function($v){return $v->getIsStandardLabelForLanguage();})->first();
-                $label = deleteAccents($label);
+                $label = StringUtils::deleteAccents($label);
                 $label = str_replace(array('"', "'"), '', $label);
                 $words = preg_split('/[^a-zA-Z0-9]+/', $label);
                 $camelCaseString = implode('', array_map('ucfirst', $words));
