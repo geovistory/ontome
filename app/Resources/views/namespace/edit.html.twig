@@ -867,7 +867,28 @@
                         <a class="btn" id="btn-toggle-identifiers-disable-enable"></a>
                     </p>
                     {{ form_end(namespaceIdentifiersForm) }}
-                </div>
+
+                {% if namespace.topLevelNamespace.isExternalNamespace %}
+                    <h3>Identifiers in URI</h3>
+                    {{ form_start(namespaceUriParameterForm) }}
+                    {{ form_errors(namespaceUriParameterForm) }}
+                    <table id="table-identifiers-uri" class="table-bordered table-condensed" style="margin-bottom: 15px;">
+                        <tr>
+                            <th>URI parameter</th>
+                            <th>Class URI example</th>
+                            <th>Property URI example</th>
+                        </tr>
+                        <tr>
+                            <td class="text-nowrap">{{ form_row(namespaceUriParameterForm.uriParameter) }}</td>
+                            <td>{{ namespace.displayURI }}<span id="classExample">{{ namespace.uriParameterStrings.classExample }}</span></td>
+                            <td>{{ namespace.displayURI }}<span id="propertyExample">{{ namespace.uriParameterStrings.propertyExample }}</span></td>
+                        </tr>
+                    </table>
+                    <p><button type="submit" class="btn btn-primary" formnovalidate><i class="fas fa-save"></i> Save</button></p>
+                    {{ form_end(namespaceUriParameterForm) }}
+                    <p>So that no entity is without a URI, the URIs will be automatically pre-filled with the entity identifier, but can be freely modified.</p>
+                {% endif %}
+            </div>
             {% endif %}
             <div id="classes" class="tab-pane fade">
                 {% if is_granted('full_edit', namespace) and app.user.currentOngoingNamespace is not null and namespace.id == app.user.currentOngoingNamespace.id %}
@@ -2106,6 +2127,30 @@
                     window.URL.revokeObjectURL(url);
                 }
             });
+        });
+
+        $('#namespace_uri_parameter_form_uriParameter').on('change', function(){
+            switch ($('#namespace_uri_parameter_form_uriParameter').val()){
+                case '0':
+                    $('#classExample').text('C1');
+                    $('#propertyExample').text('P1');
+                    break;
+                case '1':
+                    $('#classExample').text('C1_Class_Label');
+                    $('#propertyExample').text('P1_Property_Label');
+                    break;
+                case '2':
+                    $('#classExample').text('classLabel');
+                    $('#propertyExample').text('propertyLabel');
+                    break;
+                case '3':
+                    $('#classExample').text('user_choice');
+                    $('#propertyExample').text('user_choice');
+                    break;
+                default:
+                    $('#classExample').text('Error');
+                    $('#propertyExample').text('Error');
+            }
         });
     </script>
     {% include 'comment/js-bock.html.twig'  with {'objectType': 'namespace', 'objectId' : namespace.id  } %}

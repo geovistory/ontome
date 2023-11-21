@@ -16,7 +16,6 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * Class OntoNamespace
  * @ORM\Entity(repositoryClass="AppBundle\Repository\NamespaceRepository")
- * @UniqueEntity("namespaceURI", message="A namespace with the same URI already exists. Please chose another one for your namespace.")
  * @ORM\Table(schema="che", name="namespace")
  */
 class OntoNamespace
@@ -189,6 +188,18 @@ class OntoNamespace
      * )
      */
     private $rootNamespacePrefix;
+
+    /**
+     * @ORM\Column(type="integer")
+     */
+    private $uriParameter;
+    /*
+     * Pour les namespaces root (les namespaces versions n'auront pas besoin de champ = null)
+     * 0: Entity identifier
+     * 1: Entity identifier + label
+     * 2: camelCase
+     * 3: No parameter
+     */
 
     /**
      * @Assert\Valid()
@@ -1023,6 +1034,22 @@ class OntoNamespace
     }
 
     /**
+     * @return integer
+     */
+    public function getUriParameter()
+    {
+        return $this->uriParameter;
+    }
+
+    /**
+     * @param integer $uriParameter
+     */
+    public function setUriParameter($uriParameter)
+    {
+        $this->uriParameter = $uriParameter;
+    }
+
+    /**
      * @return array
      * Retourne un tableau des id de ces namespaces suivants : ce namespace (this) et ses namespaces référencés, parents y compris.
      */
@@ -1065,5 +1092,30 @@ class OntoNamespace
 
         // array_unique évite les doublons - utile si on veut compter combien de ns différents
         return array_values(array_unique($arrayIds));
+    }
+
+    /**
+     * @return Array
+     * Retourne un string pour indiquer le paramètre
+     */
+    public function getUriParameterStrings(){
+            switch ($this->getUriParameter()){
+                case 0:
+                    $arrStr = array('label' => 'Entity identifier', 'classExample' => 'C1', 'propertyExample' => 'P1');
+                    break;
+                case 1:
+                    $arrStr = array('label' => 'Entity identifier + label', 'classExample' => 'C1_Class_Label', 'propertyExample' => 'P1_Property_Label');
+                    break;
+                case 2:
+                    $arrStr = array('label' => 'camelCase label', 'classExample' => 'classLabel', 'propertyExample' => 'propertyLabel');
+                    break;
+                case 3:
+                    $arrStr = array('label' => 'No parameter', 'classExample' => 'user_choice', 'propertyExample' => 'user_choice');
+                    break;
+                default:
+                    $arrStr = array('label' => 'Unknown parameter', 'classExample' => 'Unknown parameter', 'propertyExample' => 'Unknown parameter');
+                    break;
+            }
+            return $arrStr;
     }
 }

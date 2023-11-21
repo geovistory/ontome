@@ -43,7 +43,11 @@
                         {{ form_widget(classForm.identifierInNamespace, { 'attr': {'style': 'display:none'} }) }}
                     {% endif %}
                     {{ form_row(classForm.labels) }}
-
+                    {% if app.request.get('namespace').topLevelNamespace.isExternalNamespace %}
+                    {{ form_row(classForm.identifierInUri, {
+                        help: 'This field is automatically pre-filled according to the default settings of the root namespace, but can be modified if necessary.'
+                    }) }}
+                    {% endif %}
 
                     <div class="js-text-property-wrapper"
                          data-prototype="{{ formMacros.printTextPropertyRow(classForm.textProperties.vars.prototype)|e('html_attr') }}"
@@ -148,6 +152,40 @@
                 tinymce.get("class_quick_add_form_textProperties_1_textProperty").remove();
                 $('.js-example-add').show();
                 $('.js-example-remove').hide();
+            });
+
+            if($('#class_quick_add_form_identifierInUri').data('uri-param') < 3){
+                $('#class_quick_add_form_identifierInUri').prop('readonly', true);
+            }
+
+            $('#class_quick_add_form_labels_0_label, #class_quick_add_form_identifierInNamespace').on('keyup', function(){
+                var champIdentifierInNamespace = $('#class_quick_add_form_identifierInNamespace');
+                var champIdentifierInUri = $('#class_quick_add_form_identifierInUri');
+                var champLabel = $('#class_quick_add_form_labels_0_label');
+
+                // Case 0: identifier
+                if(champIdentifierInUri.data('uri-param') == 0){
+                    var baseDefault = champIdentifierInUri.data('default-value');
+                    if(baseDefault == ''){
+                        baseDefault = champIdentifierInNamespace.val();
+                    }
+                    var newInput = baseDefault;
+                }
+                // Case 1: identifier + label
+                if(champIdentifierInUri.data('uri-param') == 1){
+                    var baseDefault = champIdentifierInUri.data('default-value');
+                    if(baseDefault == ''){
+                        baseDefault = champIdentifierInNamespace.val() + '_';
+                    }
+                    var newInput = baseDefault + champLabel.val().trim().replaceAll(' ', '_');
+                }
+                // Case 2: camelCase
+                if(champIdentifierInUri.data('uri-param') == 2){
+                    var newInput = champLabel.val().trim().replace(/[-_\s]+([a-zA-Z])/g, function(match, letter) {
+                        return letter.toUpperCase();
+                    });
+                }
+                champIdentifierInUri.val(newInput);
             });
         } );
     </script>

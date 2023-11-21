@@ -588,6 +588,22 @@
                         <td class="text-center" id="td-next-property-identifier">{{ namespace.propertyPrefix|default('P') }}{{ namespace.currentPropertyNumber|default(0)+1 }}</td>
                     </tr>
                 </table>
+                {% if namespace.topLevelNamespace.isExternalNamespace %}
+                <h3>Identifiers in URI</h3>
+                <table id="table-identifiers-uri" class="table-bordered table-condensed" style="margin-bottom: 15px;">
+                    <tr>
+                        <th>URI parameter</th>
+                        <th>Class URI example</th>
+                        <th>Property URI example</th>
+                    </tr>
+                    <tr>
+                        <td>{{ namespace.uriParameterStrings.label }}</td>
+                        <td>{{ namespace.displayURI }}{{ namespace.uriParameterStrings.classExample }}</td>
+                        <td>{{ namespace.displayURI }}{{ namespace.uriParameterStrings.propertyExample }}</td>
+                    </tr>
+                </table>
+                <p>So that no entity is without a URI, the URIs will be automatically pre-filled with the entity identifier, but can be freely modified.</p>
+                {% endif %}
             </div>
             {% endif %}
             <div id="classes" class="tab-pane fade">

@@ -8,6 +8,7 @@
 
 namespace AppBundle\Entity;
 
+use AppBundle\Utils\StringUtils;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -35,6 +36,7 @@ class Property
 
     /**
      * @ORM\Column(type="string", name="identifier_in_uri")
+     * @Assert\NotBlank(message="The identifier in URI field cannot be empty")
      */
     private $identifierInURI;
 
@@ -332,7 +334,38 @@ class Property
      */
     public function getLabels()
     {
-        return $this->labels;
+        $labels = $this->labels->toArray();
+
+        // Fonction de comparaison personnalisée pour trier les labels
+        usort($labels, function($a, $b) {
+            $order = ['en', 'fr'];
+
+            $aIsoCode = $a->getLanguageIsoCode();
+            $bIsoCode = $b->getLanguageIsoCode();
+
+            // Si les deux codes sont dans l'ordre personnalisé, comparez-les
+            if (in_array($aIsoCode, $order) && in_array($bIsoCode, $order)) {
+                return array_search($aIsoCode, $order) - array_search($bIsoCode, $order);
+            }
+
+            // Si l'un des codes est dans l'ordre personnalisé, placez-le en premier
+            if (in_array($aIsoCode, $order)) {
+                return -1;
+            }
+            if (in_array($bIsoCode, $order)) {
+                return 1;
+            }
+
+            // Les deux codes ne sont pas dans l'ordre personnalisé, ne modifiez pas l'ordre
+            return 0;
+        });
+
+        $acLabels = new ArrayCollection();
+        foreach ($labels as $label){
+            $acLabels->add($label);
+        }
+
+        return $acLabels;
     }
 
     /**
@@ -661,5 +694,30 @@ class Property
     public function setIsRecursive($isRecursive)
     {
         $this->isRecursive = $isRecursive;
+    }
+
+    public function updateIdentifierInUri(){
+        $uriParameter = $this->getTopLevelNamespace()->getUriParameter();
+        switch ($uriParameter){
+            case 0: //Entity identifier
+                $this->setIdentifierInURI($this->getIdentifierInNamespace());
+                break;
+            case 1: //Entity identifier + label
+                $label = $this->getLabels()->filter(function($v){return $v->getIsStandardLabelForLanguage();})->first();
+                $label = StringUtils::deleteAccents($label);
+                $label = str_replace(array('"', "'"), '', $label);
+                $newIdentifierInUri = str_replace(' ', '_', $this->getIdentifierInNamespace() . ' ' . $label);
+                $this->setIdentifierInURI($newIdentifierInUri);
+                break;
+            case 2: //Camel Case
+                $label = $this->getLabels()->filter(function($v){return $v->getIsStandardLabelForLanguage();})->first();
+                $label = StringUtils::deleteAccents($label);
+                $label = str_replace(array('"', "'"), '', $label);
+                $words = preg_split('/[^a-zA-Z0-9]+/', $label);
+                $camelCaseString = implode('', array_map('ucfirst', $words));
+                $newIdentifierInUri = lcfirst($camelCaseString);
+                $this->setIdentifierInURI($newIdentifierInUri);
+                break;
+        }
     }
 }

@@ -24,6 +24,7 @@ use AppBundle\Form\NamespaceEditIdentifiersForm;
 use AppBundle\Form\NamespaceForm;
 use AppBundle\Form\NamespacePublicationForm;
 use AppBundle\Form\NamespaceQuickAddForm;
+use AppBundle\Form\NamespaceUriParameterForm;
 use Doctrine\Common\Collections\ArrayCollection;
 use PhpOffice\PhpWord\Element\Footer;
 use PhpOffice\PhpWord\Element\TextBreak;
@@ -120,6 +121,7 @@ class NamespaceController  extends Controller
 
         if ($form->isSubmitted() && $form->isValid()) {
             $namespace = $form->getData();
+            $namespace->setUriParameter(0);
             $namespace->setProjectForTopLevelNamespace($project);
             $namespace->setTopLevelNamespace($namespace);
             $namespace->setCreator($this->getUser());
@@ -323,9 +325,36 @@ class NamespaceController  extends Controller
                     '_fragment' => 'identifiers'
                 ]);
             }
+
+            $formUriParameter = $this->createForm(NamespaceUriParameterForm::class, $namespace, array('default_choice' => $namespace->getUriParameter()));
+            $formUriParameter->handleRequest($request);
+            if ($formUriParameter->isSubmitted() && $formUriParameter->isValid()) {
+                $em = $this->getDoctrine()->getManager();
+                $ongoingNamespace = $namespace->getChildVersions()->filter(function($v){return $v->getIsOngoing();})->first();
+                if(!is_null($ongoingNamespace)){
+                    foreach ($ongoingNamespace->getClasses() as $class){
+                        $class->updateIdentifierInUri();
+                        $em->persist($class);
+                    }
+                    foreach ($ongoingNamespace->getProperties() as $property){
+                        $property->updateIdentifierInUri();
+                        $em->persist($property);
+                    }
+                }
+                $em->persist($namespace);
+                $em->flush();
+
+                $this->addFlash('success', 'Namespace uri parameter updated!');
+                return $this->redirectToRoute('namespace_edit', [
+                    'id' => $namespace->getId(),
+                    '_fragment' => 'identifiers'
+                ]);
+            }
+
             return $this->render('namespace/edit.html.twig', [
                 'namespaceForm' => $form->createView(),
                 'namespaceIdentifiersForm' => $formIdentifiers->createView(),
+                'namespaceUriParameterForm' => $formUriParameter->createView(),
                 'namespace' => $namespace,
                 'rootNamespaces' => $rootNamespaces,
                 'textProperties' => $textProperties,
