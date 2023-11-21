@@ -283,7 +283,9 @@ class ClassRepository extends EntityRepository
                              pk_source AS pk_parent, 
                              pk_source AS parent_id, 
                              source_identifier AS parent_name, 
-                             depth, link_type 
+                             depth, link_type,
+                             identifier_in_namespace AS property_identifier, 
+                             standard_label AS property_label
                 FROM che.get_classes_rows_for_graph(:class, :namespace)) result;";
 
         $stmt = $conn->prepare($sql);

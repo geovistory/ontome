@@ -60,8 +60,8 @@ $(document).ready(function() {
         var collisionForce = d3.forceCollide(30).strength(1).iterations(100);
 
         simulation = d3.forceSimulation()
-            .force("link", d3.forceLink().id(function(d) { return d.id; }).distance(100))
-            //.force("charge", d3.forceManyBody())
+            .force("link", d3.forceLink().id(function(d) { return d.id; }).distance(150))
+            .force("charge", d3.forceManyBody().strength(-200))
             .alphaDecay(0.01)
             .force("attractForce",attractForce)
             .force("collisionForce",collisionForce)
@@ -85,9 +85,18 @@ $(document).ready(function() {
 
             linkSvg.exit().remove();
 
-            var linkEnter = linkSvg.enter()
-                .append("line")
+            var linkEnter = linkSvg.enter().append("g")
                 .attr("class", "link");
+
+            linkEnter.append("line")
+                .attr("class", "link-line");
+
+            linkEnter.append("text")
+                .attr("class", "link-label")
+                .text(function(d) {
+                    return d.source.data && d.target.data.property_identifier && d.target.data.property_label ? d.target.data.property_identifier + ' ' + d.target.data.property_label : "Errorr";
+                });
+
 
             linkSvg = linkEnter.merge(linkSvg)
 
@@ -158,11 +167,15 @@ $(document).ready(function() {
         }
 
         function ticked() {
-            linkSvg
+            linkSvg.select(".link-line")
                 .attr("x1", function(d) { return d.source.x; })
                 .attr("y1", function(d) { return d.source.y; })
                 .attr("x2", function(d) { return d.target.x; })
                 .attr("y2", function(d) { return d.target.y; });
+
+            linkSvg.select(".link-label")
+                .attr("x", function(d) { return ((d.source.x + d.target.x) - 100) / 2; })
+                .attr("y", function(d) { return (d.source.y + d.target.y) / 2; });
 
             nodeSvg
                 .attr("transform", function(d) { return "translate(" + d.x + ", " + d.y + ")"; });
