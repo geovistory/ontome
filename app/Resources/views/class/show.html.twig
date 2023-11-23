@@ -54,6 +54,7 @@
             </div>
             <h2>{{ classVersion }}</h2>
         </div>
+        {% if classVersion.namespaceForVersion.isVisible or classVersion.namespaceForVersion.projectForTopLevelNamespace.userProjectAssociations|filter(v => v.user.id == app.user.id)|length == 1 %}
         {% if classVersion.namespaceForVersion.isOngoing %}
             <div>
                 {% set countValidationsTxtp = 0 %}
@@ -1362,7 +1363,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for profileAssociation in classVersion.class.profileAssociations if profileAssociation.systemType.id == 5 %}
+                    {% for profileAssociation in classVersion.class.profileAssociations if profileAssociation.systemType.id == 5 and profileAssociation.profile.isVisible %}
                         <tr>
                             <td>
                                 <a href="{{ path('profile_show', {
@@ -1430,6 +1431,9 @@
                 </div>
             </div>
         </div>
+        {% else %}
+        <p><i class="fas fa-eye-slash"></i> This class belongs to an ongoing namespace that is only visible to members of the <a href="{{ path('project_show', {'id': classVersion.namespaceForVersion.projectForTopLevelNamespace.id}) }}">{{ classVersion.namespaceForVersion.projectForTopLevelNamespace }}</a> project.</p>
+        {% endif %}
     </div>
 {% endblock %}
 

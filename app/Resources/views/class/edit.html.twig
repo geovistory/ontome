@@ -665,7 +665,9 @@
             </div>
             <div id="identification" class="tab-pane fade">
                 {# Test de vérification si cet identifiant existe déjà dans un namespace fermé (il n'est donc plus éditable #}
-                {% if classVersion.namespaceForVersion.topLevelNamespace.classPrefix is null and classVersion.class.classVersions|filter(v => v.namespaceForVersion != classVersion.namespaceForVersion)|length == 0 and classVersion.namespaceForVersion.isOngoing %}
+                {% if classVersion.namespaceForVersion.topLevelNamespace.classPrefix is null
+                    and classVersion.class.classVersions|filter(v => v.namespaceForVersion != classVersion.namespaceForVersion)|length == 0
+                    and classVersion.namespaceForVersion.isOngoing %}
                     <div id="identifier-form-block">
                         {{ form_start(classIdentifierForm) }}
                         {{ form_errors(classIdentifierForm) }}
@@ -684,7 +686,20 @@
                     {% else %}
                         Official URI: <strong><span id="official-uri">{{ classVersion.namespaceForVersion.topLevelNamespace.namespaceURI }}{{ classVersion.class.identifierInURI }}</span></strong>
                     {% endif %}
-                    <button data-id="official-uri" class="btn btn-xs btn-link copyToClipboard" title="Copy to clipboard"><i class="fas fa-copy"></i></button><br>
+                    <button data-id="official-uri" class="btn btn-xs btn-link copyToClipboard" title="Copy to clipboard"><i class="fas fa-copy"></i></button>
+                    {% if classVersion.namespaceForVersion.topLevelNamespace.isExternalNamespace and classVersion.namespaceForVersion.topLevelNamespace.uriParameter == 3 %}
+                    <button class="btn btn-xs btn-success" title="Edit" id="uri-identifier-edit-btn"><i class="fas fa-edit"></i></button><br>
+                    <div id="uri-identifier-form-block">
+                        {{ form_start(classUriIdentifierForm) }}
+                        {{ form_errors(classUriIdentifierForm) }}
+                        <p>{{ form_row(classUriIdentifierForm.identifierInURI) }}</p>
+                        <button type="submit" class="btn btn-primary" formnovalidate>Save</button>
+                        <button type="button" id="uri-identifier-edit-btn-close" class="btn">Close</button>
+                        {{ form_end(classUriIdentifierForm) }}
+                    </div>
+                    {% else %}
+                    <br>
+                    {% endif %}
                     OntoME URI: <strong><span id="ontome-uri">https://ontome.net/ontology/c{{ classVersion.class.id }}</span></strong>
                     <button data-id="ontome-uri" class="btn btn-xs btn-link copyToClipboard" title="Copy to clipboard"><i class="fas fa-copy"></i></button>
                 </p>
@@ -1422,7 +1437,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for profileAssociation in classVersion.class.profileAssociations if profileAssociation.systemType.id == 5 %}
+                    {% for profileAssociation in classVersion.class.profileAssociations if profileAssociation.systemType.id == 5 and profileAssociation.profile.isVisible %}
                         <tr>
                             <td>
                                 <a href="{{ path('profile_show', {
@@ -1559,6 +1574,20 @@
             $('#identifier-edit-btn-close').click(function(){
                 $('#identifier-details-block').show(200);
                 $('#identifier-form-block').hide(200);
+            });
+
+            {% if not classUriIdentifierForm.vars.valid %}
+            $('#uri-identifier-details-block').hide(0);
+            {% else %}
+            $('#uri-identifier-form-block').hide(0);
+            {% endif %}
+
+            $('#uri-identifier-edit-btn').click(function(){
+                $('#uri-identifier-form-block').show(200);
+            });
+
+            $('#uri-identifier-edit-btn-close').click(function(){
+                $('#uri-identifier-form-block').hide(200);
             });
 
             $('a.updateViewComment').on('click', function () {
@@ -1796,7 +1825,7 @@
                                         }
                                     }
                                 }
-                            });
+                            }});
                         }
                     }
                 });

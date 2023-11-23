@@ -125,6 +125,14 @@ class IngoingPropertyQuickAddForm extends AbstractType
                 'by_reference' => false,
             ));
 
+        if($options['is_external']){
+            $builder->add('identifierInUri', TextType::class, array(
+                'label' => 'Set an identifier for URI',
+                'data' => $options['identifier_in_uri_prefilled'],
+                'attr' => array('data-uri-param' => $options['uri_param'], 'data-default-value' => $options['identifier_in_uri_prefilled'])
+            ));
+        }
+
     }
 
     public function configureOptions(OptionsResolver $resolver)
@@ -132,7 +140,10 @@ class IngoingPropertyQuickAddForm extends AbstractType
         $resolver->setDefaults([
             'data_class' => 'AppBundle\Entity\Property',
             "allow_extra_fields" => true,
-            'classesVersion' => null
+            'classesVersion' => null,
+            'uri_param' => 0,
+            'identifier_in_uri_prefilled' => '',
+            'is_external' => false
         ]);
     }
 }

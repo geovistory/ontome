@@ -82,6 +82,12 @@ class MainController extends Controller
         $em = $this->getDoctrine()->getManager();
         $entity = $em->getRepository('AppBundle:OntoNamespace')->findEntity($name,$identifierInNamespace);
 
+        if(count($entity) == 0 && substr($identifierInNamespace, -1) === "i"){
+            // L'identifier n'a pas été retrouvé mais il se peut que ça soit l'identifiant d'une propriété inverse
+            $identifierInNamespace = substr($identifierInNamespace, 0, -1); // Retire le i
+            $entity = $em->getRepository('AppBundle:OntoNamespace')->findEntity($name,$identifierInNamespace);
+        }
+
         if(count($entity) == 0){
             // Rien n'a été trouvé
             $this->addFlash('warning', 'URI ontome.net/ns/'.$name."/".$identifierInNamespace." is not valid");
