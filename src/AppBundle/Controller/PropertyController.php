@@ -197,6 +197,10 @@ class PropertyController extends Controller
                 $identifierInUriPrefilled = ''; // Pour les cas 2 et 3
         }
 
+        if(!$propertyVersion->getNamespaceForVersion()->getTopLevelNamespace()->getIsExternalNamespace()){
+            $property->setIdentifierInURI($identifierInUriPrefilled); // On attribue le même identifiant à la création si namespace interne car non géré par le formulaire pour les NS internes
+        }
+
         $form = null;
         if($type == 'outgoing') {
             $form = $this->createForm(OutgoingPropertyQuickAddForm::class, $property, array(
@@ -219,9 +223,6 @@ class PropertyController extends Controller
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $property = $form->getData();
-            if(!$propertyVersion->getNamespaceForVersion()->getTopLevelNamespace()->getIsExternalNamespace()){
-                $property->setIdentifierInURI($property->getIdentifierInNamespace()); // On attribue le même identifiant à la création si namespace interne
-            }
             if($type == 'outgoing') {
                 $propertyVersion->setDomain($class);
                 $domainNamespace = $em->getRepository("AppBundle:OntoClassVersion")->findClassVersionByClassAndNamespacesId($class, $namespacesId)->getNamespaceForVersion();
