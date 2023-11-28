@@ -326,7 +326,7 @@ class OntoClassVersion
 
         curl_exec($ch);
         $returnedStatusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        if($returnedStatusCode == 0){print curl_error($ch);}
+        //if($returnedStatusCode == 0){print curl_error($ch);}
         curl_close($ch);
 
         if($returnedStatusCode >= 200 && $returnedStatusCode < 400){
