@@ -172,6 +172,10 @@ class ClassController extends Controller
                 $identifierInUriPrefilled = ''; // Pour les cas 2 et 3
         }
 
+        if(!$namespace->getTopLevelNamespace()->getIsExternalNamespace()){
+            $class->setIdentifierInURI($identifierInUriPrefilled); // On attribue le même identifiant si namespace interne car non géré par le formulaire pour les NS internes
+        }
+
         $form = $this->createForm(ClassQuickAddForm::class, $class, array(
             'uri_param' => $uriParam,
             'identifier_in_uri_prefilled' => $identifierInUriPrefilled,
@@ -183,9 +187,6 @@ class ClassController extends Controller
         if ($form->isSubmitted() && $form->isValid()) {
             $class = $form->getData();
             $class->setIsManualIdentifier(is_null($namespace->getTopLevelNamespace()->getClassPrefix()));
-            if(!$namespace->getTopLevelNamespace()->getIsExternalNamespace()){
-                $class->setIdentifierInURI($class->getIdentifierInNamespace()); // On attribue le même identifiant si namespace interne
-            }
             $class->setCreator($this->getUser());
             $class->setModifier($this->getUser());
             $class->setCreationTime(new \DateTime('now'));
