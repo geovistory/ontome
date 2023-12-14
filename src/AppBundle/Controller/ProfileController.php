@@ -139,7 +139,7 @@ class ProfileController  extends Controller
             $labels = $form->get('labels');
             foreach ($labels as $label){
                 if($allLabels->contains($label->get('label')->getData())){
-                    $label->get('label')->addError(new FormError('This label is already used by another profile, please enter another one'));
+                    $label->get('label')->addError(new FormError('This label is already used by another profile, please enter a different one.'));
                     $isLabelValid = false;
                 }
             }

@@ -115,7 +115,7 @@ class ProjectController  extends Controller
             $labels = $form->get('labels');
             foreach ($labels as $label){
                 if($allLabels->contains($label->get('label')->getData())){
-                    $label->get('label')->addError(new FormError('This label is already used by another project, please enter another one'));
+                    $label->get('label')->addError(new FormError('This label is already used by another project, please enter a different one.'));
                     $isLabelValid = false;
                 }
             }
@@ -1336,12 +1336,12 @@ class ProjectController  extends Controller
     }
 
     /**
-    * @Route("/project/{project}/profile/{profile}/delete", name="project_profile_disassociation", requirements={"project"="^([0-9]+)|(projectID){1}$", "profile"="^([0-9]+)|(profileID){1}$"})
-    * @Method({ "POST"})
-    * @param Profile  $profile    The profile to be disassociated from a project
-    * @param Project  $project    The project to be disassociated from a profile
-    * @return JsonResponse a Json 204 HTTP response
-    */
+     * @Route("/project/{project}/profile/{profile}/delete", name="project_profile_disassociation", requirements={"project"="^([0-9]+)|(projectID){1}$", "profile"="^([0-9]+)|(profileID){1}$"})
+     * @Method({ "POST"})
+     * @param Profile  $profile    The profile to be disassociated from a project
+     * @param Project  $project    The project to be disassociated from a profile
+     * @return JsonResponse a Json 204 HTTP response
+     */
     public function deleteProjectProfileAssociationAction(Profile $profile, Project $project, Request $request)
     {
         $this->denyAccessUnlessGranted('edit', $project);

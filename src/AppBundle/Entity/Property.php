@@ -129,8 +129,8 @@ class Property
     private $comments;
 
     /**
-    * @ORM\OneToMany(targetEntity="PropertyAssociation", mappedBy="childProperty")
-    */
+     * @ORM\OneToMany(targetEntity="PropertyAssociation", mappedBy="childProperty")
+     */
     private $childPropertyAssociations;
 
     /**
@@ -204,7 +204,7 @@ class Property
                 }
             }
             if(!$uniqueIdentifiant){
-                $context->buildViolation('The identifier must be unique. Please enter another one.')
+                $context->buildViolation('The identifier must be unique within the same namespace. Please enter a different one.')
                     ->atPath('identifierInNamespace')
                     ->addViolation();
             }

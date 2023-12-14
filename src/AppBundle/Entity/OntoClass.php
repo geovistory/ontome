@@ -130,11 +130,11 @@ class OntoClass
     private $labels;
 
     /**
-    * @Assert\Valid()
-    * @Assert\NotNull()
-    * @ORM\OneToMany(targetEntity="AppBundle\Entity\TextProperty", mappedBy="class", cascade={"persist"})
-    * @ORM\OrderBy({"languageIsoCode" = "ASC"})
-    */
+     * @Assert\Valid()
+     * @Assert\NotNull()
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\TextProperty", mappedBy="class", cascade={"persist"})
+     * @ORM\OrderBy({"languageIsoCode" = "ASC"})
+     */
     private $textProperties;
 
     /**
@@ -207,7 +207,7 @@ class OntoClass
                 }
             }
             if(!$uniqueIdentifiant){
-                $context->buildViolation('The identifier must be unique. Please enter another one.')
+                $context->buildViolation('The identifier must be unique within the same namespace. Please enter a different one.')
                     ->atPath('identifierInNamespace')
                     ->addViolation();
             }
