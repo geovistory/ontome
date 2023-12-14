@@ -559,9 +559,19 @@ class Property
         $this->targetEntityAssociations = $targetEntityAssociations;
     }
 
+    /**
+     * @return ArrayCollection|PropertyAssociation[]
+     */
     public function getEntityAssociations()
     {
-        return array_merge($this->getSourceEntityAssociations()->toArray(), $this->getTargetEntityAssociations()->toArray());
+        $entityAssociations = new ArrayCollection();
+        foreach ($this->sourceEntityAssociations as $entityAssociation){
+            $entityAssociations->add($entityAssociation);
+        }
+        foreach ($this->targetEntityAssociations as $entityAssociation){
+            $entityAssociations->add($entityAssociation);
+        }
+        return $entityAssociations;
     }
 
     /**

@@ -173,7 +173,7 @@
 
                     {# Subproperty of #}
                     {% set isSubpropertyOf = false %}
-                    {% for association in propertyVersion.property.childPropertyAssociations
+                    {% for association in childPropertyAssociations
                         if association.namespaceForVersion.id in namespacesId %}
                         {% set isSubpropertyOf = true %}
                     {% endfor %}
@@ -184,7 +184,7 @@
                             </div>
                             <div class="col-lg-10">
                                 <ul class="list-unstyled">
-                                    {% for association in propertyVersion.property.childPropertyAssociations
+                                    {% for association in childPropertyAssociations
                                         if association.namespaceForVersion.id in namespacesId %}
                                         <li>
                                             {# Domaine #}
@@ -246,7 +246,7 @@
                     {% endif %}
                     {# Superproperty of #}
                     {% set isSuperpropertyOf = false %}
-                    {% for association in propertyVersion.property.parentPropertyAssociations
+                    {% for association in parentPropertyAssociations
                         if association.namespaceForVersion.id in namespacesId %}
                         {% set isSuperpropertyOf = true %}
                     {% endfor %}
@@ -257,7 +257,7 @@
                             </div>
                             <div class="col-lg-10">
                                 <ul class="list-unstyled">
-                                    {% for association in propertyVersion.property.parentPropertyAssociations
+                                    {% for association in parentPropertyAssociations
                                         if association.namespaceForVersion.id in namespacesId %}
                                         <li>
                                             {# Domain #}
@@ -318,7 +318,7 @@
                         </div>
                     {% endif %}
 
-                    {% if propertyVersion.property.entityAssociations|length > 0 %}
+                    {% if entityAssociations|length > 0 %}
                         <div class="row">
                             <div class="col-lg-2">
                                 <p>Relations:</p>
@@ -326,7 +326,7 @@
                             <div class="col-lg-10">
                                 <ul class="list-unstyled">
                                     {% set relationCount = 0 %}
-                                    {% for relation in propertyVersion.property.entityAssociations
+                                    {% for relation in entityAssociations
                                         if relation.systemType.id in [18,20]
                                         and relation.namespaceForVersion.id in namespacesId %}
                                         {% set relationCount = relationCount + 1 %}
@@ -633,7 +633,7 @@
                     </tbody>
                 </table>
 
-                {% if app.user.currentOngoingNamespace is not null %}
+                {% if app.user is not null and app.user.currentOngoingNamespace is not null %}
                     <div class="pull-right add-div">
                         <a href="{{ path('text_property_new', {'type': 'internal-note', 'object': 'property', 'objectId': propertyVersion.property.id })}}"
                            class="btn btn-primary pull-right">
