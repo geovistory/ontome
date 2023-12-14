@@ -426,6 +426,7 @@ class NamespaceController  extends Controller
         $newNamespace->addLabel($newNamespaceLabel);
         $newNamespace->setStandardLabel($newNamespaceLabel->getLabel());
         $newNamespace->setIsExternalNamespace($namespace->getIsExternalNamespace());
+        $newNamespace->setIsVisible(true);
 
         $em->persist($namespace);
         $em->persist($newNamespace);
