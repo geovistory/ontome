@@ -368,7 +368,7 @@ class PropertyController extends Controller
             }
             if($type == 'parentPropertyAssociations'){
                 $propertyA = $a->getChildProperty();
-                $propertyB = $a->getChildProperty();
+                $propertyB = $b->getChildProperty();
                 $propertyNamespaceA = $a->getChildPropertyNamespace();
                 $propertyNamespaceB = $b->getChildPropertyNamespace();
             }
@@ -403,7 +403,7 @@ class PropertyController extends Controller
             if($propertyNamespaceA === $version && $propertyNamespaceB !== $version){
                 return -1;
             }
-            elseif($propertyNamespaceA === $version && $propertyNamespaceB !== $version){
+            elseif($propertyNamespaceB === $version && $propertyNamespaceA !== $version){
                 return 1;
             }
             else{
@@ -614,7 +614,7 @@ class PropertyController extends Controller
             }
             if($type == 'parentPropertyAssociations'){
                 $propertyA = $a->getChildProperty();
-                $propertyB = $a->getChildProperty();
+                $propertyB = $b->getChildProperty();
                 $propertyNamespaceA = $a->getChildPropertyNamespace();
                 $propertyNamespaceB = $b->getChildPropertyNamespace();
             }

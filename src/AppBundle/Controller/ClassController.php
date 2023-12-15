@@ -334,7 +334,7 @@ class ClassController extends Controller
             }
             if($type == 'parentClassAssociations'){
                 $classA = $a->getChildClass();
-                $classB = $a->getChildClass();
+                $classB = $b->getChildClass();
                 $classNamespaceA = $a->getChildClassNamespace();
                 $classNamespaceB = $b->getChildClassNamespace();
             }
@@ -549,7 +549,7 @@ class ClassController extends Controller
             }
             if($type == 'parentClassAssociations'){
                 $classA = $a->getChildClass();
-                $classB = $a->getChildClass();
+                $classB = $b->getChildClass();
                 $classNamespaceA = $a->getChildClassNamespace();
                 $classNamespaceB = $b->getChildClassNamespace();
             }
