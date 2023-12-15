@@ -166,6 +166,12 @@ class TextProperty implements GroupSequenceProviderInterface
      */
     private $modificationTime;
 
+    /**
+     * @ORM\ManyToOne(targetEntity="OntoNamespace")
+     * @ORM\JoinColumn(name="fk_entity_namespace_for_version", referencedColumnName="pk_namespace", nullable=false)
+     */
+    private $entityNamespaceForVersion;
+
     public function __construct()
     {
         $this->comments = new ArrayCollection();
@@ -522,6 +528,22 @@ class TextProperty implements GroupSequenceProviderInterface
     public function setEntityAssociation($entityAssociation)
     {
         $this->entityAssociation = $entityAssociation;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getEntityNamespaceForVersion()
+    {
+        return $this->entityNamespaceForVersion;
+    }
+
+    /**
+     * @param mixed $entityNamespaceForVersion
+     */
+    public function setEntityNamespaceForVersion($entityNamespaceForVersion)
+    {
+        $this->entityNamespaceForVersion = $entityNamespaceForVersion;
     }
 
 

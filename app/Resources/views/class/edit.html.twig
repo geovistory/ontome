@@ -580,7 +580,7 @@
                 </table>
 
                 <div class="pull-right add-div">
-                    <a href="{{ path('text_property_new', {'type': 'internal-note', 'object': 'class', 'objectId': classVersion.class.id })}}"
+                    <a href="{{ path('text_property_new', {'type': 'internal-note', 'object': 'class-version', 'objectId': classVersion.id })}}"
                        class="btn btn-primary pull-right">
                         Add <span class="fa fa-plus-circle"></span>
                     </a>
@@ -600,7 +600,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for textProperty in classVersion.class.textProperties|filter(v => (is_granted('edit', v) and app.user is not null and v.namespaceForVersion.id == app.user.getCurrentOngoingNamespace.id and v.systemType.id == 33) or ((v.namespaceForVersion.id in namespacesId or v.namespaceForVersion == app.user.getCurrentOngoingNamespace|default(null)) and v.systemType.id in [34,35])) %}
+                    {% for textProperty in classVersion.class.textProperties|filter(v => (v.entityNamespaceForVersion is not null and v.entityNamespaceForVersion.id == classVersion.namespaceForVersion.id) and ((is_granted('edit', v) and app.user is not null and v.namespaceForVersion.id == app.user.getCurrentOngoingNamespace.id and v.systemType.id == 33) or ((v.namespaceForVersion.id in namespacesId or v.namespaceForVersion == app.user.getCurrentOngoingNamespace|default(null)) and v.systemType.id in [34,35]))) %}
                         {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
                         <tr>
                             <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>

@@ -148,9 +148,9 @@ class TextPropertyController extends Controller
 
     /**
      * @Route("/text-property/{type}/new/{object}/{objectId}", name="text_property_new",
-     *     requirements={"type"="^(scope-note|example|justification|internal-note|definition|dct:contributor|owl:versionInfo){1}$", "object"="^(class-association|property-association|class|property|project|profile|namespace|entity-association){1}$", "objectId"="^[0-9]+$"})
+     *     requirements={"type"="^(scope-note|example|justification|internal-note|definition|dct:contributor|owl:versionInfo){1}$", "object"="^(class-association|property-association|class|class-version|property|property-version|project|profile|namespace|entity-association){1}$", "objectId"="^[0-9]+$"})
      * @Route("/text-property/{type}/new/{object}/{objectId}/inverse", name="text_property_inverse_new",
-     *     requirements={"type"="^(scope-note|example|justification|additional-note|definition|dct:contributor|owl:versionInfo){1}$", "object"="^(class-association|property-association|class|property|project|profile|namespace|entity-association){1}$", "objectId"="^[0-9]+$"})
+     *     requirements={"type"="^(scope-note|example|justification|additional-note|definition|dct:contributor|owl:versionInfo){1}$", "object"="^(class-association|property-association|class|class-version|property|property-version|project|profile|namespace|entity-association){1}$", "objectId"="^[0-9]+$"})
      */
     public function newAction($type, $object, $objectId, Request $request)
     {
@@ -217,6 +217,46 @@ class TextPropertyController extends Controller
                 $redirectToRoute = 'property_show';
             }
             $redirectToRouteFragment = 'definition';
+        }
+        else if($object === 'class-version') {
+            $associatedEntity = $em->getRepository('AppBundle:OntoClassVersion')->find($objectId);
+            $associatedClass = $associatedEntity->getClass();
+            $associatedNamespace = $associatedEntity->getNamespaceForVersion();
+
+            if (!$associatedEntity) {
+                throw $this->createNotFoundException('The class version n° '.$objectId.' does not exist');
+            }
+            $textProperty->setClass($associatedClass);
+            $textProperty->setEntityNamespaceForVersion($associatedNamespace);
+
+            if($this->isGranted('edit', $associatedEntity)){
+                $redirectToRoute = 'class_edit';
+            }
+            else{
+                $redirectToRoute = 'class_show';
+            }
+            $redirectToRouteFragment = 'definition';
+            $objectId = $associatedClass->getId();
+        }
+        else if($object === 'property-version') {
+            $associatedEntity = $em->getRepository('AppBundle:PropertyVersion')->find($objectId);
+            $associatedProperty = $associatedEntity->getProperty();
+            $associatedNamespace = $associatedEntity->getNamespaceForVersion();
+
+            if (!$associatedEntity) {
+                throw $this->createNotFoundException('The property version n° '.$objectId.' does not exist');
+            }
+            $textProperty->setProperty($associatedProperty);
+            $textProperty->setEntityNamespaceForVersion($associatedNamespace);
+
+            if($this->isGranted('edit', $associatedEntity)){
+                $redirectToRoute = 'property_edit';
+            }
+            else{
+                $redirectToRoute = 'property_show';
+            }
+            $redirectToRouteFragment = 'definition';
+            $objectId = $associatedProperty->getId();
         }
         else if($object === 'project') {
             $associatedEntity = $em->getRepository('AppBundle:Project')->find($objectId);
