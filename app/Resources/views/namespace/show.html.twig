@@ -362,7 +362,7 @@
             <div id="identification" class="tab-pane fade">
                 <h3>Identification</h3>
                 <p>
-                    {% if namespace.topLevelNamespace.isExternalNamespace %}
+                    {% if namespace.topLevelNamespace.isExternalNamespace and namespace.namespaceURI is not null %}
                         Base URI: <strong>{{ namespace.namespaceURI }}</strong>
                     {% else %}
                         Base URI: <strong>{{ namespace.topLevelNamespace.namespaceURI }}</strong>

@@ -279,7 +279,7 @@ class NamespaceController  extends Controller
             $ongoingNamespaceHasChanged = $em->getRepository('AppBundle:OntoNamespace')
                 ->checkNamespaceChange($namespace);
 
-            $form = $this->createForm(NamespaceForm::class, $namespace);
+            $form = $this->createForm(NamespaceForm::class, $namespace, ['is_root_namespace' => $namespace->getIsTopLevelNamespace()]);
 
             $form->handleRequest($request);
             if ($form->isSubmitted() && $form->isValid()) {
@@ -297,6 +297,7 @@ class NamespaceController  extends Controller
                 if ($namespace->getIsTopLevelNamespace()) {
                     foreach ($namespace->getChildVersions() as $childNamespace) {
                         if (!$namespace->getIsExternalNamespace()) {
+                            // If the root namespace is not external, then the child namespaces do not need an URI
                             $childNamespace->setNamespaceURI(null);
                         }
                         $childNamespace->setIsExternalNamespace($namespace->getIsExternalNamespace());

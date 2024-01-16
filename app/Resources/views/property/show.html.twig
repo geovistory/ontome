@@ -724,9 +724,9 @@
                 <h3>Identifier: {{ propertyVersion.property.identifierInNamespace }}</h3>
                 <p>
                     {% if propertyVersion.isLinkableURI %}
-                        Official URI: <a target="_blank" href="{{ propertyVersion.namespaceForVersion.topLevelNamespace.namespaceURI }}{{ propertyVersion.property.identifierInURI }}"><strong><span id="official-uri">{{ propertyVersion.namespaceForVersion.topLevelNamespace.namespaceURI }}{{ propertyVersion.property.identifierInURI }}</span></strong></a>
+                        Official URI: <a target="_blank" href="{{ propertyVersion.URI }}"><strong><span id="official-uri">{{ propertyVersion.URI }}</span></strong></a>
                     {% else %}
-                        Official URI: <strong><span id="official-uri">{{ propertyVersion.namespaceForVersion.topLevelNamespace.namespaceURI }}{{ propertyVersion.property.identifierInURI }}</span></strong>
+                        Official URI: <strong><span id="official-uri">{{ propertyVersion.URI }}</span></strong>
                     {% endif %}
                     <button data-id="official-uri" class="btn btn-xs btn-link copyToClipboard" title="Copy to clipboard"><i class="fas fa-copy"></i></button><br>
                     OntoME URI: <strong><span id="ontome-uri">https://ontome.net/ontology/p{{ propertyVersion.property.id }}</span></strong>
