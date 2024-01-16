@@ -54,6 +54,11 @@ class Profile
     /**
      * @ORM\Column(type="boolean")
      */
+    private $isVisible;
+
+    /**
+     * @ORM\Column(type="boolean")
+     */
     private $isRootProfile;
 
     /**
@@ -628,6 +633,22 @@ class Profile
     public function setProperties($properties)
     {
         $this->properties = $properties;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getIsVisible()
+    {
+        return $this->isVisible;
+    }
+
+    /**
+     * @param mixed $isVisible
+     */
+    public function setIsVisible($isVisible)
+    {
+        $this->isVisible = $isVisible;
     }
 
     public function removeNamespace(OntoNamespace $namespace)

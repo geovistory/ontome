@@ -872,3 +872,11 @@ FOOTER Styling
 #selectable-profiles-table_filter input[type=search]{
     width: 70%;
 }
+
+.gv-logo-top-25{
+    padding-top: 25px;
+}
+
+.xsmall{
+    font-size: 0.8em;
+}
