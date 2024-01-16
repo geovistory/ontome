@@ -188,9 +188,7 @@
 
                     {# Relations #}
                     {% set isRelated = false %}
-                    {% for relation in classVersion.class.entityAssociations
-                        if relation.namespaceForVersion.id in namespacesId
-                        and relation.systemType.id in [4,19] %}
+                    {% for relation in entityAssociations if relation.systemType.id in [4,19] %}
                         {% set isRelated = true %}
                     {% endfor %}
                     {% if isRelated %}

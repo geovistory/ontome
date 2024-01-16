@@ -135,7 +135,7 @@ class OntoClass
     * @Assert\Valid()
     * @Assert\NotNull()
     * @ORM\OneToMany(targetEntity="AppBundle\Entity\TextProperty", mappedBy="class", cascade={"persist"})
-    * @ORM\OrderBy({"languageIsoCode" = "ASC"})
+    * @ORM\OrderBy({"languageIsoCode" = "ASC", "creationTime" = "DESC"})
     */
     private $textProperties;
 
@@ -592,9 +592,19 @@ class OntoClass
         $this->targetEntityAssociations = $targetEntityAssociations;
     }
 
+    /**
+     * @return ArrayCollection|ClassAssociation[]
+     */
     public function getEntityAssociations()
     {
-        return array_merge($this->getSourceEntityAssociations()->toArray(), $this->getTargetEntityAssociations()->toArray());
+        $entityAssociations = new ArrayCollection();
+        foreach ($this->sourceEntityAssociations as $entityAssociation){
+            $entityAssociations->add($entityAssociation);
+        }
+        foreach ($this->targetEntityAssociations as $entityAssociation){
+            $entityAssociations->add($entityAssociation);
+        }
+        return $entityAssociations;
     }
 
     /**

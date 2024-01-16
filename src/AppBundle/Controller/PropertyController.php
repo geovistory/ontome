@@ -24,6 +24,7 @@ use AppBundle\Form\PropertyEditForm;
 use AppBundle\Form\PropertyEditIdentifierForm;
 use AppBundle\Form\PropertyEditUriIdentifierForm;
 use AppBundle\Form\TextPropertyForm;
+use Doctrine\Common\Collections\ArrayCollection;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
@@ -393,6 +394,114 @@ class PropertyController extends Controller
         // $namespacesId : Tous les namespaces trouvés ci-dessus
         $namespacesId = array_merge($namespacesIdFromPropertyVersion, $nsIdFromUser);
 
+        //Tri
+        // En tête, les relations appartenant à la même version que cette propriété
+        // Puis par identifiant / label
+        // Ensuite, les autres versions
+        // Puis par Préfixe, identifiant / label
+        function sortRelationsByProperties($a, $b, OntoNamespace $version, $type, $property=null){
+            if($type == 'childPropertyAssociations'){
+                $propertyA = $a->getParentProperty();
+                $propertyB = $b->getParentProperty();
+                $propertyNamespaceA = $a->getParentPropertyNamespace();
+                $propertyNamespaceB = $b->getParentPropertyNamespace();
+            }
+            if($type == 'parentPropertyAssociations'){
+                $propertyA = $a->getChildProperty();
+                $propertyB = $b->getChildProperty();
+                $propertyNamespaceA = $a->getChildPropertyNamespace();
+                $propertyNamespaceB = $b->getChildPropertyNamespace();
+            }
+            if($type == 'entityAssociations'){
+                if($a->getSystemType()->getId() > $b->getSystemType()->getId()){
+                    return 1;
+                }
+                elseif($a->getSystemType()->getId() < $b->getSystemType()->getId()){
+                    return -1;
+                }
+                else{
+                    if($property == $a->getSourceProperty()){
+                        $propertyA = $a->getTargetProperty();
+                        $propertyNamespaceA = $a->getTargetNamespaceForVersion();
+                    }
+                    else{
+                        $propertyA = $a->getSourceProperty();
+                        $propertyNamespaceA = $a->getSourceNamespaceForVersion();
+                    }
+
+                    if($property == $b->getSourceProperty()){
+                        $propertyB = $b->getTargetProperty();
+                        $propertyNamespaceB = $b->getTargetNamespaceForVersion();
+                    }
+                    else{
+                        $propertyB = $b->getSourceProperty();
+                        $propertyNamespaceB =$b->getSourceNamespaceForVersion();
+                    }
+                }
+            }
+
+            if($propertyNamespaceA === $version && $propertyNamespaceB !== $version){
+                return -1;
+            }
+            elseif($propertyNamespaceB === $version && $propertyNamespaceA !== $version){
+                return 1;
+            }
+            else{
+                $prefixA = $propertyNamespaceA->getTopLevelNamespace()->getRootNamespacePrefix();
+                $prefixB = $propertyNamespaceB->getTopLevelNamespace()->getRootNamespacePrefix();
+                $identifierInNamespaceA =  $propertyA->getIdentifierInNamespace();
+                $identifierInNamespaceB =  $propertyB->getIdentifierInNamespace();
+
+                if($prefixA == $prefixB){
+                    if(strlen($identifierInNamespaceA) == strlen($identifierInNamespaceB)){
+                        return strcmp($identifierInNamespaceA, $identifierInNamespaceB);
+                    }
+                    elseif(strlen($identifierInNamespaceA) > strlen($identifierInNamespaceB)){
+                        return 1;
+                    }
+                    elseif(strlen($identifierInNamespaceA) < strlen($identifierInNamespaceB)){
+                        return -1;
+                    }
+                }
+                else{
+                    return strcmp($prefixA, $prefixB);
+                }
+            }
+        }
+
+        // -- Associations Subproperty of
+        $childPropertyAssociations = $propertyVersion->getProperty()->getChildPropertyAssociations()
+            ->filter(function($v) use ($propertyVersion, $namespacesId){
+                return $propertyVersion->getNamespaceForVersion() == $v->getNamespaceForVersion() || in_array($v->getNamespaceForVersion()->getId(), $namespacesId);
+            });
+        $iterator = $childPropertyAssociations->getIterator();
+        $iterator->uasort(function($a, $b) use ($propertyVersion){
+            return sortRelationsByProperties($a, $b, $propertyVersion->getNamespaceForVersion(), 'childPropertyAssociations');
+        });
+        $childPropertyAssociations = new ArrayCollection(iterator_to_array($iterator));
+
+        // -- Associations Superproperty of
+        $parentPropertyAssociations = $propertyVersion->getProperty()->getParentPropertyAssociations()
+            ->filter(function($v) use ($propertyVersion, $namespacesId){
+                return $propertyVersion->getNamespaceForVersion() == $v->getNamespaceForVersion() || in_array($v->getNamespaceForVersion()->getId(), $namespacesId);
+            });
+        $iterator = $parentPropertyAssociations->getIterator();
+        $iterator->uasort(function($a, $b) use ($propertyVersion){
+            return sortRelationsByProperties($a, $b, $propertyVersion->getNamespaceForVersion(), 'parentPropertyAssociations');
+        });
+        $parentPropertyAssociations = new ArrayCollection(iterator_to_array($iterator));
+
+        // -- Relations
+        $entityAssociations = $propertyVersion->getProperty()->getEntityAssociations()
+            ->filter(function($v) use ($propertyVersion, $namespacesId){
+                return $propertyVersion->getNamespaceForVersion() == $v->getNamespaceForVersion() || in_array($v->getNamespaceForVersion()->getId(), $namespacesId);
+            });
+        $iterator = $entityAssociations->getIterator();
+        $iterator->uasort(function($a, $b) use ($propertyVersion){
+            return sortRelationsByProperties($a, $b, $propertyVersion->getNamespaceForVersion(), 'entityAssociations', $propertyVersion->getProperty());
+        });
+        $entityAssociations = new ArrayCollection(iterator_to_array($iterator));
+
         $ancestors = $em->getRepository('AppBundle:Property')->findAncestorsByPropertyVersionAndNamespacesId($propertyVersion, $namespacesId);
         $descendants = $em->getRepository('AppBundle:Property')->findDescendantsByPropertyVersionAndNamespacesId($propertyVersion, $namespacesId);
         $domainRange = $em->getRepository('AppBundle:Property')->findDomainAndRangeByPropertyVersionAndNamespacesId($propertyVersion, $namespacesId);
@@ -406,6 +515,9 @@ class PropertyController extends Controller
             'descendants' => $descendants,
             'domainRange' => $domainRange,
             'relations' => $relations,
+            'parentPropertyAssociations' => $parentPropertyAssociations,
+            'childPropertyAssociations' => $childPropertyAssociations,
+            'entityAssociations' => $entityAssociations,
             'namespacesId' => $namespacesId,
             'namespacesIdFromPropertyVersion' => $namespacesIdFromPropertyVersion,
             'namespacesIdFromUser' => $namespacesIdFromUser
@@ -547,6 +659,114 @@ class PropertyController extends Controller
         $this->get('logger')
             ->info('Showing property: '.$property->getIdentifierInNamespace());
 
+        //Tri
+        // En tête, les relations appartenant à la même version que cette propriété
+        // Puis par identifiant / label
+        // Ensuite, les autres versions
+        // Puis par Préfixe, identifiant / label
+        function sortRelationsByProperties($a, $b, OntoNamespace $version, $type, $property=null){
+            if($type == 'childPropertyAssociations'){
+                $propertyA = $a->getParentProperty();
+                $propertyB = $b->getParentProperty();
+                $propertyNamespaceA = $a->getParentPropertyNamespace();
+                $propertyNamespaceB = $b->getParentPropertyNamespace();
+            }
+            if($type == 'parentPropertyAssociations'){
+                $propertyA = $a->getChildProperty();
+                $propertyB = $b->getChildProperty();
+                $propertyNamespaceA = $a->getChildPropertyNamespace();
+                $propertyNamespaceB = $b->getChildPropertyNamespace();
+            }
+            if($type == 'entityAssociations'){
+                if($a->getSystemType()->getId() > $b->getSystemType()->getId()){
+                    return 1;
+                }
+                elseif($a->getSystemType()->getId() < $b->getSystemType()->getId()){
+                    return -1;
+                }
+                else{
+                    if($property == $a->getSourceProperty()){
+                        $propertyA = $a->getTargetProperty();
+                        $propertyNamespaceA = $a->getTargetNamespaceForVersion();
+                    }
+                    else{
+                        $propertyA = $a->getSourceProperty();
+                        $propertyNamespaceA = $a->getSourceNamespaceForVersion();
+                    }
+
+                    if($property == $b->getSourceProperty()){
+                        $propertyB = $b->getTargetProperty();
+                        $propertyNamespaceB = $b->getTargetNamespaceForVersion();
+                    }
+                    else{
+                        $propertyB = $b->getSourceProperty();
+                        $propertyNamespaceB =$b->getSourceNamespaceForVersion();
+                    }
+                }
+            }
+
+            if($propertyNamespaceA === $version && $propertyNamespaceB !== $version){
+                return -1;
+            }
+            elseif($propertyNamespaceA === $version && $propertyNamespaceB !== $version){
+                return 1;
+            }
+            else{
+                $prefixA = $propertyNamespaceA->getTopLevelNamespace()->getRootNamespacePrefix();
+                $prefixB = $propertyNamespaceB->getTopLevelNamespace()->getRootNamespacePrefix();
+                $identifierInNamespaceA =  $propertyA->getIdentifierInNamespace();
+                $identifierInNamespaceB =  $propertyB->getIdentifierInNamespace();
+
+                if($prefixA == $prefixB){
+                    if(strlen($identifierInNamespaceA) == strlen($identifierInNamespaceB)){
+                        return strcmp($identifierInNamespaceA, $identifierInNamespaceB);
+                    }
+                    elseif(strlen($identifierInNamespaceA) > strlen($identifierInNamespaceB)){
+                        return 1;
+                    }
+                    elseif(strlen($identifierInNamespaceA) < strlen($identifierInNamespaceB)){
+                        return -1;
+                    }
+                }
+                else{
+                    return strcmp($prefixA, $prefixB);
+                }
+            }
+        }
+
+        // -- Associations Subproperty of
+        $childPropertyAssociations = $propertyVersion->getProperty()->getChildPropertyAssociations()
+            ->filter(function($v) use ($propertyVersion, $namespacesId){
+                return $propertyVersion->getNamespaceForVersion() == $v->getNamespaceForVersion() || in_array($v->getNamespaceForVersion()->getId(), $namespacesId);
+            });
+        $iterator = $childPropertyAssociations->getIterator();
+        $iterator->uasort(function($a, $b) use ($propertyVersion){
+            return sortRelationsByProperties($a, $b, $propertyVersion->getNamespaceForVersion(), 'childPropertyAssociations');
+        });
+        $childPropertyAssociations = new ArrayCollection(iterator_to_array($iterator));
+
+        // -- Associations Superproperty of
+        $parentPropertyAssociations = $propertyVersion->getProperty()->getParentPropertyAssociations()
+            ->filter(function($v) use ($propertyVersion, $namespacesId){
+                return $propertyVersion->getNamespaceForVersion() == $v->getNamespaceForVersion() || in_array($v->getNamespaceForVersion()->getId(), $namespacesId);
+            });
+        $iterator = $parentPropertyAssociations->getIterator();
+        $iterator->uasort(function($a, $b) use ($propertyVersion){
+            return sortRelationsByProperties($a, $b, $propertyVersion->getNamespaceForVersion(), 'parentPropertyAssociations');
+        });
+        $parentPropertyAssociations = new ArrayCollection(iterator_to_array($iterator));
+
+        // -- Relations
+        $entityAssociations = $propertyVersion->getProperty()->getEntityAssociations()
+            ->filter(function($v) use ($propertyVersion, $namespacesId){
+                return $propertyVersion->getNamespaceForVersion() == $v->getNamespaceForVersion() || in_array($v->getNamespaceForVersion()->getId(), $namespacesId);
+            });
+        $iterator = $entityAssociations->getIterator();
+        $iterator->uasort(function($a, $b) use ($propertyVersion){
+            return sortRelationsByProperties($a, $b, $propertyVersion->getNamespaceForVersion(), 'entityAssociations', $propertyVersion->getProperty());
+        });
+        $entityAssociations = new ArrayCollection(iterator_to_array($iterator));
+
         //If validation status is in validation request or is validation, we can't allow edition of the entity and we rended the show template
         if (!is_null($propertyVersion->getValidationStatus()) && ($propertyVersion->getValidationStatus()->getId() === 26 || $propertyVersion->getValidationStatus()->getId() === 28)) {
             return $this->render('property/show.html.twig', [
@@ -555,6 +775,9 @@ class PropertyController extends Controller
                 'descendants' => $descendants,
                 'domainRange' => $domainRange,
                 'relations' => $relations,
+                'parentPropertyAssociations' => $parentPropertyAssociations,
+                'childPropertyAssociations' => $childPropertyAssociations,
+                'entityAssociations' => $entityAssociations,
                 'namespacesId' => $namespacesId
             ]);
         }
@@ -565,6 +788,9 @@ class PropertyController extends Controller
             'descendants' => $descendants,
             'domainRange' => $domainRange,
             'relations' => $relations,
+            'parentPropertyAssociations' => $parentPropertyAssociations,
+            'childPropertyAssociations' => $childPropertyAssociations,
+            'entityAssociations' => $entityAssociations,
             'propertyForm' => $form->createView(),
             'propertyIdentifierForm' => $formIdentifier->createView(),
             'propertyUriIdentifierForm' => $formUriIdentifier->createView(),

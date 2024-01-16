@@ -94,22 +94,14 @@
                 <h3>{{ classVersion.invertedLabel() }}</h3>
                 <div class="container">
                     {# Subclass of #}
-                    {% set isSubclassOf = false %}
-                    {% for association in classVersion.class.childClassAssociations
-                        if association.namespaceForVersion.id in namespacesId %}
-                        {% set isSubclassOf = true %}
-                    {% endfor %}
-                    {% if isSubclassOf %}
+                    {% if childClassAssociations|length > 0 %}
                         <div class="row">
                             <div class="col-lg-2">
                                 <p>Subclass of:</p>
                             </div>
                             <div class="col-lg-10">
                                 <ul class="list-unstyled">
-                                    {# Filtrer les associations is_subclass_of avec namespacesId #}
-                                    {% for association in classVersion.class.childClassAssociations
-                                        if association.namespaceForVersion.id in namespacesId %}
-
+                                    {% for association in childClassAssociations %}
                                         {# Initialisation #}
                                         {% set isGoodNamespace = true %}
                                         {% set route = 'class_show_with_version' %}
@@ -132,22 +124,14 @@
                     {% endif %}
 
                     {# Superclass of #}
-                    {% set isSuperclassOf = false %}
-                    {% for association in classVersion.class.parentClassAssociations
-                        if association.namespaceForVersion.id in namespacesId %}
-                        {% set isSuperclassOf = true %}
-                    {% endfor %}
-                    {% if isSuperclassOf %}
+                    {% if parentClassAssociations|length > 0 %}
                         <div class="row">
                             <div class="col-lg-2">
                                 <p>Superclass of:</p>
                             </div>
                             <div class="col-lg-10">
                                 <ul class="list-unstyled">
-                                    {# Filtrer les associations is_subclass_of avec namespacesId #}
-                                    {% for association in classVersion.class.parentClassAssociations
-                                        if association.namespaceForVersion.id in namespacesId %}
-
+                                    {% for association in parentClassAssociations %}
                                         {# Initialisation #}
                                         {% set isGoodNamespace = true %}
                                         {% set route = 'class_show_with_version' %}
@@ -171,9 +155,7 @@
 
                     {# Relations #}
                     {% set isRelated = false %}
-                    {% for relation in classVersion.class.entityAssociations
-                        if relation.namespaceForVersion.id in namespacesId
-                        and relation.systemType.id in [4,19] %}
+                    {% for relation in entityAssociations if relation.systemType.id in [4,19] %}
                         {% set isRelated = true %}
                     {% endfor %}
                     {% if isRelated %}
@@ -183,11 +165,7 @@
                             </div>
                             <div class="col-lg-10">
                                 <ul class="list-unstyled">
-                                    {# Filtrer les associations entity_associations avec namespacesId #}
-                                    {# SystemTypes utilisés: 4=owl:equivalentClass, 19=owl:DisjointWith #}
-                                    {% for relation in classVersion.class.entityAssociations
-                                        if relation.namespaceForVersion.id in namespacesId
-                                        and relation.systemType.id in [4,19] %}
+                                    {% for relation in entityAssociations if relation.systemType.id in [4,19] %}
                                         <li>{{ relation.systemType.standardLabel }}
                                             {% if relation.sourceClass.id == classVersion.class.id %}
                                                 {# La classe affichée est "source", on cherche le "target" #}
