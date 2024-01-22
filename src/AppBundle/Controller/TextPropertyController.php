@@ -233,7 +233,8 @@ class TextPropertyController extends Controller
                 $redirectToRoute = 'class_edit';
             }
             else{
-                $redirectToRoute = 'class_show';
+                $redirectToRoute = 'class_show_with_version';
+                $redirectToRouteVersion = $associatedNamespace->getId();
             }
             $redirectToRouteFragment = 'definition';
             $objectId = $associatedClass->getId();
@@ -253,7 +254,8 @@ class TextPropertyController extends Controller
                 $redirectToRoute = 'property_edit';
             }
             else{
-                $redirectToRoute = 'property_show';
+                $redirectToRoute = 'property_show_with_version';
+                $redirectToRouteVersion = $associatedNamespace->getId();
             }
             $redirectToRouteFragment = 'definition';
             $objectId = $associatedProperty->getId();
@@ -401,6 +403,13 @@ class TextPropertyController extends Controller
 
             $this->addFlash('success',  $textProperty->getSystemType().' created!');
 
+            if(isset($redirectToRouteVersion)){
+                return $this->redirectToRoute($redirectToRoute, [
+                    'id' => $objectId,
+                    'namespaceFromUrlId' => $redirectToRouteVersion,
+                    '_fragment' => $redirectToRouteFragment
+                ]);
+            }
             return $this->redirectToRoute($redirectToRoute, [
                 'id' => $objectId,
                 '_fragment' => $redirectToRouteFragment
