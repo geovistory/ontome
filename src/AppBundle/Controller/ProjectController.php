@@ -370,46 +370,50 @@ class ProjectController  extends Controller
 
                             // Scope note: un par langue
                             $langCollection = new ArrayCollection();
-                            foreach($nodeXmlClass->textProperties->scopeNote as $keySn => $nodeXmlScopeNote) {
-                                if(!$langCollection->contains((string)$nodeXmlScopeNote->attributes()->lang)){
-                                    $langCollection->add((string)$nodeXmlScopeNote->attributes()->lang);
-                                }
-                                else{
-                                    var_dump($langCollection);
-                                    echo (string)$nodeXmlScopeNote->attributes()->lang;
-                                    echo "- 2 scopes notes au moins ont la même langue. j".$newClassVersion->getClass()->getIdentifierInNamespace();
-                                    die;
-                                }
-                                $scopeNote = new TextProperty();
-                                $scopeNote->setClass($class);
-                                $scopeNote->setNamespaceForVersion($newNamespaceVersion);
-                                $scopeNote->setTextProperty((string)$nodeXmlScopeNote);
-                                $scopeNote->setLanguageIsoCode((string)$nodeXmlScopeNote->attributes()->lang);
-                                $scopeNote->setSystemType($systemTypeScopeNote);
-                                $scopeNote->setCreator($this->getUser());
-                                $scopeNote->setModifier($this->getUser());
-                                $scopeNote->setCreationTime(new \DateTime('now'));
-                                $scopeNote->setModificationTime(new \DateTime('now'));
+                            if(!is_null($nodeXmlClass->textProperties->scopeNote)){
+                                foreach($nodeXmlClass->textProperties->scopeNote as $keySn => $nodeXmlScopeNote) {
+                                    if(!$langCollection->contains((string)$nodeXmlScopeNote->attributes()->lang)){
+                                        $langCollection->add((string)$nodeXmlScopeNote->attributes()->lang);
+                                    }
+                                    else{
+                                        var_dump($langCollection);
+                                        echo (string)$nodeXmlScopeNote->attributes()->lang;
+                                        echo "- 2 scopes notes au moins ont la même langue. j".$newClassVersion->getClass()->getIdentifierInNamespace();
+                                        die;
+                                    }
+                                    $scopeNote = new TextProperty();
+                                    $scopeNote->setClass($class);
+                                    $scopeNote->setNamespaceForVersion($newNamespaceVersion);
+                                    $scopeNote->setTextProperty((string)$nodeXmlScopeNote);
+                                    $scopeNote->setLanguageIsoCode((string)$nodeXmlScopeNote->attributes()->lang);
+                                    $scopeNote->setSystemType($systemTypeScopeNote);
+                                    $scopeNote->setCreator($this->getUser());
+                                    $scopeNote->setModifier($this->getUser());
+                                    $scopeNote->setCreationTime(new \DateTime('now'));
+                                    $scopeNote->setModificationTime(new \DateTime('now'));
 
-                                $class->addTextProperty($scopeNote);
-                                $em->persist($scopeNote);
+                                    $class->addTextProperty($scopeNote);
+                                    $em->persist($scopeNote);
+                                }
                             }
 
                             // Examples
-                            foreach($nodeXmlClass->textProperties->example as $keyEx => $nodeXmlExample){
-                                $example = new TextProperty();
-                                $example->setClass($class);
-                                $example->setNamespaceForVersion($newNamespaceVersion);
-                                $example->setTextProperty("<p>".(string)$nodeXmlExample."</p>");
-                                $example->setLanguageIsoCode((string)$nodeXmlExample->attributes()->lang);
-                                $example->setSystemType($systemTypeExample);
-                                $example->setCreator($this->getUser());
-                                $example->setModifier($this->getUser());
-                                $example->setCreationTime(new \DateTime('now'));
-                                $example->setModificationTime(new \DateTime('now'));
+                            if(!is_null($nodeXmlClass->textProperties->example)) {
+                                foreach ($nodeXmlClass->textProperties->example as $keyEx => $nodeXmlExample) {
+                                    $example = new TextProperty();
+                                    $example->setClass($class);
+                                    $example->setNamespaceForVersion($newNamespaceVersion);
+                                    $example->setTextProperty("<p>" . (string)$nodeXmlExample . "</p>");
+                                    $example->setLanguageIsoCode((string)$nodeXmlExample->attributes()->lang);
+                                    $example->setSystemType($systemTypeExample);
+                                    $example->setCreator($this->getUser());
+                                    $example->setModifier($this->getUser());
+                                    $example->setCreationTime(new \DateTime('now'));
+                                    $example->setModificationTime(new \DateTime('now'));
 
-                                $class->addTextProperty($example);
-                                $em->persist($example);
+                                    $class->addTextProperty($example);
+                                    $em->persist($example);
+                                }
                             }
 
                             // Label
@@ -460,11 +464,10 @@ class ProjectController  extends Controller
                             }
                         }
 
-                        foreach($nodeXmlProperties->children() as $key => $nodeXmlProperty){
-                            if(!$arrayIdentifiers->contains((string)$nodeXmlProperty->identifierInNamespace)){
+                        foreach($nodeXmlProperties->children() as $key => $nodeXmlProperty) {
+                            if (!$arrayIdentifiers->contains((string)$nodeXmlProperty->identifierInNamespace)) {
                                 $arrayIdentifiers->add((string)$nodeXmlProperty->identifierInNamespace);
-                            }
-                            else{
+                            } else {
                                 echo "2 properties au moins ont le même identifiants";
                                 die;
                             }
@@ -472,16 +475,16 @@ class ProjectController  extends Controller
                             // Property "Root"
                             $property = null;
                             // Vérifier si la propriété n'existe déjà pas dans un des namespaces du root namespace (comparaison par identifierInNamespace)
-                            foreach($namespaceRoot->getChildVersions() as $childNamespace){
-                                foreach($childNamespace->getProperties() as $tempProperty){
-                                    if($tempProperty->getIdentifierInNamespace() == (string)$nodeXmlProperty->identifierInNamespace){
+                            foreach ($namespaceRoot->getChildVersions() as $childNamespace) {
+                                foreach ($childNamespace->getProperties() as $tempProperty) {
+                                    if ($tempProperty->getIdentifierInNamespace() == (string)$nodeXmlProperty->identifierInNamespace) {
                                         $property = $tempProperty;
                                         break; // Inutile d'aller plus loin la première vraie égalité suffit
                                     }
                                 }
                             }
 
-                            if(is_null($property)){
+                            if (is_null($property)) {
                                 // On a donc une nouvelle propriété
                                 $property = new Property();
                                 $property->setIdentifierInNamespace((string)$nodeXmlProperty->identifierInNamespace);
@@ -502,29 +505,28 @@ class ProjectController  extends Controller
                             // Quelle version Domain ?
                             $xmlDomainNamespace = $nodeXmlProperty->hasDomain->attributes()->referenceNamespace;
                             //Si attribut referenceNamespace existe, utiliser cet id, sinon ce nouveau namespace
-                            if(!is_null($xmlDomainNamespace)){
+                            if (!is_null($xmlDomainNamespace)) {
                                 $domainNamespace = $em->getRepository("AppBundle:OntoNamespace")
                                     ->findOneBy(array("id" => (integer)$xmlDomainNamespace));
-                                if(!$idsReferences->contains((integer)$xmlDomainNamespace)){
+                                if (!$idsReferences->contains((integer)$xmlDomainNamespace)) {
                                     echo "Un namespace de référence pour hasDomain n'a pas été déclaré avec la balise referenceNamespace";
                                     die;
                                 }
-                            }
-                            else{
+                            } else {
                                 $domainNamespace = $newNamespaceVersion;
                             }
                             $newPropertyVersion->setDomainNamespace($domainNamespace);
 
                             // Trouver la classe
                             $domain = null;
-                            foreach($domainNamespace->getClasses() as $tempClass){
-                                if($tempClass->getIdentifierInNamespace() == (string)$nodeXmlProperty->hasDomain){
+                            foreach ($domainNamespace->getClasses() as $tempClass) {
+                                if ($tempClass->getIdentifierInNamespace() == (string)$nodeXmlProperty->hasDomain) {
                                     $domain = $tempClass;
                                     break;
                                 }
                             }
-                            if(is_null($domain)){
-                                echo (string)$nodeXmlProperty->identifierInNamespace." Domain ".(string)$nodeXmlProperty->hasDomain." n'a pas été trouvé";
+                            if (is_null($domain)) {
+                                echo (string)$nodeXmlProperty->identifierInNamespace . " Domain " . (string)$nodeXmlProperty->hasDomain . " n'a pas été trouvé";
                                 die;
                             }
                             $newPropertyVersion->setDomain($domain);
@@ -532,41 +534,39 @@ class ProjectController  extends Controller
                             // Quelle version Range ?
                             $xmlRangeNamespace = $nodeXmlProperty->hasRange->attributes()->referenceNamespace;
                             //Si attribut referenceNamespace existe, utiliser cet id, sinon ce nouveau namespace
-                            if(!is_null($xmlRangeNamespace)){
+                            if (!is_null($xmlRangeNamespace)) {
                                 $rangeNamespace = $em->getRepository("AppBundle:OntoNamespace")
                                     ->findOneBy(array("id" => (integer)$xmlRangeNamespace));
-                                if(!$idsReferences->contains((integer)$xmlRangeNamespace)){
+                                if (!$idsReferences->contains((integer)$xmlRangeNamespace)) {
                                     echo "Un namespace de référence pour hasRange n'a pas été déclaré avec la balise referenceNamespace";
                                     die;
                                 }
-                            }
-                            else{
+                            } else {
                                 $rangeNamespace = $newNamespaceVersion;
                             }
                             $newPropertyVersion->setRangeNamespace($rangeNamespace);
 
                             // Trouver la classe
                             $range = null;
-                            foreach($rangeNamespace->getClasses() as $tempClass){
-                                if($tempClass->getIdentifierInNamespace() == (string)$nodeXmlProperty->hasRange){
+                            foreach ($rangeNamespace->getClasses() as $tempClass) {
+                                if ($tempClass->getIdentifierInNamespace() == (string)$nodeXmlProperty->hasRange) {
                                     $range = $tempClass;
                                     break;
                                 }
                             }
-                            if(is_null($range)){
-                                echo (string)$nodeXmlProperty->identifierInNamespace." Range ".(string)$nodeXmlProperty->hasRange." n'a pas été trouvé";
+                            if (is_null($range)) {
+                                echo (string)$nodeXmlProperty->identifierInNamespace . " Range " . (string)$nodeXmlProperty->hasRange . " n'a pas été trouvé";
                                 die;
                             }
                             $newPropertyVersion->setRange($range);
 
                             $domainMinQuantifier = null;
                             // La balise est dans le XML ?
-                            if(isset($nodeXmlProperty->domainInstancesMinQuantifier)){
+                            if (isset($nodeXmlProperty->domainInstancesMinQuantifier)) {
                                 //Inutile de vérifier sa valeur, le schéma XSD l'a déjà fait
-                                if((string)$nodeXmlProperty->domainInstancesMinQuantifier == 'n'){
+                                if ((string)$nodeXmlProperty->domainInstancesMinQuantifier == 'n') {
                                     $domainMinQuantifier = -1;
-                                }
-                                else{
+                                } else {
                                     $domainMinQuantifier = (integer)$nodeXmlProperty->domainInstancesMinQuantifier;
                                 }
                             }
@@ -574,12 +574,11 @@ class ProjectController  extends Controller
 
                             $domainMaxQuantifier = null;
                             // La balise est dans le XML ?
-                            if(isset($nodeXmlProperty->domainInstancesMaxQuantifier)){
+                            if (isset($nodeXmlProperty->domainInstancesMaxQuantifier)) {
                                 //Inutile de vérifier sa valeur, le schéma XSD l'a déjà fait
-                                if((string)$nodeXmlProperty->domainInstancesMaxQuantifier == 'n'){
+                                if ((string)$nodeXmlProperty->domainInstancesMaxQuantifier == 'n') {
                                     $domainMaxQuantifier = -1;
-                                }
-                                else{
+                                } else {
                                     $domainMaxQuantifier = (integer)$nodeXmlProperty->domainInstancesMaxQuantifier;
                                 }
                             }
@@ -587,12 +586,11 @@ class ProjectController  extends Controller
 
                             $rangeMinQuantifier = null;
                             // La balise est dans le XML ?
-                            if(isset($nodeXmlProperty->rangeInstancesMinQuantifier)){
+                            if (isset($nodeXmlProperty->rangeInstancesMinQuantifier)) {
                                 //Inutile de vérifier sa valeur, le schéma XSD l'a déjà fait
-                                if((string)$nodeXmlProperty->rangeInstancesMinQuantifier == 'n'){
+                                if ((string)$nodeXmlProperty->rangeInstancesMinQuantifier == 'n') {
                                     $rangeMinQuantifier = -1;
-                                }
-                                else{
+                                } else {
                                     $rangeMinQuantifier = (integer)$nodeXmlProperty->rangeInstancesMinQuantifier;
                                 }
                             }
@@ -600,12 +598,11 @@ class ProjectController  extends Controller
 
                             $rangeMaxQuantifier = null;
                             // La balise est dans le XML ?
-                            if(isset($nodeXmlProperty->rangeInstancesMaxQuantifier)){
+                            if (isset($nodeXmlProperty->rangeInstancesMaxQuantifier)) {
                                 //Inutile de vérifier sa valeur, le schéma XSD l'a déjà fait
-                                if((string)$nodeXmlProperty->rangeInstancesMaxQuantifier == 'n'){
+                                if ((string)$nodeXmlProperty->rangeInstancesMaxQuantifier == 'n') {
                                     $rangeMaxQuantifier = -1;
-                                }
-                                else{
+                                } else {
                                     $rangeMaxQuantifier = (integer)$nodeXmlProperty->rangeInstancesMaxQuantifier;
                                 }
                             }
@@ -621,20 +618,19 @@ class ProjectController  extends Controller
                             $defaultStandardLabelEn = null;
                             $defaultStandardLabelFr = null;
                             $defaultStandardLabel = null;
-                            foreach($nodeXmlProperty->label as $keyLabel => $nodeXmlLabel){
+                            foreach ($nodeXmlProperty->label as $keyLabel => $nodeXmlLabel) {
                                 $propertyLabel = new Label();
                                 $propertyLabel->setProperty($property);
                                 $propertyLabel->setNamespaceForVersion($newNamespaceVersion);
                                 $propertyLabel->setLabel((string)$nodeXmlLabel->standardLabel);
-                                if(!empty((string)$nodeXmlLabel->inverseLabel)){
+                                if (!empty((string)$nodeXmlLabel->inverseLabel)) {
                                     $propertyLabel->setInverseLabel((string)$nodeXmlLabel->inverseLabel);
                                 }
                                 $propertyLabel->setLanguageIsoCode((string)$nodeXmlLabel->attributes()->lang);
-                                if(!$langs->contains((string)$nodeXmlLabel->attributes()->lang)){
+                                if (!$langs->contains((string)$nodeXmlLabel->attributes()->lang)) {
                                     $langs->add((string)$nodeXmlLabel->attributes()->lang);
                                     $propertyLabel->setIsStandardLabelForLanguage(true);
-                                }
-                                else{
+                                } else {
                                     $propertyLabel->setIsStandardLabelForLanguage(false);
                                 }
                                 $propertyLabel->setCreator($this->getUser());
@@ -645,32 +641,30 @@ class ProjectController  extends Controller
                                 $property->addLabel($propertyLabel);
                                 $em->persist($propertyLabel);
 
-                                if(is_null($defaultStandardLabelEn) || $propertyLabel->getLanguageIsoCode() == "en"){
+                                if (is_null($defaultStandardLabelEn) || $propertyLabel->getLanguageIsoCode() == "en") {
                                     $defaultStandardLabelEn = (string)$nodeXmlLabel->standardLabel;
-                                    if(!is_null($propertyLabel->getInverseLabel())){
-                                        $defaultStandardLabelEn.= " (".$propertyLabel->getInverseLabel().")";
+                                    if (!is_null($propertyLabel->getInverseLabel())) {
+                                        $defaultStandardLabelEn .= " (" . $propertyLabel->getInverseLabel() . ")";
                                     }
                                 }
-                                if(is_null($defaultStandardLabelFr) || $propertyLabel->getLanguageIsoCode() == "fr"){
+                                if (is_null($defaultStandardLabelFr) || $propertyLabel->getLanguageIsoCode() == "fr") {
                                     $defaultStandardLabelFr = (string)$nodeXmlLabel->standardLabel;
-                                    if(!is_null($propertyLabel->getInverseLabel())){
-                                        $defaultStandardLabelFr.= " (".$propertyLabel->getInverseLabel().")";
+                                    if (!is_null($propertyLabel->getInverseLabel())) {
+                                        $defaultStandardLabelFr .= " (" . $propertyLabel->getInverseLabel() . ")";
                                     }
                                 }
-                                if(is_null($defaultStandardLabel)){
+                                if (is_null($defaultStandardLabel)) {
                                     $defaultStandardLabel = (string)$nodeXmlLabel->standardLabel;
-                                    if(!is_null($propertyLabel->getInverseLabel())){
-                                        $defaultStandardLabel.= " (".$propertyLabel->getInverseLabel().")";
+                                    if (!is_null($propertyLabel->getInverseLabel())) {
+                                        $defaultStandardLabel .= " (" . $propertyLabel->getInverseLabel() . ")";
                                     }
                                 }
                             }
-                            if(!is_null($defaultStandardLabelEn)){
+                            if (!is_null($defaultStandardLabelEn)) {
                                 $newPropertyVersion->setStandardLabel($defaultStandardLabelEn);
-                            }
-                            elseif(!is_null($defaultStandardLabelFr)){
+                            } elseif (!is_null($defaultStandardLabelFr)) {
                                 $newPropertyVersion->setStandardLabel($defaultStandardLabelEn);
-                            }
-                            else{
+                            } else {
                                 $newPropertyVersion->setStandardLabel($defaultStandardLabel);
                             }
 
@@ -679,43 +673,47 @@ class ProjectController  extends Controller
 
                             // Scope note: un par langue
                             $langCollection = new ArrayCollection();
-                            foreach($nodeXmlProperty->textProperties->scopeNote as $keySn => $nodeXmlScopeNote) {
-                                if (!$langCollection->contains((string)$nodeXmlScopeNote->attributes()->lang)) {
-                                    $langCollection->add((string)$nodeXmlScopeNote->attributes()->lang);
-                                } else {
-                                    var_dump($langCollection);
-                                    echo (string)$nodeXmlScopeNote->attributes()->lang;
-                                    echo "- 2 scopes notes au moins ont la même langue. j" . $newClassVersion->getClass()->getIdentifierInNamespace();
-                                    die;
-                                }
-                                $scopeNote = new TextProperty();
-                                $scopeNote->setProperty($property);
-                                $scopeNote->setNamespaceForVersion($newNamespaceVersion);
-                                $scopeNote->setTextProperty((string)$nodeXmlScopeNote);
-                                $scopeNote->setLanguageIsoCode((string)$nodeXmlScopeNote->attributes()->lang);
-                                $scopeNote->setSystemType($systemTypeScopeNote);
-                                $scopeNote->setCreator($this->getUser());
-                                $scopeNote->setModifier($this->getUser());
-                                $scopeNote->setCreationTime(new \DateTime('now'));
-                                $scopeNote->setModificationTime(new \DateTime('now'));
+                            if (!is_null($nodeXmlProperty->textProperties->scopeNote)) {
+                                foreach ($nodeXmlProperty->textProperties->scopeNote as $keySn => $nodeXmlScopeNote) {
+                                    if (!$langCollection->contains((string)$nodeXmlScopeNote->attributes()->lang)) {
+                                        $langCollection->add((string)$nodeXmlScopeNote->attributes()->lang);
+                                    } else {
+                                        var_dump($langCollection);
+                                        echo (string)$nodeXmlScopeNote->attributes()->lang;
+                                        echo "- 2 scopes notes au moins ont la même langue. j" . $newClassVersion->getClass()->getIdentifierInNamespace();
+                                        die;
+                                    }
+                                    $scopeNote = new TextProperty();
+                                    $scopeNote->setProperty($property);
+                                    $scopeNote->setNamespaceForVersion($newNamespaceVersion);
+                                    $scopeNote->setTextProperty((string)$nodeXmlScopeNote);
+                                    $scopeNote->setLanguageIsoCode((string)$nodeXmlScopeNote->attributes()->lang);
+                                    $scopeNote->setSystemType($systemTypeScopeNote);
+                                    $scopeNote->setCreator($this->getUser());
+                                    $scopeNote->setModifier($this->getUser());
+                                    $scopeNote->setCreationTime(new \DateTime('now'));
+                                    $scopeNote->setModificationTime(new \DateTime('now'));
 
-                                $property->addTextProperty($scopeNote);
-                                $em->persist($scopeNote);
+                                    $property->addTextProperty($scopeNote);
+                                    $em->persist($scopeNote);
+                                }
                             }
                             // Examples
-                            foreach($nodeXmlProperty->textProperties->example as $keyEx => $nodeXmlExample){
-                                $example = new TextProperty();
-                                $example->setProperty($property);
-                                $example->setNamespaceForVersion($newNamespaceVersion);
-                                $example->setTextProperty("<p>".(string)$nodeXmlExample."</p>");
-                                $example->setLanguageIsoCode((string)$nodeXmlExample->attributes()->lang);
-                                $example->setSystemType($systemTypeExample);
-                                $example->setCreator($this->getUser());
-                                $example->setModifier($this->getUser());
-                                $example->setCreationTime(new \DateTime('now'));
-                                $example->setModificationTime(new \DateTime('now'));
-                                $property->addTextProperty($example);
-                                $em->persist($example);
+                            if (!is_null($nodeXmlProperty->textProperties->example)) {
+                                foreach ($nodeXmlProperty->textProperties->example as $keyEx => $nodeXmlExample) {
+                                    $example = new TextProperty();
+                                    $example->setProperty($property);
+                                    $example->setNamespaceForVersion($newNamespaceVersion);
+                                    $example->setTextProperty("<p>" . (string)$nodeXmlExample . "</p>");
+                                    $example->setLanguageIsoCode((string)$nodeXmlExample->attributes()->lang);
+                                    $example->setSystemType($systemTypeExample);
+                                    $example->setCreator($this->getUser());
+                                    $example->setModifier($this->getUser());
+                                    $example->setCreationTime(new \DateTime('now'));
+                                    $example->setModificationTime(new \DateTime('now'));
+                                    $property->addTextProperty($example);
+                                    $em->persist($example);
+                                }
                             }
                         }
 
