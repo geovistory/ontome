@@ -597,12 +597,14 @@
                         <th>Property URI example</th>
                     </tr>
                     <tr>
-                        <td>{{ namespace.uriParameterStrings.label }}</td>
+                        <td id="parameterUri">{{ namespace.uriParameterStrings.label }}</td>
                         <td>{{ namespace.displayURI }}{{ namespace.uriParameterStrings.classExample }}</td>
                         <td>{{ namespace.displayURI }}{{ namespace.uriParameterStrings.propertyExample }}</td>
                     </tr>
+                    <tr id="noParameterUriMessage">
+                        <td colspan="3" class="text-muted">So that no entity is without a URI, the URIs will be automatically pre-filled with the entity identifier, but can be freely modified.</td>
+                    </tr>
                 </table>
-                <p>So that no entity is without a URI, the URIs will be automatically pre-filled with the entity identifier, but can be freely modified.</p>
                 {% endif %}
             </div>
             {% endif %}
@@ -1388,6 +1390,13 @@
                 }
                 $('#example-cardinality').html(strCardi);
             });
+
+            // Message avertissement pour no parameter uri
+            if($('#parameterUri').text().trim() === 'No parameter') {
+                $('#noParameterUriMessage').show();
+            } else {
+                $('#noParameterUriMessage').hide();
+            }
 
             //-- EXPORT DOCX --
             $('.btn-export-disabled').hide();
