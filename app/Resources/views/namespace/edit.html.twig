@@ -887,10 +887,10 @@
                             <td>{{ namespace.displayURI }}<span id="classExample">{{ namespace.uriParameterStrings.classExample }}</span></td>
                             <td>{{ namespace.displayURI }}<span id="propertyExample">{{ namespace.uriParameterStrings.propertyExample }}</span></td>
                         </tr>
+                        <tr id="noParameterUriMessage"><td colspan="3" class="text-muted">So that no entity is without a URI, the URIs will be automatically pre-filled with the entity identifier, but can be freely modified.</td></tr>
                     </table>
                     <p><button type="submit" class="btn btn-primary" formnovalidate><i class="fas fa-save"></i> Save</button></p>
                     {{ form_end(namespaceUriParameterForm) }}
-                    <p>So that no entity is without a URI, the URIs will be automatically pre-filled with the entity identifier, but can be freely modified.</p>
                 {% endif %}
             </div>
             {% endif %}
@@ -2096,7 +2096,22 @@
             $('#example-cardinality').html(strCardi);
         });
 
-
+        // Message avertissement pour no parameter uri
+        if($('#namespace_uri_parameter_form_uriParameter').val() === '3') {
+            $('#noParameterUriMessage').show();
+        } else {
+            $('#noParameterUriMessage').hide();
+        }
+        $('#namespace_uri_parameter_form_uriParameter').change(function(){
+            // Vérifier si l'option sélectionnée a la valeur '3'
+            if($(this).val() === '3') {
+                // Si oui, cacher l'élément avec l'ID 'noParameterUriMessage'
+                $('#noParameterUriMessage').show();
+            } else {
+                // Sinon, afficher l'élément
+                $('#noParameterUriMessage').hide();
+            }
+        });
 
         //-- EXPORT DOCX --
         $('.btn-export-disabled').hide();
