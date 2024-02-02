@@ -286,6 +286,17 @@ class PropertyAssociationController extends Controller
         //Denied access if not an authorized validator
         $this->denyAccessUnlessGranted('validate', $propertyAssociation->getChildProperty()->getPropertyVersionForDisplay());
 
+        //Verifier que les références sont cohérents
+        $nsRefsPropertyAssociation = $propertyAssociation->getNamespaceForVersion()->getAllReferencedNamespaces();
+        $nsParent = $propertyAssociation->getParentPropertyNamespace();
+        $nsChild = $propertyAssociation->getChildPropertyNamespace();
+        if(!$nsRefsPropertyAssociation->contains($nsParent) || !$nsRefsPropertyAssociation->contains($nsChild)){
+            $uriNamespaceMismatches = $this->generateUrl('namespace_show', ['id' => $propertyAssociation->getNamespaceForVersion()->getId(), '_fragment' => 'mismatches']);
+            $this->addFlash('warning', 'This relation can\'t be validated. Check <a href="'.$uriNamespaceMismatches.'">mismatches</a>.');
+            return $this->redirectToRoute('class_association_show', [
+                'id' => $propertyAssociation->getId()
+            ]);
+        }
 
         $propertyAssociation->setModifier($this->getUser());
 
