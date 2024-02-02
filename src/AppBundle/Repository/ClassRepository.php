@@ -10,6 +10,7 @@ namespace AppBundle\Repository;
 
 use AppBundle\Entity\OntoClass;
 use AppBundle\Entity\OntoClassVersion;
+use AppBundle\Entity\OntoNamespace;
 use AppBundle\Entity\Profile;
 use AppBundle\Entity\Project;
 use AppBundle\Entity\Property;
@@ -267,17 +268,28 @@ class ClassRepository extends EntityRepository
 
     /**
      * @param OntoClass $class
+     * @param OntoNamespace $namespace
      * @return array
      * @throws \Doctrine\DBAL\DBALException
      */
-    public function findClassesGraphById(OntoClass $class){
+    public function findClassesGraphById(OntoClass $class, OntoNamespace $namespace){
         $conn = $this->getEntityManager()
             ->getConnection();
 
-        $sql = "SELECT array_to_json(array_agg(result)) AS json FROM (SELECT pk_target AS id, pk_target AS real_id, replace(target_identifier, '_',' ') AS name, pk_source AS pk_parent, pk_source AS parent_id, source_identifier AS parent_name, depth, link_type FROM che.get_classes_rows_for_graph (:class)) result;";
+        $sql = "SELECT array_to_json(array_agg(result)) AS json 
+                FROM (SELECT pk_target AS id, 
+                             pk_target AS real_id, 
+                             replace(target_identifier, '_',' ') AS name, 
+                             pk_source AS pk_parent, 
+                             pk_source AS parent_id, 
+                             source_identifier AS parent_name, 
+                             depth, link_type,
+                             identifier_in_namespace AS property_identifier, 
+                             standard_label AS property_label
+                FROM che.get_classes_rows_for_graph(:class, :namespace)) result;";
 
         $stmt = $conn->prepare($sql);
-        $stmt->execute(array('class' => $class->getId()));
+        $stmt->execute(array('class' => $class->getId(), 'namespace' => $namespace->getId()));
 
         return $stmt->fetchAll();
     }
