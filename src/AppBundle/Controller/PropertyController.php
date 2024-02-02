@@ -538,7 +538,8 @@ class PropertyController extends Controller
         $nsRange = $propertyVersion->getRangeNamespace();
         if(!$nsRefsProperty->contains($nsDomain) || !$nsRefsProperty->contains($nsRange)){
             $uriNamespaceMismatches = $this->generateUrl('namespace_show', ['id' => $propertyVersion->getNamespaceForVersion()->getId(), '_fragment' => 'mismatches']);
-            $this->addFlash('warning', 'This property can\'t be validated. Check <a href="'.$uriNamespaceMismatches.'">mismatches</a>.');            return $this->redirectToRoute('property_show', [
+            $this->addFlash('warning', 'This property can\'t be validated. Check <a href="'.$uriNamespaceMismatches.'">mismatches</a>.');
+            return $this->redirectToRoute('property_show', [
                 'id' => $propertyVersion->getProperty()->getId()
             ]);
         }
