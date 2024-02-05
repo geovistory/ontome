@@ -176,6 +176,10 @@ class ClassController extends Controller
         }
 
         if(!$namespace->getTopLevelNamespace()->getIsExternalNamespace()){
+            if(empty($identifierInUriPrefilled)){
+                // Si vide (à cause gestionnaire automatique désactivée)
+                $identifierInUriPrefilled = 'identifierInUriPrefilled';
+            }
             $class->setIdentifierInURI($identifierInUriPrefilled); // On attribue le même identifiant si namespace interne car non géré par le formulaire pour les NS internes
         }
 
@@ -189,6 +193,11 @@ class ClassController extends Controller
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $class = $form->getData();
+            // Dans le cas où l'utilisateur a desactivé la gestion automatique des identifiers dans son NS interne
+            // il faut remplir correctement l'identifier in uri qui est vide après formulaire
+            if(!$namespace->getTopLevelNamespace()->getIsExternalNamespace() && $class->getIdentifierInURI() === 'identifierInUriPrefilled'){
+                $class->setIdentifierInURI($class->getIdentifierInNamespace());
+            }
             $class->setIsManualIdentifier(is_null($namespace->getTopLevelNamespace()->getClassPrefix()));
             $class->setCreator($this->getUser());
             $class->setModifier($this->getUser());
