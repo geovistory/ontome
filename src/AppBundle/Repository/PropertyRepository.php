@@ -237,7 +237,8 @@ class PropertyRepository extends EntityRepository
                         che.get_root_namespace(fk_namespace_for_version) AS \"rootNamespaceId\",
                         che.get_root_namespace_prefix(che.get_root_namespace(fk_namespace_for_version)) AS \"propertyRootNamespacePrefix\",
                         (SELECT label FROM che.get_namespace_labels(fk_namespace_for_version) WHERE language_iso_code = 'en' ORDER BY is_standard_label_for_language DESC LIMIT 1 OFFSET 0) AS namespace,
-                        (SELECT label FROM che.get_namespace_labels(v.fk_range_namespace) WHERE language_iso_code = 'en' ORDER BY is_standard_label_for_language DESC LIMIT 1 OFFSET 0) AS \"rangeNamespace\"
+                        (SELECT label FROM che.get_namespace_labels(v.fk_range_namespace) WHERE language_iso_code = 'en' ORDER BY is_standard_label_for_language DESC LIMIT 1 OFFSET 0) AS \"rangeNamespace\",
+                        (SELECT CASE WHEN pv.domain_instances_min_quantifier IS NOT NULL THEN REPLACE(CONCAT('(',pv.domain_instances_min_quantifier,',',pv.domain_instances_max_quantifier,':',pv.range_instances_min_quantifier,',',pv.range_instances_max_quantifier,')'), '-1', 'n') ELSE '' END FROM che.property_version pv WHERE v.pk_property = pv.fk_property AND pv.fk_namespace_for_version = v.fk_namespace_for_version) AS \"quantifiersString\"
                 FROM    che.v_properties_with_domain_range v
                 LEFT JOIN   che.associates_referenced_namespace asrefns ON v.fk_namespace_for_version = asrefns.fk_namespace
                 WHERE   v.pk_domain = ?
@@ -334,7 +335,8 @@ class PropertyRepository extends EntityRepository
                   che.get_root_namespace(fk_namespace_for_version) AS \"rootNamespaceId\",
                   che.get_root_namespace_prefix(che.get_root_namespace(fk_namespace_for_version)) AS \"propertyRootNamespacePrefix\",
                   (SELECT label FROM che.get_namespace_labels(fk_namespace_for_version) WHERE language_iso_code = 'en' ORDER BY is_standard_label_for_language DESC LIMIT 1 OFFSET 0) AS namespace,
-                  (SELECT label FROM che.get_namespace_labels(v.fk_range_namespace) WHERE language_iso_code = 'en' ORDER BY is_standard_label_for_language DESC LIMIT 1 OFFSET 0) AS \"domainNamespace\"
+                  (SELECT label FROM che.get_namespace_labels(v.fk_range_namespace) WHERE language_iso_code = 'en' ORDER BY is_standard_label_for_language DESC LIMIT 1 OFFSET 0) AS \"domainNamespace\",
+                  (SELECT CASE WHEN pv.domain_instances_min_quantifier IS NOT NULL THEN REPLACE(CONCAT('(',pv.domain_instances_min_quantifier,',',pv.domain_instances_max_quantifier,':',pv.range_instances_min_quantifier,',',pv.range_instances_max_quantifier,')'), '-1', 'n') ELSE '' END FROM che.property_version pv WHERE v.pk_property = pv.fk_property AND pv.fk_namespace_for_version = v.fk_namespace_for_version) AS \"quantifiersString\"
                 FROM che.v_properties_with_domain_range v
                 LEFT JOIN che.associates_referenced_namespace asrefns ON v.fk_namespace_for_version = asrefns.fk_namespace
                 WHERE pk_range = ?

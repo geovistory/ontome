@@ -136,6 +136,13 @@
                         <div class="container">
                             <h3>Label</h3>
                             {{ form_start(labelForm) }}
+                                {% if label.namespace is not null and label.namespace.isOngoing %}
+                                    {{ form_row(labelForm.label, {
+                                        help: 'The word "ongoing" is automatically added to the label of an ongoing version. It will be removed on publication.'
+                                    }) }}
+                                {% else %}
+                                    {{ form_row(labelForm.label) }}
+                                {% endif %}
                                 {{ form_row(labelForm.label) }}
                                 {% if canInverseLabel %}
                                     {{ form_row(labelForm.inverseLabel) }}

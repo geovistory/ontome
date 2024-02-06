@@ -256,11 +256,20 @@
                     </div>
                 {% endif %}
                 <div class="object-identification-edit-form">
+                    {% if profile.isOngoing %}
+                        <p>
+                            <input type="checkbox" id="make-visible" data-url="{{ path('profile_make_visible', {'id': profile.id }) }}" {% if profile.isVisible %}checked="checked" disabled{% endif %} /> Make the classes and properties of this profile visible
+                        </p>
+                    {% endif %}
                     {% if (profile.isRootProfile or profile.isOngoing) and is_granted('full_edit', profile.projectOfBelonging) %}
                         {{ form_start(profileIdentificationForm) }}
                         {{ form_errors(profileIdentificationForm) }}
                         {{ form_row(profileIdentificationForm.projectOfBelonging) }}
-                        {{ form_row(profileIdentificationForm.isForcedPublication) }}
+                        {% if profile.isVisible %}
+                            {{ form_widget(profileIdentificationForm.isForcedPublication, {'attr': {'data-visible': true }}) }}
+                        {% else %}
+                            {{ form_widget(profileIdentificationForm.isForcedPublication, {'attr': {'data-visible': false }}) }}
+                        {% endif %}
                         {% if profile.isRootProfile or profile.isPublishable %}
                             <p>
                                 <button type="submit" class="btn btn-primary" formnovalidate>Save <span class="far fa-save"></span></button>
@@ -816,7 +825,9 @@
                                 <select id="select-root-namespace">
                                     <option></option> <!-- For placeholder -->
                                     {% for rootNamespace in rootNamespaces %}
-                                        <option value="{{ rootNamespace.id }}">{{ rootNamespace.standardLabel }}</option>
+                                        {% if rootNamespace.childVersions|length > 1 or (rootNamespace.childVersions|length == 1 and ((rootNamespace.childVersions|first).isVisible) or rootNamespace.projectForTopLevelNamespace.userProjectAssociations|filter(v => v.user.id == app.user.id)|length == 1) %}
+                                        <option value="{{ rootNamespace.id }}">{{ rootNamespace.standardLabel }}
+                                        {% endif %}
                                     {% endfor %}
                                 </select>
                             </div>
@@ -942,8 +953,12 @@
             //confirmation box for forced publication status
             $('#profile_edit_form_isForcedPublication').on('change', function() {
                 if(this.checked){
+                    var message = "It's not advisable to allow an API connection on an ongoing profile. This will also make the content of this profile visible to everyone. Do you wish to proceed?";
+                    if($(this).data('visible') == 'data-visible'){
+                        message = "It's not advisable to allow an API connection on an ongoing profile. Do you wish to proceed?";
+                    }
                     bootbox.confirm({
-                        message: "It's not advisable to publish an ongoing profile. Are you sure you want to allow an API connection on this profile?",
+                        message: message,
                         buttons: {
                             confirm: {
                                 label: 'Yes',
@@ -958,10 +973,22 @@
                             if(!result){
                                 $('#profile_edit_form_isForcedPublication').prop('checked', false);
                             }
+                            if($(this).data('visible') != 'data-visible' && result) {
+                                var url = $('#make-visible').data("url");
+                                var cbx = $('#make-visible');
+                                $.ajax({
+                                    url: url,
+                                    type: 'POST',
+                                    dataType: 'json',
+                                    success: function (data) {
+                                        $('#make-visible').prop('checked', true);
+                                        cbx.attr('disabled', 'disabled');
+                                    }
+                                });
+                            }
                         }
                     });
                 }
-
             });
 
             {% if profile.isOngoing %}
@@ -1499,6 +1526,41 @@
                         $(".remove-namespace[data-id='"+classNamespaceId+"']").removeClass("remove-namespace").addClass("not-removable").attr("disabled", "disabled");
                     }
                 });
+            });
+
+            $(document).on('change', '#make-visible', function(){
+                var url =  $(this).data("url");
+                var cbx = $(this);
+                if(this.checked){
+                    bootbox.confirm({
+                        message: "Once the classes and properties of an ongoing profile are made visible, it's not possible to hide them again or to add new ones that would be hidden. Do you wish to proceed?",
+                        buttons: {
+                            confirm: {
+                                label: 'Yes',
+                                className: 'btn-success'
+                            },
+                            cancel: {
+                                label: 'No',
+                                className: 'btn-danger'
+                            }
+                        },
+                        callback: function (result) {
+                            if(result){
+                                $.ajax({
+                                    url: url,
+                                    type: 'POST',
+                                    dataType: 'json',
+                                    success: function (data) {
+                                        cbx.attr('disabled', 'disabled');
+                                    }
+                                });
+                            }
+                            else{
+                                cbx.prop('checked', false);
+                            }
+                        }
+                    });
+                }
             });
 
             $(document).on("click", ".remove-class", function() {

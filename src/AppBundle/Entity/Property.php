@@ -8,6 +8,7 @@
 
 namespace AppBundle\Entity;
 
+use AppBundle\Utils\StringUtils;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -35,6 +36,7 @@ class Property
 
     /**
      * @ORM\Column(type="string", name="identifier_in_uri")
+     * @Assert\NotBlank(message="The identifier in URI field cannot be empty")
      */
     private $identifierInURI;
 
@@ -129,8 +131,8 @@ class Property
     private $comments;
 
     /**
-    * @ORM\OneToMany(targetEntity="PropertyAssociation", mappedBy="childProperty")
-    */
+     * @ORM\OneToMany(targetEntity="PropertyAssociation", mappedBy="childProperty")
+     */
     private $childPropertyAssociations;
 
     /**
@@ -156,6 +158,11 @@ class Property
      *      )
      */
     private $namespaces;
+
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    private $isRecursive;
 
     public function __construct()
     {
@@ -187,15 +194,26 @@ class Property
             // (d'autres namespaces du même root mais qui n'ont pas cette classe, peuvent donc échapper)
             // il faut donc simplement récupérer le root et boucler dessus
             $rootNamespace = $this->getPropertyVersionForDisplay()->getNamespaceForVersion()->getTopLevelNamespace();
+            $uniqueIdentifiant = true;
             foreach ($rootNamespace->getChildVersions() as $namespace) {
                 foreach ($namespace->getProperties() as $property) {
                     if ($property->identifierInNamespace == $this->identifierInNamespace and $property != $this) {
-                        $context->buildViolation('The identifier must be unique. Please enter another one.')
-                            ->atPath('identifierInNamespace')
-                            ->addViolation();
+                        $uniqueIdentifiant = false;
                         break;
                     }
                 }
+                //Il faut aussi boucler sur les identifiants des classes
+                foreach ($namespace->getClasses() as $class) {
+                    if ($class->getIdentifierInNamespace() == $this->identifierInNamespace) {
+                        $uniqueIdentifiant = false;
+                        break;
+                    }
+                }
+            }
+            if(!$uniqueIdentifiant){
+                $context->buildViolation('The identifier must be unique within the same namespace. Please enter a different one.')
+                    ->atPath('identifierInNamespace')
+                    ->addViolation();
             }
         }
     }
@@ -327,7 +345,38 @@ class Property
      */
     public function getLabels()
     {
-        return $this->labels;
+        $labels = $this->labels->toArray();
+
+        // Fonction de comparaison personnalisée pour trier les labels
+        usort($labels, function($a, $b) {
+            $order = ['en', 'fr'];
+
+            $aIsoCode = $a->getLanguageIsoCode();
+            $bIsoCode = $b->getLanguageIsoCode();
+
+            // Si les deux codes sont dans l'ordre personnalisé, comparez-les
+            if (in_array($aIsoCode, $order) && in_array($bIsoCode, $order)) {
+                return array_search($aIsoCode, $order) - array_search($bIsoCode, $order);
+            }
+
+            // Si l'un des codes est dans l'ordre personnalisé, placez-le en premier
+            if (in_array($aIsoCode, $order)) {
+                return -1;
+            }
+            if (in_array($bIsoCode, $order)) {
+                return 1;
+            }
+
+            // Les deux codes ne sont pas dans l'ordre personnalisé, ne modifiez pas l'ordre
+            return 0;
+        });
+
+        $acLabels = new ArrayCollection();
+        foreach ($labels as $label){
+            $acLabels->add($label);
+        }
+
+        return $acLabels;
     }
 
     /**
@@ -559,9 +608,19 @@ class Property
         $this->targetEntityAssociations = $targetEntityAssociations;
     }
 
+    /**
+     * @return ArrayCollection|PropertyAssociation[]
+     */
     public function getEntityAssociations()
     {
-        return array_merge($this->getSourceEntityAssociations()->toArray(), $this->getTargetEntityAssociations()->toArray());
+        $entityAssociations = new ArrayCollection();
+        foreach ($this->sourceEntityAssociations as $entityAssociation){
+            $entityAssociations->add($entityAssociation);
+        }
+        foreach ($this->targetEntityAssociations as $entityAssociation){
+            $entityAssociations->add($entityAssociation);
+        }
+        return $entityAssociations;
     }
 
     /**
@@ -639,6 +698,47 @@ class Property
                 $tree = $parentPropertyAssociation->getChildProperty()->getHierarchicalTreeProperties($namespace, $tree, $depth+1);
             }
             return $tree;
+        }
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getIsRecursive()
+    {
+        return $this->isRecursive;
+    }
+
+    /**
+     * @param mixed $isRecursive
+     */
+    public function setIsRecursive($isRecursive)
+    {
+        $this->isRecursive = $isRecursive;
+    }
+
+    public function updateIdentifierInUri(){
+        $uriParameter = $this->getTopLevelNamespace()->getUriParameter();
+        switch ($uriParameter){
+            case 0: //Entity identifier
+                $this->setIdentifierInURI($this->getIdentifierInNamespace());
+                break;
+            case 1: //Entity identifier + label
+                $label = $this->getLabels()->filter(function($v){return $v->getIsStandardLabelForLanguage();})->first();
+                $label = StringUtils::deleteAccents($label);
+                $label = str_replace(array('"', "'"), '', $label);
+                $newIdentifierInUri = str_replace(' ', '_', $this->getIdentifierInNamespace() . ' ' . $label);
+                $this->setIdentifierInURI($newIdentifierInUri);
+                break;
+            case 2: //Camel Case
+                $label = $this->getLabels()->filter(function($v){return $v->getIsStandardLabelForLanguage();})->first();
+                $label = StringUtils::deleteAccents($label);
+                $label = str_replace(array('"', "'"), '', $label);
+                $words = preg_split('/[^a-zA-Z0-9]+/', $label);
+                $camelCaseString = implode('', array_map('ucfirst', $words));
+                $newIdentifierInUri = lcfirst($camelCaseString);
+                $this->setIdentifierInURI($newIdentifierInUri);
+                break;
         }
     }
 }

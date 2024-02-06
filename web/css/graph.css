@@ -11,6 +11,10 @@ line {
     font: 8px sans-serif;
 }
 
+.link-label {
+    font: 8px sans-serif;
+}
+
 .thesaurus-graph .node circle {
     fill: #fff;
     stroke: steelblue;

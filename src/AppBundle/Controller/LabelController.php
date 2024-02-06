@@ -14,8 +14,10 @@ use AppBundle\Entity\OntoClass;
 use AppBundle\Entity\Property;
 use AppBundle\Entity\SystemType;
 use AppBundle\Form\LabelForm;
+use Doctrine\Common\Collections\ArrayCollection;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -44,6 +46,7 @@ class LabelController  extends Controller
     public function editAction(Label $label, Request $request)
     {
         $canInverseLabel = false;
+        $em = $this->getDoctrine()->getManager();
 
         if(!is_null($label->getClass())){
             $object = $label->getClass();
@@ -60,16 +63,28 @@ class LabelController  extends Controller
             $object = $label->getProfile();
             $redirectToRoute = 'profile_edit';
             $redirectToRouteFragment = 'identification';
+            $t = 'profile';
+            $allEntities = $em->getRepository('AppBundle:Profile')->findAll();
+            $allEntities = array_filter($allEntities, function($v) use ($label){ return $v != $label->getNamespace();});
         }
         else if(!is_null($label->getProject())){
             $object = $label->getProject();
             $redirectToRoute = 'project_edit';
             $redirectToRouteFragment = 'identification';
+            $t = 'project';
+            $allEntities = $em->getRepository('AppBundle:Project')->findAll();
+            $allEntities = array_filter($allEntities, function($v) use ($label){ return $v != $label->getNamespace();});
         }
         else if(!is_null($label->getNamespace())){
             $object = $label->getNamespace();
+            if($label->getNamespace()->getIsOngoing()){
+                $label->setLabel(str_replace(' ongoing', '', $label->getLabel()));
+            }
             $redirectToRoute = 'namespace_edit';
             $redirectToRouteFragment = 'identification';
+            $t = 'namespace';
+            $allEntities = $em->getRepository('AppBundle:OntoNamespace')->findAll();
+            $allEntities = array_filter($allEntities, function($v) use ($label){ return $v != $label->getNamespace();});
         }
         else throw $this->createNotFoundException('The related object for the label n° '.$label->getId().' does not exist. Please contact an administrator.');
 
@@ -88,8 +103,31 @@ class LabelController  extends Controller
         $form = $this->createForm(LabelForm::class, $label, ['canInverseLabel' => $canInverseLabel]);
 
         $form->handleRequest($request);
-        if ($form->isValid()) {
+
+
+        //Vérification si le label n'a jamais été utilisé ailleurs pour Profile, Project et Namespace
+        $isLabelValid = true;
+        if(!is_null($allEntities)){
+            $allLabels = new ArrayCollection();
+            foreach ($allEntities as $var_entity){
+                foreach ($var_entity->getLabels() as $var_label){
+                    $allLabels->add($var_label->getLabel());
+                }
+            }
+            if($form->isSubmitted()){
+                $flabel = $form->get('label');
+                if($allLabels->contains($flabel->getData())){
+                    $flabel->addError(new FormError('This label is already used by another ' . $t . ', please enter a different one.'));
+                    $isLabelValid = false;
+                }
+            }
+        }
+
+        if ($form->isValid() && $isLabelValid) {
             $em = $this->getDoctrine()->getManager();
+            if(!is_null($label->getNamespace()) && $label->getNamespace()->getIsOngoing()){
+                $label->setLabel($label->getLabel().' ongoing');
+            }
             $label->setModifier($this->getUser());
             $em->persist($label);
             $em->flush();

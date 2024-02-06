@@ -17,7 +17,7 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
-class ClassQuickAddForm extends AbstractType
+class ClassEditUriIdentifierForm extends AbstractType
 {
 
     private $transformer;
@@ -33,45 +33,18 @@ class ClassQuickAddForm extends AbstractType
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-
-
         $builder
-            ->add('identifierInNamespace', TextType::class, array(
+            ->add('identifierInURI', TextType::class, array(
+                'label' => 'Identifier in URI'
             ))
-            ->add('labels', CollectionType::class, array(
-                'label' => 'Enter a label and select a language',
-                'entry_type' => LabelType::class,
-                'entry_options' => array('label' => false),
-                'error_bubbling' => false,
-                'allow_add' => true,
-                'by_reference' => false,
-            ))
-            ->add('textProperties', CollectionType::class, array(
-                'entry_type' => TextPropertyType::class,
-                'entry_options' => array('label' => false),
-                'error_bubbling' => false,
-                'allow_add' => true,
-                'by_reference' => false,
-            ));
-
-        if($options['is_external']){
-            $builder->add('identifierInUri', TextType::class, array(
-                'label' => 'Set an identifier for URI',
-                'data' => $options['identifier_in_uri_prefilled'],
-                'attr' => array('data-uri-param' => $options['uri_param'], 'data-default-value' => $options['identifier_in_uri_prefilled'])
-            ));
-        }
-
+        ;
     }
 
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
             'data_class' => 'AppBundle\Entity\OntoClass',
-            "allow_extra_fields" => true,
-            'uri_param' => 0,
-            'identifier_in_uri_prefilled' => '',
-            'is_external' => false
+            "allow_extra_fields" => true
         ]);
     }
 }
