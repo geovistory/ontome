@@ -37,6 +37,13 @@
                                                 </xs:restriction>
                                             </xs:simpleType>
                                         </xs:element>
+                                        <xs:element name="identifierInURI" minOccurs="0" maxOccurs="1">
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:string">
+                                                    <xs:pattern value="\S+"/>
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
                                         <xs:element name="standardLabel" maxOccurs="unbounded">
                                             <xs:complexType>
                                                 <xs:simpleContent>
@@ -47,6 +54,15 @@
                                             </xs:complexType>
                                         </xs:element>
                                         <xs:element minOccurs="0" maxOccurs="unbounded" name="subClassOf">
+                                            <xs:complexType>
+                                                <xs:simpleContent>
+                                                    <xs:extension base="xs:string">
+                                                        <xs:attribute name="referenceNamespace" type="xs:positiveInteger" use="optional" />
+                                                    </xs:extension>
+                                                </xs:simpleContent>
+                                            </xs:complexType>
+                                        </xs:element>
+                                        <xs:element minOccurs="0" maxOccurs="unbounded" name="parentClassOf">
                                             <xs:complexType>
                                                 <xs:simpleContent>
                                                     <xs:extension base="xs:string">
@@ -102,6 +118,13 @@
                                 <xs:complexType>
                                     <xs:sequence>
                                         <xs:element name="identifierInNamespace" type="xs:string" minOccurs="0" maxOccurs="1" />
+                                        <xs:element name="identifierInURI" minOccurs="0" maxOccurs="1">
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:string">
+                                                    <xs:pattern value="\S+"/>
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
                                         <xs:element name="label" maxOccurs="unbounded">
                                             <xs:complexType>
                                                 <xs:sequence>
@@ -112,6 +135,15 @@
                                             </xs:complexType>
                                         </xs:element>
                                         <xs:element minOccurs="0" maxOccurs="unbounded" name="subPropertyOf">
+                                            <xs:complexType>
+                                                <xs:simpleContent>
+                                                    <xs:extension base="xs:string">
+                                                        <xs:attribute name="referenceNamespace" type="xs:positiveInteger" use="optional" />
+                                                    </xs:extension>
+                                                </xs:simpleContent>
+                                            </xs:complexType>
+                                        </xs:element>
+                                        <xs:element minOccurs="0" maxOccurs="unbounded" name="parentPropertyOf">
                                             <xs:complexType>
                                                 <xs:simpleContent>
                                                     <xs:extension base="xs:string">
