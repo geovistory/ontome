@@ -873,6 +873,10 @@ FOOTER Styling
     width: 70%;
 }
 
+.label-warning2{
+    background-color: #236E96;
+}
+
 .gv-logo-top-25{
     padding-top: 25px;
 }

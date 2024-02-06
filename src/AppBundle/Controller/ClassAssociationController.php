@@ -211,7 +211,7 @@ class ClassAssociationController extends Controller
     }
 
     /**
-     * @Route("/class-association/{id}/edit-validity/{validationStatus}", name="class_association_validation_status_edit", requirements={"id"="^[0-9]+$", "validationStatus"="^(26|27|28){1}$"})
+     * @Route("/class-association/{id}/edit-validity/{validationStatus}", name="class_association_validation_status_edit", requirements={"id"="^[0-9]+$", "validationStatus"="^(26|27|28|37){1}$"})
      * @param ClassAssociation $classAssociation
      * @param SystemType $validationStatus
      * @param Request $request
@@ -255,7 +255,7 @@ class ClassAssociationController extends Controller
 
         if (!is_null($newValidationStatus)) {
             $statusId = intval($newValidationStatus->getId());
-            if (in_array($statusId, [26,27,28], true)) {
+            if (in_array($statusId, [26,27,28,37], true)) {
                 $classAssociation->setValidationStatus($newValidationStatus);
                 $classAssociation->setModifier($this->getUser());
                 $classAssociation->setModificationTime(new \DateTime('now'));

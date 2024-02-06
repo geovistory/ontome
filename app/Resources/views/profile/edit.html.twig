@@ -14,7 +14,7 @@
         <h2 class="profile-name">
             {{ profile.standardLabel }}{% if profile.isRootProfile %}&nbsp;<span class="label label-default" style="font-size: 12px; vertical-align: middle">Root</span>{% endif %}
             {% if (not profile.isOngoing and profile.wasClosedAt is not null and profile.endDate is null) or (profile.isForcedPublication and profile.isOngoing) %}
-            <span class="pull-right">
+                <span class="pull-right">
                 <div class="btn-group">
                     <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         <i class="fas fa-file-export"></i> Export <span class="caret"></span>
@@ -370,7 +370,7 @@
                         <div class="row">
                             <div class="col-md-7">
                                 <h3>Associated classes
-                                <span class="pull-right">
+                                    <span class="pull-right">
                                     {% if (not profile.isOngoing and profile.wasClosedAt is not null and profile.endDate is null)
                                         or (profile.isForcedPublication and profile.isOngoing ) %}
                                         <a  href="{{ path('api_classes_profile_json', {
@@ -656,6 +656,10 @@
                                 {% endif %}
                                 profile</strong>.
                         </p>
+                    {% else %}
+                        <p>
+                            {{ profile.standardLabel }} is an <strong>ongoing profile</strong>.
+                        </p>
                     {% endif %}
                     <p>
                         Root profile:
@@ -674,7 +678,7 @@
                         {% endfor %}
                     {% endif %}
                 {% endif %}
-                <h3>Published versions</h3>
+                <h3>Other versions</h3>
                 <table class="table table-striped" id="profile-versions-table">
                     <thead>
                     <tr>
@@ -682,7 +686,6 @@
                         <th>Version</th>
                         <th>Status</th>
                         <th>Publication date</th>
-                        <th>Current profile</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -706,7 +709,6 @@
                                     {% endif %}
                                 </td>
                                 <td>{{ publishedProfile.startDate|date('Y-m-d') }}</td>
-                                <td>todo</td>
                             </tr>
                         {% endfor %}
                     {% else %}
@@ -729,7 +731,6 @@
                                     {% endif %}
                                 </td>
                                 <td>{{ publishedProfile.startDate|date('Y-m-d') }}</td>
-                                <td>todo</td>
                             </tr>
                         {% endfor %}
                     {% endif %}

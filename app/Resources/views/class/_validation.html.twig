@@ -19,10 +19,15 @@
             <span class="label label-warning">
                 {{ classVersion.validationStatus }}
             </span>
+            {% elseif classVersion.validationStatus.id == 37  %}
+                <span class="label label-warning2">
+                {{ classVersion.validationStatus }}
+            </span>
             {% endif %}
             &nbsp;<span class="caret"></span>
         </button>
         <ul class="dropdown-menu dropdown-versions" aria-labelledby="dropdown-versions">
+            {% if countValidationsTxtp > 0 and countValidationsLbl > 0 %}
             <li class="label-success">
                 <a class="select-validation-status" data-id ="26" 
                    href="{{ path('class_version_validation_status_edit', {
@@ -34,14 +39,27 @@
                     </span>
                 </a>
             </li>
+            {% endif %}
             <li class="label-warning">
-                <a class="select-validation-status" data-id="28" 
+                <a class="select-validation-status" data-id="28"
                    href="{{ path('class_version_validation_status_edit', {
-                        id: classVersion.id,
-                        validationStatus: 28
-                    }) }}">
+                       id: classVersion.id,
+                       validationStatus: 28
+                   }) }}">
                     <span class="label label-warning">
                         Validation request
+                    </span>
+                </a>
+            </li>
+            {% if countValidationsTxtp > 0 and countValidationsLbl > 0 %}
+            <li class="label-warning2">
+                <a class="select-validation-status" data-id="37"
+                   href="{{ path('class_version_validation_status_edit', {
+                       id: classVersion.id,
+                       validationStatus: 37
+                   }) }}">
+                    <span class="label label-warning2">
+                        Under revision
                     </span>
                 </a>
             </li>
@@ -56,6 +74,7 @@
                     </span>
                 </a>
             </li>
+            {% endif %}
         </ul>
     </div>
     {% elseif classVersion.validationStatus is null %}

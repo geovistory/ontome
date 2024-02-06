@@ -56,6 +56,10 @@
                             <span class="label label-warning">
                                     {{ entityAssociation.validationStatus }}
                                 </span>
+                        {% elseif entityAssociation.validationStatus.id == 37  %}
+                            <span class="label label-warning2">
+                                    {{ entityAssociation.validationStatus }}
+                                </span>
                         {% endif %}
                         &nbsp;<span class="caret"></span>
                     </button>
@@ -77,6 +81,16 @@
                             }) }}">
                                     <span class="label label-warning">
                                         Validation request
+                                    </span>
+                            </a>
+                        </li>
+                        <li class="label-warning2">
+                            <a class="select-validation-status" data-id="37" href="{{ path('entity_association_validation_status_edit', {
+                                id: entityAssociation.id,
+                                validationStatus: 37
+                            }) }}">
+                                    <span class="label label-warning2">
+                                        Under revision
                                     </span>
                             </a>
                         </li>
@@ -107,6 +121,10 @@
                                 </span>
                 {% elseif entityAssociation.validationStatus.id == 28  %}
                     <span class="label label-warning">
+                                    {{ entityAssociation.validationStatus }}
+                                </span>
+                {% elseif entityAssociation.validationStatus.id == 37  %}
+                    <span class="label label-warning2">
                                     {{ entityAssociation.validationStatus }}
                                 </span>
                 {% endif %}

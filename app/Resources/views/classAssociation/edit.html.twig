@@ -37,6 +37,10 @@
                             <span class="label label-warning">
                                     {{ classAssociation.validationStatus }}
                                 </span>
+                        {% elseif classAssociation.validationStatus.id == 37  %}
+                            <span class="label label-warning2">
+                                    {{ classAssociation.validationStatus }}
+                                </span>
                         {% endif %}
                         &nbsp;<span class="caret"></span>
                     </button>
@@ -58,6 +62,16 @@
                             }) }}">
                                     <span class="label label-warning">
                                         Validation request
+                                    </span>
+                            </a>
+                        </li>
+                        <li class="label-warning2">
+                            <a class="select-validation-status" data-id="37" href="{{ path('class_association_validation_status_edit', {
+                                id: classAssociation.id,
+                                validationStatus: 37
+                            }) }}">
+                                    <span class="label label-warning2">
+                                        Under revision
                                     </span>
                             </a>
                         </li>

@@ -219,19 +219,28 @@ class OntoNamespaceVoter extends Voter
         // Condition 2 : le namespace du projet actif est ongoing
         // Condition 3 : l'utilisateur peut gérer ce namespace ongoing
 
-        //Récupérer le namespace ongoing du projet actif
-        $ongoingNamespace = $user->getCurrentActiveProject()->getManagedNamespaces()->filter(function($v){return $v->getIsOngoing();})->first();
-
-        if(is_null($ongoingNamespace) || !$ongoingNamespace){
+        //Récupérer le namespace actif du projet actif
+        // Ongoing > Le plus récent > Le premier.
+        $activeNamespace = $user->getCurrentActiveProject()->getManagedNamespaces()[0];
+        foreach($user->getCurrentActiveProject()->getManagedNamespaces() as $managedNamespace){
+            if($managedNamespace->getIsOngoing()){
+                $activeNamespace=$managedNamespace;
+            }
+            elseif(!$activeNamespace->getIsOngoing() &&
+                $activeNamespace->getPublishedAt()<$managedNamespace->getPublishedAt()){
+                $activeNamespace=$managedNamespace;
+            }
+        }
+        if(is_null($activeNamespace)){
             return false;
         }
 
         foreach($user->getUserProjectAssociations()->getIterator() as $i => $userProjectAssociation) {
-            if($userProjectAssociation->getProject() === $ongoingNamespace->getProjectForTopLevelNamespace() && $userProjectAssociation->getPermission() <= 2){
-                if(($namespace === $ongoingNamespace)){
+            if($userProjectAssociation->getProject() === $activeNamespace->getProjectForTopLevelNamespace() && $userProjectAssociation->getPermission() <= 2){
+                if(($activeNamespace->getIsOngoing() && $namespace === $activeNamespace)){
                     return true;
                 }
-                foreach ($ongoingNamespace->getAllReferencedNamespaces() as $referencedNamespace){
+                foreach ($activeNamespace->getAllReferencedNamespaces() as $referencedNamespace){
                     if($namespace === $referencedNamespace){
                         return true;
                     }

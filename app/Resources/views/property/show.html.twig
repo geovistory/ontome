@@ -36,7 +36,7 @@
                         {% endif %}
                     </ul>
                 </div>
-                {% if is_granted('edit', propertyVersion) and (propertyVersion.validationStatus is null or propertyVersion.validationStatus.id == 27) %}
+                {% if is_granted('edit', propertyVersion) and (propertyVersion.validationStatus is null or propertyVersion.validationStatus.id == 27 or propertyVersion.validationStatus.id == 37) %}
                     <p class="inline-block">
                         <a href="{{ path('property_edit', {
                             id: propertyVersion.property.id
@@ -553,6 +553,10 @@
                                         <span class="label label-warning">
                                     {{ textProperty.validationStatus }}
                                 </span>
+                                    {% elseif textProperty.validationStatus.id == 37  %}
+                                        <span class="label label-warning2">
+                                    {{ textProperty.validationStatus }}
+                                </span>
                                     {% endif %}
                                     </a>
                                 </td>
@@ -622,6 +626,10 @@
                                 </span>
                                     {% elseif textProperty.validationStatus.id == 28  %}
                                         <span class="label label-warning">
+                                    {{ textProperty.validationStatus }}
+                                </span>
+                                    {% elseif textProperty.validationStatus.id == 37  %}
+                                        <span class="label label-warning2">
                                     {{ textProperty.validationStatus }}
                                 </span>
                                     {% endif %}
@@ -710,6 +718,10 @@
                                 </span>
                                 {% elseif textProperty.validationStatus.id == 28  %}
                                     <span class="label label-warning">
+                                    {{ textProperty.validationStatus }}
+                                </span>
+                                {% elseif textProperty.validationStatus.id == 37  %}
+                                    <span class="label label-warning2">
                                     {{ textProperty.validationStatus }}
                                 </span>
                                 {% endif %}
@@ -830,6 +842,10 @@
                                 </span>
                                     {% elseif label.validationStatus.id == 28  %}
                                         <span class="label label-warning">
+                                    {{ label.validationStatus }}
+                                </span>
+                                    {% elseif label.validationStatus.id == 37  %}
+                                        <span class="label label-warning2">
                                     {{ label.validationStatus }}
                                 </span>
                                     {% endif %}
@@ -1058,6 +1074,10 @@
                                 </span>
                                     {% elseif association.validationStatus.id == 28  %}
                                         <span class="label label-warning">
+                                    {{ association.validationStatus }}
+                                </span>
+                                    {% elseif association.validationStatus.id == 37  %}
+                                        <span class="label label-warning2">
                                     {{ association.validationStatus }}
                                 </span>
                                     {% endif %}
@@ -1418,6 +1438,10 @@
                                     </span>
                                     {% elseif relation.validationStatus.id == 28  %}
                                         <span class="label label-warning">
+                                        {{ relation.validationStatus }}
+                                    </span>
+                                    {% elseif relation.validationStatus.id == 37  %}
+                                        <span class="label label-warning2">
                                         {{ relation.validationStatus }}
                                     </span>
                                     {% endif %}

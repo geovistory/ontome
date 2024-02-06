@@ -38,6 +38,10 @@
                             <span class="label label-warning">
                                     {{ propertyAssociation.validationStatus }}
                                 </span>
+                        {% elseif propertyAssociation.validationStatus.id == 37  %}
+                            <span class="label label-warning2">
+                                    {{ propertyAssociation.validationStatus }}
+                                </span>
                         {% endif %}
                         &nbsp;<span class="caret"></span>
                     </button>
