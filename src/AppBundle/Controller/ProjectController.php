@@ -378,7 +378,7 @@ class ProjectController  extends Controller
                                     else{
                                         var_dump($langCollection);
                                         echo (string)$nodeXmlScopeNote->attributes()->lang;
-                                        echo "- 2 scopes notes au moins ont la même langue. j".$newClassVersion->getClass()->getIdentifierInNamespace();
+                                        echo "- 2 scopes notes au moins ont la même langue. ".$newClassVersion->getClass()->getIdentifierInNamespace();
                                         die;
                                     }
                                     $scopeNote = new TextProperty();
@@ -680,7 +680,7 @@ class ProjectController  extends Controller
                                     } else {
                                         var_dump($langCollection);
                                         echo (string)$nodeXmlScopeNote->attributes()->lang;
-                                        echo "- 2 scopes notes au moins ont la même langue. j" . $newClassVersion->getClass()->getIdentifierInNamespace();
+                                        echo "- 2 scopes notes au moins ont la même langue. " . $newClassVersion->getClass()->getIdentifierInNamespace();
                                         die;
                                     }
                                     $scopeNote = new TextProperty();
