@@ -131,8 +131,8 @@ class Property
     private $comments;
 
     /**
-    * @ORM\OneToMany(targetEntity="PropertyAssociation", mappedBy="childProperty")
-    */
+     * @ORM\OneToMany(targetEntity="PropertyAssociation", mappedBy="childProperty")
+     */
     private $childPropertyAssociations;
 
     /**
@@ -194,15 +194,26 @@ class Property
             // (d'autres namespaces du même root mais qui n'ont pas cette classe, peuvent donc échapper)
             // il faut donc simplement récupérer le root et boucler dessus
             $rootNamespace = $this->getPropertyVersionForDisplay()->getNamespaceForVersion()->getTopLevelNamespace();
+            $uniqueIdentifiant = true;
             foreach ($rootNamespace->getChildVersions() as $namespace) {
                 foreach ($namespace->getProperties() as $property) {
                     if ($property->identifierInNamespace == $this->identifierInNamespace and $property != $this) {
-                        $context->buildViolation('The identifier must be unique. Please enter another one.')
-                            ->atPath('identifierInNamespace')
-                            ->addViolation();
+                        $uniqueIdentifiant = false;
                         break;
                     }
                 }
+                //Il faut aussi boucler sur les identifiants des classes
+                foreach ($namespace->getClasses() as $class) {
+                    if ($class->getIdentifierInNamespace() == $this->identifierInNamespace) {
+                        $uniqueIdentifiant = false;
+                        break;
+                    }
+                }
+            }
+            if(!$uniqueIdentifiant){
+                $context->buildViolation('The identifier must be unique within the same namespace. Please enter a different one.')
+                    ->atPath('identifierInNamespace')
+                    ->addViolation();
             }
         }
     }

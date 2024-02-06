@@ -39,6 +39,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Finder\Exception\AccessDeniedException;
+use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -115,11 +116,32 @@ class NamespaceController  extends Controller
         $txtpContributors = new TextProperty();
         $txtpContributors->setSystemType($txtpContributors);
 
-        $form = $this->createForm(NamespaceQuickAddForm::class, $namespace, array("txtpContributors" => $txtpContributors));
+        $allNamespaces = $em->getRepository('AppBundle:OntoNamespace')->findAll();
+        $allLabels = new ArrayCollection();
+
+        foreach ($allNamespaces as $var_namespace){
+            foreach ($var_namespace->getLabels() as $label){
+                $allLabels->add($label->getLabel());
+            }
+        }
+
+        $form = $this->createForm(NamespaceQuickAddForm::class, $namespace);
         // only handles data on POST
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
+        //Vérification si le label n'a jamais été utilisé ailleurs
+        $isLabelValid = true;
+        if($form->isSubmitted()){
+            $labels = $form->get('labels');
+            foreach ($labels as $label){
+                if($allLabels->contains($label->get('label')->getData())){
+                    $label->get('label')->addError(new FormError('This label is already used by another namespace, please enter a different one.'));
+                    $isLabelValid = false;
+                }
+            }
+        }
+
+        if ($form->isSubmitted() && $form->isValid() && $isLabelValid) {
             $namespace = $form->getData();
             $namespace->setUriParameter(0);
             $namespace->setProjectForTopLevelNamespace($project);
@@ -137,17 +159,19 @@ class NamespaceController  extends Controller
 
             // Ajout des namespaces références si choisi(s)
             $referencesNamespaces = json_decode($form->get("referenceNamespaces")->getData());
-            foreach ($referencesNamespaces as $referenceNamespace => $labelNamespace){
-                $referencedNamespaceAssociation = new ReferencedNamespaceAssociation();
-                $referencedNamespaceAssociation->setNamespace($ongoingNamespace);
-                $referenceNamespace = $em->getRepository("AppBundle:OntoNamespace")->find(intval($referenceNamespace));
-                $referencedNamespaceAssociation->setReferencedNamespace($referenceNamespace);
-                $referencedNamespaceAssociation->setCreator($this->getUser());
-                $referencedNamespaceAssociation->setModifier($this->getUser());
-                $referencedNamespaceAssociation->setCreationTime(new \DateTime('now'));
-                $referencedNamespaceAssociation->setModificationTime(new \DateTime('now'));
-                $ongoingNamespace->addReferenceNamespaceAssociation($referencedNamespaceAssociation);
-                $em->persist($referencedNamespaceAssociation);
+            if(!is_null($referencesNamespaces)){
+                foreach ($referencesNamespaces as $referenceNamespace => $labelNamespace){
+                    $referencedNamespaceAssociation = new ReferencedNamespaceAssociation();
+                    $referencedNamespaceAssociation->setNamespace($ongoingNamespace);
+                    $referenceNamespace = $em->getRepository("AppBundle:OntoNamespace")->find(intval($referenceNamespace));
+                    $referencedNamespaceAssociation->setReferencedNamespace($referenceNamespace);
+                    $referencedNamespaceAssociation->setCreator($this->getUser());
+                    $referencedNamespaceAssociation->setModifier($this->getUser());
+                    $referencedNamespaceAssociation->setCreationTime(new \DateTime('now'));
+                    $referencedNamespaceAssociation->setModificationTime(new \DateTime('now'));
+                    $ongoingNamespace->addReferenceNamespaceAssociation($referencedNamespaceAssociation);
+                    $em->persist($referencedNamespaceAssociation);
+                }
             }
 
             //just in case, we set the domain to ontome.net for non external namespaces
@@ -803,8 +827,8 @@ class NamespaceController  extends Controller
 
     }
 
-     /**
-      * @Route("/namespace/{namespace}/document", name="namespace_document", requirements={"namespace"="^([0-9]+)|(namespaceID){1}$"})
+    /**
+     * @Route("/namespace/{namespace}/document", name="namespace_document", requirements={"namespace"="^([0-9]+)|(namespaceID){1}$"})
      * @Method({ "GET"})
      * @param OntoNamespace  $namespace    The namespace
      * @return BinaryFileResponse
@@ -1358,7 +1382,7 @@ class NamespaceController  extends Controller
         // Relations autres
         foreach($namespace->getEntityAssociations()
                     ->filter(function($v){return is_null($v->getValidationStatus()) || !is_null($v->getValidationStatus()) && $v->getValidationStatus()->getId() != 27;}) /*On retire les denied*/
-                    ->filter(function($v){return !is_null($v->getSourceProperty());})
+            ->filter(function($v){return !is_null($v->getSourceProperty());})
                 as $propertyAssociation){
             if($propertyAssociation->getSourceNamespaceForVersion() != $namespace && $propertyAssociation->getSourceNamespaceForVersion()->getId() != 4 and !$propertiesVersionWithNSref->contains($propertyAssociation->getSourceProperty())){
                 if(!$propertiesVersionWithNSref->contains($propertyAssociation->getSourceProperty()->getPropertyVersionForDisplay($propertyAssociation->getSourceNamespaceForVersion()))){

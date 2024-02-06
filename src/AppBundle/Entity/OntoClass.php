@@ -197,15 +197,26 @@ class OntoClass
             // (d'autres namespaces du même root mais qui n'ont pas cette classe, peuvent donc échapper)
             // il faut donc simplement récupérer le root et boucler dessus
             $rootNamespace = $this->getClassVersionForDisplay()->getNamespaceForVersion()->getTopLevelNamespace();
+            $uniqueIdentifiant = true;
             foreach ($rootNamespace->getChildVersions() as $namespace) {
                 foreach ($namespace->getClasses() as $class) {
                     if ($class->identifierInNamespace == $this->identifierInNamespace and $class != $this) {
-                        $context->buildViolation('The identifier must be unique. Please enter another one.')
-                            ->atPath('identifierInNamespace')
-                            ->addViolation();
+                        $uniqueIdentifiant = false;
                         break;
                     }
                 }
+                //Il faut aussi boucler sur les identifiants des propriétés
+                foreach ($namespace->getProperties() as $property) {
+                    if ($property->getIdentifierInNamespace() == $this->identifierInNamespace) {
+                        $uniqueIdentifiant = false;
+                        break;
+                    }
+                }
+            }
+            if(!$uniqueIdentifiant){
+                $context->buildViolation('The identifier must be unique within the same namespace. Please enter a different one.')
+                    ->atPath('identifierInNamespace')
+                    ->addViolation();
             }
         }
 
