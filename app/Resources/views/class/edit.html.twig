@@ -1438,7 +1438,7 @@
                     <button id="reset-tree" onclick="reset();">Reset</button>
                 </p>
                 <div id="graph-container" data-url="{{ path('class_graph_json', {
-                    'class': classVersion.class.id})
+                    'class': classVersion.class.id, 'namespace': classVersion.namespaceForVersion.id})
                 }}">
                 </div>
                 <p><span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span><em>Use mouse wheel to zoom in/out.</em></p>
