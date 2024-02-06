@@ -199,6 +199,10 @@ class PropertyController extends Controller
         }
 
         if(!$propertyVersion->getNamespaceForVersion()->getTopLevelNamespace()->getIsExternalNamespace()){
+            if(empty($identifierInUriPrefilled)){
+                // Si vide (à cause gestionnaire automatique désactivée)
+                $identifierInUriPrefilled = 'identifierInUriPrefilled';
+            }
             $property->setIdentifierInURI($identifierInUriPrefilled); // On attribue le même identifiant à la création si namespace interne car non géré par le formulaire pour les NS internes
         }
 
@@ -241,6 +245,12 @@ class PropertyController extends Controller
                 $propertyVersion->setDomain($domain);
                 $domainNamespace = $em->getRepository("AppBundle:OntoClassVersion")->findClassVersionByClassAndNamespacesId($domain, $namespacesId)->getNamespaceForVersion();
                 $propertyVersion->setDomainNamespace($domainNamespace);
+            }
+
+            // Dans le cas où l'utilisateur a desactivé la gestion automatique des identifiers dans son NS interne
+            // il faut remplir correctement l'identifier in uri qui est vide après formulaire
+            if(!$namespace->getTopLevelNamespace()->getIsExternalNamespace() && $property->getIdentifierInURI() === 'identifierInUriPrefilled'){
+                $property->setIdentifierInURI($property->getIdentifierInNamespace());
             }
 
             $propertyVersion->setDomainMinQuantifier($form->get("domainMinQuantifierVersion")->getData());
