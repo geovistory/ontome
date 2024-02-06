@@ -635,7 +635,7 @@
 
                 {% if app.user is not null and app.user.currentOngoingNamespace is not null %}
                     <div class="pull-right add-div">
-                        <a href="{{ path('text_property_new', {'type': 'internal-note', 'object': 'property', 'objectId': propertyVersion.property.id })}}"
+                        <a href="{{ path('text_property_new', {'type': 'internal-note', 'object': 'property-version', 'objectId': propertyVersion.id })}}"
                            class="btn btn-primary pull-right">
                             Add <span class="fa fa-plus-circle"></span>
                         </a>
@@ -658,7 +658,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for textProperty in propertyVersion.property.textProperties|filter(v => (is_granted('edit', v) and app.user is not null and v.namespaceForVersion.id == app.user.getCurrentOngoingNamespace.id and v.systemType.id == 33) or ((v.namespaceForVersion.id in namespacesId or v.namespaceForVersion == app.user.getCurrentOngoingNamespace|default(null)) and v.systemType.id in [34,35])) %}
+                    {% for textProperty in propertyVersion.property.textProperties|filter(v => (v.entityNamespaceForVersion is not null and v.entityNamespaceForVersion.id == propertyVersion.namespaceForVersion.id) and ((is_granted('edit', v) and app.user is not null and v.namespaceForVersion.id == app.user.getCurrentOngoingNamespace.id and v.systemType.id == 33) or ((v.namespaceForVersion.id in namespacesId or v.namespaceForVersion == app.user.getCurrentOngoingNamespace|default(null)) and v.systemType.id in [34,35]))) %}
                         {# listSystemType est définie dans #summary #}
                         {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
                         <tr>

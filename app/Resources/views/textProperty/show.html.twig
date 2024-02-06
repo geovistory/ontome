@@ -1,20 +1,45 @@
 {% extends 'base.html.twig' %}
 {% block body %}
+
+    {% import _self as btnMacros %}
+    {% macro backButton(_route, _id, _fragment = "", _namespaceVersionId = 0) %}
+
+        {% set css = 'pull-right btn btn-link' %}
+
+        {% if _namespaceVersionId != 0 %}
+            {% set _path = path(_route, {id: _id, 'namespaceFromUrlId': _namespaceVersionId, '_fragment': _fragment}) %}
+        {% else %}
+            {% set _path = path(_route, {id: _id, '_fragment': _fragment}) %}
+        {% endif %}
+
+        <a href="{{ _path|e('html_attr') }}" class={{ css|e('html_attr') }} role="button">
+            <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
+        </a>
+    {% endmacro %}
+
+
     <div class="container">
         <div class="row">
             <div class="col-xs-12">
                 <h2>
-
                     {% if textProperty.class is not null %}
-                        {% set route = 'class_show_with_version' %}
-                        {% set namespaceFromUrlId = textProperty.namespaceForVersion.id %}
-                        {{ textProperty.systemType.standardLabel|capitalize }} for the class {{ textProperty.class.classVersionForDisplay(textProperty.namespaceForVersion) }}
+
+                        {# Chercher la bonne version de la classe selon la version du txtp #}
+                        {% set classVersion = textProperty.class.classVersions|filter(v => v.namespaceForVersion in textProperty.namespaceForVersion.allReferencedNamespaces)|first|default(textProperty.class.classVersionForDisplay) %}
+                        {{ textProperty.systemType.standardLabel|capitalize }} for the class {{ classVersion }}
+
+                        {% set _route, _id, _namespaceFromUrlId, _fragment = 'class_show_with_version', textProperty.class.id, classVersion.namespaceForVersion.id, 'definition' %}
+
                     {% elseif textProperty.property is not null %}
-                        {% set route = 'property_show_with_version' %}
-                        {% set namespaceFromUrlId = textProperty.namespaceForVersion.id %}
-                        {{ textProperty.systemType.standardLabel|capitalize }} for the property {{ textProperty.property.propertyVersionForDisplay(textProperty.namespaceForVersion) }}
+
+                        {# Chercher la bonne version de la propriété selon la version du txtp #}
+                        {% set propertyVersion = textProperty.property.propertyVersions|filter(v => v.namespaceForVersion in textProperty.namespaceForVersion.allReferencedNamespaces)|first|default(textProperty.property.propertyVersionForDisplay) %}
+                        {{ textProperty.systemType.standardLabel|capitalize }} for the property {{ propertyVersion }}
+
+                        {% set _route, _id, _namespaceFromUrlId, _fragment = 'property_show_with_version', textProperty.property.id, propertyVersion.namespaceForVersion.id, 'definition' %}
+
                     {% elseif textProperty.namespace is not null %}
-                        {% set route = 'namespace_show' %}
+
                         {% if textProperty.object is not null %}
                             {% if textProperty.object.identifierInNamespace is not null %}
                                 {{ textProperty.object.standardLabel }} – {{ textProperty.object.identifierInNamespace }}: {{ textProperty.systemType.standardLabel }}
@@ -24,8 +49,11 @@
                         {% else %}
                             {{ textProperty.systemType.standardLabel }}
                         {% endif %}
+                        {% set _route, _id, _fragment = 'namespace_show', textProperty.namespace.id, 'definition' %}
+
                     {% elseif textProperty.project is not null %}
-                        {% set route = 'project_show' %}
+
+                        {% set route = '' %}
                         {% if textProperty.object is not null %}
                             {% if textProperty.object.identifierInNamespace is not null %}
                                 {{ textProperty.object.standardLabel }} – {{ textProperty.object.identifierInNamespace }}: {{ textProperty.systemType.standardLabel }}
@@ -35,8 +63,10 @@
                         {% else %}
                             {{ textProperty.systemType.standardLabel }}
                         {% endif %}
+                        {% set _route, _id, _fragment = 'project_show', textProperty.project.id, 'definition' %}
+
                     {% elseif textProperty.profile is not null %}
-                        {% set route = 'profile_show' %}
+
                         {% if textProperty.object is not null %}
                             {% if textProperty.object.identifierInNamespace is not null %}
                                 {{ textProperty.object.standardLabel }} – {{ textProperty.object.identifierInNamespace }}: {{ textProperty.systemType.standardLabel }}
@@ -46,38 +76,36 @@
                         {% else %}
                             {{ textProperty.systemType.standardLabel }}
                         {% endif %}
+                    {% set _route, _id, _fragment = 'profile_show', textProperty.profile.id, 'definition' %}
+
                     {% elseif textProperty.classAssociation is not null %}
-                        {% set route = 'class_association_show' %}
+
                         {% set childClass = textProperty.classAssociation.childClass %}
                         {{ childClass.classVersionForDisplay(textProperty.classAssociation.childClassNamespace).standardLabel }} – {{ childClass.identifierInNamespace }}: {{ textProperty.systemType.standardLabel }}
+                        {% set _route, _id, _fragment = 'class_association_show', textProperty.classAssociation.id, 'definition' %}
+
                     {% elseif textProperty.propertyAssociation is not null %}
-                        {% set route = 'property_association_show' %}
+
                         {% set childProperty = textProperty.propertyAssociation.childProperty %}
                         {{ childProperty.propertyVersionForDisplay(textProperty.propertyAssociation.childPropertyNamespace).standardLabel }} – {{ childClass.identifierInNamespace }}: {{ textProperty.systemType.standardLabel }}
+                        {% set _route, _id, _fragment = 'property_association_show', textProperty.propertyAssociation.id, 'definition' %}
+
                     {% elseif textProperty.entityAssociation is not null %}
+
                         {% set route = 'entity_association_show' %}
                         {% if textProperty.entityAssociation.sourceClass is not null %}
                             {{ textProperty.entityAssociation.sourceClass }} {{ textProperty.entityAssociation.systemType.standardLabel }} {{ textProperty.entityAssociation.targetClass }} : {{ textProperty.systemType.standardLabel }}
                         {% elseif textProperty.entityAssociation.sourceProperty is not null %}
                             {{ textProperty.entityAssociation.sourceClass }} {{ textProperty.entityAssociation.systemType.standardLabel }} {{ textProperty.entityAssociation.targetClass }} : {{ textProperty.systemType.standardLabel }}
                         {% endif %}
+                        {% set _route, _id, _fragment = 'entity_association_show', textProperty.entityAssociation.id, 'definition' %}
+
                     {% endif %}
 
-                    {% if route is not null and namespaceFromUrlId is defined %}
-                        <a href="{{ path(route, {
-                            'id':textProperty.object.id,
-                            'namespaceFromUrlId': namespaceFromUrlId,
-                            '_fragment': 'definition'}) }}"
-                           class="pull-right btn btn-link"
-                           role="button">
-                            <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
-                        </a>
+                    {% if route is not null and _namespaceFromUrlId is defined %}
+                        {{ btnMacros.backButton(_route, _id, _fragment, _namespaceFromUrlId) }}
                     {% elseif route is not null %}
-                        <a href="{{ path(route, {'id':textProperty.object.id, '_fragment': 'definition'}) }}"
-                           class="pull-right btn btn-link"
-                           role="button">
-                            <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
-                        </a>
+                        {{ btnMacros.backButton(_route, _id, _fragment) }}
                     {% else %}
                         <a href="{{ app.request.headers.get('referer') }}#definition"
                            class="pull-right btn btn-link"
