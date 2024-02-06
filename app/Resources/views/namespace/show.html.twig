@@ -76,7 +76,7 @@
                             </div>
                             <div class="col-xs-8">
                                 <p id="example-cardinality">one to many (0,n:0,1)</p>
-                                <p id="example-fol">P1(x,y) ⊃ C1(x)<br>P1(x,y) ⊃ C2(y)<br>P1(x,y) ⊃ P2(x,y)</p>
+                                <p id="example-fol">P1(x,y) ⇒ C1(x)<br>P1(x,y) ⇒ C2(y)<br>P1(x,y) ⇒ P2(x,y)</p>
                             </div>
                         </div>
                     </div>
@@ -100,6 +100,7 @@
             <li><a data-toggle="tab" href="#classes">Classes</a></li>
             <li><a data-toggle="tab" href="#properties">Properties</a></li>
             <li><a data-toggle="tab" href="#relations">Relations</a></li>
+            <li><a data-toggle="tab" href="#notes">Notes</a></li>
             <li><a data-toggle="tab" href="#graph">Graph</a></li>
             {% endif %}
             <li><a data-toggle="tab" href="#comments" class="updateViewComment" data-id="{{ namespace.id }}" data-object="namespace">Comments</a></li>
@@ -361,7 +362,7 @@
             <div id="identification" class="tab-pane fade">
                 <h3>Identification</h3>
                 <p>
-                    {% if namespace.topLevelNamespace.isExternalNamespace %}
+                    {% if namespace.topLevelNamespace.isExternalNamespace and namespace.namespaceURI is not null %}
                         Base URI: <strong>{{ namespace.namespaceURI }}</strong>
                     {% else %}
                         Base URI: <strong>{{ namespace.topLevelNamespace.namespaceURI }}</strong>
@@ -502,7 +503,8 @@
                 {% else %}
                     <!--Deprecated version-->
                     {% set rootNamespace = namespace.topLevelNamespace %}
-                    {% set ongoingNamespace = rootNamespace.childVersions|filter(v => v.isOngoingl)|first %}
+                    {% set ongoingNamespace = rootNamespace.childVersions|filter(v => v.isOngoing)|first %}
+                    {% set deprecatedNamespace = rootNamespace.childVersions|filter(v => v.deprecatedAt is not null)|first %}
                     <p>{{ namespace.standardLabel}} is a <b>deprecated namespace</b>.</p>
                     {% set ns1 = [rootNamespace, labelRoot] %}
                     {% set ns2 = [deprecatedNamespace, labelDeprecated] %}
@@ -520,7 +522,7 @@
                         <th>Namespace</th>
                         <th>Publication date</th>
                         {% if app.user.id is defined %}
-                        <th>Current namespace}</th>
+                        <th>Current namespace</th>
                         {% endif %}
                     </tr>
                     </thead>
@@ -586,10 +588,29 @@
                         <td class="text-center" id="td-next-property-identifier">{{ namespace.propertyPrefix|default('P') }}{{ namespace.currentPropertyNumber|default(0)+1 }}</td>
                     </tr>
                 </table>
+                {% if namespace.topLevelNamespace.isExternalNamespace %}
+                <h3>Identifiers in URI</h3>
+                <table id="table-identifiers-uri" class="table-bordered table-condensed" style="margin-bottom: 15px;">
+                    <tr>
+                        <th>URI parameter</th>
+                        <th>Class URI example</th>
+                        <th>Property URI example</th>
+                    </tr>
+                    <tr>
+                        <td id="parameterUri">{{ namespace.uriParameterStrings.label }}</td>
+                        <td>{{ namespace.displayURI }}{{ namespace.uriParameterStrings.classExample }}</td>
+                        <td>{{ namespace.displayURI }}{{ namespace.uriParameterStrings.propertyExample }}</td>
+                    </tr>
+                    <tr id="noParameterUriMessage">
+                        <td colspan="3" class="text-muted">So that no entity is without a URI, the URIs will be automatically pre-filled with the entity identifier, but can be freely modified.</td>
+                    </tr>
+                </table>
+                {% endif %}
             </div>
             {% endif %}
             <div id="classes" class="tab-pane fade">
                 <h3>Classes</h3>
+                {% if namespace.isVisible or namespace.projectForTopLevelNamespace.userProjectAssociations|filter(v => app.user and v.user.id == app.user.id)|length == 1 %}
                 <table class="table table-striped" id="classes-table">
                     <thead>
                     <tr>
@@ -613,7 +634,7 @@
                                     {{ classVersion.standardLabel }}
                                 </a>
                             </td>
-                            <td>{{ classVersion.class.modificationTime|date('Y-m-d') }}</td>
+                            <td>{{ classVersion.modificationTime|date('Y-m-d') }}</td>
                             {% if namespace.isOngoing %}
                             <td>
                                 {% if classVersion.validationStatus is null %}
@@ -639,19 +660,24 @@
                     {% endfor %}
                     </tbody>
                 </table>
-
+                {% else %}
+                <p><i class="fas fa-eye-slash"></i> The classes in this ongoing namespace are currently only visible to members of the <a href="{{ path('project_show', {'id': namespace.projectForTopLevelNamespace.id}) }}">{{ namespace.projectForTopLevelNamespace }}</a> project.</p>
+                {% endif %}
             </div>
             <div id="properties" class="tab-pane fade">
                 <h3>Properties</h3>
+                {% if namespace.isVisible or namespace.projectForTopLevelNamespace.userProjectAssociations|filter(v => app.user and v.user.id == app.user.id)|length == 1 %}
                 <table class="table table-striped" id="properties-table">
                     <thead>
                     <tr>
                         <th class="text-right">Domain</th>
+                        <th>Domain namespace</th> <!--Not visible -->
                         <th></th>
                         <th>Identifier</th>
                         <th class="text-center">Property</th>
                         <th></th>
                         <th>Range</th>
+                        <th>Range namespace</th> <!--Not visible -->
                         <th>Last updated</th>
                         {% if namespace.isOngoing %}
                         <th>Validation status</th>
@@ -671,6 +697,7 @@
                                 </a>
                                 {% endif %}
                             </td>
+                            <td>{{ propertyVersion.domainNamespace }}</td>
                             <td class="small" style="padding-left: 30px;">
                                 {% if propertyVersion.domainMinQuantifier is not null and propertyVersion.domainMaxQuantifier is not null %}
                                     ({% if  propertyVersion.domainMinQuantifier != -1 %}{{ propertyVersion.domainMinQuantifier }}{% else %}n{% endif %},{% if  propertyVersion.domainMaxQuantifier != -1 %}{{ propertyVersion.domainMaxQuantifier }}{% else %}n{% endif %})
@@ -700,6 +727,7 @@
                                     </a>
                                 {% endif %}
                             </td>
+                            <td>{{ propertyVersion.rangeNamespace }}</td>
                             <td>{{ propertyVersion.modificationTime|date('Y-m-d') }}</td>
                             {% if namespace.isOngoing %}
                             <td>
@@ -726,9 +754,13 @@
                     {% endfor %}
                     </tbody>
                 </table>
+                {% else %}
+                <p><i class="fas fa-eye-slash"></i> The properties in this ongoing namespace are currently only visible to members of the <a href="{{ path('project_show', {'id': namespace.projectForTopLevelNamespace.id}) }}">{{ namespace.projectForTopLevelNamespace }}</a> project.</p>
+                {% endif %}
             </div>
             <div id="relations" class="tab-pane fade">
                 <h3>Relations</h3>
+                {% if namespace.isVisible or namespace.projectForTopLevelNamespace.userProjectAssociations|filter(v => app.user and v.user.id == app.user.id)|length == 1  %}
                 <h4>Filter by</h4>
                 <div class="form-group">
                     <div class="btn-group" id="btns-choose-entity-relations">
@@ -748,16 +780,19 @@
                     <thead>
                     <tr>
                         <th>Source</th>
+                        <th>Source namespace</th><!-- not visible -->
                         <th>Relation</th>
                         <th>Target</th>
+                        <th>Target namespace</th><!-- not visible -->
                         <th>Last updated</th>
-                        <th>Type</th>
+                        <th>Type</th><!-- not visible -->
                     </tr>
                     </thead>
                     <tbody>
                     {% for classAssociation in namespace.classAssociations %}
                         <tr>
                             <td>{{ classAssociation.childClass.classVersionForDisplay(classAssociation.childClassNamespace) }}</td>
+                            <td>{{ classAssociation.childClassNamespace }}</td>
                             <td>
                                 <a href="{{ path('class_show_with_version', {
                                     'id': classAssociation.childClass.id,
@@ -768,6 +803,7 @@
                                 </a>
                             </td>
                             <td>{{ classAssociation.parentClass.classVersionForDisplay(classAssociation.parentClassNamespace) }}</td>
+                            <td>{{ classAssociation.parentClassNamespace }}</td>
                             <td>{{ classAssociation.modificationTime|date('Y-m-d') }}</td>
                             <td>ClassesRelation-HierarchyAssociation</td>
                         </tr>
@@ -775,6 +811,7 @@
                     {% for propertyAssociation in namespace.propertyAssociations %}
                         <tr>
                             <td>{{ propertyAssociation.childProperty.propertyVersionForDisplay(propertyAssociation.childPropertyNamespace) }}</td>
+                            <td>{{ propertyAssociation.childPropertyNamespace }}</td>
                             <td>
                                 <a href="{{ path('property_show_with_version', {
                                     'id': propertyAssociation.childProperty.id,
@@ -785,6 +822,7 @@
                                 </a>
                             </td>
                             <td>{{ propertyAssociation.parentProperty.propertyVersionForDisplay(propertyAssociation.parentPropertyNamespace) }}</td>
+                            <td>{{ propertyAssociation.parentPropertyNamespace }}</td>
                             <td>{{ propertyAssociation.modificationTime|date('Y-m-d') }}</td>
                             <td>PropertiesRelation-HierarchyAssociation</td>
                         </tr>
@@ -796,6 +834,13 @@
                                     {{ entityAssociation.sourceClass.classVersionForDisplay(entityAssociation.sourceNamespaceForVersion) }}
                                 {% elseif entityAssociation.sourceProperty is not null %}
                                     {{ entityAssociation.sourceProperty.propertyVersionForDisplay(entityAssociation.sourceNamespaceForVersion) }}
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if entityAssociation.sourceClass is not null %}
+                                    {{ entityAssociation.sourceNamespaceForVersion }}
+                                {% elseif entityAssociation.sourceProperty is not null %}
+                                    {{ entityAssociation.sourceNamespaceForVersion }}
                                 {% endif %}
                             </td>
                             <td>
@@ -824,6 +869,13 @@
                                     {{ entityAssociation.targetProperty.propertyVersionForDisplay(entityAssociation.targetNamespaceForVersion) }}
                                 {% endif %}
                             </td>
+                            <td>
+                                {% if entityAssociation.targetClass is not null %}
+                                    {{ entityAssociation.targetNamespaceForVersion }}
+                                {% elseif entityAssociation.targetProperty is not null %}
+                                    {{ entityAssociation.targetNamespaceForVersion }}
+                                {% endif %}
+                            </td>
                             <td>{{ entityAssociation.modificationTime|date('Y-m-d') }}</td>
                             <td>
                                 {% if entityAssociation.sourceClass is not null %}
@@ -836,16 +888,82 @@
                     {% endfor %}
                     </tbody>
                 </table>
+                {% else %}
+                    <p><i class="fas fa-eye-slash"></i> The relations in this ongoing namespace are currently only visible to members of the <a href="{{ path('project_show', {'id': namespace.projectForTopLevelNamespace.id}) }}">{{ namespace.projectForTopLevelNamespace }}</a> project.</p>
+                {% endif %}
+            </div>
+            <div id="notes" class="tab-pane fade">
+                <h3>Notes</h3>
+                <table class="table table-striped" id="notes-table">
+                    <thead>
+                    <tr>
+                        <th>Show</th>
+                        <th>Note</th>
+                        <th>Type</th>
+                        <th>Language</th>
+                        <th>Entity</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for textProperty in textProperties|filter(v => (is_granted('edit', v) and v.systemType.id == 33) or v.systemType.id in [34,35]) %}
+                        {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
+                        <tr>
+                            <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
+                            <td class="truncated-text">
+                                <span>{{ textProperty.textProperty|striptags|raw }}</span>
+                            </td>
+                            <td class="text-nowrap">{{ textProperty.systemType }}</td>
+                            <td>{{ textProperty.languageIsoCode }}</td>
+                            {% if textProperty.class is not null %}
+                                {% set classVersion = textProperty.class.classVersions|filter(v => v.namespaceForVersion in namespace.allReferencedNamespaces or v.namespaceForVersion == namespace)|first  %}
+                                {% set prefix = '' %}
+                                {% if classVersion.namespaceForVersion.topLevelNamespace.rootNamespacePrefix is not null %}
+                                    {% set prefix = classVersion.namespaceForVersion.topLevelNamespace.rootNamespacePrefix ~ ':' %}
+                                {% endif %}
+                            <td class="text-nowrap">
+                                <a href="{{ path('class_show_with_version', {
+                                    'id': classVersion.class.id,
+                                    'namespaceFromUrlId': classVersion.namespaceForVersion.id,
+                                    '_fragment':'definition'
+                                }) }}">
+                                    {{ prefix ~ classVersion.invertedLabel }}
+                                </a>
+                            </td>
+                            {% endif %}
+                            {% if textProperty.property is not null %}
+                                {% set propertyVersion = textProperty.property.propertyVersions|filter(v => v.namespaceForVersion in namespace.allReferencedNamespaces or v.namespaceForVersion == namespace)|first  %}
+                                {% set prefix = '' %}
+                                {% if propertyVersion.namespaceForVersion.topLevelNamespace.rootNamespacePrefix is not null %}
+                                    {% set prefix = propertyVersion.namespaceForVersion.topLevelNamespace.rootNamespacePrefix ~ ':' %}
+                                {% endif %}
+                            <td class="text-nowrap">
+                                <a href="{{ path('property_show_with_version', {
+                                    'id': propertyVersion.property.id,
+                                    'namespaceFromUrlId': propertyVersion.namespaceForVersion.id,
+                                    '_fragment':'definition'
+                                }) }}">
+                                {{ prefix ~ propertyVersion.invertedLabel }}
+                                </a>
+                            </td>
+                            {% endif %}
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
             </div>
             <div id="graph" class="tab-pane fade">
                 <h3>Graph</h3>
-                {% if namespace.classes|length > 0 and namespace.properties|length > 0 %}
-                    <a href="https://betagraph.ontome.net/#url={{ url('namespace_json', {'id': namespace.id}) }}" target="_blank" class="btn btn-primary">Full screen (WebVOWL) <span class="fa fa-desktop"></span></a><br><br>
-                    <embed src="https://betagraph.ontome.net/#url={{ url('namespace_json', {'id': namespace.id}) }}" width="100%" height="1000px"><br><br>
-                    <a href="https://betagraph.ontome.net/#url={{ url('namespace_json', {'id': namespace.id}) }}" target="_blank" class="btn btn-primary">Full screen (WebVOWL) <span class="fa fa-desktop"></span></a>
+                {% if namespace.isVisible or namespace.projectForTopLevelNamespace.userProjectAssociations|filter(v => app.user and v.user.id == app.user.id)|length == 1  %}
+                    {% if namespace.classes|length > 0 and namespace.properties|length > 0 %}
+                        <a href="https://betagraph.ontome.net/#url={{ url('namespace_json', {'id': namespace.id}) }}" target="_blank" class="btn btn-primary">Full screen (WebVOWL) <span class="fa fa-desktop"></span></a><br><br>
+                        <embed src="https://betagraph.ontome.net/#url={{ url('namespace_json', {'id': namespace.id}) }}" width="100%" height="1000px"><br><br>
+                        <a href="https://betagraph.ontome.net/#url={{ url('namespace_json', {'id': namespace.id}) }}" target="_blank" class="btn btn-primary">Full screen (WebVOWL) <span class="fa fa-desktop"></span></a>
 
+                    {% else %}
+                        <p>The webvowl graph cannot be displayed because there is no class or property in this namespace.</p>
+                    {% endif %}
                 {% else %}
-                    <p>The webvowl graph cannot be displayed because there is no class or property in this namespace.</p>
+                    <p><i class="fas fa-eye-slash"></i> This graph of an ongoing namespace is currently only visible to members of the <a href="{{ path('project_show', {'id': namespace.projectForTopLevelNamespace.id}) }}">{{ namespace.projectForTopLevelNamespace }}</a> project.</p>
                 {% endif %}
             </div>
             <div id="comments" class="tab-pane fade">
@@ -1135,7 +1253,7 @@
                 var filterEntityRelations = $("#btns-choose-entity-relations .btn-primary").val();
                 var filterTypeRelations = $("#btns-choose-type-relations .btn-primary").val();
                 var filterRelations = filterEntityRelations+"-"+filterTypeRelations;
-                var strForFilter = data[4]; // use data for comparaison
+                var strForFilter = data[6]; // use data for comparaison
                 return strForFilter.includes(filterRelations);
             }
         );
@@ -1156,13 +1274,117 @@
             $('#labels-table').DataTable();
             $('#descriptions-table').DataTable();
             $('#additional-notes-table').DataTable();
+            $('#notes-table').DataTable({
+                columnDefs: [
+                    { targets: [1], width: '100%'}
+                ],
+                "autoWidth": false,
+                initComplete: function(){
+                    this.api().columns([2]).every(function(){
+                        var column = this;
+                        var select = $('<br><select id="notes-select" style="width:100%;"></select>')
+                            .appendTo($(column.header()))
+                            .on('change', function(){
+                                var val = $.fn.dataTable.util.escapeRegex(
+                                    $(this).val()
+                                );
+
+                                if(val == "All") {
+                                    column
+                                        .search(val ? 'note' : '', true, false)
+                                        .draw();
+                                }
+                                else{
+                                    column
+                                        .search(val ? '^'+val+'$' : '', true, false)
+                                        .draw();
+                                }
+                            });
+
+                        $(select).click(function(e){
+                            e.stopPropagation();
+                        });
+
+                        select.append('<option value="All">All</option>');
+                        column.data().unique().sort().each(function(d, j){
+                            select.append('<option value="'+d+'">'+d+'</option>');
+                        });
+                    });
+                    var existsClassesSelectedInProfile = $("#notes-select option[value='All']").length !== 0; //détermine si cette valeur est dans le select
+                    if (existsClassesSelectedInProfile) {
+                        $("#notes-select").val('All').change(); //default filter on this column
+                    }
+                }
+            });
             $('#properties-table').DataTable({
                 columnDefs: [
-                    { type: 'natural-ci', targets: 2, width: '1%', className: 'text-right' },
+                    { type: 'natural-ci', targets: 3, width: '1%', className: 'text-right' },
+                    { targets: [1, 7], visible: false},
                     { targets: -1, width: '1%'}
                 ],
                 "autoWidth": false,
-                order: [[ 3, 'asc' ]]});
+                order: [[ 3, 'asc' ]],
+                initComplete: function(){
+                    var columnAppend = this.api().columns([0]);
+                    this.api().columns([1]).every(function(){
+                        var column = this;
+                        var select = $('<br><select id="properties-namespace-select" style="width:100%;"></select>')
+                            .appendTo($(columnAppend.header()))
+                            .on('change', function(){
+                                var val = $.fn.dataTable.util.escapeRegex(
+                                    $(this).val()
+                                );
+
+                                if(val == "All namespaces"){val = "";}
+
+                                column
+                                    .search(val ? '^'+val+'$' : '', true, false)
+                                    .draw();
+                            });
+
+                        $(select).click(function(e){
+                            e.stopPropagation();
+                        });
+
+                        select.append('<option value="All namespaces">All namespaces</option>');
+                        select.append('<option value="{{ namespace }}">{{ namespace }}</option>');
+                        column.data().unique().sort().each(function(d, j){
+                            if(d != '{{ namespace.standardLabel }}'){
+                                select.append('<option value="'+d+'">'+d+'</option>')
+                            }
+                        });
+                    });
+                    var columnAppend = this.api().columns([6]);
+                    this.api().columns([7]).every(function(){
+                        var column = this;
+                        var select = $('<select id="properties-status-select" style="width:100%;"></select>')
+                            .appendTo($(columnAppend.header()))
+                            .on('change', function(){
+                                var val = $.fn.dataTable.util.escapeRegex(
+                                    $(this).val()
+                                );
+
+                                if(val == "All namespaces"){val = "";}
+
+                                column
+                                    .search(val ? '^'+val+'$' : '', true, false)
+                                    .draw();
+                            });
+
+                        $(select).click(function(e){
+                            e.stopPropagation();
+                        });
+
+                        select.append('<option value="All namespaces">All namespaces</option>');
+                        select.append('<option value="{{ namespace }}">{{ namespace }}</option>');
+                        column.data().unique().sort().each(function(d, j){
+                            if(d != '{{ namespace.standardLabel }}'){
+                                select.append('<option value="'+d+'">'+d+'</option>')
+                            }
+                        });
+                    });
+                }
+            });
             $('#classes-table').DataTable({
                 columnDefs: [
                     { type: 'natural-ci', targets: 0, width: '1%', className: 'text-right' },
@@ -1172,9 +1394,69 @@
                 order: [[ 1, 'asc' ]]});
             var tableRelations = $('#relations-table').DataTable({
                 "columnDefs": [
-                    { "visible": false, "targets": 4 }
+                    { "visible": false, "targets": [1, 4, 6] }
                 ],
-                "autoWidth": false
+                "autoWidth": false,
+                initComplete: function(){
+                    var columnAppend = this.api().columns([0]);
+                    this.api().columns([1]).every(function(){
+                        var column = this;
+                        var select = $('<br><select id="properties-namespace-select" style="width:100%;"></select>')
+                            .appendTo($(columnAppend.header()))
+                            .on('change', function(){
+                                var val = $.fn.dataTable.util.escapeRegex(
+                                    $(this).val()
+                                );
+
+                                if(val == "All namespaces"){val = "";}
+
+                                column
+                                    .search(val ? '^'+val+'$' : '', true, false)
+                                    .draw();
+                            });
+
+                        $(select).click(function(e){
+                            e.stopPropagation();
+                        });
+
+                        select.append('<option value="All namespaces">All namespaces</option>');
+                        select.append('<option value="{{ namespace }}">{{ namespace }}</option>');
+                        column.data().unique().sort().each(function(d, j){
+                            if(d != '{{ namespace.standardLabel }}'){
+                                select.append('<option value="'+d+'">'+d+'</option>')
+                            }
+                        });
+                    });
+                    var columnAppend = this.api().columns([3]);
+                    this.api().columns([4]).every(function(){
+                        var column = this;
+                        var select = $('<select id="properties-status-select" style="width:100%;"></select>')
+                            .appendTo($(columnAppend.header()))
+                            .on('change', function(){
+                                var val = $.fn.dataTable.util.escapeRegex(
+                                    $(this).val()
+                                );
+
+                                if(val == "All namespaces"){val = "";}
+
+                                column
+                                    .search(val ? '^'+val+'$' : '', true, false)
+                                    .draw();
+                            });
+
+                        $(select).click(function(e){
+                            e.stopPropagation();
+                        });
+
+                        select.append('<option value="All namespaces">All namespaces</option>');
+                        select.append('<option value="{{ namespace }}">{{ namespace }}</option>');
+                        column.data().unique().sort().each(function(d, j){
+                            if(d != '{{ namespace.standardLabel }}'){
+                                select.append('<option value="'+d+'">'+d+'</option>')
+                            }
+                        });
+                    });
+                }
             });
             $('#mismatches-table').DataTable();
             $('#child-namespaces-table').DataTable({
@@ -1254,6 +1536,13 @@
                 }
                 $('#example-cardinality').html(strCardi);
             });
+
+            // Message avertissement pour no parameter uri
+            if($('#parameterUri').text().trim() === 'No parameter') {
+                $('#noParameterUriMessage').show();
+            } else {
+                $('#noParameterUriMessage').hide();
+            }
 
             //-- EXPORT DOCX --
             $('.btn-export-disabled').hide();

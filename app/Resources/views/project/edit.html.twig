@@ -257,7 +257,11 @@
                 {% if project.managedNamespaces is not empty %}
                     <h3>Root namespace</h3>
                     <p>This project manages the <strong><a href="{{ path('namespace_show', {'id':project.managedNamespaces|first.topLevelNamespace.id}) }}">{{ project.managedNamespaces|first.topLevelNamespace }}</a></strong> namespace.</p>
-                    <h3>Versions of this namespace:</h3>
+                    {% set ongoingNamespace = project.managedNamespaces|filter(v => v.isOngoing)|first %}
+                    {% if ongoingNamespace %}
+                        Ongoing namespace: <a href="{{ path('namespace_show', {'id': ongoingNamespace.id}) }}">{{ ongoingNamespace }}</a>
+                    {% endif %}
+                    <h3>Published versions</h3>
                     <table class="table table-striped" id="managed-namespaces-table">
                         <thead>
                         <tr>
@@ -266,7 +270,7 @@
                         </tr>
                         </thead>
                         <tbody>
-                        {% for namespace in project.managedNamespaces|first.topLevelNamespace.childVersions %}
+                        {% for namespace in project.managedNamespaces|first.topLevelNamespace.childVersions|filter(v => not v.isOngoing) %}
                             <tr>
                                 <td>
                                     <a href="{{ path('namespace_show', {
@@ -460,7 +464,6 @@
                     </div>
                 </div>
             </div>
-            <!-- Onglet Comment List - Retiré par AP - Sauvegardé sous Desktop/commentList.txt -->
         </div>
     </div>
 
@@ -545,6 +548,7 @@
                             var urlEditAssociationPermissionAdmin = urlEditAssociationPermission.replace("permissionToken", 1);
                             var urlEditAssociationPermissionManager = urlEditAssociationPermission.replace("permissionToken", 2);
                             var urlEditAssociationPermissionMember = urlEditAssociationPermission.replace("permissionToken", 3);
+                            var urlEditAssociationPermissionObserver = urlEditAssociationPermission.replace("permissionToken", 4);
 
 
                             var renderedPermissionsBlock;
@@ -560,6 +564,9 @@
                                 else if(data == 3){
                                     permissionBadge = '<span class="label label-success">Member</span>';
                                 }
+                                else if(data == 4){
+                                    permissionBadge = '<span class="label label-info">Observer</span>';
+                                }
 
                                 renderedPermissionsBlock = permissionBadge;
                             }
@@ -573,6 +580,7 @@
                                         '  <ul class="dropdown-menu">\n' +
                                         '    <li><a data-url="' + urlEditAssociationPermissionManager + '" class="edit-association-permission">Manager</a></li>\n' +
                                         '    <li><a data-url="' + urlEditAssociationPermissionMember + '" class="edit-association-permission">Member</a></li>\n' +
+                                        '    <li><a data-url="' + urlEditAssociationPermissionObserver + '" class="edit-association-permission">Observer</a></li>\n' +
                                         '  </ul>\n' +
                                         '</div>';
                                 }
@@ -584,6 +592,7 @@
                                         '  <ul class="dropdown-menu">\n' +
                                         '    <li><a data-url="' + urlEditAssociationPermissionAdmin + '" class="edit-association-permission">Administrator</a></li>\n' +
                                         '    <li><a data-url="' + urlEditAssociationPermissionMember + '" class="edit-association-permission">Member</a></li>\n' +
+                                        '    <li><a data-url="' + urlEditAssociationPermissionObserver + '" class="edit-association-permission">Observer</a></li>\n' +
                                         '  </ul>\n' +
                                         '</div>';
                                 }
@@ -595,6 +604,19 @@
                                         '  <ul class="dropdown-menu">\n' +
                                         '    <li><a data-url="' + urlEditAssociationPermissionAdmin + '" class="edit-association-permission">Administrator</a></li>\n' +
                                         '    <li><a data-url="' + urlEditAssociationPermissionManager + '" class="edit-association-permission">Manager</a></li>\n' +
+                                        '    <li><a data-url="' + urlEditAssociationPermissionObserver + '" class="edit-association-permission">Observer</a></li>\n' +
+                                        '  </ul>\n' +
+                                        '</div>';
+                                }
+                                else if(data == 4){
+                                    permissionButtonGroup = '<div class="btn-group">\n' +
+                                        '  <button type="button" class="btn btn-xs btn-info dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">\n' +
+                                        '    Observer <span class="caret"></span>\n' +
+                                        '  </button>\n' +
+                                        '  <ul class="dropdown-menu">\n' +
+                                        '    <li><a data-url="' + urlEditAssociationPermissionAdmin + '" class="edit-association-permission">Administrator</a></li>\n' +
+                                        '    <li><a data-url="' + urlEditAssociationPermissionManager + '" class="edit-association-permission">Manager</a></li>\n' +
+                                        '    <li><a data-url="' + urlEditAssociationPermissionMember + '" class="edit-association-permission">Member</a></li>\n' +
                                         '  </ul>\n' +
                                         '</div>';
                                 }

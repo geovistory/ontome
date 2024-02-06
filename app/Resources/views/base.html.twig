@@ -78,7 +78,7 @@
                     }) }}"><i class="fas fa-tachometer-alt"></i>&nbsp;Dashboard</a></li>
             {% endif %}
             <li><a href="http://phn-wiki.ish-lyon.cnrs.fr/doku.php?id=ontome:index" target="_blank"><i class="fas fa-question-circle"></i> User guide</a></li>
-            <li><a href="https://github.com/Semantic-Data-for-Humanities/OntoME" target="_blank"><i class="fas fa-pen-square"></i> Submit feedback</a></li>
+            <li><a href="https://github.com/geovistory#submit-feedback" target="_blank"><i class="fas fa-pen-square"></i> Submit feedback</a></li>
         </ul>
         {% if app.user is not null and app.user.currentActiveProject is not null %}
         <p class="navbar-text navbar-right" style="margin-right: 12px;">
@@ -93,12 +93,12 @@
 <div class="main-content">
     {% for msg in app.session.flashBag.get('success') %}
         <div class="alert alert-success">
-            {{ msg }}
+            {{ msg|raw }}
         </div>
     {% endfor %}
     {% for msg in app.session.flashBag.get('warning') %}
         <div class="alert alert-warning">
-            {{ msg }}
+            {{ msg|raw }}
         </div>
     {% endfor %}
     {% block body %}{% endblock %}
@@ -138,8 +138,19 @@
                     <div id="block-block-4" class="block block-block">
                         <h3>CREDITS</h3>
                         <div class="content">
-                            <p class="text-justify">OntoME is a <a href="http://larhra.ish-lyon.cnrs.fr/" target="_blank">LARHRA</a> application, developed and maintained by the <a href="http://larhra.ish-lyon.cnrs.fr/axe-de-recherche-en-histoire-numerique" target="_blank">Digital history research team</a></p>
-                            <p><a href="http://larhra.ish-lyon.cnrs.fr/" target="_blank"><img width="50%" src="{{ asset('images/Logo_LARHRA_Coul_Seul_131.png') }}" alt="LARHRA"></a></p>
+                            <p class="text-justify">OntoME is a <a href="http://larhra.ish-lyon.cnrs.fr/" target="_blank">LARHRA</a> application, developed and maintained by the <a href="http://larhra.ish-lyon.cnrs.fr/axe-de-recherche-en-histoire-numerique" target="_blank">Digital History Research Team</a> as part of the <a href="https://www.geovistory.org/" target="_blank">Geovistory</a> initiative.</p>
+                            <div class="row">
+                                <div class="col-lg-6">
+                                    <a href="http://larhra.ish-lyon.cnrs.fr/" target="_blank">
+                                        <img width="90%" src="{{ asset('images/Logo_LARHRA_Coul_Seul_131.png') }}" alt="LARHRA">
+                                    </a>
+                                </div>
+                                <div class="col-lg-6 text-right gv-logo-top-25">
+                                    <a href="https://www.geovistory.org/" target="_blank">
+                                        <img width="95%"  style="margin: auto;"  src="{{ asset('images/geovistory-logo.svg') }}" alt="Geovistory">
+                                    </a>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

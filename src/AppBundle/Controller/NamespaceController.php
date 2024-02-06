@@ -24,6 +24,7 @@ use AppBundle\Form\NamespaceEditIdentifiersForm;
 use AppBundle\Form\NamespaceForm;
 use AppBundle\Form\NamespacePublicationForm;
 use AppBundle\Form\NamespaceQuickAddForm;
+use AppBundle\Form\NamespaceUriParameterForm;
 use Doctrine\Common\Collections\ArrayCollection;
 use PhpOffice\PhpWord\Element\Footer;
 use PhpOffice\PhpWord\Element\TextBreak;
@@ -120,6 +121,7 @@ class NamespaceController  extends Controller
 
         if ($form->isSubmitted() && $form->isValid()) {
             $namespace = $form->getData();
+            $namespace->setUriParameter(0);
             $namespace->setProjectForTopLevelNamespace($project);
             $namespace->setTopLevelNamespace($namespace);
             $namespace->setCreator($this->getUser());
@@ -234,8 +236,12 @@ class NamespaceController  extends Controller
     {
         $em = $this->getDoctrine()->getManager();
 
+        $textProperties = $em
+            ->getRepository('AppBundle:TextProperty')
+            ->findBy(array("namespaceForVersion" => $namespace->getId()));
         return $this->render('namespace/show.html.twig', array(
-            'namespace' => $namespace
+            'namespace' => $namespace,
+            'textProperties' => $textProperties
         ));
     }
 
@@ -256,15 +262,24 @@ class NamespaceController  extends Controller
 
         $em = $this->getDoctrine()->getManager();
 
-        $rootNamespaces = $em->getRepository('AppBundle:OntoNamespace')
+        $rootNamespacesBrut = $em->getRepository('AppBundle:OntoNamespace')
             ->findAllNonAssociatedToNamespaceByNamespaceId($namespace);
+
+        $rootNamespaces = new ArrayCollection();
+        foreach($rootNamespacesBrut as $rootNamespace){
+            $rootNamespaces->add($em->getRepository('AppBundle:OntoNamespace')->find($rootNamespace['id']));
+        }
+
+        $textProperties = $em
+            ->getRepository('AppBundle:TextProperty')
+            ->findBy(array("namespaceForVersion" => $namespace->getId()));
 
         if($this->isGranted('full_edit', $namespace)) {
 
             $ongoingNamespaceHasChanged = $em->getRepository('AppBundle:OntoNamespace')
                 ->checkNamespaceChange($namespace);
 
-            $form = $this->createForm(NamespaceForm::class, $namespace);
+            $form = $this->createForm(NamespaceForm::class, $namespace, ['is_root_namespace' => $namespace->getIsTopLevelNamespace()]);
 
             $form->handleRequest($request);
             if ($form->isSubmitted() && $form->isValid()) {
@@ -282,6 +297,7 @@ class NamespaceController  extends Controller
                 if ($namespace->getIsTopLevelNamespace()) {
                     foreach ($namespace->getChildVersions() as $childNamespace) {
                         if (!$namespace->getIsExternalNamespace()) {
+                            // If the root namespace is not external, then the child namespaces do not need an URI
                             $childNamespace->setNamespaceURI(null);
                         }
                         $childNamespace->setIsExternalNamespace($namespace->getIsExternalNamespace());
@@ -310,11 +326,39 @@ class NamespaceController  extends Controller
                     '_fragment' => 'identifiers'
                 ]);
             }
+
+            $formUriParameter = $this->createForm(NamespaceUriParameterForm::class, $namespace, array('default_choice' => $namespace->getUriParameter()));
+            $formUriParameter->handleRequest($request);
+            if ($formUriParameter->isSubmitted() && $formUriParameter->isValid()) {
+                $em = $this->getDoctrine()->getManager();
+                $ongoingNamespace = $namespace->getChildVersions()->filter(function($v){return $v->getIsOngoing();})->first();
+                if(!is_null($ongoingNamespace)){
+                    foreach ($ongoingNamespace->getClasses() as $class){
+                        $class->updateIdentifierInUri();
+                        $em->persist($class);
+                    }
+                    foreach ($ongoingNamespace->getProperties() as $property){
+                        $property->updateIdentifierInUri();
+                        $em->persist($property);
+                    }
+                }
+                $em->persist($namespace);
+                $em->flush();
+
+                $this->addFlash('success', 'Namespace uri parameter updated!');
+                return $this->redirectToRoute('namespace_edit', [
+                    'id' => $namespace->getId(),
+                    '_fragment' => 'identifiers'
+                ]);
+            }
+
             return $this->render('namespace/edit.html.twig', [
                 'namespaceForm' => $form->createView(),
                 'namespaceIdentifiersForm' => $formIdentifiers->createView(),
+                'namespaceUriParameterForm' => $formUriParameter->createView(),
                 'namespace' => $namespace,
                 'rootNamespaces' => $rootNamespaces,
+                'textProperties' => $textProperties,
                 'hasChanged' => $ongoingNamespaceHasChanged,
             ]);
         }
@@ -323,6 +367,7 @@ class NamespaceController  extends Controller
                 'namespaceForm' => null,
                 'namespace' => $namespace,
                 'rootNamespaces' => $rootNamespaces,
+                'textProperties' => $textProperties,
                 'hasChanged' => null,
             ]);
         }
@@ -382,6 +427,7 @@ class NamespaceController  extends Controller
         $newNamespace->addLabel($newNamespaceLabel);
         $newNamespace->setStandardLabel($newNamespaceLabel->getLabel());
         $newNamespace->setIsExternalNamespace($namespace->getIsExternalNamespace());
+        $newNamespace->setIsVisible(true);
 
         $em->persist($namespace);
         $em->persist($newNamespace);
@@ -444,7 +490,8 @@ class NamespaceController  extends Controller
         if($rootNamespace->getIsTopLevelNamespace()) {
             $status = 'Success';
             $message = 'This namespace is valid';
-            foreach ($rootNamespace->getChildVersions() as $namespace) {
+            $user = $this->getUser();
+            foreach ($rootNamespace->getChildVersions()->filter(function($v)use($user){return $v->getIsVisible() or $v->getProjectForTopLevelNamespace()->getuserProjectAssociations()->filter(function($v)use($user){return $v->getUser() == $user;})->count() == 1; }) as $namespace) {
                 $referencedNamespaces = array();
                 foreach ($namespace->getAllReferencedNamespaces() as $referencedNamespace){
                     $referencedNamespaces[$referencedNamespace->getTopLevelNamespace()->getId()] = [$referencedNamespace->getId(), $referencedNamespace->getStandardLabel()];
@@ -510,8 +557,6 @@ class NamespaceController  extends Controller
 
         return new JsonResponse($response);
     }
-
-
 
     /**
      * @Route("/namespace/{id}/json", name="namespace_json", schemes={"https"}, requirements={"id"="^[0-9]+"})
@@ -1688,5 +1733,25 @@ class NamespaceController  extends Controller
         );
 
         return $response;
+    }
+
+    /**
+     * @Route("/namespace/{id}/makevisible", name="namespace_make_visible", requirements={"id"="^([0-9]+)|(namespaceID){1}$"})
+     * @param OntoNamespace $namespace
+     * @return JsonResponse
+     */
+    public function makeVisibleAction(OntoNamespace $namespace)
+    {
+        $this->denyAccessUnlessGranted('edit', $namespace);
+        try {
+            $namespace->setIsVisible(true);
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($namespace);
+            $em->flush();
+        }
+        catch (\Exception $e) {
+            return new JsonResponse(null, 500, array('content-type:application/problem+json'));
+        }
+        return new JsonResponse(null, 204);
     }
 }

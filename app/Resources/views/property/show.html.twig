@@ -53,6 +53,7 @@
             }) }}" target="_blank"><em>original</em></a>]
             {% endif %}
         </div>
+        {% if propertyVersion.namespaceForVersion.isVisible or propertyVersion.namespaceForVersion.projectForTopLevelNamespace.userProjectAssociations|filter(v => v.user.id == app.user.id)|length == 1 %}
         {% if propertyVersion.namespaceForVersion.isOngoing %}
             <div>
                 {% set countValidationsTxtp = 0 %}
@@ -98,7 +99,6 @@
                 </a>
             </li>
         </ul>
-
         <div class="tab-content">
             <div id="summary" class="tab-pane fade in active">
                 <h3>
@@ -173,7 +173,7 @@
 
                     {# Subproperty of #}
                     {% set isSubpropertyOf = false %}
-                    {% for association in propertyVersion.property.childPropertyAssociations
+                    {% for association in childPropertyAssociations
                         if association.namespaceForVersion.id in namespacesId %}
                         {% set isSubpropertyOf = true %}
                     {% endfor %}
@@ -184,7 +184,7 @@
                             </div>
                             <div class="col-lg-10">
                                 <ul class="list-unstyled">
-                                    {% for association in propertyVersion.property.childPropertyAssociations
+                                    {% for association in childPropertyAssociations
                                         if association.namespaceForVersion.id in namespacesId %}
                                         <li>
                                             {# Domaine #}
@@ -246,7 +246,7 @@
                     {% endif %}
                     {# Superproperty of #}
                     {% set isSuperpropertyOf = false %}
-                    {% for association in propertyVersion.property.parentPropertyAssociations
+                    {% for association in parentPropertyAssociations
                         if association.namespaceForVersion.id in namespacesId %}
                         {% set isSuperpropertyOf = true %}
                     {% endfor %}
@@ -257,7 +257,7 @@
                             </div>
                             <div class="col-lg-10">
                                 <ul class="list-unstyled">
-                                    {% for association in propertyVersion.property.parentPropertyAssociations
+                                    {% for association in parentPropertyAssociations
                                         if association.namespaceForVersion.id in namespacesId %}
                                         <li>
                                             {# Domain #}
@@ -318,7 +318,7 @@
                         </div>
                     {% endif %}
 
-                    {% if propertyVersion.property.entityAssociations|length > 0 %}
+                    {% if entityAssociations|length > 0 %}
                         <div class="row">
                             <div class="col-lg-2">
                                 <p>Relations:</p>
@@ -326,7 +326,7 @@
                             <div class="col-lg-10">
                                 <ul class="list-unstyled">
                                     {% set relationCount = 0 %}
-                                    {% for relation in propertyVersion.property.entityAssociations
+                                    {% for relation in entityAssociations
                                         if relation.systemType.id in [18,20]
                                         and relation.namespaceForVersion.id in namespacesId %}
                                         {% set relationCount = relationCount + 1 %}
@@ -476,14 +476,14 @@
                         <div class="col-lg-10">
                             <ul class="list-unstyled">
                                 {% if propertyVersion.domain is not null %}
-                                    <li>{{ propertyVersion.property.identifierInNamespace }}(x,y) ⊃ {{ propertyVersion.domain.identifierInNamespace }}(x)</li>
+                                    <li>{{ propertyVersion.property.identifierInNamespace }}(x,y) ⇒ {{ propertyVersion.domain.identifierInNamespace }}(x)</li>
                                 {% endif %}
                                 {% if propertyVersion.range is not null %}
-                                    <li>{{ propertyVersion.property.identifierInNamespace }}(x,y) ⊃ {{ propertyVersion.range.identifierInNamespace }}(y)</li>
+                                    <li>{{ propertyVersion.property.identifierInNamespace }}(x,y) ⇒ {{ propertyVersion.range.identifierInNamespace }}(y)</li>
                                 {% endif %}
                                 {% for association in propertyVersion.property.childPropertyAssociations
                                     if association.namespaceForVersion.id in namespacesId %}
-                                    <li>{{ propertyVersion.property.identifierInNamespace }}(x,y) ⊃ {{ association.parentProperty.identifierInNamespace }}(x,y)</li>
+                                    <li>{{ propertyVersion.property.identifierInNamespace }}(x,y) ⇒ {{ association.parentProperty.identifierInNamespace }}(x,y)</li>
                                 {% endfor %}
                             </ul>
                         </div>
@@ -633,7 +633,7 @@
                     </tbody>
                 </table>
 
-                {% if app.user.currentOngoingNamespace is not null %}
+                {% if app.user is not null and app.user.currentOngoingNamespace is not null %}
                     <div class="pull-right add-div">
                         <a href="{{ path('text_property_new', {'type': 'internal-note', 'object': 'property-version', 'objectId': propertyVersion.id })}}"
                            class="btn btn-primary pull-right">
@@ -724,9 +724,9 @@
                 <h3>Identifier: {{ propertyVersion.property.identifierInNamespace }}</h3>
                 <p>
                     {% if propertyVersion.isLinkableURI %}
-                        Official URI: <a target="_blank" href="{{ propertyVersion.namespaceForVersion.topLevelNamespace.namespaceURI }}{{ propertyVersion.property.identifierInURI }}"><strong><span id="official-uri">{{ propertyVersion.namespaceForVersion.topLevelNamespace.namespaceURI }}{{ propertyVersion.property.identifierInURI }}</span></strong></a>
+                        Official URI: <a target="_blank" href="{{ propertyVersion.URI }}"><strong><span id="official-uri">{{ propertyVersion.URI }}</span></strong></a>
                     {% else %}
-                        Official URI: <strong><span id="official-uri">{{ propertyVersion.namespaceForVersion.topLevelNamespace.namespaceURI }}{{ propertyVersion.property.identifierInURI }}</span></strong>
+                        Official URI: <strong><span id="official-uri">{{ propertyVersion.URI }}</span></strong>
                     {% endif %}
                     <button data-id="official-uri" class="btn btn-xs btn-link copyToClipboard" title="Copy to clipboard"><i class="fas fa-copy"></i></button><br>
                     OntoME URI: <strong><span id="ontome-uri">https://ontome.net/ontology/p{{ propertyVersion.property.id }}</span></strong>
@@ -1444,6 +1444,7 @@
                     {% set profilesAssociated = [] %}
                     {% for profileAssociation in propertyVersion.property.profileAssociations
                         if profileAssociation.systemType.id == 5
+                        and profileAssociation.profile.isVisible
                         and profileAssociation.profile not in profilesAssociated %}
                         {% set profilesAssociated = [profileAssociation.profile]|merge(profilesAssociated) %}
                     {% endfor %}
@@ -1504,6 +1505,9 @@
                 </div>
             </div>
         </div>
+        {% else %}
+        <p><i class="fas fa-eye-slash"></i> This property belongs to an ongoing namespace that is only visible to members of the <a href="{{ path('project_show', {'id': propertyVersion.namespaceForVersion.projectForTopLevelNamespace.id}) }}">{{ propertyVersion.namespaceForVersion.projectForTopLevelNamespace }}</a> project.</p>
+        {% endif %}
     </div>
 
 {% endblock %}
