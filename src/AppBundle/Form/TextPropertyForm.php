@@ -77,7 +77,7 @@ class TextPropertyForm extends AbstractType
                     'label' => 'Language'
                 ));
         }
-        elseif(in_array($options['systemType'],[33,34,35]) and in_array($options['objectType'], ['class', 'property'])) {
+        elseif(in_array($options['systemType'],[33,34,35]) and in_array($options['objectType'], ['class-version', 'property-version'])) {
             $builder
                 ->add('systemType', ChoiceType::class, array(
                     'choices'  => array(

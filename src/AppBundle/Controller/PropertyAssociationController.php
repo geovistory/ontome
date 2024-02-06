@@ -68,6 +68,12 @@ class PropertyAssociationController extends Controller
         $arrayPropertiesVersion = $em->getRepository('AppBundle:PropertyVersion')
             ->findIdAndStandardLabelOfPropertiesVersionByNamespacesId($namespacesId);
 
+        foreach ($arrayPropertiesVersion as $pv){
+            if($pv['id'] == $childProperty->getId()){
+                unset($arrayPropertiesVersion[array_search($pv, $arrayPropertiesVersion)]);
+            }
+        }
+
         $form = $this->createForm(ParentPropertyAssociationForm::class, $propertyAssociation, array(
             "propertiesVersion" => $arrayPropertiesVersion
         ));
@@ -194,8 +200,13 @@ class PropertyAssociationController extends Controller
 
         $namespacesId = $this->getUser()->getCurrentOngoingNamespace()->getSelectedNamespacesId();
 
-        //$arrayPropertiesVersion = $em->getRepository('AppBundle:PropertyVersion')->findIdAndStandardLabelOfPropertiesVersionByNamespacesId($namespacesIdFromChildProperty);
         $arrayPropertiesVersion = $em->getRepository('AppBundle:PropertyVersion')->findIdAndStandardLabelOfPropertiesVersionByNamespacesId($namespacesId);
+
+        foreach ($arrayPropertiesVersion as $pv){
+            if($pv['id'] == $propertyAssociation->getChildProperty()->getId()){
+                unset($arrayPropertiesVersion[array_search($pv, $arrayPropertiesVersion)]);
+            }
+        }
 
         $form = $this->createForm(PropertyAssociationEditForm::class, $propertyAssociation, array(
             'propertiesVersion' => $arrayPropertiesVersion,
@@ -275,6 +286,17 @@ class PropertyAssociationController extends Controller
         //Denied access if not an authorized validator
         $this->denyAccessUnlessGranted('validate', $propertyAssociation->getChildProperty()->getPropertyVersionForDisplay());
 
+        //Verifier que les références sont cohérents
+        $nsRefsPropertyAssociation = $propertyAssociation->getNamespaceForVersion()->getAllReferencedNamespaces();
+        $nsParent = $propertyAssociation->getParentPropertyNamespace();
+        $nsChild = $propertyAssociation->getChildPropertyNamespace();
+        if(!$nsRefsPropertyAssociation->contains($nsParent) || !$nsRefsPropertyAssociation->contains($nsChild)){
+            $uriNamespaceMismatches = $this->generateUrl('namespace_show', ['id' => $propertyAssociation->getNamespaceForVersion()->getId(), '_fragment' => 'mismatches']);
+            $this->addFlash('warning', 'This relation can\'t be validated. Check <a href="'.$uriNamespaceMismatches.'">mismatches</a>.');
+            return $this->redirectToRoute('class_association_show', [
+                'id' => $propertyAssociation->getId()
+            ]);
+        }
 
         $propertyAssociation->setModifier($this->getUser());
 

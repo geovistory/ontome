@@ -163,7 +163,7 @@
 
                     {# Subproperty of #}
                     {% set isSubpropertyOf = false %}
-                    {% for association in propertyVersion.property.childPropertyAssociations
+                    {% for association in childPropertyAssociations
                         if association.namespaceForVersion.id in namespacesId %}
                         {% set isSubpropertyOf = true %}
                     {% endfor %}
@@ -174,7 +174,7 @@
                             </div>
                             <div class="col-lg-10">
                                 <ul class="list-unstyled">
-                                    {% for association in propertyVersion.property.childPropertyAssociations
+                                    {% for association in childPropertyAssociations
                                         if association.namespaceForVersion.id in namespacesId %}
                                         <li>
                                             {# Domaine #}
@@ -236,7 +236,7 @@
                     {% endif %}
                     {# Superproperty of #}
                     {% set isSuperpropertyOf = false %}
-                    {% for association in propertyVersion.property.parentPropertyAssociations
+                    {% for association in parentPropertyAssociations
                         if association.namespaceForVersion.id in namespacesId %}
                         {% set isSuperpropertyOf = true %}
                     {% endfor %}
@@ -247,7 +247,7 @@
                             </div>
                             <div class="col-lg-10">
                                 <ul class="list-unstyled">
-                                    {% for association in propertyVersion.property.parentPropertyAssociations
+                                    {% for association in parentPropertyAssociations
                                         if association.namespaceForVersion.id in namespacesId %}
                                         <li>
                                             {# Domain #}
@@ -308,7 +308,7 @@
                         </div>
                     {% endif %}
 
-                    {% if propertyVersion.property.entityAssociations|length > 0 %}
+                    {% if entityAssociations|length > 0 %}
                         <div class="row">
                             <div class="col-lg-2">
                                 <p>Relations:</p>
@@ -316,7 +316,7 @@
                             <div class="col-lg-10">
                                 <ul class="list-unstyled">
                                     {% set relationCount = 0 %}
-                                    {% for relation in propertyVersion.property.entityAssociations
+                                    {% for relation in entityAssociations
                                         if relation.systemType.id in [18,20]
                                         and relation.namespaceForVersion.id in namespacesId %}
                                         {% set relationCount = relationCount + 1 %}
@@ -466,14 +466,14 @@
                         <div class="col-lg-10">
                             <ul class="list-unstyled">
                                 {% if propertyVersion.domain is not null %}
-                                    <li>{{ propertyVersion.property.identifierInNamespace }}(x,y) ⊃ {{ propertyVersion.domain.identifierInNamespace }}(x)</li>
+                                    <li>{{ propertyVersion.property.identifierInNamespace }}(x,y) ⇒ {{ propertyVersion.domain.identifierInNamespace }}(x)</li>
                                 {% endif %}
                                 {% if propertyVersion.range is not null %}
-                                    <li>{{ propertyVersion.property.identifierInNamespace }}(x,y) ⊃ {{ propertyVersion.range.identifierInNamespace }}(y)</li>
+                                    <li>{{ propertyVersion.property.identifierInNamespace }}(x,y) ⇒ {{ propertyVersion.range.identifierInNamespace }}(y)</li>
                                 {% endif %}
                                 {% for association in propertyVersion.property.childPropertyAssociations
                                     if association.namespaceForVersion.id in namespacesId %}
-                                    <li>{{ propertyVersion.property.identifierInNamespace }}(x,y) ⊃ {{ association.parentProperty.identifierInNamespace }}(x,y)</li>
+                                    <li>{{ propertyVersion.property.identifierInNamespace }}(x,y) ⇒ {{ association.parentProperty.identifierInNamespace }}(x,y)</li>
                                 {% endfor %}
                             </ul>
                         </div>
@@ -629,7 +629,7 @@
                     </tbody>
                 </table>
                 <div class="pull-right add-div">
-                    <a href="{{ path('text_property_new', {'type': 'internal-note', 'object': 'property', 'objectId': propertyVersion.property.id })}}"
+                    <a href="{{ path('text_property_new', {'type': 'internal-note', 'object': 'property-version', 'objectId': propertyVersion.id })}}"
                        class="btn btn-primary pull-right">
                         Add <span class="fa fa-plus-circle"></span>
                     </a>
@@ -649,7 +649,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for textProperty in propertyVersion.property.textProperties|filter(v => (is_granted('edit', v) and app.user is not null and v.namespaceForVersion.id == app.user.getCurrentOngoingNamespace.id and v.systemType.id == 33) or ((v.namespaceForVersion.id in namespacesId or v.namespaceForVersion == app.user.getCurrentOngoingNamespace|default(null)) and v.systemType.id in [34,35])) %}
+                    {% for textProperty in propertyVersion.property.textProperties|filter(v => (v.entityNamespaceForVersion is not null and v.entityNamespaceForVersion.id == propertyVersion.namespaceForVersion.id) and ((is_granted('edit', v) and app.user is not null and v.namespaceForVersion.id == app.user.getCurrentOngoingNamespace.id and v.systemType.id == 33) or ((v.namespaceForVersion.id in namespacesId or v.namespaceForVersion == app.user.getCurrentOngoingNamespace|default(null)) and v.systemType.id in [34,35]))) %}
                         {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
                         <tr>
                             <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
@@ -738,7 +738,20 @@
                     {% else %}
                         Official URI: <strong><span id="official-uri">{{ propertyVersion.namespaceForVersion.topLevelNamespace.namespaceURI }}{{ propertyVersion.property.identifierInURI }}</span></strong>
                     {% endif %}
-                    <button data-id="official-uri" class="btn btn-xs btn-link copyToClipboard" title="Copy to clipboard"><i class="fas fa-copy"></i></button><br>
+                    <button data-id="official-uri" class="btn btn-xs btn-link copyToClipboard" title="Copy to clipboard"><i class="fas fa-copy"></i></button>
+                    {% if propertyVersion.namespaceForVersion.topLevelNamespace.isExternalNamespace and propertyVersion.namespaceForVersion.topLevelNamespace.uriParameter == 3 %}
+                    <button class="btn btn-xs btn-success" title="Edit" id="uri-identifier-edit-btn"><i class="fas fa-edit"></i></button><br>
+                    <div id="uri-identifier-form-block">
+                        {{ form_start(propertyUriIdentifierForm) }}
+                        {{ form_errors(propertyUriIdentifierForm) }}
+                        <p>{{ form_row(propertyUriIdentifierForm.identifierInURI) }}</p>
+                        <button type="submit" class="btn btn-primary" formnovalidate>Save</button>
+                        <button type="button" id="uri-identifier-edit-btn-close" class="btn">Close</button>
+                        {{ form_end(propertyUriIdentifierForm) }}
+                    </div>
+                    {% else %}
+                    <br>
+                    {% endif %}
                     OntoME URI: <strong><span id="ontome-uri">https://ontome.net/ontology/p{{ propertyVersion.property.id }}</span></strong>
                     <button data-id="ontome-uri" class="btn btn-xs btn-link copyToClipboard" title="Copy to clipboard"><i class="fas fa-copy"></i></button>
                 </p>
@@ -1502,6 +1515,7 @@
                     {% set profilesAssociated = [] %}
                     {% for profileAssociation in propertyVersion.property.profileAssociations
                         if profileAssociation.systemType.id == 5
+                        and profileAssociation.profile.isVisible
                         and profileAssociation.profile not in profilesAssociated %}
                         {% set profilesAssociated = [profileAssociation.profile]|merge(profilesAssociated) %}
                     {% endfor %}
@@ -1668,6 +1682,20 @@
             $('#identifier-edit-btn-close').click(function(){
                 $('#identifier-details-block').show(200);
                 $('#identifier-form-block').hide(200);
+            });
+
+            {% if not propertyUriIdentifierForm.vars.valid %}
+            $('#uri-identifier-details-block').hide(0);
+            {% else %}
+            $('#uri-identifier-form-block').hide(0);
+            {% endif %}
+
+            $('#uri-identifier-edit-btn').click(function(){
+                $('#uri-identifier-form-block').show(200);
+            });
+
+            $('#uri-identifier-edit-btn-close').click(function(){
+                $('#uri-identifier-form-block').hide(200);
             });
 
             $('[data-toggle="tooltip"]').tooltip();

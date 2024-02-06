@@ -59,6 +59,12 @@ class ClassAssociationController extends Controller
         $arrayClassesVersion = $em->getRepository('AppBundle:OntoClassVersion')
             ->findIdAndStandardLabelOfClassesVersionByNamespacesId($namespacesId);
 
+        foreach ($arrayClassesVersion as $cv){
+            if($cv['id'] == $childClass->getId()){
+                unset($arrayClassesVersion[array_search($cv, $arrayClassesVersion)]);
+            }
+        }
+
         $form = $this->createForm(ParentClassAssociationForm::class, $classAssociation, array(
             "classesVersion" => $arrayClassesVersion
         ));
@@ -165,6 +171,12 @@ class ClassAssociationController extends Controller
         $arrayClassesVersion = $em->getRepository('AppBundle:OntoClassVersion')
             ->findIdAndStandardLabelOfClassesVersionByNamespacesId($namespacesId);
 
+        foreach ($arrayClassesVersion as $cv){
+            if($cv['id'] == $classAssociation->getChildClass()->getId()){
+                unset($arrayClassesVersion[array_search($cv, $arrayClassesVersion)]);
+            }
+        }
+
         $form = $this->createForm(ClassAssociationEditForm::class, $classAssociation, array(
             'classesVersion' => $arrayClassesVersion,
             'defaultParent' => $classAssociation->getParentClass()->getId()));
@@ -215,6 +227,18 @@ class ClassAssociationController extends Controller
 
         //Denied access if not an authorized validator
         $this->denyAccessUnlessGranted('validate', $classAssociation->getChildClass()->getClassVersionForDisplay());
+
+        //Verifier que les références sont cohérents
+        $nsRefsClassAssociation = $classAssociation->getNamespaceForVersion()->getAllReferencedNamespaces();
+        $nsParent = $classAssociation->getParentClassNamespace();
+        $nsChild = $classAssociation->getChildClassNamespace();
+        if(!$nsRefsClassAssociation->contains($nsParent) || !$nsRefsClassAssociation->contains($nsChild)){
+            $uriNamespaceMismatches = $this->generateUrl('namespace_show', ['id' => $classAssociation->getNamespaceForVersion()->getId(), '_fragment' => 'mismatches']);
+            $this->addFlash('warning', 'This relation can\'t be validated. Check <a href="'.$uriNamespaceMismatches.'">mismatches</a>.');
+            return $this->redirectToRoute('class_association_show', [
+                'id' => $classAssociation->getId()
+            ]);
+        }
 
 
         $classAssociation->setModifier($this->getUser());

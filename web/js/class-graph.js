@@ -16,23 +16,28 @@ $(document).ready(function() {
         data.forEach(function(node) {
             // add to parent
             var parent = dataMap[node.parent_id];
-            if (parent) {
+            if(node.depth == 1){
+                treeData.push(node);
+            }
+            else if (parent) {
                 // create child array if it doesn't exist
-                (parent.children || (parent.children = []))
+                if(!parent.children){
+                    parent.children = [];
+                }
                 // add node to child array
-                    .push(node);
+                parent.children.push(node);
             } else {
                 // parent is null or missing
                 treeData.push(node);
             }
         });
 
-        var sTreeData = '{"name": "'+$("#class-label").text()+'","children": '+JSON.stringify(treeData)+'}';
+        var sTreeData = '{"name": "'+$("div#summary h3:first").text()+'","children": '+JSON.stringify(treeData)+'}';
         treeData = JSON.parse(sTreeData);
 
         //initialising hierarchical data
         root = d3.hierarchy(treeData);
-        console.log(root);
+        //console.log(root);
         var i = 0;
 
         var transform = d3.zoomIdentity;
@@ -55,8 +60,8 @@ $(document).ready(function() {
         var collisionForce = d3.forceCollide(30).strength(1).iterations(100);
 
         simulation = d3.forceSimulation()
-            .force("link", d3.forceLink().id(function(d) { return d.id; }).distance(100))
-            //.force("charge", d3.forceManyBody())
+            .force("link", d3.forceLink().id(function(d) { return d.id; }).distance(150))
+            .force("charge", d3.forceManyBody().strength(-200))
             .alphaDecay(0.01)
             .force("attractForce",attractForce)
             .force("collisionForce",collisionForce)
@@ -74,15 +79,24 @@ $(document).ready(function() {
             nodes[0].x = width / 2;
             nodes[0].y = height / 2;
 
-            console.log(nodes);
+            //console.log(nodes);
             linkSvg = svg.selectAll(".link")
                 .data(links, function(d) { return d.target.id; })
 
             linkSvg.exit().remove();
 
-            var linkEnter = linkSvg.enter()
-                .append("line")
+            var linkEnter = linkSvg.enter().append("g")
                 .attr("class", "link");
+
+            linkEnter.append("line")
+                .attr("class", "link-line");
+
+            linkEnter.append("text")
+                .attr("class", "link-label")
+                .text(function(d) {
+                    return d.source.data && d.target.data.property_identifier && d.target.data.property_label ? d.target.data.property_identifier + ' ' + d.target.data.property_label : "Errorr";
+                });
+
 
             linkSvg = linkEnter.merge(linkSvg)
 
@@ -113,7 +127,7 @@ $(document).ready(function() {
                 .attr("x", function(d) { return d.children ? -8 : 8; })
                 .style("text-anchor", function(d) { return d.children ? "end" : "start"; })
                 .text(function(d) { return d.data.name; })
-                .on("click",function(d){if(d.data.real_id){window.open(d.data.real_id+'#graph','_blank')};});
+                .on("click",function(d){if(d.data.real_id){window.open('/class/' + d.data.real_id + '#graph','_blank')};});
 
             nodeSvg = nodeEnter.merge(nodeSvg);
 
@@ -127,15 +141,17 @@ $(document).ready(function() {
 
         function color(d) {
             var hexaCode;
-            if(d.data.link_type == "parent_class"){
+            //if(d.data.link_type == "parent_class"){
+            if(d.data.link_type == "ingoing_property"){
                 hexaCode = "#3182bd";
             }
-            else if(d.data.link_type == "child_class"){
+            //else if(d.data.link_type == "child_class"){
+            else if(d.data.link_type == "outgoing_property"){
                 hexaCode = "#c6dbef";
             }
-            else if(d.data.link_type == "equivalent_class"){
-                hexaCode = "#2cd66b";
-            }
+            //else if(d.data.link_type == "equivalent_class"){
+            //    hexaCode = "#2cd66b";
+            //}
             else hexaCode = "#fd8d3c";
 
             return hexaCode;
@@ -151,11 +167,15 @@ $(document).ready(function() {
         }
 
         function ticked() {
-            linkSvg
+            linkSvg.select(".link-line")
                 .attr("x1", function(d) { return d.source.x; })
                 .attr("y1", function(d) { return d.source.y; })
                 .attr("x2", function(d) { return d.target.x; })
                 .attr("y2", function(d) { return d.target.y; });
+
+            linkSvg.select(".link-label")
+                .attr("x", function(d) { return ((d.source.x + d.target.x) - 100) / 2; })
+                .attr("y", function(d) { return (d.source.y + d.target.y) / 2; });
 
             nodeSvg
                 .attr("transform", function(d) { return "translate(" + d.x + ", " + d.y + ")"; });

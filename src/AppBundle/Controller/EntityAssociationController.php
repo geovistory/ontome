@@ -93,10 +93,25 @@ class EntityAssociationController extends Controller
         if($entityAssociation->getSourceObjectType() == "class"){
             $arrayEntitiesVersion = $em->getRepository('AppBundle:OntoClassVersion')
                 ->findIdAndStandardLabelOfClassesVersionByNamespacesId($namespacesId);
+
+            if(!$entityAssociation->getSourceClass()->getIsRecursive()){
+                foreach ($arrayEntitiesVersion as $cv){
+                    if($cv['id'] == $objectId){
+                        unset($arrayEntitiesVersion[array_search($cv, $arrayEntitiesVersion)]);
+                    }
+                }
+            }
         }
         elseif($entityAssociation->getSourceObjectType() == "property"){
             $arrayEntitiesVersion = $em->getRepository('AppBundle:PropertyVersion')
                 ->findIdAndStandardLabelOfPropertiesVersionByNamespacesId($namespacesId);
+            if(!$entityAssociation->getSourceProperty()->getIsRecursive()){
+                foreach ($arrayEntitiesVersion as $pv){
+                    if($pv['id'] == $objectId){
+                        unset($arrayEntitiesVersion[array_search($pv, $arrayEntitiesVersion)]);
+                    }
+                }
+            }
         }
 
         $form = $this->createForm(EntityAssociationForm::class, $entityAssociation, array(
@@ -344,6 +359,18 @@ class EntityAssociationController extends Controller
             $this->denyAccessUnlessGranted('validate', $entityAssociation->getSourceProperty()->getPropertyVersionForDisplay());
         }
         else throw new AccessDeniedHttpException();
+
+        //Verifier que les références sont cohérents
+        $nsRefsEntityAssociation = $entityAssociation->getNamespaceForVersion()->getAllReferencedNamespaces();
+        $nsSource = $entityAssociation->getParentClassNamespace();
+        $nsTarget = $entityAssociation->getChildClassNamespace();
+        if(!$nsRefsEntityAssociation->contains($nsSource) || !$nsRefsEntityAssociation->contains($nsTarget)){
+            $uriNamespaceMismatches = $this->generateUrl('namespace_show', ['id' => $entityAssociation->getNamespaceForVersion()->getId(), '_fragment' => 'mismatches']);
+            $this->addFlash('warning', 'This relation can\'t be validated. Check <a href="'.$uriNamespaceMismatches.'">mismatches</a>.');
+            return $this->redirectToRoute('entity_association_show', [
+                'id' => $entityAssociation->getId()
+            ]);
+        }
 
         $entityAssociation->setModifier($this->getUser());
 

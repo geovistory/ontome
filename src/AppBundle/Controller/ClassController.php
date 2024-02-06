@@ -9,6 +9,8 @@
 namespace AppBundle\Controller;
 
 
+use AppBundle\Entity\ClassAssociation;
+use AppBundle\Entity\EntityAssociation;
 use AppBundle\Entity\Label;
 use AppBundle\Entity\OntoClass;
 use AppBundle\Entity\OntoClassVersion;
@@ -18,9 +20,12 @@ use AppBundle\Entity\Project;
 use AppBundle\Entity\SystemType;
 use AppBundle\Entity\TextProperty;
 use AppBundle\Form\ClassEditIdentifierForm;
+use AppBundle\Form\ClassEditUriIdentifierForm;
 use AppBundle\Form\NamespaceEditIdentifiersForm;
 use AppBundle\Form\ClassQuickAddForm;
+use AppBundle\Form\NamespaceUriParameterForm;
 use AppBundle\Form\TextPropertyForm;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\DBAL\DBALException;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -152,14 +157,48 @@ class ClassController extends Controller
         $class->setCreator($this->getUser());
         $class->setModifier($this->getUser());
 
-        $form = $this->createForm(ClassQuickAddForm::class, $class);
+        $uriParam = $namespace->getTopLevelNamespace()->getUriParameter();
+        $identifierInUriPrefilled = '';
+        if(!is_null($namespace->getTopLevelNamespace()->getClassPrefix())){
+            $identifierInUriPrefilled = $namespace->getTopLevelNamespace()->getClassPrefix().($namespace->getTopLevelNamespace()->getCurrentClassNumber()+1);
+        }
+        switch ($uriParam){
+            case 0:
+                // Rien à faire
+                break;
+            case 1:
+                if(!is_null($namespace->getTopLevelNamespace()->getClassPrefix())) {
+                    $identifierInUriPrefilled = $identifierInUriPrefilled . '_';
+                }
+                break;
+            default:
+                $identifierInUriPrefilled = ''; // Pour les cas 2 et 3
+        }
+
+        if(!$namespace->getTopLevelNamespace()->getIsExternalNamespace()){
+            if(empty($identifierInUriPrefilled)){
+                // Si vide (à cause gestionnaire automatique désactivée)
+                $identifierInUriPrefilled = 'identifierInUriPrefilled';
+            }
+            $class->setIdentifierInURI($identifierInUriPrefilled); // On attribue le même identifiant si namespace interne car non géré par le formulaire pour les NS internes
+        }
+
+        $form = $this->createForm(ClassQuickAddForm::class, $class, array(
+            'uri_param' => $uriParam,
+            'identifier_in_uri_prefilled' => $identifierInUriPrefilled,
+            'is_external' => $classVersion->getNamespaceForVersion()->getTopLevelNamespace()->getIsExternalNamespace()
+        ));
 
         // only handles data on POST
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $class = $form->getData();
+            // Dans le cas où l'utilisateur a desactivé la gestion automatique des identifiers dans son NS interne
+            // il faut remplir correctement l'identifier in uri qui est vide après formulaire
+            if(!$namespace->getTopLevelNamespace()->getIsExternalNamespace() && $class->getIdentifierInURI() === 'identifierInUriPrefilled'){
+                $class->setIdentifierInURI($class->getIdentifierInNamespace());
+            }
             $class->setIsManualIdentifier(is_null($namespace->getTopLevelNamespace()->getClassPrefix()));
-            $class->setIdentifierInURI($class->getIdentifierInNamespace()); // On attribue le même identifiant à la création en attendant un nouveau ticket (si identifier automatique c'est dans le trigger)
             $class->setCreator($this->getUser());
             $class->setModifier($this->getUser());
             $class->setCreationTime(new \DateTime('now'));
@@ -281,8 +320,18 @@ class ClassController extends Controller
         // Créer un array de ns à ajouter (ne pas rajouter ceux dont le root est déjà utilisé
         $nsIdFromUser = array();
         foreach ($namespacesIdFromUser as $namespaceIdFromUser){
-            $nsRootUser = $em->getRepository('AppBundle:OntoNamespace')->findOneBy(array('id' => $namespaceIdFromUser))->getTopLevelNamespace();
-            if(!in_array($nsRootUser, $rootNamespacesFromClassVersion)){
+            $isCompatible = true;
+            $nsUser = $em->getRepository('AppBundle:OntoNamespace')->findOneBy(array('id' => $namespaceIdFromUser));
+            $nsRootUser = $nsUser->getTopLevelNamespace();
+            if(in_array($nsRootUser, $rootNamespacesFromClassVersion) and !in_array($nsUser->getId(), $namespacesIdFromClassVersion)){
+                $isCompatible = false;
+            }
+            foreach ($nsUser->getAllReferencedNamespaces() as $referencedNamespace){
+                if(in_array($referencedNamespace->getTopLevelNamespace(), $rootNamespacesFromClassVersion) and !in_array($referencedNamespace->getId(), $namespacesIdFromClassVersion)){
+                    $isCompatible = false;
+                }
+            }
+            if($isCompatible){
                 $nsIdFromUser[] = $namespaceIdFromUser;
             }
         }
@@ -317,8 +366,119 @@ class ClassController extends Controller
             $error = $e->getMessage();
         }
 
+        //Tri
+        // En tête, les relations appartenant à la même version que cette classe
+        // Puis par identifiant / label
+        // Ensuite, les autres versions
+        // Puis par Préfixe, identifiant / label
+        function sortRelationsByClasses($a, $b, OntoNamespace $version, $type, $class=null){
+            if($type == 'childClassAssociations'){
+                $classA = $a->getParentClass();
+                $classB = $b->getParentClass();
+                $classNamespaceA = $a->getParentClassNamespace();
+                $classNamespaceB = $b->getParentClassNamespace();
+            }
+            if($type == 'parentClassAssociations'){
+                $classA = $a->getChildClass();
+                $classB = $b->getChildClass();
+                $classNamespaceA = $a->getChildClassNamespace();
+                $classNamespaceB = $b->getChildClassNamespace();
+            }
+            if($type == 'entityAssociations'){
+                if($a->getSystemType()->getId() > $b->getSystemType()->getId()){
+                    return 1;
+                }
+                elseif($a->getSystemType()->getId() < $b->getSystemType()->getId()){
+                    return -1;
+                }
+                else{
+                    if($class == $a->getSourceClass()){
+                        $classA = $a->getTargetClass();
+                        $classNamespaceA = $a->getTargetNamespaceForVersion();
+                    }
+                    else{
+                        $classA = $a->getSourceClass();
+                        $classNamespaceA = $a->getSourceNamespaceForVersion();
+                    }
+
+                    if($class == $b->getSourceClass()){
+                        $classB = $b->getTargetClass();
+                        $classNamespaceB = $b->getTargetNamespaceForVersion();
+                    }
+                    else{
+                        $classB = $b->getSourceClass();
+                        $classNamespaceB =$b->getSourceNamespaceForVersion();
+                    }
+                }
+            }
+
+            if($classNamespaceA === $version && $classNamespaceB !== $version){
+                return -1;
+            }
+            elseif($classNamespaceB === $version && $classNamespaceA !== $version){
+                return 1;
+            }
+            else{
+                $prefixA = $classNamespaceA->getTopLevelNamespace()->getRootNamespacePrefix();
+                $prefixB = $classNamespaceB->getTopLevelNamespace()->getRootNamespacePrefix();
+                $identifierInNamespaceA =  $classA->getIdentifierInNamespace();
+                $identifierInNamespaceB =  $classB->getIdentifierInNamespace();
+
+                if($prefixA == $prefixB){
+                    if(strlen($identifierInNamespaceA) == strlen($identifierInNamespaceB)){
+                        return strcmp($identifierInNamespaceA, $identifierInNamespaceB);
+                    }
+                    elseif(strlen($identifierInNamespaceA) > strlen($identifierInNamespaceB)){
+                        return 1;
+                    }
+                    elseif(strlen($identifierInNamespaceA) < strlen($identifierInNamespaceB)){
+                        return -1;
+                    }
+                }
+                else{
+                    return strcmp($prefixA, $prefixB);
+                }
+            }
+        }
+
+        // -- Associations Subclass of
+        $childClassAssociations = $classVersion->getClass()->getChildClassAssociations()
+            ->filter(function($v) use ($classVersion, $namespacesId){
+                return $classVersion->getNamespaceForVersion() == $v->getNamespaceForVersion() || in_array($v->getNamespaceForVersion()->getId(), $namespacesId);
+            });
+        $iterator = $childClassAssociations->getIterator();
+        $iterator->uasort(function($a, $b) use ($classVersion){
+            return sortRelationsByClasses($a, $b, $classVersion->getNamespaceForVersion(), 'childClassAssociations');
+        });
+        $childClassAssociations = new ArrayCollection(iterator_to_array($iterator));
+
+        // -- Associations Superclass of
+        $parentClassAssociations = $classVersion->getClass()->getParentClassAssociations()
+            ->filter(function($v) use ($classVersion, $namespacesId){
+                return $classVersion->getNamespaceForVersion() == $v->getNamespaceForVersion() || in_array($v->getNamespaceForVersion()->getId(), $namespacesId);
+            });
+        $iterator = $parentClassAssociations->getIterator();
+        $iterator->uasort(function($a, $b) use ($classVersion){
+            return sortRelationsByClasses($a, $b, $classVersion->getNamespaceForVersion(), 'parentClassAssociations');
+        });
+        $parentClassAssociations = new ArrayCollection(iterator_to_array($iterator));
+
+        // -- Relations
+        $entityAssociations = $classVersion->getClass()->getEntityAssociations()
+            ->filter(function($v) use ($classVersion, $namespacesId){
+            return $classVersion->getNamespaceForVersion() == $v->getNamespaceForVersion() || in_array($v->getNamespaceForVersion()->getId(), $namespacesId);
+        });
+        $iterator = $entityAssociations->getIterator();
+        $iterator->uasort(function($a, $b) use ($classVersion){
+            return sortRelationsByClasses($a, $b, $classVersion->getNamespaceForVersion(), 'entityAssociations', $classVersion->getClass());
+        });
+        $entityAssociations = new ArrayCollection(iterator_to_array($iterator));
+
         return $this->render('class/show.html.twig', array(
             'classVersion' => $classVersion,
+            'childClassAssociations' => $childClassAssociations,
+            'parentClassAssociations' => $parentClassAssociations,
+            'entityAssociations' => $entityAssociations,
             'ancestors' => $ancestors,
             'descendants' => $descendants,
             'relations' => $relations,
@@ -408,6 +568,26 @@ class ClassController extends Controller
         $formIdentifier->handleRequest($request);
         if ($formIdentifier->isSubmitted() && $formIdentifier->isValid()) {
             $class->setIdentifierInNamespace($classTemp->getIdentifierInNamespace());
+            if(!$classVersion->getNamespaceForVersion()->getTopLevelNamespace()->getIsExternalNamespace()){
+                $class->setIdentifierInURI($class->getIdentifierInNamespace()); // On attribue le même identifiant si namespace interne
+            }
+            else{
+                $class->updateIdentifierInUri();
+            }
+
+            $em->persist($class);
+            $em->flush();
+
+            $this->addFlash('success', 'Class updated!');
+            return $this->redirectToRoute('class_edit', [
+                'id' => $class->getId(),
+                '_fragment' => 'identification'
+            ]);
+        }
+
+        $formUriIdentifier = $this->createForm(ClassEditUriIdentifierForm::class, $class);
+        $formUriIdentifier->handleRequest($request);
+        if ($formUriIdentifier->isSubmitted() && $formUriIdentifier->isValid()) {
             $em->persist($class);
             $em->flush();
 
@@ -421,10 +601,122 @@ class ClassController extends Controller
         $this->get('logger')
             ->info('Showing class: '.$class->getIdentifierInNamespace());
 
+        //Tri
+        // En tête, les relations appartenant à la même version que cette classe
+        // Puis par identifiant / label
+        // Ensuite, les autres versions
+        // Puis par Préfixe, identifiant / label
+        function sortRelationsByClasses($a, $b, OntoNamespace $version, $type, $class=null){
+            if($type == 'childClassAssociations'){
+                $classA = $a->getParentClass();
+                $classB = $b->getParentClass();
+                $classNamespaceA = $a->getParentClassNamespace();
+                $classNamespaceB = $b->getParentClassNamespace();
+            }
+            if($type == 'parentClassAssociations'){
+                $classA = $a->getChildClass();
+                $classB = $b->getChildClass();
+                $classNamespaceA = $a->getChildClassNamespace();
+                $classNamespaceB = $b->getChildClassNamespace();
+            }
+            if($type == 'entityAssociations'){
+                if($a->getSystemType()->getId() > $b->getSystemType()->getId()){
+                    return 1;
+                }
+                elseif($a->getSystemType()->getId() < $b->getSystemType()->getId()){
+                    return -1;
+                }
+                else{
+                    if($class == $a->getSourceClass()){
+                        $classA = $a->getTargetClass();
+                        $classNamespaceA = $a->getTargetNamespaceForVersion();
+                    }
+                    else{
+                        $classA = $a->getSourceClass();
+                        $classNamespaceA = $a->getSourceNamespaceForVersion();
+                    }
+
+                    if($class == $b->getSourceClass()){
+                        $classB = $b->getTargetClass();
+                        $classNamespaceB = $b->getTargetNamespaceForVersion();
+                    }
+                    else{
+                        $classB = $b->getSourceClass();
+                        $classNamespaceB =$b->getSourceNamespaceForVersion();
+                    }
+                }
+            }
+
+            if($classNamespaceA === $version && $classNamespaceB !== $version){
+                return -1;
+            }
+            elseif($classNamespaceB === $version && $classNamespaceA !== $version){
+                return 1;
+            }
+            else{
+                $prefixA = $classNamespaceA->getTopLevelNamespace()->getRootNamespacePrefix();
+                $prefixB = $classNamespaceB->getTopLevelNamespace()->getRootNamespacePrefix();
+                $identifierInNamespaceA =  $classA->getIdentifierInNamespace();
+                $identifierInNamespaceB =  $classB->getIdentifierInNamespace();
+
+                if($prefixA == $prefixB){
+                    if(strlen($identifierInNamespaceA) == strlen($identifierInNamespaceB)){
+                        return strcmp($identifierInNamespaceA, $identifierInNamespaceB);
+                    }
+                    elseif(strlen($identifierInNamespaceA) > strlen($identifierInNamespaceB)){
+                        return 1;
+                    }
+                    elseif(strlen($identifierInNamespaceA) < strlen($identifierInNamespaceB)){
+                        return -1;
+                    }
+                }
+                else{
+                    return strcmp($prefixA, $prefixB);
+                }
+            }
+        }
+
+        // -- Associations Subclass of
+        $childClassAssociations = $classVersion->getClass()->getChildClassAssociations()
+            ->filter(function($v) use ($classVersion, $namespacesId){
+                return $classVersion->getNamespaceForVersion() == $v->getNamespaceForVersion() || in_array($v->getNamespaceForVersion()->getId(), $namespacesId);
+            });
+        $iterator = $childClassAssociations->getIterator();
+        $iterator->uasort(function($a, $b) use ($classVersion){
+            return sortRelationsByClasses($a, $b, $classVersion->getNamespaceForVersion(), 'childClassAssociations');
+        });
+        $childClassAssociations = new ArrayCollection(iterator_to_array($iterator));
+
+        // -- Associations Superclass of
+        $parentClassAssociations = $classVersion->getClass()->getParentClassAssociations()
+            ->filter(function($v) use ($classVersion, $namespacesId){
+                return $classVersion->getNamespaceForVersion() == $v->getNamespaceForVersion() || in_array($v->getNamespaceForVersion()->getId(), $namespacesId);
+            });
+        $iterator = $parentClassAssociations->getIterator();
+        $iterator->uasort(function($a, $b) use ($classVersion){
+            return sortRelationsByClasses($a, $b, $classVersion->getNamespaceForVersion(), 'parentClassAssociations');
+        });
+        $parentClassAssociations = new ArrayCollection(iterator_to_array($iterator));
+
+        // -- Relations
+        $entityAssociations = $classVersion->getClass()->getEntityAssociations()
+            ->filter(function($v) use ($classVersion, $namespacesId){
+                return $classVersion->getNamespaceForVersion() == $v->getNamespaceForVersion() || in_array($v->getNamespaceForVersion()->getId(), $namespacesId);
+            });
+        $iterator = $entityAssociations->getIterator();
+        $iterator->uasort(function($a, $b) use ($classVersion){
+            return sortRelationsByClasses($a, $b, $classVersion->getNamespaceForVersion(), 'entityAssociations', $classVersion->getClass());
+        });
+        $entityAssociations = new ArrayCollection(iterator_to_array($iterator));
+
+
         //If validation status is in validation request or is validation, we can't allow edition of the entity and we rended the show template
         if (!is_null($classVersion->getValidationStatus()) && ($classVersion->getValidationStatus()->getId() === 26 || $classVersion->getValidationStatus()->getId() === 28)) {
             return $this->render('class/show.html.twig', [
                 'classVersion' => $classVersion,
+                'childClassAssociations' => $childClassAssociations,
+                'parentClassAssociations' => $parentClassAssociations,
+                'entityAssociations' => $entityAssociations,
                 'ancestors' => $ancestors,
                 'descendants' => $descendants,
                 'relations' => $relations,
@@ -439,6 +731,9 @@ class ClassController extends Controller
 
         return $this->render('class/edit.html.twig', array(
             'classVersion' => $classVersion,
+            'childClassAssociations' => $childClassAssociations,
+            'parentClassAssociations' => $parentClassAssociations,
+            'entityAssociations' => $entityAssociations,
             'ancestors' => $ancestors,
             'descendants' => $descendants,
             'relations' => $relations,
@@ -450,7 +745,8 @@ class ClassController extends Controller
             'namespacesId' => $namespacesId,
             'namespacesIdFromClassVersion' => $namespacesIdFromClassVersion,
             'namespacesIdFromUser' => $namespacesIdFromUser,
-            'classIdentifierForm' => $formIdentifier->createView()
+            'classIdentifierForm' => $formIdentifier->createView(),
+            'classUriIdentifierForm' => $formUriIdentifier->createView()
         ));
     }
 
@@ -565,16 +861,17 @@ class ClassController extends Controller
     }
 
     /**
-     * @Route("/class/{class}/graph/json", name="class_graph_json", requirements={"class"="^[0-9]+$"})
+     * @Route("/class/{class}/{namespace}/graph/json", name="class_graph_json", requirements={"class"="^[0-9]+$"})
      * @Method("GET")
      * @param OntoClass $class
+     * @param OntoNamespace $namespace
      * @return JsonResponse a Json formatted tree representation of OntoClasses
      */
-    public function getGraphJson(OntoClass $class)
+    public function getGraphJson(OntoClass $class, OntoNamespace $namespace)
     {
         $em = $this->getDoctrine()->getManager();
         $classes = $em->getRepository('AppBundle:OntoClass')
-            ->findClassesGraphById($class);
+            ->findClassesGraphById($class, $namespace);
 
         return new JsonResponse($classes[0]['json'],200, array(), true);
     }

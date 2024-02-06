@@ -77,6 +77,9 @@ class LabelController  extends Controller
         }
         else if(!is_null($label->getNamespace())){
             $object = $label->getNamespace();
+            if($label->getNamespace()->getIsOngoing()){
+                $label->setLabel(str_replace(' ongoing', '', $label->getLabel()));
+            }
             $redirectToRoute = 'namespace_edit';
             $redirectToRouteFragment = 'identification';
             $t = 'namespace';
@@ -122,6 +125,9 @@ class LabelController  extends Controller
 
         if ($form->isValid() && $isLabelValid) {
             $em = $this->getDoctrine()->getManager();
+            if(!is_null($label->getNamespace()) && $label->getNamespace()->getIsOngoing()){
+                $label->setLabel($label->getLabel().' ongoing');
+            }
             $label->setModifier($this->getUser());
             $em->persist($label);
             $em->flush();

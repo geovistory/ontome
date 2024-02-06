@@ -8,6 +8,7 @@
 
 namespace AppBundle\Entity;
 
+use AppBundle\Utils\StringUtils;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\HttpFoundation\Session\Session;
@@ -36,6 +37,7 @@ class OntoClass
 
     /**
      * @ORM\Column(type="string", name="identifier_in_uri")
+     * @Assert\NotBlank(message="The identifier in URI field cannot be empty")
      */
     private $identifierInURI;
 
@@ -130,11 +132,11 @@ class OntoClass
     private $labels;
 
     /**
-     * @Assert\Valid()
-     * @Assert\NotNull()
-     * @ORM\OneToMany(targetEntity="AppBundle\Entity\TextProperty", mappedBy="class", cascade={"persist"})
-     * @ORM\OrderBy({"languageIsoCode" = "ASC"})
-     */
+    * @Assert\Valid()
+    * @Assert\NotNull()
+    * @ORM\OneToMany(targetEntity="AppBundle\Entity\TextProperty", mappedBy="class", cascade={"persist"})
+    * @ORM\OrderBy({"languageIsoCode" = "ASC", "creationTime" = "DESC"})
+    */
     private $textProperties;
 
     /**
@@ -158,6 +160,11 @@ class OntoClass
      * @ORM\OrderBy({"systemType" = "ASC"})
      */
     private $profileAssociations;
+
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    private $isRecursive;
 
     public function __construct()
     {
@@ -596,9 +603,19 @@ class OntoClass
         $this->targetEntityAssociations = $targetEntityAssociations;
     }
 
+    /**
+     * @return ArrayCollection|ClassAssociation[]
+     */
     public function getEntityAssociations()
     {
-        return array_merge($this->getSourceEntityAssociations()->toArray(), $this->getTargetEntityAssociations()->toArray());
+        $entityAssociations = new ArrayCollection();
+        foreach ($this->sourceEntityAssociations as $entityAssociation){
+            $entityAssociations->add($entityAssociation);
+        }
+        foreach ($this->targetEntityAssociations as $entityAssociation){
+            $entityAssociations->add($entityAssociation);
+        }
+        return $entityAssociations;
     }
 
     /**
@@ -659,6 +676,48 @@ class OntoClass
                 $tree = $parentClassAssociation->getChildClass()->getHierarchicalTreeClasses($namespace, $tree, $depth+1);
             }
             return $tree;
+        }
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getIsRecursive()
+    {
+        return $this->isRecursive;
+    }
+
+    /**
+     * @param mixed $isRecursive
+     */
+    public function setIsRecursive($isRecursive)
+    {
+        $this->isRecursive = $isRecursive;
+    }
+
+    public function updateIdentifierInUri(){
+        $uriParameter = $this->getTopLevelNamespace()->getUriParameter();
+        switch ($uriParameter){
+            case 0: //Entity identifier
+                $this->setIdentifierInURI($this->getIdentifierInNamespace());
+                break;
+            case 1: //Entity identifier + label
+                $label = $this->getClassVersionForDisplay()->getStandardLabel(); // classVersionForDisplay renverra l'ongoing par défaut sans paramètres
+                // Remplacer les espaces par des underscores
+                $label = StringUtils::deleteAccents($label);
+                $label = str_replace(array('"', "'"), '', $label);
+                $newIdentifierInUri = str_replace(' ', '_', $this->getIdentifierInNamespace() . ' ' . $label);
+                $this->setIdentifierInURI($newIdentifierInUri);
+                break;
+            case 2: //Camel Case
+                $label = $this->getClassVersionForDisplay()->getStandardLabel();
+                $label = StringUtils::deleteAccents($label);
+                $label = str_replace(array('"', "'"), '', $label);
+                $words = preg_split('/[^a-zA-Z0-9]+/', $label);
+                $camelCaseString = implode('', array_map('ucfirst', $words));
+                $newIdentifierInUri = lcfirst($camelCaseString);
+                $this->setIdentifierInURI($newIdentifierInUri);
+                break;
         }
     }
 }
