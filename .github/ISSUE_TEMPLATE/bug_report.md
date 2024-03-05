@@ -1,6 +1,6 @@
 ---
 name: Bug report
-about: Create a report to help us improve
+about: New issues must first be validated by the development team. Please create a [discussion](https://github.com/orgs/geovistory/discussions) to report a new bug.
 title: ''
 labels: bug
 assignees: ''
