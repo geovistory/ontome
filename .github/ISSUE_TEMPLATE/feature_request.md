@@ -1,6 +1,6 @@
 ---
 name: Feature request
-about: Suggest an idea for this project
+about: New issues must first be validated by the development team. Please create a discussion https://github.com/orgs/geovistory/discussions to suggest a new feature.
 title: ''
 labels: ''
 assignees: ''
