@@ -51,13 +51,14 @@ class LabelType extends AbstractType
                 'choices'  => array(
                     'English' => 'en',
                     'French' => 'fr',
+                    'Canadian French' => 'fr-CA',
                     'German' => 'de',
                     'Greek' => 'el',
                     'Spanish' => 'es',
                     'Italian' => 'it',
                     'Portuguese' => 'pt',
                     'Russian' => 'ru',
-                    'Chinese' => 'zh'
+                    'Chinese' => 'zh',
                 ),
                 'label' => 'Language'
             ))
