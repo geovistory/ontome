@@ -7,14 +7,14 @@ assignees: ''
 
 ---
 
-**Problem description / use case**
+## Problem description / use case
 A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
 
-**Functional Requirements**
+## Functional Requirements
 A clear and concise description of what you want to happen.
 
-**Technical Specification**
+## Technical Specification
 A clear and concise description of how the feature is implemented.
 
-**Acceptance criteria**
+## Acceptance criteria
 What has the reviewer to test?
