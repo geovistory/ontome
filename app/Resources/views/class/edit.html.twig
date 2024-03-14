@@ -246,10 +246,18 @@
                             {# SystemType utilisé: 7=Example #}
                             {% for textProperty in classVersion.class.textProperties
                                 if textProperty.namespaceForVersion.id in namespacesId
-                                and textProperty.systemType.id == 7 %}
+                                and textProperty.systemType.id == 7 and textProperty.languageIsoCode == 'en' %}
                                 {% set isExamplesEmpty = false %}
                                 {{ textProperty.textProperty|raw }}
                             {% endfor %}
+                            {% if isExamplesEmpty %}
+                                {% for textProperty in classVersion.class.textProperties
+                                    if textProperty.namespaceForVersion.id in namespacesId
+                                    and textProperty.systemType.id == 7 %}
+                                    {% set isExamplesEmpty = false %}
+                                    {{ textProperty.textProperty|raw }}
+                                {% endfor %}
+                            {% endif %}
                             {% if isExamplesEmpty %}
                                 <p><i>No example yet.</i></p>
                             {% endif %}
