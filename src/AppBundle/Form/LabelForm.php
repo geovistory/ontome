@@ -46,7 +46,7 @@ class LabelForm extends AbstractType
                 'choices'  => array(
                     'English' => 'en',
                     'French' => 'fr',
-                    'Canadian French' => 'fr-CA',
+                    //'Canadian French' => 'fr-CA',
                     'German' => 'de',
                     'Greek' => 'el',
                     'Spanish' => 'es',
