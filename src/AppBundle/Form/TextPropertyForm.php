@@ -33,7 +33,6 @@ class TextPropertyForm extends AbstractType
     {
         $userID = $this->tokenStorage->getToken()->getUser()->getId();
         $user = $this->em->getRepository('AppBundle:User')->find($userID);
-
         if (!$user) {
             throw new \LogicException(
                 'The TextPropertyForm cannot be used without an authenticated user!'
@@ -43,7 +42,7 @@ class TextPropertyForm extends AbstractType
         $labelTextProperty = $options['labelTextProperty'];
 
         //if the systemType of the textProperty is 31 (owl:versionInfo), we only need an input text field with of 10 characters long
-        if ($options['systemType'] === 31) {
+        if (isset($options['systemType']) and $options['systemType'] === 31) {
             $builder
                 ->add('textProperty', TextType::class, array(
                     'attr' => array(
@@ -77,7 +76,7 @@ class TextPropertyForm extends AbstractType
                     'label' => 'Language'
                 ));
         }
-        elseif(in_array($options['systemType'],[33,34,35]) and in_array($options['objectType'], ['class-version', 'property-version'])) {
+        elseif(isset($options['systemType']) and in_array($options['systemType'],[33,34,35]) and in_array($options['objectType'], ['class', 'class-version', 'property', 'property-version'])) {
             $builder
                 ->add('systemType', ChoiceType::class, array(
                     'choices'  => array(
