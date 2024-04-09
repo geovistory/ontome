@@ -243,6 +243,7 @@ class NamespaceController  extends Controller
 
         $rootNamespaces = $em->getRepository('AppBundle:OntoNamespace')
             ->findBy(array("isTopLevelNamespace" => true), array("standardLabel" => "ASC"));
+        $rootNamespaces = array_filter($rootNamespaces, function($v){return $v->getId() != 5;});
 
         return $this->render('namespace/new.html.twig', [
             'namespace' => $namespace,
@@ -293,6 +294,7 @@ class NamespaceController  extends Controller
         foreach($rootNamespacesBrut as $rootNamespace){
             $rootNamespaces->add($em->getRepository('AppBundle:OntoNamespace')->find($rootNamespace['id']));
         }
+        $rootNamespaces = $rootNamespaces->filter(function($v){return $v->getId() != 5;});
 
         $textProperties = $em
             ->getRepository('AppBundle:TextProperty')
