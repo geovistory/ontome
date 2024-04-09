@@ -288,7 +288,6 @@
                         <th>Description</th>
                         <th>Language</th>
                         <th>Edit</th>
-                        <th>Comments</th>
                         {% if namespace.isOngoing %}
                         <th>Validation</th>
                         {% endif %}
@@ -309,13 +308,6 @@
                                 }) }}"
                                    class="btn btn-xs btn-success">
                                     <span class="fa fa-edit"></span>
-                                </a>
-                            </td>
-                            <td>
-                                <a class="btn" href="{{ path('text_property_edit', {
-                                    'id': textProperty.id
-                                }) }}#comments">
-                                    <span class="badge {% if textProperty.comments|length > 0  %}progress-bar-danger {% endif %}">{{ textProperty.comments|length }}</span>
                                 </a>
                             </td>
                             {% if namespace.isOngoing %}
@@ -417,7 +409,9 @@
                         <th>Notes</th>
                         <th>Language</th>
                         <th>Edit</th>
-                        <th>Comment</th>
+                        {% if namespace.isOngoing %}
+                        <th>Validation</th>
+                        {% endif %}
                     </tr>
                     </thead>
                     <tbody>
@@ -438,13 +432,32 @@
                                     <span class="fa fa-edit"></span>
                                 </a>
                             </td>
-                            <td>
-                                <a class="btn" href="{{ path('text_property_edit', {
-                                    'id': textProperty.id
-                                }) }}#comments">
-                                    <span class="badge {% if textProperty.comments|length > 0  %}progress-bar-danger {% endif %}">{{ textProperty.comments|length }}</span>
-                                </a>
-                            </td>
+                            {% if namespace.isOngoing %}
+                                <td>
+                                    {% if textProperty.validationStatus is null %}
+                                        <span class="label label-info">
+                                        Candidate
+                                    </span>
+                                    {% elseif textProperty.validationStatus.id == 26  %}
+                                        <span class="label label-success">
+                                        {{ textProperty.validationStatus }}
+                                            {% set countValidationsTxtp = countValidationsTxtp + 1 %}
+                                    </span>
+                                    {% elseif textProperty.validationStatus.id == 27  %}
+                                        <span class="label label-danger">
+                                        {{ textProperty.validationStatus }}
+                                    </span>
+                                    {% elseif textProperty.validationStatus.id == 28  %}
+                                        <span class="label label-warning">
+                                        {{ textProperty.validationStatus }}
+                                    </span>
+                                    {% elseif textProperty.validationStatus.id == 37  %}
+                                        <span class="label label-warning2">
+                                        {{ textProperty.validationStatus }}
+                                    </span>
+                                    {% endif %}
+                                </td>
+                            {% endif %}
                         </tr>
                     {% endfor %}
                     </tbody>
@@ -702,7 +715,6 @@
                         <th>Language</th>
                         <th>Last updated</th>
                         <th>Edit</th>
-                        <th>Comments</th>
                         <th>Validation</th>
                     </tr>
                     </thead>
@@ -724,13 +736,6 @@
                                 }) }}"
                                    class="btn btn-xs btn-success">
                                     <span class="fa fa-edit"></span>
-                                </a>
-                            </td>
-                            <td>
-                                <a class="btn" href="{{ path('label_edit', {
-                                    'id': label.id
-                                }) }}#comments">
-                                    <span class="badge {% if label.comments|length > 0  %}progress-bar-danger {% endif %}">{{ label.comments|length }}</span>
                                 </a>
                             </td>
                             <td>
@@ -1539,12 +1544,12 @@
         $.fn.dataTable.ext.search.push(
             function( settings, data, dataIndex ) {
                 // Don't filter on anything other than "relations-table"
-                if ( settings.nTable.id !== 'relations-table' ) {
+                if (settings.nTable.id !== 'relations-table') {
                     return true;
                 }
                 var filterEntityRelations = $("#btns-choose-entity-relations .btn-primary").val();
                 var filterTypeRelations = $("#btns-choose-type-relations .btn-primary").val();
-                var filterRelations = filterEntityRelations+"-"+filterTypeRelations;
+                var filterRelations = filterEntityRelations + "-" + filterTypeRelations;
                 var strForFilter = data[6]; // use data for comparaison
                 return strForFilter.includes(filterRelations);
             }

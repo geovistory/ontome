@@ -282,7 +282,9 @@
                         <th>Show</th>
                         <th>Description</th>
                         <th>Language</th>
-                        <th>Namespace</th>
+                        {% if namespace.isOngoing %}
+                        <th>Validation</th>
+                        {% endif %}
                     </tr>
                     </thead>
                     <tbody>
@@ -294,29 +296,75 @@
                                 <span>{{ textProperty.textProperty|striptags|raw }}</span>
                             </td>
                             <td>{{ textProperty.languageIsoCode}}</td>
-                            <td>WIP</td>
+                            {% if namespace.isOngoing %}
+                                <td>
+                                    {% if textProperty.validationStatus is null %}
+                                        <span class="label label-info">
+                                        Candidate
+                                    </span>
+                                    {% elseif textProperty.validationStatus.id == 26  %}
+                                        <span class="label label-success">
+                                        {{ textProperty.validationStatus }}
+                                            {% set countValidationsTxtp = countValidationsTxtp + 1 %}
+                                    </span>
+                                    {% elseif textProperty.validationStatus.id == 27  %}
+                                        <span class="label label-danger">
+                                        {{ textProperty.validationStatus }}
+                                    </span>
+                                    {% elseif textProperty.validationStatus.id == 28  %}
+                                        <span class="label label-warning">
+                                        {{ textProperty.validationStatus }}
+                                    </span>
+                                    {% elseif textProperty.validationStatus.id == 37  %}
+                                        <span class="label label-warning2">
+                                        {{ textProperty.validationStatus }}
+                                    </span>
+                                    {% endif %}
+                                </td>
+                            {% endif %}
                         </tr>
                     {% endfor %}
                     </tbody>
                 </table>
                 {% if not namespace.isTopLevelNamespace %}
-                    <h3>Contributors</h3>
-                    {% set contributors, break = null, false %}
+                    {% set txtpContributors, break = null, false %}
                     {% for textProperty in namespace.textProperties if textProperty.systemType.id == 2 %}
                         {% if not break %}
                             {% if textProperty.languageIsoCode == 'en' %}
                                 {% set break = true %}
-                                {% set contributors = textProperty.textProperty %}
+                                {% set txtpContributors = textProperty %}
                             {% else %}
-                                {% if contributors == null %}
-                                    {% set contributors = textProperty.textProperty %}
+                                {% if txtpContributors == null %}
+                                    {% set txtpContributors = textProperty %}
                                 {% endif %}
                             {% endif %}
                         {% endif %}
                     {% endfor %}
-
-                    {% if contributors is not null %}
-                        {{ contributors|raw }}
+                    <h3>Contributors</h3>
+                    {% if txtpContributors is not null %}
+                        {{ txtpContributors.textProperty|raw }}
+                        {% if txtpContributors.validationStatus is null %}
+                            <span class="label label-info">
+                                    Candidate
+                                </span>
+                        {% elseif txtpContributors.validationStatus.id == 26  %}
+                            <span class="label label-success">
+                                    {{ txtpContributors.validationStatus }}
+                                {% set countValidationsContributors = countValidationsContributors + 1 %}
+                                </span>
+                        {% elseif txtpContributors.validationStatus.id == 27  %}
+                            <span class="label label-danger">
+                                    {{ txtpContributors.validationStatus }}
+                                </span>
+                        {% elseif txtpContributors.validationStatus.id == 28  %}
+                            <span class="label label-warning">
+                                    {{ txtpContributors.validationStatus }}
+                                </span>
+                        {% elseif txtpContributors.validationStatus.id == 37  %}
+                            <span class="label label-warning2">
+                                    {{ txtpContributors.validationStatus }}
+                                </span>
+                        {% endif %}
                     {% else %}
                         <p><i>No contributors yet.</i></p>
                     {% endif %}
@@ -338,7 +386,9 @@
                         <th>Show</th>
                         <th>Notes</th>
                         <th>Language</th>
-                        <th>Namespace</th>
+                        {% if namespace.isOngoing %}
+                        <th>Validation</th>
+                        {% endif %}
                     </tr>
                     </thead>
                     <tbody>
@@ -352,7 +402,32 @@
                                 <span>{{ textProperty.textProperty|striptags|raw }}</span>
                             </td>
                             <td>{{ textProperty.languageIsoCode}}</td>
-                            <td>WIP</td>
+                            {% if namespace.isOngoing %}
+                                <td>
+                                    {% if textProperty.validationStatus is null %}
+                                        <span class="label label-info">
+                                        Candidate
+                                    </span>
+                                    {% elseif textProperty.validationStatus.id == 26  %}
+                                        <span class="label label-success">
+                                        {{ textProperty.validationStatus }}
+                                            {% set countValidationsTxtp = countValidationsTxtp + 1 %}
+                                    </span>
+                                    {% elseif textProperty.validationStatus.id == 27  %}
+                                        <span class="label label-danger">
+                                        {{ textProperty.validationStatus }}
+                                    </span>
+                                    {% elseif textProperty.validationStatus.id == 28  %}
+                                        <span class="label label-warning">
+                                        {{ textProperty.validationStatus }}
+                                    </span>
+                                    {% elseif textProperty.validationStatus.id == 37  %}
+                                        <span class="label label-warning2">
+                                        {{ textProperty.validationStatus }}
+                                    </span>
+                                    {% endif %}
+                                </td>
+                            {% endif %}
                         </tr>
                     {% endfor %}
                     </tbody>
@@ -451,6 +526,9 @@
                         <th>Label</th>
                         <th>Language</th>
                         <th>Last updated</th>
+                        {% if namespace.isOngoing %}
+                        <th>Validation</th>
+                        {% endif %}
                     </tr>
                     </thead>
                     <tbody>
@@ -465,6 +543,28 @@
                             </td>
                             <td>{{ label.languageIsoCode}}</td>
                             <td>{{ label.modificationTime|date('Y-m-d') }}</td>
+                            {% if namespace.isOngoing %}
+                            <td>
+                                {% if label.validationStatus is null %}
+                                    <span class="label label-info">
+                                        Candidate
+                                    </span>
+                                {% elseif label.validationStatus.id == 26  %}
+                                    <span class="label label-success">
+                                        {{ label.validationStatus }}
+                                        {% set countValidationsLbl = countValidationsLbl + 1 %}
+                                    </span>
+                                {% elseif label.validationStatus.id == 27  %}
+                                    <span class="label label-danger">
+                                        {{ label.validationStatus }}
+                                    </span>
+                                {% elseif label.validationStatus.id == 28  %}
+                                    <span class="label label-warning">
+                                        {{ label.validationStatus }}
+                                    </span>
+                                {% endif %}
+                            </td>
+                            {% endif %}
                         </tr>
                     {% endfor %}
                     </tbody>
