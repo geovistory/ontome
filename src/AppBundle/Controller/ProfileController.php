@@ -278,6 +278,8 @@ class ProfileController  extends Controller
         foreach($rootNamespacesBrut as $rootNamespace){
             $rootNamespaces->add($em->getRepository('AppBundle:OntoNamespace')->find($rootNamespace['id']));
         }
+        $rootNamespaces = $rootNamespaces->filter(function($v){return $v->getId() != 5;});
+
 
         $profileAssociations = $em->getRepository('AppBundle:ProfileAssociation')
             ->findBy(array('profile' => $profile));

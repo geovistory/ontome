@@ -369,6 +369,7 @@ class UserController extends Controller
 
             $rootNamespaces = $em->getRepository('AppBundle:OntoNamespace')
                 ->findBy(array('isTopLevelNamespace' => true));
+            $rootNamespaces = array_filter($rootNamespaces, function($v){return $v->getId() != 5;});
 
             return $this->render('user/show.html.twig', array(
                 'userProjectAssociations' => $userProjectAssociations,
