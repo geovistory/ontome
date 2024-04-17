@@ -102,6 +102,16 @@
                                                             <xs:attribute name="lang" use="required" type="xs:language"/>
                                                         </xs:complexType>
                                                     </xs:element>
+                                                    <xs:element name="contextNote" minOccurs="0" maxOccurs="unbounded">
+                                                        <xs:complexType mixed="true">
+                                                            <xs:attribute name="lang" use="required" type="xs:language" />
+                                                        </xs:complexType>
+                                                    </xs:element>
+                                                    <xs:element name="bibliographicalNote" minOccurs="0" maxOccurs="unbounded">
+                                                        <xs:complexType mixed="true">
+                                                            <xs:attribute name="lang" use="required" type="xs:language" />
+                                                        </xs:complexType>
+                                                    </xs:element>
                                                 </xs:sequence>
                                             </xs:complexType>
                                         </xs:element>
@@ -225,6 +235,16 @@
                                                         </xs:complexType>
                                                     </xs:element>
                                                     <xs:element name="example" minOccurs="0" maxOccurs="unbounded">
+                                                        <xs:complexType mixed="true">
+                                                            <xs:attribute name="lang" use="required" type="xs:language" />
+                                                        </xs:complexType>
+                                                    </xs:element>
+                                                    <xs:element name="contextNote" minOccurs="0" maxOccurs="unbounded">
+                                                        <xs:complexType mixed="true">
+                                                            <xs:attribute name="lang" use="required" type="xs:language" />
+                                                        </xs:complexType>
+                                                    </xs:element>
+                                                    <xs:element name="bibliographicalNote" minOccurs="0" maxOccurs="unbounded">
                                                         <xs:complexType mixed="true">
                                                             <xs:attribute name="lang" use="required" type="xs:language" />
                                                         </xs:complexType>
