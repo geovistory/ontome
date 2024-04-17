@@ -306,8 +306,7 @@ $(document).ready(function() {
                 .attr('class', 'nodeCircle')
                 .attr("r", 0)
                 .attr("stroke", function(d) {
-
-                    return d.namespace_color;
+                    return d.namespace_color ? d.namespace_color : "black";
 
                 })
                 .style("fill", function(d) {
