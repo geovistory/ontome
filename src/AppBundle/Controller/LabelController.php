@@ -65,7 +65,7 @@ class LabelController  extends Controller
             $redirectToRouteFragment = 'identification';
             $t = 'profile';
             $allEntities = $em->getRepository('AppBundle:Profile')->findAll();
-            $allEntities = array_filter($allEntities, function($v) use ($label){ return $v != $label->getNamespace();});
+            $allEntities = array_filter($allEntities, function($v) use ($label){ return $v != $label->getProfile();});
         }
         else if(!is_null($label->getProject())){
             $object = $label->getProject();
@@ -73,7 +73,7 @@ class LabelController  extends Controller
             $redirectToRouteFragment = 'identification';
             $t = 'project';
             $allEntities = $em->getRepository('AppBundle:Project')->findAll();
-            $allEntities = array_filter($allEntities, function($v) use ($label){ return $v != $label->getNamespace();});
+            $allEntities = array_filter($allEntities, function($v) use ($label){ return $v != $label->getProject();});
         }
         else if(!is_null($label->getNamespace())){
             $object = $label->getNamespace();

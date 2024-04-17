@@ -220,7 +220,9 @@ class ProjectController  extends Controller
                         $systemTypeExample = $em->getRepository('AppBundle:SystemType')->find(7); // example
                         $systemTypeVersion = $em->getRepository('AppBundle:SystemType')->find(31); //owl:versionInfo
                         $systemTypeContributors = $em->getRepository('AppBundle:SystemType')->find(2); //contributor
-                        $systemTypeDescription = $em->getRepository('AppBundle:SystemType')->find(16); //contributor
+                        $systemTypeDescription = $em->getRepository('AppBundle:SystemType')->find(16); //description
+                        $systemTypeContextNote = $em->getRepository('AppBundle:SystemType')->find(34); //context note
+                        $systemTypeBibliographicalNote = $em->getRepository('AppBundle:SystemType')->find(35); //bibliographical note
 
                         $newNamespaceVersion = new OntoNamespace();
                         $newNamespaceVersion->setTopLevelNamespace($namespaceRoot);
@@ -436,6 +438,46 @@ class ProjectController  extends Controller
 
                                     $class->addTextProperty($example);
                                     $em->persist($example);
+                                }
+                            }
+
+                            // Context note
+                            if(!is_null($nodeXmlClass->textProperties->contextNote)) {
+                                foreach ($nodeXmlClass->textProperties->contextNote as $keyEx => $nodeXmlContextNote) {
+                                    $contextNote = new TextProperty();
+                                    $contextNote->setClass($class);
+                                    $contextNote->setNamespaceForVersion($newNamespaceVersion);
+                                    $contextNote->setEntityNamespaceForVersion($newNamespaceVersion);
+                                    $contextNote->setTextProperty("<p>" . (string)$nodeXmlContextNote . "</p>");
+                                    $contextNote->setLanguageIsoCode((string)$nodeXmlContextNote->attributes()->lang);
+                                    $contextNote->setSystemType($systemTypeContextNote);
+                                    $contextNote->setCreator($this->getUser());
+                                    $contextNote->setModifier($this->getUser());
+                                    $contextNote->setCreationTime(new \DateTime('now'));
+                                    $contextNote->setModificationTime(new \DateTime('now'));;
+
+                                    $class->addTextProperty($contextNote);
+                                    $em->persist($contextNote);
+                                }
+                            }
+
+                            // Bibliographical note
+                            if(!is_null($nodeXmlClass->textProperties->bibliographicalNote)) {
+                                foreach ($nodeXmlClass->textProperties->bibliographicalNote as $keyEx => $nodeXmlBibliographicalNote) {
+                                    $bibliographicalNote = new TextProperty();
+                                    $bibliographicalNote->setClass($class);
+                                    $bibliographicalNote->setNamespaceForVersion($newNamespaceVersion);
+                                    $bibliographicalNote->setEntityNamespaceForVersion($newNamespaceVersion);
+                                    $bibliographicalNote->setTextProperty("<p>" . (string)$nodeXmlBibliographicalNote . "</p>");
+                                    $bibliographicalNote->setLanguageIsoCode((string)$nodeXmlBibliographicalNote->attributes()->lang);
+                                    $bibliographicalNote->setSystemType($systemTypeBibliographicalNote);
+                                    $bibliographicalNote->setCreator($this->getUser());
+                                    $bibliographicalNote->setModifier($this->getUser());
+                                    $bibliographicalNote->setCreationTime(new \DateTime('now'));
+                                    $bibliographicalNote->setModificationTime(new \DateTime('now'));
+
+                                    $class->addTextProperty($bibliographicalNote);
+                                    $em->persist($bibliographicalNote);
                                 }
                             }
 
@@ -738,7 +780,49 @@ class ProjectController  extends Controller
                                     $em->persist($example);
                                 }
                             }
+
+                            // Context note
+                            if(!is_null($nodeXmlProperty->textProperties->contextNote)) {
+                                foreach ($nodeXmlProperty->textProperties->contextNote as $keyEx => $nodeXmlContextNote) {
+                                    $contextNote = new TextProperty();
+                                    $contextNote->setProperty($property);
+                                    $contextNote->setNamespaceForVersion($newNamespaceVersion);
+                                    $contextNote->setEntityNamespaceForVersion($newNamespaceVersion);
+                                    $contextNote->setTextProperty("<p>" . (string)$nodeXmlContextNote . "</p>");
+                                    $contextNote->setLanguageIsoCode((string)$nodeXmlContextNote->attributes()->lang);
+                                    $contextNote->setSystemType($systemTypeContextNote);
+                                    $contextNote->setCreator($this->getUser());
+                                    $contextNote->setModifier($this->getUser());
+                                    $contextNote->setCreationTime(new \DateTime('now'));
+                                    $contextNote->setModificationTime(new \DateTime('now'));
+
+                                    $property->addTextProperty($contextNote);
+                                    $em->persist($contextNote);
+                                }
+                            }
+
+                            // Bibliographical note
+                            if(!is_null($nodeXmlProperty->textProperties->bibliographicalNote)) {
+                                foreach ($nodeXmlProperty->textProperties->bibliographicalNote as $keyEx => $nodeXmlBibliographicalNote) {
+                                    $bibliographicalNote = new TextProperty();
+                                    $bibliographicalNote->setProperty($property);
+                                    $bibliographicalNote->setNamespaceForVersion($newNamespaceVersion);
+                                    $bibliographicalNote->setEntityNamespaceForVersion($newNamespaceVersion);
+                                    $bibliographicalNote->setTextProperty("<p>" . (string)$nodeXmlBibliographicalNote . "</p>");
+                                    $bibliographicalNote->setLanguageIsoCode((string)$nodeXmlBibliographicalNote->attributes()->lang);
+                                    $bibliographicalNote->setSystemType($systemTypeBibliographicalNote);
+                                    $bibliographicalNote->setCreator($this->getUser());
+                                    $bibliographicalNote->setModifier($this->getUser());
+                                    $bibliographicalNote->setCreationTime(new \DateTime('now'));
+                                    $bibliographicalNote->setModificationTime(new \DateTime('now'));
+
+                                    $property->addTextProperty($bibliographicalNote);
+                                    $em->persist($bibliographicalNote);
+                                }
+                            }
                         }
+
+
 
                         // Les entités ont été créées. Maintenant on passe aux relations hierarchiques/autres
                         foreach($nodeXmlClasses->children() as $key => $nodeXmlClass) {
