@@ -863,9 +863,9 @@
                 <div id="graph" class="tab-pane fade">
                     <h3>Graph</h3>
                     {% if profile.classes|length > 0 and profile.properties|length > 0 %}
-                        <a href="https://betagraph.ontome.net/#url={{ url('profile_json', {'id': profile.id}) }}" target="_blank" class="btn btn-primary">Full screen (WebVOWL) <span class="fa fa-desktop"></span></a><br><br>
-                        <embed src="https://betagraph.ontome.net/#url={{ url('profile_json', {'id': profile.id}) }}" width="100%" height="1000px"><br><br>
-                        <a href="https://betagraph.ontome.net/#url={{ url('profile_json', {'id': profile.id}) }}" target="_blank" class="btn btn-primary">Full screen (WebVOWL) <span class="fa fa-desktop"></span></a>
+                        <a href="https://webvowl.geovistory.org/#url={{ url('profile_json', {'id': profile.id}) }}" target="_blank" class="btn btn-primary">Full screen (WebVOWL) <span class="fa fa-desktop"></span></a><br><br>
+                        <embed src="https://webvowl.geovistory.org/#url={{ url('profile_json', {'id': profile.id}) }}" width="100%" height="1000px"><br><br>
+                        <a href="https://webvowl.geovistory.org/#url={{ url('profile_json', {'id': profile.id}) }}" target="_blank" class="btn btn-primary">Full screen (WebVOWL) <span class="fa fa-desktop"></span></a>
                     {% else %}
                         <p>The webvowl graph cannot be displayed because no class or property has been associated with this profile.</p>
                     {% endif %}
