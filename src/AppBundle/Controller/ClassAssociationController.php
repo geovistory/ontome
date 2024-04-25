@@ -13,6 +13,7 @@ use AppBundle\Entity\OntoClass;
 use AppBundle\Entity\SystemType;
 use AppBundle\Entity\TextProperty;
 use AppBundle\Form\ClassAssociationEditForm;
+use Psr\Log\LoggerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use AppBundle\Form\ParentClassAssociationForm;
@@ -135,10 +136,9 @@ class ClassAssociationController extends Controller
      * @param ClassAssociation $classAssociation
      * @return Response the rendered template
      */
-    public function showAction(ClassAssociation $classAssociation)
+    public function showAction(ClassAssociation $classAssociation, LoggerInterface $logger)
     {
-        $this->get('logger')
-            ->info('Showing class association: '.$classAssociation->getObjectIdentification());
+        $logger->info('Showing class association: '.$classAssociation->getObjectIdentification());
 
         return $this->render('classAssociation/show.html.twig', array(
             'class' => $classAssociation->getChildClass(),
