@@ -27,6 +27,7 @@ use AppBundle\Form\NamespaceUriParameterForm;
 use AppBundle\Form\TextPropertyForm;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\DBAL\DBALException;
+use Psr\Log\LoggerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
@@ -501,7 +502,7 @@ class ClassController extends Controller
      * @return Response the rendered template
      * @throws DBALException
      */
-    public function editAction(OntoClass $class, Request $request)
+    public function editAction(OntoClass $class, Request $request, LoggerInterface $logger)
     {
         // Récupérer la version de la classe demandée
         // En mode Edit on a besoin de la version ongoing
@@ -598,8 +599,7 @@ class ClassController extends Controller
             ]);
         }
 
-        $this->get('logger')
-            ->info('Showing class: '.$class->getIdentifierInNamespace());
+        $logger->info('Showing class: '.$class->getIdentifierInNamespace());
 
         //Tri
         // En tête, les relations appartenant à la même version que cette classe

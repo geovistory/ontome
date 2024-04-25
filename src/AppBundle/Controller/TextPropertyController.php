@@ -14,6 +14,7 @@ use AppBundle\Entity\Property;
 use AppBundle\Entity\SystemType;
 use AppBundle\Entity\TextProperty;
 use AppBundle\Form\TextPropertyForm;
+use Psr\Log\LoggerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -29,10 +30,9 @@ class TextPropertyController extends Controller
      * @param string $id
      * @return Response the rendered template
      */
-    public function showAction(TextProperty $textProperty)
+    public function showAction(TextProperty $textProperty, LoggerInterface $logger)
     {
-        $this->get('logger')
-            ->info('Showing text property: ' . $textProperty->getId());
+        $logger->info('Showing text property: ' . $textProperty->getId());
         return $this->render('textProperty/show.html.twig', array(
             'textProperty' => $textProperty
         ));

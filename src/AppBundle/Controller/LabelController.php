@@ -15,6 +15,7 @@ use AppBundle\Entity\Property;
 use AppBundle\Entity\SystemType;
 use AppBundle\Form\LabelForm;
 use Doctrine\Common\Collections\ArrayCollection;
+use Psr\Log\LoggerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Form\FormError;
@@ -31,10 +32,9 @@ class LabelController  extends Controller
      * @param string $id
      * @return Response the rendered template
      */
-    public function showAction(Label $label)
+    public function showAction(Label $label, LoggerInterface $logger)
     {
-        $this->get('logger')
-            ->info('Showing text property: ' . $label->getId());
+        $logger->info('Showing text property: ' . $label->getId());
         return $this->render('label/show.html.twig', array(
             'label' => $label
         ));

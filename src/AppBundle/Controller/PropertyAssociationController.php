@@ -14,6 +14,7 @@ use AppBundle\Entity\SystemType;
 use AppBundle\Entity\TextProperty;
 use AppBundle\Form\PropertyAssociationEditForm;
 use Doctrine\Common\Collections\ArrayCollection;
+use Psr\Log\LoggerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use AppBundle\Form\ParentPropertyAssociationForm;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -145,10 +146,9 @@ class PropertyAssociationController extends Controller
      * @param PropertyAssociation $propertyAssociation
      * @return Response the rendered template
      */
-    public function showAction(PropertyAssociation $propertyAssociation)
+    public function showAction(PropertyAssociation $propertyAssociation, LoggerInterface $logger)
     {
-        $this->get('logger')
-            ->info('Showing property association: '.$propertyAssociation->getObjectIdentification());
+        $logger->info('Showing property association: '.$propertyAssociation->getObjectIdentification());
 
 
         return $this->render('propertyAssociation/show.html.twig', array(
