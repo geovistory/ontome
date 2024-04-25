@@ -21,7 +21,7 @@
                     </button>
                     <ul class="dropdown-menu" aria-labelledby="dropdownVersions">
                         {% if classVersion.class.classVersions|length > 1 %}
-                            {% for otherClassVersion in classVersion.class.classVersions if otherClassVersion != classVersion %}
+                            {% for otherClassVersion in classVersion.class.classVersions|filter(cv => cv != classVersion) %}
                                 <li>
                                     <a href="#">{{ otherClassVersion.namespaceForVersion }}
                                         <span class="label label-{{ otherClassVersion.namespaceForVersion.status.classCss }}">
@@ -44,16 +44,13 @@
             {% set countValidationsTxtp = 0 %}
             {% set countValidationsLbl = 0 %}
 
-            {% for textProperty in classVersion.class.textProperties
-                if textProperty.systemType.id == 1
-                and textProperty.namespaceForVersion.id in namespacesId %}
+            {% for textProperty in classVersion.class.textProperties|filter(txtp => txtp.systemType.id == 1 and txtp.namespaceForVersion.id in namespacesId) %}
                 {% if textProperty.validationStatus is not null and textProperty.validationStatus.id == 26 %}
                     {% set countValidationsTxtp = countValidationsTxtp + 1 %}
                 {% endif %}
             {% endfor %}
 
-            {% for label in classVersion.class.labels
-                if label.namespaceForVersion.id in namespacesId %}
+            {% for label in classVersion.class.labels|filter(lbl => lbl.namespaceForVersion.id in namespacesId) %}
                 {% if label.validationStatus is not null and label.validationStatus.id == 26 %}
                     {% set countValidationsLbl = countValidationsLbl + 1 %}
                 {% endif %}
@@ -151,7 +148,7 @@
 
                     {# Relations #}
                     {% set isRelated = false %}
-                    {% for relation in entityAssociations if relation.systemType.id in [4,19] %}
+                    {% for relation in entityAssociations|filter(asso => asso.systemType.id in [4,19]) %}
                         {% set isRelated = true %}
                     {% endfor %}
                     {% if isRelated %}
@@ -161,7 +158,7 @@
                             </div>
                             <div class="col-lg-10">
                                 <ul class="list-unstyled">
-                                    {% for relation in entityAssociations if relation.systemType.id in [4,19] %}
+                                    {% for relation in entityAssociations|filter(asso => asso.systemType.id in [4,19]) %}
                                         <li>{{ relation.systemType.standardLabel }}
                                             {% if relation.sourceClass.id == classVersion.class.id %}
                                                 {# La classe affichée est "source", on cherche le "target" #}
@@ -215,16 +212,16 @@
                             {# Filtrer les textproperties avec namespacesId #}
                             {# SystemType utilisé: 1=Scope note #}
                             {# Retrouver en priorité le scope note en anglais #}
-                            {% for textProperty in classVersion.class.textProperties
-                                if textProperty.namespaceForVersion.id in namespacesId
-                                and textProperty.systemType.id == 1
-                                and not break %}
-                                {% if textProperty.languageIsoCode == 'en' %}
-                                    {% set break = true %}{# En anglais donc prioritaire: break #}
-                                    {% set scopeNote = textProperty.textProperty %}
-                                {% else %}
-                                    {% if scopeNote is null %}
+                            {% for textProperty in classVersion.class.textProperties|filter(txtp => txtp.namespaceForVersion.id in namespacesId and txtp.systemType.id == 1) %}
+                                {% if not break %}
+                                    {% if textProperty.languageIsoCode == 'en' %}
+                                    {# En anglais donc prioritaire: break #}
+                                        {% set break = true %}
                                         {% set scopeNote = textProperty.textProperty %}
+                                    {% else %}
+                                        {% if scopeNote is null %}
+                                            {% set scopeNote = textProperty.textProperty %}
+                                        {% endif %}
                                     {% endif %}
                                 {% endif %}
                             {% endfor %}
@@ -244,16 +241,12 @@
                             {% set isExamplesEmpty = true %}
                             {# Filtrer les textproperties avec namespacesId #}
                             {# SystemType utilisé: 7=Example #}
-                            {% for textProperty in classVersion.class.textProperties
-                                if textProperty.namespaceForVersion.id in namespacesId
-                                and textProperty.systemType.id == 7 and textProperty.languageIsoCode == 'en' %}
+                            {% for textProperty in classVersion.class.textProperties|filter(txtp => txtp.namespaceForVersion.id in namespacesId and txtp.systemType.id == 7 and txtp.languageIsoCode == 'en') %}
                                 {% set isExamplesEmpty = false %}
                                 {{ textProperty.textProperty|raw }}
                             {% endfor %}
                             {% if isExamplesEmpty %}
-                                {% for textProperty in classVersion.class.textProperties
-                                    if textProperty.namespaceForVersion.id in namespacesId
-                                    and textProperty.systemType.id == 7 %}
+                                {% for textProperty in classVersion.class.textProperties|filter(txtp => txtp.namespaceForVersion.id in namespacesId and txtp.systemType.id == 7) %}
                                     {% set isExamplesEmpty = false %}
                                     {{ textProperty.textProperty|raw }}
                                 {% endfor %}
@@ -272,8 +265,7 @@
                                 <p>Internal notes:</p>
                             </div>
                             <div class="col-lg-10">
-                                {% for textProperty in classVersion.class.textProperties
-                                    if (textProperty.namespaceForVersion.id == app.user.getCurrentOngoingNamespace.id and textProperty.systemType.id == internalNoteType) %}
+                                {% for textProperty in classVersion.class.textProperties|filter(txtp => txtp.namespaceForVersion.id == app.user.getCurrentOngoingNamespace.id and txtp.systemType.id == internalNoteType) %}
                                     {{ textProperty.textProperty|raw }}
                                 {% endfor %}
                             </div>
@@ -288,8 +280,7 @@
                                 <p>Context notes:</p>
                             </div>
                             <div class="col-lg-10">
-                                {% for textProperty in classVersion.class.textProperties
-                                    if (textProperty.namespaceForVersion.id in namespacesId and textProperty.systemType.id == contextNoteType) %}
+                                {% for textProperty in classVersion.class.textProperties|filter(txtp => txtp.namespaceForVersion.id in namespacesId  and txtp.systemType.id == contextNoteType) %}
                                     {{ textProperty.textProperty|raw }}
                                 {% endfor %}
                             </div>
@@ -304,8 +295,7 @@
                                 <p>Bibliographical notes:</p>
                             </div>
                             <div class="col-lg-10">
-                                {% for textProperty in classVersion.class.textProperties
-                                    if (textProperty.namespaceForVersion.id in namespacesId and textProperty.systemType.id == bibliographicalNoteType) %}
+                                {% for textProperty in classVersion.class.textProperties|filter(txtp => txtp.namespaceForVersion.id in namespacesId and txtp.systemType.id == bibliographicalNoteType) %}
                                     {{ textProperty.textProperty|raw }}
                                 {% endfor %}
                             </div>
@@ -314,8 +304,7 @@
 
                     {# In First Order Logic #}
                     {% set associationCount = 0 %}
-                    {% for association in classVersion.class.childClassAssociations
-                        if association.namespaceForVersion.id in namespacesId %}
+                    {% for association in classVersion.class.childClassAssociations|filter(asso => asso.namespaceForVersion.id in namespacesId) %}
                         {% set associationCount = associationCount + 1 %}
                     {% endfor %}
                     {% if associationCount > 0 %}
@@ -325,8 +314,7 @@
                             </div>
                             <div class="col-lg-10">
                                 <ul class="list-unstyled">
-                                    {% for association in classVersion.class.childClassAssociations
-                                        if association.namespaceForVersion.id in namespacesId %}
+                                    {% for association in classVersion.class.childClassAssociations|filter(asso => asso.namespaceForVersion.id in namespacesId) %}
                                         <li>{{ classVersion.class.identifierInNamespace }}(x) ⇒ {{ association.parentClass.identifierInNamespace }}(x)</li>
                                     {% endfor %}
                                 </ul>
@@ -431,9 +419,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for textProperty in classVersion.class.textProperties
-                        if textProperty.systemType.id == 1
-                        and textProperty.namespaceForVersion.id in namespacesId %}
+                    {% for textProperty in classVersion.class.textProperties|filter(txtp => txtp.systemType.id == 1 and txtp.namespaceForVersion.id in namespacesId) %}
                         {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
                             <tr>
                                 <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
@@ -511,9 +497,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for textProperty in classVersion.class.textProperties
-                        if textProperty.systemType.id == 7
-                        and textProperty.namespaceForVersion.id in namespacesId %}
+                    {% for textProperty in classVersion.class.textProperties|filter(txtp => txtp.systemType.id == 7 and txtp.namespaceForVersion.id in namespacesId) %}
                         {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
                         <tr>
                             <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
@@ -716,8 +700,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for label in classVersion.class.labels
-                        if label.namespaceForVersion.id in namespacesId %}
+                    {% for label in classVersion.class.labels|filter(lbl => lbl.namespaceForVersion.id in namespacesId) %}
                         <tr>
                             <td>
                                 <a href="{{ path('label_show', {
@@ -830,8 +813,7 @@
                     </thead>
                     <tbody>
                     {# Filtrer les associations is_subclass_of avec namespacesId #}
-                    {% for association in classVersion.class.childClassAssociations
-                        if association.namespaceForVersion.id in namespacesId %}
+                    {% for association in classVersion.class.childClassAssociations|filter(asso => asso.namespaceForVersion.id in namespacesId) %}
 
                         {# Initialisation #}
                         {% set parentClassVersion = null %}
@@ -848,8 +830,7 @@
                         {% endif %}
 
                         {# Est ce qu'une version parentClass existe dans les namespaces sélectionnés de l'association ? #}
-                        {% for iParentClassVersion in association.parentClass.classVersions
-                            if iParentClassVersion.namespaceForVersion.id in association.namespaceForVersion.selectedNamespacesId %}
+                        {% for iParentClassVersion in association.parentClass.classVersions|filter(cv => cv.namespaceForVersion.id in association.namespaceForVersion.selectedNamespacesId) %}
                             {% set parentClassVersion = iParentClassVersion %}
                         {% endfor %}
 
@@ -867,7 +848,7 @@
                             <td>{{ association.namespaceForVersion }}</td>
                             <td>
                                 {% if association.textProperties is not null %}
-                                    {% for textProperty in association.textProperties if textProperty.systemType.id == 15 %}
+                                    {% for textProperty in association.textProperties|filter(txtp => txtp.systemType.id == 15) %}
                                         {% if loop.index == 1 %}
                                             <a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="fas fa-eye" aria-hidden="true"></span></a>
                                             {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
@@ -1028,9 +1009,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for relation in classVersion.class.entityAssociations
-                        if relation.systemType.id in [4,19]
-                        and relation.namespaceForVersion.id in namespacesId %}
+                    {% for relation in classVersion.class.entityAssociations|filter(asso => asso.systemType.id in [4,19] and asso.namespaceForVersion.id in namespacesId) %}
                         <tr>
                             <td>{{ relation.systemType }}</td>
                             {% if relation.sourceClass.id == classVersion.class.id %}
@@ -1043,8 +1022,7 @@
                                 {% set route_params = {'id': relation.targetClass.id,  'namespaceFromUrlId': relation.targetNamespaceForVersion.id } %}
 
                                 {# Est ce qu'une version targetClass existe dans les namespaces sélectionnés de l'association ? #}
-                                {% for iTargetClassVersion in relation.targetClass.classVersions
-                                    if iTargetClassVersion.namespaceForVersion.id in relation.namespaceForVersion.selectedNamespacesId %}
+                                {% for iTargetClassVersion in relation.targetClass.classVersions|filter(cv => cv.namespaceForVersion.id in relation.namespaceForVersion.selectedNamespacesId) %}
                                     {% set targetClassVersion = iTargetClassVersion %}
                                 {% endfor %}
 
@@ -1073,8 +1051,7 @@
                                 {% set route_params = {'id': relation.sourceClass.id,  'namespaceFromUrlId': relation.sourceNamespaceForVersion.id } %}
 
                                 {# Est ce qu'une version sourceClass existe dans les namespaces sélectionnés de l'association ? #}
-                                {% for iSourceClassVersion in relation.sourceClass.classVersions
-                                    if iSourceClassVersion.namespaceForVersion.id in relation.namespaceForVersion.selectedNamespacesId %}
+                                {% for iSourceClassVersion in relation.sourceClass.classVersions|filter(cv => cv.namespaceForVersion.id in relation.namespaceForVersion.selectedNamespacesId) %}
                                     {% set sourceClassVersion = iSourceClassVersion %}
                                 {% endfor %}
 
@@ -1095,7 +1072,7 @@
                             {% endif %}
                             <td>
                                 {% if relation.textProperties is not null %}
-                                    {% for textProperty in relation.textProperties if textProperty.systemType.id == 15 %}
+                                    {% for textProperty in relation.textProperties|filter(txtp => txtp.systemType.id == 15) %}
                                         {% if loop.index == 1 %}
                                             <a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="fas fa-eye" aria-hidden="true"></span></a>
                                             {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
@@ -1443,7 +1420,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for profileAssociation in classVersion.class.profileAssociations if profileAssociation.systemType.id == 5 and profileAssociation.profile.isVisible %}
+                    {% for profileAssociation in classVersion.class.profileAssociations|filter(asso => asso.systemType.id == 5 and asso.profile.isVisible) %}
                         <tr>
                             <td>
                                 <a href="{{ path('profile_show', {

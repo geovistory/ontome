@@ -277,7 +277,7 @@
                                 {{ textProperty.textProperty|raw }}
                             {% endfor %}
                             {% if isExamplesEmpty %}
-                                {% for textProperty in classVersion.class.textProperties|filter(txtp => txtp.namespaceForVersion.id in namespacesId and textProperty.systemType.id == 7) %}
+                                {% for textProperty in classVersion.class.textProperties|filter(txtp => txtp.namespaceForVersion.id in namespacesId and txtp.systemType.id == 7) %}
                                     {% set isExamplesEmpty = false %}
                                     {{ textProperty.textProperty|raw }}
                                 {% endfor %}
