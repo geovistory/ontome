@@ -27,6 +27,7 @@ security:
             logout:
                 path: /logout
             switch_user: ~
+            logout_on_user_change: true
             # http_basic: ~
             # http://symfony.com/doc/current/security.html#a-configuring-how-your-users-will-authenticate
 
