@@ -77,7 +77,7 @@ class Html
         }
         $dom = new \DOMDocument();
         $dom->preserveWhiteSpace = $preserveWhiteSpace;
-        @$dom->loadHTML($html);
+        $dom->loadXML($html);
         self::$xpath = new \DOMXPath($dom);
         $node = $dom->getElementsByTagName('body');
 
@@ -661,7 +661,10 @@ class Html
                     break;
                 case 'line-height':
                     $matches = array();
-                    if (preg_match('/([0-9]+\.?[0-9]*[a-z]+)/', $cValue, $matches)) {
+                    if ($cValue === 'normal') {
+                        $spacingLineRule = \PhpOffice\PhpWord\SimpleType\LineSpacingRule::AUTO;
+                        $spacing = 0;
+                    } elseif (preg_match('/([0-9]+\.?[0-9]*[a-z]+)/', $cValue, $matches)) {
                         //matches number with a unit, e.g. 12px, 15pt, 20mm, ...
                         $spacingLineRule = \PhpOffice\PhpWord\SimpleType\LineSpacingRule::EXACT;
                         $spacing = Converter::cssToTwip($matches[1]);
@@ -1013,11 +1016,7 @@ class Html
         }
         $styles['font'] = self::parseInlineStyle($node, $styles['font']);
 
-        if (empty($target)) {
-            $target = '#';
-        }
-
-        if (strpos($target, '#') === 0 && strlen($target) > 1) {
+        if (strpos($target, '#') === 0) {
             return $element->addLink(substr($target, 1), $node->textContent, $styles['font'], $styles['paragraph'], true);
         }
 
