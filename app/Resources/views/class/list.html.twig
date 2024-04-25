@@ -26,7 +26,7 @@
             {# Rappel : "classes" est déjà filtrée : toutes ces classes ont au moins une classVersion compatible avec le filtrage #}
             {# Inutile donc de refiltrer sur classes #}
             {% for class in classes %}
-                {% for classVersion in class.classVersions if classVersion.namespaceForVersion.isVisible or (app.user is not null and classVersion.namespaceForVersion.projectForTopLevelNamespace.userProjectAssociations|filter(v => v.user.id == app.user.id)|length == 1)%}
+                {% for classVersion in class.classVersions|filter(cv => cv.namespaceForVersion.isVisible or (app.user is not null and cv.namespaceForVersion.projectForTopLevelNamespace.userProjectAssociations|filter(asso => asso.user.id == app.user.id)|length == 1)) %}
                 <tr>
                     <td>
                         {{ classVersion.class.identifierInNamespace }}
