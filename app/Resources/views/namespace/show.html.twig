@@ -106,10 +106,10 @@
             <li><a data-toggle="tab" href="#comments" class="updateViewComment" data-id="{{ namespace.id }}" data-object="namespace">Comments</a></li>
             {% if not namespace.isTopLevelNamespace %}
                 {% set hasMismatches = false %}
-                {% for classAssociation in namespace.classAssociations if classAssociation.parentClassNamespace.id not in namespace.selectedNamespacesId or classAssociation.childClassNamespace.id not in namespace.selectedNamespacesId %}{% set hasMismatches = true %}{% endfor %}
-                {% for propertyAssociation in namespace.propertyAssociations if propertyAssociation.parentPropertyNamespace.id not in namespace.selectedNamespacesId or propertyAssociation.childPropertyNamespace.id not in namespace.selectedNamespacesId %}{% set hasMismatches = true %}{% endfor %}
-                {% for property in namespace.properties if property.propertyVersionForDisplay(namespace).domainNamespace is not null and property.propertyVersionForDisplay(namespace).domainNamespace.id not in namespace.selectedNamespacesId or property.propertyVersionForDisplay(namespace).rangeNamespace is not null and property.propertyVersionForDisplay(namespace).rangeNamespace.id not in namespace.selectedNamespacesId %}{% set hasMismatches = true %}{% endfor %}
-                {% for entityAssociation in namespace.entityAssociations if entityAssociation.sourceNamespaceForVersion.id not in namespace.selectedNamespacesId or entityAssociation.targetNamespaceForVersion.id not in namespace.selectedNamespacesId %}{% set hasMismatches = true %}{% endfor %}
+                {% for classAssociation in namespace.classAssociations|filter(asso => asso.parentClassNamespace.id not in namespace.selectedNamespacesId or asso.childClassNamespace.id not in namespace.selectedNamespacesId) %}{% set hasMismatches = true %}{% endfor %}
+                {% for propertyAssociation in namespace.propertyAssociations|filter(asso => asso.parentPropertyNamespace.id not in namespace.selectedNamespacesId or asso.childPropertyNamespace.id not in namespace.selectedNamespacesId) %}{% set hasMismatches = true %}{% endfor %}
+                {% for property in namespace.properties|filter(prop => prop.propertyVersionForDisplay(namespace).domainNamespace is not null and prop.propertyVersionForDisplay(namespace).domainNamespace.id not in namespace.selectedNamespacesId or prop.propertyVersionForDisplay(namespace).rangeNamespace is not null and prop.propertyVersionForDisplay(namespace).rangeNamespace.id not in namespace.selectedNamespacesId) %}{% set hasMismatches = true %}{% endfor %}
+                {% for entityAssociation in namespace.entityAssociations|filter(asso => asso.sourceNamespaceForVersion.id not in namespace.selectedNamespacesId or asso.targetNamespaceForVersion.id not in namespace.selectedNamespacesId) %}{% set hasMismatches = true %}{% endfor %}
                 {% if hasMismatches %}
                     <li><a data-toggle="tab" href="#mismatches" class="text-danger"><i class="fas fa-exclamation-triangle"></i> Mismatches</a></li>
                 {% endif %}
@@ -138,7 +138,7 @@
                         </div>
                         <div class="col-lg-10">
                             {% set description, break = null, false %}
-                            {% for textProperty in namespace.textProperties if textProperty.systemType.id == 16 %}
+                            {% for textProperty in namespace.textProperties|filter(txtp => txtp.systemType.id == 16) %}
                                 {% if not break %}
                                     {% if textProperty.languageIsoCode == 'en' %}
                                         {% set break = true %}
@@ -197,19 +197,18 @@
                     {# Internal notes #}
                     {% set canSeeInternalNotes = false %}
                     {% if app.user is not null %}
-                        {% for userProjectAssociation in namespace.projectForTopLevelNamespace.userProjectAssociations
-                            if userProjectAssociation.user.id == app.user.id and userProjectAssociation.permission <= 3 %}
+                        {% for userProjectAssociation in namespace.projectForTopLevelNamespace.userProjectAssociations|filter(asso => asso.user.id == app.user.id and asso.permission <= 3) %}
                             {# Seuls les admins et managers du projet peuvent voir les internal notes #}
                             {% set canSeeInternalNotes = true %}
                         {% endfor %}
                     {% endif %}
-                    {% if canSeeInternalNotes and namespace.textProperties|filter(v => v.systemType.id == 33)|length > 0 %}
+                    {% if canSeeInternalNotes and namespace.textProperties|filter(txtp => txtp.systemType.id == 33)|length > 0 %}
                         <div class="row">
                             <div class="col-lg-2">
                                 <p>Internal notes:</p>
                             </div>
                             <div class="col-lg-10">
-                                {% for textProperty in namespace.textProperties|filter(v => v.systemType.id == 33) %}
+                                {% for textProperty in namespace.textProperties|filter(txtp => txtp.systemType.id == 33) %}
                                     {{ textProperty.textProperty|raw }}
                                 {% endfor %}
                             </div>
@@ -223,7 +222,7 @@
                             </div>
                             <div class="col-lg-10">
                                 {% set contributors, break = null, false %}
-                                {% for textProperty in namespace.textProperties if textProperty.systemType.id == 2 %}
+                                {% for textProperty in namespace.textProperties|filter(txtp => txtp.systemType.id == 2) %}
                                     {% if not break %}
                                         {% if textProperty.languageIsoCode == 'en' %}
                                             {% set break = true %}
@@ -250,7 +249,7 @@
                                 </div>
                                 <div class="col-lg-10">
                                     {% set versionInfo, break = null, false %}
-                                    {% for textProperty in namespace.textProperties if textProperty.systemType.id == 31 %}
+                                    {% for textProperty in namespace.textProperties|filter(txtp => txtp.systemType.id == 31) %}
                                         {% if not break %}
                                             {% if textProperty.languageIsoCode == 'en' %}
                                                 {% set break = true %}
@@ -288,7 +287,8 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for textProperty in namespace.textProperties if textProperty.systemType.id == 16 %}
+                    {% set countValidationsTxtp = 0 %}
+                    {% for textProperty in namespace.textProperties|filter(txtp => txtp.systemType.id == 16) %}
                     {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
                         <tr>
                             <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
@@ -327,8 +327,9 @@
                     </tbody>
                 </table>
                 {% if not namespace.isTopLevelNamespace %}
+                    {% set countValidationsContributors = 0 %}
                     {% set txtpContributors, break = null, false %}
-                    {% for textProperty in namespace.textProperties if textProperty.systemType.id == 2 %}
+                    {% for textProperty in namespace.textProperties|filter(txtp => txtp.systemType.id == 2) %}
                         {% if not break %}
                             {% if textProperty.languageIsoCode == 'en' %}
                                 {% set break = true %}
@@ -372,8 +373,7 @@
 
                 {% set canSeeInternalNotes = false %}
                 {% if app.user is not null %}
-                    {% for userProjectAssociation in namespace.projectForTopLevelNamespace.userProjectAssociations
-                        if userProjectAssociation.user.id == app.user.id and userProjectAssociation.permission <= 3 %}
+                    {% for userProjectAssociation in namespace.projectForTopLevelNamespace.userProjectAssociations|filter(asso => asso.user.id == app.user.id and asso.permission <= 3) %}
                         {# Seuls les admins et managers du projet peuvent voir les internal notes #}
                         {% set canSeeInternalNotes = true %}
                     {% endfor %}
@@ -392,9 +392,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for textProperty in namespace.textProperties
-                        if textProperty.systemType.id == 33
-                    %}
+                    {% for textProperty in namespace.textProperties|filter(txtp => txtp.systemType.id == 33) %}
                     {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
                         <tr>
                             <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
@@ -460,7 +458,7 @@
                         <p>This namespace is ongoing and can be modified at any time. It is not advisable to use its classes and properties.</p>
                     {% else %}
                         {% set txtpVersion, break = null, false %}
-                        {% for textProperty in namespace.textProperties if textProperty.systemType.id == 31 %}
+                        {% for textProperty in namespace.textProperties|filter(txtp => txtp.systemType.id == 31) %}
                             {% if not break %}
                                 {% if textProperty.languageIsoCode == 'en' %}
                                     {% set break = true %}
@@ -532,6 +530,7 @@
                     </tr>
                     </thead>
                     <tbody>
+                    {% set countValidationsLbl = 0 %}
                     {% for label in namespace.labels %}
                         <tr>
                             <td>
@@ -641,8 +640,8 @@
                             {% if app.user.id is defined %}
                             <td>
                                 {% set isEnabled = false %}
-                                {% for upa in app.user.userProjectAssociations if upa.project == app.user.currentActiveProject %}
-                                    {% for eupa in upa.entityUserProjectAssociations if eupa.systemType.id == 25 %}
+                                {% for upa in app.user.userProjectAssociations|filter(asso => asso.project == app.user.currentActiveProject) %}
+                                    {% for eupa in upa.entityUserProjectAssociations|filter(asso => asso.systemType.id == 25) %}
                                         {% if eupa.namespace == childNamespace %}
                                             {% set isEnabled = true %}
                                         {% elseif eupa.namespace is not null %}
@@ -1119,7 +1118,7 @@
                         {% set errorType = "Missing reference namespace" %}
 
                         {# Premiere boucle : les hierarchies de classes - vérification des parents #}
-                        {% for classAssociation in namespace.classAssociations if classAssociation.parentClassNamespace.id not in namespace.selectedNamespacesId %}
+                        {% for classAssociation in namespace.classAssociations|filter(asso => asso.parentClassNamespace.id not in namespace.selectedNamespacesId) %}
                             {% if namespace.selectedNamespacesId|length != 2 %}
                                 {% set errorType = "Class not in any reference namespace" %}
                                 {% if classAssociation.parentClassNamespace.id in namespace.largeSelectedNamespacesId %}
@@ -1141,7 +1140,7 @@
                         {% endfor %}
 
                         {# Deuxieme boucle : les hierarchies de classes - vérification des enfants#}
-                        {% for classAssociation in namespace.classAssociations if classAssociation.childClassNamespace.id not in namespace.selectedNamespacesId %}
+                        {% for classAssociation in namespace.classAssociations|filter(asso => asso.childClassNamespace.id not in namespace.selectedNamespacesId) %}
                             {% if namespace.selectedNamespacesId|length != 2 %}
                                 {% set errorType = "Class not in any reference namespace" %}
                                 {% if classAssociation.childClassNamespace.id in namespace.largeSelectedNamespacesId %}
@@ -1163,7 +1162,7 @@
                         {% endfor %}
 
                         {# Troisieme boucle : les hierarchies de propriétés - vérification des parents #}
-                        {% for propertyAssociation in namespace.propertyAssociations if propertyAssociation.parentPropertyNamespace.id not in namespace.selectedNamespacesId %}
+                        {% for propertyAssociation in namespace.propertyAssociations|filter(asso => asso.parentPropertyNamespace.id not in namespace.selectedNamespacesId) %}
                             {% if namespace.selectedNamespacesId|length != 2 %}
                                 {% set errorType = "Property not in any reference namespace" %}
                                 {% if propertyAssociation.parentPropertyNamespace.id in namespace.largeSelectedNamespacesId %}
@@ -1185,7 +1184,7 @@
                         {% endfor %}
 
                         {# Quatrieme boucle : les hierarchies de propriétés - vérification des enfants #}
-                        {% for propertyAssociation in namespace.propertyAssociations if propertyAssociation.childPropertyNamespace.id not in namespace.selectedNamespacesId %}
+                        {% for propertyAssociation in namespace.propertyAssociations|filter(asso => asso.childPropertyNamespace.id not in namespace.selectedNamespacesId) %}
                             {% if namespace.selectedNamespacesId|length != 2 %}
                                 {% set errorType = "Property not in any reference namespace" %}
                                 {% if propertyAssociation.childPropertyNamespace.id in namespace.largeSelectedNamespacesId %}
@@ -1207,8 +1206,7 @@
                         {% endfor %}
 
                         {# Cinquieme boucle : les propriétés - vérification des domains #}
-                        {% for property in namespace.properties if property.propertyVersionForDisplay(namespace).domainNamespace is not null
-                            and property.propertyVersionForDisplay(namespace).domainNamespace.id not in namespace.selectedNamespacesId %}
+                        {% for property in namespace.properties|filter(prop => prop.propertyVersionForDisplay(namespace).domainNamespace is not null and prop.propertyVersionForDisplay(namespace).domainNamespace.id not in namespace.selectedNamespacesId) %}
                             {% if namespace.selectedNamespacesId|length != 2 %}
                                 {% set errorType = "Class not in any reference namespace" %}
                                 {% if property.propertyVersionForDisplay(namespace).domainNamespace.id in namespace.largeSelectedNamespacesId %}
@@ -1230,8 +1228,7 @@
                         {% endfor %}
 
                         {# Sixieme boucle : les propriétés - vérification des ranges #}
-                        {% for property in namespace.properties if property.propertyVersionForDisplay(namespace).rangeNamespace is not null
-                            and property.propertyVersionForDisplay(namespace).rangeNamespace.id not in namespace.selectedNamespacesId %}
+                        {% for property in namespace.properties|filter(prop => prop.propertyVersionForDisplay(namespace).rangeNamespace is not null and prop.propertyVersionForDisplay(namespace).rangeNamespace.id not in namespace.selectedNamespacesId) %}
                             {% if namespace.selectedNamespacesId|length != 2 %}
                                 {% set errorType = "Class not in any reference namespace" %}
                                 {% if property.propertyVersionForDisplay(namespace).rangeNamespace.id in namespace.largeSelectedNamespacesId %}
@@ -1253,7 +1250,7 @@
                         {% endfor %}
 
                         {# Septième boucle : les relations - vérification des sources #}
-                        {% for entityAssociation in namespace.entityAssociations if entityAssociation.sourceNamespaceForVersion.id not in namespace.selectedNamespacesId %}
+                        {% for entityAssociation in namespace.entityAssociations|filter(asso => asso.sourceNamespaceForVersion.id not in namespace.selectedNamespacesId) %}
                             {% if entityAssociation.sourceClass is not null %}
                                 {% if namespace.selectedNamespacesId|length != 2 %}
                                     {% set errorType = "Class not in any reference namespace" %}
@@ -1296,7 +1293,7 @@
                         {% endfor %}
 
                         {# Huitième boucle : les relations - vérification des targets #}
-                        {% for entityAssociation in namespace.entityAssociations if entityAssociation.targetNamespaceForVersion.id not in namespace.selectedNamespacesId %}
+                        {% for entityAssociation in namespace.entityAssociations|filter(asso => asso.targetNamespaceForVersion.id not in namespace.selectedNamespacesId) %}
                             {% if entityAssociation.targetClass is not null %}
                                 {% if namespace.selectedNamespacesId|length != 2 %}
                                     {% set errorType = "Class not in any reference namespace" %}

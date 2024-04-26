@@ -21,7 +21,7 @@
                 <p><strong>Label: {{ namespace.standardLabel|replace({(' ongoing'):''}) }}</strong></p>
                 <p><strong>URI: <a>{{ namespace.displayURI }}</a></strong></p>
                 {% set txtpVersion, break = null, false %}
-                {% for textProperty in namespace.textProperties if textProperty.systemType.id == 31 %}
+                {% for textProperty in namespace.textProperties|filter(txtp => txtp.systemType.id == 31) %}
                     {% if not break %}
                         {% if textProperty.languageIsoCode == 'en' %}
                             {% set break = true %}
