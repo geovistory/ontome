@@ -52,12 +52,14 @@ class LabelController  extends Controller
             $object = $label->getClass();
             $redirectToRoute = 'class_edit';
             $redirectToRouteFragment = 'identification';
+            $allEntities = null;
         }
         else if(!is_null($label->getProperty())){
             $object = $label->getProperty();
             $redirectToRoute = 'property_edit';
             $redirectToRouteFragment = 'identification';
             $canInverseLabel = true;
+            $allEntities = null;
         }
         else if(!is_null($label->getProfile())){
             $object = $label->getProfile();

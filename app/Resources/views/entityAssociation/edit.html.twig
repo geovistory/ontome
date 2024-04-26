@@ -187,7 +187,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for textProperty in entityAssociation.textProperties if textProperty.systemType.id == 15 %}
+                    {% for textProperty in entityAssociation.textProperties|filter(txtp => txtp.systemType.id == 15) %}
                         {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
                         <tr>
                             <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
@@ -257,7 +257,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for textProperty in entityAssociation.textProperties if textProperty.systemType.id == 7 %}
+                    {% for textProperty in entityAssociation.textProperties|filter(txtp => txtp.systemType.id == 7) %}
                         {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
                         <tr>
                             <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
