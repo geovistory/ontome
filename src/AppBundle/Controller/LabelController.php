@@ -125,7 +125,7 @@ class LabelController  extends Controller
             }
         }
 
-        if ($form->isValid() && $isLabelValid) {
+        if ($form->isSubmitted() && $form->isValid() && $isLabelValid) {
             $em = $this->getDoctrine()->getManager();
             if(!is_null($label->getNamespace()) && $label->getNamespace()->getIsOngoing()){
                 $label->setLabel($label->getLabel().' ongoing');

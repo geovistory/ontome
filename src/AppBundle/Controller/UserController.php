@@ -63,7 +63,7 @@ class UserController extends Controller
 
         $form->handleRequest($request);
 
-        if ($form->isValid() && $this->captchaVerify($request->get('g-recaptcha-response'))){
+        if ($form->isSubmitted() && $form->isValid() && $this->captchaVerify($request->get('g-recaptcha-response'))){
 
             /** @var User $user */
             $user = $form->getData();
@@ -115,7 +115,7 @@ class UserController extends Controller
                 );
         }
 
-        if($form->isValid() && !$this->captchaVerify($request->get('g-recaptcha-response'))){
+        if($form->isSubmitted() && $form->isValid() && !$this->captchaVerify($request->get('g-recaptcha-response'))){
 
             $this->addFlash(
                 'error',
