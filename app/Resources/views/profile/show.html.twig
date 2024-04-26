@@ -80,7 +80,7 @@
                         </div>
                         <div class="col-lg-10">
                             {% set description, break = null, false %}
-                            {% for textProperty in profile.textProperties if textProperty.systemType.id == 16 %}
+                            {% for textProperty in profile.textProperties|filter(txtp => txtp.systemType.id == 16) %}
                                 {% if not break %}
                                     {% if textProperty.languageIsoCode == 'en' %}
                                         {% set break = true %}
@@ -119,8 +119,7 @@
                         {# Internal notes #}
                         {% set canSeeInternalNotes = false %}
                         {% if app.user is not null %}
-                            {% for userProjectAssociation in profile.projectOfBelonging.userProjectAssociations
-                                if userProjectAssociation.user.id == app.user.id and userProjectAssociation.permission <= 3 %}
+                            {% for userProjectAssociation in profile.projectOfBelonging.userProjectAssociations|filter(asso => asso.user.id == app.user.id and asso.permission <= 3) %}
                                 {# Seuls les admins et managers du projet peuvent voir les internal notes #}
                                 {% set canSeeInternalNotes = true %}
                             {% endfor %}
@@ -131,7 +130,7 @@
                                     <p>Internal notes:</p>
                                 </div>
                                 <div class="col-lg-10">
-                                    {% for textProperty in profile.textProperties|filter(v => v.systemType.id == 33) %}
+                                    {% for textProperty in profile.textProperties|filter(txtp => txtp.systemType.id == 33) %}
                                         {{ textProperty.textProperty|raw }}
                                     {% endfor %}
                                 </div>
@@ -160,7 +159,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for textProperty in profile.textProperties if textProperty.systemType.id == 16 %}
+                    {% for textProperty in profile.textProperties|filter(txtp => txtp.systemType.id == 16) %}
                         {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
                         <tr>
                             <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
@@ -175,8 +174,7 @@
 
                 {% set canSeeInternalNotes = false %}
                 {% if app.user is not null %}
-                    {% for userProjectAssociation in profile.projectOfBelonging.userProjectAssociations
-                        if userProjectAssociation.user.id == app.user.id and userProjectAssociation.permission <= 3 %}
+                    {% for userProjectAssociation in profile.projectOfBelonging.userProjectAssociations|filter(asso => asso.user.id == app.user.id and asso.permission <= 3) %}
                         {# Seuls les admins et managers du projet peuvent voir les internal notes #}
                         {% set canSeeInternalNotes = true %}
                     {% endfor %}
@@ -193,8 +191,7 @@
                         </tr>
                         </thead>
                         <tbody>
-                        {% for textProperty in profile.textProperties
-                            if textProperty.systemType.id == 33 %}
+                        {% for textProperty in profile.textProperties|filter(txtp => txtp.systemType.id == 33) %}
                             {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
                             <tr>
                                 <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
@@ -348,9 +345,7 @@
                             </tr>
                             </thead>
                             <tbody>
-                            {% for profileAssociation in profileAssociations
-                                if profileAssociation.property is not null
-                                and profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion) %}
+                            {% for profileAssociation in profileAssociations|filter(asso => asso.property is not null and asso.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion)) %}
                                 <tr>
                                     <td class="text-right small">
                                         {% if profileAssociation.domain is not null %}
@@ -496,7 +491,7 @@
                     <p>
                         {{ profile.standardLabel }} is a <strong>root profile</strong>.
                     </p>
-                    {% for ongoingProfile in profile.childProfiles if ongoingProfile.isOngoing %}
+                    {% for ongoingProfile in profile.childProfiles|filter(prf => prf.isOngoing) %}
                         <p> Ongoing version:
                             <a href="{{ path('profile_show', {'id': ongoingProfile.id, '_fragment': 'versions'}) }}">
                                 {{ ongoingProfile }}
@@ -526,7 +521,7 @@
                         </a>
                     </p>
                     {% if not profile.isOngoing %}
-                        {% for profile in profile.rootProfile.childProfiles if profile.isOngoing %}
+                        {% for profile in profile.rootProfile.childProfiles|filter(prf => prf.isOngoing) %}
                             <p>
                                 Ongoing version:
                                 <a href="{{ path('profile_show', {'id': profile.id, '_fragment': 'versions'}) }}">
@@ -548,7 +543,7 @@
                     </thead>
                     <tbody>
                     {% if profile.isRootProfile %}
-                        {% for publishedProfile in profile.childProfiles if not publishedProfile.isOngoing %}
+                        {% for publishedProfile in profile.childProfiles|filter(prf => not prf.isOngoing) %}
                             <tr>
                                 <td>
                                     <a href="{{ path('profile_show', {
@@ -570,7 +565,7 @@
                             </tr>
                         {% endfor %}
                     {% else %}
-                        {% for publishedProfile in profile.rootProfile.childProfiles if publishedProfile.id != profile.id and not publishedProfile.isOngoing %}
+                        {% for publishedProfile in profile.rootProfile.childProfiles|filter(prf => prf.id != profile.id and not prf.isOngoing) %}
                             <tr>
                                 <td>
                                     <a href="{{ path('profile_show', {

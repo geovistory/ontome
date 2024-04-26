@@ -18,7 +18,7 @@
         </tr>
         </thead>
         <tbody>
-        {% for profile in profiles if profile.isRootProfile %}
+        {% for profile in profiles|filter(prf =>prf.isRootProfile) %}
             <tr>
                 <td>
                     <a href="{{ path('profile_show', {

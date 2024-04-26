@@ -83,7 +83,7 @@
                         </div>
                         <div class="col-lg-10">
                             {% set description, break = null, false %}
-                            {% for textProperty in profile.textProperties if textProperty.systemType.id == 16 %}
+                            {% for textProperty in profile.textProperties|filter(txtp => txtp.systemType.id == 16) %}
                                 {% if not break %}
                                     {% if textProperty.languageIsoCode == 'en' %}
                                         {% set break = true %}
@@ -122,19 +122,18 @@
                         {# Internal notes #}
                         {% set canSeeInternalNotes = false %}
                         {% if app.user is not null %}
-                            {% for userProjectAssociation in profile.projectOfBelonging.userProjectAssociations
-                                if userProjectAssociation.user.id == app.user.id and userProjectAssociation.permission <= 3 %}
+                            {% for userProjectAssociation in profile.projectOfBelonging.userProjectAssociations|filter(asso => asso.user.id == app.user.id and asso.permission <= 3) %}
                                 {# Seuls les admins et managers du projet peuvent voir les internal notes #}
                                 {% set canSeeInternalNotes = true %}
                             {% endfor %}
                         {% endif %}
-                        {% if canSeeInternalNotes and profile.textProperties|filter(v => v.systemType.id == 33)|length > 0 %}
+                        {% if canSeeInternalNotes and profile.textProperties|filter(txtp => txtp.systemType.id == 33)|length > 0 %}
                             <div class="row">
                                 <div class="col-lg-2">
                                     <p>Internal notes:</p>
                                 </div>
                                 <div class="col-lg-10">
-                                    {% for textProperty in profile.textProperties|filter(v => v.systemType.id == 33) %}
+                                    {% for textProperty in profile.textProperties|filter(txtp => txtp.systemType.id == 33) %}
                                         {{ textProperty.textProperty|raw }}
                                     {% endfor %}
                                 </div>
@@ -171,7 +170,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for textProperty in profile.textProperties if textProperty.systemType.id == 16 %}
+                    {% for textProperty in profile.textProperties|filter(txtp => txtp.systemType.id == 16) %}
                         <tr>
                             <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
                             <td class="truncated-text">
@@ -216,8 +215,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for textProperty in profile.textProperties
-                        if textProperty.systemType.id == 33 %}
+                    {% for textProperty in profile.textProperties|filter(txtp => txtp.systemType.id == 33) %}
                         <tr>
                             <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
                             <td class="truncated-text">
@@ -492,9 +490,7 @@
                         </tr>
                         </thead>
                         <tbody>
-                        {% for profileAssociation in profileAssociations
-                            if profileAssociation.property is not null
-                            and profileAssociation.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion) %}
+                        {% for profileAssociation in profileAssociations|filter(asso => asso.property is not null and asso.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion)) %}
                             <tr>
                                 <td class="text-right small">
                                     {% if profileAssociation.domain is not null %}
@@ -641,7 +637,7 @@
                     <p>
                         {{ profile.standardLabel }} is a <strong>root profile</strong>.
                     </p>
-                    {% for ongoingProfile in profile.childProfiles if ongoingProfile.isOngoing %}
+                    {% for ongoingProfile in profile.childProfiles|filter(prf => prf.isOngoing) %}
                         <p> Ongoing version:
                             <a href="{{ path('profile_edit', {'id': ongoingProfile.id, '_fragment': 'versions'}) }}">
                                 {{ ongoingProfile }}
@@ -671,7 +667,7 @@
                         </a>
                     </p>
                     {% if not profile.isOngoing %}
-                        {% for profile in profile.rootProfile.childProfiles if profile.isOngoing %}
+                        {% for profile in profile.rootProfile.childProfiles|filter(prf => prf.isOngoing) %}
                             <p>
                                 Ongoing version:
                                 <a href="{{ path('profile_edit', {'id': profile.id, '_fragment': 'versions'}) }}">
@@ -693,7 +689,7 @@
                     </thead>
                     <tbody>
                     {% if profile.isRootProfile %}
-                        {% for publishedProfile in profile.childProfiles if not publishedProfile.isOngoing %}
+                        {% for publishedProfile in profile.childProfiles|filter(prf => not prf.isOngoing) %}
                             <tr>
                                 <td>
                                     <a href="{{ path('profile_show', {
@@ -715,7 +711,7 @@
                             </tr>
                         {% endfor %}
                     {% else %}
-                        {% for publishedProfile in profile.rootProfile.childProfiles if publishedProfile.id != profile.id and not publishedProfile.isOngoing %}
+                        {% for publishedProfile in profile.rootProfile.childProfiles|filter(prf => prf.id != profile.id and not prf.isOngoing) %}
                             <tr>
                                 <td>
                                     <a href="{{ path('profile_show', {
@@ -789,12 +785,7 @@
                                                 {% endfor %}
                                             </ul>
                                         {% endif %}
-                                        {% for profileAssociation in profile.profileAssociations
-                                            if (profileAssociation.class is not null or profileAssociation.property is not null)
-                                            and profileAssociation.entityNamespaceForVersion.topLevelNamespace.id in arrayTopLevelNamespacesIds
-                                            and profileAssociation.entityNamespaceForVersion != namespace
-                                            and profileAssociation.entityNamespaceForVersion not in namespace.allReferencedNamespaces
-                                            and profileAssociation.systemType.id == 5 %}
+                                        {% for profileAssociation in profile.profileAssociations|filter(asso => (asso.class is not null or asso.property is not null) and asso.entityNamespaceForVersion.topLevelNamespace.id in arrayTopLevelNamespacesIds and asso.entityNamespaceForVersion != namespace and asso.entityNamespaceForVersion not in namespace.allReferencedNamespaces and asso.systemType.id == 5) %}
                                             {% if loop.first %}
                                                 <span class="text-danger"><i class="fas fa-exclamation-triangle"></i>  Classes and/or properties from another version of this namespace - or to one of its reference namespaces -, previously selected in your profile, are not available in the selected version. They are displayed in red in your profile. Please make the necessary corrections before proceeding.</span>
                                             {% endif %}
@@ -807,9 +798,7 @@
                                     </td>
                                     <td>
                                         {% set isRemovable = true %}
-                                        {% for profileAssociation in profile.profileAssociations
-                                            if profileAssociation.systemType.id == 5
-                                            and (profileAssociation.entityNamespaceForVersion == namespace or profileAssociation.entityNamespaceForVersion in namespace.allReferencedNamespaces)%}
+                                        {% for profileAssociation in profile.profileAssociations|filter(asso => asso.systemType.id == 5and (asso.entityNamespaceForVersion == namespace or asso.entityNamespaceForVersion in namespace.allReferencedNamespaces)) %}
                                             {% set isRemovable = false %}
                                         {% endfor %}
                                         {% if isRemovable %}
@@ -1007,7 +996,7 @@
             {% set allProfileNamespacesId = [] %}
             {% for namespace in profile.namespaces %}
             {% set allProfileNamespacesId = allProfileNamespacesId|merge([namespace.id]) %}
-            {% for referencedNamespace in namespace.allReferencedNamespaces if referencedNamespace.id not in allProfileNamespacesId %}
+            {% for referencedNamespace in namespace.allReferencedNamespaces|filter(ns => ns.id not in allProfileNamespacesId) %}
             {% set allProfileNamespacesId = allProfileNamespacesId|merge([referencedNamespace.id]) %}
             {% endfor %}
             {% endfor %}
