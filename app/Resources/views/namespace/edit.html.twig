@@ -101,8 +101,8 @@
                 <li><a data-toggle="tab" href="#graph">Graph</a></li>
             {% endif %}
             <li><a data-toggle="tab" href="#comments" class="updateViewComment" data-id="{{ namespace.id }}" data-object="namespace">Comments</a></li>
+            {% set hasMismatches = false %}
             {% if not namespace.isTopLevelNamespace %}
-                {% set hasMismatches = false %}
                 {% for classAssociation in namespace.classAssociations|filter(asso => asso.parentClassNamespace.id not in namespace.selectedNamespacesId or asso.childClassNamespace.id not in namespace.selectedNamespacesId) %}{% set hasMismatches = true %}{% endfor %}
                 {% for propertyAssociation in namespace.propertyAssociations|filter(asso => asso.parentPropertyNamespace.id not in namespace.selectedNamespacesId or asso.childPropertyNamespace.id not in namespace.selectedNamespacesId) %}{% set hasMismatches = true %}{% endfor %}
                 {% for property in namespace.properties|filter(prop => prop.propertyVersionForDisplay(namespace).domainNamespace is not null and prop.propertyVersionForDisplay(namespace).domainNamespace.id not in namespace.selectedNamespacesId or prop.propertyVersionForDisplay(namespace).rangeNamespace is not null and prop.propertyVersionForDisplay(namespace).rangeNamespace.id not in namespace.selectedNamespacesId) %}{% set hasMismatches = true %}{% endfor %}
