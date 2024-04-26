@@ -45,6 +45,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 class NamespaceController  extends Controller
 {
@@ -67,10 +68,10 @@ class NamespaceController  extends Controller
     /**
      * @Route("/namespace/new/{project}", name="namespace_new", requirements={"project"="^[0-9]+$"})
      */
-    public function newNamespaceAction(Project $project, Request $request)
+    public function newNamespaceAction(Project $project, Request $request, TokenStorageInterface $tokenStorage)
     {
 
-        $tokenInterface = $this->get('security.token_storage')->getToken();
+        $tokenInterface = $tokenStorage->getToken();
         $isAuthenticated = $tokenInterface->isAuthenticated();
         if(!$isAuthenticated) throw new AccessDeniedException('You must be an authenticated user to access this page.');
 

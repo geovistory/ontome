@@ -25,6 +25,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Form\FormError;
+use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -1364,7 +1365,7 @@ class ProfileController  extends Controller
      * @param Profile $profile
      * @return Response the rendered template
      */
-    public function editCustomisationAction(ProfileAssociation $profileAssociation, Request $request)
+    public function editCustomisationAction(ProfileAssociation $profileAssociation, Request $request, FormFactoryInterface $formFactory)
     {
         $em = $this->getDoctrine()->getManager();
 
@@ -1384,7 +1385,7 @@ class ProfileController  extends Controller
             $textPropertyJustification->setSystemType($systemTypeJustification);
         }
 
-        $formJustification = $this->get('form.factory')->createNamed('formJustification', TextPropertyForm::class, $textPropertyJustification);
+        $formJustification = $formFactory->createNamed('formJustification', TextPropertyForm::class, $textPropertyJustification);
         $formJustification->handleRequest($request);
         if($formJustification->isSubmitted() && $formJustification->isValid()){
             $textPropertyJustification = $formJustification->getData();
@@ -1416,7 +1417,7 @@ class ProfileController  extends Controller
             $textPropertyUseCase->setSystemType($systemTypeUseCase);
         }
 
-        $formUseCase = $this->get('form.factory')->createNamed('formUseCase', TextPropertyForm::class, $textPropertyUseCase);
+        $formUseCase = $formFactory->createNamed('formUseCase', TextPropertyForm::class, $textPropertyUseCase);
         $formUseCase->handleRequest($request);
         if($formUseCase->isSubmitted() && $formUseCase->isValid()){
             $textPropertyUseCase = $formUseCase->getData();
@@ -1448,7 +1449,7 @@ class ProfileController  extends Controller
             $textPropertyNote->setSystemType($systemTypeNote);
         }
 
-        $formNote = $this->get('form.factory')->createNamed('formNote', TextPropertyForm::class, $textPropertyNote);
+        $formNote = $formFactory->createNamed('formNote', TextPropertyForm::class, $textPropertyNote);
         $formNote->handleRequest($request);
         if($formNote->isSubmitted() && $formNote->isValid()){
             $textPropertyNote = $formNote->getData();
@@ -1477,7 +1478,7 @@ class ProfileController  extends Controller
         $textPropertyNewExample->setNamespaceForVersion($profileAssociation->getEntityNamespaceForVersion());
         $textPropertyNewExample->setSystemType($systemTypeExample);
 
-        $formNewExample = $this->get('form.factory')->createNamed('formNewExample', TextPropertyForm::class, $textPropertyNewExample);
+        $formNewExample = $formFactory->createNamed('formNewExample', TextPropertyForm::class, $textPropertyNewExample);
         $formNewExample->handleRequest($request);
         if($formNewExample->isSubmitted() && $formNewExample->isValid()){
             $textPropertyNewExample = $formNewExample->getData();
@@ -1500,7 +1501,7 @@ class ProfileController  extends Controller
         $forms = array();
         foreach($textPropertyExamples as $example){
             $uniqueFormName = 'formExample'.$example->getId();
-            $form = $this->get('form.factory')->createNamed($uniqueFormName, TextPropertyForm::class, $example);
+            $form = $formFactory->createNamed($uniqueFormName, TextPropertyForm::class, $example);
             $forms[$uniqueFormName] = $form;
         }
 

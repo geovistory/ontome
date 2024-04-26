@@ -28,6 +28,8 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
+use Symfony\Component\Security\Guard\GuardAuthenticatorHandler;
 
 class UserController extends Controller
 {
@@ -55,7 +57,7 @@ class UserController extends Controller
      * @param Request $request
      * @return Response a response instance
      */
-    public function registerAction(Request $request, LoginFormAuthenticator $authenticator, \Swift_Mailer $mailer)
+    public function registerAction(Request $request, LoginFormAuthenticator $authenticator, \Swift_Mailer $mailer, GuardAuthenticatorHandler $guardAuthenticatorHandler)
     {
         $form = $this->createForm(UserRegistrationForm::class);
 
@@ -104,7 +106,7 @@ class UserController extends Controller
 
             $this->addFlash('success', 'Welcome '.$user->getFullName());
 
-            return $this->get('security.authentication.guard_handler')
+            return $guardAuthenticatorHandler
                 ->authenticateUserAndHandleSuccess(
                     $user,
                     $request,
@@ -267,9 +269,9 @@ class UserController extends Controller
     /**
      * @Route("/user")
      */
-    public function listAction()
+    public function listAction(AuthorizationCheckerInterface $authorizationChecker)
     {
-        if (!$this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) {
+        if (!$authorizationChecker->isGranted('IS_AUTHENTICATED_FULLY')) {
             throw $this->createAccessDeniedException();
         }
 
@@ -288,12 +290,12 @@ class UserController extends Controller
      * @param $user User
      * @return Response
      */
-    public function showAction(Request $request, User $user)
+    public function showAction(Request $request, User $user, AuthorizationCheckerInterface $authorizationChecker)
     {
-        if (!$this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) {
+        if (!$authorizationChecker->isGranted('IS_AUTHENTICATED_FULLY')) {
             throw $this->createAccessDeniedException();
         }
-        else if ($user != $this->getUser() && !$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN')) {
+        else if ($user != $this->getUser() && !$authorizationChecker->isGranted('ROLE_ADMIN')) {
             throw $this->createAccessDeniedException();
         }
 
@@ -516,15 +518,15 @@ class UserController extends Controller
     /**
      * @Route("/user/{id}/edit", name="user_edit", requirements={"id"="^[0-9]+$"})
      */
-    public function editAction(User $user, Request $request)
+    public function editAction(User $user, Request $request, AuthorizationCheckerInterface $authorizationChecker)
     {
-        if ($user != $this->getUser() && !$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN')) {
+        if ($user != $this->getUser() && !$authorizationChecker->isGranted('ROLE_ADMIN')) {
             throw $this->createAccessDeniedException();
         }
 
         $form = $this->createForm(UserSelfEditForm::class, $user);
 
-        if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN')) {
+        if ($authorizationChecker->isGranted('ROLE_ADMIN')) {
             $form = $this->createForm(UserEditForm::class, $user);
         }
 
@@ -540,7 +542,7 @@ class UserController extends Controller
                 'id' => $user->getId()
             ]);
         }
-        if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN')) {
+        if ($authorizationChecker->isGranted('ROLE_ADMIN')) {
             return $this->render('user/edit.html.twig', [
                 'userForm' => $form->createView(),
                 'user' => $user

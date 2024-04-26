@@ -36,6 +36,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 class ProjectController  extends Controller
 {
@@ -57,10 +58,10 @@ class ProjectController  extends Controller
     /**
      * @Route("/project/new", name="project_new_user")
      */
-    public function newUserProjectAction(Request $request)
+    public function newUserProjectAction(Request $request, TokenStorageInterface $tokenStorage)
     {
 
-        $tokenInterface = $this->get('security.token_storage')->getToken();
+        $tokenInterface = $tokenStorage->getToken();
         $isAuthenticated = $tokenInterface->isAuthenticated();
         if(!$isAuthenticated) throw new AccessDeniedException('You must be an authenticated user to access this page.');
 
