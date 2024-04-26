@@ -148,7 +148,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for textProperty in classAssociation.textProperties if textProperty.systemType.id == 15 %}
+                    {% for textProperty in classAssociation.textProperties|filter(txtp => txtp.systemType.id == 15) %}
                     {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
                         <tr>
                             <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
@@ -158,10 +158,8 @@
                             <td>{{ textProperty.languageIsoCode}}</td>
                             <td>
                                 <!-- {% if textProperty.namespace is not null %}
-                                    {% for label in textProperty.namespace.topLevelNamespace.labels %}
-                                        {% if label.isStandardLabelForLanguage == true and label.languageIsoCode == 'en' %}
-                                            {{ label.label }}
-                                        {% endif %}
+                                    {% for label in textProperty.namespace.topLevelNamespace.labels|filter(lbl => lbl.isStandardLabelForLanguage == true and lbl.languageIsoCode == 'en') %}
+                                        {{ label.label }}
                                     {% endfor %}
                                 {% endif %} -->
                             </td>
@@ -189,7 +187,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for textProperty in classAssociation.textProperties if textProperty.systemType.id == 7 %}
+                    {% for textProperty in classAssociation.textProperties|filter(txtp => txtp.systemType.id == 7) %}
                     {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
                         <tr>
                             <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
