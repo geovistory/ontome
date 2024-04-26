@@ -312,7 +312,7 @@ class PropertyAssociationController extends Controller
 
         if (!is_null($newValidationStatus)) {
             $statusId = intval($newValidationStatus->getId());
-            if (in_array($statusId, [26,27,28], true)) {
+            if (in_array($statusId, [26,27,28, 37], true)) {
                 $propertyAssociation->setValidationStatus($newValidationStatus);
                 $propertyAssociation->setModifier($this->getUser());
                 $propertyAssociation->setModificationTime(new \DateTime('now'));

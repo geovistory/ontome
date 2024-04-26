@@ -37,7 +37,7 @@
                         </div>
                         <div class="col-lg-10">
                             {% set description, break = null, false %}
-                            {% for textProperty in project.textProperties if textProperty.systemType.id == 16 %}
+                            {% for textProperty in project.textProperties|filter(txtp => txtp.systemType.id == 16) %}
                                 {% if not break %}
                                     {% if textProperty.languageIsoCode == 'en' %}
                                         {% set break = true %}
@@ -61,8 +61,7 @@
                     {# Internal notes #}
                     {% set canSeeInternalNotes = false %}
                     {% if app.user is not null %}
-                        {% for userProjectAssociation in project.userProjectAssociations
-                            if userProjectAssociation.user.id == app.user.id and userProjectAssociation.permission <= 3 %}
+                        {% for userProjectAssociation in project.userProjectAssociations|filter(asso => asso.user.id == app.user.id and asso.permission <= 3) %}
                             {# Seuls les admins et managers du projet peuvent voir les internal notes #}
                             {% set canSeeInternalNotes = true %}
                         {% endfor %}
@@ -73,7 +72,7 @@
                                 <p>Additional notes:</p>
                             </div>
                             <div class="col-lg-10">
-                                {% for textProperty in project.textProperties|filter(v => v.systemType.id == 33) %}
+                                {% for textProperty in project.textProperties|filter(txtp => txtp.systemType.id == 33) %}
                                     {{ textProperty.textProperty|raw }}
                                 {% endfor %}
                             </div>
@@ -93,7 +92,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for textProperty in project.textProperties if textProperty.systemType.id == 16 %}
+                    {% for textProperty in project.textProperties|filter(txtp => txtp.systemType.id == 16) %}
                         {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
                         <tr>
                             <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
@@ -108,8 +107,7 @@
 
                 {% set canSeeInternalNotes = false %}
                 {% if app.user is not null %}
-                    {% for userProjectAssociation in project.userProjectAssociations
-                        if userProjectAssociation.user.id == app.user.id and userProjectAssociation.permission <= 3 %}
+                    {% for userProjectAssociation in project.userProjectAssociations|filter(asso => asso.user.id == app.user.id and asso.permission <= 3) %}
                         {# Seuls les admins et managers du projet peuvent voir les internal notes #}
                         {% set canSeeInternalNotes = true %}
                     {% endfor %}
@@ -125,7 +123,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for textProperty in project.textProperties|filter(v => v.systemType.id == 33) %}
+                    {% for textProperty in project.textProperties|filter(txtp => txtp.systemType.id == 33) %}
                         {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
                         <tr>
                             <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
@@ -259,7 +257,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for profile in project.ownedProfiles if profile.isRootProfile %}
+                    {% for profile in project.ownedProfiles|filter(prf => prf.isRootProfile) %}
                         <tr>
                             <td>
                                 <a href="{{ path('profile_show', {
@@ -396,7 +394,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for userProjectAssociation in project.userProjectAssociations if userProjectAssociation.project.id == project.id %}
+                    {% for userProjectAssociation in project.userProjectAssociations|filter(asso => asso.project.id == project.id) %}
                         <tr>
                             <td>{{ userProjectAssociation.user }}</td>
                             <td>{{ userProjectAssociation.user.institution }}</td>
