@@ -17,7 +17,7 @@
                     </button>
                     <ul class="dropdown-menu" aria-labelledby="dropdown-versions">
                         {% if propertyVersion.property.propertyVersions|length > 1 %}
-                            {% for otherPropertyVersion in propertyVersion.property.propertyVersions if otherPropertyVersion != propertyVersion %}
+                            {% for otherPropertyVersion in propertyVersion.property.propertyVersions|filter(pv => pv != propertyVersion) %}
                                 <li>
                                     <a href="{{ path('property_show_with_version', {
                                         'id': propertyVersion.property.id,
@@ -59,16 +59,13 @@
                 {% set countValidationsTxtp = 0 %}
                 {% set countValidationsLbl = 0 %}
 
-                {% for textProperty in propertyVersion.property.textProperties
-                    if textProperty.systemType.id == 1
-                    and textProperty.namespaceForVersion.id in namespacesId %}
+                {% for textProperty in propertyVersion.property.textProperties|filter(txtp => txtp.systemType.id == 1 and txtp.namespaceForVersion.id in namespacesId) %}
                     {% if textProperty.validationStatus is not null and textProperty.validationStatus.id == 26 %}
                         {% set countValidationsTxtp = countValidationsTxtp + 1 %}
                     {% endif %}
                 {% endfor %}
 
-                {% for label in propertyVersion.property.labels
-                    if label.namespaceForVersion.id in namespacesId %}
+                {% for label in propertyVersion.property.labels|filter(lbl => lbl.namespaceForVersion.id in namespacesId) %}
                     {% if label.validationStatus is not null and label.validationStatus.id == 26 %}
                         {% set countValidationsLbl = countValidationsLbl + 1 %}
                     {% endif %}
@@ -173,8 +170,7 @@
 
                     {# Subproperty of #}
                     {% set isSubpropertyOf = false %}
-                    {% for association in childPropertyAssociations
-                        if association.namespaceForVersion.id in namespacesId %}
+                    {% for association in childPropertyAssociations|filter(asso => asso.namespaceForVersion.id in namespacesId) %}
                         {% set isSubpropertyOf = true %}
                     {% endfor %}
                     {% if isSubpropertyOf %}
@@ -184,8 +180,7 @@
                             </div>
                             <div class="col-lg-10">
                                 <ul class="list-unstyled">
-                                    {% for association in childPropertyAssociations
-                                        if association.namespaceForVersion.id in namespacesId %}
+                                    {% for association in childPropertyAssociations|filter(asso => asso.namespaceForVersion.id in namespacesId) %}
                                         <li>
                                             {# Domaine #}
                                             {% if association.parentProperty.propertyVersionForDisplay(association.parentPropertyNamespace).domain is not null %}
@@ -246,8 +241,7 @@
                     {% endif %}
                     {# Superproperty of #}
                     {% set isSuperpropertyOf = false %}
-                    {% for association in parentPropertyAssociations
-                        if association.namespaceForVersion.id in namespacesId %}
+                    {% for association in parentPropertyAssociations|filter(asso => asso.namespaceForVersion.id in namespacesId) %}
                         {% set isSuperpropertyOf = true %}
                     {% endfor %}
                     {% if isSuperpropertyOf %}
@@ -257,8 +251,7 @@
                             </div>
                             <div class="col-lg-10">
                                 <ul class="list-unstyled">
-                                    {% for association in parentPropertyAssociations
-                                        if association.namespaceForVersion.id in namespacesId %}
+                                    {% for association in parentPropertyAssociations|filter(asso => asso.namespaceForVersion.id in namespacesId) %}
                                         <li>
                                             {# Domain #}
                                             {% if association.childProperty.propertyVersionForDisplay(association.childPropertyNamespace).domain is not null %}
@@ -326,9 +319,7 @@
                             <div class="col-lg-10">
                                 <ul class="list-unstyled">
                                     {% set relationCount = 0 %}
-                                    {% for relation in entityAssociations
-                                        if relation.systemType.id in [18,20]
-                                        and relation.namespaceForVersion.id in namespacesId %}
+                                    {% for relation in entityAssociations|filter(asso => asso.systemType.id in [18,20] and asso.namespaceForVersion.id in namespacesId) %}
                                         {% set relationCount = relationCount + 1 %}
                                         {% if relationCount > 0 %}
                                             <li>{{ relation.systemType.standardLabel }}
@@ -382,16 +373,15 @@
                             {# Filtrer les textproperties avec namespacesId #}
                             {# SystemType utilisé: 1=Scope note #}
                             {# Retrouver en priorité le scope note en anglais #}
-                            {% for textProperty in propertyVersion.property.textProperties
-                                if textProperty.namespaceForVersion.id in namespacesId
-                                and textProperty.systemType.id == 1
-                                and not break %}
-                                {% if textProperty.languageIsoCode == 'en' %}
-                                    {% set break = true %}{# En anglais donc prioritaire: break #}
-                                    {% set scopeNote = textProperty.textProperty %}
-                                {% else %}
-                                    {% if scopeNote is null %}
+                            {% for textProperty in propertyVersion.property.textProperties|filter(txtp => txtp.namespaceForVersion.id in namespacesId and txtp.systemType.id == 1) %}
+                                {% if not break %}
+                                    {% if textProperty.languageIsoCode == 'en' %}
+                                        {% set break = true %}{# En anglais donc prioritaire: break #}
                                         {% set scopeNote = textProperty.textProperty %}
+                                    {% else %}
+                                        {% if scopeNote is null %}
+                                            {% set scopeNote = textProperty.textProperty %}
+                                        {% endif %}
                                     {% endif %}
                                 {% endif %}
                             {% endfor %}
@@ -409,16 +399,12 @@
                             {% set isExamplesEmpty = true %}
                             {# Filtrer les textproperties avec namespacesId #}
                             {# SystemType utilisé: 7=Example #}
-                            {% for textProperty in propertyVersion.property.textProperties
-                                if textProperty.namespaceForVersion.id in namespacesId
-                                and textProperty.systemType.id == 7 and textProperty.languageIsoCode == 'en' %}
+                            {% for textProperty in propertyVersion.property.textProperties|filter(txtp => txtp.namespaceForVersion.id in namespacesId and txtp.systemType.id == 7 and txtp.languageIsoCode == 'en') %}
                                 {% set isExamplesEmpty = false %}
                                 {{ textProperty.textProperty|raw }}
                             {% endfor %}
                             {% if isExamplesEmpty %}
-                                {% for textProperty in propertyVersion.property.textProperties
-                                    if textProperty.namespaceForVersion.id in namespacesId
-                                    and textProperty.systemType.id == 7 %}
+                                {% for textProperty in propertyVersion.property.textProperties|filter(txtp => txtp.namespaceForVersion.id in namespacesId and txtp.systemType.id == 7) %}
                                     {% set isExamplesEmpty = false %}
                                     {{ textProperty.textProperty|raw }}
                                 {% endfor %}
@@ -437,8 +423,7 @@
                                 <p>Internal notes:</p>
                             </div>
                             <div class="col-lg-10">
-                                {% for textProperty in propertyVersion.property.textProperties
-                                    if (textProperty.namespaceForVersion.id == app.user.getCurrentOngoingNamespace.id and textProperty.systemType.id == internalNoteType) %}
+                                {% for textProperty in propertyVersion.property.textProperties|filter(txtp => (txtp.namespaceForVersion.id == app.user.getCurrentOngoingNamespace.id and txtp.systemType.id == internalNoteType)) %}
                                     {{ textProperty.textProperty|raw }}
                                 {% endfor %}
                             </div>
@@ -453,8 +438,7 @@
                                 <p>Context notes:</p>
                             </div>
                             <div class="col-lg-10">
-                                {% for textProperty in propertyVersion.property.textProperties
-                                    if (textProperty.namespaceForVersion.id in namespacesId and textProperty.systemType.id == contextNoteType) %}
+                                {% for textProperty in propertyVersion.property.textProperties|filter(txtp => (txtp.namespaceForVersion.id in namespacesId and txtp.systemType.id == contextNoteType)) %}
                                     {{ textProperty.textProperty|raw }}
                                 {% endfor %}
                             </div>
@@ -469,8 +453,7 @@
                                 <p>Bibliographical notes:</p>
                             </div>
                             <div class="col-lg-10">
-                                {% for textProperty in propertyVersion.property.textProperties
-                                    if (textProperty.namespaceForVersion.id in namespacesId and textProperty.systemType.id == bibliographicalNoteType) %}
+                                {% for textProperty in propertyVersion.property.textProperties|filter(txtp => (txtp.namespaceForVersion.id in namespacesId and txtp.systemType.id == bibliographicalNoteType)) %}
                                     {{ textProperty.textProperty|raw }}
                                 {% endfor %}
                             </div>
@@ -489,8 +472,7 @@
                                 {% if propertyVersion.range is not null %}
                                     <li>{{ propertyVersion.property.identifierInNamespace }}(x,y) ⇒ {{ propertyVersion.range.identifierInNamespace }}(y)</li>
                                 {% endif %}
-                                {% for association in propertyVersion.property.childPropertyAssociations
-                                    if association.namespaceForVersion.id in namespacesId %}
+                                {% for association in propertyVersion.property.childPropertyAssociations|filter(asso => asso.namespaceForVersion.id in namespacesId) %}
                                     <li>{{ propertyVersion.property.identifierInNamespace }}(x,y) ⇒ {{ association.parentProperty.identifierInNamespace }}(x,y)</li>
                                 {% endfor %}
                             </ul>
@@ -515,9 +497,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for textProperty in propertyVersion.property.textProperties
-                        if textProperty.systemType.id == 1
-                        and textProperty.namespaceForVersion.id in namespacesId %}
+                    {% for textProperty in propertyVersion.property.textProperties|filter(txtp => txtp.systemType.id == 1 and txtp.namespaceForVersion.id in namespacesId) %}
                         {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
                         <tr>
                             <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
@@ -590,9 +570,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for textProperty in propertyVersion.property.textProperties
-                        if textProperty.systemType.id == 7
-                        and textProperty.namespaceForVersion.id in namespacesId %}
+                    {% for textProperty in propertyVersion.property.textProperties|filter(txtp => txtp.systemType.id == 7 and txtp.namespaceForVersion.id in namespacesId) %}
                         {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
                         <tr>
                             <td><a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span></a></td>
@@ -807,8 +785,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for label in propertyVersion.property.labels
-                        if label.namespaceForVersion.id in namespacesId %}
+                    {% for label in propertyVersion.property.labels|filter(lbl => lbl.namespaceForVersion.id in namespacesId) %}
                         <tr>
                             <td>
                                 <a href="{{ path('label_show', {
@@ -930,8 +907,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for association in propertyVersion.property.childPropertyAssociations
-                        if association.namespaceForVersion.id in namespacesId %}
+                    {% for association in propertyVersion.property.childPropertyAssociations|filter(asso => asso.namespaceForVersion.id in namespacesId) %}
                         <tr>
                             {# Domain #}
                             <td class="text-right small">
@@ -1037,7 +1013,7 @@
                             <td>{{ association.namespaceForVersion }}</td>
                             <td>
                                 {% if association.textProperties is not null %}
-                                    {% for textProperty in association.textProperties if textProperty.systemType.id == 15 %}
+                                    {% for textProperty in association.textProperties|filter(txtp => txtp.systemType.id == 15) %}
                                         {% if loop.index == 1 %}
                                             <a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="fas fa-eye" aria-hidden="true"></span></a>
                                             {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
@@ -1310,9 +1286,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for relation in propertyVersion.property.entityAssociations
-                        if relation.systemType.id in [18,20]
-                        and relation.namespaceForVersion.id in namespacesId %}
+                    {% for relation in propertyVersion.property.entityAssociations|filter(asso => asso .systemType.id in [18,20] and relation.namespaceForVersion.id in namespacesId) %}
                         <tr>
                             <td>{{ relation.systemType }}</td>
                             {% if propertyVersion.property.id == relation.sourceProperty.id %}
@@ -1361,7 +1335,7 @@
                             <td>{{ relation.namespaceForVersion.topLevelNamespace }}</td>
                             <td>
                                 {% if relation.textProperties is not null %}
-                                    {% for textProperty in relation.textProperties if textProperty.systemType.id == 15 %}
+                                    {% for textProperty in relation.textProperties|filter(txtp => txtp.systemType.id == 15) %}
                                         {% if loop.index == 1 %}
                                             <a class="btn" href="#" data-toggle="modal" data-target="#modal-text-property-{{ textProperty.id }}"><span class="fas fa-eye" aria-hidden="true"></span></a>
                                             {{ include('textProperty/modal.html.twig', { 'modalId': textProperty.id }) }}
@@ -1474,10 +1448,7 @@
                     </thead>
                     <tbody>
                     {% set profilesAssociated = [] %}
-                    {% for profileAssociation in propertyVersion.property.profileAssociations
-                        if profileAssociation.systemType.id == 5
-                        and profileAssociation.profile.isVisible
-                        and profileAssociation.profile not in profilesAssociated %}
+                    {% for profileAssociation in propertyVersion.property.profileAssociations|filter(asso => asso.systemType.id == 5 and asso.profile.isVisible and asso.profile not in profilesAssociated) %}
                         {% set profilesAssociated = [profileAssociation.profile]|merge(profilesAssociated) %}
                     {% endfor %}
                     {% for profile in profilesAssociated %}
