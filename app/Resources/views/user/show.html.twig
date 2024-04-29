@@ -161,9 +161,11 @@
                                     <a href="{{ path('namespace_show', {'id': additionalNamespace.id}) }}">{{ additionalNamespace.standardLabel }}</a>
                                     {% if additionalNamespace.directReferencedNamespaces|length > 0 %}
                                         {% set break = false %}
-                                        {% for referencedNamespace in additionalNamespace.allReferencedNamespaces if not break %}
-                                            {% set break = true %}
-                                            <div class="small text-muted"><strong><em>Referenced:</em></strong></div>
+                                        {% for referencedNamespace in additionalNamespace.allReferencedNamespaces %}
+                                            {% if not break %}
+                                                {% set break = true %}
+                                                <div class="small text-muted"><strong><em>Referenced:</em></strong></div>
+                                            {% endif %}
                                         {% endfor %}
                                         {% if break %}
                                         <ul>
@@ -198,7 +200,7 @@
                             {% if userActiveProjectAssociation.project.ownedProfiles|length == 0 %}
                                 <p class="text-muted"><em>This project does not manage any profile.</em></p>
                             {% endif %}
-                            {% for profile in userActiveProjectAssociation.project.ownedProfiles if not profile.isRootProfile and profile.isOngoing%}
+                            {% for profile in userActiveProjectAssociation.project.ownedProfiles|filter(prf => not prf.isRootProfile and prf.isOngoing) %}
                                 <div>
                                     {% set isActiveProfile = false %}
                                     {% if profile in activeProfiles %}
@@ -253,13 +255,15 @@
                                 <a href="{{ path('namespace_show', {'id': displayedNamespace.id}) }}">{{ displayedNamespace.standardLabel }}</a>
                                 {% if displayedNamespace.referencedNamespaceAssociations|length > 0 %}
                                     {% set break = false %}
-                                    {% for referencedNamespaceAssociation in displayedNamespace.referencedNamespaceAssociations if referencedNamespaceAssociation.referencedNamespace is not null and not break %}
-                                        {% set break = true %}
-                                        <div class="small text-muted"><strong><em>Referenced :</em></strong></div>
+                                    {% for referencedNamespaceAssociation in displayedNamespace.referencedNamespaceAssociations|filter(asso => asso.referencedNamespace is not null) %}
+                                        {% if not break %}
+                                            {% set break = true %}
+                                            <div class="small text-muted"><strong><em>Referenced :</em></strong></div>
+                                        {% endif %}
                                     {% endfor %}
                                     {% if break %}
                                         <ul>
-                                            {% for referencedNamespaceAssociation in displayedNamespace.referencedNamespaceAssociations if referencedNamespaceAssociation.referencedNamespace is not null %}
+                                            {% for referencedNamespaceAssociation in displayedNamespace.referencedNamespaceAssociations|filter(asso => asso.referencedNamespace is not null) %}
                                                 <li class="list-unstyled"><em class="text-muted">{{ referencedNamespaceAssociation.referencedNamespace.standardLabel }}</em></li>
                                             {% endfor %}
                                         </ul>
@@ -281,7 +285,7 @@
                         </thead>
                         <tbody>
                             {% for upa in user.userProjectAssociations %}
-                                {% for profile in upa.project.ownedProfiles if profile.isRootProfile %}
+                                {% for profile in upa.project.ownedProfiles|filter(prf => prf.isRootProfile) %}
                                     <tr>
                                         <td>
                                             <a href="{{ path('profile_show', {
