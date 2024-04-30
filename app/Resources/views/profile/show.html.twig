@@ -345,7 +345,7 @@
                             </tr>
                             </thead>
                             <tbody>
-                            {% for profileAssociation in profileAssociations|filter(asso => asso.property is not null and asso.property.propertyVersionForDisplay(profileAssociation.entityNamespaceForVersion)) %}
+                            {% for profileAssociation in profileAssociations|filter(asso => asso.property is not null and asso.property.propertyVersionForDisplay(asso.entityNamespaceForVersion)) %}
                                 <tr>
                                     <td class="text-right small">
                                         {% if profileAssociation.domain is not null %}
