@@ -1,0 +1,18 @@
+# see https://symfony.com/doc/current/reference/configuration/framework.html
+framework:
+    secret: '%env(APP_SECRET)%'
+    csrf_protection: true
+    #http_method_override: true
+
+    # Enables session support. Note that the session will ONLY be started if you read or write from it.
+    # Remove or comment this section to explicitly disable session support.
+    session:
+        handler_id: ~
+        #use_cookies: true #TODO remove when updated to symfony 4.2+ <- done
+        cookie_secure: auto #TODO set this value as auto when updated to symfony 4.2+ <- done
+        cookie_samesite: lax #TODO uncomment updated to symfony 4.2+ <- done
+
+    #esi: true
+    fragments: true
+    php_errors:
+        log: true
