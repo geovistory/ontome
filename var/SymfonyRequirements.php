@@ -791,7 +791,7 @@ class SymfonyRequirements extends RequirementCollection
      */
     protected function getPhpRequiredVersion()
     {
-        if (!file_exists($path = __DIR__.'/../composer.lock')) {
+        if (!file_exists($path = __DIR__ . '/../composer.lock.old')) {
             return false;
         }
 

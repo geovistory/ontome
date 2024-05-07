@@ -101,12 +101,12 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator
         return false;
     }
 
-    protected function getLoginUrl()
+    protected function getLoginUrl(): string
     {
         return $this->router->generate('security_login');
     }
 
-    public function onAuthenticationSuccess(Request $request, TokenInterface $token, $providerKey)
+    public function onAuthenticationSuccess(Request $request, TokenInterface $token, $providerKey): RedirectResponse
     {
         $session = $request->getSession();
         $targetPath = null;

@@ -1,0 +1,2 @@
+{{ { 'error': { 'code': status_code, 'message': status_text } }|json_encode|raw }}
+TODO properly handle JSON error responses, see: https://symfony.com/blog/new-in-symfony-4-4-errorhandler-component
