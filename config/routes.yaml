@@ -1,3 +1,14 @@
-#index:
-#    path: /
-#    controller: App\Controller\DefaultController::index
+app:
+  resource: "../src/AppBundle/Controller/"
+  type:     annotation
+
+home:
+  path: /
+  defaults:
+    _controller: AppBundle\Controller\MainController::homepageAction
+
+api:
+  resource: "../src/AppBundle/Controller/ApiController.php"
+  type: annotation
+  defaults:
+    _format: json
