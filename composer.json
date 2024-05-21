@@ -41,7 +41,7 @@
     "symfony/routing": "^4.0.15",
     "symfony/security-bundle": "^4.0.15",
     "symfony/security-csrf": "^4.0.15",
-    "symfony/swiftmailer-bundle": "3.2.1",
+    "symfony/swiftmailer-bundle": "^3.2.1",
     "symfony/translation": "^4.0.15",
     "symfony/twig-bundle": "^4.0.15",
     "symfony/validator": "^4.0.15",
@@ -56,8 +56,7 @@
     "doctrine/doctrine-fixtures-bundle": "2.3.0",
     "symfony/phpunit-bridge": "^4.0.15",
     "symfony/stopwatch": "^4.0.15",
-    "symfony/web-profiler-bundle": "^4.0.15",
-    "symfony/web-server-bundle": "^4.0.15"
+    "symfony/web-profiler-bundle": "^4.0.15"
   },
   "config": {
     "preferred-install": {
