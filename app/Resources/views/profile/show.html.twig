@@ -628,7 +628,7 @@
                 </div>
                 <div id="graph" class="tab-pane fade">
                     <h3>Graph</h3>
-                    {% if profile.isVisible %}
+                    {% if profile.isVisible or (app.user is not null and profile.projectOfBelonging.userProjectAssociations|filter(v => v.user.id == app.user.id)|length == 1) %}
                         {% if profile.classes|length > 0 and profile.properties|length > 0 %}
                             <a href="https://webvowl.geovistory.org/#url={{ url('profile_json', {'id': profile.id}) }}" target="_blank" class="btn btn-primary">Full screen (WebVOWL) <span class="fa fa-desktop"></span></a><br><br>
                             <embed src="https://webvowl.geovistory.org/#url={{ url('profile_json', {'id': profile.id}) }}" width="100%" height="1000px"><br><br>
