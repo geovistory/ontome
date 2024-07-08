@@ -288,6 +288,10 @@ class PropertyRepository extends EntityRepository
                   concat(identifier_in_namespace, ' ', standard_label) AS property,
                   fk_namespace_for_version AS \"propertyNamespaceId\",
                   array_append(array_agg(asrefns.fk_referenced_namespace), v.fk_namespace_for_version) AS \"selectedNamespacesId\",
+                 (
+                    SELECT array_agg(pk_namespace) 
+                    FROM che.get_all_references_namespaces_for_namespace(v.fk_namespace_for_version)
+                  ) AS \"allSelectedNamespacesId\",
                   pk_range_class AS \"rangeId\",
                   concat(range_identifier_in_namespace, ' ', range_standard_label) AS range,
                   fk_range_namespace_for_version AS \"rangeNamespaceId\",
@@ -380,6 +384,10 @@ class PropertyRepository extends EntityRepository
                   v.fk_domain_namespace_for_version AS \"domainNamespaceId\",
                   che.get_root_namespace_prefix(che.get_root_namespace(pv.fk_namespace_for_version)) AS \"propertyRootNamespacePrefix\",
                   replace(ancestors, '|', '→') AS ancestors,
+                 (
+                    SELECT array_agg(pk_namespace) 
+                    FROM che.get_all_references_namespaces_for_namespace(v.fk_namespace_for_version)
+                  ) AS \"allSelectedNamespacesId\",
                   (SELECT label FROM che.get_namespace_labels(nsp.pk_namespace) WHERE language_iso_code = 'en' ORDER BY is_standard_label_for_language DESC LIMIT 1 OFFSET 0) AS namespace
                 FROM che.class_ingoing_inherited_properties(?, ARRAY[".$in."]::integer[]) v,
                   che.property_version pv,

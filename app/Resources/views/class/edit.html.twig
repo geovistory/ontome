@@ -1271,10 +1271,10 @@
                     {% for outgoingInheritedProperty in outgoingInheritedProperties|sort %}
                         {% set isGoodDomainNamespace = true %}
                         {% set isGoodRangeNamespace = true %}
-                        {% if outgoingInheritedProperty.domainNamespaceId not in namespacesIdFromClassVersion %}
+                        {% if outgoingInheritedProperty.domainNamespaceId not in outgoingInheritedProperty.allSelectedNamespacesId %}
                             {% set isGoodDomainNamespace = false %}
                         {% endif %}
-                        {% if outgoingInheritedProperty.rangeNamespaceId not in namespacesIdFromClassVersion %}
+                        {% if outgoingInheritedProperty.rangeNamespaceId not in outgoingInheritedProperty.allSelectedNamespacesId %}
                             {% set isGoodRangeNamespace = false %}
                         {% endif %}
                         <tr>
@@ -1379,10 +1379,10 @@
                     {% for ingoingInheritedProperty in ingoingInheritedProperties|sort %}
                         {% set isGoodDomainNamespace = true %}
                         {% set isGoodRangeNamespace = true %}
-                        {% if ingoingInheritedProperty.domainNamespaceId not in namespacesIdFromClassVersion %}
+                        {% if ingoingInheritedProperty.domainNamespaceId not in ingoingInheritedProperty.allSelectedNamespacesId %}
                             {% set isGoodDomainNamespace = false %}
                         {% endif %}
-                        {% if ingoingInheritedProperty.rangeNamespaceId not in namespacesIdFromClassVersion %}
+                        {% if ingoingInheritedProperty.rangeNamespaceId not in ingoingInheritedProperty.allSelectedNamespacesId %}
                             {% set isGoodRangeNamespace = false %}
                         {% endif %}
                         <tr>
