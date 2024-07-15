@@ -80,56 +80,51 @@ class ProfileController  extends Controller
      */
     public function newAction(Request $request, Project $project)
     {
-        $profile = new Profile();
-        $ongoingProfile = new Profile();
-
         $this->denyAccessUnlessGranted('edit', $project);
 
         $em = $this->getDoctrine()->getManager();
+
         $systemTypeDescription = $em->getRepository('AppBundle:SystemType')->find(16); //systemType 16 = description
 
-        $description = new TextProperty();
-        $description->setProfile($profile);
-        $description->setSystemType($systemTypeDescription);
-        $description->setCreator($this->getUser());
-        $description->setModifier($this->getUser());
-        $description->setCreationTime(new \DateTime('now'));
-        $description->setModificationTime(new \DateTime('now'));
+        // Root
+        $rootProfile = new Profile();
+        $rootProfile->setIsRootProfile(true);
+        $rootProfile->setIsOngoing(false);
+        $rootProfile->setProjectOfBelonging($project);
+        $rootProfile->setIsForcedPublication(false);
+        $rootProfile->setCreator($this->getUser());
+        $rootProfile->setModifier($this->getUser());
+        $rootProfile->setCreationTime(new \DateTime('now'));
+        $rootProfile->setModificationTime(new \DateTime('now'));
 
-        $ongoingDescription = new TextProperty();
-        $ongoingDescription->setProfile($profile);
-        $ongoingDescription->setSystemType($systemTypeDescription);
-        $ongoingDescription->setCreator($this->getUser());
-        $ongoingDescription->setModifier($this->getUser());
-        $ongoingDescription->setCreationTime(new \DateTime('now'));
-        $ongoingDescription->setModificationTime(new \DateTime('now'));
+        // Root description (TextProperty)
+        $rootDescription = new TextProperty();
+        $rootDescription->setProfile($rootProfile);
+        $rootDescription->setSystemType($systemTypeDescription);
+        $rootDescription->setCreator($this->getUser());
+        $rootDescription->setModifier($this->getUser());
+        $rootDescription->setCreationTime(new \DateTime('now'));
+        $rootDescription->setModificationTime(new \DateTime('now'));
+        $rootProfile->addTextProperty($rootDescription);
 
-        $profile->addTextProperty($description);
-
-        $profileLabel = new Label();
-        $ongoingProfileLabel = new Label();
-
-        $profile->setCreator($this->getUser());
-        $profile->setModifier($this->getUser());
-
-        $profileLabel->setIsStandardLabelForLanguage(true);
-        $profileLabel->setCreator($this->getUser());
-        $profileLabel->setModifier($this->getUser());
-        $profileLabel->setCreationTime(new \DateTime('now'));
-        $profileLabel->setModificationTime(new \DateTime('now'));
-
-        $profile->addLabel($profileLabel);
+        // Root label (Label)
+        $rootProfileLabel = new Label();
+        $rootProfileLabel->setIsStandardLabelForLanguage(true);
+        $rootProfileLabel->setCreator($this->getUser());
+        $rootProfileLabel->setModifier($this->getUser());
+        $rootProfileLabel->setCreationTime(new \DateTime('now'));
+        $rootProfileLabel->setModificationTime(new \DateTime('now'));
+        $rootProfile->addLabel($rootProfileLabel);
 
         $allProfiles = $em->getRepository('AppBundle:Profile')->findAll();
-
         $allLabels = new ArrayCollection();
-        foreach ($allProfiles as $var_profile){
-            foreach ($var_profile->getLabels() as $label){
+        foreach ($allProfiles as $profile){
+            foreach ($profile->getLabels() as $label){
                 $allLabels->add($label->getLabel());
             }
         }
 
-        $form = $this->createForm(ProfileQuickAddForm::class, $profile);
+        $form = $this->createForm(ProfileQuickAddForm::class, $rootProfile);
         // only handles data on POST
         $form->handleRequest($request);
 
@@ -146,64 +141,61 @@ class ProfileController  extends Controller
         }
 
         if ($form->isSubmitted() && $form->isValid() && $isLabelValid) {
-            //root profile
-            $profile = $form->getData();
-            $profile->setIsRootProfile(true);
-            $profile->setIsOngoing(false);
-            $profile->setProjectOfBelonging($project);
-            $profile->setIsForcedPublication(false);
-            $profile->setCreator($this->getUser());
-            $profile->setModifier($this->getUser());
-            $profile->setCreationTime(new \DateTime('now'));
-            $profile->setModificationTime(new \DateTime('now'));
+            // Root profile with form submissions (Description+lang, Label+lang)
+            $rootProfile = $form->getData();
 
-            //ongoing profile
+            // Create an ongoing profile
+            $ongoingProfile = new Profile();
             $ongoingProfile->setIsRootProfile(false);
             $ongoingProfile->setIsOngoing(true);
             $ongoingProfile->setProjectOfBelonging($project);
             $ongoingProfile->setIsForcedPublication(false);
             $ongoingProfile->setVersion(1);
-            $ongoingProfile->setRootProfile($profile);
+            $ongoingProfile->setRootProfile($rootProfile);
             $ongoingProfile->setCreator($this->getUser());
             $ongoingProfile->setModifier($this->getUser());
             $ongoingProfile->setCreationTime(new \DateTime('now'));
             $ongoingProfile->setModificationTime(new \DateTime('now'));
             $ongoingProfile->setIsForcedPublication(false);
 
-            $ongoingProfileLabel->setIsStandardLabelForLanguage(true);
-            $ongoingProfileLabel->setLabel($profileLabel->getLabel().' ongoing');
-            $ongoingProfileLabel->setLanguageIsoCode($profileLabel->getLanguageIsoCode());
-            $ongoingProfileLabel->setCreator($this->getUser());
-            $ongoingProfileLabel->setModifier($this->getUser());
-            $ongoingProfileLabel->setCreationTime(new \DateTime('now'));
-            $ongoingProfileLabel->setModificationTime(new \DateTime('now'));
+            // Create a label for ongoing profile
+            $ongoingProfileLabel = clone $rootProfile->getLabels()[0];
+            $ongoingProfileLabel->setLabel($ongoingProfileLabel->getLabel().' ongoing');
             $ongoingProfile->addLabel($ongoingProfileLabel);
 
-            if($profile->getTextProperties()->containsKey(1)){
-                $profile->getTextProperties()[1]->setCreationTime(new \DateTime('now'));
-                $profile->getTextProperties()[1]->setModificationTime(new \DateTime('now'));
-                $profile->getTextProperties()[1]->setSystemType($systemTypeDescription);
-                $profile->getTextProperties()[1]->setProfile($ongoingProfile);
-                $profile->getTextProperties()[1]->setLanguageIsoCode($profileLabel->getLanguageIsoCode());
+            // Create a description for ongoing profile
+            if($rootProfile->getTextProperties()->containsKey(1)){
+                // Here we have an ongoing description different ([1]) from root description ([0])
+                // Add metadata
+                $ongoingDescription = $rootProfile->getTextProperties()[1];
+                $ongoingDescription->setSystemType($systemTypeDescription);
+                $ongoingDescription->setCreator($this->getUser());
+                $ongoingDescription->setModifier($this->getUser());
+                $ongoingDescription->setCreationTime(new \DateTime('now'));
+                $ongoingDescription->setModificationTime(new \DateTime('now'));
+                $ongoingDescription->setLanguageIsoCode($rootProfileLabel->getLanguageIsoCode());
             }
             else {
-                $ongoingProfile->addTextProperty($profile->getTextProperties()[0]);
+                // Here we have a same ongoing and root description (form are not expanded). Clone the first TxtP for Ongoing.
+                $ongoingDescription = clone $rootProfile->getTextProperties()[0];
             }
+            $ongoingDescription->setProfile($ongoingProfile);
+            $ongoingProfile->addTextProperty($ongoingDescription);
 
             $em = $this->getDoctrine()->getManager();
-            $em->persist($profile);
+            $em->persist($rootProfile);
             $em->persist($ongoingProfile);
             $em->flush();
 
             return $this->redirectToRoute('profile_show', [
-                'id' => $profile->getId()
+                'id' => $rootProfile->getId()
             ]);
 
         }
 
 
         return $this->render('profile/new.html.twig', [
-            'profile' => $profile,
+            'profile' => $rootProfile,
             'profileForm' => $form->createView()
         ]);
     }
