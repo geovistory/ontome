@@ -255,7 +255,7 @@
                     <thead>
                     <tr>
                         <th>Profile</th>
-                        <th>Creation date</th>
+                        <th>Last updated</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -268,7 +268,7 @@
                                     {{ profile.standardLabel }}
                                 </a>
                             </td>
-                            <td>{{ profile.creationTime|date('Y-m-d') }}</td>
+                            <td>{{ profile.modificationTime|date('Y-m-d') }}</td>
                         </tr>
                     {% endfor %}
                     </tbody>
