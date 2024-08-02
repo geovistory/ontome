@@ -356,7 +356,7 @@ class ClassRepository extends EntityRepository
                 JOIN che.namespace nsp ON cv.fk_namespace_for_version = nsp.pk_namespace
                 EXCEPT
                 SELECT pk_class, identifier_in_namespace, class_standard_label, fk_class_namespace_for_version, namespace
-                FROM che.get_all_classes_for_profile(:profile) WHERE profile_association_type = 'selected';";
+                FROM che.get_all_classes_for_profile(:profile) WHERE profile_association_type = 'Selected';";
         $stmt = $conn->prepare($sql);
         $stmt->execute(array('profile' => $profile->getId()));
 
