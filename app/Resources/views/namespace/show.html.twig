@@ -305,7 +305,7 @@
                                     {% elseif textProperty.validationStatus.id == 26  %}
                                         <span class="label label-success">
                                         {{ textProperty.validationStatus }}
-                                            {% set countValidationsTxtp = countValidationsTxtp + 1 %}
+                                            {% set countValidationsTxtp = countValidationsTxtp|default(0) + 1 %}
                                     </span>
                                     {% elseif textProperty.validationStatus.id == 27  %}
                                         <span class="label label-danger">
@@ -350,7 +350,7 @@
                         {% elseif txtpContributors.validationStatus.id == 26  %}
                             <span class="label label-success">
                                     {{ txtpContributors.validationStatus }}
-                                {% set countValidationsContributors = countValidationsContributors + 1 %}
+                                {% set countValidationsContributors = countValidationsContributors|default(0) + 1 %}
                                 </span>
                         {% elseif txtpContributors.validationStatus.id == 27  %}
                             <span class="label label-danger">
@@ -411,7 +411,7 @@
                                     {% elseif textProperty.validationStatus.id == 26  %}
                                         <span class="label label-success">
                                         {{ textProperty.validationStatus }}
-                                            {% set countValidationsTxtp = countValidationsTxtp + 1 %}
+                                            {% set countValidationsTxtp = countValidationsTxtp|default(0) + 1 %}
                                     </span>
                                     {% elseif textProperty.validationStatus.id == 27  %}
                                         <span class="label label-danger">
@@ -436,6 +436,9 @@
             </div>
             <div id="identification" class="tab-pane fade">
                 <h3>Identification</h3>
+                {% if namespace.isTopLevelNamespace %}
+                    <p>Start date: {{ namespace.creationTime|date('Y-m-d') }}</p>
+                {% endif %}
                 <p>
                     {% if namespace.topLevelNamespace.isExternalNamespace and namespace.namespaceURI is not null %}
                         Base URI: <strong>{{ namespace.namespaceURI }}</strong>
@@ -552,7 +555,7 @@
                                 {% elseif label.validationStatus.id == 26  %}
                                     <span class="label label-success">
                                         {{ label.validationStatus }}
-                                        {% set countValidationsLbl = countValidationsLbl + 1 %}
+                                        {% set countValidationsLbl = countValidationsLbl|default(0) + 1 %}
                                     </span>
                                 {% elseif label.validationStatus.id == 27  %}
                                     <span class="label label-danger">
