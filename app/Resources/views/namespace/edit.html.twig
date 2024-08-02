@@ -465,6 +465,9 @@
             </div>
             <div id="identification" class="tab-pane fade">
                 <h3>Identification</h3>
+                {% if namespace.isTopLevelNamespace %}
+                    <p>Start date: {{ namespace.creationTime|date('Y-m-d') }}</p>
+                {% endif %}
                 <div class="object-identification-edit-form">
                     {% if is_granted('full_edit', namespace) and (not namespace.isOngoing or namespace.topLevelNamespace.isExternalNamespace) %}
                         {{ form_start(namespaceForm) }}

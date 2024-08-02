@@ -247,6 +247,9 @@
             </div>
             <div id="identification" class="tab-pane fade">
                 <h3>Identification</h3>
+                {% if profile.isRootProfile %}
+                    <p>Start date: {{ profile.creationTime|date('Y-m-d') }}</p>
+                {% endif %}
                 {% if not profile.isRootProfile %}
                     <p>Project of belonging: <a href="{{ path('project_show', {'id': profile.projectOfBelonging.id}) }}">{{ profile.projectOfBelonging.standardLabel }}</a></p>
                 {% endif %}
