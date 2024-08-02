@@ -1414,6 +1414,16 @@ class ProjectController  extends Controller
         $this->denyAccessUnlessGranted('edit_manager', $userProjectAssociation->getProject());
         try {
             $em = $this->getDoctrine()->getManager();
+            $project = $userProjectAssociation->getProject();
+            $user = $userProjectAssociation->getUser();
+
+            // Si l'utilisateur l'a en projet actif, modifier pour éviter qu'il se retrouve bloqué
+            if($user->getCurrentActiveProject() == $project){
+                $publicProject = $em->getRepository('AppBundle:Project')->find(21);
+                $user->setCurrentActiveProject($publicProject);
+                $em->persist($user);
+            }
+
             $entityUserProjectsAssociations = $em->getRepository('AppBundle:EntityUserProjectAssociation')
                 ->findBy(array('userProjectAssociation' => $userProjectAssociation->getId()));
             foreach ($entityUserProjectsAssociations as $eupa){
