@@ -296,7 +296,7 @@
                         <th>Profile</th>
                         <th>Version</th>
                         <th>Status</th>
-                        <th>Creation date</th>
+                        <th>Last updated</th>
                         <th>API</th>
                         {% if app.user is not null %}
                         <th>Download</th>
@@ -329,7 +329,7 @@
                                     Deprecated
                                 {% endif %}
                             </td>
-                            <td>{{ profile.creationTime|date('Y-m-d') }}</td>
+                            <td>{{ profile.modificationTime|date('Y-m-d') }}</td>
                             <td>
                                 {% if (not profile.isOngoing and profile.wasClosedAt is not null and profile.endDate is null) or (profile.isForcedPublication and profile.isOngoing ) %}
                                     <a  href="{{ path('api_classes_profile_json', {
