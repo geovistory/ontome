@@ -830,6 +830,7 @@ class PropertyController extends Controller
 
         //Verifier que les références sont cohérents
         $nsRefsProperty = $propertyVersion->getNamespaceForVersion()->getAllReferencedNamespaces();
+        $nsRefsProperty->add($propertyVersion->getNamespaceForVersion());
         $nsDomain = $propertyVersion->getDomainNamespace();
         $nsRange = $propertyVersion->getRangeNamespace();
         if(!$nsRefsProperty->contains($nsDomain) || !$nsRefsProperty->contains($nsRange)){

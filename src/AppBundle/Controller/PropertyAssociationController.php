@@ -288,6 +288,7 @@ class PropertyAssociationController extends Controller
 
         //Verifier que les références sont cohérents
         $nsRefsPropertyAssociation = $propertyAssociation->getNamespaceForVersion()->getAllReferencedNamespaces();
+        $nsRefsPropertyAssociation->add($propertyAssociation->getNamespaceForVersion());
         $nsParent = $propertyAssociation->getParentPropertyNamespace();
         $nsChild = $propertyAssociation->getChildPropertyNamespace();
         if(!$nsRefsPropertyAssociation->contains($nsParent) || !$nsRefsPropertyAssociation->contains($nsChild)){
