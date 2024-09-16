@@ -230,6 +230,7 @@ class ClassAssociationController extends Controller
 
         //Verifier que les références sont cohérents
         $nsRefsClassAssociation = $classAssociation->getNamespaceForVersion()->getAllReferencedNamespaces();
+        $nsRefsClassAssociation->add($classAssociation->getNamespaceForVersion());
         $nsParent = $classAssociation->getParentClassNamespace();
         $nsChild = $classAssociation->getChildClassNamespace();
         if(!$nsRefsClassAssociation->contains($nsParent) || !$nsRefsClassAssociation->contains($nsChild)){

@@ -362,6 +362,7 @@ class EntityAssociationController extends Controller
 
         //Verifier que les références sont cohérents
         $nsRefsEntityAssociation = $entityAssociation->getNamespaceForVersion()->getAllReferencedNamespaces();
+        $nsRefsEntityAssociation->add($entityAssociation->getNamespaceForVersion());
         $nsSource = $entityAssociation->getParentClassNamespace();
         $nsTarget = $entityAssociation->getChildClassNamespace();
         if(!$nsRefsEntityAssociation->contains($nsSource) || !$nsRefsEntityAssociation->contains($nsTarget)){
