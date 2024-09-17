@@ -25,7 +25,10 @@
                         {% if propertyVersion.property.propertyVersions|length > 1 %}
                             {% for otherPropertyVersion in propertyVersion.property.propertyVersions if otherPropertyVersion != propertyVersion %}
                                 <li>
-                                    <a href="#">{{ otherPropertyVersion.namespaceForVersion }}
+                                    <a href="{{ path('property_show_with_version', {
+                                        'id': propertyVersion.property.id,
+                                        'namespaceFromUrlId': otherPropertyVersion.namespaceForVersion.id
+                                    }) }}">{{ otherPropertyVersion.namespaceForVersion }}
                                         <span class="label label-{{ otherPropertyVersion.namespaceForVersion.status.classCss }}">
                                             {{ otherPropertyVersion.namespaceForVersion.status.label }}
                                         </span>
