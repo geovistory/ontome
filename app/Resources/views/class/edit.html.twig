@@ -1446,7 +1446,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for profileAssociation in classVersion.class.profileAssociations if profileAssociation.systemType.id == 5 and profileAssociation.profile.isVisible %}
+                    {% for profileAssociation in classVersion.class.profileAssociations if profileAssociation.systemType.id == 5 and (profileAssociation.profile.isVisible or profileAssociation.profile.projectOfBelonging == app.user.currentActiveProject) %}
                         <tr>
                             <td>
                                 <a href="{{ path('profile_show', {
