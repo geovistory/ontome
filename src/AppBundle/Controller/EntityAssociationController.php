@@ -363,8 +363,8 @@ class EntityAssociationController extends Controller
         //Verifier que les références sont cohérents
         $nsRefsEntityAssociation = $entityAssociation->getNamespaceForVersion()->getAllReferencedNamespaces();
         $nsRefsEntityAssociation->add($entityAssociation->getNamespaceForVersion());
-        $nsSource = $entityAssociation->getParentClassNamespace();
-        $nsTarget = $entityAssociation->getChildClassNamespace();
+        $nsSource = $entityAssociation->getSourceNamespaceForVersion();
+        $nsTarget = $entityAssociation->getTargetNamespaceForVersion();
         if(!$nsRefsEntityAssociation->contains($nsSource) || !$nsRefsEntityAssociation->contains($nsTarget)){
             $uriNamespaceMismatches = $this->generateUrl('namespace_show', ['id' => $entityAssociation->getNamespaceForVersion()->getId(), '_fragment' => 'mismatches']);
             $this->addFlash('warning', 'This relation can\'t be validated. Check <a href="'.$uriNamespaceMismatches.'">mismatches</a>.');
