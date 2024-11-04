@@ -915,50 +915,78 @@ class PropertyController extends Controller
                     }
                 }
 
-                // Denied && minimum not reached => all related validated entities (txtp, lbl) must be "validation request"
-                $validationRequestStatus = $em->getRepository('AppBundle:SystemType')->findOneBy(array('id' => 28));
-
+                // On met une propriété en Denied: Ses textproperties et labels doivent être en "Validation request".
+                // Les relations à cette classe seront dévalidés dans l'if suivant
                 if($statusId == 27){
-                    $txtpValidateds = $propertyVersion->getProperty()->getTextProperties()->filter(function($t)use($propertyVersion){
+                    $validatedTextProperties = $propertyVersion->getProperty()->getTextProperties()->filter(function($t)use($propertyVersion){
                         return $t->getNamespaceForVersion() == $propertyVersion->getNamespaceForVersion()
                             && !is_null($t->getValidationStatus())
                             && $t->getValidationStatus()->getId() == 26;
                     });
-                    $lblValidateds = $propertyVersion->getProperty()->getLabels()->filter(function($l)use($propertyVersion){
+                    $validatedLabels = $propertyVersion->getProperty()->getLabels()->filter(function($l)use($propertyVersion){
                         return $l->getNamespaceForVersion() == $propertyVersion->getNamespaceForVersion()
                             && !is_null($l->getValidationStatus())
                             && $l->getValidationStatus()->getId() == 26;
                     });
-                    $childPropertyAssociationValidateds = $propertyVersion->getProperty()->getChildPropertyAssociations()->filter(function($c)use($propertyVersion){
-                        return $c->getNamespaceForVersion() == $propertyVersion->getNamespaceForVersion()
-                            && !is_null($c->getValidationStatus())
-                            && $c->getValidationStatus()->getId() == 26;
-                    });
-                    $sourceEntityAssociationValidateds = $propertyVersion->getProperty()->getSourceEntityAssociations()->filter(function($c)use($propertyVersion){
-                        return $c->getNamespaceForVersion() == $propertyVersion->getNamespaceForVersion()
-                            && !is_null($c->getValidationStatus())
-                            && $c->getValidationStatus()->getId() == 26;
-                    });
-                    $targetEntityAssociationValidateds = $propertyVersion->getProperty()->getTargetEntityAssociations()->filter(function($c)use($propertyVersion){
-                        return $c->getNamespaceForVersion() == $propertyVersion->getNamespaceForVersion()
-                            && !is_null($c->getValidationStatus())
-                            && $c->getValidationStatus()->getId() == 26;
-                    });
 
-                    $allEntitiesValidateds = array(
-                        $txtpValidateds,
-                        $lblValidateds,
-                        $childPropertyAssociationValidateds,
-                        $sourceEntityAssociationValidateds,
-                        $targetEntityAssociationValidateds
+                    $allValidatedEntities = array(
+                        $validatedTextProperties,
+                        $validatedLabels
                     );
 
-                    foreach ($allEntitiesValidateds as $entitiesValidateds){
-                        foreach ($entitiesValidateds as $entitiesValidated){
-                            $entitiesValidated->setValidationStatus($validationRequestStatus);
-                            $entitiesValidated->setModifier($this->getUser());
-                            $entitiesValidated->setModificationTime(new \DateTime('now'));
-                            $em->persist($entitiesValidated);
+                    $validationRequestStatus = $em->getRepository('AppBundle:SystemType')->findOneBy(array('id' => 28));
+
+                    foreach ($allValidatedEntities as $validatedEntities){
+                        foreach ($validatedEntities as $entityValidated){
+                            $entityValidated->setValidationStatus($validationRequestStatus);
+                            $entityValidated->setModifier($this->getUser());
+                            $entityValidated->setModificationTime(new \DateTime('now'));
+                            $em->persist($entityValidated);
+                        }
+                    }
+                }
+
+                // Dé-validation d'une propriété: on dévalide les relations à cette classe dans le même namespace
+                if(in_array($statusId, [27, 28, 37])){
+                    $validatedChildPropertyAssociations = $propertyVersion->getProperty()->getChildPropertyAssociations()->filter(function($c)use($propertyVersion){
+                        return $c->getNamespaceForVersion() == $propertyVersion->getNamespaceForVersion()
+                            && !is_null($c->getValidationStatus())
+                            && $c->getValidationStatus()->getId() == 26;
+                    });
+                    $validatedParentPropertyAssociations = $propertyVersion->getProperty()->getParentPropertyAssociations()->filter(function($c)use($propertyVersion){
+                        return $c->getNamespaceForVersion() == $propertyVersion->getNamespaceForVersion()
+                            && !is_null($c->getValidationStatus())
+                            && $c->getValidationStatus()->getId() == 26;
+                    });
+                    $validatedSourceEntityAssociations = $propertyVersion->getProperty()->getSourceEntityAssociations()->filter(function($c)use($propertyVersion){
+                        return $c->getNamespaceForVersion() == $propertyVersion->getNamespaceForVersion()
+                            && !is_null($c->getValidationStatus())
+                            && $c->getValidationStatus()->getId() == 26;
+                    });
+                    $validatedTargetEntityAssociations = $propertyVersion->getProperty()->getTargetEntityAssociations()->filter(function($c)use($propertyVersion){
+                        return $c->getNamespaceForVersion() == $propertyVersion->getNamespaceForVersion()
+                            && !is_null($c->getValidationStatus())
+                            && $c->getValidationStatus()->getId() == 26;
+                    });
+
+                    $allValidatedEntities = array(
+                        $validatedChildPropertyAssociations,
+                        $validatedParentPropertyAssociations,
+                        $validatedSourceEntityAssociations,
+                        $validatedTargetEntityAssociations
+                    );
+
+                    if(!empty($allValidatedEntities)){
+                        $this->addFlash('warning', 'The devalidation of this property has led to the devalidation of one or more relations or entities linked to this entity.');
+                    }
+
+                    $underRevisionStatus = $em->getRepository('AppBundle:SystemType')->findOneBy(array('id' => 37));
+                    foreach ($allValidatedEntities as $validatedEntities){
+                        foreach ($validatedEntities as $entityValidated){
+                            $entityValidated->setValidationStatus($underRevisionStatus);
+                            $entityValidated->setModifier($this->getUser());
+                            $entityValidated->setModificationTime(new \DateTime('now'));
+                            $em->persist($entityValidated);
                         }
                     }
                 }
