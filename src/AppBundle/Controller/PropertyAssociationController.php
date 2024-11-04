@@ -269,7 +269,7 @@ class PropertyAssociationController extends Controller
     }
 
     /**
-     * @Route("/property-association/{id}/edit-validity/{validationStatus}", name="property_association_validation_status_edit", requirements={"id"="^[0-9]+$", "validationStatus"="^(26|27|28){1}$"})
+     * @Route("/property-association/{id}/edit-validity/{validationStatus}", name="property_association_validation_status_edit", requirements={"id"="^[0-9]+$", "validationStatus"="^(26|27|28|37){1}$"})
      * @param PropertyAssociation $propertyAssociation
      * @param SystemType $validationStatus
      * @param Request $request
@@ -288,6 +288,7 @@ class PropertyAssociationController extends Controller
 
         //Verifier que les références sont cohérents
         $nsRefsPropertyAssociation = $propertyAssociation->getNamespaceForVersion()->getAllReferencedNamespaces();
+        $nsRefsPropertyAssociation->add($propertyAssociation->getNamespaceForVersion());
         $nsParent = $propertyAssociation->getParentPropertyNamespace();
         $nsChild = $propertyAssociation->getChildPropertyNamespace();
         if(!$nsRefsPropertyAssociation->contains($nsParent) || !$nsRefsPropertyAssociation->contains($nsChild)){

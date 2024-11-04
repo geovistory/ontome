@@ -137,9 +137,8 @@
                             <h3>Label</h3>
                             {{ form_start(labelForm) }}
                                 {% if label.namespace is not null and label.namespace.isOngoing %}
-                                    {{ form_row(labelForm.label, {
-                                        help: 'The word "ongoing" is automatically added to the label of an ongoing version. It will be removed on publication.'
-                                    }) }}
+                                    <p class="text-danger">The word "ongoing" is automatically added to the label of an ongoing version. It will be removed on publication.</p>
+                                    {{ form_row(labelForm.label) }}
                                 {% else %}
                                     {{ form_row(labelForm.label) }}
                                 {% endif %}

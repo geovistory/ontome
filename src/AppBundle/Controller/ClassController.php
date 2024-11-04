@@ -843,50 +843,85 @@ class ClassController extends Controller
                     }
                 }
 
-                // Denied && minimum not reached => all related validated entities (txtp, lbl) must be "validation request"
-                $validationRequestStatus = $em->getRepository('AppBundle:SystemType')->findOneBy(array('id' => 28));
-
+                // On met une classe en Denied: Ses textproperties et labels doivent être en "Validation request".
+                // Les relations à cette classe seront dévalidés dans l'if suivant
                 if($statusId == 27){
-                    $txtpValidateds = $classVersion->getClass()->getTextProperties()->filter(function($t)use($classVersion){
+                    $validatedTextProperties = $classVersion->getClass()->getTextProperties()->filter(function($t)use($classVersion){
                         return $t->getNamespaceForVersion() == $classVersion->getNamespaceForVersion()
                             && !is_null($t->getValidationStatus())
                             && $t->getValidationStatus()->getId() == 26;
                     });
-                    $lblValidateds = $classVersion->getClass()->getLabels()->filter(function($l)use($classVersion){
+                    $validatedLabels = $classVersion->getClass()->getLabels()->filter(function($l)use($classVersion){
                         return $l->getNamespaceForVersion() == $classVersion->getNamespaceForVersion()
                             && !is_null($l->getValidationStatus())
                             && $l->getValidationStatus()->getId() == 26;
                     });
-                    $childClassAssociationValidateds = $classVersion->getClass()->getChildClassAssociations()->filter(function($c)use($classVersion){
-                        return $c->getNamespaceForVersion() == $classVersion->getNamespaceForVersion()
-                            && !is_null($c->getValidationStatus())
-                            && $c->getValidationStatus()->getId() == 26;
-                    });
-                    $sourceEntityAssociationValidateds = $classVersion->getClass()->getSourceEntityAssociations()->filter(function($c)use($classVersion){
-                        return $c->getNamespaceForVersion() == $classVersion->getNamespaceForVersion()
-                            && !is_null($c->getValidationStatus())
-                            && $c->getValidationStatus()->getId() == 26;
-                    });
-                    $targetEntityAssociationValidateds = $classVersion->getClass()->getTargetEntityAssociations()->filter(function($c)use($classVersion){
-                        return $c->getNamespaceForVersion() == $classVersion->getNamespaceForVersion()
-                            && !is_null($c->getValidationStatus())
-                            && $c->getValidationStatus()->getId() == 26;
-                    });
 
-                    $allEntitiesValidateds = array(
-                        $txtpValidateds,
-                        $lblValidateds,
-                        $childClassAssociationValidateds,
-                        $sourceEntityAssociationValidateds,
-                        $targetEntityAssociationValidateds
+                    $allValidatedEntities = array(
+                        $validatedTextProperties,
+                        $validatedLabels
                     );
 
-                    foreach ($allEntitiesValidateds as $entitiesValidateds){
-                        foreach ($entitiesValidateds as $entitiesValidated){
-                            $entitiesValidated->setValidationStatus($validationRequestStatus);
-                            $entitiesValidated->setModifier($this->getUser());
-                            $entitiesValidated->setModificationTime(new \DateTime('now'));
-                            $em->persist($entitiesValidated);
+                    $validationRequestStatus = $em->getRepository('AppBundle:SystemType')->findOneBy(array('id' => 28));
+
+                    foreach ($allValidatedEntities as $validatedEntities){
+                        foreach ($validatedEntities as $entityValidated){
+                            $entityValidated->setValidationStatus($validationRequestStatus);
+                            $entityValidated->setModifier($this->getUser());
+                            $entityValidated->setModificationTime(new \DateTime('now'));
+                            $em->persist($entityValidated);
+                        }
+                    }
+                }
+
+                // Dé-validation d'une classe: on dévalide les relations à cette classe dans le même namespace
+                if(in_array($statusId, [27, 28, 37])){
+                    $validatedChildClassAssociations = $classVersion->getClass()->getChildClassAssociations()->filter(function($c)use($classVersion){
+                        return $c->getNamespaceForVersion() == $classVersion->getNamespaceForVersion()
+                            && !is_null($c->getValidationStatus())
+                            && $c->getValidationStatus()->getId() == 26;
+                    });
+                    $validatedParentClassAssociations = $classVersion->getClass()->getParentClassAssociations()->filter(function($c)use($classVersion){
+                        return $c->getNamespaceForVersion() == $classVersion->getNamespaceForVersion()
+                            && !is_null($c->getValidationStatus())
+                            && $c->getValidationStatus()->getId() == 26;
+                    });
+                    $validatedSourceEntityAssociations = $classVersion->getClass()->getSourceEntityAssociations()->filter(function($c)use($classVersion){
+                        return $c->getNamespaceForVersion() == $classVersion->getNamespaceForVersion()
+                            && !is_null($c->getValidationStatus())
+                            && $c->getValidationStatus()->getId() == 26;
+                    });
+                    $validatedTargetEntityAssociations = $classVersion->getClass()->getTargetEntityAssociations()->filter(function($c)use($classVersion){
+                        return $c->getNamespaceForVersion() == $classVersion->getNamespaceForVersion()
+                            && !is_null($c->getValidationStatus())
+                            && $c->getValidationStatus()->getId() == 26;
+                    });
+                    // Retrouver les propriétés validés ayant cette classe en domain ou range
+                    $validatedProperties = $classVersion->getNamespaceForVersion()->getPropertyVersions()->filter(function($p)use($classVersion){
+                        return ($p->getDomain() == $classVersion->getClass() || $p->getRange() == $classVersion->getClass())
+                            && !is_null($p->getValidationStatus())
+                            && $p->getValidationStatus()->getId() == 26;
+                    });
+
+                    $allValidatedEntities = array(
+                        $validatedChildClassAssociations,
+                        $validatedParentClassAssociations,
+                        $validatedSourceEntityAssociations,
+                        $validatedTargetEntityAssociations,
+                        $validatedProperties
+                    );
+
+                    if(!empty($allValidatedEntities)){
+                        $this->addFlash('warning', 'The devalidation of this class has led to the devalidation of one or more relations or entities linked to this entity.');
+                    }
+
+                    $underRevisionStatus = $em->getRepository('AppBundle:SystemType')->findOneBy(array('id' => 37));
+                    foreach ($allValidatedEntities as $validatedEntities){
+                        foreach ($validatedEntities as $entityValidated){
+                            $entityValidated->setValidationStatus($underRevisionStatus);
+                            $entityValidated->setModifier($this->getUser());
+                            $entityValidated->setModificationTime(new \DateTime('now'));
+                            $em->persist($entityValidated);
                         }
                     }
                 }

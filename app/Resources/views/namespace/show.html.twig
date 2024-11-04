@@ -343,27 +343,29 @@
                     <h3>Contributors</h3>
                     {% if txtpContributors is not null %}
                         {{ txtpContributors.textProperty|raw }}
-                        {% if txtpContributors.validationStatus is null %}
-                            <span class="label label-info">
-                                    Candidate
-                                </span>
-                        {% elseif txtpContributors.validationStatus.id == 26  %}
-                            <span class="label label-success">
-                                    {{ txtpContributors.validationStatus }}
-                                {% set countValidationsContributors = countValidationsContributors|default(0) + 1 %}
-                                </span>
-                        {% elseif txtpContributors.validationStatus.id == 27  %}
-                            <span class="label label-danger">
-                                    {{ txtpContributors.validationStatus }}
-                                </span>
-                        {% elseif txtpContributors.validationStatus.id == 28  %}
-                            <span class="label label-warning">
-                                    {{ txtpContributors.validationStatus }}
-                                </span>
-                        {% elseif txtpContributors.validationStatus.id == 37  %}
-                            <span class="label label-warning2">
-                                    {{ txtpContributors.validationStatus }}
-                                </span>
+                        {% if namespace.isOngoing %}
+                            {% if txtpContributors.validationStatus is null %}
+                                <span class="label label-info">
+                                        Candidate
+                                    </span>
+                            {% elseif txtpContributors.validationStatus.id == 26  %}
+                                <span class="label label-success">
+                                        {{ txtpContributors.validationStatus }}
+                                    {% set countValidationsContributors = countValidationsContributors|default(0) + 1 %}
+                                    </span>
+                            {% elseif txtpContributors.validationStatus.id == 27  %}
+                                <span class="label label-danger">
+                                        {{ txtpContributors.validationStatus }}
+                                    </span>
+                            {% elseif txtpContributors.validationStatus.id == 28  %}
+                                <span class="label label-warning">
+                                        {{ txtpContributors.validationStatus }}
+                                    </span>
+                            {% elseif txtpContributors.validationStatus.id == 37  %}
+                                <span class="label label-warning2">
+                                        {{ txtpContributors.validationStatus }}
+                                    </span>
+                            {% endif %}
                         {% endif %}
                     {% else %}
                         <p><i>No contributors yet.</i></p>

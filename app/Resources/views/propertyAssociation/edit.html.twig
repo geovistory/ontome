@@ -18,29 +18,23 @@
             }) }}" class="pull-right btn btn-link">
                 <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
             </a>
-            {% if is_granted('validate', propertyAssociation.childProperty.propertyVersionForDisplay(propertyAssociation.namespaceForVersion))  %}
+            {% set childValidationStatus = propertyAssociation.childProperty.propertyVersionForDisplay(propertyAssociation.childPropertyNamespace).validationStatus %}
+            {% set parentValidationStatus = propertyAssociation.parentProperty.propertyVersionForDisplay(propertyAssociation.parentPropertyNamespace).validationStatus %}
+            {% if (childValidationStatus is null or childValidationStatus.id != 26) or (parentValidationStatus is null or parentValidationStatus.id != 26) %}
+                <h6><span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span><em>This relation cannot be validated because at least one of the properties in the relation has not been validated.</em></h6>
+            {% elseif is_granted('validate', propertyAssociation.childProperty.propertyVersionForDisplay(propertyAssociation.childPropertyNamespace))  %}
                 <div class="dropdown inline-block">
                     <button class="btn btn-default dropdown-toggle" type="button" id="dropdown-validation" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
                         {% if propertyAssociation.validationStatus is null %}
-                            <span class="label label-info">
-                                    Candidate
-                                </span>
+                            <span class="label label-info">Candidate</span>
                         {% elseif propertyAssociation.validationStatus.id == 26  %}
-                            <span class="label label-success">
-                                    {{ propertyAssociation.validationStatus }}
-                                </span>
+                            <span class="label label-success">{{ propertyAssociation.validationStatus }}</span>
                         {% elseif propertyAssociation.validationStatus.id == 27  %}
-                            <span class="label label-danger">
-                                    {{ propertyAssociation.validationStatus }}
-                                </span>
+                            <span class="label label-danger">{{ propertyAssociation.validationStatus }}</span>
                         {% elseif propertyAssociation.validationStatus.id == 28  %}
-                            <span class="label label-warning">
-                                    {{ propertyAssociation.validationStatus }}
-                                </span>
+                            <span class="label label-warning">{{ propertyAssociation.validationStatus }}</span>
                         {% elseif propertyAssociation.validationStatus.id == 37  %}
-                            <span class="label label-warning2">
-                                    {{ propertyAssociation.validationStatus }}
-                                </span>
+                            <span class="label label-warning2">{{ propertyAssociation.validationStatus }}</span>
                         {% endif %}
                         &nbsp;<span class="caret"></span>
                     </button>
@@ -50,9 +44,7 @@
                                 id: propertyAssociation.id,
                                 validationStatus: 26
                             }) }}">
-                                    <span class="label label-success">
-                                        Validated
-                                    </span>
+                                <span class="label label-success">Validated</span>
                             </a>
                         </li>
                         <li class="label-warning">
@@ -60,9 +52,7 @@
                                 id: propertyAssociation.id,
                                 validationStatus: 28
                             }) }}">
-                                    <span class="label label-warning">
-                                        Validation request
-                                    </span>
+                                <span class="label label-warning">Validation request</span>
                             </a>
                         </li>
                         <li class="label-warning2">
@@ -70,9 +60,7 @@
                                 id: propertyAssociation.id,
                                 validationStatus: 37
                             }) }}">
-                                    <span class="label label-warning2">
-                                        Under revision
-                                    </span>
+                                <span class="label label-warning2">Under revision</span>
                             </a>
                         </li>
                         <li class="label-danger">
@@ -80,9 +68,7 @@
                                 id: propertyAssociation.id,
                                 validationStatus: 27
                             }) }}">
-                                    <span class="label label-danger">
-                                        Denied (see comment)
-                                    </span>
+                                <span class="label label-danger">Denied (see comment)</span>
                             </a>
                         </li>
                     </ul>

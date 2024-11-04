@@ -25,7 +25,10 @@
                         {% if propertyVersion.property.propertyVersions|length > 1 %}
                             {% for otherPropertyVersion in propertyVersion.property.propertyVersions if otherPropertyVersion != propertyVersion %}
                                 <li>
-                                    <a href="#">{{ otherPropertyVersion.namespaceForVersion }}
+                                    <a href="{{ path('property_show_with_version', {
+                                        'id': propertyVersion.property.id,
+                                        'namespaceFromUrlId': otherPropertyVersion.namespaceForVersion.id
+                                    }) }}">{{ otherPropertyVersion.namespaceForVersion }}
                                         <span class="label label-{{ otherPropertyVersion.namespaceForVersion.status.classCss }}">
                                             {{ otherPropertyVersion.namespaceForVersion.status.label }}
                                         </span>
@@ -1543,7 +1546,7 @@
                     {% set profilesAssociated = [] %}
                     {% for profileAssociation in propertyVersion.property.profileAssociations
                         if profileAssociation.systemType.id == 5
-                        and profileAssociation.profile.isVisible
+                        and (profileAssociation.profile.isVisible or profileAssociation.profile.projectOfBelonging == app.user.currentActiveProject)
                         and profileAssociation.profile not in profilesAssociated %}
                         {% set profilesAssociated = [profileAssociation.profile]|merge(profilesAssociated) %}
                     {% endfor %}
