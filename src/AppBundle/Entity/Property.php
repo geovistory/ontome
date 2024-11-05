@@ -29,7 +29,7 @@ class Property
     private $id;
 
     /**
-     * @Assert\Regex(pattern="/^[a-zA-Z0-9_]+$/", message="This identifier should be alphanumeric without space. Underscores are allowed.")
+     * @Assert\Regex(pattern="/^[a-zA-Z0-9_.]+$/", message="This identifier should be alphanumeric without space. Underscores and dots are allowed.")
      * @ORM\Column(type="string")
      */
     private $identifierInNamespace;
