@@ -699,25 +699,35 @@ class OntoNamespace
     /**
      * @return ArrayCollection|OntoNamespace[] Retourne TOUS les espaces de noms référencés directs ET indirects
      */
-    public function getAllReferencedNamespaces(ArrayCollection $allReferencedNamespaces=null){
-        if(is_null($allReferencedNamespaces)){$allReferencedNamespaces = new ArrayCollection;}
-        if($this->getDirectReferencedNamespaces()->isEmpty()){
-            return new ArrayCollection;
+    public function getAllReferencedNamespaces(ArrayCollection $allReferencedNamespaces = null, ArrayCollection $visitedRootNamespaces = null)
+    {
+        if (is_null($allReferencedNamespaces)) {
+            $allReferencedNamespaces = new ArrayCollection();
         }
-        else
-        {
-            foreach ($this->getDirectReferencedNamespaces() as $directReferencedNamespace){
-                if(!$allReferencedNamespaces->contains($directReferencedNamespace)){
-                    $allReferencedNamespaces->add($directReferencedNamespace);
-                    foreach($directReferencedNamespace->getAllReferencedNamespaces($allReferencedNamespaces) as $ns){
-                        if(!$allReferencedNamespaces->contains($ns)){
-                            $allReferencedNamespaces->add($ns);
-                        }
-                    }
-                }
+
+        if (is_null($visitedRootNamespaces)) {
+            $visitedRootNamespaces = new ArrayCollection();
+        }
+
+        // Marquer le root de l'instance courante comme visitée
+        if (!$visitedRootNamespaces->contains($this->getTopLevelNamespace())) {
+            $visitedRootNamespaces->add($this->getTopLevelNamespace());
+        }
+
+        foreach ($this->getDirectReferencedNamespaces() as $directReferencedNamespace) {
+            // Exclure les namespaces déjà visités
+            if ($visitedRootNamespaces->contains($directReferencedNamespace->getTopLevelNamespace())) {
+                continue;
             }
-            return $allReferencedNamespaces;
+
+            $allReferencedNamespaces->add($directReferencedNamespace);
+            $visitedRootNamespaces->add($directReferencedNamespace->getTopLevelNamespace());
+
+            // Récursion avec la mise à jour des namespaces visités
+            $directReferencedNamespace->getAllReferencedNamespaces($allReferencedNamespaces, $visitedRootNamespaces);
         }
+
+        return $allReferencedNamespaces;
     }
 
     /**
