@@ -843,7 +843,7 @@ class ClassController extends Controller
                     }
                 }
 
-                // On met une classe en Denied: Ses textproperties et labels doivent être en "Validation request".
+                // On met une classe en Denied: Ses textproperties et labels doivent être en "Under revision".
                 // Les relations à cette classe seront dévalidés dans l'if suivant
                 if($statusId == 27){
                     $validatedTextProperties = $classVersion->getClass()->getTextProperties()->filter(function($t)use($classVersion){
@@ -862,11 +862,11 @@ class ClassController extends Controller
                         $validatedLabels
                     );
 
-                    $validationRequestStatus = $em->getRepository('AppBundle:SystemType')->findOneBy(array('id' => 28));
+                    $underRevisionStatus = $em->getRepository('AppBundle:SystemType')->findOneBy(array('id' => 37));
 
                     foreach ($allValidatedEntities as $validatedEntities){
                         foreach ($validatedEntities as $entityValidated){
-                            $entityValidated->setValidationStatus($validationRequestStatus);
+                            $entityValidated->setValidationStatus($underRevisionStatus);
                             $entityValidated->setModifier($this->getUser());
                             $entityValidated->setModificationTime(new \DateTime('now'));
                             $em->persist($entityValidated);
@@ -910,6 +910,37 @@ class ClassController extends Controller
                         $validatedTargetEntityAssociations,
                         $validatedProperties
                     );
+
+                    // Retrouver toutes les relations validées de ces propriétés validées de la classe
+                    foreach($validatedProperties as $validatedPropertyVersion) {
+                        $validatedChildPropertyAssociations = $validatedPropertyVersion->getProperty()->getChildPropertyAssociations()->filter(function ($c) use ($validatedPropertyVersion) {
+                            return $c->getNamespaceForVersion() == $validatedPropertyVersion->getNamespaceForVersion()
+                                && !is_null($c->getValidationStatus())
+                                && $c->getValidationStatus()->getId() == 26;
+                        });
+                        $validatedParentPropertyAssociations = $validatedPropertyVersion->getProperty()->getParentPropertyAssociations()->filter(function ($c) use ($validatedPropertyVersion) {
+                            return $c->getNamespaceForVersion() == $validatedPropertyVersion->getNamespaceForVersion()
+                                && !is_null($c->getValidationStatus())
+                                && $c->getValidationStatus()->getId() == 26;
+                        });
+                        $validatedSourceEntityAssociations = $validatedPropertyVersion->getProperty()->getSourceEntityAssociations()->filter(function ($c) use ($validatedPropertyVersion) {
+                            return $c->getNamespaceForVersion() == $validatedPropertyVersion->getNamespaceForVersion()
+                                && !is_null($c->getValidationStatus())
+                                && $c->getValidationStatus()->getId() == 26;
+                        });
+                        $validatedTargetEntityAssociations = $validatedPropertyVersion->getProperty()->getTargetEntityAssociations()->filter(function ($c) use ($validatedPropertyVersion) {
+                            return $c->getNamespaceForVersion() == $validatedPropertyVersion->getNamespaceForVersion()
+                                && !is_null($c->getValidationStatus())
+                                && $c->getValidationStatus()->getId() == 26;
+                        });
+
+                        $allValidatedEntities = array_merge($allValidatedEntities, array(
+                                $validatedChildPropertyAssociations,
+                                $validatedParentPropertyAssociations,
+                                $validatedSourceEntityAssociations,
+                                $validatedTargetEntityAssociations)
+                        );
+                    }
 
                     if(!empty($allValidatedEntities)){
                         $this->addFlash('warning', 'The devalidation of this class has led to the devalidation of one or more relations or entities linked to this entity.');
