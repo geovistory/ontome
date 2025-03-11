@@ -81,6 +81,19 @@
                     {% if (domainValidationStatus is not null and domainValidationStatus.id == 26) and (rangeValidationStatus is not null and rangeValidationStatus.id == 26) %}
                         {{ include('property/_validation.html.twig') }}
                     {% else %}
+                        <h4>Validation status:
+                                {% if propertyVersion.validationStatus is null %}
+                                    <span class="label label-info">Candidate</span>
+                                {% elseif propertyVersion.validationStatus.id == 26  %}
+                                    <span class="label label-success">{{ propertyVersion.validationStatus }}</span>
+                                {% elseif propertyVersion.validationStatus.id == 27  %}
+                                    <span class="label label-danger">{{ propertyVersion.validationStatus }}</span>
+                                {% elseif propertyVersion.validationStatus.id == 28  %}
+                                    <span class="label label-warning">{{ propertyVersion.validationStatus }}</span>
+                                {% elseif propertyVersion.validationStatus.id == 37  %}
+                                    <span class="label label-warning2">{{ propertyVersion.validationStatus }}</span>
+                                {% endif %}
+                        </h4>
                         <h6><span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span><em>This property cannot be validated because its domain and/or range is not validated.</em></h6>
                     {% endif %}
                 {% else %}

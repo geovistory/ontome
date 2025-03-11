@@ -20,6 +20,21 @@
             {% set childValidationStatus = propertyAssociation.childProperty.propertyVersionForDisplay(propertyAssociation.childPropertyNamespace).validationStatus %}
             {% set parentValidationStatus = propertyAssociation.parentProperty.propertyVersionForDisplay(propertyAssociation.parentPropertyNamespace).validationStatus %}
             {% if (childValidationStatus is null or childValidationStatus.id != 26) or (parentValidationStatus is null or parentValidationStatus.id != 26) %}
+                <div class="inline-block">
+                    <h4>
+                    {% if propertyAssociation.validationStatus is null %}
+                        <span class="label label-info">Candidate</span>
+                    {% elseif propertyAssociation.validationStatus.id == 26  %}
+                        <span class="label label-success">{{ propertyAssociation.validationStatus }}</span>
+                    {% elseif propertyAssociation.validationStatus.id == 27  %}
+                        <span class="label label-danger">{{ propertyAssociation.validationStatus }}</span>
+                    {% elseif propertyAssociation.validationStatus.id == 28  %}
+                        <span class="label label-warning">{{ propertyAssociation.validationStatus }}</span>
+                    {% elseif propertyAssociation.validationStatus.id == 37  %}
+                        <span class="label label-warning2">{{ propertyAssociation.validationStatus }}</span>
+                    {% endif %}
+                    </h4>
+                </div>
                 <h6><span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span><em>This relation cannot be validated because at least one of the properties in the relation has not been validated.</em></h6>
             {% elseif is_granted('validate', propertyAssociation.childProperty.propertyVersionForDisplay(propertyAssociation.namespaceForVersion)) %}
                 <div class="dropdown inline-block">

@@ -49,6 +49,21 @@
             {% endif %}
 
             {% if (sourceValidationStatus is null or sourceValidationStatus.id != 26) or (targetValidationStatus is null or targetValidationStatus.id != 26) %}
+                <div class="inline-block">
+                    <h4>
+                        {% if entityAssociation.validationStatus is null %}
+                            <span class="label label-info">Candidate</span>
+                        {% elseif entityAssociation.validationStatus.id == 26  %}
+                            <span class="label label-success">{{ entityAssociation.validationStatus }}</span>
+                        {% elseif entityAssociation.validationStatus.id == 27  %}
+                            <span class="label label-danger">{{ entityAssociation.validationStatus }}</span>
+                        {% elseif entityAssociation.validationStatus.id == 28  %}
+                            <span class="label label-warning">{{ entityAssociation.validationStatus }}</span>
+                        {% elseif entityAssociation.validationStatus.id == 37  %}
+                            <span class="label label-warning2">{{ entityAssociation.validationStatus }}</span>
+                        {% endif %}
+                    </h4>
+                </div>
                 <h6><span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span><em>This relation cannot be validated because at least one of the {{ word }} in the relation has not been validated.</em></h6>
             {% elseif entityAssociation.sourceObjectType == "class" and is_granted('validate', entityAssociation.sourceClass.classVersionForDisplay(entityAssociation.sourceNamespaceForVersion))
                 or entityAssociation.sourceObjectType == "property" and is_granted('validate', entityAssociation.sourceProperty.propertyVersionForDisplay(entityAssociation.sourceNamespaceForVersion)) %}
