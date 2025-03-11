@@ -75,7 +75,27 @@
                 {% endfor %}
 
                 {% if countValidationsTxtp > 0 and countValidationsLbl > 0 %}
-                    {{ include('property/_validation.html.twig') }}
+                    <!-- ok on a le label et le txtp, est ce que la propriété a son domain et range validés ? -->
+                    {% set domainValidationStatus = propertyVersion.domain.classVersionForDisplay(propertyVersion.domainNamespace).validationStatus %}
+                    {% set rangeValidationStatus = propertyVersion.range.classVersionForDisplay(propertyVersion.rangeNamespace).validationStatus %}
+                    {% if (domainValidationStatus is not null and domainValidationStatus.id == 26) and (rangeValidationStatus is not null and rangeValidationStatus.id == 26) %}
+                        {{ include('property/_validation.html.twig') }}
+                    {% else %}
+                        <h4>Validation status:
+                                {% if propertyVersion.validationStatus is null %}
+                                    <span class="label label-info">Candidate</span>
+                                {% elseif propertyVersion.validationStatus.id == 26  %}
+                                    <span class="label label-success">{{ propertyVersion.validationStatus }}</span>
+                                {% elseif propertyVersion.validationStatus.id == 27  %}
+                                    <span class="label label-danger">{{ propertyVersion.validationStatus }}</span>
+                                {% elseif propertyVersion.validationStatus.id == 28  %}
+                                    <span class="label label-warning">{{ propertyVersion.validationStatus }}</span>
+                                {% elseif propertyVersion.validationStatus.id == 37  %}
+                                    <span class="label label-warning2">{{ propertyVersion.validationStatus }}</span>
+                                {% endif %}
+                        </h4>
+                        <h6><span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span><em>This property cannot be validated because its domain and/or range is not validated.</em></h6>
+                    {% endif %}
                 {% else %}
                     <h6><span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span><em>This property does not yet have the minimum number of validated parts required for publication.</em></h6>
                 {% endif %}
@@ -1476,7 +1496,7 @@
                     {% set profilesAssociated = [] %}
                     {% for profileAssociation in propertyVersion.property.profileAssociations
                         if profileAssociation.systemType.id == 5
-                        and profileAssociation.profile.isVisible
+                        and (profileAssociation.profile.isVisible or profileAssociation.profile.projectOfBelonging == app.user.currentActiveProject)
                         and profileAssociation.profile not in profilesAssociated %}
                         {% set profilesAssociated = [profileAssociation.profile]|merge(profilesAssociated) %}
                     {% endfor %}

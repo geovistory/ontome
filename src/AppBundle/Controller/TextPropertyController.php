@@ -495,9 +495,9 @@ class TextPropertyController extends Controller
                         $cv = $object->getClassVersionForDisplay();
                         if (!is_null($cv->getValidationStatus())) {
                             if ($cv->getValidationStatus()->getId() != 27) {
-                                $validationRequestStatus = $em->getRepository('AppBundle:SystemType')
-                                    ->findOneBy(array('id' => $statusId));
-                                $cv->setValidationStatus($validationRequestStatus);
+                                $underRevisionStatus = $em->getRepository('AppBundle:SystemType')
+                                    ->findOneBy(array('id' => 37));
+                                $cv->setValidationStatus($underRevisionStatus);
                             }
                         }
                         else $cv->setValidationStatus(null);
@@ -507,9 +507,9 @@ class TextPropertyController extends Controller
                         $pv = $object->getPropertyVersionForDisplay();
                         if (!is_null($pv->getValidationStatus())) {
                             if ($pv->getValidationStatus()->getId() != 27) {
-                                $validationRequestStatus = $em->getRepository('AppBundle:SystemType')
-                                    ->findOneBy(array('id' => $statusId));
-                                $pv->setValidationStatus($validationRequestStatus);
+                                $underRevisionStatus = $em->getRepository('AppBundle:SystemType')
+                                    ->findOneBy(array('id' => 37));
+                                $pv->setValidationStatus($underRevisionStatus);
                             }
                         }
                         else $pv->setValidationStatus(null);

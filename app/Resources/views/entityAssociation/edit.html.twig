@@ -35,31 +35,47 @@
                     <i class="fas fa-arrow-left"></i><span>&nbsp;Back</span>
                 </a>
             {% endif %}
-        </h2>
-        <h4>
-            {% if entityAssociation.sourceObjectType == "class" and is_granted('validate', entityAssociation.sourceClass.classVersionForDisplay(entityAssociation.namespaceForVersion)) or entityAssociation.sourceObjectType == "property" and is_granted('validate', entityAssociation.sourceProperty.propertyVersionForDisplay(entityAssociation.namespaceForVersion)) %}
+
+            {% if entityAssociation.sourceObjectType == "class" %}
+                {% set sourceValidationStatus = entityAssociation.sourceClass.classVersionForDisplay(entityAssociation.sourceNamespaceForVersion).validationStatus %}
+                {% set targetValidationStatus = entityAssociation.targetClass.classVersionForDisplay(entityAssociation.targetNamespaceForVersion).validationStatus %}
+                {% set word = "classes" %}
+            {% elseif entityAssociation.sourceObjectType == "property" %}
+                {% set sourceValidationStatus = entityAssociation.sourceProperty.propertyVersionForDisplay(entityAssociation.sourceNamespaceForVersion).validationStatus %}
+                {% set targetValidationStatus = entityAssociation.targetProperty.propertyVersionForDisplay(entityAssociation.targetNamespaceForVersion).validationStatus %}
+                {% set word = "properties" %}
+            {% endif %}
+
+            {% if (sourceValidationStatus is null or sourceValidationStatus.id != 26) or (targetValidationStatus is null or targetValidationStatus.id != 26) %}
+                <div class="inline-block">
+                    <h4>
+                        {% if entityAssociation.validationStatus is null %}
+                            <span class="label label-info">Candidate</span>
+                        {% elseif entityAssociation.validationStatus.id == 26  %}
+                            <span class="label label-success">{{ entityAssociation.validationStatus }}</span>
+                        {% elseif entityAssociation.validationStatus.id == 27  %}
+                            <span class="label label-danger">{{ entityAssociation.validationStatus }}</span>
+                        {% elseif entityAssociation.validationStatus.id == 28  %}
+                            <span class="label label-warning">{{ entityAssociation.validationStatus }}</span>
+                        {% elseif entityAssociation.validationStatus.id == 37  %}
+                            <span class="label label-warning2">{{ entityAssociation.validationStatus }}</span>
+                        {% endif %}
+                    </h4>
+                </div>
+                <h6><span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span><em>This relation cannot be validated because at least one of the {{ word }} in the relation has not been validated.</em></h6>
+            {% elseif entityAssociation.sourceObjectType == "class" and is_granted('validate', entityAssociation.sourceClass.classVersionForDisplay(entityAssociation.namespaceForVersion)) or entityAssociation.sourceObjectType == "property" and is_granted('validate', entityAssociation.sourceProperty.propertyVersionForDisplay(entityAssociation.namespaceForVersion)) %}
                 <div class="dropdown inline-block">
                     <button class="btn btn-default dropdown-toggle" type="button" id="dropdown-validation" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
                         {% if entityAssociation.validationStatus is null %}
-                            <span class="label label-info">
-                                    Candidate
-                                </span>
+                            <span class="label label-info">Candidate</span>
                         {% elseif entityAssociation.validationStatus.id == 26  %}
-                            <span class="label label-success">
-                                    {{ entityAssociation.validationStatus }}
-                                </span>
+                            <span class="label label-success">{{ entityAssociation.validationStatus }}</span>
                         {% elseif entityAssociation.validationStatus.id == 27  %}
-                            <span class="label label-danger">
-                                    {{ entityAssociation.validationStatus }}
-                                </span>
+                            <span class="label label-danger">{{ entityAssociation.validationStatus }}</span>
                         {% elseif entityAssociation.validationStatus.id == 28  %}
-                            <span class="label label-warning">
-                                    {{ entityAssociation.validationStatus }}
-                                </span>
+                            <span class="label label-warning">{{ entityAssociation.validationStatus }}</span>
                         {% elseif entityAssociation.validationStatus.id == 37  %}
-                            <span class="label label-warning2">
-                                    {{ entityAssociation.validationStatus }}
-                                </span>
+                            <span class="label label-warning2">{{ entityAssociation.validationStatus }}</span>
                         {% endif %}
                         &nbsp;<span class="caret"></span>
                     </button>
@@ -69,9 +85,7 @@
                                 id: entityAssociation.id,
                                 validationStatus: 26
                             }) }}">
-                                    <span class="label label-success">
-                                        Validated
-                                    </span>
+                                <span class="label label-success">Validated</span>
                             </a>
                         </li>
                         <li class="label-warning">
@@ -79,9 +93,7 @@
                                 id: entityAssociation.id,
                                 validationStatus: 28
                             }) }}">
-                                    <span class="label label-warning">
-                                        Validation request
-                                    </span>
+                                <span class="label label-warning">Validation request</span>
                             </a>
                         </li>
                         <li class="label-warning2">
@@ -89,9 +101,7 @@
                                 id: entityAssociation.id,
                                 validationStatus: 37
                             }) }}">
-                                    <span class="label label-warning2">
-                                        Under revision
-                                    </span>
+                                <span class="label label-warning2">Under revision</span>
                             </a>
                         </li>
                         <li class="label-danger">
@@ -99,37 +109,25 @@
                                 id: entityAssociation.id,
                                 validationStatus: 27
                             }) }}">
-                                    <span class="label label-danger">
-                                        Denied (see comment)
-                                    </span>
+                                <span class="label label-danger">Denied (see comment)</span>
                             </a>
                         </li>
                     </ul>
                 </div>
             {% else %}
                 {% if entityAssociation.validationStatus is null %}
-                    <span class="label label-info">
-                                    Candidate
-                                </span>
+                    <span class="label label-info">Candidate</span>
                 {% elseif entityAssociation.validationStatus.id == 26  %}
-                    <span class="label label-success">
-                                    {{ entityAssociation.validationStatus }}
-                                </span>
+                    <span class="label label-success">{{ entityAssociation.validationStatus }}</span>
                 {% elseif entityAssociation.validationStatus.id == 27  %}
-                    <span class="label label-danger">
-                                    {{ entityAssociation.validationStatus }}
-                                </span>
+                    <span class="label label-danger">{{ entityAssociation.validationStatus }}</span>
                 {% elseif entityAssociation.validationStatus.id == 28  %}
-                    <span class="label label-warning">
-                                    {{ entityAssociation.validationStatus }}
-                                </span>
+                    <span class="label label-warning">{{ entityAssociation.validationStatus }}</span>
                 {% elseif entityAssociation.validationStatus.id == 37  %}
-                    <span class="label label-warning2">
-                                    {{ entityAssociation.validationStatus }}
-                                </span>
+                    <span class="label label-warning2">{{ entityAssociation.validationStatus }}</span>
                 {% endif %}
             {% endif %}
-        </h4>
+        </h2>
 
         <ul class="nav nav-tabs" id="main-tabs">
             <li class="active"><a data-toggle="tab" href="#justifications">Relation and justifications</a></li>

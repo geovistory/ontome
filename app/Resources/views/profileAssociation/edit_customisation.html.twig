@@ -81,7 +81,7 @@
                 <a href="#" class="btn-justification btn btn-xs btn-primary"><i class="fa fa-plus"></i> Add</a>
             {% endif %}
             </h3>
-            <span class="txtp-justification">{{ justification ? justification.textProperty|raw : '<i>Not justification yet.</i>' }}</span>
+            <span class="txtp-justification">{{ justification ? justification.textProperty|raw : '<i>No justification yet.</i>' }}</span>
 
             {{ form_start(formJustification) }}
             {{ form_errors(formJustification) }}
@@ -106,7 +106,7 @@
                     <a href="#" class="btn-use-case btn btn-xs btn-primary"><i class="fa fa-plus"></i> Add</a>
                 {% endif %}
             </h3>
-            <span class="txtp-use-case">{{ useCase ? useCase.textProperty|raw : '<i>Not use case yet.</i>' }}</span>
+            <span class="txtp-use-case">{{ useCase ? useCase.textProperty|raw : '<i>No use case yet.</i>' }}</span>
             {{ form_start(formUseCase) }}
             {{ form_errors(formUseCase) }}
             <div class="paddingInherit input-add-use-case">
@@ -180,7 +180,7 @@
                     <a href="#" class="btn-note btn btn-xs btn-primary"><i class="fa fa-plus"></i> Add</a>
                 {% endif %}
             </h3>
-            <span class="txtp-note">{{ note ? note.textProperty|raw : '<i>Not profile internal note yet.</i>' }}</span>
+            <span class="txtp-note">{{ note ? note.textProperty|raw : '<i>No profile internal note yet.</i>' }}</span>
             {{ form_start(formNote) }}
             {{ form_errors(formNote) }}
             <div class="paddingInherit input-add-note">
