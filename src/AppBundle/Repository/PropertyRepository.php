@@ -232,6 +232,10 @@ class PropertyRepository extends EntityRepository
                         pk_range AS \"rangeId\",
                         v.fk_namespace_for_version AS \"propertyNamespaceId\",
                         array_append(array_agg(asrefns.fk_referenced_namespace), v.fk_namespace_for_version) AS \"selectedNamespacesId\",
+                         (
+                            SELECT array_agg(pk_namespace) 
+                            FROM che.get_all_references_namespaces_for_namespace(v.fk_namespace_for_version)
+                          ) AS \"allSelectedNamespacesId\",
                         identifier_domain AS domain,
                         v.fk_domain_namespace AS \"domainNamespaceId\",
                         che.get_root_namespace(fk_namespace_for_version) AS \"rootNamespaceId\",
@@ -330,6 +334,10 @@ class PropertyRepository extends EntityRepository
                   pk_property AS \"propertyId\",
                   v.fk_namespace_for_version AS \"propertyNamespaceId\",
                   array_append(array_agg(asrefns.fk_referenced_namespace), v.fk_namespace_for_version) AS \"selectedNamespacesId\",
+                 (
+                    SELECT array_agg(pk_namespace) 
+                    FROM che.get_all_references_namespaces_for_namespace(v.fk_namespace_for_version)
+                  ) AS \"allSelectedNamespacesId\",
                   pk_range AS \"rangeId\",
                   identifier_range AS range,
                     che.get_root_namespace_prefix(che.get_root_namespace(v.fk_range_namespace)) AS \"rangeRootNamespacePrefix\",
