@@ -404,7 +404,7 @@
                             urlGetDescendentClasses = urlGetDescendentClasses.replace("domainID", row.domain_id);
                             urlGetDescendentClasses = urlGetDescendentClasses.replace("rangeID", classID);
                             urlGetDescendentClasses = urlGetDescendentClasses.replace("propertyID", row.property_id);
-                            return '<span class = "incoming-property-domain-switch" data-id="' + row.property_id + '">' + row.domain_root_namespace_prefix + ':' + ':' + row.domain_identifier + " " + row.domain_label + '</span><span id="incoming-property-domain-select-' + row.property_id + '" data-id="' + row.property_id + '"></span>&nbsp;<a data-id="' + row.property_id + '" data-url="' + urlGetDescendentClasses + '" class="select-subclass-domain" data-toggle="tooltip" title="Select a child class"><i class="far fa-caret-square-down"></i></a>';
+                            return '<span class = "incoming-property-domain-switch" data-id="' + row.property_id + '">' + row.domain_root_namespace_prefix + ':' + row.domain_identifier + " " + row.domain_label + '</span><span id="incoming-property-domain-select-' + row.property_id + '" data-id="' + row.property_id + '"></span>&nbsp;<a data-id="' + row.property_id + '" data-url="' + urlGetDescendentClasses + '" class="select-subclass-domain" data-toggle="tooltip" title="Select a child class"><i class="far fa-caret-square-down"></i></a>';
                         }
                         else return  row.domain_root_namespace_prefix + ':' + row.domain_identifier + " " + row.domain_label;
                     },
