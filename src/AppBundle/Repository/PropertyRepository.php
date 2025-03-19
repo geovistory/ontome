@@ -761,7 +761,7 @@ class PropertyRepository extends EntityRepository
                 FROM che.class_ingoing_inherited_properties(:class, ARRAY[".$in."]::integer[]) ciip
                 LEFT JOIN che.associates_profile aspro ON aspro.fk_property = ciip.pk_property AND aspro.fk_inheriting_range_class = :class AND aspro.fk_inheriting_domain_class = ciip.pk_domain_class AND aspro.fk_profile = :profile 
                 
-                UNION DISTINCT
+                UNION
                 
                 SELECT DISTINCT
                 r.identifier_in_namespace AS present_class_identifier,

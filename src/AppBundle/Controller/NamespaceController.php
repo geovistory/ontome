@@ -358,7 +358,7 @@ class NamespaceController  extends Controller
             if ($formUriParameter->isSubmitted() && $formUriParameter->isValid()) {
                 $em = $this->getDoctrine()->getManager();
                 $ongoingNamespace = $namespace->getChildVersions()->filter(function($v){return $v->getIsOngoing();})->first();
-                if(!is_null($ongoingNamespace)){
+                if($ongoingNamespace instanceof OntoNamespace){
                     foreach ($ongoingNamespace->getClasses() as $class){
                         $class->updateIdentifierInUri();
                         $em->persist($class);
