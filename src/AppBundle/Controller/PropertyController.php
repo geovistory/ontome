@@ -845,10 +845,11 @@ class PropertyController extends Controller
         $this->denyAccessUnlessGranted('validate', $propertyVersion);
 
         //Verifier que les références sont cohérents
-        $nsRefsProperty = $propertyVersion->getNamespaceForVersion()->getAllReferencedNamespaces();
+        $allNsFromPropertyVersion = $propertyVersion->getNamespaceForVersion()->getAllReferencedNamespaces();
+        $allNsFromPropertyVersion->add($propertyVersion->getNamespaceForVersion());
         $nsDomain = $propertyVersion->getDomainNamespace();
         $nsRange = $propertyVersion->getRangeNamespace();
-        if(!$nsRefsProperty->contains($nsDomain) || !$nsRefsProperty->contains($nsRange)){
+        if(!$allNsFromPropertyVersion->contains($nsDomain) || !$allNsFromPropertyVersion->contains($nsRange)){
             $uriNamespaceMismatches = $this->generateUrl('namespace_show', ['id' => $propertyVersion->getNamespaceForVersion()->getId(), '_fragment' => 'mismatches']);
             $this->addFlash('warning', 'This property can\'t be validated. Check <a href="'.$uriNamespaceMismatches.'">mismatches</a>.');
             return $this->redirectToRoute('property_show', [
