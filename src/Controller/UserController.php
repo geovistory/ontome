@@ -31,8 +31,8 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
-use Symfony\Component\Security\Guard\GuardAuthenticatorHandler;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
 use Doctrine\Persistence\ManagerRegistry;
@@ -66,7 +66,7 @@ class UserController extends AbstractController
      * @param Request $request
      * @return Response a response instance
      */
-    public function registerAction(Request $request, LoginFormAuthenticator $authenticator, MailerInterface $mailer, GuardAuthenticatorHandler $guardAuthenticatorHandler, ProjectRepository $projectRepository)
+    public function registerAction(Request $request, LoginFormAuthenticator $authenticator, MailerInterface $mailer, UserAuthenticatorInterface $userAuthenticator, ProjectRepository $projectRepository)
     {
         $form = $this->createForm(UserRegistrationForm::class);
 
@@ -103,11 +103,10 @@ class UserController extends AbstractController
 
             $this->addFlash('success', 'Welcome '.$user->getFullName());
 
-            return $guardAuthenticatorHandler->authenticateUserAndHandleSuccess(
+            return $userAuthenticator->authenticateUser(
                 $user,
-                $request,
                 $authenticator,
-                'main'
+                $request
             );
         }
 

@@ -18,15 +18,15 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
-use Symfony\Component\Security\Core\Exception\AuthenticationException;
+use Symfony\Component\Security\Core\Exception\UserNotFoundException;
 use Symfony\Component\Security\Core\Security;
-use Symfony\Component\Security\Core\User\UserInterface;
-use Symfony\Component\Security\Core\User\UserProviderInterface;
-use Symfony\Component\Security\Guard\Authenticator\AbstractFormLoginAuthenticator;
+use Symfony\Component\Security\Http\Authenticator\AbstractLoginFormAuthenticator;
+use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
+use Symfony\Component\Security\Http\Authenticator\Passport\Credentials\PasswordCredentials;
+use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
 use Symfony\Component\Security\Http\Util\TargetPathTrait;
 
-class LoginFormAuthenticator extends AbstractFormLoginAuthenticator
+class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
 {
     use TargetPathTrait;
     /**
@@ -41,18 +41,13 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator
      * @var RouterInterface
      */
     private $router;
-    /**
-     * @var UserPasswordHasherInterface
-     */
-    private $passwordHasher;
 
-    public function __construct(FormFactoryInterface $formFactory, EntityManager $em, RouterInterface $router, UserPasswordHasherInterface $passwordHasher)
+    public function __construct(FormFactoryInterface $formFactory, EntityManager $em, RouterInterface $router)
     {
 
         $this->formFactory = $formFactory;
         $this->em = $em;
         $this->router = $router;
-        $this->passwordHasher = $passwordHasher;
     }
 
     public function supports(Request $request): bool
@@ -60,13 +55,15 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator
         return $request->getPathInfo() == '/login' && $request->isMethod('POST');
     }
 
-    public function getCredentials(Request $request): mixed
+    public function authenticate(Request $request): Passport
     {
         $session = $request->getSession();
-        if(!is_null($request->get('_target_path'))
-            && explode("#", basename($request->request->get('_target_path')))[0] != ''
-            && is_null($session->get('trueReferer'))
-            && is_null($session->get('_security.main.target_path')))
+        if (
+            null !== $request->get('_target_path')
+            && explode('#', basename((string) $request->request->get('_target_path')))[0] !== ''
+            && null === $session->get('trueReferer')
+            && null === $session->get('_security.main.target_path')
+        )
         {
             $session->set('trueReferer', $request->get('_target_path'));
         }
@@ -74,40 +71,33 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator
         $form = $this->formFactory->create(LoginForm::class);
         $form->handleRequest($request);
 
-        $data = $form->getData();
-        $request->getSession()->set(
-            Security::LAST_USERNAME,
-            $data['_username']
+        $data = $form->getData() ?? [];
+        $username = (string) ($data['_username'] ?? '');
+        $password = (string) ($data['_password'] ?? '');
+
+        $request->getSession()->set(Security::LAST_USERNAME, $username);
+
+        return new Passport(
+            new UserBadge($username, function (string $userIdentifier) {
+                $user = $this->em->getRepository(User::class)
+                    ->findOneBy(['login' => $userIdentifier]);
+
+                if (!$user) {
+                    throw new UserNotFoundException(sprintf('Utilisateur "%s" introuvable.', $userIdentifier));
+                }
+
+                return $user;
+            }),
+            new PasswordCredentials($password)
         );
-
-        return $data;
     }
 
-    public function getUser($credentials, UserProviderInterface $userProvider): ?UserInterface
-    {
-        $username = $credentials['_username'];
-
-        return $this->em->getRepository(User::class)
-            ->findOneBy(['login' => $username]);
-
-    }
-
-    public function checkCredentials($credentials, UserInterface $user): bool
-    {
-        $password = $credentials['_password'];
-        if ($this->passwordHasher->isPasswordValid($user, $password)) {
-            return true;
-        }
-
-        return false;
-    }
-
-    protected function getLoginUrl(): string
+    protected function getLoginUrl(Request $request): string
     {
         return $this->router->generate('security_login');
     }
 
-    public function onAuthenticationSuccess(Request $request, TokenInterface $token, $providerKey): ?Response
+    public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
     {
         $session = $request->getSession();
         $targetPath = null;

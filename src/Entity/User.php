@@ -210,6 +210,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getSalt(): ?string
     {
+        return null;
     }
 
     public function eraseCredentials()
@@ -378,7 +379,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
-     * @return OntoNamespace the ongoing namespace managed by the current active project
+     * @return OntoNamespace|null the ongoing namespace managed by the current active project
      */
     public function getCurrentOngoingNamespace()
     {
@@ -389,7 +390,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         if($namespaces->first())
             return $namespaces->first();
         else
-            return;
+            return null;
     }
 
     /**
